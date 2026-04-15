@@ -13,17 +13,23 @@ describe("custom dot shapes", () => {
     const geometry = getCustomDotShapeGeometry("diamond", 10, 20, 40)
 
     expect(geometry.d).toContain("256 0")
-    expect(geometry.translateX).toBeCloseTo(12.4)
-    expect(geometry.translateY).toBeCloseTo(22.4)
-    expect(geometry.scale).toBeCloseTo(0.06875)
+    expect(geometry.translateX).toBeCloseTo(10.8)
+    expect(geometry.translateY).toBeCloseTo(20.8)
+    expect(geometry.scaleX).toBeCloseTo(0.1044, 3)
+    expect(geometry.scaleY).toBeCloseTo(0.075, 3)
+    expect(geometry.originX).toBeCloseTo(-72.115)
+    expect(geometry.originY).toBeCloseTo(0)
   })
 
-  it("builds a more inset placement for heart modules", () => {
+  it("normalizes the heart shape to fill most of the module height", () => {
     const geometry = getCustomDotShapeGeometry("heart", 0, 0, 16)
 
     expect(geometry.d).toContain("M1.24264 8.24264")
-    expect(geometry.translateX).toBeCloseTo(1.92)
-    expect(geometry.translateY).toBeCloseTo(1.92)
-    expect(geometry.scale).toBeCloseTo(0.76)
+    expect(geometry.translateX).toBeCloseTo(0.64)
+    expect(geometry.translateY).toBeCloseTo(0.64)
+    expect(geometry.scaleX).toBeCloseTo(0.92)
+    expect(geometry.scaleY).toBeCloseTo(1.0514, 3)
+    expect(geometry.originX).toBeCloseTo(0)
+    expect(geometry.originY).toBeCloseTo(-1)
   })
 })

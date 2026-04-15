@@ -36,7 +36,7 @@ export function createCustomDotShapeExtension(shape: CustomDotShape): ExtensionF
       path.setAttribute("d", geometry.d)
       path.setAttribute(
         "transform",
-        `translate(${geometry.translateX} ${geometry.translateY}) scale(${geometry.scale})`,
+        `translate(${geometry.translateX} ${geometry.translateY}) scale(${geometry.scaleX} ${geometry.scaleY}) translate(${geometry.originX} ${geometry.originY})`,
       )
 
       dotsClipPath.replaceChild(path, child)
