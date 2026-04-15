@@ -24,6 +24,8 @@ export type StudioGradient = {
   colorStops: [GradientStop, GradientStop];
 };
 
+export type StudioDotType = DotType | "diamond" | "heart";
+
 export type QrStudioState = {
   data: string;
   type: DrawType;
@@ -44,7 +46,7 @@ export type QrStudioState = {
     crossOrigin: "anonymous";
   };
   dotsOptions: {
-    type: DotType;
+    type: StudioDotType;
     color: string;
     roundSize: boolean;
   };
@@ -165,7 +167,7 @@ export function toQrCodeOptions(state: QrStudioState): Options {
       margin: coerceNumber(state.imageOptions.margin, 0, 40, 12),
     },
     dotsOptions: {
-      type: state.dotsOptions.type,
+      type: mapStudioDotType(state.dotsOptions.type),
       roundSize: state.dotsOptions.roundSize,
       color: state.dotsGradient.enabled ? undefined : state.dotsOptions.color,
       gradient: buildGradient(state.dotsGradient),
@@ -194,6 +196,14 @@ export function toQrCodeOptions(state: QrStudioState): Options {
       gradient: buildGradient(state.backgroundGradient),
     },
   };
+}
+
+function mapStudioDotType(type: StudioDotType): DotType {
+  if (type === "diamond" || type === "heart") {
+    return "square";
+  }
+
+  return type;
 }
 
 function buildGradient(gradient: StudioGradient): Gradient | undefined {

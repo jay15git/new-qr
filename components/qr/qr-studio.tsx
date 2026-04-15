@@ -5,12 +5,18 @@ import type { FileExtension } from "qr-code-styling"
 import QRCodeStyling from "qr-code-styling"
 
 import {
+  getActiveCustomDotShape,
+  type CustomDotShape,
+} from "@/components/qr/custom-dot-shapes"
+import {
   type LogoSourceMode,
   QrControlSections,
 } from "@/components/qr/qr-control-sections"
 import { QrPreviewCard } from "@/components/qr/qr-preview-card"
+import { createCustomDotShapeExtension } from "@/components/qr/qr-svg-custom-shape-extension"
 import {
   createDefaultQrStudioState,
+  type QrStudioState,
   toQrCodeOptions,
 } from "@/components/qr/qr-studio-state"
 
@@ -27,6 +33,7 @@ export function QrStudio() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const initialStateRef = useRef(state)
   const qrCodeRef = useRef<QRCodeStyling | null>(null)
+  const qrExtensionKeyRef = useRef(getQrExtensionKey(state))
   const uploadedLogoUrlRef = useRef<string | null>(null)
 
   useEffect(() => {
@@ -36,8 +43,9 @@ export function QrStudio() {
       return
     }
 
-    const qrCode = new QRCodeStyling(toQrCodeOptions(initialStateRef.current))
+    const qrCode = createQrCodeInstance(initialStateRef.current)
     qrCodeRef.current = qrCode
+    qrExtensionKeyRef.current = getQrExtensionKey(initialStateRef.current)
     previewElement.replaceChildren()
     qrCode.append(previewElement)
 
@@ -49,12 +57,26 @@ export function QrStudio() {
   }, [])
 
   useEffect(() => {
-    if (!qrCodeRef.current) {
+    const previewElement = previewRef.current
+
+    if (!qrCodeRef.current || !previewElement) {
       return
     }
 
     try {
-      qrCodeRef.current.update(toQrCodeOptions(deferredState))
+      const nextExtensionKey = getQrExtensionKey(deferredState)
+
+      if (nextExtensionKey !== qrExtensionKeyRef.current) {
+        const qrCode = createQrCodeInstance(deferredState)
+
+        qrCodeRef.current = qrCode
+        qrExtensionKeyRef.current = nextExtensionKey
+        previewElement.replaceChildren()
+        qrCode.append(previewElement)
+      } else {
+        qrCodeRef.current.update(toQrCodeOptions(deferredState))
+      }
+
       queueMicrotask(() => setErrorMessage(null))
     } catch {
       queueMicrotask(() => {
@@ -157,4 +179,27 @@ function cleanupUploadedLogo(uploadedLogoUrlRef: React.MutableRefObject<string |
 
   URL.revokeObjectURL(uploadedLogoUrlRef.current)
   uploadedLogoUrlRef.current = null
+}
+
+function createQrCodeInstance(state: QrStudioState) {
+  const qrCode = new QRCodeStyling(toQrCodeOptions(state))
+  const customDotShape = getSvgCustomDotShape(state)
+
+  if (customDotShape) {
+    qrCode.applyExtension(createCustomDotShapeExtension(customDotShape))
+  }
+
+  return qrCode
+}
+
+function getSvgCustomDotShape(state: QrStudioState): CustomDotShape | null {
+  if (state.type !== "svg") {
+    return null
+  }
+
+  return getActiveCustomDotShape(state.dotsOptions.type)
+}
+
+function getQrExtensionKey(state: QrStudioState) {
+  return getSvgCustomDotShape(state) ?? "none"
 }

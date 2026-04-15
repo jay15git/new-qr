@@ -67,4 +67,22 @@ describe("qr studio state helpers", () => {
 
     expect(options.data).toBe("");
   });
+
+  it("maps custom heart dots to square modules for the upstream renderer", () => {
+    const state = createDefaultQrStudioState();
+    state.dotsOptions.type = "heart" as typeof state.dotsOptions.type;
+
+    const options = toQrCodeOptions(state);
+
+    expect(options.dotsOptions?.type).toBe("square");
+  });
+
+  it("maps custom diamond dots to square modules for the upstream renderer", () => {
+    const state = createDefaultQrStudioState();
+    state.dotsOptions.type = "diamond" as typeof state.dotsOptions.type;
+
+    const options = toQrCodeOptions(state);
+
+    expect(options.dotsOptions?.type).toBe("square");
+  });
 });

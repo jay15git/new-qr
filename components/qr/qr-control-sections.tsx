@@ -33,14 +33,18 @@ import { Textarea } from "@/components/ui/textarea"
 import type {
   CornerDotType,
   CornerSquareType,
-  DotType,
   DrawType,
   GradientType,
   Mode,
   TypeNumber,
 } from "qr-code-styling"
 
-import type { QrStudioState, StudioGradient } from "@/components/qr/qr-studio-state"
+import { getActiveCustomDotShape } from "@/components/qr/custom-dot-shapes"
+import type {
+  QrStudioState,
+  StudioDotType,
+  StudioGradient,
+} from "@/components/qr/qr-studio-state"
 
 export type LogoSourceMode = "none" | "url" | "upload"
 
@@ -59,13 +63,15 @@ const DRAW_TYPES: Array<{ label: string; value: DrawType }> = [
   { label: "Canvas", value: "canvas" },
 ]
 
-const DOT_TYPES: Array<{ label: string; value: DotType }> = [
+const DOT_TYPES: Array<{ label: string; value: StudioDotType }> = [
   { label: "Rounded", value: "rounded" },
   { label: "Square", value: "square" },
   { label: "Dots", value: "dots" },
   { label: "Classy", value: "classy" },
   { label: "Classy rounded", value: "classy-rounded" },
   { label: "Extra rounded", value: "extra-rounded" },
+  { label: "Diamond", value: "diamond" },
+  { label: "Heart", value: "heart" },
 ]
 
 const CORNER_SQUARE_TYPES: Array<{ label: string; value: CornerSquareType }> = [
@@ -124,6 +130,7 @@ export function QrControlSections({
   state,
 }: QrControlSectionsProps) {
   const contentError = state.data.trim() ? null : "Add text or a URL to encode"
+  const activeCustomDotShape = getActiveCustomDotShape(state.dotsOptions.type)
 
   return (
     <div className="flex flex-col gap-4">
@@ -214,7 +221,7 @@ export function QrControlSections({
               onValueChange={(value) =>
                 setState((current) => ({
                   ...current,
-                  dotsOptions: { ...current.dotsOptions, type: value as DotType },
+                  dotsOptions: { ...current.dotsOptions, type: value as StudioDotType },
                 }))
               }
               options={DOT_TYPES}
@@ -232,6 +239,12 @@ export function QrControlSections({
               value={state.dotsOptions.color}
             />
           </FieldGroup>
+
+          {activeCustomDotShape && state.type !== "svg" ? (
+            <p className="text-sm text-muted-foreground">
+              Custom dot shapes currently render only in SVG mode.
+            </p>
+          ) : null}
 
           <Field orientation="horizontal">
             <FieldContent>
