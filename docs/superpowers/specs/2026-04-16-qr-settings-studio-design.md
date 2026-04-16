@@ -2,7 +2,7 @@
 
 ## Summary
 
-Redesign the QR settings workspace as a premium split-studio editor that preserves the full existing control surface while making the experience feel intuitive for mixed-skill users. The new layout should replace the current stacked-card settings form with a three-zone composition: section navigation on the left, a stable live preview in the center, and a focused control panel on the right. The first design deliverable is a high-fidelity Pencil concept for desktop only.
+Redesign the QR settings workspace as a premium, editing-first studio that preserves the full existing control surface while making the experience feel faster and more intuitive for mixed-skill users. The new layout replaces the oversized preview concept with a tighter three-zone composition: section navigation on the left, the active section content immediately beside it, and a compact sticky live preview on the far right. The first design deliverable is a high-fidelity Pencil concept for desktop only.
 
 ## Goals
 
@@ -10,7 +10,7 @@ Redesign the QR settings workspace as a premium split-studio editor that preserv
 - Preserve every existing QR configuration capability currently exposed in `components/qr/qr-control-sections.tsx`.
 - Support a mixed audience: approachable for first-time users, but efficient for users who want precise control.
 - Use a premium editorial visual language rather than generic SaaS dashboard styling.
-- Keep the preview visually central so changes are easy to understand.
+- Keep the preview persistently visible without allowing it to dominate the page.
 - Produce a focused Pencil design artifact that can be reviewed before implementation.
 
 ## Non-Goals
@@ -26,32 +26,32 @@ Redesign the QR settings workspace as a premium split-studio editor that preserv
 - The existing `/settings` route renders `QrStudio` inside the current page shell.
 - `components/qr/qr-control-sections.tsx` currently exposes six stacked card sections: `Content`, `Dots`, `Corners`, `Background`, `Logo`, and `QR settings`.
 - `components/qr/qr-studio-state.ts` defines the full editable state, including content, sizing, gradients, logo behavior, and encoding options.
-- The current UI is functionally complete, but the interaction model is a vertical form stack rather than a focused creative workspace.
+- The current UI is functionally complete, but the interaction model is still unresolved: the original concept over-allocated width to the preview and pushed the active controls too far away from the section navigation.
 - The homepage input/search flow will eventually feed into this editor, but that entry experience is out of scope for this design phase.
 
 ## Chosen Approach
 
-Use a split creative studio layout with a strong editorial aesthetic:
+Use an editing-first studio layout with a strong editorial aesthetic:
 
-1. A persistent left rail provides orientation and section switching.
-2. A large center stage presents the QR preview as the primary object being crafted.
-3. A right-side control panel displays the active section's controls only, using progressive disclosure for advanced options.
+1. A compact left rail provides orientation and section switching.
+2. The active section content sits directly beside the rail so changing sections feels immediate.
+3. A compact sticky preview sits on the far right with export/reset actions attached to it.
 
-This approach creates a clearer editing workflow than the current stacked cards, scales cleanly to the existing control set, and avoids hiding advanced functionality behind a separate mode.
+This approach creates a faster editing workflow than both the original stacked cards and the oversized-preview concept, scales cleanly to the existing control set, and avoids hiding advanced functionality behind a separate mode.
 
 ## Alternatives Considered
 
-### 1. Editorial Canvas
+### 1. Stacked Sections
 
-This would emphasize a highly art-directed composition with less tool-like structure. It is visually strong, but it is slower for users who want to move between settings quickly.
+This would show all sections in one scrolling column. It is faster than section switching, but it changes the interaction model too much for this phase and reduces the value of the section navigation structure the user wants to keep.
 
-### 2. Split Creative Studio
+### 2. Oversized Preview Split
 
-This is the selected approach. It balances clarity, power, and premium presentation without turning the page into a dense workstation.
+This was the first direction, with a large center-stage preview. It created too much dead space, made the preview heavier than the actual editing workflow, and separated the section list from the active controls too aggressively.
 
-### 3. Progressive Atelier
+### 3. Editing-First Split
 
-This would reveal controls in sequence below the preview. It is friendly for beginners, but it adds friction for users who want direct access to deeper settings and makes the page less predictable as a reusable workspace.
+This is the selected approach. It keeps the existing section-switching model while making the page read clearly as edit-left / verify-right.
 
 ## Audience And UX Positioning
 
@@ -66,12 +66,12 @@ The experience should therefore feel simple first, but not simplified. Basic dec
 
 ### Left Rail
 
-The left rail acts as a navigation and status column.
+The left rail acts as a compact navigation and status column.
 
 - It lists the workspace sections in editing order.
 - It provides a clear active state.
-- It can surface subtle configured-state indicators when a section differs from defaults.
-- It should be narrow and quiet, giving orientation without competing with the preview.
+- It includes mini summaries so the list is informative, not merely navigational.
+- It should remain visually quiet and avoid pills, cards, or large background blocks around each item.
 
 Recommended navigation labels:
 
@@ -82,34 +82,49 @@ Recommended navigation labels:
 - `Logo`
 - `Encoding`
 
+Recommended summary style:
+
+- short, scannable phrases such as `SVG · 320×320`, `Rounded · Gradient on`, `Transparent`, or `Logo uploaded`
+
 `Style` replaces the current `Dots` label in navigation because it is more intuitive. `Encoding` replaces `QR settings` for the same reason.
 
-### Center Stage
+### Active Content Region
 
-The center column is the visual anchor of the page.
-
-- It contains the live QR preview.
-- The preview should be large, stable, and framed as the object being designed.
-- Export and reset actions should live near the preview rather than inside the form panel.
-- Lightweight metadata such as current size or export format should sit beneath the preview in a subdued secondary row.
-
-This zone should remain visually stable as the user switches settings sections so the page feels continuous.
-
-### Right Panel
-
-The right panel is the active editing surface.
+The primary editing region sits immediately after the left rail.
 
 - It displays only the selected section's controls.
-- It begins with a section heading and a short description.
-- It uses grouped rows and inset subsections instead of repeated full cards.
-- It uses progressive disclosure so primary controls are visible first and advanced controls expand within the same panel.
+- It should be visually grouped with the section rail so the page reads as one editing block.
+- It should receive most of the page width.
+- It should prioritize fast scanning and direct editing over theatrical presentation.
+
+This region should feel like the working surface of the page.
+
+### Sticky Preview
+
+The preview should move to the far-right edge of the layout.
+
+- It remains visible while users edit the active section.
+- It should be compact and proportionate to the actual QR object size.
+- It functions as a live reference, not as the dominant page stage.
+- Export and reset actions should stay attached to this column.
+- Lightweight metadata such as current size or export format should sit beneath the preview in a subdued secondary row.
+
+This keeps the output close at hand without wasting horizontal space.
+
+### Section Navigation + Content Relationship
+
+The section rail and active content should behave as one editing system.
+
+- Clicking a section updates the adjacent content immediately.
+- The distance between navigation and content should be small enough that the relationship is obvious.
+- The left rail should avoid feeling like a detached sidebar.
 
 ## Interaction Model
 
 The page should use focused editing rather than exposing every control at once.
 
-- Clicking a section in the left rail updates the right panel.
-- The center preview remains fixed during section changes.
+- Clicking a section in the left rail updates the adjacent content panel.
+- The sticky preview remains fixed during section changes.
 - The default section on load should be `Content`.
 - The section order should follow the natural creative sequence:
   1. `Content`
@@ -126,14 +141,14 @@ This order mirrors how most users think: what the QR encodes, how it looks, how 
 - Show 2-4 primary decisions at the top of each section.
 - Keep advanced controls in compact subsections below the primary ones.
 - Treat technical or rare options with less visual emphasis.
-- Keep the right panel legible without making users scroll through unrelated controls.
+- Keep the active content region legible without making users scroll through unrelated controls.
 
 ## Visual Direction
 
 The visual language should be editorial-premium, not dashboard-premium.
 
-- Background: warm neutral or stone-tinted off-white with subtle tonal depth
-- Panels: quiet paper-like surfaces with hairline borders
+- Background: white or near-white as the dominant page surface
+- Panels: only where they are needed for inputs, preview containment, or subtle grouping
 - Accent color: deep, muted, and deliberate rather than bright or synthetic
 - Typography: refined, hierarchy-led, with strong section titling and restrained field text
 - Shape language: medium radii, architectural rather than playful
@@ -146,6 +161,8 @@ The design should avoid:
 - purple/cyan AI-tool aesthetics
 - excessive icon decoration
 - equal visual weight for every setting
+- oversized empty preview stages
+- detached sidebars that repeat information without helping the edit flow
 
 ## Control Mapping
 
@@ -232,9 +249,9 @@ The first Pencil design should be a high-fidelity desktop concept focused on the
 It should include:
 
 - the full page shell
-- the left rail with section states
-- the center preview stage with nearby actions
-- the right panel structure
+- the left rail with section states and mini summaries
+- the adjacent active-content structure
+- the compact sticky preview with nearby actions
 - a fully designed `Content` panel state
 - a fully designed `Style` panel state
 - a fully designed `Logo` panel state
@@ -254,7 +271,7 @@ This phase is design-only, so validation is based on review rather than runtime 
 The Pencil design should be reviewed for:
 
 - clarity of the section model
-- strength of the center-preview-first workflow
+- strength of the edit-left / verify-right workflow
 - visual distinctiveness
 - preservation of the existing control set
 - whether the page feels intuitive for both new and advanced users
@@ -263,9 +280,9 @@ No React implementation, linting, or build verification is part of this phase.
 
 ## Risks And Mitigations
 
-### Risk: the design becomes a prettier version of the current stacked form
+### Risk: the design becomes a prettier version of the current spaced-out concept
 
-Mitigation: enforce the three-zone structure and move to single-section editing in the right panel rather than preserving all sections in one scroll.
+Mitigation: enforce the tighter `sections + active content + sticky preview` structure and remove any area that does not directly support editing or verification.
 
 ### Risk: the layout feels too tool-like and loses warmth
 
@@ -273,7 +290,7 @@ Mitigation: use editorial spacing, restrained surfaces, and typography-led hiera
 
 ### Risk: advanced controls become hard to discover
 
-Mitigation: keep them in the active section panel with clear subgrouping and progressive disclosure, rather than burying them in a separate mode.
+Mitigation: keep them in the active content region with clear subgrouping and progressive disclosure, rather than burying them in a separate mode.
 
 ### Risk: the first Pencil pass becomes too broad to evaluate cleanly
 
@@ -282,7 +299,7 @@ Mitigation: keep the first deliverable desktop-only and focus on the highest-val
 ## Success Criteria
 
 - The settings workspace reads as a premium creative studio rather than a settings form.
-- The layout clearly separates navigation, preview, and active controls.
+- The layout clearly reads as edit-left / verify-right.
 - All existing settings categories remain represented in the design.
 - The design feels approachable without removing advanced control.
 - The Pencil artifact is specific enough to guide later UI implementation.
