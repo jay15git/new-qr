@@ -50,7 +50,8 @@ export function QrPreviewCard({
     <Card
       className={cn(
         "w-full bg-card/95 shadow-sm backdrop-blur",
-        isDashboard && "max-w-[28rem] bg-card/98 shadow-none",
+        isDashboard &&
+          "bg-card/98 shadow-none lg:max-h-[calc(100svh-2rem)] lg:max-w-[clamp(22rem,30vw,28rem)]",
       )}
       size={isDashboard ? "sm" : "default"}
     >
@@ -88,7 +89,7 @@ export function QrPreviewCard({
             className={cn(
               "flex aspect-square items-center justify-center rounded-[calc(var(--radius-xl)-2px)] bg-background shadow-inner [&_canvas]:h-full [&_canvas]:w-full [&_canvas]:max-w-full [&_svg]:h-full [&_svg]:w-full [&_svg]:max-w-full",
               isDashboard
-                ? "mx-auto w-full max-w-[18rem] min-h-[18rem] p-3 lg:max-w-[20rem] lg:min-h-[20rem] xl:max-w-[22rem] xl:min-h-[22rem]"
+                ? "mx-auto w-full max-w-full p-3 lg:size-[clamp(15rem,calc(100svh-30rem),22rem)]"
                 : "p-4",
             )}
           />

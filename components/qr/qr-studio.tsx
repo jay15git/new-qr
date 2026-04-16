@@ -207,7 +207,7 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
           />
 
           <main className="flex-1">
-            <div className="mx-auto grid min-h-screen w-full max-w-[1700px] gap-4 px-3 py-3 sm:px-4 lg:grid-cols-[minmax(24rem,1fr)_minmax(24rem,28rem)] lg:items-start lg:gap-5 lg:px-5 lg:py-5 xl:grid-cols-[minmax(26rem,1fr)_minmax(26rem,30rem)] xl:gap-6 xl:px-6">
+            <div className="mx-auto grid min-h-screen w-full max-w-[1700px] gap-4 px-3 py-3 sm:px-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(22rem,.9fr)] lg:items-start lg:gap-4 lg:px-4 lg:py-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(24rem,1fr)] xl:gap-5 xl:px-5 xl:py-5 2xl:grid-cols-[minmax(0,1.7fr)_minmax(26rem,1fr)] 2xl:gap-6 2xl:px-6">
               <div className="min-w-0 space-y-3">
                 <section className="border-b border-border/60 pb-3">
                   <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
@@ -227,7 +227,7 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
                 />
               </div>
 
-              <div className="lg:sticky lg:top-4 lg:self-start lg:justify-self-end">
+              <div className="lg:sticky lg:top-4 lg:self-start lg:w-full lg:justify-self-end">
                 {previewCard}
               </div>
             </div>

@@ -40,9 +40,11 @@ describe("QrPreviewCard", () => {
       />,
     )
 
-    expect(markup).toContain("max-w-[28rem]")
-    expect(markup).toContain("lg:min-h-[20rem]")
-    expect(markup).toContain("xl:min-h-[22rem]")
+    expect(markup).toContain("lg:max-w-[clamp(22rem,30vw,28rem)]")
+    expect(markup).toContain("lg:max-h-[calc(100svh-2rem)]")
+    expect(markup).toContain("lg:size-[clamp(15rem,calc(100svh-30rem),22rem)]")
+    expect(markup).not.toContain("lg:min-h-[20rem]")
+    expect(markup).not.toContain("xl:min-h-[22rem]")
     expect(markup).toContain("Reset defaults")
   })
 })
