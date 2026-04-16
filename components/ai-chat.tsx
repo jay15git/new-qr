@@ -47,13 +47,13 @@ export default function Ai03() {
   return (
     <div className="w-xl">
       <div className="bg-background border border-border rounded-2xl overflow-hidden">
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          className="sr-only"
-          onChange={(e) => {}}
-        />
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="sr-only"
+            onChange={() => {}}
+          />
 
         <div className="px-3 pt-3 pb-2 grow">
           <form onSubmit={handleSubmit}>
