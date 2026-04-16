@@ -1,13 +1,19 @@
 "use client"
 
-import { useDeferredValue, useEffect, useRef, useState } from "react"
+import { startTransition, useDeferredValue, useEffect, useRef, useState } from "react"
 import type { FileExtension } from "qr-code-styling"
 import QRCodeStyling from "qr-code-styling"
 
+import { DashboardSidebar } from "@/components/sidebar-03/app-sidebar"
 import {
   getActiveCustomDotShape,
   type CustomDotShape,
 } from "@/components/qr/custom-dot-shapes"
+import {
+  DEFAULT_QR_EDITOR_SECTION,
+  getQrEditorSection,
+  type QrEditorSectionId,
+} from "@/components/qr/qr-sections"
 import {
   type LogoSourceMode,
   QrControlSections,
@@ -19,14 +25,21 @@ import {
   type QrStudioState,
   toQrCodeOptions,
 } from "@/components/qr/qr-studio-state"
+import { SidebarProvider } from "@/components/ui/sidebar"
 
 const DEFAULT_DOWNLOAD_NAME = "new-qr-studio"
 
-export function QrStudio() {
+type QrStudioProps = {
+  variant?: "settings" | "dashboard"
+}
+
+export function QrStudio({ variant = "settings" }: QrStudioProps) {
   const [state, setState] = useState(() => createDefaultQrStudioState())
   const [downloadName, setDownloadName] = useState(DEFAULT_DOWNLOAD_NAME)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [logoSourceMode, setLogoSourceMode] = useState<LogoSourceMode>("none")
+  const [activeSection, setActiveSection] =
+    useState<QrEditorSectionId>(DEFAULT_QR_EDITOR_SECTION)
 
   const deferredState = useDeferredValue(state)
   const previewRef = useRef<HTMLDivElement>(null)
@@ -145,29 +158,75 @@ export function QrStudio() {
     setErrorMessage(null)
   }
 
+  const previewCard = (
+    <QrPreviewCard
+      canDownload={Boolean(state.data.trim())}
+      downloadName={downloadName}
+      errorMessage={errorMessage}
+      onDownload={handleDownload}
+      onDownloadNameChange={setDownloadName}
+      onReset={handleReset}
+      previewRef={previewRef}
+      state={state}
+    />
+  )
+
+  const controlSectionProps = {
+    fileInputRef,
+    logoSourceMode,
+    onLogoFileChange: handleLogoFileChange,
+    onLogoModeChange: handleLogoModeChange,
+    onPickLogoFile: () => fileInputRef.current?.click(),
+    setState,
+    state,
+  }
+
+  if (variant === "dashboard") {
+    const activeSectionMeta = getQrEditorSection(activeSection)
+
+    return (
+      <SidebarProvider className="min-h-screen w-full">
+        <div className="flex min-h-screen w-full bg-muted/20">
+          <DashboardSidebar
+            activeSection={activeSection}
+            onSectionChange={(section) => {
+              startTransition(() => setActiveSection(section))
+            }}
+          />
+
+          <main className="flex-1">
+            <div className="mx-auto grid min-h-screen w-full max-w-[1600px] gap-6 px-4 py-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:px-8 xl:grid-cols-[minmax(0,1fr)_24rem]">
+              <div className="min-w-0 space-y-4">
+                <section className="rounded-xl border border-border/70 bg-background/95 p-5 shadow-sm">
+                  <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                    Main editor
+                  </p>
+                  <h1 className="mt-2 text-2xl font-semibold tracking-tight">
+                    {activeSectionMeta.title}
+                  </h1>
+                  <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
+                    {activeSectionMeta.detail}
+                  </p>
+                </section>
+
+                <QrControlSections
+                  {...controlSectionProps}
+                  activeSection={activeSection}
+                />
+              </div>
+
+              <div className="lg:sticky lg:top-6 lg:self-start">{previewCard}</div>
+            </div>
+          </main>
+        </div>
+      </SidebarProvider>
+    )
+  }
+
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]">
-      <div className="xl:sticky xl:top-6 xl:self-start">
-        <QrPreviewCard
-          canDownload={Boolean(state.data.trim())}
-          downloadName={downloadName}
-          errorMessage={errorMessage}
-          onDownload={handleDownload}
-          onDownloadNameChange={setDownloadName}
-          onReset={handleReset}
-          previewRef={previewRef}
-          state={state}
-        />
-      </div>
-      <QrControlSections
-        fileInputRef={fileInputRef}
-        logoSourceMode={logoSourceMode}
-        onLogoFileChange={handleLogoFileChange}
-        onLogoModeChange={handleLogoModeChange}
-        onPickLogoFile={() => fileInputRef.current?.click()}
-        setState={setState}
-        state={state}
-      />
+      <div className="xl:sticky xl:top-6 xl:self-start">{previewCard}</div>
+      <QrControlSections {...controlSectionProps} />
     </div>
   )
 }

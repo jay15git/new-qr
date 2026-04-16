@@ -30,6 +30,7 @@ import {
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
 import type {
   CornerDotType,
   CornerSquareType,
@@ -40,6 +41,7 @@ import type {
 } from "qr-code-styling"
 
 import { getActiveCustomDotShape } from "@/components/qr/custom-dot-shapes"
+import type { QrEditorSectionId } from "@/components/qr/qr-sections"
 import type {
   QrStudioState,
   StudioDotType,
@@ -56,6 +58,12 @@ type QrControlSectionsProps = {
   onPickLogoFile: () => void
   setState: React.Dispatch<React.SetStateAction<QrStudioState>>
   state: QrStudioState
+  activeSection?: QrEditorSectionId
+}
+
+type StyleOption = {
+  label: string
+  value: string
 }
 
 const DRAW_TYPES: Array<{ label: string; value: DrawType }> = [
@@ -128,13 +136,19 @@ export function QrControlSections({
   onPickLogoFile,
   setState,
   state,
+  activeSection,
 }: QrControlSectionsProps) {
   const contentError = state.data.trim() ? null : "Add text or a URL to encode"
   const activeCustomDotShape = getActiveCustomDotShape(state.dotsOptions.type)
+  const isDashboardMode = activeSection !== undefined
+
+  const showsSection = (section: QrEditorSectionId) =>
+    activeSection === undefined || activeSection === section
 
   return (
     <div className="flex flex-col gap-4">
-      <Card>
+      {showsSection("content") ? (
+        <Card>
         <CardHeader>
           <CardTitle>Content</CardTitle>
           <CardDescription>
@@ -205,28 +219,45 @@ export function QrControlSections({
           </FieldGroup>
         </CardContent>
       </Card>
+      ) : null}
 
-      <Card>
+      {showsSection("style") ? (
+        <Card>
         <CardHeader>
-          <CardTitle>Dots</CardTitle>
+          <CardTitle>{isDashboardMode ? "Style" : "Dots"}</CardTitle>
           <CardDescription>
             Shape the main QR modules and optionally apply a gradient.
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <FieldGroup className="grid gap-4 md:grid-cols-2">
-            <SelectField
-              id="dots-type"
-              label="Dot style"
-              onValueChange={(value) =>
-                setState((current) => ({
-                  ...current,
-                  dotsOptions: { ...current.dotsOptions, type: value as StudioDotType },
-                }))
-              }
-              options={DOT_TYPES}
-              value={state.dotsOptions.type}
-            />
+          <CardContent className="flex flex-col gap-4">
+            <FieldGroup className="grid gap-4 md:grid-cols-2">
+            {isDashboardMode ? (
+              <VisualStylePicker
+                id="dots-type"
+                label="Dot style"
+                onValueChange={(value) =>
+                  setState((current) => ({
+                    ...current,
+                    dotsOptions: { ...current.dotsOptions, type: value as StudioDotType },
+                  }))
+                }
+                options={DOT_TYPES}
+                value={state.dotsOptions.type}
+              />
+            ) : (
+              <SelectField
+                id="dots-type"
+                label="Dot style"
+                onValueChange={(value) =>
+                  setState((current) => ({
+                    ...current,
+                    dotsOptions: { ...current.dotsOptions, type: value as StudioDotType },
+                  }))
+                }
+                options={DOT_TYPES}
+                value={state.dotsOptions.type}
+              />
+            )}
             <ColorField
               id="dots-color"
               label="Solid color"
@@ -275,31 +306,51 @@ export function QrControlSections({
           />
         </CardContent>
       </Card>
+      ) : null}
 
-      <Card>
+      {showsSection("corners") ? (
+        <Card>
         <CardHeader>
           <CardTitle>Corners</CardTitle>
           <CardDescription>
             Style the corner frames and the inner corner dots independently.
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-5">
-          <FieldGroup className="grid gap-4 md:grid-cols-2">
-            <SelectField
-              id="corner-square-type"
-              label="Corner square style"
-              onValueChange={(value) =>
-                setState((current) => ({
-                  ...current,
-                  cornersSquareOptions: {
-                    ...current.cornersSquareOptions,
-                    type: value as CornerSquareType,
-                  },
-                }))
-              }
-              options={CORNER_SQUARE_TYPES}
-              value={state.cornersSquareOptions.type}
-            />
+          <CardContent className="flex flex-col gap-5">
+            <FieldGroup className="grid gap-4 md:grid-cols-2">
+            {isDashboardMode ? (
+              <VisualStylePicker
+                id="corner-square-type"
+                label="Corner square style"
+                onValueChange={(value) =>
+                  setState((current) => ({
+                    ...current,
+                    cornersSquareOptions: {
+                      ...current.cornersSquareOptions,
+                      type: value as CornerSquareType,
+                    },
+                  }))
+                }
+                options={CORNER_SQUARE_TYPES}
+                value={state.cornersSquareOptions.type}
+              />
+            ) : (
+              <SelectField
+                id="corner-square-type"
+                label="Corner square style"
+                onValueChange={(value) =>
+                  setState((current) => ({
+                    ...current,
+                    cornersSquareOptions: {
+                      ...current.cornersSquareOptions,
+                      type: value as CornerSquareType,
+                    },
+                  }))
+                }
+                options={CORNER_SQUARE_TYPES}
+                value={state.cornersSquareOptions.type}
+              />
+            )}
             <ColorField
               id="corner-square-color"
               label="Corner square color"
@@ -328,22 +379,40 @@ export function QrControlSections({
             title="Corner square gradient"
           />
 
-          <FieldGroup className="grid gap-4 md:grid-cols-2">
-            <SelectField
-              id="corner-dot-type"
-              label="Corner dot style"
-              onValueChange={(value) =>
-                setState((current) => ({
-                  ...current,
-                  cornersDotOptions: {
-                    ...current.cornersDotOptions,
-                    type: value as CornerDotType,
-                  },
-                }))
-              }
-              options={CORNER_DOT_TYPES}
-              value={state.cornersDotOptions.type}
-            />
+            <FieldGroup className="grid gap-4 md:grid-cols-2">
+            {isDashboardMode ? (
+              <VisualStylePicker
+                id="corner-dot-type"
+                label="Corner dot style"
+                onValueChange={(value) =>
+                  setState((current) => ({
+                    ...current,
+                    cornersDotOptions: {
+                      ...current.cornersDotOptions,
+                      type: value as CornerDotType,
+                    },
+                  }))
+                }
+                options={CORNER_DOT_TYPES}
+                value={state.cornersDotOptions.type}
+              />
+            ) : (
+              <SelectField
+                id="corner-dot-type"
+                label="Corner dot style"
+                onValueChange={(value) =>
+                  setState((current) => ({
+                    ...current,
+                    cornersDotOptions: {
+                      ...current.cornersDotOptions,
+                      type: value as CornerDotType,
+                    },
+                  }))
+                }
+                options={CORNER_DOT_TYPES}
+                value={state.cornersDotOptions.type}
+              />
+            )}
             <ColorField
               id="corner-dot-color"
               label="Corner dot color"
@@ -370,8 +439,10 @@ export function QrControlSections({
           />
         </CardContent>
       </Card>
+      ) : null}
 
-      <Card>
+      {showsSection("background") ? (
+        <Card>
         <CardHeader>
           <CardTitle>Background</CardTitle>
           <CardDescription>
@@ -428,8 +499,10 @@ export function QrControlSections({
           />
         </CardContent>
       </Card>
+      ) : null}
 
-      <Card>
+      {showsSection("logo") ? (
+        <Card>
         <CardHeader>
           <CardTitle>Logo</CardTitle>
           <CardDescription>
@@ -590,10 +663,12 @@ export function QrControlSections({
           </Field>
         </CardContent>
       </Card>
+      ) : null}
 
-      <Card>
+      {showsSection("encoding") ? (
+        <Card>
         <CardHeader>
-          <CardTitle>QR settings</CardTitle>
+          <CardTitle>{isDashboardMode ? "Encoding" : "QR settings"}</CardTitle>
           <CardDescription>
             Adjust the encoding mode and error correction level.
           </CardDescription>
@@ -653,6 +728,7 @@ export function QrControlSections({
           </FieldGroup>
         </CardContent>
       </Card>
+      ) : null}
     </div>
   )
 }
@@ -842,6 +918,185 @@ function NumberField({
       />
     </Field>
   )
+}
+
+function VisualStylePicker({
+  id,
+  label,
+  onValueChange,
+  options,
+  value,
+}: {
+  id: string
+  label: string
+  onValueChange: (value: string) => void
+  options: StyleOption[]
+  value: string
+}) {
+  const labelId = `${id}-label`
+
+  return (
+    <Field>
+      <FieldLabel id={labelId}>{label}</FieldLabel>
+      <div
+        aria-labelledby={labelId}
+        className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4"
+        data-slot="style-picker"
+        id={id}
+        role="radiogroup"
+      >
+        {options.map((option) => {
+          const isSelected = option.value === value
+
+          return (
+            <label
+              key={option.value}
+              className={cn(
+                "flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border px-3 py-3 text-center transition-colors",
+                isSelected
+                  ? "border-primary bg-primary/8 text-foreground shadow-sm"
+                  : "border-border/70 bg-muted/20 text-muted-foreground hover:border-border hover:bg-muted/35",
+              )}
+            >
+              <input
+                aria-label={option.label}
+                checked={isSelected}
+                className="sr-only"
+                name={id}
+                onChange={() => onValueChange(option.value)}
+                type="radio"
+                value={option.value}
+              />
+              <StylePreview value={option.value} />
+              <span className={cn("text-xs leading-tight", isSelected && "text-foreground")}>
+                {option.label}
+              </span>
+            </label>
+          )
+        })}
+      </div>
+    </Field>
+  )
+}
+
+function StylePreview({ value }: { value: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className="size-12 text-foreground/80"
+      fill="none"
+      viewBox="0 0 48 48"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <PreviewShape size={12} value={value} x={8} y={8} />
+      <PreviewShape size={12} value={value} x={28} y={8} />
+      <PreviewShape size={12} value={value} x={18} y={28} />
+    </svg>
+  )
+}
+
+function PreviewShape({
+  size,
+  value,
+  x,
+  y,
+}: {
+  size: number
+  value: string
+  x: number
+  y: number
+}) {
+  switch (value) {
+    case "dots":
+    case "dot":
+      return (
+        <circle
+          cx={x + size / 2}
+          cy={y + size / 2}
+          fill="currentColor"
+          r={size / 2}
+        />
+      )
+    case "rounded":
+      return (
+        <rect
+          fill="currentColor"
+          height={size}
+          rx={3.5}
+          width={size}
+          x={x}
+          y={y}
+        />
+      )
+    case "extra-rounded":
+      return (
+        <rect
+          fill="currentColor"
+          height={size}
+          rx={5.5}
+          width={size}
+          x={x}
+          y={y}
+        />
+      )
+    case "diamond":
+      return (
+        <path
+          d={`M ${x + size / 2} ${y} L ${x + size} ${y + size / 2} L ${x + size / 2} ${y + size} L ${x} ${y + size / 2} Z`}
+          fill="currentColor"
+        />
+      )
+    case "heart":
+      return (
+        <path
+          d={buildHeartPath(x, y, size)}
+          fill="currentColor"
+        />
+      )
+    case "classy":
+      return (
+        <path
+          d={`M ${x + 2} ${y} H ${x + size} V ${y + size - 2} Q ${x + size - 1} ${y + 1} ${x + 2} ${y + size - 2} Z`}
+          fill="currentColor"
+        />
+      )
+    case "classy-rounded":
+      return (
+        <path
+          d={`M ${x + 3} ${y} H ${x + size - 2} Q ${x + size} ${y} ${x + size} ${y + 2} V ${y + size - 3} Q ${x + size - 2} ${y + size} ${x + size - 4} ${y + size} H ${x + 5} Q ${x + 1} ${y + size} ${x + 1} ${y + size - 4} V ${y + 3} Q ${x + 1} ${y + 1} ${x + 3} ${y} Z`}
+          fill="currentColor"
+        />
+      )
+    case "square":
+    default:
+      return (
+        <rect
+          fill="currentColor"
+          height={size}
+          rx={1.5}
+          width={size}
+          x={x}
+          y={y}
+        />
+      )
+  }
+}
+
+function buildHeartPath(x: number, y: number, size: number) {
+  const top = y + size * 0.25
+  const bottom = y + size
+  const left = x
+  const right = x + size
+  const center = x + size / 2
+
+  return [
+    `M ${center} ${bottom}`,
+    `C ${center - size * 0.55} ${y + size * 0.62}, ${left} ${y + size * 0.35}, ${left} ${top}`,
+    `C ${left} ${y - size * 0.02}, ${center - size * 0.18} ${y - size * 0.04}, ${center} ${y + size * 0.2}`,
+    `C ${center + size * 0.18} ${y - size * 0.04}, ${right} ${y - size * 0.02}, ${right} ${top}`,
+    `C ${right} ${y + size * 0.35}, ${center + size * 0.55} ${y + size * 0.62}, ${center} ${bottom}`,
+    "Z",
+  ].join(" ")
 }
 
 function SelectField({
