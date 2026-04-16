@@ -1,32 +1,46 @@
-import { isValidElement } from "react"
+import React from "react"
+import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 
-vi.mock("@/components/ui/ai-prompt-box", () => ({
-  PromptInputBox: () => <div data-testid="prompt-input-box" />,
+vi.mock("framer-motion", () => ({
+  AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  motion: {
+    div: ({
+      animate,
+      children,
+      whileHover,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement> & {
+      animate?: unknown
+      whileHover?: unknown
+    }) => (
+      <div
+        data-motion-animate={JSON.stringify(animate)}
+        data-motion-while-hover={JSON.stringify(whileHover)}
+        {...props}
+      >
+        {children}
+      </div>
+    ),
+    span: ({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>) => (
+      <span {...props}>{children}</span>
+    ),
+  },
 }))
 
-import { PromptInputBox } from "@/components/ui/ai-prompt-box"
 import Home from "./page"
 
 describe("home page", () => {
-  it("renders the prompt box inside the centered CTA layout", () => {
-    const page = Home()
+  it("renders the prompt box and qr category browser inside the centered CTA layout", () => {
+    const markup = renderToStaticMarkup(<Home />)
 
-    expect(isValidElement(page)).toBe(true)
-    expect(page.type).toBe("main")
-    expect(page.props.className).toContain("flex")
-    expect(page.props.className).toContain("min-h-screen")
-    expect(page.props.className).toContain("items-center")
-    expect(page.props.className).toContain("justify-center")
-    expect(page.props.className).toContain("px-4")
-
-    const innerWrapper = page.props.children
-
-    expect(isValidElement(innerWrapper)).toBe(true)
-    expect(innerWrapper.type).toBe("div")
-    expect(innerWrapper.props.className).toContain("w-full")
-    expect(innerWrapper.props.className).toContain("max-w-lg")
-    expect(isValidElement(innerWrapper.props.children)).toBe(true)
-    expect(innerWrapper.props.children.type).toBe(PromptInputBox)
+    expect(markup).toContain("min-h-screen")
+    expect(markup).toContain('aria-label="Auto"')
+    expect(markup).toContain('data-testid="qr-category-browser"')
+    expect(markup).toContain(">Popular<")
+    expect(markup).toContain(">Socials<")
+    expect(markup).toContain(">Contact<")
+    expect(markup).toContain(">Business<")
+    expect(markup).toContain(">Content<")
   })
 })
