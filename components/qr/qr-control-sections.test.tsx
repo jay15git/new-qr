@@ -21,6 +21,7 @@ describe("QrControlSections", () => {
     )
 
     expect(markup).toContain("Style")
+    expect(markup).toContain('data-size="sm"')
     expect(markup).not.toContain("Content")
     expect(markup).not.toContain("Corners")
     expect(markup).not.toContain("QR settings")

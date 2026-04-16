@@ -44,6 +44,8 @@ describe("DashboardSidebar", () => {
     expect(markup).toContain("Background")
     expect(markup).toContain("Logo")
     expect(markup).toContain("Encoding")
+    expect(markup).not.toContain("Value, output type, and size")
+    expect(markup).not.toContain("Switch between content, styling, branding, and encoding controls.")
     expect(markup).not.toContain("Acme")
     expect(markup).not.toContain("Notifications")
     expect(markup).not.toContain("Team switcher")

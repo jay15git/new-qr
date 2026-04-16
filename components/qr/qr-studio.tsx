@@ -1,6 +1,13 @@
 "use client"
 
-import { startTransition, useDeferredValue, useEffect, useRef, useState } from "react"
+import {
+  startTransition,
+  useDeferredValue,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react"
 import type { FileExtension } from "qr-code-styling"
 import QRCodeStyling from "qr-code-styling"
 
@@ -28,6 +35,10 @@ import {
 import { SidebarProvider } from "@/components/ui/sidebar"
 
 const DEFAULT_DOWNLOAD_NAME = "new-qr-studio"
+const DASHBOARD_SIDEBAR_STYLE = {
+  "--sidebar-width": "12rem",
+  "--sidebar-width-icon": "3.25rem",
+} as CSSProperties
 
 type QrStudioProps = {
   variant?: "settings" | "dashboard"
@@ -168,6 +179,7 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
       onReset={handleReset}
       previewRef={previewRef}
       state={state}
+      variant={variant}
     />
   )
 
@@ -185,7 +197,7 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
     const activeSectionMeta = getQrEditorSection(activeSection)
 
     return (
-      <SidebarProvider className="min-h-screen w-full">
+      <SidebarProvider className="min-h-screen w-full" style={DASHBOARD_SIDEBAR_STYLE}>
         <div className="flex min-h-screen w-full bg-muted/20">
           <DashboardSidebar
             activeSection={activeSection}
@@ -195,16 +207,16 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
           />
 
           <main className="flex-1">
-            <div className="mx-auto grid min-h-screen w-full max-w-[1600px] gap-6 px-4 py-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:px-8 xl:grid-cols-[minmax(0,1fr)_24rem]">
-              <div className="min-w-0 space-y-4">
-                <section className="rounded-xl border border-border/70 bg-background/95 p-5 shadow-sm">
-                  <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                    Main editor
+            <div className="mx-auto grid min-h-screen w-full max-w-[1700px] gap-4 px-3 py-3 sm:px-4 lg:grid-cols-[minmax(24rem,1fr)_minmax(24rem,28rem)] lg:items-start lg:gap-5 lg:px-5 lg:py-5 xl:grid-cols-[minmax(26rem,1fr)_minmax(26rem,30rem)] xl:gap-6 xl:px-6">
+              <div className="min-w-0 space-y-3">
+                <section className="border-b border-border/60 pb-3">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                    Active section
                   </p>
-                  <h1 className="mt-2 text-2xl font-semibold tracking-tight">
+                  <h1 className="mt-1 text-xl font-semibold tracking-tight sm:text-2xl">
                     {activeSectionMeta.title}
                   </h1>
-                  <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
+                  <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">
                     {activeSectionMeta.detail}
                   </p>
                 </section>
@@ -215,7 +227,9 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
                 />
               </div>
 
-              <div className="lg:sticky lg:top-6 lg:self-start">{previewCard}</div>
+              <div className="lg:sticky lg:top-4 lg:self-start lg:justify-self-end">
+                {previewCard}
+              </div>
             </div>
           </main>
         </div>

@@ -34,7 +34,7 @@ export function DashboardSidebar({
 
   return (
     <Sidebar variant="floating" collapsible="icon">
-      <SidebarHeader className="gap-3 px-2 py-3 md:pt-3.5">
+      <SidebarHeader className="gap-2 px-2 py-2.5 md:pt-3">
         <div
           className={cn(
             "flex items-start gap-2",
@@ -42,29 +42,23 @@ export function DashboardSidebar({
           )}
         >
           {!isCollapsed ? (
-            <div className="px-2">
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-sidebar-foreground/55">
-                Main editor
+            <div className="px-1.5">
+              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-sidebar-foreground/55">
+                QR edit
               </p>
-              <h2 className="mt-1 text-sm font-semibold text-sidebar-foreground">
-                QR settings
-              </h2>
             </div>
           ) : null}
           <SidebarTrigger className={cn(isCollapsed && "mx-auto")} />
         </div>
-        {!isCollapsed ? (
-          <p className="px-2 text-xs leading-5 text-sidebar-foreground/70">
-            Switch between content, styling, branding, and encoding controls.
-          </p>
-        ) : null}
       </SidebarHeader>
 
       <SidebarSeparator />
 
-      <SidebarContent className="px-2 py-3">
+      <SidebarContent className="px-2 py-2.5">
         <SidebarGroup className="p-0">
-          <SidebarGroupLabel>Sections</SidebarGroupLabel>
+          <SidebarGroupLabel className="px-1.5 text-[11px] uppercase tracking-[0.16em]">
+            Sections
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {QR_EDITOR_SECTIONS.map((section) => {
@@ -76,21 +70,17 @@ export function DashboardSidebar({
                       type="button"
                       tooltip={section.title}
                       isActive={section.id === activeSection}
+                      size="sm"
                       className={cn(
-                        "h-auto items-start gap-3 px-2 py-2.5",
+                        "h-auto items-center gap-2 px-1.5 py-2",
                         isCollapsed && "justify-center",
                       )}
                       onClick={() => onSectionChange(section.id)}
                     >
-                      <Icon className="mt-0.5 size-4" />
+                      <Icon className="size-4" />
                       {!isCollapsed ? (
-                        <span className="flex min-w-0 flex-col text-left">
-                          <span className="text-sm font-medium text-sidebar-foreground">
-                            {section.title}
-                          </span>
-                          <span className="text-xs leading-5 text-sidebar-foreground/65">
-                            {section.description}
-                          </span>
+                        <span className="min-w-0 truncate text-sm font-medium text-sidebar-foreground">
+                          {section.title}
                         </span>
                       ) : null}
                     </SidebarMenuButton>

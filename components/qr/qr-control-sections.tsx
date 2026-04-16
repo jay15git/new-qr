@@ -141,21 +141,27 @@ export function QrControlSections({
   const contentError = state.data.trim() ? null : "Add text or a URL to encode"
   const activeCustomDotShape = getActiveCustomDotShape(state.dotsOptions.type)
   const isDashboardMode = activeSection !== undefined
+  const sectionCardClassName = isDashboardMode
+    ? "gap-3 bg-transparent py-0 ring-0 shadow-none"
+    : undefined
+  const sectionHeaderClassName = isDashboardMode ? "gap-1 px-0" : undefined
+  const sectionContentClassName = isDashboardMode ? "px-0" : undefined
+  const sectionDescriptionClassName = isDashboardMode ? "text-xs leading-5" : undefined
 
   const showsSection = (section: QrEditorSectionId) =>
     activeSection === undefined || activeSection === section
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className={cn("flex flex-col", isDashboardMode ? "gap-3" : "gap-4")}>
       {showsSection("content") ? (
-        <Card>
-        <CardHeader>
+        <Card className={sectionCardClassName} size={isDashboardMode ? "sm" : "default"}>
+        <CardHeader className={sectionHeaderClassName}>
           <CardTitle>Content</CardTitle>
-          <CardDescription>
+          <CardDescription className={sectionDescriptionClassName}>
             Set the encoded value, renderer, and output dimensions.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className={sectionContentClassName}>
           <FieldGroup>
             <Field data-invalid={contentError ? true : undefined}>
               <FieldLabel htmlFor="qr-data">Text or URL</FieldLabel>
@@ -222,14 +228,14 @@ export function QrControlSections({
       ) : null}
 
       {showsSection("style") ? (
-        <Card>
-        <CardHeader>
+        <Card className={sectionCardClassName} size={isDashboardMode ? "sm" : "default"}>
+        <CardHeader className={sectionHeaderClassName}>
           <CardTitle>{isDashboardMode ? "Style" : "Dots"}</CardTitle>
-          <CardDescription>
+          <CardDescription className={sectionDescriptionClassName}>
             Shape the main QR modules and optionally apply a gradient.
           </CardDescription>
         </CardHeader>
-          <CardContent className="flex flex-col gap-4">
+          <CardContent className={cn(sectionContentClassName, "flex flex-col gap-4")}>
             <FieldGroup className="grid gap-4 md:grid-cols-2">
             {isDashboardMode ? (
               <VisualStylePicker
@@ -309,14 +315,14 @@ export function QrControlSections({
       ) : null}
 
       {showsSection("corners") ? (
-        <Card>
-        <CardHeader>
+        <Card className={sectionCardClassName} size={isDashboardMode ? "sm" : "default"}>
+        <CardHeader className={sectionHeaderClassName}>
           <CardTitle>Corners</CardTitle>
-          <CardDescription>
+          <CardDescription className={sectionDescriptionClassName}>
             Style the corner frames and the inner corner dots independently.
           </CardDescription>
         </CardHeader>
-          <CardContent className="flex flex-col gap-5">
+          <CardContent className={cn(sectionContentClassName, "flex flex-col gap-5")}>
             <FieldGroup className="grid gap-4 md:grid-cols-2">
             {isDashboardMode ? (
               <VisualStylePicker
@@ -442,14 +448,14 @@ export function QrControlSections({
       ) : null}
 
       {showsSection("background") ? (
-        <Card>
-        <CardHeader>
+        <Card className={sectionCardClassName} size={isDashboardMode ? "sm" : "default"}>
+        <CardHeader className={sectionHeaderClassName}>
           <CardTitle>Background</CardTitle>
-          <CardDescription>
+          <CardDescription className={sectionDescriptionClassName}>
             Choose a fill or layer in a gradient behind the code.
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className={cn(sectionContentClassName, "flex flex-col gap-4")}>
           <Field orientation="horizontal">
             <FieldContent>
               <FieldLabel htmlFor="background-transparent">Transparent background</FieldLabel>
@@ -502,15 +508,15 @@ export function QrControlSections({
       ) : null}
 
       {showsSection("logo") ? (
-        <Card>
-        <CardHeader>
+        <Card className={sectionCardClassName} size={isDashboardMode ? "sm" : "default"}>
+        <CardHeader className={sectionHeaderClassName}>
           <CardTitle>Logo</CardTitle>
-          <CardDescription>
+          <CardDescription className={sectionDescriptionClassName}>
             Add a logo from a URL or local file and tune how much QR space it
             occupies.
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className={cn(sectionContentClassName, "flex flex-col gap-4")}>
           <SelectField
             id="logo-source-mode"
             label="Logo source"
@@ -666,14 +672,14 @@ export function QrControlSections({
       ) : null}
 
       {showsSection("encoding") ? (
-        <Card>
-        <CardHeader>
+        <Card className={sectionCardClassName} size={isDashboardMode ? "sm" : "default"}>
+        <CardHeader className={sectionHeaderClassName}>
           <CardTitle>{isDashboardMode ? "Encoding" : "QR settings"}</CardTitle>
-          <CardDescription>
+          <CardDescription className={sectionDescriptionClassName}>
             Adjust the encoding mode and error correction level.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className={sectionContentClassName}>
           <FieldGroup className="grid gap-4 md:grid-cols-3">
             <SelectField
               id="qr-mode"

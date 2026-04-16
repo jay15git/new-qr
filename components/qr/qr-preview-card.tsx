@@ -17,6 +17,7 @@ import {
   DOWNLOAD_EXTENSIONS,
   type QrStudioState,
 } from "@/components/qr/qr-studio-state"
+import { cn } from "@/lib/utils"
 
 type QrPreviewCardProps = {
   canDownload: boolean
@@ -29,6 +30,7 @@ type QrPreviewCardProps = {
   onReset: () => void
   previewRef: React.RefObject<HTMLDivElement | null>
   state: QrStudioState
+  variant?: "settings" | "dashboard"
 }
 
 export function QrPreviewCard({
@@ -40,19 +42,31 @@ export function QrPreviewCard({
   onReset,
   previewRef,
   state,
+  variant = "settings",
 }: QrPreviewCardProps) {
+  const isDashboard = variant === "dashboard"
+
   return (
-    <Card className="border-border/70 bg-card/95 shadow-sm backdrop-blur">
-      <CardHeader className="gap-4">
+    <Card
+      className={cn(
+        "w-full bg-card/95 shadow-sm backdrop-blur",
+        isDashboard && "max-w-[28rem] bg-card/98 shadow-none",
+      )}
+      size={isDashboard ? "sm" : "default"}
+    >
+      <CardHeader className={cn(isDashboard ? "gap-3" : "gap-4")}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <CardTitle className="text-xl">Live preview</CardTitle>
+            <CardTitle className={cn(isDashboard ? "text-lg" : "text-xl")}>
+              Live preview
+            </CardTitle>
             <CardDescription>
-              Every change is applied directly to the same QR instance for fast
-              styling feedback.
+              {isDashboard
+                ? "Instant feedback while you tune the active section."
+                : "Every change is applied directly to the same QR instance for fast styling feedback."}
             </CardDescription>
           </div>
-          <Badge variant="secondary">qr-code-styling</Badge>
+          {!isDashboard ? <Badge variant="secondary">qr-code-styling</Badge> : null}
         </div>
         <div className="flex flex-wrap gap-2">
           <Badge variant="outline">{state.type.toUpperCase()}</Badge>
@@ -62,11 +76,21 @@ export function QrPreviewCard({
           <Badge variant="outline">EC {state.qrOptions.errorCorrectionLevel}</Badge>
         </div>
       </CardHeader>
-      <CardContent className="flex flex-col gap-5">
-        <div className="rounded-[calc(var(--radius-xl)+4px)] border border-border/70 bg-muted/30 p-4">
+      <CardContent className={cn("flex flex-col", isDashboard ? "gap-4" : "gap-5")}>
+        <div
+          className={cn(
+            "rounded-[calc(var(--radius-xl)+4px)] border border-border/70 bg-muted/30",
+            isDashboard ? "p-3" : "p-4",
+          )}
+        >
           <div
             ref={previewRef}
-            className="flex aspect-square items-center justify-center rounded-[calc(var(--radius-xl)-2px)] bg-background p-4 shadow-inner [&_canvas]:h-full [&_canvas]:w-full [&_canvas]:max-w-full [&_svg]:h-full [&_svg]:w-full [&_svg]:max-w-full"
+            className={cn(
+              "flex aspect-square items-center justify-center rounded-[calc(var(--radius-xl)-2px)] bg-background shadow-inner [&_canvas]:h-full [&_canvas]:w-full [&_canvas]:max-w-full [&_svg]:h-full [&_svg]:w-full [&_svg]:max-w-full",
+              isDashboard
+                ? "mx-auto w-full max-w-[18rem] min-h-[18rem] p-3 lg:max-w-[20rem] lg:min-h-[20rem] xl:max-w-[22rem] xl:min-h-[22rem]"
+                : "p-4",
+            )}
           />
         </div>
 
@@ -82,7 +106,12 @@ export function QrPreviewCard({
           </Field>
         </FieldGroup>
 
-        <div className="rounded-[var(--radius-xl)] border border-dashed border-border/70 bg-muted/20 p-4">
+        <div
+          className={cn(
+            "rounded-[var(--radius-xl)] border border-dashed border-border/70 bg-muted/20",
+            isDashboard ? "p-3" : "p-4",
+          )}
+        >
           <div className="flex items-start gap-3 text-sm text-muted-foreground">
             <SparklesIcon className="mt-0.5 size-4 text-foreground/70" />
             <div className="flex flex-col gap-1">
@@ -100,7 +129,12 @@ export function QrPreviewCard({
           </p>
         ) : null}
       </CardContent>
-      <CardFooter className="flex flex-col gap-4 border-t border-border/70 pt-6">
+      <CardFooter
+        className={cn(
+          "flex flex-col gap-4 border-t border-border/70",
+          isDashboard ? "pt-4" : "pt-6",
+        )}
+      >
         <div className="flex w-full flex-wrap gap-2">
           {DOWNLOAD_EXTENSIONS.map((extension) => (
             <Button
