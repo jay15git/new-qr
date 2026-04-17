@@ -228,7 +228,7 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
 
             <section
               data-slot="dashboard-workspace"
-              className="flex flex-1 flex-col lg:h-full lg:min-h-0 lg:grid lg:grid-cols-[6.5rem_minmax(20rem,1fr)_minmax(22rem,32vw)] lg:overflow-hidden"
+              className="flex flex-1 flex-col lg:h-full lg:min-h-0 lg:grid lg:grid-cols-[6.5rem_minmax(20rem,26rem)_minmax(22rem,1fr)] lg:overflow-hidden xl:grid-cols-[6.5rem_minmax(21rem,28rem)_minmax(24rem,1fr)]"
             >
               <QrSectionRail
                 activeSection={activeSection}
