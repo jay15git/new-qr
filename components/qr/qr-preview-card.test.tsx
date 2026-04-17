@@ -6,7 +6,7 @@ import { QrPreviewCard } from "@/components/qr/qr-preview-card"
 import { createDefaultQrStudioState } from "@/components/qr/qr-studio-state"
 
 describe("QrPreviewCard", () => {
-  it("uses the compact dashboard shell when requested", () => {
+  it("renders dashboard preview actions below the qr image", () => {
     const markup = renderToStaticMarkup(
       <QrPreviewCard
         canDownload
@@ -21,12 +21,19 @@ describe("QrPreviewCard", () => {
       />,
     )
 
-    expect(markup).toContain('data-size="sm"')
-    expect(markup).toContain("Preview stage")
-    expect(markup).toContain("<h2")
+    expect(markup).toContain('data-slot="dashboard-preview-canvas"')
+    expect(markup).toContain('data-slot="dashboard-proof-stage"')
+    expect(markup).toContain('data-slot="dashboard-preview-actions"')
+    expect(markup).not.toContain('data-slot="card"')
+    expect(markup).not.toContain('data-slot="card-header"')
+    expect(markup).not.toContain('data-slot="card-content"')
+    expect(markup).not.toContain('data-slot="card-footer"')
+    expect(markup).toContain("Export filename")
+    expect(markup).toContain("Reset defaults")
+    expect(markup).toContain('data-slot="field-group"')
   })
 
-  it("uses a light proof stage in dashboard mode while keeping export actions beneath it", () => {
+  it("keeps the dashboard preview pane fixed without its own scroll area", () => {
     const markup = renderToStaticMarkup(
       <QrPreviewCard
         canDownload
@@ -41,11 +48,12 @@ describe("QrPreviewCard", () => {
       />,
     )
 
-    expect(markup).toContain("xl:min-h-[calc(100svh-13rem)]")
-    expect(markup).toContain('data-slot="proof-stage"')
-    expect(markup).toContain("bg-[linear-gradient(180deg,oklch(0.97_0.006_95),oklch(0.92_0.012_95))]")
-    expect(markup).toContain("lg:size-[clamp(23rem,34vw,34rem)]")
-    expect(markup).not.toContain("bg-[color-mix(in_oklch,var(--color-background)_90%,black_10%)]")
-    expect(markup).toContain("Reset defaults")
+    expect(markup).toContain('data-slot="dashboard-proof-stage"')
+    expect(markup).toContain("dashboard-preview-shell")
+    expect(markup).toContain("max-h-[calc(100svh-18rem)]")
+    expect(markup).toContain("lg:max-h-[calc(100svh-20rem)]")
+    expect(markup).toContain("bg-background")
+    expect(markup).not.toContain("overflow-y-auto")
+    expect(markup).not.toContain("overflow-auto")
   })
 })

@@ -34,7 +34,11 @@ export function DashboardSidebar({
 
   return (
     <aside aria-label="Studio navigation">
-      <Sidebar variant="floating" collapsible="icon">
+      <Sidebar
+        variant="sidebar"
+        collapsible="icon"
+        className="lg:top-24 lg:bottom-6 lg:h-auto"
+      >
         <SidebarHeader className="gap-2 px-2 py-2.5 md:pt-3">
           <div
             className={cn(

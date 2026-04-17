@@ -25,6 +25,13 @@ export type StudioGradient = {
 };
 
 export type StudioDotType = DotType | "diamond" | "heart";
+export type DotsColorMode = "solid" | "gradient" | "palette";
+export type AssetSourceMode = "none" | "url" | "upload";
+
+export type StudioAsset = {
+  source: AssetSourceMode;
+  value?: string;
+};
 
 export type QrStudioState = {
   data: string;
@@ -32,7 +39,8 @@ export type QrStudioState = {
   width: number;
   height: number;
   margin: number;
-  image?: string;
+  logo: StudioAsset;
+  backgroundImage: StudioAsset;
   qrOptions: {
     typeNumber: TypeNumber;
     mode: Mode;
@@ -50,6 +58,8 @@ export type QrStudioState = {
     color: string;
     roundSize: boolean;
   };
+  dotsColorMode: DotsColorMode;
+  dotsPalette: string[];
   cornersSquareOptions: {
     type: CornerSquareType;
     color: string;
@@ -85,6 +95,13 @@ const DEFAULT_GRADIENT: StudioGradient = {
   ],
 };
 
+const DEFAULT_DOTS_PALETTE = [
+  "#04879c",
+  "#0c3c78",
+  "#090030",
+  "#f30a49",
+];
+
 export function createDefaultQrStudioState(): QrStudioState {
   return {
     data: "https://new-qr-studio.local/launch",
@@ -92,7 +109,14 @@ export function createDefaultQrStudioState(): QrStudioState {
     width: 320,
     height: 320,
     margin: 12,
-    image: undefined,
+    logo: {
+      source: "none",
+      value: undefined,
+    },
+    backgroundImage: {
+      source: "none",
+      value: undefined,
+    },
     qrOptions: {
       typeNumber: 0,
       mode: "Byte",
@@ -110,6 +134,8 @@ export function createDefaultQrStudioState(): QrStudioState {
       color: "#111827",
       roundSize: true,
     },
+    dotsColorMode: "solid",
+    dotsPalette: [...DEFAULT_DOTS_PALETTE],
     cornersSquareOptions: {
       type: "extra-rounded",
       color: "#111827",
@@ -149,7 +175,8 @@ export function coerceNumber(
 }
 
 export function toQrCodeOptions(state: QrStudioState): Options {
-  const image = sanitizeImage(state.image);
+  const logoImage = getAssetValue(state.logo);
+  const backgroundImage = getAssetValue(state.backgroundImage);
 
   return {
     width: coerceNumber(state.width, 120, 1200, 320),
@@ -157,7 +184,7 @@ export function toQrCodeOptions(state: QrStudioState): Options {
     type: state.type,
     data: state.data.trim(),
     margin: coerceNumber(state.margin, 0, 80, 12),
-    image,
+    image: logoImage,
     qrOptions: {
       ...state.qrOptions,
     },
@@ -169,8 +196,8 @@ export function toQrCodeOptions(state: QrStudioState): Options {
     dotsOptions: {
       type: mapStudioDotType(state.dotsOptions.type),
       roundSize: state.dotsOptions.roundSize,
-      color: state.dotsGradient.enabled ? undefined : state.dotsOptions.color,
-      gradient: buildGradient(state.dotsGradient),
+      color: getDotsColor(state),
+      gradient: getDotsGradient(state),
     },
     cornersSquareOptions: {
       type: state.cornersSquareOptions.type,
@@ -188,14 +215,32 @@ export function toQrCodeOptions(state: QrStudioState): Options {
     },
     backgroundOptions: {
       color:
-        state.backgroundGradient.enabled || state.backgroundOptions.transparent
-          ? state.backgroundOptions.transparent
-            ? "transparent"
-            : undefined
+        backgroundImage ||
+        state.backgroundGradient.enabled ||
+        state.backgroundOptions.transparent
+          ? backgroundImage
+            ? undefined
+            : state.backgroundOptions.transparent
+              ? "transparent"
+              : undefined
           : state.backgroundOptions.color,
-      gradient: buildGradient(state.backgroundGradient),
+      gradient: backgroundImage ? undefined : buildGradient(state.backgroundGradient),
     },
   };
+}
+
+export function getAssetValue(asset?: StudioAsset) {
+  const trimmed = asset?.value?.trim();
+
+  return trimmed ? trimmed : undefined;
+}
+
+export function hasBackgroundImage(state: QrStudioState) {
+  return Boolean(getAssetValue(state.backgroundImage));
+}
+
+export function hasLogoImage(state: QrStudioState) {
+  return Boolean(getAssetValue(state.logo));
 }
 
 function mapStudioDotType(type: StudioDotType): DotType {
@@ -204,6 +249,25 @@ function mapStudioDotType(type: StudioDotType): DotType {
   }
 
   return type;
+}
+
+function getDotsColor(state: QrStudioState) {
+  if (state.dotsColorMode !== "solid") {
+    return undefined;
+  }
+
+  return state.dotsOptions.color;
+}
+
+function getDotsGradient(state: QrStudioState) {
+  if (state.dotsColorMode !== "gradient") {
+    return undefined;
+  }
+
+  return buildGradient({
+    ...state.dotsGradient,
+    enabled: true,
+  });
 }
 
 function buildGradient(gradient: StudioGradient): Gradient | undefined {
@@ -219,10 +283,4 @@ function buildGradient(gradient: StudioGradient): Gradient | undefined {
       color: stop.color,
     })),
   };
-}
-
-function sanitizeImage(image?: string) {
-  const trimmed = image?.trim();
-
-  return trimmed ? trimmed : undefined;
 }

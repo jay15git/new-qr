@@ -1,7 +1,8 @@
 "use client"
 
-import { ImagePlusIcon, UploadIcon, XIcon } from "lucide-react"
+import { PlusIcon, XIcon } from "lucide-react"
 
+import FileUpload from "@/components/kokonutui/file-upload"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -43,19 +44,23 @@ import type {
 import { getActiveCustomDotShape } from "@/components/qr/custom-dot-shapes"
 import type { QrEditorSectionId } from "@/components/qr/qr-sections"
 import type {
+  AssetSourceMode,
+  DotsColorMode,
   QrStudioState,
   StudioDotType,
   StudioGradient,
 } from "@/components/qr/qr-studio-state"
-
-export type LogoSourceMode = "none" | "url" | "upload"
+import { hasBackgroundImage } from "@/components/qr/qr-studio-state"
 
 type QrControlSectionsProps = {
-  fileInputRef: React.RefObject<HTMLInputElement | null>
-  logoSourceMode: LogoSourceMode
-  onLogoFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-  onLogoModeChange: (mode: LogoSourceMode) => void
-  onPickLogoFile: () => void
+  backgroundSourceMode: AssetSourceMode
+  logoSourceMode: AssetSourceMode
+  onBackgroundModeChange: (mode: AssetSourceMode) => void
+  onBackgroundUploadError: (message: string) => void
+  onBackgroundUploadSuccess: (file: File) => void
+  onLogoModeChange: (mode: AssetSourceMode) => void
+  onLogoUploadError: (message: string) => void
+  onLogoUploadSuccess: (file: File) => void
   setState: React.Dispatch<React.SetStateAction<QrStudioState>>
   state: QrStudioState
   activeSection?: QrEditorSectionId
@@ -122,25 +127,56 @@ const GRADIENT_TYPES: Array<{ label: string; value: GradientType }> = [
   { label: "Radial", value: "radial" },
 ]
 
-const LOGO_MODES: Array<{ label: string; value: LogoSourceMode }> = [
+const DOT_COLOR_MODES: Array<{ label: string; value: DotsColorMode }> = [
+  { label: "Solid", value: "solid" },
+  { label: "Gradient", value: "gradient" },
+  { label: "Palette", value: "palette" },
+]
+
+const LOGO_MODES: Array<{ label: string; value: AssetSourceMode }> = [
   { label: "No logo", value: "none" },
   { label: "Remote URL", value: "url" },
   { label: "Upload file", value: "upload" },
 ]
 
+const BACKGROUND_MODES: Array<{ label: string; value: AssetSourceMode }> = [
+  { label: "No background image", value: "none" },
+  { label: "Remote URL", value: "url" },
+  { label: "Upload file", value: "upload" },
+]
+
+const MIN_DOT_PALETTE_SWATCHES = 2
+const MAX_DOT_PALETTE_SWATCHES = 8
+const DOTS_PALETTE_FALLBACKS = [
+  "#04879c",
+  "#0c3c78",
+  "#090030",
+  "#f30a49",
+  "#3f88c5",
+  "#16a085",
+  "#ff7f11",
+  "#8f2d56",
+]
+
 export function QrControlSections({
-  fileInputRef,
+  backgroundSourceMode,
   logoSourceMode,
-  onLogoFileChange,
+  onBackgroundModeChange,
+  onBackgroundUploadError,
+  onBackgroundUploadSuccess,
   onLogoModeChange,
-  onPickLogoFile,
+  onLogoUploadError,
+  onLogoUploadSuccess,
   setState,
   state,
   activeSection,
 }: QrControlSectionsProps) {
   const contentError = state.data.trim() ? null : "Add text or a URL to encode"
   const activeCustomDotShape = getActiveCustomDotShape(state.dotsOptions.type)
+  const backgroundImageActive = hasBackgroundImage(state)
   const isDashboardMode = activeSection !== undefined
+  const stackClassName = isDashboardMode ? "gap-3" : "grid gap-4 md:grid-cols-2"
+  const encodingStackClassName = isDashboardMode ? "gap-3" : "grid gap-4 md:grid-cols-3"
 
   const showsSection = (section: QrEditorSectionId) =>
     activeSection === undefined || activeSection === section
@@ -198,13 +234,15 @@ export function QrControlSections({
                 className="min-h-28"
                 placeholder="https://example.com/invite"
               />
-              <FieldDescription>
-                The value you enter here is encoded directly into the QR code.
-              </FieldDescription>
+              {!isDashboardMode ? (
+                <FieldDescription>
+                  The value you enter here is encoded directly into the QR code.
+                </FieldDescription>
+              ) : null}
               {contentError ? <FieldError>{contentError}</FieldError> : null}
             </Field>
 
-            <FieldGroup className="grid gap-4 md:grid-cols-2">
+            <FieldGroup className={stackClassName}>
               <SelectField
                 id="qr-draw-type"
                 label="Render type"
@@ -253,11 +291,11 @@ export function QrControlSections({
       {showsSection("style") ? (
         renderSection({
           title: "Dots",
-          description: "Shape the main QR modules and optionally apply a gradient.",
+          description: "Shape the main QR modules and choose solid, gradient, or palette color treatment.",
           contentClassName: "flex flex-col gap-4",
           children: (
             <>
-            <FieldGroup className="grid gap-4 md:grid-cols-2">
+            <FieldGroup className={stackClassName}>
             {isDashboardMode ? (
               <VisualStylePicker
                 id="dots-type"
@@ -285,16 +323,18 @@ export function QrControlSections({
                 value={state.dotsOptions.type}
               />
             )}
-            <ColorField
-              id="dots-color"
-              label="Solid color"
+            <SegmentedOptionPicker
+              id="dots-color-mode"
+              isStacked={isDashboardMode}
+              label="Color mode"
               onValueChange={(value) =>
                 setState((current) => ({
                   ...current,
-                  dotsOptions: { ...current.dotsOptions, color: value },
+                  dotsColorMode: value as DotsColorMode,
                 }))
               }
-              value={state.dotsOptions.color}
+              options={DOT_COLOR_MODES}
+              value={state.dotsColorMode}
             />
           </FieldGroup>
 
@@ -304,12 +344,62 @@ export function QrControlSections({
             </p>
           ) : null}
 
+          {state.dotsColorMode === "solid" ? (
+            <ColorField
+              id="dots-color"
+              isDashboardMode={isDashboardMode}
+              label="Solid color"
+              onValueChange={(value) =>
+                setState((current) => ({
+                  ...current,
+                  dotsOptions: { ...current.dotsOptions, color: value },
+                }))
+              }
+              value={state.dotsOptions.color}
+            />
+          ) : null}
+
+          {state.dotsColorMode === "palette" ? (
+            <DotsPaletteEditor
+              isDashboardMode={isDashboardMode}
+              palette={state.dotsPalette}
+              onAddSwatch={() =>
+                setState((current) => ({
+                  ...current,
+                  dotsPalette: [
+                    ...current.dotsPalette,
+                    getNextDotsPaletteColor(current.dotsPalette.length),
+                  ].slice(0, MAX_DOT_PALETTE_SWATCHES),
+                }))
+              }
+              onPaletteColorChange={(index, value) =>
+                setState((current) => ({
+                  ...current,
+                  dotsPalette: current.dotsPalette.map((color, colorIndex) =>
+                    colorIndex === index ? value : color,
+                  ),
+                }))
+              }
+              onRemoveSwatch={(index) =>
+                setState((current) => ({
+                  ...current,
+                  dotsPalette:
+                    current.dotsPalette.length <= MIN_DOT_PALETTE_SWATCHES
+                      ? current.dotsPalette
+                      : current.dotsPalette.filter((_, colorIndex) => colorIndex !== index),
+                }))
+              }
+            />
+          ) : null}
+
           <Field orientation="horizontal">
             <FieldContent>
               <FieldLabel htmlFor="dots-round-size">Round dot sizes</FieldLabel>
-              <FieldDescription>
-                Keeps SVG output visually softer by rounding dot sizing.
-              </FieldDescription>
+              {!isDashboardMode ? (
+                <FieldDescription>
+                  Keeps SVG output visually softer by rounding dot sizing.
+                </FieldDescription>
+              ) : null}
             </FieldContent>
             <Switch
               id="dots-round-size"
@@ -323,14 +413,21 @@ export function QrControlSections({
             />
           </Field>
 
-          <GradientEditor
-            gradient={state.dotsGradient}
-            idPrefix="dots-gradient"
-            onGradientChange={(gradient) =>
-              setState((current) => ({ ...current, dotsGradient: gradient }))
-            }
-            title="Dot gradient"
-          />
+          {state.dotsColorMode === "gradient" ? (
+            <GradientEditor
+              gradient={{ ...state.dotsGradient, enabled: true }}
+              hideToggle
+              idPrefix="dots-gradient"
+              isDashboardMode={isDashboardMode}
+              onGradientChange={(gradient) =>
+                setState((current) => ({
+                  ...current,
+                  dotsGradient: { ...gradient, enabled: true },
+                }))
+              }
+              title="Dot gradient"
+            />
+          ) : null}
             </>
           ),
         })
@@ -343,7 +440,7 @@ export function QrControlSections({
           contentClassName: "flex flex-col gap-5",
           children: (
             <>
-            <FieldGroup className="grid gap-4 md:grid-cols-2">
+            <FieldGroup className={stackClassName}>
             {isDashboardMode ? (
               <VisualStylePicker
                 id="corner-square-type"
@@ -379,6 +476,7 @@ export function QrControlSections({
             )}
             <ColorField
               id="corner-square-color"
+              isDashboardMode={isDashboardMode}
               label="Corner square color"
               onValueChange={(value) =>
                 setState((current) => ({
@@ -396,6 +494,7 @@ export function QrControlSections({
           <GradientEditor
             gradient={state.cornersSquareGradient}
             idPrefix="corner-square-gradient"
+            isDashboardMode={isDashboardMode}
             onGradientChange={(gradient) =>
               setState((current) => ({
                 ...current,
@@ -405,7 +504,7 @@ export function QrControlSections({
             title="Corner square gradient"
           />
 
-            <FieldGroup className="grid gap-4 md:grid-cols-2">
+            <FieldGroup className={stackClassName}>
             {isDashboardMode ? (
               <VisualStylePicker
                 id="corner-dot-type"
@@ -441,6 +540,7 @@ export function QrControlSections({
             )}
             <ColorField
               id="corner-dot-color"
+              isDashboardMode={isDashboardMode}
               label="Corner dot color"
               onValueChange={(value) =>
                 setState((current) => ({
@@ -458,6 +558,7 @@ export function QrControlSections({
           <GradientEditor
             gradient={state.cornersDotGradient}
             idPrefix="corner-dot-gradient"
+            isDashboardMode={isDashboardMode}
             onGradientChange={(gradient) =>
               setState((current) => ({ ...current, cornersDotGradient: gradient }))
             }
@@ -475,15 +576,56 @@ export function QrControlSections({
           contentClassName: "flex flex-col gap-4",
           children: (
             <>
+          <AssetSourceField
+            idPrefix="background"
+            isDashboardMode={isDashboardMode}
+            mode={backgroundSourceMode}
+            noneLabel="No background image"
+            onModeChange={onBackgroundModeChange}
+            onRemove={() =>
+              setState((current) => ({
+                ...current,
+                backgroundImage: { source: "none", value: undefined },
+              }))
+            }
+            onUploadError={onBackgroundUploadError}
+            onUploadSuccess={onBackgroundUploadSuccess}
+            onValueChange={(value) =>
+              setState((current) => ({
+                ...current,
+                backgroundImage: {
+                  source: "url",
+                  value,
+                },
+              }))
+            }
+            options={BACKGROUND_MODES}
+            removeLabel="Remove background image"
+            sourceLabel="Background source"
+            uploadLabel="Upload background image"
+            urlLabel="Remote background URL"
+            urlPlaceholder="https://example.com/background.png"
+            value={state.backgroundImage.value ?? ""}
+          />
+
+          {backgroundImageActive ? (
+            <p className="text-sm text-muted-foreground">
+              Background image replaces the background fill and gradient.
+            </p>
+          ) : null}
+
           <Field orientation="horizontal">
             <FieldContent>
               <FieldLabel htmlFor="background-transparent">Transparent background</FieldLabel>
-              <FieldDescription>
-                Use this when the QR should sit on top of another surface.
-              </FieldDescription>
+              {!isDashboardMode ? (
+                <FieldDescription>
+                  Use this when the QR should sit on top of another surface.
+                </FieldDescription>
+              ) : null}
             </FieldContent>
             <Switch
               id="background-transparent"
+              disabled={backgroundImageActive}
               checked={state.backgroundOptions.transparent}
               onCheckedChange={(checked) =>
                 setState((current) => ({
@@ -502,6 +644,8 @@ export function QrControlSections({
 
           <ColorField
             id="background-color"
+            disabled={backgroundImageActive}
+            isDashboardMode={isDashboardMode}
             label="Background color"
             onValueChange={(value) =>
               setState((current) => ({
@@ -513,10 +657,15 @@ export function QrControlSections({
           />
 
           <GradientEditor
-            disabled={state.backgroundOptions.transparent}
-            disabledText="Disable transparency to apply a background gradient."
+            disabled={backgroundImageActive || state.backgroundOptions.transparent}
+            disabledText={
+              backgroundImageActive
+                ? "Remove the background image to edit the background fill or gradient."
+                : "Disable transparency to apply a background gradient."
+            }
             gradient={state.backgroundGradient}
             idPrefix="background-gradient"
+            isDashboardMode={isDashboardMode}
             onGradientChange={(gradient) =>
               setState((current) => ({ ...current, backgroundGradient: gradient }))
             }
@@ -538,17 +687,9 @@ export function QrControlSections({
           <SelectField
             id="logo-source-mode"
             label="Logo source"
-            onValueChange={(value) => onLogoModeChange(value as LogoSourceMode)}
+            onValueChange={(value) => onLogoModeChange(value as AssetSourceMode)}
             options={LOGO_MODES}
             value={logoSourceMode}
-          />
-
-          <input
-            ref={fileInputRef}
-            accept="image/*"
-            className="hidden"
-            onChange={onLogoFileChange}
-            type="file"
           />
 
           {logoSourceMode === "url" ? (
@@ -557,42 +698,34 @@ export function QrControlSections({
               <Input
                 id="logo-url"
                 placeholder="https://example.com/logo.png"
-                value={state.image ?? ""}
+                value={state.logo.value ?? ""}
                 onChange={(event) =>
-                  setState((current) => ({ ...current, image: event.target.value }))
+                  setState((current) => ({
+                    ...current,
+                    logo: {
+                      source: "url",
+                      value: event.target.value,
+                    },
+                  }))
                 }
               />
-              <FieldDescription>
-                Use a public image URL if you want exportable SVG output with a
-                hosted asset.
-              </FieldDescription>
+              {!isDashboardMode ? (
+                <FieldDescription>
+                  Use a public image URL if you want exportable SVG output with a
+                  hosted asset.
+                </FieldDescription>
+              ) : null}
             </Field>
           ) : null}
 
           {logoSourceMode === "upload" ? (
-            <div className="rounded-[var(--radius-xl)] border border-dashed border-border/70 bg-muted/20 p-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-start gap-3">
-                  <ImagePlusIcon className="mt-0.5 size-4 text-foreground/70" />
-                  <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-                    <p className="font-medium text-foreground">Local image upload</p>
-                    <p>
-                      Choose a PNG, SVG, or JPG file from this machine. The file
-                      stays local and is referenced through a temporary object URL.
-                    </p>
-                  </div>
-                </div>
-                <Button variant="outline" onClick={onPickLogoFile}>
-                  <UploadIcon data-icon="inline-start" />
-                  Choose file
-                </Button>
-              </div>
-              {state.image ? (
-                <p className="mt-3 text-sm text-muted-foreground break-all">
-                  Current upload: {state.image}
-                </p>
-              ) : null}
-            </div>
+            <FileUpload
+              acceptedFileTypes={["image/*"]}
+              className={cn("mx-0 max-w-none", isDashboardMode ? "max-w-full" : undefined)}
+              onUploadError={(error) => onLogoUploadError(error.message)}
+              onUploadSuccess={onLogoUploadSuccess}
+              uploadDelay={0}
+            />
           ) : null}
 
           {logoSourceMode !== "none" ? (
@@ -601,7 +734,10 @@ export function QrControlSections({
               className="self-start"
               onClick={() => {
                 onLogoModeChange("none")
-                setState((current) => ({ ...current, image: undefined }))
+                setState((current) => ({
+                  ...current,
+                  logo: { source: "none", value: undefined },
+                }))
               }}
             >
               <XIcon data-icon="inline-start" />
@@ -624,9 +760,15 @@ export function QrControlSections({
                 }))
               }
             />
-            <FieldDescription>
-              {(state.imageOptions.imageSize * 100).toFixed(0)}% of the QR width
-            </FieldDescription>
+            {isDashboardMode ? (
+              <p className="font-mono text-xs text-muted-foreground">
+                {(state.imageOptions.imageSize * 100).toFixed(0)}% of the QR width
+              </p>
+            ) : (
+              <FieldDescription>
+                {(state.imageOptions.imageSize * 100).toFixed(0)}% of the QR width
+              </FieldDescription>
+            )}
           </Field>
 
           <NumberField
@@ -646,10 +788,12 @@ export function QrControlSections({
           <Field orientation="horizontal">
             <FieldContent>
               <FieldLabel htmlFor="hide-background-dots">Hide background dots</FieldLabel>
-              <FieldDescription>
-                Clears the modules directly under the logo so the image reads
-                cleanly.
-              </FieldDescription>
+              {!isDashboardMode ? (
+                <FieldDescription>
+                  Clears the modules directly under the logo so the image reads
+                  cleanly.
+                </FieldDescription>
+              ) : null}
             </FieldContent>
             <Switch
               id="hide-background-dots"
@@ -669,10 +813,12 @@ export function QrControlSections({
           <Field orientation="horizontal">
             <FieldContent>
               <FieldLabel htmlFor="save-as-blob">Save embedded image as blob</FieldLabel>
-              <FieldDescription>
-                Larger SVG files, but better compatibility when the QR is opened
-                elsewhere.
-              </FieldDescription>
+              {!isDashboardMode ? (
+                <FieldDescription>
+                  Larger SVG files, but better compatibility when the QR is opened
+                  elsewhere.
+                </FieldDescription>
+              ) : null}
             </FieldContent>
             <Switch
               id="save-as-blob"
@@ -695,7 +841,7 @@ export function QrControlSections({
           title: "QR settings",
           description: "Adjust the encoding mode and error correction level.",
           children: (
-          <FieldGroup className="grid gap-4 md:grid-cols-3">
+          <FieldGroup className={encodingStackClassName}>
             <SelectField
               id="qr-mode"
               label="Mode"
@@ -755,12 +901,16 @@ export function QrControlSections({
 }
 
 function ColorField({
+  disabled,
   id,
+  isDashboardMode,
   label,
   onValueChange,
   value,
 }: {
+  disabled?: boolean
   id: string
+  isDashboardMode?: boolean
   label: string
   onValueChange: (value: string) => void
   value: string
@@ -770,13 +920,104 @@ function ColorField({
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
       <Input
         id={id}
+        disabled={disabled}
         type="color"
         value={value}
         onChange={(event) => onValueChange(event.target.value)}
         className="h-11 p-1"
       />
-      <FieldDescription>{value}</FieldDescription>
+      {isDashboardMode ? (
+        <p className="font-mono text-xs text-muted-foreground">{value}</p>
+      ) : (
+        <FieldDescription>{value}</FieldDescription>
+      )}
     </Field>
+  )
+}
+
+function AssetSourceField({
+  idPrefix,
+  isDashboardMode,
+  mode,
+  noneLabel,
+  onModeChange,
+  onRemove,
+  onUploadError,
+  onUploadSuccess,
+  onValueChange,
+  options,
+  removeLabel,
+  sourceLabel,
+  uploadLabel,
+  urlLabel,
+  urlPlaceholder,
+  value,
+}: {
+  idPrefix: string
+  isDashboardMode?: boolean
+  mode: AssetSourceMode
+  noneLabel: string
+  onModeChange: (mode: AssetSourceMode) => void
+  onRemove: () => void
+  onUploadError: (message: string) => void
+  onUploadSuccess: (file: File) => void
+  onValueChange: (value: string) => void
+  options: Array<{ label: string; value: AssetSourceMode }>
+  removeLabel: string
+  sourceLabel: string
+  uploadLabel: string
+  urlLabel: string
+  urlPlaceholder: string
+  value: string
+}) {
+  return (
+    <>
+      <SelectField
+        id={`${idPrefix}-source-mode`}
+        label={sourceLabel}
+        onValueChange={(nextValue) => onModeChange(nextValue as AssetSourceMode)}
+        options={options}
+        value={mode}
+      />
+
+      {mode === "url" ? (
+        <Field>
+          <FieldLabel htmlFor={`${idPrefix}-url`}>{urlLabel}</FieldLabel>
+          <Input
+            id={`${idPrefix}-url`}
+            placeholder={urlPlaceholder}
+            value={value}
+            onChange={(event) => onValueChange(event.target.value)}
+          />
+        </Field>
+      ) : null}
+
+      {mode === "upload" ? (
+        <div className="space-y-3">
+          {isDashboardMode ? (
+            <p className="text-sm font-medium text-foreground">{uploadLabel}</p>
+          ) : null}
+          <FileUpload
+            acceptedFileTypes={["image/*"]}
+            className={cn("mx-0 max-w-none", isDashboardMode ? "max-w-full" : undefined)}
+            onUploadError={(error) => onUploadError(error.message)}
+            onUploadSuccess={onUploadSuccess}
+            uploadDelay={0}
+          />
+        </div>
+      ) : null}
+
+      {mode !== "none" ? (
+        <Button variant="ghost" className="self-start" onClick={onRemove}>
+          <XIcon data-icon="inline-start" />
+          {removeLabel}
+        </Button>
+      ) : null}
+
+      {mode === "none" && !isDashboardMode ? (
+        <p className="text-sm text-muted-foreground">{noneLabel}</p>
+      ) : null}
+    </>
   )
 }
 
@@ -784,42 +1025,59 @@ function GradientEditor({
   disabled,
   disabledText,
   gradient,
+  hideToggle,
   idPrefix,
+  isDashboardMode,
   onGradientChange,
   title,
 }: {
   disabled?: boolean
   disabledText?: string
   gradient: StudioGradient
+  hideToggle?: boolean
   idPrefix: string
+  isDashboardMode?: boolean
   onGradientChange: (gradient: StudioGradient) => void
   title: string
 }) {
   return (
     <div className="rounded-[var(--radius-xl)] border border-border/70 bg-muted/20 p-4">
-      <Field orientation="horizontal">
-        <FieldContent>
-          <FieldLabel htmlFor={`${idPrefix}-enabled`}>{title}</FieldLabel>
-          <FieldDescription>
-            Toggle a two-stop gradient for this region.
-          </FieldDescription>
-        </FieldContent>
-        <Switch
-          id={`${idPrefix}-enabled`}
-          disabled={disabled}
-          checked={disabled ? false : gradient.enabled}
-          onCheckedChange={(checked) =>
-            onGradientChange({ ...gradient, enabled: disabled ? false : checked })
-          }
-        />
-      </Field>
+      {hideToggle ? (
+        <div className="flex flex-col gap-0.5">
+          <p className="text-sm font-medium">{title}</p>
+          {!isDashboardMode ? (
+            <p className="text-sm text-muted-foreground">
+              Adjust the two-stop gradient for this region.
+            </p>
+          ) : null}
+        </div>
+      ) : (
+        <Field orientation="horizontal">
+          <FieldContent>
+            <FieldLabel htmlFor={`${idPrefix}-enabled`}>{title}</FieldLabel>
+            {!isDashboardMode ? (
+              <FieldDescription>
+                Toggle a two-stop gradient for this region.
+              </FieldDescription>
+            ) : null}
+          </FieldContent>
+          <Switch
+            id={`${idPrefix}-enabled`}
+            disabled={disabled}
+            checked={disabled ? false : gradient.enabled}
+            onCheckedChange={(checked) =>
+              onGradientChange({ ...gradient, enabled: disabled ? false : checked })
+            }
+          />
+        </Field>
+      )}
 
       {disabledText && disabled ? (
         <p className="mt-3 text-sm text-muted-foreground">{disabledText}</p>
       ) : null}
 
-      {gradient.enabled && !disabled ? (
-        <FieldGroup className="mt-4 grid gap-4 md:grid-cols-2">
+      {(hideToggle || gradient.enabled) && !disabled ? (
+        <FieldGroup className={cn("mt-4", isDashboardMode ? "gap-3" : "grid gap-4 md:grid-cols-2")}>
           <SelectField
             id={`${idPrefix}-type`}
             label="Gradient type"
@@ -842,6 +1100,7 @@ function GradientEditor({
           />
           <ColorField
             id={`${idPrefix}-start-color`}
+            isDashboardMode={isDashboardMode}
             label="Start color"
             onValueChange={(value) =>
               onGradientChange({
@@ -873,6 +1132,7 @@ function GradientEditor({
           />
           <ColorField
             id={`${idPrefix}-end-color`}
+            isDashboardMode={isDashboardMode}
             label="End color"
             onValueChange={(value) =>
               onGradientChange({
@@ -904,6 +1164,84 @@ function GradientEditor({
           />
         </FieldGroup>
       ) : null}
+    </div>
+  )
+}
+
+function DotsPaletteEditor({
+  isDashboardMode,
+  palette,
+  onAddSwatch,
+  onPaletteColorChange,
+  onRemoveSwatch,
+}: {
+  isDashboardMode?: boolean
+  palette: string[]
+  onAddSwatch: () => void
+  onPaletteColorChange: (index: number, value: string) => void
+  onRemoveSwatch: (index: number) => void
+}) {
+  const swatches = getPaletteSwatchItems(palette)
+
+  return (
+    <div className="rounded-[var(--radius-xl)] border border-border/70 bg-muted/20 p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-sm font-medium">Palette swatches</p>
+          {!isDashboardMode ? (
+            <p className="text-sm text-muted-foreground">
+              Seeded module coloring cycles through these swatches without reshuffling on resize.
+            </p>
+          ) : null}
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={palette.length >= MAX_DOT_PALETTE_SWATCHES}
+          onClick={onAddSwatch}
+        >
+          <PlusIcon data-icon="inline-start" />
+          Add swatch
+        </Button>
+      </div>
+
+      <div className={cn("mt-4 grid gap-3", isDashboardMode ? "grid-cols-1" : "sm:grid-cols-2 xl:grid-cols-3")}>
+        {swatches.map(({ color, index, key }) => (
+          <div
+            key={key}
+            className="overflow-hidden rounded-2xl border border-border/70 bg-background/75"
+          >
+            <div
+              className="h-16 w-full"
+              style={{ backgroundColor: color }}
+            />
+            <div className="flex items-center gap-3 px-3 py-3">
+              <Input
+                aria-label={`Palette swatch ${index + 1}`}
+                className="h-10 w-14 p-1"
+                type="color"
+                value={color}
+                onChange={(event) => onPaletteColorChange(index, event.target.value)}
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                  Swatch {index + 1}
+                </p>
+                <p className="truncate font-mono text-sm text-foreground">{color}</p>
+              </div>
+              <Button
+                aria-label={`Remove palette swatch ${index + 1}`}
+                size="icon-xs"
+                variant="ghost"
+                disabled={palette.length <= MIN_DOT_PALETTE_SWATCHES}
+                onClick={() => onRemoveSwatch(index)}
+              >
+                <XIcon />
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -961,7 +1299,7 @@ function VisualStylePicker({
       <FieldLabel id={labelId}>{label}</FieldLabel>
       <div
         aria-labelledby={labelId}
-        className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4"
+        className="grid grid-cols-2 gap-2"
         data-slot="style-picker"
         id={id}
         role="radiogroup"
@@ -1000,6 +1338,64 @@ function VisualStylePicker({
   )
 }
 
+function SegmentedOptionPicker({
+  id,
+  isStacked,
+  label,
+  onValueChange,
+  options,
+  value,
+}: {
+  id: string
+  isStacked?: boolean
+  label: string
+  onValueChange: (value: string) => void
+  options: StyleOption[]
+  value: string
+}) {
+  const labelId = `${id}-label`
+
+  return (
+    <Field>
+      <FieldLabel id={labelId}>{label}</FieldLabel>
+      <div
+        aria-labelledby={labelId}
+        className={cn("grid gap-2", isStacked ? "grid-cols-1" : "grid-cols-3")}
+        data-slot="segmented-picker"
+        id={id}
+        role="radiogroup"
+      >
+        {options.map((option) => {
+          const isSelected = option.value === value
+
+          return (
+            <label
+              key={option.value}
+              className={cn(
+                "cursor-pointer rounded-xl border px-3 py-3 text-center text-sm transition-colors",
+                isSelected
+                  ? "border-primary bg-primary/8 text-foreground shadow-sm"
+                  : "border-border/70 bg-muted/20 text-muted-foreground hover:border-border hover:bg-muted/35",
+              )}
+            >
+              <input
+                aria-label={option.label}
+                checked={isSelected}
+                className="sr-only"
+                name={id}
+                onChange={() => onValueChange(option.value)}
+                type="radio"
+                value={option.value}
+              />
+              <span>{option.label}</span>
+            </label>
+          )
+        })}
+      </div>
+    </Field>
+  )
+}
+
 function StylePreview({ value }: { value: string }) {
   return (
     <svg
@@ -1014,6 +1410,25 @@ function StylePreview({ value }: { value: string }) {
       <PreviewShape size={12} value={value} x={18} y={28} />
     </svg>
   )
+}
+
+function getNextDotsPaletteColor(index: number) {
+  return DOTS_PALETTE_FALLBACKS[index % DOTS_PALETTE_FALLBACKS.length]
+}
+
+function getPaletteSwatchItems(palette: string[]) {
+  const colorCounts = new Map<string, number>()
+
+  return palette.map((color, index) => {
+    const nextCount = (colorCounts.get(color) ?? 0) + 1
+    colorCounts.set(color, nextCount)
+
+    return {
+      color,
+      index,
+      key: nextCount === 1 ? color : `${color}-${nextCount}`,
+    }
+  })
 }
 
 function PreviewShape({

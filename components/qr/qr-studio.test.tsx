@@ -1,4 +1,3 @@
-import type { ReactNode } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 
@@ -11,45 +10,44 @@ vi.mock("qr-code-styling", () => ({
   },
 }))
 
-vi.mock("@/components/sidebar-03/app-sidebar", () => ({
-  DashboardSidebar: () => <div data-testid="dashboard-sidebar" />,
+vi.mock("@/components/qr/qr-section-rail", () => ({
+  QrSectionRail: () => <div data-testid="section-rail" />,
 }))
 
 vi.mock("@/components/qr/qr-control-sections", () => ({
   QrControlSections: () => <div data-testid="control-sections" />,
 }))
 
-vi.mock("@/components/qr/qr-preview-card", () => ({
-  QrPreviewCard: () => <div data-testid="preview-card" />,
-}))
-
-vi.mock("@/components/ui/sidebar", () => ({
-  SidebarProvider: ({
-    children,
-    className,
-  }: {
-    children: ReactNode
-    className?: string
-  }) => (
-    <div data-testid="sidebar-provider" className={className}>
-      {children}
-    </div>
-  ),
-}))
-
 import { QrStudio } from "@/components/qr/qr-studio"
 
 describe("QrStudio", () => {
-  it("renders the dashboard as a stable three-panel desktop workspace", () => {
+  it("renders the dashboard as a full-height three-pane shell with scrollable settings controls", () => {
     const markup = renderToStaticMarkup(<QrStudio variant="dashboard" />)
 
     expect(markup).toContain('aria-labelledby="dashboard-title"')
     expect(markup).toContain("QR Studio")
-    expect(markup).toContain("Settings panel")
-    expect(markup).toContain("QR code panel")
-    expect(markup).toContain("lg:grid-cols-[minmax(17.5rem,0.82fr)_minmax(0,1.5fr)]")
-    expect(markup).not.toContain("xl:grid-cols-[minmax(18.5rem,0.82fr)_minmax(0,1.5fr)]")
-    expect(markup).toContain("lg:sticky lg:top-6")
-    expect(markup.indexOf("Settings panel")).toBeLessThan(markup.indexOf("QR code panel"))
+    expect(markup).toContain('data-slot="dashboard-workspace"')
+    expect(markup).toContain('data-testid="section-rail"')
+    expect(markup).toContain('data-slot="dashboard-settings-panel"')
+    expect(markup).toContain('data-slot="dashboard-settings-stage"')
+    expect(markup).toContain('data-slot="dashboard-settings-measure"')
+    expect(markup).toContain('data-slot="dashboard-settings-motion"')
+    expect(markup).toContain('data-slot="dashboard-settings-scroll"')
+    expect(markup).toContain('data-direction="0"')
+    expect(markup).toContain('data-slot="dashboard-preview-pane"')
+    expect(markup).toContain('data-slot="dashboard-preview-canvas"')
+    expect(markup).toContain('data-slot="dashboard-preview-actions"')
+    expect(markup).toContain("lg:grid-cols-[6.5rem_minmax(20rem,1fr)_minmax(22rem,32vw)]")
+    expect(markup).toContain("h-screen")
+    expect(markup).toContain("lg:h-full")
+    expect(markup).toContain("Export filename")
+    expect(markup).toContain("Reset defaults")
+    expect(markup).toContain("Content")
+    expect(markup).toContain("min-h-screen")
+    expect(markup).not.toContain("rounded-[2rem]")
+    expect(markup).not.toContain("bg-[linear-gradient(180deg,color-mix(in_oklch,var(--color-card)_94%,transparent),color-mix(in_oklch,var(--color-card)_88%,black_12%))]")
+    expect(markup).not.toContain('data-slot="dashboard-settings-controls"')
+    expect(markup).not.toContain("dashboard-sidebar")
+    expect(markup).not.toContain("sidebar-provider")
   })
 })

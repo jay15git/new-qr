@@ -6,39 +6,51 @@ import {
   useEffect,
   useRef,
   useState,
-  type CSSProperties,
 } from "react"
+import { AnimatePresence, motion, MotionConfig } from "motion/react"
 import type { FileExtension } from "qr-code-styling"
 import QRCodeStyling from "qr-code-styling"
 
-import { DashboardSidebar } from "@/components/sidebar-03/app-sidebar"
-import {
-  getActiveCustomDotShape,
-  type CustomDotShape,
-} from "@/components/qr/custom-dot-shapes"
 import {
   DEFAULT_QR_EDITOR_SECTION,
   getQrEditorSection,
+  getQrEditorSectionChangeDirection,
+  type QrEditorSectionDirection,
   type QrEditorSectionId,
 } from "@/components/qr/qr-sections"
-import {
-  type LogoSourceMode,
-  QrControlSections,
-} from "@/components/qr/qr-control-sections"
+import { QrSectionRail } from "@/components/qr/qr-section-rail"
+import { QrControlSections } from "@/components/qr/qr-control-sections"
 import { QrPreviewCard } from "@/components/qr/qr-preview-card"
-import { createCustomDotShapeExtension } from "@/components/qr/qr-svg-custom-shape-extension"
+import { buildQrExtension, getQrExtensionKey } from "@/components/qr/qr-rendering"
 import {
+  type AssetSourceMode,
   createDefaultQrStudioState,
   type QrStudioState,
   toQrCodeOptions,
 } from "@/components/qr/qr-studio-state"
-import { SidebarProvider } from "@/components/ui/sidebar"
 
 const DEFAULT_DOWNLOAD_NAME = "new-qr-studio"
-const DASHBOARD_SIDEBAR_STYLE = {
-  "--sidebar-width": "12rem",
-  "--sidebar-width-icon": "3.25rem",
-} as CSSProperties
+type UploadedAssetKey = "logo" | "backgroundImage"
+const DASHBOARD_SECTION_PANE_VARIANTS = {
+  active: {
+    filter: "blur(0px)",
+    opacity: 1,
+    scale: 1,
+    y: 0,
+  },
+  exit: (direction: QrEditorSectionDirection) => ({
+    filter: "blur(6px)",
+    opacity: 0,
+    scale: 0.985,
+    y: direction === 0 ? 0 : direction * -48,
+  }),
+  initial: (direction: QrEditorSectionDirection) => ({
+    filter: "blur(6px)",
+    opacity: 0,
+    scale: 0.985,
+    y: direction === 0 ? 0 : direction * 48,
+  }),
+} as const
 
 type QrStudioProps = {
   variant?: "settings" | "dashboard"
@@ -48,17 +60,21 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
   const [state, setState] = useState(() => createDefaultQrStudioState())
   const [downloadName, setDownloadName] = useState(DEFAULT_DOWNLOAD_NAME)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [logoSourceMode, setLogoSourceMode] = useState<LogoSourceMode>("none")
   const [activeSection, setActiveSection] =
     useState<QrEditorSectionId>(DEFAULT_QR_EDITOR_SECTION)
+  const [sectionDirection, setSectionDirection] =
+    useState<QrEditorSectionDirection>(0)
 
   const deferredState = useDeferredValue(state)
   const previewRef = useRef<HTMLDivElement>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const initialStateRef = useRef(state)
   const qrCodeRef = useRef<QRCodeStyling | null>(null)
   const qrExtensionKeyRef = useRef(getQrExtensionKey(state))
-  const uploadedLogoUrlRef = useRef<string | null>(null)
+  const uploadedAssetUrlsRef = useRef<Record<UploadedAssetKey, string | null>>({
+    logo: null,
+    backgroundImage: null,
+  })
+  const canDownload = Boolean(state.data.trim())
 
   useEffect(() => {
     const previewElement = previewRef.current
@@ -76,7 +92,7 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
     return () => {
       previewElement.replaceChildren()
       qrCodeRef.current = null
-      cleanupUploadedLogo(uploadedLogoUrlRef)
+      cleanupUploadedAssets(uploadedAssetUrlsRef)
     }
   }, [])
 
@@ -125,45 +141,38 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
     }
   }
 
-  function handleLogoModeChange(mode: LogoSourceMode) {
-    cleanupUploadedLogo(uploadedLogoUrlRef)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""
-    }
-
-    setLogoSourceMode(mode)
+  function handleAssetModeChange(assetKey: UploadedAssetKey, mode: AssetSourceMode) {
+    cleanupUploadedAsset(uploadedAssetUrlsRef, assetKey)
     setState((current) => ({
       ...current,
-      image: undefined,
+      [assetKey]: {
+        source: mode,
+        value: undefined,
+      },
     }))
   }
 
-  function handleLogoFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-
-    if (!file) {
-      return
-    }
-
+  function handleAssetUploadSuccess(assetKey: UploadedAssetKey, file: File) {
     try {
-      cleanupUploadedLogo(uploadedLogoUrlRef)
+      cleanupUploadedAsset(uploadedAssetUrlsRef, assetKey)
       const nextUrl = URL.createObjectURL(file)
-      uploadedLogoUrlRef.current = nextUrl
-      setLogoSourceMode("upload")
-      setState((current) => ({ ...current, image: nextUrl }))
+      uploadedAssetUrlsRef.current[assetKey] = nextUrl
+      setState((current) => ({
+        ...current,
+        [assetKey]: {
+          source: "upload",
+          value: nextUrl,
+        },
+      }))
       setErrorMessage(null)
     } catch {
-      setErrorMessage("The logo file could not be read. Try another image.")
+      const assetLabel = assetKey === "logo" ? "logo" : "background image"
+      setErrorMessage(`The ${assetLabel} file could not be read. Try another image.`)
     }
   }
 
   function handleReset() {
-    cleanupUploadedLogo(uploadedLogoUrlRef)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""
-    }
-
-    setLogoSourceMode("none")
+    cleanupUploadedAssets(uploadedAssetUrlsRef)
     setDownloadName(DEFAULT_DOWNLOAD_NAME)
     setState(createDefaultQrStudioState())
     setErrorMessage(null)
@@ -171,7 +180,7 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
 
   const previewCard = (
     <QrPreviewCard
-      canDownload={Boolean(state.data.trim())}
+      canDownload={canDownload}
       downloadName={downloadName}
       errorMessage={errorMessage}
       onDownload={handleDownload}
@@ -184,11 +193,16 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
   )
 
   const controlSectionProps = {
-    fileInputRef,
-    logoSourceMode,
-    onLogoFileChange: handleLogoFileChange,
-    onLogoModeChange: handleLogoModeChange,
-    onPickLogoFile: () => fileInputRef.current?.click(),
+    backgroundSourceMode: state.backgroundImage.source,
+    logoSourceMode: state.logo.source,
+    onBackgroundModeChange: (mode: AssetSourceMode) =>
+      handleAssetModeChange("backgroundImage", mode),
+    onBackgroundUploadError: (message: string) => setErrorMessage(message),
+    onBackgroundUploadSuccess: (file: File) =>
+      handleAssetUploadSuccess("backgroundImage", file),
+    onLogoModeChange: (mode: AssetSourceMode) => handleAssetModeChange("logo", mode),
+    onLogoUploadError: (message: string) => setErrorMessage(message),
+    onLogoUploadSuccess: (file: File) => handleAssetUploadSuccess("logo", file),
     setState,
     state,
   }
@@ -197,87 +211,112 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
     const activeSectionMeta = getQrEditorSection(activeSection)
 
     return (
-      <SidebarProvider className="min-h-screen w-full" style={DASHBOARD_SIDEBAR_STYLE}>
-        <div className="flex min-h-screen w-full bg-[radial-gradient(circle_at_top_left,oklch(0.3_0.05_66/0.18),transparent_28%),linear-gradient(180deg,color-mix(in_oklch,var(--color-background)_92%,black_8%),var(--color-background))]">
-          <DashboardSidebar
-            activeSection={activeSection}
-            onSectionChange={(section) => {
-              startTransition(() => setActiveSection(section))
-            }}
-          />
+      <div className="flex min-h-screen w-full bg-[linear-gradient(180deg,color-mix(in_oklch,var(--color-background)_96%,black_4%),var(--color-background))] lg:h-screen lg:overflow-hidden">
+        <main
+          className="flex min-h-screen min-w-0 flex-1 flex-col lg:h-screen"
+          aria-labelledby="dashboard-title"
+        >
+          <div className="flex min-h-screen w-full flex-col lg:h-full lg:min-h-0">
+            <header className="border-b border-border/70 px-4 py-4 sm:px-5 lg:px-6">
+              <h1
+                id="dashboard-title"
+                className="font-heading text-2xl font-semibold tracking-[-0.04em] text-balance text-foreground sm:text-3xl"
+              >
+                QR Studio
+              </h1>
+            </header>
 
-          <main className="min-w-0 flex-1" aria-labelledby="dashboard-title">
-            <div className="mx-auto flex min-h-screen w-full max-w-[1800px] flex-col gap-6 px-4 py-4 sm:px-5 lg:px-6 lg:py-6">
-              <header className="flex max-w-3xl flex-col gap-3">
-                <div className="flex max-w-3xl flex-col gap-3">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-primary/72">
-                    Brand-safe QR design studio
-                  </p>
-                  <h1
-                    id="dashboard-title"
-                    className="font-heading text-4xl font-semibold tracking-[-0.04em] text-balance text-foreground sm:text-5xl"
-                  >
-                    QR Studio
-                  </h1>
-                  <p className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-                    Tune content, geometry, background, and logo treatment in a
-                    focused three-panel workspace built for campaign handoff.
-                  </p>
-                </div>
-              </header>
+            <section
+              data-slot="dashboard-workspace"
+              className="flex flex-1 flex-col lg:h-full lg:min-h-0 lg:grid lg:grid-cols-[6.5rem_minmax(20rem,1fr)_minmax(22rem,32vw)] lg:overflow-hidden"
+            >
+              <QrSectionRail
+                activeSection={activeSection}
+                onSectionChange={(section) => {
+                  if (section === activeSection) {
+                    return
+                  }
 
-              <div className="grid flex-1 gap-5 lg:grid-cols-[minmax(17.5rem,0.82fr)_minmax(0,1.5fr)] lg:items-start 2xl:grid-cols-[minmax(18.5rem,0.8fr)_minmax(0,1.56fr)]">
-                <aside
-                  className="min-w-0 rounded-[1.85rem] border border-border/70 bg-[color-mix(in_oklch,var(--color-card)_82%,transparent)] px-4 py-4 shadow-[0_24px_80px_-60px_rgba(0,0,0,0.85)] sm:px-5 sm:py-5 lg:max-w-[28rem]"
-                  aria-labelledby="settings-panel-title"
+                  const nextDirection = getQrEditorSectionChangeDirection(
+                    activeSection,
+                    section,
+                  )
+
+                  startTransition(() => {
+                    setSectionDirection(nextDirection)
+                    setActiveSection(section)
+                  })
+                }}
+              />
+
+              <aside
+                data-slot="dashboard-settings-panel"
+                className="min-w-0 border-t border-border/70 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:border-t-0"
+                aria-label="QR editor settings"
+              >
+                <MotionConfig
+                  transition={{ duration: 0.32, type: "spring", bounce: 0.16 }}
                 >
-                  <div className="mb-5 flex flex-col gap-1 border-b border-border/70 pb-4">
-                    <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-primary/72">
-                      Settings panel
-                    </p>
-                    <h2
-                      id="settings-panel-title"
-                      className="font-heading text-2xl font-medium tracking-[-0.03em] text-foreground"
+                  <motion.div
+                    data-slot="dashboard-settings-stage"
+                    className="relative flex min-h-0 flex-1 flex-col overflow-hidden"
+                    initial={false}
+                  >
+                    <div
+                      data-slot="dashboard-settings-measure"
+                      className="relative flex min-h-0 flex-1 flex-col"
                     >
-                      {activeSectionMeta.title}
-                    </h2>
-                    <p className="max-w-[34ch] text-sm leading-6 text-muted-foreground">
-                      {activeSectionMeta.detail}
-                    </p>
-                  </div>
+                      <AnimatePresence
+                        initial={false}
+                        mode="popLayout"
+                        custom={sectionDirection}
+                      >
+                        <motion.div
+                          key={activeSection}
+                          data-slot="dashboard-settings-motion"
+                          data-direction={sectionDirection}
+                          className="flex min-h-0 flex-1 flex-col"
+                          custom={sectionDirection}
+                          variants={DASHBOARD_SECTION_PANE_VARIANTS}
+                          initial="initial"
+                          animate="active"
+                          exit="exit"
+                        >
+                          <div className="border-b border-border/70 px-4 py-5 sm:px-5 lg:px-6">
+                            <h2
+                              className="font-heading text-2xl font-medium tracking-[-0.03em] text-foreground"
+                            >
+                              {activeSectionMeta.title}
+                            </h2>
+                          </div>
 
-                  <div className="min-h-0 lg:max-h-[calc(100svh-13rem)] lg:overflow-y-auto lg:pr-1">
-                    <QrControlSections
-                      {...controlSectionProps}
-                      activeSection={activeSection}
-                    />
-                  </div>
-                </aside>
+                          <div
+                            data-slot="dashboard-settings-scroll"
+                            className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-5 lg:px-6 lg:py-6"
+                          >
+                            <QrControlSections
+                              {...controlSectionProps}
+                              activeSection={activeSection}
+                            />
+                          </div>
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
+                  </motion.div>
+                </MotionConfig>
+              </aside>
 
-                <section className="min-w-0 space-y-4" aria-labelledby="preview-panel-title">
-                  <div className="flex flex-col gap-1 px-1">
-                    <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-primary/72">
-                      QR code panel
-                    </p>
-                    <h2
-                      id="preview-panel-title"
-                      className="font-heading text-2xl font-medium tracking-[-0.03em] text-foreground"
-                    >
-                      Review the live QR at final size.
-                    </h2>
-                    <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-                      The code stays visually dominant while export actions
-                      remain directly below the preview for final delivery.
-                    </p>
-                  </div>
-
-                  <div className="lg:sticky lg:top-6">{previewCard}</div>
-                </section>
-              </div>
-            </div>
-          </main>
-        </div>
-      </SidebarProvider>
+              <section
+                data-slot="dashboard-preview-pane"
+                className="min-w-0 border-t border-border/70 bg-muted/10 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:border-l lg:border-t-0"
+                aria-label="Preview"
+              >
+                <div className="h-full min-h-[22rem] lg:h-full">{previewCard}</div>
+              </section>
+            </section>
+          </div>
+        </main>
+      </div>
     )
   }
 
@@ -289,34 +328,36 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
   )
 }
 
-function cleanupUploadedLogo(uploadedLogoUrlRef: React.MutableRefObject<string | null>) {
-  if (!uploadedLogoUrlRef.current) {
+function cleanupUploadedAsset(
+  uploadedAssetUrlsRef: React.MutableRefObject<
+    Record<UploadedAssetKey, string | null>
+  >,
+  assetKey: UploadedAssetKey,
+) {
+  if (!uploadedAssetUrlsRef.current[assetKey]) {
     return
   }
 
-  URL.revokeObjectURL(uploadedLogoUrlRef.current)
-  uploadedLogoUrlRef.current = null
+  URL.revokeObjectURL(uploadedAssetUrlsRef.current[assetKey] as string)
+  uploadedAssetUrlsRef.current[assetKey] = null
+}
+
+function cleanupUploadedAssets(
+  uploadedAssetUrlsRef: React.MutableRefObject<
+    Record<UploadedAssetKey, string | null>
+  >,
+) {
+  cleanupUploadedAsset(uploadedAssetUrlsRef, "logo")
+  cleanupUploadedAsset(uploadedAssetUrlsRef, "backgroundImage")
 }
 
 function createQrCodeInstance(state: QrStudioState) {
   const qrCode = new QRCodeStyling(toQrCodeOptions(state))
-  const customDotShape = getSvgCustomDotShape(state)
+  const extension = buildQrExtension(state)
 
-  if (customDotShape) {
-    qrCode.applyExtension(createCustomDotShapeExtension(customDotShape))
+  if (extension) {
+    qrCode.applyExtension(extension)
   }
 
   return qrCode
-}
-
-function getSvgCustomDotShape(state: QrStudioState): CustomDotShape | null {
-  if (state.type !== "svg") {
-    return null
-  }
-
-  return getActiveCustomDotShape(state.dotsOptions.type)
-}
-
-function getQrExtensionKey(state: QrStudioState) {
-  return getSvgCustomDotShape(state) ?? "none"
 }
