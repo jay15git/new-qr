@@ -40,12 +40,16 @@ vi.mock("@/components/ui/sidebar", () => ({
 import { QrStudio } from "@/components/qr/qr-studio"
 
 describe("QrStudio", () => {
-  it("uses fluid desktop columns for the dashboard workspace", () => {
+  it("renders the dashboard as a stable three-panel desktop workspace", () => {
     const markup = renderToStaticMarkup(<QrStudio variant="dashboard" />)
 
-    expect(markup).toContain("lg:grid-cols-[minmax(0,1.45fr)_minmax(22rem,.9fr)]")
-    expect(markup).toContain("xl:grid-cols-[minmax(0,1.6fr)_minmax(24rem,1fr)]")
-    expect(markup).toContain("2xl:grid-cols-[minmax(0,1.7fr)_minmax(26rem,1fr)]")
-    expect(markup).toContain("lg:w-full")
+    expect(markup).toContain('aria-labelledby="dashboard-title"')
+    expect(markup).toContain("QR Studio")
+    expect(markup).toContain("Settings panel")
+    expect(markup).toContain("QR code panel")
+    expect(markup).toContain("lg:grid-cols-[minmax(17.5rem,0.82fr)_minmax(0,1.5fr)]")
+    expect(markup).not.toContain("xl:grid-cols-[minmax(18.5rem,0.82fr)_minmax(0,1.5fr)]")
+    expect(markup).toContain("lg:sticky lg:top-6")
+    expect(markup.indexOf("Settings panel")).toBeLessThan(markup.indexOf("QR code panel"))
   })
 })

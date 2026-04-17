@@ -33,11 +33,13 @@ vi.mock("@/components/ui/sidebar", () => ({
 import { DashboardSidebar } from "./app-sidebar"
 
 describe("DashboardSidebar", () => {
-  it("renders a simplified qr section rail", () => {
+  it("renders a simplified qr section rail with navigation semantics", () => {
     const markup = renderToStaticMarkup(
       <DashboardSidebar activeSection="content" onSectionChange={() => {}} />,
     )
 
+    expect(markup).toContain('aria-label="Studio navigation"')
+    expect(markup).toContain('aria-label="Studio sections"')
     expect(markup).toContain("Content")
     expect(markup).toContain("Style")
     expect(markup).toContain("Corners")

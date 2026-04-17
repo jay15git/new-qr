@@ -33,64 +33,68 @@ export function DashboardSidebar({
   const isCollapsed = state === "collapsed"
 
   return (
-    <Sidebar variant="floating" collapsible="icon">
-      <SidebarHeader className="gap-2 px-2 py-2.5 md:pt-3">
-        <div
-          className={cn(
-            "flex items-start gap-2",
-            isCollapsed ? "justify-center" : "justify-between",
-          )}
-        >
-          {!isCollapsed ? (
-            <div className="px-1.5">
-              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-sidebar-foreground/55">
-                QR edit
-              </p>
-            </div>
-          ) : null}
-          <SidebarTrigger className={cn(isCollapsed && "mx-auto")} />
-        </div>
-      </SidebarHeader>
+    <aside aria-label="Studio navigation">
+      <Sidebar variant="floating" collapsible="icon">
+        <SidebarHeader className="gap-2 px-2 py-2.5 md:pt-3">
+          <div
+            className={cn(
+              "flex items-start gap-2",
+              isCollapsed ? "justify-center" : "justify-between",
+            )}
+          >
+            {!isCollapsed ? (
+              <div className="px-1.5">
+                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-sidebar-foreground/55">
+                  Studio
+                </p>
+              </div>
+            ) : null}
+            <SidebarTrigger className={cn(isCollapsed && "mx-auto")} />
+          </div>
+        </SidebarHeader>
 
-      <SidebarSeparator />
+        <SidebarSeparator />
 
-      <SidebarContent className="px-2 py-2.5">
-        <SidebarGroup className="p-0">
-          <SidebarGroupLabel className="px-1.5 text-[11px] uppercase tracking-[0.16em]">
-            Sections
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {QR_EDITOR_SECTIONS.map((section) => {
-                const Icon = section.icon
+        <SidebarContent className="px-2 py-2.5">
+          <nav aria-label="Studio sections">
+            <SidebarGroup className="p-0">
+              <SidebarGroupLabel className="px-1.5 text-[11px] uppercase tracking-[0.16em]">
+                Sections
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {QR_EDITOR_SECTIONS.map((section) => {
+                    const Icon = section.icon
 
-                return (
-                  <SidebarMenuItem key={section.id}>
-                    <SidebarMenuButton
-                      type="button"
-                      tooltip={section.title}
-                      isActive={section.id === activeSection}
-                      size="sm"
-                      className={cn(
-                        "h-auto items-center gap-2 px-1.5 py-2",
-                        isCollapsed && "justify-center",
-                      )}
-                      onClick={() => onSectionChange(section.id)}
-                    >
-                      <Icon className="size-4" />
-                      {!isCollapsed ? (
-                        <span className="min-w-0 truncate text-sm font-medium text-sidebar-foreground">
-                          {section.title}
-                        </span>
-                      ) : null}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
+                    return (
+                      <SidebarMenuItem key={section.id}>
+                        <SidebarMenuButton
+                          type="button"
+                          tooltip={section.title}
+                          isActive={section.id === activeSection}
+                          size="sm"
+                          className={cn(
+                            "h-auto items-center gap-2 px-1.5 py-2",
+                            isCollapsed && "justify-center",
+                          )}
+                          onClick={() => onSectionChange(section.id)}
+                        >
+                          <Icon className="size-4" />
+                          {!isCollapsed ? (
+                            <span className="min-w-0 truncate text-sm font-medium text-sidebar-foreground">
+                              {section.title}
+                            </span>
+                          ) : null}
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    )
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </nav>
+        </SidebarContent>
+      </Sidebar>
+    </aside>
   )
 }

@@ -198,7 +198,7 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
 
     return (
       <SidebarProvider className="min-h-screen w-full" style={DASHBOARD_SIDEBAR_STYLE}>
-        <div className="flex min-h-screen w-full bg-muted/20">
+        <div className="flex min-h-screen w-full bg-[radial-gradient(circle_at_top_left,oklch(0.3_0.05_66/0.18),transparent_28%),linear-gradient(180deg,color-mix(in_oklch,var(--color-background)_92%,black_8%),var(--color-background))]">
           <DashboardSidebar
             activeSection={activeSection}
             onSectionChange={(section) => {
@@ -206,29 +206,73 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
             }}
           />
 
-          <main className="flex-1">
-            <div className="mx-auto grid min-h-screen w-full max-w-[1700px] gap-4 px-3 py-3 sm:px-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(22rem,.9fr)] lg:items-start lg:gap-4 lg:px-4 lg:py-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(24rem,1fr)] xl:gap-5 xl:px-5 xl:py-5 2xl:grid-cols-[minmax(0,1.7fr)_minmax(26rem,1fr)] 2xl:gap-6 2xl:px-6">
-              <div className="min-w-0 space-y-3">
-                <section className="border-b border-border/60 pb-3">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                    Active section
+          <main className="min-w-0 flex-1" aria-labelledby="dashboard-title">
+            <div className="mx-auto flex min-h-screen w-full max-w-[1800px] flex-col gap-6 px-4 py-4 sm:px-5 lg:px-6 lg:py-6">
+              <header className="flex max-w-3xl flex-col gap-3">
+                <div className="flex max-w-3xl flex-col gap-3">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-primary/72">
+                    Brand-safe QR design studio
                   </p>
-                  <h1 className="mt-1 text-xl font-semibold tracking-tight sm:text-2xl">
-                    {activeSectionMeta.title}
+                  <h1
+                    id="dashboard-title"
+                    className="font-heading text-4xl font-semibold tracking-[-0.04em] text-balance text-foreground sm:text-5xl"
+                  >
+                    QR Studio
                   </h1>
-                  <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">
-                    {activeSectionMeta.detail}
+                  <p className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
+                    Tune content, geometry, background, and logo treatment in a
+                    focused three-panel workspace built for campaign handoff.
                   </p>
+                </div>
+              </header>
+
+              <div className="grid flex-1 gap-5 lg:grid-cols-[minmax(17.5rem,0.82fr)_minmax(0,1.5fr)] lg:items-start 2xl:grid-cols-[minmax(18.5rem,0.8fr)_minmax(0,1.56fr)]">
+                <aside
+                  className="min-w-0 rounded-[1.85rem] border border-border/70 bg-[color-mix(in_oklch,var(--color-card)_82%,transparent)] px-4 py-4 shadow-[0_24px_80px_-60px_rgba(0,0,0,0.85)] sm:px-5 sm:py-5 lg:max-w-[28rem]"
+                  aria-labelledby="settings-panel-title"
+                >
+                  <div className="mb-5 flex flex-col gap-1 border-b border-border/70 pb-4">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-primary/72">
+                      Settings panel
+                    </p>
+                    <h2
+                      id="settings-panel-title"
+                      className="font-heading text-2xl font-medium tracking-[-0.03em] text-foreground"
+                    >
+                      {activeSectionMeta.title}
+                    </h2>
+                    <p className="max-w-[34ch] text-sm leading-6 text-muted-foreground">
+                      {activeSectionMeta.detail}
+                    </p>
+                  </div>
+
+                  <div className="min-h-0 lg:max-h-[calc(100svh-13rem)] lg:overflow-y-auto lg:pr-1">
+                    <QrControlSections
+                      {...controlSectionProps}
+                      activeSection={activeSection}
+                    />
+                  </div>
+                </aside>
+
+                <section className="min-w-0 space-y-4" aria-labelledby="preview-panel-title">
+                  <div className="flex flex-col gap-1 px-1">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-primary/72">
+                      QR code panel
+                    </p>
+                    <h2
+                      id="preview-panel-title"
+                      className="font-heading text-2xl font-medium tracking-[-0.03em] text-foreground"
+                    >
+                      Review the live QR at final size.
+                    </h2>
+                    <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+                      The code stays visually dominant while export actions
+                      remain directly below the preview for final delivery.
+                    </p>
+                  </div>
+
+                  <div className="lg:sticky lg:top-6">{previewCard}</div>
                 </section>
-
-                <QrControlSections
-                  {...controlSectionProps}
-                  activeSection={activeSection}
-                />
-              </div>
-
-              <div className="lg:sticky lg:top-4 lg:self-start lg:w-full lg:justify-self-end">
-                {previewCard}
               </div>
             </div>
           </main>

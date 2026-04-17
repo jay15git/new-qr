@@ -22,10 +22,11 @@ describe("QrPreviewCard", () => {
     )
 
     expect(markup).toContain('data-size="sm"')
-    expect(markup).toContain("Live preview")
+    expect(markup).toContain("Preview stage")
+    expect(markup).toContain("<h2")
   })
 
-  it("caps the dashboard preview footprint so export controls remain visible", () => {
+  it("uses a light proof stage in dashboard mode while keeping export actions beneath it", () => {
     const markup = renderToStaticMarkup(
       <QrPreviewCard
         canDownload
@@ -40,11 +41,11 @@ describe("QrPreviewCard", () => {
       />,
     )
 
-    expect(markup).toContain("lg:max-w-[clamp(22rem,30vw,28rem)]")
-    expect(markup).toContain("lg:max-h-[calc(100svh-2rem)]")
-    expect(markup).toContain("lg:size-[clamp(15rem,calc(100svh-30rem),22rem)]")
-    expect(markup).not.toContain("lg:min-h-[20rem]")
-    expect(markup).not.toContain("xl:min-h-[22rem]")
+    expect(markup).toContain("xl:min-h-[calc(100svh-13rem)]")
+    expect(markup).toContain('data-slot="proof-stage"')
+    expect(markup).toContain("bg-[linear-gradient(180deg,oklch(0.97_0.006_95),oklch(0.92_0.012_95))]")
+    expect(markup).toContain("lg:size-[clamp(23rem,34vw,34rem)]")
+    expect(markup).not.toContain("bg-[color-mix(in_oklch,var(--color-background)_90%,black_10%)]")
     expect(markup).toContain("Reset defaults")
   })
 })

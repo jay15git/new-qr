@@ -16,9 +16,14 @@ vi.mock("@/components/ui/tooltip", () => ({
 
 import { QrStudio } from "@/components/qr/qr-studio"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import DashboardPage from "./page"
+import DashboardPage, { metadata } from "./page"
 
 describe("dashboard page", () => {
+  it("exposes dashboard-specific metadata for route announcements", () => {
+    expect(metadata.title).toBe("QR Studio Dashboard")
+    expect(metadata.description).toContain("premium QR design studio")
+  })
+
   it("renders the dashboard qr editor variant inside the tooltip provider", () => {
     const page = DashboardPage()
 

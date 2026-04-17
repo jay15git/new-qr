@@ -51,19 +51,22 @@ export function QrPreviewCard({
       className={cn(
         "w-full bg-card/95 shadow-sm backdrop-blur",
         isDashboard &&
-          "bg-card/98 shadow-none lg:max-h-[calc(100svh-2rem)] lg:max-w-[clamp(22rem,30vw,28rem)]",
+          "rounded-[2rem] border border-border/70 bg-[color-mix(in_oklch,var(--color-card)_90%,transparent)] shadow-[0_28px_90px_-48px_rgba(0,0,0,0.85)] xl:min-h-[calc(100svh-13rem)]",
       )}
       size={isDashboard ? "sm" : "default"}
     >
-      <CardHeader className={cn(isDashboard ? "gap-3" : "gap-4")}>
+      <CardHeader className={cn(isDashboard ? "gap-4" : "gap-4")}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <CardTitle className={cn(isDashboard ? "text-lg" : "text-xl")}>
-              Live preview
+            <CardTitle
+              as={isDashboard ? "h2" : "div"}
+              className={cn(isDashboard ? "text-xl" : "text-xl")}
+            >
+              {isDashboard ? "Preview stage" : "Live preview"}
             </CardTitle>
             <CardDescription>
               {isDashboard
-                ? "Instant feedback while you tune the active section."
+                ? "Review scale, contrast, and export readiness before handoff."
                 : "Every change is applied directly to the same QR instance for fast styling feedback."}
             </CardDescription>
           </div>
@@ -77,19 +80,24 @@ export function QrPreviewCard({
           <Badge variant="outline">EC {state.qrOptions.errorCorrectionLevel}</Badge>
         </div>
       </CardHeader>
-      <CardContent className={cn("flex flex-col", isDashboard ? "gap-4" : "gap-5")}>
+      <CardContent
+        className={cn("flex flex-col", isDashboard ? "min-h-0 flex-1 gap-5" : "gap-5")}
+      >
         <div
           className={cn(
             "rounded-[calc(var(--radius-xl)+4px)] border border-border/70 bg-muted/30",
-            isDashboard ? "p-3" : "p-4",
+            isDashboard
+              ? "bg-[radial-gradient(circle_at_top,oklch(0.32_0.03_66/0.28),transparent_58%),color-mix(in_oklch,var(--color-muted)_72%,transparent)] p-4 xl:p-6"
+              : "p-4",
           )}
         >
           <div
             ref={previewRef}
+            data-slot={isDashboard ? "proof-stage" : undefined}
             className={cn(
               "flex aspect-square items-center justify-center rounded-[calc(var(--radius-xl)-2px)] bg-background shadow-inner [&_canvas]:h-full [&_canvas]:w-full [&_canvas]:max-w-full [&_svg]:h-full [&_svg]:w-full [&_svg]:max-w-full",
               isDashboard
-                ? "mx-auto w-full max-w-full p-3 lg:size-[clamp(15rem,calc(100svh-30rem),22rem)]"
+                ? "mx-auto w-full max-w-full border border-black/8 bg-[linear-gradient(180deg,oklch(0.97_0.006_95),oklch(0.92_0.012_95))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] lg:size-[clamp(23rem,34vw,34rem)]"
                 : "p-4",
             )}
           />
@@ -109,7 +117,7 @@ export function QrPreviewCard({
 
         <div
           className={cn(
-            "rounded-[var(--radius-xl)] border border-dashed border-border/70 bg-muted/20",
+            "rounded-[var(--radius-xl)] border border-border/70 bg-muted/20",
             isDashboard ? "p-3" : "p-4",
           )}
         >

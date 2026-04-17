@@ -15,13 +15,15 @@ const baseProps = {
 }
 
 describe("QrControlSections", () => {
-  it("renders only the selected section in dashboard mode", () => {
+  it("renders only the selected section in dashboard mode without a duplicate section header", () => {
     const markup = renderToStaticMarkup(
       <QrControlSections {...baseProps} activeSection="style" />,
     )
 
-    expect(markup).toContain("Style")
-    expect(markup).toContain('data-size="sm"')
+    expect(markup).toContain('data-slot="section-fields"')
+    expect(markup).not.toContain("Style")
+    expect(markup).not.toContain('data-slot="card-title"')
+    expect(markup).not.toContain('data-slot="card-description"')
     expect(markup).not.toContain("Content")
     expect(markup).not.toContain("Corners")
     expect(markup).not.toContain("QR settings")
