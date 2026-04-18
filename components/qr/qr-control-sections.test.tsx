@@ -107,8 +107,8 @@ describe("QrControlSections", () => {
 
     expect(markup).toMatch(/data-item-id="gradient"[^>]*data-state="open"/)
     expect(markup).toMatch(/data-item-id="palette"[^>]*data-state="closed"/)
-    expect(markup).toContain("Dot gradient")
     expect(markup).toContain("Palette preview")
+    expect(markup).toContain("Use palette")
     expect(markup).toContain("Solid color")
   })
 
@@ -202,7 +202,7 @@ describe("QrControlSections", () => {
     expect(markup).toMatch(/data-item-id="solid"[^>]*data-state="open"/)
     expect(markup).toMatch(/data-item-id="gradient"[^>]*data-state="closed"/)
     expect(markup).toContain("Solid color")
-    expect(markup).toContain("Corner square gradient")
+    expect(markup).not.toContain("Corner square gradient")
   })
 
   it("uses the enhanced gradient controls for corner square in dashboard mode", () => {
@@ -219,10 +219,14 @@ describe("QrControlSections", () => {
     )
 
     expect(markup).toContain("Color stop range")
-    expect(markup).toContain('data-slot="adaptive-offset-range-slider"')
-    expect(markup).toContain('data-slot="adaptive-offset-track"')
-    expect(markup).toContain("Rotation")
-    expect(markup).toContain("0°")
+    expect(markup).toContain('data-slot="gradient-offset-range-slider"')
+    expect(markup).toContain('data-slot="gradient-offset-track"')
+    expect(markup).toContain('data-slot="gradient-offset-thumb"')
+    expect(markup).toContain('data-slot="segmented-picker"')
+    expect(markup).toContain("linear-gradient(90deg, #18181b 0%, #3f3f46 100%)")
+    expect(markup).not.toContain(
+      'class="flex justify-center rounded-[var(--radius-xl)] border border-border/70 bg-background/80 p-3"',
+    )
     expect(markup).not.toContain('id="corner-square-gradient-rotation"')
     expect(markup).not.toContain('id="corner-square-gradient-start-color"')
     expect(markup).not.toContain('id="corner-square-gradient-end-color"')
@@ -243,7 +247,7 @@ describe("QrControlSections", () => {
 
     expect(markup).toMatch(/data-item-id="gradient"[^>]*data-state="open"/)
     expect(markup).toMatch(/data-item-id="solid"[^>]*data-state="closed"/)
-    expect(markup).toContain("Corner dot gradient")
+    expect(markup).not.toContain("Corner dot gradient")
     expect(markup).toContain("Solid color")
     expect(markup).not.toContain(">Palette<")
   })
@@ -262,10 +266,11 @@ describe("QrControlSections", () => {
     )
 
     expect(markup).toContain("Color stop range")
-    expect(markup).toContain('data-slot="adaptive-offset-range-slider"')
-    expect(markup).toContain('data-slot="adaptive-offset-track"')
-    expect(markup).toContain("Rotation")
-    expect(markup).toContain("0°")
+    expect(markup).toContain('data-slot="gradient-offset-range-slider"')
+    expect(markup).toContain('data-slot="gradient-offset-track"')
+    expect(markup).toContain('data-slot="gradient-offset-thumb"')
+    expect(markup).toContain('data-slot="segmented-picker"')
+    expect(markup).toContain("linear-gradient(90deg, #18181b 0%, #3f3f46 100%)")
     expect(markup).not.toContain('id="corner-dot-gradient-rotation"')
     expect(markup).not.toContain('id="corner-dot-gradient-start-color"')
     expect(markup).not.toContain('id="corner-dot-gradient-end-color"')
@@ -363,10 +368,11 @@ describe("QrControlSections", () => {
     )
 
     expect(markup).toContain("Color stop range")
-    expect(markup).toContain('data-slot="adaptive-offset-range-slider"')
-    expect(markup).toContain('data-slot="adaptive-offset-track"')
-    expect(markup).toContain("Rotation")
-    expect(markup).toContain("0°")
+    expect(markup).toContain('data-slot="gradient-offset-range-slider"')
+    expect(markup).toContain('data-slot="gradient-offset-track"')
+    expect(markup).toContain('data-slot="gradient-offset-thumb"')
+    expect(markup).toContain('data-slot="segmented-picker"')
+    expect(markup).toContain("linear-gradient(90deg, #f8fafc 0%, #dbeafe 100%)")
     expect(markup).not.toContain('id="background-gradient-rotation"')
     expect(markup).not.toContain('id="background-gradient-start-color"')
     expect(markup).not.toContain('id="background-gradient-end-color"')
@@ -435,13 +441,10 @@ describe("QrControlSections", () => {
 
     const markup = renderToStaticMarkup(<QrControlSections {...baseProps} state={state} />)
 
-    expect(markup).toContain("Color stop range")
-    expect(markup).toContain('data-slot="adaptive-offset-range-slider"')
-    expect(markup).toContain('data-slot="adaptive-offset-track"')
-    expect(markup).toContain("Start")
-    expect(markup).toContain("End")
-    expect(markup).toContain("0.00")
-    expect(markup).toContain("1.00")
+    expect(markup).toContain('data-slot="gradient-offset-range-slider"')
+    expect(markup).toContain('data-slot="gradient-offset-track"')
+    expect(markup).toContain('data-slot="gradient-offset-thumb"')
+    expect(markup).toContain("linear-gradient(90deg, #18181b 0%, #3f3f46 100%)")
   })
 
   it("keeps functional validation copy in dashboard mode", () => {
@@ -479,6 +482,8 @@ describe("QrControlSections", () => {
     )
 
     expect(markup).toContain("Logo size")
+    expect(markup).toContain('data-slot="logo-size-slider"')
+    expect(markup).toContain("40%")
     expect(markup).toContain("Logo margin")
     expect(markup).toContain("Hide background dots")
     expect(markup).toContain("Save embedded image as blob")

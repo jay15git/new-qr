@@ -6,7 +6,9 @@ import {
   useState,
   useEffect,
   useCallback,
+  type CSSProperties,
   type HTMLAttributes,
+  type ReactNode,
 } from "react";
 import {
   motion,
@@ -45,11 +47,22 @@ interface SliderProps
   formatValue?: (v: number) => string;
   label?: string;
   disabled?: boolean;
+  trackClassName?: string;
+  trackStyle?: CSSProperties;
+  trackDataSlot?: string;
+  rangeClassName?: string;
+  rangeStyle?: CSSProperties;
+  thumbDataSlot?: string;
+  renderThumb?: (
+    index: number,
+    state: { isActive: boolean; isHovered: boolean; isPressed: boolean },
+  ) => ReactNode;
 }
 
 const THUMB_SIZE = 18;
 const THUMB_SIZE_REST = 14;
-const TRACK_HEIGHT = 6;
+const TRACK_HEIGHT = 10;
+const ACTIVE_TRACK_HEIGHT = 12;
 const DOT_SIZE = 4;
 
 function valueToPixel(
@@ -114,10 +127,9 @@ function ValueDisplay({
 
   useEffect(() => {
     if (editingIndex !== null) {
-      setInputValue(String(values[editingIndex]));
       requestAnimationFrame(() => inputRef.current?.select());
     }
-  }, [editingIndex, values]);
+  }, [editingIndex]);
 
   const commitEdit = useCallback(
     (index: number) => {
@@ -172,7 +184,10 @@ function ValueDisplay({
     return (
       <span
         className="cursor-text select-none"
-        onClick={() => onStartEdit(index)}
+        onClick={() => {
+          setInputValue(String(values[index]));
+          onStartEdit(index);
+        }}
       >
         {formatValue(values[index])}
       </span>
@@ -247,6 +262,13 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
       formatValue = String,
       label,
       disabled = false,
+      trackClassName,
+      trackStyle,
+      trackDataSlot,
+      rangeClassName,
+      rangeStyle,
+      thumbDataSlot,
+      renderThumb,
       className,
       ...props
     },
@@ -263,6 +285,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
 
     const [isHovered, setIsHovered] = useState(false);
     const [isPressed, setIsPressed] = useState(false);
+    const [activeThumbIndex, setActiveThumbIndex] = useState<number | null>(null);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [hoverPreview, setHoverPreview] = useState<{
       left: number;
@@ -330,9 +353,11 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
         trackWidthRef.current = entry.contentRect.width;
         if (dragging.current) return;
         const px0 = valueToPixel(values[0], min, max, entry.contentRect.width);
-        hasMounted.current
-          ? animate(motionX0, px0, springs.moderate)
-          : motionX0.set(px0);
+        if (hasMounted.current) {
+          animate(motionX0, px0, springs.moderate);
+        } else {
+          motionX0.set(px0);
+        }
         if (isRange && values[1] !== undefined) {
           const px1 = valueToPixel(
             values[1],
@@ -340,9 +365,11 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
             max,
             entry.contentRect.width,
           );
-          hasMounted.current
-            ? animate(motionX1, px1, springs.moderate)
-            : motionX1.set(px1);
+          if (hasMounted.current) {
+            animate(motionX1, px1, springs.moderate);
+          } else {
+            motionX1.set(px1);
+          }
         }
       });
       ro.observe(el);
@@ -354,14 +381,18 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
       const tw = trackWidthRef.current;
       if (tw <= 0) return;
       const px0 = valueToPixel(values[0], min, max, tw);
-      hasMounted.current
-        ? animate(motionX0, px0, springs.moderate)
-        : motionX0.set(px0);
+      if (hasMounted.current) {
+        animate(motionX0, px0, springs.moderate);
+      } else {
+        motionX0.set(px0);
+      }
       if (isRange && values[1] !== undefined) {
         const px1 = valueToPixel(values[1], min, max, tw);
-        hasMounted.current
-          ? animate(motionX1, px1, springs.moderate)
-          : motionX1.set(px1);
+        if (hasMounted.current) {
+          animate(motionX1, px1, springs.moderate);
+        } else {
+          motionX1.set(px1);
+        }
       }
     }, [values, min, max, isRange, motionX0, motionX1]);
 
@@ -414,6 +445,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
 
         dragging.current = true;
         setIsPressed(true);
+        setActiveThumbIndex(activeDragThumb.current);
 
         const motionX = activeDragThumb.current === 0 ? motionX0 : motionX1;
         const snappedValue = pixelToValue(
@@ -499,6 +531,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
       if (!dragging.current) return;
       dragging.current = false;
       setIsPressed(false);
+      setActiveThumbIndex(null);
       const tw = trackWidthRef.current;
       const motionX = activeDragThumb.current === 0 ? motionX0 : motionX1;
       const snapped = pixelToValue(motionX.get(), min, max, step, tw);
@@ -544,9 +577,18 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
 
     const renderVisualThumb = (index: number) => {
       const motionX = index === 0 ? motionX0 : motionX1;
+      const isHovered = hoverThumbIndex === index;
+      const isPressedThumb =
+        isPressed && activeThumbIndex === index;
+      const thumbState = {
+        isActive: isHovered || isPressedThumb,
+        isHovered,
+        isPressed: isPressedThumb,
+      };
       return (
         <motion.span
           key={`visual-thumb-${index}`}
+          data-slot={thumbDataSlot}
           className="flex items-center justify-center pointer-events-none absolute top-1/2"
           style={{
             width: THUMB_SIZE,
@@ -559,28 +601,24 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
           initial={false}
           transition={springs.moderate}
         >
-          <motion.span
-            className="block rounded-full"
-            initial={false}
-            animate={{
-              width:
-                hoverThumbIndex === index ||
-                (isPressed && activeDragThumb.current === index)
-                  ? THUMB_SIZE
-                  : THUMB_SIZE_REST,
-              height:
-                hoverThumbIndex === index ||
-                (isPressed && activeDragThumb.current === index)
-                  ? THUMB_SIZE
-                  : THUMB_SIZE_REST,
-            }}
-            transition={springs.fast}
-            style={{
-              backgroundColor: "white",
-              boxShadow:
-                "0 1px 4px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.06)",
-            }}
-          />
+          {renderThumb ? (
+            renderThumb(index, thumbState)
+          ) : (
+            <motion.span
+              className="block rounded-full"
+              initial={false}
+              animate={{
+                width: thumbState.isActive ? THUMB_SIZE : THUMB_SIZE_REST,
+                height: thumbState.isActive ? THUMB_SIZE : THUMB_SIZE_REST,
+              }}
+              transition={springs.fast}
+              style={{
+                backgroundColor: "white",
+                boxShadow:
+                  "0 1px 4px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.06)",
+              }}
+            />
+          )}
         </motion.span>
       );
     };
@@ -609,6 +647,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
           onPointerEnter={() => setIsHovered(true)}
           onPointerLeave={() => {
             setIsHovered(false);
+            setActiveThumbIndex(null);
             setHoverPreview(null);
             setHoverThumbIndex(null);
           }}
@@ -709,24 +748,29 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
             </AnimatePresence>
 
             <motion.div
-              className="absolute left-0 right-0 rounded-full"
+              data-slot={trackDataSlot}
+              className={cn(
+                "absolute left-0 right-0 rounded-full",
+                trackClassName,
+              )}
               initial={false}
               animate={{
-                height: isHovered || isPressed ? 8 : TRACK_HEIGHT,
+                height: isHovered || isPressed ? ACTIVE_TRACK_HEIGHT : TRACK_HEIGHT,
                 top:
                   isHovered || isPressed
-                    ? 8 + (THUMB_SIZE - 8) / 2
+                    ? 8 + (THUMB_SIZE - ACTIVE_TRACK_HEIGHT) / 2
                     : 8 + (THUMB_SIZE - TRACK_HEIGHT) / 2,
               }}
               transition={springs.fast}
-              style={{ backgroundColor: "var(--accent)" }}
+              style={{ backgroundColor: "var(--accent)", ...trackStyle }}
             >
               <motion.div
-                className="absolute h-full rounded-full"
+                className={cn("absolute h-full rounded-full", rangeClassName)}
                 style={{
                   left: fillLeft,
                   width: fillWidth,
                   backgroundColor: "var(--foreground)",
+                  ...rangeStyle,
                 }}
               />
 

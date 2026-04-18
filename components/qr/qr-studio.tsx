@@ -4,10 +4,12 @@ import {
   startTransition,
   useDeferredValue,
   useEffect,
+  useId,
   useRef,
   useState,
 } from "react"
 import { AnimatePresence, motion, MotionConfig } from "motion/react"
+import { ChevronDownIcon, DownloadIcon } from "lucide-react"
 import type { FileExtension } from "qr-code-styling"
 import QRCodeStyling from "qr-code-styling"
 
@@ -21,7 +23,15 @@ import { QrSectionRail } from "@/components/qr/qr-section-rail"
 import { QrControlSections } from "@/components/qr/qr-control-sections"
 import { QrPreviewCard } from "@/components/qr/qr-preview-card"
 import { buildQrExtension, getQrExtensionKey } from "@/components/qr/qr-rendering"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  DOWNLOAD_EXTENSIONS,
   type AssetSourceMode,
   createDefaultQrStudioState,
   type QrStudioState,
@@ -38,16 +48,16 @@ const DASHBOARD_SECTION_PANE_VARIANTS = {
     y: 0,
   },
   exit: (direction: QrEditorSectionDirection) => ({
-    filter: "blur(6px)",
+    filter: "blur(4px)",
     opacity: 0,
-    scale: 0.985,
-    y: direction === 0 ? 0 : direction * -48,
+    scale: 0.992,
+    y: direction === 0 ? 0 : direction * -24,
   }),
   initial: (direction: QrEditorSectionDirection) => ({
-    filter: "blur(6px)",
+    filter: "blur(4px)",
     opacity: 0,
-    scale: 0.985,
-    y: direction === 0 ? 0 : direction * 48,
+    scale: 0.992,
+    y: direction === 0 ? 0 : direction * 24,
   }),
 } as const
 
@@ -73,6 +83,7 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
     logo: null,
     backgroundImage: null,
   })
+  const dashboardFilenameId = useId()
   const canDownload = Boolean(state.data.trim())
 
   useEffect(() => {
@@ -208,24 +219,81 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
 
   if (variant === "dashboard") {
     return (
-      <div className="flex min-h-screen w-full bg-[linear-gradient(180deg,color-mix(in_oklch,var(--color-background)_96%,black_4%),var(--color-background))] lg:h-screen lg:overflow-hidden">
+      <div className="flex min-h-screen w-full bg-[linear-gradient(180deg,color-mix(in_oklch,var(--color-background)_98%,white_2%),color-mix(in_oklch,var(--color-background)_94%,black_6%))] lg:h-screen lg:overflow-hidden">
         <main
           className="flex min-h-screen min-w-0 flex-1 flex-col lg:h-screen"
-          aria-labelledby="dashboard-title"
+          aria-label="QR editor dashboard"
         >
           <div className="flex min-h-screen w-full flex-col lg:h-full lg:min-h-0">
-            <header className="border-b border-border/70 px-4 py-4 sm:px-5 lg:px-6">
-              <h1
-                id="dashboard-title"
-                className="font-heading text-2xl font-semibold tracking-[-0.04em] text-balance text-foreground sm:text-3xl"
-              >
-                QR Studio
-              </h1>
-            </header>
+            <section
+              data-slot="dashboard-top-strip"
+              className="border-b border-white/6 bg-[color-mix(in_oklch,var(--color-card)_32%,transparent)] px-4 py-3 sm:px-6 lg:px-8"
+              aria-label="Export controls"
+            >
+              <div className="grid items-center gap-3 md:grid-cols-[minmax(0,1fr)_minmax(18rem,28rem)_minmax(0,1fr)]">
+                <div className="hidden md:block" />
+
+                <div className="flex justify-center">
+                  <div className="w-full max-w-xl">
+                    <label htmlFor={dashboardFilenameId} className="sr-only">
+                      Export filename
+                    </label>
+                    <Input
+                      id={dashboardFilenameId}
+                      value={downloadName}
+                      onChange={(event) => setDownloadName(event.target.value)}
+                      placeholder="new-qr"
+                      className="h-10 rounded-full border-white/8 bg-white/[0.03] px-5 text-center text-sm shadow-none focus-visible:border-white/14 focus-visible:ring-white/10"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-center md:justify-end">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        disabled={!canDownload}
+                        variant="secondary"
+                        className="rounded-full border border-white/10 bg-white/[0.08] px-4 text-foreground shadow-none hover:bg-white/[0.12]"
+                      >
+                        <DownloadIcon data-icon="inline-start" />
+                        Download
+                        <ChevronDownIcon data-icon="inline-end" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      align="end"
+                      className="w-52 rounded-2xl border-white/10 bg-[color-mix(in_oklch,var(--color-popover)_90%,black_10%)] p-2"
+                    >
+                      <div className="grid gap-1">
+                        {DOWNLOAD_EXTENSIONS.map((extension) => (
+                          <Button
+                            key={extension}
+                            disabled={!canDownload}
+                            variant={extension === state.type ? "secondary" : "ghost"}
+                            className={
+                              extension === state.type
+                                ? "justify-start rounded-xl border border-white/10 bg-white/[0.08] text-foreground shadow-none hover:bg-white/[0.12]"
+                                : "justify-start rounded-xl border border-transparent text-foreground/70 shadow-none hover:border-white/8 hover:bg-white/[0.04] hover:text-foreground"
+                            }
+                            onClick={() => {
+                              void handleDownload(extension)
+                            }}
+                          >
+                            <DownloadIcon data-icon="inline-start" />
+                            {extension.toUpperCase()}
+                          </Button>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            </section>
 
             <section
               data-slot="dashboard-workspace"
-              className="flex flex-1 flex-col lg:h-full lg:min-h-0 lg:grid lg:grid-cols-[6.5rem_minmax(20rem,26rem)_minmax(22rem,1fr)] lg:overflow-hidden xl:grid-cols-[6.5rem_minmax(21rem,28rem)_minmax(24rem,1fr)]"
+              className="flex flex-1 flex-col lg:h-full lg:min-h-0 lg:grid lg:grid-cols-[5.75rem_minmax(22rem,29rem)_minmax(24rem,1fr)] lg:overflow-hidden xl:grid-cols-[6rem_minmax(24rem,31rem)_minmax(26rem,1fr)]"
             >
               <QrSectionRail
                 activeSection={activeSection}
@@ -248,11 +316,11 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
 
               <aside
                 data-slot="dashboard-settings-panel"
-                className="min-w-0 border-t border-border/70 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:border-t-0"
+                className="min-w-0 border-t border-white/6 bg-[color-mix(in_oklch,var(--color-card)_18%,transparent)] lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:border-t-0"
                 aria-label="QR editor settings"
               >
                 <MotionConfig
-                  transition={{ duration: 0.32, type: "spring", bounce: 0.16 }}
+                  transition={{ duration: 0.26, type: "spring", bounce: 0.06 }}
                 >
                   <motion.div
                     data-slot="dashboard-settings-stage"
@@ -281,7 +349,7 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
                         >
                           <div
                             data-slot="dashboard-settings-scroll"
-                            className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-5 pb-8 sm:px-5 lg:px-6 lg:py-6 lg:pb-10"
+                            className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-5 py-6 pb-10 sm:px-6 lg:px-8 lg:py-8 lg:pb-12"
                           >
                             <QrControlSections
                               {...controlSectionProps}
@@ -297,7 +365,7 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
 
               <section
                 data-slot="dashboard-preview-pane"
-                className="min-w-0 border-t border-border/70 bg-muted/10 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:border-l lg:border-t-0"
+                className="min-w-0 border-t border-white/6 bg-[linear-gradient(180deg,color-mix(in_oklch,var(--color-muted)_14%,transparent),color-mix(in_oklch,var(--color-background)_92%,black_8%))] lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:border-l lg:border-white/6 lg:border-t-0"
                 aria-label="Preview"
               >
                 <div className="h-full min-h-[22rem] lg:h-full">{previewCard}</div>

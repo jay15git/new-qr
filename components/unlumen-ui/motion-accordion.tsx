@@ -9,12 +9,15 @@ export interface MotionAccordionItem {
   id: string
   title: React.ReactNode
   content: React.ReactNode
+  onToggle?: (isOpen: boolean) => void
 }
 
 export interface MotionAccordionProps {
   items: MotionAccordionItem[]
   openItemId?: string | null
+  openItemIds?: string[]
   onOpenItemChange?: (itemId: string | null) => void
+  onOpenItemIdsChange?: (itemIds: string[]) => void
   allowCollapse?: boolean
   gap?: number
   className?: string
@@ -33,6 +36,23 @@ export function getNextOpenItemId(
   }
 
   return targetItemId
+}
+
+export function getNextOpenItemIds(
+  currentOpenItemIds: string[] | null | undefined,
+  targetItemId: string,
+  allowCollapse = true,
+) {
+  const safeOpenItemIds = currentOpenItemIds ?? []
+  const isOpen = safeOpenItemIds.includes(targetItemId)
+
+  if (isOpen) {
+    return allowCollapse
+      ? safeOpenItemIds.filter((itemId) => itemId !== targetItemId)
+      : safeOpenItemIds
+  }
+
+  return [...safeOpenItemIds, targetItemId]
 }
 
 export function getAccordionScrollAdjustment({
@@ -180,7 +200,7 @@ function AccordionItem({
       className={cn(
         "overflow-hidden",
         isSettingsVariant
-          ? "w-full border-b border-border/70 bg-transparent text-foreground shadow-none first:border-t"
+          ? "w-full border-b border-white/6 bg-transparent text-foreground shadow-none first:border-t"
           : "rounded-[30px] bg-foreground text-background shadow-[0_20px_45px_-30px_rgba(0,0,0,0.65)]",
         !isSettingsVariant &&
           isOpen &&
@@ -200,14 +220,14 @@ function AccordionItem({
         onClick={onSelect}
         className={cn(
           "flex w-full cursor-pointer select-none items-center justify-between gap-4 text-left",
-          isSettingsVariant ? "px-0 py-4" : "px-7 py-5",
+          isSettingsVariant ? "px-0 py-3.5" : "px-7 py-5",
         )}
       >
         <span
           className={cn(
             "leading-snug",
             isSettingsVariant
-              ? "text-sm font-medium text-foreground"
+              ? "text-[0.78rem] font-medium tracking-[0.16em] uppercase text-foreground/70"
               : "text-[clamp(1.2rem,1.6vw,1.3rem)] font-semibold",
           )}
         >
@@ -222,13 +242,13 @@ function AccordionItem({
             className={cn(
               "relative inline-flex h-6 w-10 flex-shrink-0 items-center rounded-full border transition-colors duration-200",
               isOpen
-                ? "border-foreground bg-foreground"
-                : "border-border bg-muted/60",
+                ? "border-white/10 bg-white/[0.12]"
+                : "border-white/8 bg-white/[0.03]",
             )}
           >
             <span
               className={cn(
-                "h-4.5 w-4.5 rounded-full bg-background shadow-sm transition-transform duration-200",
+                "h-4.5 w-4.5 rounded-full bg-[color:var(--color-card)] transition-transform duration-200",
                 isOpen ? "translate-x-[18px]" : "translate-x-[3px]",
               )}
             />
@@ -288,7 +308,7 @@ function AccordionItem({
             damping: 30,
             mass: 0.8,
           }}
-          className={cn(isSettingsVariant ? "pb-4" : "px-7 pb-7")}
+          className={cn(isSettingsVariant ? "pb-5" : "px-7 pb-7")}
         >
           <div
             className={cn(
@@ -308,7 +328,9 @@ function AccordionItem({
 export function MotionAccordion({
   items,
   openItemId = null,
+  openItemIds,
   onOpenItemChange,
+  onOpenItemIdsChange,
   allowCollapse = true,
   gap = 12,
   className,
@@ -316,12 +338,15 @@ export function MotionAccordion({
 }: MotionAccordionProps) {
   const rawId = React.useId()
   const baseId = `accordion-${rawId.replace(/:/g, "")}`
+  const isMultiOpen = openItemIds !== undefined
 
   return (
     <div data-slot="motion-accordion" className={cn("w-full", className)}>
       <div className="flex flex-col" style={{ gap }}>
         {items.map((item, index) => {
-          const isOpen = openItemId === item.id
+          const isOpen = isMultiOpen
+            ? openItemIds.includes(item.id)
+            : openItemId === item.id
 
           return (
             <AccordionItem
@@ -329,11 +354,28 @@ export function MotionAccordion({
               item={item}
               isOpen={isOpen}
               variant={variant}
-              onSelect={() =>
-                onOpenItemChange?.(
-                  getNextOpenItemId(openItemId, item.id, allowCollapse),
+              onSelect={() => {
+                if (isMultiOpen) {
+                  const nextOpenItemIds = getNextOpenItemIds(
+                    openItemIds,
+                    item.id,
+                    allowCollapse,
+                  )
+
+                  onOpenItemIdsChange?.(nextOpenItemIds)
+                  item.onToggle?.(nextOpenItemIds.includes(item.id))
+                  return
+                }
+
+                const nextOpenItemId = getNextOpenItemId(
+                  openItemId,
+                  item.id,
+                  allowCollapse,
                 )
-              }
+
+                onOpenItemChange?.(nextOpenItemId)
+                item.onToggle?.(nextOpenItemId === item.id)
+              }}
               itemId={`${baseId}-trigger-${index}`}
               panelId={`${baseId}-panel-${index}`}
             />

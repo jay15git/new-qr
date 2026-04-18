@@ -45,56 +45,62 @@ export function QrPreviewCard({
   variant = "settings",
 }: QrPreviewCardProps) {
   const isDashboard = variant === "dashboard"
+  const previewBadges = (
+    <div className="flex flex-wrap gap-2">
+      <Badge
+        variant="outline"
+        className="border-white/8 bg-white/[0.04] text-foreground/70"
+      >
+        {state.type.toUpperCase()}
+      </Badge>
+      <Badge
+        variant="outline"
+        className="border-white/8 bg-white/[0.04] text-foreground/70"
+      >
+        {state.width} x {state.height}
+      </Badge>
+      <Badge
+        variant="outline"
+        className="border-white/8 bg-white/[0.04] text-foreground/70"
+      >
+        EC {state.qrOptions.errorCorrectionLevel}
+      </Badge>
+    </div>
+  )
 
   if (isDashboard) {
     return (
       <div
         data-slot="dashboard-preview-shell"
-        className="flex h-full min-h-0 flex-col px-4 py-5 sm:px-5 lg:px-6 lg:py-6"
+        className="flex h-full min-h-0 flex-col gap-6 px-5 py-6 sm:px-6 lg:px-8 lg:py-8"
       >
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <p className="text-[0.68rem] font-medium tracking-[0.22em] text-foreground/40 uppercase">
+              Preview
+            </p>
+            <h2 className="font-heading text-xl font-medium tracking-[-0.04em] text-foreground">
+              Export stage
+            </h2>
+          </div>
+          {previewBadges}
+        </div>
+
         <div
           data-slot="dashboard-preview-canvas"
-          className="flex min-h-0 flex-1 items-center justify-center pb-5"
+          className="flex min-h-0 flex-1 items-center justify-center"
         >
           <div
             ref={previewRef}
             data-slot="dashboard-proof-stage"
-            className="flex aspect-square w-full max-w-[32rem] max-h-[calc(100svh-18rem)] items-center justify-center rounded-[28px] border border-border/70 bg-background shadow-inner [&_canvas]:h-full [&_canvas]:w-full [&_canvas]:max-w-full [&_svg]:h-full [&_svg]:w-full [&_svg]:max-w-full lg:max-h-[calc(100svh-20rem)]"
+            className="flex aspect-square w-full max-w-[34rem] max-h-[calc(100svh-19rem)] items-center justify-center rounded-[2rem] border border-black/10 bg-[linear-gradient(180deg,oklch(0.96_0.006_90),oklch(0.91_0.012_90))] p-5 shadow-[0_24px_60px_-44px_rgba(0,0,0,0.72),inset_0_1px_0_rgba(255,255,255,0.78)] [&_canvas]:h-full [&_canvas]:w-full [&_canvas]:max-w-full [&_svg]:h-full [&_svg]:w-full [&_svg]:max-w-full lg:max-h-[calc(100svh-21rem)]"
           />
         </div>
 
         <div
-          data-slot="dashboard-preview-actions"
-          className="flex flex-col gap-4 border-t border-border/70 pt-5"
+          data-slot="dashboard-preview-footer"
+          className="flex flex-col gap-4 border-t border-white/6 pt-5"
         >
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="dashboard-download-name">Export filename</FieldLabel>
-              <Input
-                id="dashboard-download-name"
-                value={downloadName}
-                onChange={(event) => onDownloadNameChange(event.target.value)}
-                placeholder="new-qr"
-              />
-            </Field>
-          </FieldGroup>
-
-          <div className="flex w-full flex-wrap gap-2">
-            {DOWNLOAD_EXTENSIONS.map((extension) => (
-              <Button
-                key={extension}
-                disabled={!canDownload}
-                variant={extension === state.type ? "default" : "outline"}
-                onClick={() => {
-                  void onDownload(extension)
-                }}
-              >
-                <DownloadIcon data-icon="inline-start" />
-                {extension.toUpperCase()}
-              </Button>
-            ))}
-          </div>
-
           {errorMessage ? (
             <p aria-live="polite" role="alert" className="text-sm text-destructive">
               {errorMessage}
@@ -102,7 +108,11 @@ export function QrPreviewCard({
           ) : null}
 
           <div className="flex w-full justify-end">
-            <Button variant="ghost" onClick={onReset}>
+            <Button
+              variant="ghost"
+              className="rounded-full text-foreground/58 hover:bg-white/[0.04] hover:text-foreground"
+              onClick={onReset}
+            >
               <RefreshCcwIcon data-icon="inline-start" />
               Reset defaults
             </Button>
@@ -111,16 +121,6 @@ export function QrPreviewCard({
       </div>
     )
   }
-
-  const previewBadges = (
-    <div className="flex flex-wrap gap-2">
-      <Badge variant="outline">{state.type.toUpperCase()}</Badge>
-      <Badge variant="outline">
-        {state.width} x {state.height}
-      </Badge>
-      <Badge variant="outline">EC {state.qrOptions.errorCorrectionLevel}</Badge>
-    </div>
-  )
 
   const previewStage = (
     <div

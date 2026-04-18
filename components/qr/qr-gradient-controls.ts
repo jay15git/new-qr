@@ -16,7 +16,7 @@ export function clampGradientOffset(value: number) {
   return Math.min(1, Math.max(0, value))
 }
 
-export function normalizeGradientOffsetRange(values: [number, number]) {
+export function normalizeGradientOffsetRange(values: [number, number]): [number, number] {
   const [start, end] = values.map((value) => clampGradientOffset(value))
 
   return start <= end ? [start, end] : [end, start]

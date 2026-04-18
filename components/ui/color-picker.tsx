@@ -32,6 +32,7 @@ import {
 
 type ColorPickerProps = {
   className?: string
+  chrome?: "default" | "embedded"
   onColorChange: (value: string) => void
   size?: number
   value: string
@@ -41,6 +42,7 @@ type ColorType = "hex" | "hsl" | "rgb"
 
 export default function ColorPicker({
   className,
+  chrome = "default",
   onColorChange,
   size = 320,
   value,
@@ -58,6 +60,8 @@ export default function ColorPicker({
   return (
     <div
       className={cn("space-y-3", className)}
+      data-chrome={chrome}
+      data-slot="color-picker"
       style={{ maxWidth: size, width: "100%" }}
     >
       <Saturation
@@ -69,7 +73,11 @@ export default function ColorPicker({
           height: "auto",
           width: "100%",
         }}
-        className="overflow-hidden border border-border bg-background"
+        className={cn(
+          "overflow-hidden",
+          chrome === "default" && "border border-border bg-background",
+          chrome === "embedded" && "border border-white/8 bg-white/[0.03]",
+        )}
       />
       <Hue
         hue={hsva.h}
@@ -89,7 +97,11 @@ export default function ColorPicker({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              className="shrink-0 justify-between uppercase"
+              className={cn(
+                "shrink-0 justify-between uppercase",
+                chrome === "embedded" &&
+                  "border-white/8 bg-white/[0.03] hover:bg-white/[0.05]",
+              )}
               variant="outline"
             >
               {colorType}

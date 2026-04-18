@@ -34,10 +34,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { AdaptiveOffsetRangeSlider } from "@/components/ui/adaptive-slider"
-import { Slider } from "@/components/ui/slider"
+import { buildAdaptiveTrackGradient } from "@/components/ui/adaptive-slider"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { Slider as UnlumenSlider } from "@/components/unlumen-ui/slider"
 import { cn } from "@/lib/utils"
 import type {
   CornerDotType,
@@ -91,6 +91,8 @@ type StyleSettingsTabId = "style" | "color"
 type BackgroundSettingsTabId = "colors" | "upload"
 type BackgroundColorMode = "solid" | "gradient" | "transparent"
 type GradientEditorVariant = "default" | "dot-enhanced"
+type DashboardCornerColorKey = "cornersSquare" | "cornersDot"
+type DashboardAssetKey = "backgroundImage" | "logo"
 
 const DRAW_TYPES: Array<{ label: string; value: DrawType }> = [
   { label: "SVG", value: "svg" },
@@ -198,6 +200,12 @@ export function QrControlSections({
   const activeCustomDotShape = getActiveCustomDotShape(state.dotsOptions.type)
   const backgroundImageActive = hasBackgroundImage(state)
   const backgroundColorMode = getBackgroundColorMode(state)
+  const selectedCornerSquareColorItemId = state.cornersSquareGradient.enabled
+    ? "gradient"
+    : "solid"
+  const selectedCornerDotColorItemId = state.cornersDotGradient.enabled
+    ? "gradient"
+    : "solid"
   const isDashboardMode = activeSection !== undefined
   const isDashboardStyleSection = activeSection === "style"
   const isDashboardBackgroundSection = activeSection === "background"
@@ -206,10 +214,40 @@ export function QrControlSections({
   const stackClassName = isDashboardMode ? "gap-3" : "grid gap-4 md:grid-cols-2"
   const encodingStackClassName = isDashboardMode ? "gap-3" : "grid gap-4 md:grid-cols-3"
   const dashboardTopTabListClassName =
-    "mx-auto w-fit border border-border/60 bg-background/35 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+    "mx-auto w-full border border-white/6 bg-white/[0.03] p-1 shadow-none"
   const dashboardTopTabContainerClassName = "items-center gap-4"
   const dashboardTopTabClassName =
-    "justify-center px-4 py-2 text-sm text-foreground/72 hover:text-foreground data-[active=true]:text-background"
+    "flex-1 justify-center rounded-full px-3.5 py-1.5 text-[0.7rem] font-medium tracking-[0.16em] uppercase text-foreground/40 hover:text-foreground/66 data-[active=true]:text-foreground"
+  const dashboardTopTabBubbleClassName =
+    "bg-white/[0.07] ring-1 ring-white/[0.08] shadow-none mix-blend-normal"
+  const [dotsColorOpenItemIds, setDotsColorOpenItemIds] =
+    useExpandedDashboardAccordionIds(state.dotsColorMode)
+  const [cornerSquareColorOpenItemIds, setCornerSquareColorOpenItemIds] =
+    useExpandedDashboardAccordionIds(selectedCornerSquareColorItemId)
+  const [cornerDotColorOpenItemIds, setCornerDotColorOpenItemIds] =
+    useExpandedDashboardAccordionIds(selectedCornerDotColorItemId)
+  const [backgroundColorOpenItemIds, setBackgroundColorOpenItemIds] =
+    useExpandedDashboardAccordionIds(backgroundColorMode)
+  const [backgroundSourceOpenItemIds, setBackgroundSourceOpenItemIds] =
+    useExpandedDashboardAccordionIds(backgroundSourceMode)
+  const [logoSourceOpenItemIds, setLogoSourceOpenItemIds] =
+    useExpandedDashboardAccordionIds(logoSourceMode)
+  const expandDotsColorItem = (itemId: DotsColorMode) =>
+    setDotsColorOpenItemIds((current) =>
+      ensureDashboardAccordionItemExpanded(current, itemId),
+    )
+  const expandCornerSquareColorItem = (itemId: "solid" | "gradient") =>
+    setCornerSquareColorOpenItemIds((current) =>
+      ensureDashboardAccordionItemExpanded(current, itemId),
+    )
+  const expandCornerDotColorItem = (itemId: "solid" | "gradient") =>
+    setCornerDotColorOpenItemIds((current) =>
+      ensureDashboardAccordionItemExpanded(current, itemId),
+    )
+  const expandBackgroundColorItem = (itemId: BackgroundColorMode) =>
+    setBackgroundColorOpenItemIds((current) =>
+      ensureDashboardAccordionItemExpanded(current, itemId),
+    )
 
   const showsSection = (section: QrEditorSectionId) =>
     activeSection === undefined || activeSection === section
@@ -229,7 +267,10 @@ export function QrControlSections({
       return (
         <section
           data-slot="section-fields"
-          className={cn("flex flex-col", contentClassName)}
+          className={cn(
+            "flex flex-col gap-6 [&_[data-slot=field-group]]:gap-4 [&_[data-slot=field-label]]:text-[0.78rem] [&_[data-slot=field-label]]:font-medium [&_[data-slot=field-label]]:tracking-[0.02em] [&_[data-slot=field-description]]:text-foreground/48 [&_[data-slot=input]]:h-10 [&_[data-slot=input]]:rounded-[1rem] [&_[data-slot=input]]:border-white/8 [&_[data-slot=input]]:bg-white/[0.03] [&_[data-slot=input]]:px-3.5 [&_[data-slot=select-trigger]]:h-10 [&_[data-slot=select-trigger]]:w-full [&_[data-slot=select-trigger]]:rounded-[1rem] [&_[data-slot=select-trigger]]:border-white/8 [&_[data-slot=select-trigger]]:bg-white/[0.03] [&_[data-slot=select-trigger]]:px-3.5 [&_[data-slot=textarea]]:rounded-[1.35rem] [&_[data-slot=textarea]]:border-white/8 [&_[data-slot=textarea]]:bg-white/[0.03] [&_[data-slot=textarea]]:px-4 [&_[data-slot=textarea]]:py-3.5 [&_[data-slot=slider-track]]:bg-white/[0.08] [&_[data-slot=slider-thumb]]:border-white/18 [&_[data-slot=slider-thumb]]:bg-[color:var(--color-card)]",
+            contentClassName,
+          )}
         >
           {children}
         </section>
@@ -316,13 +357,13 @@ export function QrControlSections({
 
   const solidDotColorControl = (
     <EmbeddedColorPickerField
+      chrome="minimal"
       label="Solid color"
-      onValueChange={(value) =>
-        setState((current) => ({
-          ...current,
-          dotsOptions: { ...current.dotsOptions, color: value },
-        }))
-      }
+      onValueChange={(value) => {
+        expandDotsColorItem("solid")
+        setState((current) => applyDotsSolidColor(current, value))
+      }}
+      pickerClassName="mx-auto"
       value={state.dotsOptions.color}
     />
   )
@@ -330,6 +371,14 @@ export function QrControlSections({
   const paletteDotColorControl = (
     <DotsPaletteCard
       isDashboardMode={isDashboardMode}
+      onApply={
+        isDashboardMode
+          ? () => {
+              expandDotsColorItem("palette")
+              setState((current) => applyDotsPaletteSelection(current))
+            }
+          : undefined
+      }
       palette={state.dotsPalette}
     />
   )
@@ -340,12 +389,10 @@ export function QrControlSections({
       hideToggle
       idPrefix="dots-gradient"
       isDashboardMode={isDashboardMode}
-      onGradientChange={(gradient) =>
-        setState((current) => ({
-          ...current,
-          dotsGradient: { ...gradient, enabled: true },
-        }))
-      }
+      onGradientChange={(gradient) => {
+        expandDotsColorItem("gradient")
+        setState((current) => applyDotsGradient(current, gradient))
+      }}
       title="Dot gradient"
       variant="dot-enhanced"
     />
@@ -353,17 +400,10 @@ export function QrControlSections({
 
   const dashboardDotColorAccordion = (
     <MotionAccordion
-      allowCollapse={false}
+      allowCollapse
       gap={0}
-      openItemId={state.dotsColorMode}
-      onOpenItemChange={(value) => {
-        if (!value) return
-
-        setState((current) => ({
-          ...current,
-          dotsColorMode: value as DotsColorMode,
-        }))
-      }}
+      openItemIds={dotsColorOpenItemIds}
+      onOpenItemIdsChange={setDotsColorOpenItemIds}
       variant="settings"
       items={[
         {
@@ -421,20 +461,10 @@ export function QrControlSections({
 
   const dashboardCornerSquareColorAccordion = (
     <MotionAccordion
-      allowCollapse={false}
+      allowCollapse
       gap={0}
-      openItemId={state.cornersSquareGradient.enabled ? "gradient" : "solid"}
-      onOpenItemChange={(value) => {
-        if (!value) return
-
-        setState((current) => ({
-          ...current,
-          cornersSquareGradient: {
-            ...current.cornersSquareGradient,
-            enabled: value === "gradient",
-          },
-        }))
-      }}
+      openItemIds={cornerSquareColorOpenItemIds}
+      onOpenItemIdsChange={setCornerSquareColorOpenItemIds}
       variant="settings"
       items={[
         {
@@ -442,16 +472,15 @@ export function QrControlSections({
           title: "Solid",
           content: (
             <EmbeddedColorPickerField
+              chrome="minimal"
               label="Solid color"
-              onValueChange={(value) =>
-                setState((current) => ({
-                  ...current,
-                  cornersSquareOptions: {
-                    ...current.cornersSquareOptions,
-                    color: value,
-                  },
-                }))
-              }
+              onValueChange={(value) => {
+                expandCornerSquareColorItem("solid")
+                setState((current) =>
+                  applyCornerSolidColor(current, "cornersSquare", value),
+                )
+              }}
+              pickerClassName="mx-auto"
               value={state.cornersSquareOptions.color}
             />
           ),
@@ -465,12 +494,12 @@ export function QrControlSections({
               hideToggle
               idPrefix="corner-square-gradient"
               isDashboardMode={isDashboardMode}
-              onGradientChange={(gradient) =>
-                setState((current) => ({
-                  ...current,
-                  cornersSquareGradient: { ...gradient, enabled: true },
-                }))
-              }
+              onGradientChange={(gradient) => {
+                expandCornerSquareColorItem("gradient")
+                setState((current) =>
+                  applyCornerGradient(current, "cornersSquare", gradient),
+                )
+              }}
               title="Corner square gradient"
               variant="dot-enhanced"
             />
@@ -516,20 +545,10 @@ export function QrControlSections({
 
   const dashboardCornerDotColorAccordion = (
     <MotionAccordion
-      allowCollapse={false}
+      allowCollapse
       gap={0}
-      openItemId={state.cornersDotGradient.enabled ? "gradient" : "solid"}
-      onOpenItemChange={(value) => {
-        if (!value) return
-
-        setState((current) => ({
-          ...current,
-          cornersDotGradient: {
-            ...current.cornersDotGradient,
-            enabled: value === "gradient",
-          },
-        }))
-      }}
+      openItemIds={cornerDotColorOpenItemIds}
+      onOpenItemIdsChange={setCornerDotColorOpenItemIds}
       variant="settings"
       items={[
         {
@@ -537,16 +556,15 @@ export function QrControlSections({
           title: "Solid",
           content: (
             <EmbeddedColorPickerField
+              chrome="minimal"
               label="Solid color"
-              onValueChange={(value) =>
-                setState((current) => ({
-                  ...current,
-                  cornersDotOptions: {
-                    ...current.cornersDotOptions,
-                    color: value,
-                  },
-                }))
-              }
+              onValueChange={(value) => {
+                expandCornerDotColorItem("solid")
+                setState((current) =>
+                  applyCornerSolidColor(current, "cornersDot", value),
+                )
+              }}
+              pickerClassName="mx-auto"
               value={state.cornersDotOptions.color}
             />
           ),
@@ -560,12 +578,12 @@ export function QrControlSections({
               hideToggle
               idPrefix="corner-dot-gradient"
               isDashboardMode={isDashboardMode}
-              onGradientChange={(gradient) =>
-                setState((current) => ({
-                  ...current,
-                  cornersDotGradient: { ...gradient, enabled: true },
-                }))
-              }
+              onGradientChange={(gradient) => {
+                expandCornerDotColorItem("gradient")
+                setState((current) =>
+                  applyCornerGradient(current, "cornersDot", gradient),
+                )
+              }}
               title="Corner dot gradient"
               variant="dot-enhanced"
             />
@@ -578,45 +596,28 @@ export function QrControlSections({
   const dashboardBackgroundColorAccordion = (
     <div className="flex flex-col gap-4">
       <MotionAccordion
-        allowCollapse={false}
+        allowCollapse
         gap={0}
-        openItemId={backgroundColorMode}
-        onOpenItemChange={(value) => {
-          if (!value || backgroundImageActive) return
-
-          setState((current) => ({
-            ...current,
-            backgroundOptions: {
-              ...current.backgroundOptions,
-              transparent: value === "transparent",
-            },
-            backgroundGradient: {
-              ...current.backgroundGradient,
-              enabled: value === "gradient",
-            },
-          }))
-        }}
+        openItemIds={backgroundColorOpenItemIds}
+        onOpenItemIdsChange={setBackgroundColorOpenItemIds}
         variant="settings"
         items={[
           {
             id: "solid",
-            title: "Solid",
-            content: (
-              <EmbeddedColorPickerField
-                className={cn(backgroundImageActive && "pointer-events-none opacity-50")}
-                label="Solid color"
-                onValueChange={(value) =>
-                  setState((current) => ({
-                    ...current,
-                    backgroundOptions: {
-                      ...current.backgroundOptions,
-                      color: value,
-                    },
-                  }))
-                }
-                value={state.backgroundOptions.color}
-              />
-            ),
+          title: "Solid",
+          content: (
+            <EmbeddedColorPickerField
+              chrome="minimal"
+              className={cn(backgroundImageActive && "pointer-events-none opacity-50")}
+              label="Solid color"
+              onValueChange={(value) => {
+                expandBackgroundColorItem("solid")
+                setState((current) => applyBackgroundSolidColor(current, value))
+              }}
+              pickerClassName="mx-auto"
+              value={state.backgroundOptions.color}
+            />
+          ),
           },
           {
             id: "gradient",
@@ -628,12 +629,12 @@ export function QrControlSections({
                 hideToggle
                 idPrefix="background-gradient"
                 isDashboardMode={isDashboardMode}
-                onGradientChange={(gradient) =>
-                  setState((current) => ({
-                    ...current,
-                    backgroundGradient: { ...gradient, enabled: true },
-                  }))
-                }
+                onGradientChange={(gradient) => {
+                  expandBackgroundColorItem("gradient")
+                  setState((current) =>
+                    applyBackgroundGradient(current, gradient),
+                  )
+                }}
                 title="Background gradient"
                 variant="dot-enhanced"
               />
@@ -643,6 +644,9 @@ export function QrControlSections({
             id: "transparent",
             title: "Transparent",
             content: null,
+            onToggle: () =>
+              !backgroundImageActive &&
+              setState((current) => applyBackgroundTransparentSelection(current)),
           },
         ]}
       />
@@ -657,20 +661,17 @@ export function QrControlSections({
 
   const dashboardBackgroundUploadAccordion = (
     <MotionAccordion
-      allowCollapse={false}
+      allowCollapse
       gap={0}
-      openItemId={backgroundSourceMode}
-      onOpenItemChange={(value) => {
-        if (!value) return
-
-        onBackgroundModeChange(value as AssetSourceMode)
-      }}
+      openItemIds={backgroundSourceOpenItemIds}
+      onOpenItemIdsChange={setBackgroundSourceOpenItemIds}
       variant="settings"
       items={[
         {
           id: "none",
           title: "None",
           content: null,
+          onToggle: () => onBackgroundModeChange("none"),
         },
         {
           id: "upload",
@@ -699,13 +700,13 @@ export function QrControlSections({
                 placeholder="https://example.com/background.png"
                 value={state.backgroundImage.value ?? ""}
                 onChange={(event) =>
-                  setState((current) => ({
-                    ...current,
-                    backgroundImage: {
-                      source: "url",
-                      value: event.target.value,
-                    },
-                  }))
+                  setState((current) =>
+                    applyAssetUrlValue(
+                      current,
+                      "backgroundImage",
+                      event.target.value,
+                    ),
+                  )
                 }
               />
             </Field>
@@ -717,20 +718,17 @@ export function QrControlSections({
 
   const dashboardLogoSourceAccordion = (
     <MotionAccordion
-      allowCollapse={false}
+      allowCollapse
       gap={0}
-      openItemId={logoSourceMode}
-      onOpenItemChange={(value) => {
-        if (!value) return
-
-        onLogoModeChange(value as AssetSourceMode)
-      }}
+      openItemIds={logoSourceOpenItemIds}
+      onOpenItemIdsChange={setLogoSourceOpenItemIds}
       variant="settings"
       items={[
         {
           id: "none",
           title: "None",
           content: null,
+          onToggle: () => onLogoModeChange("none"),
         },
         {
           id: "upload",
@@ -759,13 +757,9 @@ export function QrControlSections({
                 placeholder="https://example.com/logo.png"
                 value={state.logo.value ?? ""}
                 onChange={(event) =>
-                  setState((current) => ({
-                    ...current,
-                    logo: {
-                      source: "url",
-                      value: event.target.value,
-                    },
-                  }))
+                  setState((current) =>
+                    applyAssetUrlValue(current, "logo", event.target.value),
+                  )
                 }
               />
             </Field>
@@ -859,7 +853,7 @@ export function QrControlSections({
               {isDashboardStyleSection ? (
                 <DirectionAwareTabs
                   activeTab={activeStyleTab}
-                  bubbleClassName="bg-foreground text-background mix-blend-normal shadow-none"
+                  bubbleClassName={dashboardTopTabBubbleClassName}
                   className={dashboardTopTabListClassName}
                   containerClassName={dashboardTopTabContainerClassName}
                   contentClassName="min-h-0"
@@ -1027,7 +1021,7 @@ export function QrControlSections({
           children: (
             <DirectionAwareTabs
               activeTab={activeCornerSquareTab}
-              bubbleClassName="bg-foreground text-background mix-blend-normal shadow-none"
+              bubbleClassName={dashboardTopTabBubbleClassName}
               className={dashboardTopTabListClassName}
               containerClassName={dashboardTopTabContainerClassName}
               contentClassName="min-h-0"
@@ -1066,7 +1060,7 @@ export function QrControlSections({
           children: (
             <DirectionAwareTabs
               activeTab={activeCornerDotTab}
-              bubbleClassName="bg-foreground text-background mix-blend-normal shadow-none"
+              bubbleClassName={dashboardTopTabBubbleClassName}
               className={dashboardTopTabListClassName}
               containerClassName={dashboardTopTabContainerClassName}
               contentClassName="min-h-0"
@@ -1104,7 +1098,7 @@ export function QrControlSections({
             children: (
               <DirectionAwareTabs
                 activeTab={activeBackgroundTab}
-                bubbleClassName="bg-foreground text-background mix-blend-normal shadow-none"
+                bubbleClassName={dashboardTopTabBubbleClassName}
                 className={dashboardTopTabListClassName}
                 containerClassName={dashboardTopTabContainerClassName}
                 contentClassName="min-h-0"
@@ -1313,29 +1307,31 @@ export function QrControlSections({
               )}
 
               <Field>
-                <FieldLabel htmlFor="logo-size">Logo size</FieldLabel>
-                <Slider
+                <UnlumenSlider
+                  data-slot="logo-size-slider"
                   id="logo-size"
+                  label="Logo size"
+                  formatValue={(value) => `${(value * 100).toFixed(0)}%`}
                   max={0.5}
                   min={0.1}
-                  step={0.01}
-                  value={[state.imageOptions.imageSize]}
-                  onValueChange={([value]) =>
+                  onChange={(value) =>
                     setState((current) => ({
                       ...current,
-                      imageOptions: { ...current.imageOptions, imageSize: value },
+                      imageOptions: {
+                        ...current.imageOptions,
+                        imageSize: Array.isArray(value) ? value[0] : value,
+                      },
                     }))
                   }
+                  showValue
+                  step={0.01}
+                  value={state.imageOptions.imageSize}
                 />
-                {isDashboardMode ? (
-                  <p className="font-mono text-xs text-muted-foreground">
-                    {(state.imageOptions.imageSize * 100).toFixed(0)}% of the QR width
-                  </p>
-                ) : (
+                {!isDashboardMode ? (
                   <FieldDescription>
-                    {(state.imageOptions.imageSize * 100).toFixed(0)}% of the QR width
+                    Sets the logo width as a percentage of the QR code.
                   </FieldDescription>
-                )}
+                ) : null}
               </Field>
 
               <NumberField
@@ -1468,6 +1464,7 @@ export function QrControlSections({
 }
 
 function ColorField({
+  chrome = "default",
   disabled,
   id,
   isDashboardMode,
@@ -1475,6 +1472,7 @@ function ColorField({
   onValueChange,
   value,
 }: {
+  chrome?: "default" | "minimal"
   disabled?: boolean
   id: string
   isDashboardMode?: boolean
@@ -1482,22 +1480,31 @@ function ColorField({
   onValueChange: (value: string) => void
   value: string
 }) {
+  const isMinimal = chrome === "minimal"
+
   return (
     <Field>
-      <FieldLabel htmlFor={id}>{label}</FieldLabel>
+      <FieldLabel htmlFor={id} className={cn(isMinimal && "sr-only")}>
+        {label}
+      </FieldLabel>
       <Input
         id={id}
         disabled={disabled}
         type="color"
         value={value}
         onChange={(event) => onValueChange(event.target.value)}
-        className="h-11 p-1"
+        className={cn(
+          "h-11 p-1",
+          isDashboardMode && "rounded-[1rem] border-white/8 bg-white/[0.03]",
+        )}
       />
-      {isDashboardMode ? (
-        <p className="font-mono text-xs text-muted-foreground">{value}</p>
-      ) : (
-        <FieldDescription>{value}</FieldDescription>
-      )}
+      {!isMinimal
+        ? isDashboardMode ? (
+            <p className="font-mono text-xs text-muted-foreground">{value}</p>
+          ) : (
+            <FieldDescription>{value}</FieldDescription>
+          )
+        : null}
     </Field>
   )
 }
@@ -1575,7 +1582,15 @@ function AssetSourceField({
       ) : null}
 
       {mode !== "none" ? (
-        <Button variant="ghost" className="self-start" onClick={onRemove}>
+        <Button
+          variant="ghost"
+          className={cn(
+            "self-start",
+            isDashboardMode &&
+              "rounded-full px-0 text-foreground/56 hover:bg-transparent hover:text-foreground",
+          )}
+          onClick={onRemove}
+        >
           <XIcon data-icon="inline-start" />
           {removeLabel}
         </Button>
@@ -1637,14 +1652,14 @@ function GradientEditor({
       )}
     >
       {hideToggle ? (
-        <div className="flex flex-col gap-0.5">
-          <p className="text-sm font-medium">{title}</p>
-          {!isDashboardMode ? (
+        !isDashboardMode ? (
+          <div className="flex flex-col gap-0.5">
+            <p className="text-sm font-medium">{title}</p>
             <p className="text-sm text-muted-foreground">
               Adjust the two-stop gradient for this region.
             </p>
-          ) : null}
-        </div>
+          </div>
+        ) : null
       ) : (
         <Field orientation="horizontal">
           <FieldContent>
@@ -1672,7 +1687,9 @@ function GradientEditor({
 
       {(hideToggle || gradient.enabled) && !disabled ? (
         <FieldGroup className={cn("mt-4", isDashboardMode ? "gap-3" : "grid gap-4 md:grid-cols-2")}>
-          <SelectField
+          <SegmentedOptionPicker
+            columns={2}
+            hideLabel
             id={`${idPrefix}-type`}
             label="Gradient type"
             onValueChange={(value) =>
@@ -1683,19 +1700,9 @@ function GradientEditor({
           />
           {isDotEnhanced ? (
             <>
-              <KnobSliderField
-                id={`${idPrefix}-rotation`}
-                label="Rotation"
-                max={360}
-                min={0}
-                onValueChange={(value) =>
-                  onGradientChange({ ...gradient, rotation: degreesToRadians(value) })
-                }
-                value={rotationDegrees}
-                valueFormatter={(value) => `${Math.round(value)}°`}
-              />
               <div className={cn("grid gap-4 md:grid-cols-2", !isDashboardMode && "md:col-span-2")}>
                 <EmbeddedColorPickerField
+                  chrome="minimal"
                   label="Start color"
                   onValueChange={(value) =>
                     onGradientChange({
@@ -1709,6 +1716,7 @@ function GradientEditor({
                   value={gradient.colorStops[0].color}
                 />
                 <EmbeddedColorPickerField
+                  chrome="minimal"
                   label="End color"
                   onValueChange={(value) =>
                     onGradientChange({
@@ -1723,8 +1731,9 @@ function GradientEditor({
                 />
               </div>
               <div className={cn(!isDashboardMode && "md:col-span-2")}>
-                <AdaptiveOffsetRangeSlider
+                <GradientOffsetRangeField
                   className={cn(!isDashboardMode && "max-w-full")}
+                  hideHeader
                   id={`${idPrefix}-offset-range`}
                   endColor={gradient.colorStops[1].color}
                   endValue={gradientOffsetRange[1]}
@@ -1738,10 +1747,24 @@ function GradientEditor({
                   valueFormatter={(value) => value.toFixed(2)}
                 />
               </div>
+              <KnobSliderField
+                id={`${idPrefix}-rotation`}
+                hideLabel
+                hideValue
+                label="Rotation"
+                max={360}
+                min={0}
+                onValueChange={(value) =>
+                  onGradientChange({ ...gradient, rotation: degreesToRadians(value) })
+                }
+                value={rotationDegrees}
+                valueFormatter={(value) => `${Math.round(value)}°`}
+              />
             </>
           ) : (
             <>
               <NumberField
+                hideLabel
                 id={`${idPrefix}-rotation`}
                 label="Rotation"
                 max={6.3}
@@ -1753,6 +1776,7 @@ function GradientEditor({
                 value={gradient.rotation}
               />
               <ColorField
+                chrome="minimal"
                 id={`${idPrefix}-start-color`}
                 isDashboardMode={isDashboardMode}
                 label="Start color"
@@ -1768,6 +1792,7 @@ function GradientEditor({
                 value={gradient.colorStops[0].color}
               />
               <ColorField
+                chrome="minimal"
                 id={`${idPrefix}-end-color`}
                 isDashboardMode={isDashboardMode}
                 label="End color"
@@ -1783,14 +1808,17 @@ function GradientEditor({
                 value={gradient.colorStops[1].color}
               />
               <div className={cn(!isDashboardMode && "md:col-span-2")}>
-                <OffsetRangeSliderField
+                <GradientOffsetRangeField
+                  hideHeader
                   id={`${idPrefix}-offset-range`}
+                  endColor={gradient.colorStops[1].color}
                   endLabel="End"
                   endValue={gradientOffsetRange[1]}
                   label="Color stop range"
                   max={1}
                   min={0}
                   onValueChange={updateGradientOffsetRange}
+                  startColor={gradient.colorStops[0].color}
                   startLabel="Start"
                   startValue={gradientOffsetRange[0]}
                   step={0.01}
@@ -1807,9 +1835,11 @@ function GradientEditor({
 
 function DotsPaletteCard({
   isDashboardMode,
+  onApply,
   palette,
 }: {
   isDashboardMode?: boolean
+  onApply?: () => void
   palette: string[]
 }) {
   const paletteLabel = `${palette.length} ${palette.length === 1 ? "swatch" : "swatches"}`
@@ -1834,8 +1864,190 @@ function DotsPaletteCard({
       <div className="mt-4 flex min-h-[232px] w-full items-center justify-center">
         <ColorPaletteCard colors={cardColors} statsText={paletteLabel} />
       </div>
+
+      {onApply ? (
+        <Button
+          type="button"
+          variant="outline"
+          className="mt-4 w-full rounded-full border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
+          onClick={onApply}
+        >
+          Use palette
+        </Button>
+      ) : null}
     </div>
   )
+}
+
+export function createDashboardAccordionOpenItemIds(selectedItemId: string) {
+  return [selectedItemId]
+}
+
+export function ensureDashboardAccordionItemExpanded(
+  openItemIds: string[],
+  selectedItemId: string,
+) {
+  return openItemIds.includes(selectedItemId)
+    ? openItemIds
+    : [...openItemIds, selectedItemId]
+}
+
+export function applyDotsSolidColor(state: QrStudioState, color: string) {
+  return {
+    ...state,
+    dotsColorMode: "solid" as const,
+    dotsOptions: {
+      ...state.dotsOptions,
+      color,
+    },
+  }
+}
+
+export function applyDotsGradient(state: QrStudioState, gradient: StudioGradient) {
+  return {
+    ...state,
+    dotsColorMode: "gradient" as const,
+    dotsGradient: {
+      ...gradient,
+      enabled: true,
+    },
+  }
+}
+
+export function applyDotsPaletteSelection(state: QrStudioState) {
+  return {
+    ...state,
+    dotsColorMode: "palette" as const,
+  }
+}
+
+export function applyCornerSolidColor(
+  state: QrStudioState,
+  cornerKey: DashboardCornerColorKey,
+  color: string,
+) {
+  if (cornerKey === "cornersSquare") {
+    return {
+      ...state,
+      cornersSquareOptions: {
+        ...state.cornersSquareOptions,
+        color,
+      },
+      cornersSquareGradient: {
+        ...state.cornersSquareGradient,
+        enabled: false,
+      },
+    }
+  }
+
+  return {
+    ...state,
+    cornersDotOptions: {
+      ...state.cornersDotOptions,
+      color,
+    },
+    cornersDotGradient: {
+      ...state.cornersDotGradient,
+      enabled: false,
+    },
+  }
+}
+
+export function applyCornerGradient(
+  state: QrStudioState,
+  cornerKey: DashboardCornerColorKey,
+  gradient: StudioGradient,
+) {
+  if (cornerKey === "cornersSquare") {
+    return {
+      ...state,
+      cornersSquareGradient: {
+        ...gradient,
+        enabled: true,
+      },
+    }
+  }
+
+  return {
+    ...state,
+    cornersDotGradient: {
+      ...gradient,
+      enabled: true,
+    },
+  }
+}
+
+export function applyBackgroundSolidColor(state: QrStudioState, color: string) {
+  return {
+    ...state,
+    backgroundOptions: {
+      ...state.backgroundOptions,
+      color,
+      transparent: false,
+    },
+    backgroundGradient: {
+      ...state.backgroundGradient,
+      enabled: false,
+    },
+  }
+}
+
+export function applyBackgroundGradient(
+  state: QrStudioState,
+  gradient: StudioGradient,
+) {
+  return {
+    ...state,
+    backgroundOptions: {
+      ...state.backgroundOptions,
+      transparent: false,
+    },
+    backgroundGradient: {
+      ...gradient,
+      enabled: true,
+    },
+  }
+}
+
+export function applyBackgroundTransparentSelection(state: QrStudioState) {
+  return {
+    ...state,
+    backgroundOptions: {
+      ...state.backgroundOptions,
+      transparent: true,
+    },
+    backgroundGradient: {
+      ...state.backgroundGradient,
+      enabled: false,
+    },
+  }
+}
+
+export function applyAssetNoneSelection(
+  state: QrStudioState,
+  assetKey: DashboardAssetKey,
+) {
+  return {
+    ...state,
+    [assetKey]: {
+      source: "none",
+      value: undefined,
+    },
+  }
+}
+
+export function applyAssetUrlValue(
+  state: QrStudioState,
+  assetKey: DashboardAssetKey,
+  value: string,
+) {
+  return {
+    ...state,
+    [assetKey]: {
+      source: "url",
+      value,
+    },
+  }
 }
 
 function getBackgroundColorMode(state: QrStudioState): BackgroundColorMode {
@@ -1850,7 +2062,12 @@ function getBackgroundColorMode(state: QrStudioState): BackgroundColorMode {
   return "solid"
 }
 
+function useExpandedDashboardAccordionIds(selectedItemId: string) {
+  return useState(() => createDashboardAccordionOpenItemIds(selectedItemId))
+}
+
 function NumberField({
+  hideLabel = false,
   id,
   label,
   max,
@@ -1859,6 +2076,7 @@ function NumberField({
   step = 1,
   value,
 }: {
+  hideLabel?: boolean
   id: string
   label: string
   max: number
@@ -1869,7 +2087,9 @@ function NumberField({
 }) {
   return (
     <Field>
-      <FieldLabel htmlFor={id}>{label}</FieldLabel>
+      <FieldLabel htmlFor={id} className={cn(hideLabel && "sr-only")}>
+        {label}
+      </FieldLabel>
       <Input
         id={id}
         type="number"
@@ -1883,70 +2103,140 @@ function NumberField({
   )
 }
 
-function OffsetRangeSliderField({
+function GradientOffsetRangeField({
   className,
-  endLabel,
+  endColor,
+  endLabel = "End",
   endValue,
+  hideHeader = false,
   id,
   label,
   max,
   min,
   onValueChange,
-  startLabel,
+  startColor,
+  startLabel = "Start",
   startValue,
   step,
   valueFormatter,
 }: {
   className?: string
-  endLabel: string
+  endColor: string
+  endLabel?: string
   endValue: number
+  hideHeader?: boolean
   id: string
   label: string
   max: number
   min: number
   onValueChange: (value: [number, number]) => void
-  startLabel: string
+  startColor: string
+  startLabel?: string
   startValue: number
   step: number
   valueFormatter: (value: number) => string
 }) {
   const displayValues = normalizeGradientOffsetRange([startValue, endValue])
+  const trackGradient = buildAdaptiveTrackGradient(startColor, endColor)
 
   return (
-    <Field className={className}>
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <FieldLabel htmlFor={id}>{label}</FieldLabel>
-        <span className="font-mono text-xs text-muted-foreground">
-          {valueFormatter(displayValues[0])} - {valueFormatter(displayValues[1])}
-        </span>
-      </div>
-      <Slider
+    <Field data-slot="gradient-offset-range-slider" className={className}>
+      {!hideHeader ? (
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <FieldLabel>{label}</FieldLabel>
+          <div className="flex flex-wrap items-center gap-2">
+            <GradientValueChip
+              label={startLabel}
+              value={valueFormatter(displayValues[0])}
+            />
+            <GradientValueChip
+              label={endLabel}
+              value={valueFormatter(displayValues[1])}
+            />
+          </div>
+        </div>
+      ) : (
+        <FieldLabel className="sr-only">{label}</FieldLabel>
+      )}
+      <UnlumenSlider
+        className="w-full"
+        data-slot="gradient-offset-slider"
+        formatValue={valueFormatter}
         id={id}
+        label={label}
         max={max}
         min={min}
-        onValueChange={(nextValue) => {
-          if (nextValue.length < 2) {
+        onChange={(nextValue) => {
+          if (!Array.isArray(nextValue) || nextValue.length < 2) {
             return
           }
 
-          onValueChange([nextValue[0] ?? min, nextValue[1] ?? max])
+          onValueChange(
+            normalizeGradientOffsetRange([
+              nextValue[0] ?? min,
+              nextValue[1] ?? max,
+            ]),
+          )
         }}
+        rangeClassName="bg-transparent"
+        rangeStyle={{ backgroundColor: "transparent" }}
+        renderThumb={(index, state) => (
+          <GradientSliderThumb
+            accentColor={index === 0 ? startColor : endColor}
+            isActive={state.isActive}
+          />
+        )}
+        showValue={false}
         step={step}
+        thumbDataSlot="gradient-offset-thumb"
+        trackDataSlot="gradient-offset-track"
+        trackStyle={{ background: trackGradient }}
         value={displayValues}
       />
-      <div className="mt-2 flex items-center justify-between gap-3 font-mono text-xs text-muted-foreground">
-        <span>
-          {startLabel}: {valueFormatter(displayValues[0])}
-        </span>
-        <span>
-          {endLabel}: {valueFormatter(displayValues[1])}
-        </span>
-      </div>
     </Field>
   )
 }
 
+function GradientSliderThumb({
+  accentColor,
+  isActive = false,
+}: {
+  accentColor: string
+  isActive?: boolean
+}) {
+  return (
+    <span
+      className={cn(
+        "flex size-[18px] items-center justify-center rounded-full border border-black/10 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.06)] transition-transform",
+        isActive && "scale-105",
+      )}
+    >
+      <span
+        className="size-2.5 rounded-full border border-black/10"
+        style={{ backgroundColor: accentColor }}
+      />
+    </span>
+  )
+}
+
+function GradientValueChip({
+  label,
+  value,
+}: {
+  label: string
+  value: string
+}) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-muted/30 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
+      <span className="font-medium text-foreground">{label}</span>
+      <span>{value}</span>
+    </span>
+  )
+}
+
 function KnobSliderField({
+  hideLabel = false,
+  hideValue = false,
   id,
   label,
   max,
@@ -1955,6 +2245,8 @@ function KnobSliderField({
   value,
   valueFormatter,
 }: {
+  hideLabel?: boolean
+  hideValue?: boolean
   id: string
   label: string
   max: number
@@ -1965,13 +2257,23 @@ function KnobSliderField({
 }) {
   return (
     <Field>
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <FieldLabel htmlFor={id}>{label}</FieldLabel>
-        <span className="font-mono text-xs text-muted-foreground">
-          {valueFormatter(value)}
-        </span>
-      </div>
-      <div className="flex justify-center rounded-[var(--radius-xl)] border border-border/70 bg-background/80 p-3">
+      {!hideLabel || !hideValue ? (
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <FieldLabel htmlFor={id} className={cn(hideLabel && "sr-only")}>
+            {label}
+          </FieldLabel>
+          {!hideValue ? (
+            <span className="font-mono text-xs text-muted-foreground">
+              {valueFormatter(value)}
+            </span>
+          ) : null}
+        </div>
+      ) : (
+        <FieldLabel htmlFor={id} className="sr-only">
+          {label}
+        </FieldLabel>
+      )}
+      <div className="flex justify-center">
         <KnobSlider
           max={max}
           min={min}
@@ -1985,29 +2287,39 @@ function KnobSliderField({
 }
 
 function EmbeddedColorPickerField({
+  chrome = "default",
   className,
   label,
   onValueChange,
+  pickerClassName,
   value,
 }: {
+  chrome?: "default" | "minimal"
   className?: string
   label: string
   onValueChange: (value: string) => void
+  pickerClassName?: string
   value: string
 }) {
+  const isMinimal = chrome === "minimal"
+
   return (
     <Field className={className}>
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <FieldLabel>{label}</FieldLabel>
-        <span className="font-mono text-xs text-muted-foreground">{value}</span>
-      </div>
-      <div className="flex justify-center rounded-[var(--radius-xl)] border border-border/70 bg-background/80 p-3">
-        <ColorPicker
-          onColorChange={onValueChange}
-          size={320}
-          value={value}
-        />
-      </div>
+      {!isMinimal ? (
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <FieldLabel>{label}</FieldLabel>
+          <span className="font-mono text-xs text-muted-foreground">{value}</span>
+        </div>
+      ) : (
+        <FieldLabel className="sr-only">{label}</FieldLabel>
+      )}
+      <ColorPicker
+        className={pickerClassName}
+        chrome="embedded"
+        onColorChange={onValueChange}
+        size={320}
+        value={value}
+      />
     </Field>
   )
 }
@@ -2044,10 +2356,10 @@ function VisualStylePicker({
             <label
               key={option.value}
               className={cn(
-                "flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border px-3 py-3 text-center transition-colors",
+                "flex min-h-20 cursor-pointer flex-col items-center justify-center gap-2 rounded-[1.25rem] px-3 py-3 text-center transition-colors",
                 isSelected
-                  ? "border-primary bg-primary/8 text-foreground shadow-sm"
-                  : "border-border/70 bg-muted/20 text-muted-foreground hover:border-border hover:bg-muted/35",
+                  ? "border border-white/10 bg-white/[0.07] text-foreground"
+                  : "border border-transparent bg-white/[0.02] text-muted-foreground hover:bg-white/[0.04] hover:text-foreground/78",
               )}
             >
               <input
@@ -2072,6 +2384,8 @@ function VisualStylePicker({
 }
 
 function SegmentedOptionPicker({
+  columns = 3,
+  hideLabel = false,
   id,
   isStacked,
   label,
@@ -2079,6 +2393,8 @@ function SegmentedOptionPicker({
   options,
   value,
 }: {
+  columns?: 2 | 3
+  hideLabel?: boolean
   id: string
   isStacked?: boolean
   label: string
@@ -2090,10 +2406,15 @@ function SegmentedOptionPicker({
 
   return (
     <Field>
-      <FieldLabel id={labelId}>{label}</FieldLabel>
+      <FieldLabel id={labelId} className={cn(hideLabel && "sr-only")}>
+        {label}
+      </FieldLabel>
       <div
         aria-labelledby={labelId}
-        className={cn("grid gap-2", isStacked ? "grid-cols-1" : "grid-cols-3")}
+        className={cn(
+          "grid gap-2",
+          isStacked ? "grid-cols-1" : columns === 2 ? "grid-cols-2" : "grid-cols-3",
+        )}
         data-slot="segmented-picker"
         id={id}
         role="radiogroup"
@@ -2105,10 +2426,10 @@ function SegmentedOptionPicker({
             <label
               key={option.value}
               className={cn(
-                "cursor-pointer rounded-xl border px-3 py-3 text-center text-sm transition-colors",
+                "cursor-pointer rounded-full border px-3 py-2.5 text-center text-sm transition-colors",
                 isSelected
-                  ? "border-primary bg-primary/8 text-foreground shadow-sm"
-                  : "border-border/70 bg-muted/20 text-muted-foreground hover:border-border hover:bg-muted/35",
+                  ? "border-white/10 bg-white/[0.07] text-foreground shadow-none"
+                  : "border-transparent bg-white/[0.02] text-muted-foreground hover:bg-white/[0.04] hover:text-foreground/78",
               )}
             >
               <input
