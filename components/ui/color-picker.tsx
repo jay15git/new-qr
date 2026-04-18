@@ -1,180 +1,244 @@
-'use client'
+"use client"
 
-import { useEffect, useRef, useState } from 'react'
-import { memo } from 'react'
+import * as React from "react"
+import {
+  hslaToHsva,
+  hsvaToHex,
+  hsvaToHsla,
+  hsvaToRgba,
+  type HsvaColor,
+  rgbaToHsva,
+} from "@uiw/color-convert"
+import Hue from "@uiw/react-color-hue"
+import Saturation from "@uiw/react-color-saturation"
+import { ChevronDownIcon } from "lucide-react"
 
-function hslToHex(h: number, s: number, l: number) {
-    l /= 100
-    s /= 100
-    const k = (n: number) => (n + h / 30) % 12
-    const a = s * Math.min(l, 1 - l)
-    const f = (n: number) => l - a * Math.max(-1, Math.min(Math.min(k(n) - 3, 9 - k(n)), 1))
-    return (
-        '#' +
-        [f(0), f(8), f(4)]
-            .map(x =>
-                Math.round(x * 255)
-                    .toString(16)
-                    .padStart(2, '0')
-            )
-            .join('')
-    )
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
+
+import {
+  coerceHexColor,
+  toHsvaColor,
+  updateHslaChannel,
+  updateRgbaChannel,
+} from "./color-picker-utils"
+
+type ColorPickerProps = {
+  className?: string
+  onColorChange: (value: string) => void
+  size?: number
+  value: string
 }
 
-interface ColorPickerProps {
-    size?: number
-    padding?: number
-    bulletRadius?: number
-    spreadFactor?: number
-    minSpread?: number
-    maxSpread?: number
-    minLight?: number
-    maxLight?: number
-    showColorWheel?: boolean
-    numPoints?: number
-    onColorChange?: (colors: string[]) => void
-}
+type ColorType = "hex" | "hsl" | "rgb"
 
-const ColorPicker = ({ size = 280, padding = 20, bulletRadius = 24, spreadFactor = 0.4, minSpread = Math.PI / 1.5, maxSpread = Math.PI / 3, minLight = 15, maxLight = 90, showColorWheel = false, numPoints = 1, onColorChange }: ColorPickerProps) => {
-    const RADIUS = size / 2 - padding
+export default function ColorPicker({
+  className,
+  onColorChange,
+  size = 320,
+  value,
+}: ColorPickerProps) {
+  const [colorType, setColorType] = React.useState<ColorType>("hsl")
+  const hsva = toHsvaColor(value)
+  const hsl = hsvaToHsla(hsva)
+  const rgb = hsvaToRgba(hsva)
 
-    const [angle, setAngle] = useState(-Math.PI / 2)
-    const [radius, setRadius] = useState(RADIUS * 0.7)
-    const [drag, setDrag] = useState(false)
+  function emitColor(nextColor: Partial<HsvaColor>) {
+    const mergedColor = { ...hsva, ...nextColor }
+    onColorChange(coerceHexColor(hsvaToHex(mergedColor)))
+  }
 
-    const ref = useRef<HTMLCanvasElement>(null)
-
-    const hue = (angle * 180) / Math.PI
-    const light = maxLight * (radius / RADIUS)
-    const color = hslToHex(hue, 100, light)
-
-    const normalizedRadius = radius / RADIUS
-    const spread = (minSpread + (maxSpread - minSpread) * Math.pow(normalizedRadius, 3)) * spreadFactor
-
-    const bx1 = size / 2 + Math.cos(angle - spread) * radius
-    const by1 = size / 2 + Math.sin(angle - spread) * radius
-    const bx2 = size / 2 + Math.cos(angle + spread) * radius
-    const by2 = size / 2 + Math.sin(angle + spread) * radius
-
-    const angle1 = angle - spread
-    const angle2 = angle + spread
-    const hue1 = (angle1 * 180) / Math.PI
-    const hue2 = (angle2 * 180) / Math.PI
-    const light1 = maxLight * (radius / RADIUS)
-    const light2 = maxLight * (radius / RADIUS)
-    const color1 = hslToHex(hue1, 100, light1)
-    const color2 = hslToHex(hue2, 100, light2)
-
-    useEffect(() => {
-        const ctx = ref.current!.getContext('2d')!
-        ctx.clearRect(0, 0, size, size)
-
-        ctx.beginPath()
-        ctx.arc(size / 2, size / 2, RADIUS, 0, Math.PI * 2)
-        ctx.clip()
-
-        for (let r = 0; r <= RADIUS; r++) {
-            for (let a = 0; a < 360; a += 1) {
-                const rad = (a * Math.PI) / 180
-                const x = size / 2 + Math.cos(rad) * r
-                const y = size / 2 + Math.sin(rad) * r
-                const lightness = minLight + (maxLight - minLight) * (r / RADIUS)
-                ctx.beginPath()
-                ctx.strokeStyle = hslToHex(a, 100, lightness)
-                ctx.moveTo(x, y)
-                ctx.lineTo(x + 1, y + 1)
-                ctx.stroke()
-            }
+  return (
+    <div
+      className={cn("space-y-3", className)}
+      style={{ maxWidth: size, width: "100%" }}
+    >
+      <Saturation
+        hsva={hsva}
+        onChange={(newColor) => emitColor({ ...newColor, a: hsva.a })}
+        style={{
+          aspectRatio: "4 / 2",
+          borderRadius: "0.75rem",
+          height: "auto",
+          width: "100%",
+        }}
+        className="overflow-hidden border border-border bg-background"
+      />
+      <Hue
+        hue={hsva.h}
+        onChange={(newHue) => emitColor(newHue)}
+        style={
+          {
+            "--alpha-pointer-background-color": "hsl(var(--foreground))",
+            borderRadius: "0.5rem",
+            height: "0.875rem",
+            width: "100%",
+          } as React.CSSProperties
         }
-    }, [size, RADIUS, minLight, maxLight])
+        className="[&>div:first-child]:overflow-hidden [&>div:first-child]:rounded-lg"
+      />
 
-    useEffect(() => {
-        const colors = numPoints === 1 ? [color] : numPoints === 2 ? [color2, color] : [color2, color, color1]
-        onColorChange?.(colors)
-    }, [color, color1, color2, numPoints, onColorChange])
-
-    function setFromPointer(e: React.PointerEvent) {
-        const rect = ref.current!.getBoundingClientRect()
-        const x = e.clientX - rect.left - size / 2
-        const y = e.clientY - rect.top - size / 2
-        let r = Math.sqrt(x * x + y * y)
-        let a = Math.atan2(y, x)
-        if (a < 0) a += 2 * Math.PI
-        r = Math.max(0, Math.min(RADIUS, r))
-        setAngle(a)
-        setRadius(r)
-    }
-
-    function onPointerDown(e: React.PointerEvent) {
-        setDrag(true)
-        setFromPointer(e)
-        ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
-    }
-    function onPointerMove(e: React.PointerEvent) {
-        if (!drag) return
-        setFromPointer(e)
-    }
-    function onPointerUp() {
-        setDrag(false)
-    }
-
-    const bx = size / 2 + Math.cos(angle) * radius
-    const by = size / 2 + Math.sin(angle) * radius
-
-    return (
-        <div>
-            <div
-                style={{
-                    width: size,
-                    height: size,
-                }}
-                className="select-none relative"
+      <div className="flex items-center gap-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              className="shrink-0 justify-between uppercase"
+              variant="outline"
             >
-                <canvas ref={ref} width={size} height={size} className={`rounded-full ${!showColorWheel && 'opacity-0'}`} />
+              {colorType}
+              <ChevronDownIcon
+                aria-hidden="true"
+                className="-me-1 ms-2 opacity-60"
+                size={16}
+                strokeWidth={2}
+              />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuCheckboxItem
+              checked={colorType === "hex"}
+              onCheckedChange={() => setColorType("hex")}
+            >
+              HEX
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={colorType === "hsl"}
+              onCheckedChange={() => setColorType("hsl")}
+            >
+              HSL
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={colorType === "rgb"}
+              onCheckedChange={() => setColorType("rgb")}
+            >
+              RGB
+            </DropdownMenuCheckboxItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-                {numPoints >= 2 && (
-                    <div
-                        className="absolute rounded-full border-2 border-white/80 shadow pointer-events-none opacity-90 z-20"
-                        style={{
-                            left: bx2 - bulletRadius / 1.7,
-                            top: by2 - bulletRadius / 1.7,
-                            width: bulletRadius * 1.2,
-                            height: bulletRadius * 1.2,
-                            background: color2,
-                        }}
-                    />
-                )}
+        <div className="flex grow">
+          {colorType === "hex" ? (
+            <Input
+              className="flex"
+              value={hsvaToHex(hsva)}
+              onChange={(event) => {
+                const nextValue = event.target.value.startsWith("#")
+                  ? event.target.value
+                  : `#${event.target.value}`
 
-                <div
-                    className="absolute rounded-full border-3 border-white/90 shadow cursor-grab touch-none z-30"
-                    style={{
-                        left: bx - bulletRadius,
-                        top: by - bulletRadius,
-                        width: bulletRadius * 2,
-                        height: bulletRadius * 2,
-                        background: color,
-                    }}
-                    onPointerDown={onPointerDown}
-                    onPointerMove={onPointerMove}
-                    onPointerUp={onPointerUp}
-                    onPointerLeave={onPointerUp}
-                />
+                if (/^#[0-9a-f]{6}$/i.test(nextValue)) {
+                  onColorChange(nextValue)
+                }
+              }}
+            />
+          ) : null}
 
-                {numPoints >= 3 && (
-                    <div
-                        className="absolute rounded-full border-2 border-white/80 shadow pointer-events-none opacity-90 z-20"
-                        style={{
-                            left: bx1 - bulletRadius / 1.7,
-                            top: by1 - bulletRadius / 1.7,
-                            width: bulletRadius * 1.2,
-                            height: bulletRadius * 1.2,
-                            background: color1,
-                        }}
-                    />
-                )}
-            </div>
+          {colorType === "hsl" ? (
+            <HslColorInput
+              channels={[
+                { key: "h", value: hsl.h.toFixed(0) },
+                { key: "s", value: hsl.s.toFixed(0) },
+                { key: "l", value: hsl.l.toFixed(0) },
+              ]}
+              onValueChange={(channel, nextValue) =>
+                emitColor(hslaToHsva(updateHslaChannel(hsl, channel, nextValue)))
+              }
+            />
+          ) : null}
+
+          {colorType === "rgb" ? (
+            <RgbColorInput
+              channels={[
+                { key: "r", value: String(rgb.r) },
+                { key: "g", value: String(rgb.g) },
+                { key: "b", value: String(rgb.b) },
+              ]}
+              onValueChange={(channel, nextValue) =>
+                emitColor(rgbaToHsva(updateRgbaChannel(rgb, channel, nextValue)))
+              }
+            />
+          ) : null}
         </div>
-    )
+      </div>
+    </div>
+  )
 }
 
-export default ColorPicker
+function HslColorInput({
+  channels,
+  onValueChange,
+}: {
+  channels: Array<{
+    key: "h" | "l" | "s"
+    value: string
+  }>
+  onValueChange: (channel: "h" | "l" | "s", nextValue: string) => void
+}) {
+  return (
+    <div className="-mt-px flex w-full">
+      {channels.map((channel, index) => (
+        <div
+          className={cn(
+            "relative min-w-0 flex-1 focus-within:z-10",
+            index > 0 && "-ms-px",
+          )}
+          key={channel.key}
+        >
+          <Input
+            className={cn(
+              "shadow-none [direction:inherit]",
+              index === 0 && "rounded-e-none",
+              index > 0 && index < channels.length - 1 && "rounded-none",
+              index === channels.length - 1 && "rounded-s-none",
+            )}
+            value={channel.value}
+            onChange={(event) => onValueChange(channel.key, event.target.value)}
+          />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function RgbColorInput({
+  channels,
+  onValueChange,
+}: {
+  channels: Array<{
+    key: "b" | "g" | "r"
+    value: string
+  }>
+  onValueChange: (channel: "b" | "g" | "r", nextValue: string) => void
+}) {
+  return (
+    <div className="-mt-px flex w-full">
+      {channels.map((channel, index) => (
+        <div
+          className={cn(
+            "relative min-w-0 flex-1 focus-within:z-10",
+            index > 0 && "-ms-px",
+          )}
+          key={channel.key}
+        >
+          <Input
+            className={cn(
+              "shadow-none [direction:inherit]",
+              index === 0 && "rounded-e-none",
+              index > 0 && index < channels.length - 1 && "rounded-none",
+              index === channels.length - 1 && "rounded-s-none",
+            )}
+            value={channel.value}
+            onChange={(event) => onValueChange(channel.key, event.target.value)}
+          />
+        </div>
+      ))}
+    </div>
+  )
+}

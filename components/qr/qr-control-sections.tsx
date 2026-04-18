@@ -1,8 +1,11 @@
 "use client"
 
-import { PlusIcon, XIcon } from "lucide-react"
+import { useState } from "react"
+import { XIcon } from "lucide-react"
 
 import FileUpload from "@/components/kokonutui/file-upload"
+import { DirectionAwareTabs } from "@/components/ui/direction-aware-tabs"
+import { MotionAccordion } from "@/components/unlumen-ui/motion-accordion"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -19,7 +22,10 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
+import { ColorPaletteCard } from "@/components/ui/color-palette-card"
+import ColorPicker from "@/components/ui/color-picker"
 import { Input } from "@/components/ui/input"
+import { KnobSlider } from "@/components/ui/knob-slider"
 import {
   Select,
   SelectContent,
@@ -28,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { AdaptiveOffsetRangeSlider } from "@/components/ui/adaptive-slider"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
@@ -42,6 +49,11 @@ import type {
 } from "qr-code-styling"
 
 import { getActiveCustomDotShape } from "@/components/qr/custom-dot-shapes"
+import {
+  degreesToRadians,
+  normalizeGradientOffsetRange,
+  radiansToDegrees,
+} from "@/components/qr/qr-gradient-controls"
 import type { QrEditorSectionId } from "@/components/qr/qr-sections"
 import type {
   AssetSourceMode,
@@ -54,6 +66,7 @@ import { hasBackgroundImage } from "@/components/qr/qr-studio-state"
 
 type QrControlSectionsProps = {
   backgroundSourceMode: AssetSourceMode
+  initialStyleTab?: StyleSettingsTabId
   logoSourceMode: AssetSourceMode
   onBackgroundModeChange: (mode: AssetSourceMode) => void
   onBackgroundUploadError: (message: string) => void
@@ -70,6 +83,9 @@ type StyleOption = {
   label: string
   value: string
 }
+
+type StyleSettingsTabId = "style" | "color"
+type GradientEditorVariant = "default" | "dot-enhanced"
 
 const DRAW_TYPES: Array<{ label: string; value: DrawType }> = [
   { label: "SVG", value: "svg" },
@@ -145,21 +161,9 @@ const BACKGROUND_MODES: Array<{ label: string; value: AssetSourceMode }> = [
   { label: "Upload file", value: "upload" },
 ]
 
-const MIN_DOT_PALETTE_SWATCHES = 2
-const MAX_DOT_PALETTE_SWATCHES = 8
-const DOTS_PALETTE_FALLBACKS = [
-  "#04879c",
-  "#0c3c78",
-  "#090030",
-  "#f30a49",
-  "#3f88c5",
-  "#16a085",
-  "#ff7f11",
-  "#8f2d56",
-]
-
 export function QrControlSections({
   backgroundSourceMode,
+  initialStyleTab = "style",
   logoSourceMode,
   onBackgroundModeChange,
   onBackgroundUploadError,
@@ -171,10 +175,18 @@ export function QrControlSections({
   state,
   activeSection,
 }: QrControlSectionsProps) {
+  const [activeStyleTab, setActiveStyleTab] =
+    useState<StyleSettingsTabId>(initialStyleTab)
+  const [activeCornerSquareTab, setActiveCornerSquareTab] =
+    useState<StyleSettingsTabId>("style")
+  const [activeCornerDotTab, setActiveCornerDotTab] = useState<StyleSettingsTabId>("style")
   const contentError = state.data.trim() ? null : "Add text or a URL to encode"
   const activeCustomDotShape = getActiveCustomDotShape(state.dotsOptions.type)
   const backgroundImageActive = hasBackgroundImage(state)
   const isDashboardMode = activeSection !== undefined
+  const isDashboardStyleSection = activeSection === "style"
+  const isDashboardCornerSquareSection = activeSection === "corner-square"
+  const isDashboardCornerDotSection = activeSection === "corner-dot"
   const stackClassName = isDashboardMode ? "gap-3" : "grid gap-4 md:grid-cols-2"
   const encodingStackClassName = isDashboardMode ? "gap-3" : "grid gap-4 md:grid-cols-3"
 
@@ -213,6 +225,275 @@ export function QrControlSections({
       </Card>
     )
   }
+
+  const dotStyleControl = isDashboardMode ? (
+    <VisualStylePicker
+      id="dots-type"
+      label="Dot style"
+      onValueChange={(value) =>
+        setState((current) => ({
+          ...current,
+          dotsOptions: { ...current.dotsOptions, type: value as StudioDotType },
+        }))
+      }
+      options={DOT_TYPES}
+      value={state.dotsOptions.type}
+    />
+  ) : (
+    <SelectField
+      id="dots-type"
+      label="Dot style"
+      onValueChange={(value) =>
+        setState((current) => ({
+          ...current,
+          dotsOptions: { ...current.dotsOptions, type: value as StudioDotType },
+        }))
+      }
+      options={DOT_TYPES}
+      value={state.dotsOptions.type}
+    />
+  )
+
+  const dotsRoundSizeControl = (
+    <Field orientation="horizontal">
+      <FieldContent>
+        <FieldLabel htmlFor="dots-round-size">Round dot sizes</FieldLabel>
+        {!isDashboardMode ? (
+          <FieldDescription>
+            Keeps SVG output visually softer by rounding dot sizing.
+          </FieldDescription>
+        ) : null}
+      </FieldContent>
+      <Switch
+        id="dots-round-size"
+        checked={state.dotsOptions.roundSize}
+        onCheckedChange={(checked) =>
+          setState((current) => ({
+            ...current,
+            dotsOptions: { ...current.dotsOptions, roundSize: checked },
+          }))
+        }
+      />
+    </Field>
+  )
+
+  const dotsColorModeControl = (
+    <SegmentedOptionPicker
+      id="dots-color-mode"
+      isStacked={isDashboardMode}
+      label="Color mode"
+      onValueChange={(value) =>
+        setState((current) => ({
+          ...current,
+          dotsColorMode: value as DotsColorMode,
+        }))
+      }
+      options={DOT_COLOR_MODES}
+      value={state.dotsColorMode}
+    />
+  )
+
+  const solidDotColorControl = (
+    <EmbeddedColorPickerField
+      label="Solid color"
+      onValueChange={(value) =>
+        setState((current) => ({
+          ...current,
+          dotsOptions: { ...current.dotsOptions, color: value },
+        }))
+      }
+      value={state.dotsOptions.color}
+    />
+  )
+
+  const paletteDotColorControl = (
+    <DotsPaletteCard
+      isDashboardMode={isDashboardMode}
+      palette={state.dotsPalette}
+    />
+  )
+
+  const gradientDotColorControl = (
+    <GradientEditor
+      gradient={{ ...state.dotsGradient, enabled: true }}
+      hideToggle
+      idPrefix="dots-gradient"
+      isDashboardMode={isDashboardMode}
+      onGradientChange={(gradient) =>
+        setState((current) => ({
+          ...current,
+          dotsGradient: { ...gradient, enabled: true },
+        }))
+      }
+      title="Dot gradient"
+      variant="dot-enhanced"
+    />
+  )
+
+  const dashboardDotColorAccordion = (
+    <MotionAccordion
+      allowCollapse={false}
+      gap={0}
+      openItemId={state.dotsColorMode}
+      onOpenItemChange={(value) => {
+        if (!value) return
+
+        setState((current) => ({
+          ...current,
+          dotsColorMode: value as DotsColorMode,
+        }))
+      }}
+      variant="settings"
+      items={[
+        {
+          id: "solid",
+          title: "Solid",
+          content: solidDotColorControl,
+        },
+        {
+          id: "gradient",
+          title: "Gradient",
+          content: gradientDotColorControl,
+        },
+        {
+          id: "palette",
+          title: "Palette",
+          content: paletteDotColorControl,
+        },
+      ]}
+    />
+  )
+
+  const cornerSquareStyleControl = isDashboardMode ? (
+    <VisualStylePicker
+      id="corner-square-type"
+      label="Corner square style"
+      onValueChange={(value) =>
+        setState((current) => ({
+          ...current,
+          cornersSquareOptions: {
+            ...current.cornersSquareOptions,
+            type: value as CornerSquareType,
+          },
+        }))
+      }
+      options={CORNER_SQUARE_TYPES}
+      value={state.cornersSquareOptions.type}
+    />
+  ) : (
+    <SelectField
+      id="corner-square-type"
+      label="Corner square style"
+      onValueChange={(value) =>
+        setState((current) => ({
+          ...current,
+          cornersSquareOptions: {
+            ...current.cornersSquareOptions,
+            type: value as CornerSquareType,
+          },
+        }))
+      }
+      options={CORNER_SQUARE_TYPES}
+      value={state.cornersSquareOptions.type}
+    />
+  )
+
+  const cornerSquareColorControls = (
+    <div className="flex flex-col gap-4">
+      <ColorField
+        id="corner-square-color"
+        isDashboardMode={isDashboardMode}
+        label="Corner square color"
+        onValueChange={(value) =>
+          setState((current) => ({
+            ...current,
+            cornersSquareOptions: {
+              ...current.cornersSquareOptions,
+              color: value,
+            },
+          }))
+        }
+        value={state.cornersSquareOptions.color}
+      />
+
+      <GradientEditor
+        gradient={state.cornersSquareGradient}
+        idPrefix="corner-square-gradient"
+        isDashboardMode={isDashboardMode}
+        onGradientChange={(gradient) =>
+          setState((current) => ({
+            ...current,
+            cornersSquareGradient: gradient,
+          }))
+        }
+        title="Corner square gradient"
+      />
+    </div>
+  )
+
+  const cornerDotStyleControl = isDashboardMode ? (
+    <VisualStylePicker
+      id="corner-dot-type"
+      label="Corner dot style"
+      onValueChange={(value) =>
+        setState((current) => ({
+          ...current,
+          cornersDotOptions: {
+            ...current.cornersDotOptions,
+            type: value as CornerDotType,
+          },
+        }))
+      }
+      options={CORNER_DOT_TYPES}
+      value={state.cornersDotOptions.type}
+    />
+  ) : (
+    <SelectField
+      id="corner-dot-type"
+      label="Corner dot style"
+      onValueChange={(value) =>
+        setState((current) => ({
+          ...current,
+          cornersDotOptions: {
+            ...current.cornersDotOptions,
+            type: value as CornerDotType,
+          },
+        }))
+      }
+      options={CORNER_DOT_TYPES}
+      value={state.cornersDotOptions.type}
+    />
+  )
+
+  const cornerDotColorControls = (
+    <div className="flex flex-col gap-4">
+      <ColorField
+        id="corner-dot-color"
+        isDashboardMode={isDashboardMode}
+        label="Corner dot color"
+        onValueChange={(value) =>
+          setState((current) => ({
+            ...current,
+            cornersDotOptions: {
+              ...current.cornersDotOptions,
+              color: value,
+            },
+          }))
+        }
+        value={state.cornersDotOptions.color}
+      />
+
+      <GradientEditor
+        gradient={state.cornersDotGradient}
+        idPrefix="corner-dot-gradient"
+        isDashboardMode={isDashboardMode}
+        onGradientChange={(gradient) =>
+          setState((current) => ({ ...current, cornersDotGradient: gradient }))
+        }
+        title="Corner dot gradient"
+      />
+    </div>
+  )
 
   return (
     <div className={cn("flex flex-col", isDashboardMode ? "gap-3" : "gap-4")}>
@@ -295,276 +576,233 @@ export function QrControlSections({
           contentClassName: "flex flex-col gap-4",
           children: (
             <>
-            <FieldGroup className={stackClassName}>
-            {isDashboardMode ? (
-              <VisualStylePicker
-                id="dots-type"
-                label="Dot style"
-                onValueChange={(value) =>
-                  setState((current) => ({
-                    ...current,
-                    dotsOptions: { ...current.dotsOptions, type: value as StudioDotType },
-                  }))
-                }
-                options={DOT_TYPES}
-                value={state.dotsOptions.type}
-              />
-            ) : (
-              <SelectField
-                id="dots-type"
-                label="Dot style"
-                onValueChange={(value) =>
-                  setState((current) => ({
-                    ...current,
-                    dotsOptions: { ...current.dotsOptions, type: value as StudioDotType },
-                  }))
-                }
-                options={DOT_TYPES}
-                value={state.dotsOptions.type}
-              />
-            )}
-            <SegmentedOptionPicker
-              id="dots-color-mode"
-              isStacked={isDashboardMode}
-              label="Color mode"
-              onValueChange={(value) =>
-                setState((current) => ({
-                  ...current,
-                  dotsColorMode: value as DotsColorMode,
-                }))
-              }
-              options={DOT_COLOR_MODES}
-              value={state.dotsColorMode}
-            />
-          </FieldGroup>
+              {isDashboardStyleSection ? (
+                <DirectionAwareTabs
+                  activeTab={activeStyleTab}
+                  bubbleClassName="bg-foreground text-background mix-blend-normal shadow-none"
+                  className="border border-border/60 bg-background/35 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+                  containerClassName="items-stretch gap-4"
+                  contentClassName="min-h-0 overflow-visible"
+                  onTabChange={(tabId) => setActiveStyleTab(tabId as StyleSettingsTabId)}
+                  showContent
+                  tabClassName="justify-center px-4 py-2 text-sm text-foreground/72 hover:text-foreground data-[active=true]:text-background"
+                  tabListLabel="Style settings groups"
+                  tabs={[
+                    {
+                      id: "style",
+                      label: "Style",
+                      content: (
+                        <div className="flex flex-col gap-4">
+                          {dotStyleControl}
+                          {dotsRoundSizeControl}
+                        </div>
+                      ),
+                    },
+                    {
+                      id: "color",
+                      label: "Color",
+                      content: (
+                        <div className="flex flex-col gap-4">{dashboardDotColorAccordion}</div>
+                      ),
+                    },
+                  ]}
+                />
+              ) : (
+                <>
+                  <FieldGroup className={stackClassName}>
+                    {dotStyleControl}
+                    {dotsColorModeControl}
+                  </FieldGroup>
 
-          {activeCustomDotShape && state.type !== "svg" ? (
-            <p className="text-sm text-muted-foreground">
-              Custom dot shapes currently render only in SVG mode.
-            </p>
-          ) : null}
+                  {state.dotsColorMode === "solid" ? (
+                    <ColorField
+                      id="dots-color"
+                      isDashboardMode={isDashboardMode}
+                      label="Solid color"
+                      onValueChange={(value) =>
+                        setState((current) => ({
+                          ...current,
+                          dotsOptions: { ...current.dotsOptions, color: value },
+                        }))
+                      }
+                      value={state.dotsOptions.color}
+                    />
+                  ) : null}
 
-          {state.dotsColorMode === "solid" ? (
-            <ColorField
-              id="dots-color"
-              isDashboardMode={isDashboardMode}
-              label="Solid color"
-              onValueChange={(value) =>
-                setState((current) => ({
-                  ...current,
-                  dotsOptions: { ...current.dotsOptions, color: value },
-                }))
-              }
-              value={state.dotsOptions.color}
-            />
-          ) : null}
+                  {state.dotsColorMode === "palette" ? (
+                    <DotsPaletteCard
+                      isDashboardMode={isDashboardMode}
+                      palette={state.dotsPalette}
+                    />
+                  ) : null}
+                </>
+              )}
 
-          {state.dotsColorMode === "palette" ? (
-            <DotsPaletteEditor
-              isDashboardMode={isDashboardMode}
-              palette={state.dotsPalette}
-              onAddSwatch={() =>
-                setState((current) => ({
-                  ...current,
-                  dotsPalette: [
-                    ...current.dotsPalette,
-                    getNextDotsPaletteColor(current.dotsPalette.length),
-                  ].slice(0, MAX_DOT_PALETTE_SWATCHES),
-                }))
-              }
-              onPaletteColorChange={(index, value) =>
-                setState((current) => ({
-                  ...current,
-                  dotsPalette: current.dotsPalette.map((color, colorIndex) =>
-                    colorIndex === index ? value : color,
-                  ),
-                }))
-              }
-              onRemoveSwatch={(index) =>
-                setState((current) => ({
-                  ...current,
-                  dotsPalette:
-                    current.dotsPalette.length <= MIN_DOT_PALETTE_SWATCHES
-                      ? current.dotsPalette
-                      : current.dotsPalette.filter((_, colorIndex) => colorIndex !== index),
-                }))
-              }
-            />
-          ) : null}
-
-          <Field orientation="horizontal">
-            <FieldContent>
-              <FieldLabel htmlFor="dots-round-size">Round dot sizes</FieldLabel>
-              {!isDashboardMode ? (
-                <FieldDescription>
-                  Keeps SVG output visually softer by rounding dot sizing.
-                </FieldDescription>
+              {activeCustomDotShape && state.type !== "svg" ? (
+                <p className="text-sm text-muted-foreground">
+                  Custom dot shapes currently render only in SVG mode.
+                </p>
               ) : null}
-            </FieldContent>
-            <Switch
-              id="dots-round-size"
-              checked={state.dotsOptions.roundSize}
-              onCheckedChange={(checked) =>
-                setState((current) => ({
-                  ...current,
-                  dotsOptions: { ...current.dotsOptions, roundSize: checked },
-                }))
-              }
-            />
-          </Field>
 
-          {state.dotsColorMode === "gradient" ? (
-            <GradientEditor
-              gradient={{ ...state.dotsGradient, enabled: true }}
-              hideToggle
-              idPrefix="dots-gradient"
-              isDashboardMode={isDashboardMode}
-              onGradientChange={(gradient) =>
-                setState((current) => ({
-                  ...current,
-                  dotsGradient: { ...gradient, enabled: true },
-                }))
-              }
-              title="Dot gradient"
-            />
-          ) : null}
+              {!isDashboardStyleSection ? dotsRoundSizeControl : null}
+
+              {!isDashboardStyleSection && state.dotsColorMode === "gradient" ? (
+                <GradientEditor
+                  gradient={{ ...state.dotsGradient, enabled: true }}
+                  hideToggle
+                  idPrefix="dots-gradient"
+                  isDashboardMode={isDashboardMode}
+                  onGradientChange={(gradient) =>
+                    setState((current) => ({
+                      ...current,
+                      dotsGradient: { ...gradient, enabled: true },
+                    }))
+                  }
+                  title="Dot gradient"
+                  variant="dot-enhanced"
+                />
+              ) : null}
             </>
           ),
         })
       ) : null}
 
-      {showsSection("corners") ? (
+      {!isDashboardMode ? (
         renderSection({
           title: "Corners",
           description: "Style the corner frames and the inner corner dots independently.",
           contentClassName: "flex flex-col gap-5",
           children: (
             <>
-            <FieldGroup className={stackClassName}>
-            {isDashboardMode ? (
-              <VisualStylePicker
-                id="corner-square-type"
-                label="Corner square style"
-                onValueChange={(value) =>
-                  setState((current) => ({
-                    ...current,
-                    cornersSquareOptions: {
-                      ...current.cornersSquareOptions,
-                      type: value as CornerSquareType,
-                    },
-                  }))
-                }
-                options={CORNER_SQUARE_TYPES}
-                value={state.cornersSquareOptions.type}
-              />
-            ) : (
-              <SelectField
-                id="corner-square-type"
-                label="Corner square style"
-                onValueChange={(value) =>
-                  setState((current) => ({
-                    ...current,
-                    cornersSquareOptions: {
-                      ...current.cornersSquareOptions,
-                      type: value as CornerSquareType,
-                    },
-                  }))
-                }
-                options={CORNER_SQUARE_TYPES}
-                value={state.cornersSquareOptions.type}
-              />
-            )}
-            <ColorField
-              id="corner-square-color"
-              isDashboardMode={isDashboardMode}
-              label="Corner square color"
-              onValueChange={(value) =>
-                setState((current) => ({
-                  ...current,
-                  cornersSquareOptions: {
-                    ...current.cornersSquareOptions,
-                    color: value,
-                  },
-                }))
-              }
-              value={state.cornersSquareOptions.color}
-            />
-          </FieldGroup>
+              <FieldGroup className={stackClassName}>
+                {cornerSquareStyleControl}
+                <ColorField
+                  id="corner-square-color"
+                  isDashboardMode={isDashboardMode}
+                  label="Corner square color"
+                  onValueChange={(value) =>
+                    setState((current) => ({
+                      ...current,
+                      cornersSquareOptions: {
+                        ...current.cornersSquareOptions,
+                        color: value,
+                      },
+                    }))
+                  }
+                  value={state.cornersSquareOptions.color}
+                />
+              </FieldGroup>
 
-          <GradientEditor
-            gradient={state.cornersSquareGradient}
-            idPrefix="corner-square-gradient"
-            isDashboardMode={isDashboardMode}
-            onGradientChange={(gradient) =>
-              setState((current) => ({
-                ...current,
-                cornersSquareGradient: gradient,
-              }))
-            }
-            title="Corner square gradient"
-          />
-
-            <FieldGroup className={stackClassName}>
-            {isDashboardMode ? (
-              <VisualStylePicker
-                id="corner-dot-type"
-                label="Corner dot style"
-                onValueChange={(value) =>
+              <GradientEditor
+                gradient={state.cornersSquareGradient}
+                idPrefix="corner-square-gradient"
+                isDashboardMode={isDashboardMode}
+                onGradientChange={(gradient) =>
                   setState((current) => ({
                     ...current,
-                    cornersDotOptions: {
-                      ...current.cornersDotOptions,
-                      type: value as CornerDotType,
-                    },
+                    cornersSquareGradient: gradient,
                   }))
                 }
-                options={CORNER_DOT_TYPES}
-                value={state.cornersDotOptions.type}
+                title="Corner square gradient"
               />
-            ) : (
-              <SelectField
-                id="corner-dot-type"
-                label="Corner dot style"
-                onValueChange={(value) =>
-                  setState((current) => ({
-                    ...current,
-                    cornersDotOptions: {
-                      ...current.cornersDotOptions,
-                      type: value as CornerDotType,
-                    },
-                  }))
-                }
-                options={CORNER_DOT_TYPES}
-                value={state.cornersDotOptions.type}
-              />
-            )}
-            <ColorField
-              id="corner-dot-color"
-              isDashboardMode={isDashboardMode}
-              label="Corner dot color"
-              onValueChange={(value) =>
-                setState((current) => ({
-                  ...current,
-                  cornersDotOptions: {
-                    ...current.cornersDotOptions,
-                    color: value,
-                  },
-                }))
-              }
-              value={state.cornersDotOptions.color}
-            />
-          </FieldGroup>
 
-          <GradientEditor
-            gradient={state.cornersDotGradient}
-            idPrefix="corner-dot-gradient"
-            isDashboardMode={isDashboardMode}
-            onGradientChange={(gradient) =>
-              setState((current) => ({ ...current, cornersDotGradient: gradient }))
-            }
-            title="Corner dot gradient"
-          />
+              <FieldGroup className={stackClassName}>
+                {cornerDotStyleControl}
+                <ColorField
+                  id="corner-dot-color"
+                  isDashboardMode={isDashboardMode}
+                  label="Corner dot color"
+                  onValueChange={(value) =>
+                    setState((current) => ({
+                      ...current,
+                      cornersDotOptions: {
+                        ...current.cornersDotOptions,
+                        color: value,
+                      },
+                    }))
+                  }
+                  value={state.cornersDotOptions.color}
+                />
+              </FieldGroup>
+
+              <GradientEditor
+                gradient={state.cornersDotGradient}
+                idPrefix="corner-dot-gradient"
+                isDashboardMode={isDashboardMode}
+                onGradientChange={(gradient) =>
+                  setState((current) => ({ ...current, cornersDotGradient: gradient }))
+                }
+                title="Corner dot gradient"
+              />
             </>
+          ),
+        })
+      ) : null}
+
+      {isDashboardCornerSquareSection ? (
+        renderSection({
+          title: "Corner square",
+          description: "Style the corner frame and choose its color treatment.",
+          contentClassName: "flex flex-col gap-4",
+          children: (
+            <DirectionAwareTabs
+              activeTab={activeCornerSquareTab}
+              bubbleClassName="bg-foreground text-background mix-blend-normal shadow-none"
+              className="border border-border/60 bg-background/35 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+              containerClassName="items-stretch gap-4"
+              contentClassName="min-h-0 overflow-visible"
+              onTabChange={(tabId) => setActiveCornerSquareTab(tabId as StyleSettingsTabId)}
+              showContent
+              tabClassName="justify-center px-4 py-2 text-sm text-foreground/72 hover:text-foreground data-[active=true]:text-background"
+              tabListLabel="Corner square settings groups"
+              tabs={[
+                {
+                  id: "style",
+                  label: "Style",
+                  content: (
+                    <div className="flex flex-col gap-4">{cornerSquareStyleControl}</div>
+                  ),
+                },
+                {
+                  id: "color",
+                  label: "Color",
+                  content: cornerSquareColorControls,
+                },
+              ]}
+            />
+          ),
+        })
+      ) : null}
+
+      {isDashboardCornerDotSection ? (
+        renderSection({
+          title: "Corner dot",
+          description: "Style the inner corner dot and choose its color treatment.",
+          contentClassName: "flex flex-col gap-4",
+          children: (
+            <DirectionAwareTabs
+              activeTab={activeCornerDotTab}
+              bubbleClassName="bg-foreground text-background mix-blend-normal shadow-none"
+              className="border border-border/60 bg-background/35 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+              containerClassName="items-stretch gap-4"
+              contentClassName="min-h-0 overflow-visible"
+              onTabChange={(tabId) => setActiveCornerDotTab(tabId as StyleSettingsTabId)}
+              showContent
+              tabClassName="justify-center px-4 py-2 text-sm text-foreground/72 hover:text-foreground data-[active=true]:text-background"
+              tabListLabel="Corner dot settings groups"
+              tabs={[
+                {
+                  id: "style",
+                  label: "Style",
+                  content: <div className="flex flex-col gap-4">{cornerDotStyleControl}</div>,
+                },
+                {
+                  id: "color",
+                  label: "Color",
+                  content: cornerDotColorControls,
+                },
+              ]}
+            />
           ),
         })
       ) : null}
@@ -1030,6 +1268,7 @@ function GradientEditor({
   isDashboardMode,
   onGradientChange,
   title,
+  variant = "default",
 }: {
   disabled?: boolean
   disabledText?: string
@@ -1039,9 +1278,35 @@ function GradientEditor({
   isDashboardMode?: boolean
   onGradientChange: (gradient: StudioGradient) => void
   title: string
+  variant?: GradientEditorVariant
 }) {
+  const isDotEnhanced = variant === "dot-enhanced"
+  const rotationDegrees = Math.min(360, Math.max(0, radiansToDegrees(gradient.rotation)))
+  const gradientOffsetRange = normalizeGradientOffsetRange([
+    gradient.colorStops[0].offset,
+    gradient.colorStops[1].offset,
+  ])
+
+  const updateGradientOffsetRange = (values: [number, number]) => {
+    const [startOffset, endOffset] = normalizeGradientOffsetRange(values)
+
+    onGradientChange({
+      ...gradient,
+      colorStops: [
+        { ...gradient.colorStops[0], offset: startOffset },
+        { ...gradient.colorStops[1], offset: endOffset },
+      ],
+    })
+  }
+
   return (
-    <div className="rounded-[var(--radius-xl)] border border-border/70 bg-muted/20 p-4">
+    <div
+      className={cn(
+        isDashboardMode
+          ? "border-0 bg-transparent p-0"
+          : "rounded-[var(--radius-xl)] border border-border/70 bg-muted/20 p-4",
+      )}
+    >
       {hideToggle ? (
         <div className="flex flex-col gap-0.5">
           <p className="text-sm font-medium">{title}</p>
@@ -1087,160 +1352,158 @@ function GradientEditor({
             options={GRADIENT_TYPES}
             value={gradient.type}
           />
-          <NumberField
-            id={`${idPrefix}-rotation`}
-            label="Rotation"
-            max={6.3}
-            min={0}
-            step={0.1}
-            onValueChange={(value) =>
-              onGradientChange({ ...gradient, rotation: value })
-            }
-            value={gradient.rotation}
-          />
-          <ColorField
-            id={`${idPrefix}-start-color`}
-            isDashboardMode={isDashboardMode}
-            label="Start color"
-            onValueChange={(value) =>
-              onGradientChange({
-                ...gradient,
-                colorStops: [
-                  { ...gradient.colorStops[0], color: value },
-                  gradient.colorStops[1],
-                ],
-              })
-            }
-            value={gradient.colorStops[0].color}
-          />
-          <NumberField
-            id={`${idPrefix}-start-offset`}
-            label="Start offset"
-            max={1}
-            min={0}
-            step={0.05}
-            onValueChange={(value) =>
-              onGradientChange({
-                ...gradient,
-                colorStops: [
-                  { ...gradient.colorStops[0], offset: value },
-                  gradient.colorStops[1],
-                ],
-              })
-            }
-            value={gradient.colorStops[0].offset}
-          />
-          <ColorField
-            id={`${idPrefix}-end-color`}
-            isDashboardMode={isDashboardMode}
-            label="End color"
-            onValueChange={(value) =>
-              onGradientChange({
-                ...gradient,
-                colorStops: [
-                  gradient.colorStops[0],
-                  { ...gradient.colorStops[1], color: value },
-                ],
-              })
-            }
-            value={gradient.colorStops[1].color}
-          />
-          <NumberField
-            id={`${idPrefix}-end-offset`}
-            label="End offset"
-            max={1}
-            min={0}
-            step={0.05}
-            onValueChange={(value) =>
-              onGradientChange({
-                ...gradient,
-                colorStops: [
-                  gradient.colorStops[0],
-                  { ...gradient.colorStops[1], offset: value },
-                ],
-              })
-            }
-            value={gradient.colorStops[1].offset}
-          />
+          {isDotEnhanced ? (
+            <>
+              <KnobSliderField
+                id={`${idPrefix}-rotation`}
+                label="Rotation"
+                max={360}
+                min={0}
+                onValueChange={(value) =>
+                  onGradientChange({ ...gradient, rotation: degreesToRadians(value) })
+                }
+                value={rotationDegrees}
+                valueFormatter={(value) => `${Math.round(value)}°`}
+              />
+              <div className={cn("grid gap-4 md:grid-cols-2", !isDashboardMode && "md:col-span-2")}>
+                <EmbeddedColorPickerField
+                  label="Start color"
+                  onValueChange={(value) =>
+                    onGradientChange({
+                      ...gradient,
+                      colorStops: [
+                        { ...gradient.colorStops[0], color: value },
+                        gradient.colorStops[1],
+                      ],
+                    })
+                  }
+                  value={gradient.colorStops[0].color}
+                />
+                <EmbeddedColorPickerField
+                  label="End color"
+                  onValueChange={(value) =>
+                    onGradientChange({
+                      ...gradient,
+                      colorStops: [
+                        gradient.colorStops[0],
+                        { ...gradient.colorStops[1], color: value },
+                      ],
+                    })
+                  }
+                  value={gradient.colorStops[1].color}
+                />
+              </div>
+              <div className={cn(!isDashboardMode && "md:col-span-2")}>
+                <AdaptiveOffsetRangeSlider
+                  className={cn(!isDashboardMode && "max-w-full")}
+                  id={`${idPrefix}-offset-range`}
+                  endColor={gradient.colorStops[1].color}
+                  endValue={gradientOffsetRange[1]}
+                  label="Color stop range"
+                  max={1}
+                  min={0}
+                  onValueChange={updateGradientOffsetRange}
+                  startColor={gradient.colorStops[0].color}
+                  startValue={gradientOffsetRange[0]}
+                  step={0.01}
+                  valueFormatter={(value) => value.toFixed(2)}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <NumberField
+                id={`${idPrefix}-rotation`}
+                label="Rotation"
+                max={6.3}
+                min={0}
+                step={0.1}
+                onValueChange={(value) =>
+                  onGradientChange({ ...gradient, rotation: value })
+                }
+                value={gradient.rotation}
+              />
+              <ColorField
+                id={`${idPrefix}-start-color`}
+                isDashboardMode={isDashboardMode}
+                label="Start color"
+                onValueChange={(value) =>
+                  onGradientChange({
+                    ...gradient,
+                    colorStops: [
+                      { ...gradient.colorStops[0], color: value },
+                      gradient.colorStops[1],
+                    ],
+                  })
+                }
+                value={gradient.colorStops[0].color}
+              />
+              <ColorField
+                id={`${idPrefix}-end-color`}
+                isDashboardMode={isDashboardMode}
+                label="End color"
+                onValueChange={(value) =>
+                  onGradientChange({
+                    ...gradient,
+                    colorStops: [
+                      gradient.colorStops[0],
+                      { ...gradient.colorStops[1], color: value },
+                    ],
+                  })
+                }
+                value={gradient.colorStops[1].color}
+              />
+              <div className={cn(!isDashboardMode && "md:col-span-2")}>
+                <OffsetRangeSliderField
+                  id={`${idPrefix}-offset-range`}
+                  endLabel="End"
+                  endValue={gradientOffsetRange[1]}
+                  label="Color stop range"
+                  max={1}
+                  min={0}
+                  onValueChange={updateGradientOffsetRange}
+                  startLabel="Start"
+                  startValue={gradientOffsetRange[0]}
+                  step={0.01}
+                  valueFormatter={(value) => value.toFixed(2)}
+                />
+              </div>
+            </>
+          )}
         </FieldGroup>
       ) : null}
     </div>
   )
 }
 
-function DotsPaletteEditor({
+function DotsPaletteCard({
   isDashboardMode,
   palette,
-  onAddSwatch,
-  onPaletteColorChange,
-  onRemoveSwatch,
 }: {
   isDashboardMode?: boolean
   palette: string[]
-  onAddSwatch: () => void
-  onPaletteColorChange: (index: number, value: string) => void
-  onRemoveSwatch: (index: number) => void
 }) {
-  const swatches = getPaletteSwatchItems(palette)
+  const paletteLabel = `${palette.length} ${palette.length === 1 ? "swatch" : "swatches"}`
+  const cardColors = palette.map((color) => color.replace(/^#/, ""))
 
   return (
-    <div className="rounded-[var(--radius-xl)] border border-border/70 bg-muted/20 p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <p className="text-sm font-medium">Palette swatches</p>
-          {!isDashboardMode ? (
-            <p className="text-sm text-muted-foreground">
-              Seeded module coloring cycles through these swatches without reshuffling on resize.
-            </p>
-          ) : null}
-        </div>
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={palette.length >= MAX_DOT_PALETTE_SWATCHES}
-          onClick={onAddSwatch}
-        >
-          <PlusIcon data-icon="inline-start" />
-          Add swatch
-        </Button>
+    <div
+      data-slot="dots-palette-card"
+      className={cn(
+        isDashboardMode
+          ? "border-0 bg-transparent p-0"
+          : "rounded-[var(--radius-xl)] border border-border/70 bg-muted/20 p-4",
+      )}
+    >
+      <div className="space-y-1">
+        <p className="text-sm font-medium">Palette preview</p>
+        <p className="text-sm text-muted-foreground">
+          Dot coloring rotates through the active palette in a fixed order.
+        </p>
       </div>
 
-      <div className={cn("mt-4 grid gap-3", isDashboardMode ? "grid-cols-1" : "sm:grid-cols-2 xl:grid-cols-3")}>
-        {swatches.map(({ color, index, key }) => (
-          <div
-            key={key}
-            className="overflow-hidden rounded-2xl border border-border/70 bg-background/75"
-          >
-            <div
-              className="h-16 w-full"
-              style={{ backgroundColor: color }}
-            />
-            <div className="flex items-center gap-3 px-3 py-3">
-              <Input
-                aria-label={`Palette swatch ${index + 1}`}
-                className="h-10 w-14 p-1"
-                type="color"
-                value={color}
-                onChange={(event) => onPaletteColorChange(index, event.target.value)}
-              />
-              <div className="min-w-0 flex-1">
-                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                  Swatch {index + 1}
-                </p>
-                <p className="truncate font-mono text-sm text-foreground">{color}</p>
-              </div>
-              <Button
-                aria-label={`Remove palette swatch ${index + 1}`}
-                size="icon-xs"
-                variant="ghost"
-                disabled={palette.length <= MIN_DOT_PALETTE_SWATCHES}
-                onClick={() => onRemoveSwatch(index)}
-              >
-                <XIcon />
-              </Button>
-            </div>
-          </div>
-        ))}
+      <div className="mt-4 flex min-h-[232px] w-full items-center justify-center">
+        <ColorPaletteCard colors={cardColors} statsText={paletteLabel} />
       </div>
     </div>
   )
@@ -1275,6 +1538,135 @@ function NumberField({
         value={value}
         onChange={(event) => onValueChange(Number(event.target.value))}
       />
+    </Field>
+  )
+}
+
+function OffsetRangeSliderField({
+  className,
+  endLabel,
+  endValue,
+  id,
+  label,
+  max,
+  min,
+  onValueChange,
+  startLabel,
+  startValue,
+  step,
+  valueFormatter,
+}: {
+  className?: string
+  endLabel: string
+  endValue: number
+  id: string
+  label: string
+  max: number
+  min: number
+  onValueChange: (value: [number, number]) => void
+  startLabel: string
+  startValue: number
+  step: number
+  valueFormatter: (value: number) => string
+}) {
+  const displayValues = normalizeGradientOffsetRange([startValue, endValue])
+
+  return (
+    <Field className={className}>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <FieldLabel htmlFor={id}>{label}</FieldLabel>
+        <span className="font-mono text-xs text-muted-foreground">
+          {valueFormatter(displayValues[0])} - {valueFormatter(displayValues[1])}
+        </span>
+      </div>
+      <Slider
+        id={id}
+        max={max}
+        min={min}
+        onValueChange={(nextValue) => {
+          if (nextValue.length < 2) {
+            return
+          }
+
+          onValueChange([nextValue[0] ?? min, nextValue[1] ?? max])
+        }}
+        step={step}
+        value={displayValues}
+      />
+      <div className="mt-2 flex items-center justify-between gap-3 font-mono text-xs text-muted-foreground">
+        <span>
+          {startLabel}: {valueFormatter(displayValues[0])}
+        </span>
+        <span>
+          {endLabel}: {valueFormatter(displayValues[1])}
+        </span>
+      </div>
+    </Field>
+  )
+}
+
+function KnobSliderField({
+  id,
+  label,
+  max,
+  min,
+  onValueChange,
+  value,
+  valueFormatter,
+}: {
+  id: string
+  label: string
+  max: number
+  min: number
+  onValueChange: (value: number) => void
+  value: number
+  valueFormatter: (value: number) => string
+}) {
+  return (
+    <Field>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <FieldLabel htmlFor={id}>{label}</FieldLabel>
+        <span className="font-mono text-xs text-muted-foreground">
+          {valueFormatter(value)}
+        </span>
+      </div>
+      <div className="flex justify-center rounded-[var(--radius-xl)] border border-border/70 bg-background/80 p-3">
+        <KnobSlider
+          max={max}
+          min={min}
+          onChange={onValueChange}
+          size={132}
+          value={Math.round(value)}
+        />
+      </div>
+    </Field>
+  )
+}
+
+function EmbeddedColorPickerField({
+  className,
+  label,
+  onValueChange,
+  value,
+}: {
+  className?: string
+  label: string
+  onValueChange: (value: string) => void
+  value: string
+}) {
+  return (
+    <Field className={className}>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <FieldLabel>{label}</FieldLabel>
+        <span className="font-mono text-xs text-muted-foreground">{value}</span>
+      </div>
+      <div className="flex justify-center rounded-[var(--radius-xl)] border border-border/70 bg-background/80 p-3">
+        <ColorPicker
+          onColorChange={onValueChange}
+          size={320}
+          value={value}
+        />
+      </div>
     </Field>
   )
 }
@@ -1410,25 +1802,6 @@ function StylePreview({ value }: { value: string }) {
       <PreviewShape size={12} value={value} x={18} y={28} />
     </svg>
   )
-}
-
-function getNextDotsPaletteColor(index: number) {
-  return DOTS_PALETTE_FALLBACKS[index % DOTS_PALETTE_FALLBACKS.length]
-}
-
-function getPaletteSwatchItems(palette: string[]) {
-  const colorCounts = new Map<string, number>()
-
-  return palette.map((color, index) => {
-    const nextCount = (colorCounts.get(color) ?? 0) + 1
-    colorCounts.set(color, nextCount)
-
-    return {
-      color,
-      index,
-      key: nextCount === 1 ? color : `${color}-${nextCount}`,
-    }
-  })
 }
 
 function PreviewShape({

@@ -40,7 +40,15 @@ describe("QrSectionRail", () => {
       (capturedDirectionAwareTabsProps?.tabs as Array<{ id: string }>).map(
         (tab) => tab.id,
       ),
-    ).toEqual(["content", "style", "corners", "background", "logo", "encoding"])
+    ).toEqual([
+      "content",
+      "style",
+      "corner-square",
+      "corner-dot",
+      "background",
+      "logo",
+      "encoding",
+    ])
 
     const firstTabLabel = (
       capturedDirectionAwareTabsProps?.tabs as Array<{ label: TabLabelElement }>
@@ -59,7 +67,7 @@ describe("QrSectionRail", () => {
     const onSectionChange = vi.fn()
 
     renderToStaticMarkup(
-      <QrSectionRail activeSection="corners" onSectionChange={onSectionChange} />,
+      <QrSectionRail activeSection="corner-square" onSectionChange={onSectionChange} />,
     )
 
     expect(capturedDirectionAwareTabsProps).not.toBeNull()

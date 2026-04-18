@@ -259,7 +259,7 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
                 >
                   <motion.div
                     data-slot="dashboard-settings-stage"
-                    className="relative flex min-h-0 flex-1 flex-col overflow-hidden"
+                    className="relative flex min-h-0 flex-1 flex-col"
                     initial={false}
                   >
                     <div
@@ -292,7 +292,7 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
 
                           <div
                             data-slot="dashboard-settings-scroll"
-                            className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-5 lg:px-6 lg:py-6"
+                            className="min-h-0 flex-1 overflow-x-visible overflow-y-auto px-4 py-5 pb-8 sm:px-5 lg:px-6 lg:py-6 lg:pb-10"
                           >
                             <QrControlSections
                               {...controlSectionProps}

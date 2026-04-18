@@ -1,57 +1,193 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { motion } from "motion/react";
+import * as React from "react"
+import { motion } from "motion/react"
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 
 export interface MotionAccordionItem {
-  question: string;
-  answer: string;
+  id: string
+  title: React.ReactNode
+  content: React.ReactNode
 }
 
 export interface MotionAccordionProps {
-  items: MotionAccordionItem[];
-  /** @default 10 */
-  gap?: number;
-  className?: string;
+  items: MotionAccordionItem[]
+  openItemId?: string | null
+  onOpenItemChange?: (itemId: string | null) => void
+  allowCollapse?: boolean
+  gap?: number
+  className?: string
+  variant?: "card" | "settings"
+}
+
+const ACCORDION_SCROLL_PADDING = 24
+
+export function getNextOpenItemId(
+  currentOpenItemId: string | null | undefined,
+  targetItemId: string,
+  allowCollapse = true,
+) {
+  if (currentOpenItemId === targetItemId) {
+    return allowCollapse ? null : targetItemId
+  }
+
+  return targetItemId
+}
+
+export function getAccordionScrollAdjustment({
+  containerBottom,
+  containerTop,
+  itemBottom,
+  itemTop,
+  padding = ACCORDION_SCROLL_PADDING,
+  targetContentHeight,
+  visiblePanelHeight,
+}: {
+  containerBottom: number
+  containerTop: number
+  itemBottom: number
+  itemTop: number
+  padding?: number
+  targetContentHeight: number
+  visiblePanelHeight: number
+}) {
+  const projectedBottom =
+    itemBottom + Math.max(0, targetContentHeight - visiblePanelHeight)
+  const maxVisibleBottom = containerBottom - padding
+
+  if (projectedBottom > maxVisibleBottom) {
+    return projectedBottom - maxVisibleBottom
+  }
+
+  const minVisibleTop = containerTop + padding
+
+  if (itemTop < minVisibleTop) {
+    return itemTop - minVisibleTop
+  }
+
+  return 0
+}
+
+function findScrollableParent(element: HTMLElement | null) {
+  let current = element?.parentElement ?? null
+
+  while (current) {
+    const style = window.getComputedStyle(current)
+    const isScrollable = /(auto|scroll)/.test(style.overflowY)
+
+    if (isScrollable && current.scrollHeight > current.clientHeight) {
+      return current
+    }
+
+    current = current.parentElement
+  }
+
+  return null
 }
 
 function AccordionItem({
   item,
   isOpen,
-  onToggle,
+  onSelect,
   itemId,
   panelId,
+  variant,
 }: {
-  item: MotionAccordionItem;
-  isOpen: boolean;
-  onToggle: () => void;
-  itemId: string;
-  panelId: string;
+  item: MotionAccordionItem
+  isOpen: boolean
+  onSelect: () => void
+  itemId: string
+  panelId: string
+  variant: "card" | "settings"
 }) {
-  const contentRef = React.useRef<HTMLDivElement>(null);
-  const [contentH, setContentH] = React.useState(0);
+  const itemRef = React.useRef<HTMLDivElement>(null)
+  const panelRef = React.useRef<HTMLDivElement>(null)
+  const contentRef = React.useRef<HTMLDivElement>(null)
+  const [contentH, setContentH] = React.useState(0)
+  const isSettingsVariant = variant === "settings"
 
   React.useEffect(() => {
-    const el = contentRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => setContentH(el.scrollHeight));
-    ro.observe(el);
-    setContentH(el.scrollHeight);
-    return () => ro.disconnect();
-  }, []);
+    const element = contentRef.current
+
+    if (!element) {
+      return
+    }
+
+    const updateHeight = () => setContentH(element.scrollHeight)
+
+    if (typeof ResizeObserver === "undefined") {
+      updateHeight()
+      return
+    }
+
+    const observer = new ResizeObserver(updateHeight)
+    observer.observe(element)
+    updateHeight()
+
+    return () => observer.disconnect()
+  }, [item.id])
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      const itemElement = itemRef.current
+      const panelElement = panelRef.current
+
+      if (!itemElement || !panelElement) {
+        return
+      }
+
+      const scrollParent = findScrollableParent(itemElement)
+
+      if (!scrollParent) {
+        return
+      }
+
+      const itemRect = itemElement.getBoundingClientRect()
+      const panelRect = panelElement.getBoundingClientRect()
+      const parentRect = scrollParent.getBoundingClientRect()
+      const adjustment = getAccordionScrollAdjustment({
+        containerBottom: parentRect.bottom,
+        containerTop: parentRect.top,
+        itemBottom: itemRect.bottom,
+        itemTop: itemRect.top,
+        targetContentHeight: contentH,
+        visiblePanelHeight: panelRect.height,
+      })
+
+      if (adjustment !== 0) {
+        scrollParent.scrollTo({
+          top: scrollParent.scrollTop + adjustment,
+          behavior: "smooth",
+        })
+      }
+    })
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [contentH, isOpen])
 
   return (
     <motion.div
+      ref={itemRef}
       layout
+      data-slot="motion-accordion-item"
+      data-item-id={item.id}
+      data-state={isOpen ? "open" : "closed"}
       className={cn(
-        "overflow-hidden rounded-[30px] bg-foreground text-background shadow-[0_20px_45px_-30px_rgba(0,0,0,0.65)]",
-        isOpen &&
+        "overflow-hidden",
+        isSettingsVariant
+          ? "w-full border-b border-border/70 bg-transparent text-foreground shadow-none first:border-t"
+          : "rounded-[30px] bg-foreground text-background shadow-[0_20px_45px_-30px_rgba(0,0,0,0.65)]",
+        !isSettingsVariant &&
+          isOpen &&
           "border-foreground/25 shadow-[0_28px_60px_-34px_rgba(0,0,0,0.72)]",
       )}
       transition={{ type: "spring", stiffness: 280, damping: 28, mass: 0.9 }}
-      animate={{ scale: isOpen ? 1 : 0.985 }}
+      animate={{ scale: isSettingsVariant ? 1 : isOpen ? 1 : 0.985 }}
       initial={false}
       style={{ originX: 0.5, originY: 0 }}
     >
@@ -60,39 +196,77 @@ function AccordionItem({
         type="button"
         aria-controls={panelId}
         aria-expanded={isOpen}
-        onClick={onToggle}
-        className="flex w-full cursor-pointer select-none items-center justify-between gap-4 px-7 py-5 text-left"
+        data-slot="motion-accordion-trigger"
+        onClick={onSelect}
+        className={cn(
+          "flex w-full cursor-pointer select-none items-center justify-between gap-4 text-left",
+          isSettingsVariant ? "px-0 py-4" : "px-7 py-5",
+        )}
       >
-        <span className="text-[clamp(1.2rem,1.6vw,1.3rem)] font-semibold leading-snug">
-          {item.question}
+        <span
+          className={cn(
+            "leading-snug",
+            isSettingsVariant
+              ? "text-sm font-medium text-foreground"
+              : "text-[clamp(1.2rem,1.6vw,1.3rem)] font-semibold",
+          )}
+        >
+          {item.title}
         </span>
 
-        <motion.div
-          animate={{ rotate: isOpen ? 45 : 0 }}
-          transition={{ type: "spring", stiffness: 480, damping: 28 }}
-          className="flex-shrink-0 text-background/60"
-        >
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 13 13"
-            fill="none"
-            aria-hidden
+        {isSettingsVariant ? (
+          <span
+            aria-hidden="true"
+            data-slot="motion-accordion-toggle"
+            data-state={isOpen ? "open" : "closed"}
+            className={cn(
+              "relative inline-flex h-6 w-10 flex-shrink-0 items-center rounded-full border transition-colors duration-200",
+              isOpen
+                ? "border-foreground bg-foreground"
+                : "border-border bg-muted/60",
+            )}
           >
-            <path
-              d="M6.5 0v13M0 6.5h13"
-              stroke="currentColor"
-              strokeWidth="1.75"
-              strokeLinecap="round"
+            <span
+              className={cn(
+                "h-4.5 w-4.5 rounded-full bg-background shadow-sm transition-transform duration-200",
+                isOpen ? "translate-x-[18px]" : "translate-x-[3px]",
+              )}
             />
-          </svg>
-        </motion.div>
+          </span>
+        ) : (
+          <motion.div
+            aria-hidden="true"
+            data-slot="motion-accordion-icon"
+            animate={{ rotate: isOpen ? 45 : 0 }}
+            transition={{ type: "spring", stiffness: 480, damping: 28 }}
+            className="flex-shrink-0 text-background/60"
+          >
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 13 13"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M6.5 0v13M0 6.5h13"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+              />
+            </svg>
+          </motion.div>
+        )}
       </button>
 
       <motion.div
+        ref={panelRef}
         id={panelId}
         role="region"
         aria-labelledby={itemId}
+        aria-hidden={!isOpen}
+        data-slot="motion-accordion-panel"
+        data-state={isOpen ? "open" : "closed"}
         animate={{
           height: isOpen ? contentH : 0,
           opacity: isOpen ? 1 : 0,
@@ -107,49 +281,65 @@ function AccordionItem({
         <motion.div
           ref={contentRef}
           animate={{ y: isOpen ? 0 : -8 }}
+          initial={false}
           transition={{
             type: "spring",
             stiffness: 360,
             damping: 30,
             mass: 0.8,
           }}
-          className="px-7 pb-7"
+          className={cn(isSettingsVariant ? "pb-4" : "px-7 pb-7")}
         >
-          <p className="text-[0.98rem] leading-8 text-background/65">
-            {item.answer}
-          </p>
+          <div
+            className={cn(
+              isSettingsVariant
+                ? "pt-1"
+                : "text-[0.98rem] leading-8 text-background/65",
+            )}
+          >
+            {item.content}
+          </div>
         </motion.div>
       </motion.div>
     </motion.div>
-  );
+  )
 }
 
 export function MotionAccordion({
   items,
-  gap = 10,
+  openItemId = null,
+  onOpenItemChange,
+  allowCollapse = true,
+  gap = 12,
   className,
+  variant = "card",
 }: MotionAccordionProps) {
-  const rawId = React.useId();
-  const baseId = `accordion-${rawId.replace(/:/g, "")}`;
-
-  const [openIndex, setOpenIndex] = React.useState<number | null>(null);
-
-  const toggle = (i: number) => setOpenIndex((prev) => (prev === i ? null : i));
+  const rawId = React.useId()
+  const baseId = `accordion-${rawId.replace(/:/g, "")}`
 
   return (
-    <div className={cn("w-full", className)}>
-      <div className="flex flex-col rounded-[34px] p-3 " style={{ gap }}>
-        {items.map((item, i) => (
-          <AccordionItem
-            key={item.question}
-            item={item}
-            isOpen={openIndex === i}
-            onToggle={() => toggle(i)}
-            itemId={`${baseId}-trigger-${i}`}
-            panelId={`${baseId}-panel-${i}`}
-          />
-        ))}
+    <div data-slot="motion-accordion" className={cn("w-full", className)}>
+      <div className="flex flex-col" style={{ gap }}>
+        {items.map((item, index) => {
+          const isOpen = openItemId === item.id
+
+          return (
+            <AccordionItem
+              key={item.id}
+              item={item}
+              isOpen={isOpen}
+              variant={variant}
+              onSelect={() =>
+                onOpenItemChange?.(
+                  getNextOpenItemId(openItemId, item.id, allowCollapse),
+                )
+              }
+              itemId={`${baseId}-trigger-${index}`}
+              panelId={`${baseId}-panel-${index}`}
+            />
+          )
+        })}
       </div>
     </div>
-  );
+  )
 }

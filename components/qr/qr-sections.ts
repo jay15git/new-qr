@@ -11,7 +11,8 @@ import {
 export type QrEditorSectionId =
   | "content"
   | "style"
-  | "corners"
+  | "corner-square"
+  | "corner-dot"
   | "background"
   | "logo"
   | "encoding"
@@ -38,8 +39,13 @@ export const QR_EDITOR_SECTIONS: QrEditorSection[] = [
     icon: Sparkles,
   },
   {
-    id: "corners",
-    title: "Corners",
+    id: "corner-square",
+    title: "Corner Square",
+    icon: PieChart,
+  },
+  {
+    id: "corner-dot",
+    title: "Corner Dot",
     icon: PieChart,
   },
   {
