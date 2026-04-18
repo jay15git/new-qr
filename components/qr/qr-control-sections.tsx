@@ -66,6 +66,9 @@ import { hasBackgroundImage } from "@/components/qr/qr-studio-state"
 
 type QrControlSectionsProps = {
   backgroundSourceMode: AssetSourceMode
+  initialBackgroundTab?: BackgroundSettingsTabId
+  initialCornerDotTab?: StyleSettingsTabId
+  initialCornerSquareTab?: StyleSettingsTabId
   initialStyleTab?: StyleSettingsTabId
   logoSourceMode: AssetSourceMode
   onBackgroundModeChange: (mode: AssetSourceMode) => void
@@ -85,6 +88,8 @@ type StyleOption = {
 }
 
 type StyleSettingsTabId = "style" | "color"
+type BackgroundSettingsTabId = "colors" | "upload"
+type BackgroundColorMode = "solid" | "gradient" | "transparent"
 type GradientEditorVariant = "default" | "dot-enhanced"
 
 const DRAW_TYPES: Array<{ label: string; value: DrawType }> = [
@@ -163,6 +168,9 @@ const BACKGROUND_MODES: Array<{ label: string; value: AssetSourceMode }> = [
 
 export function QrControlSections({
   backgroundSourceMode,
+  initialBackgroundTab,
+  initialCornerDotTab = "style",
+  initialCornerSquareTab = "style",
   initialStyleTab = "style",
   logoSourceMode,
   onBackgroundModeChange,
@@ -177,18 +185,31 @@ export function QrControlSections({
 }: QrControlSectionsProps) {
   const [activeStyleTab, setActiveStyleTab] =
     useState<StyleSettingsTabId>(initialStyleTab)
+  const [activeBackgroundTab, setActiveBackgroundTab] =
+    useState<BackgroundSettingsTabId>(
+      initialBackgroundTab ??
+        (backgroundSourceMode === "none" ? "colors" : "upload"),
+    )
   const [activeCornerSquareTab, setActiveCornerSquareTab] =
-    useState<StyleSettingsTabId>("style")
-  const [activeCornerDotTab, setActiveCornerDotTab] = useState<StyleSettingsTabId>("style")
+    useState<StyleSettingsTabId>(initialCornerSquareTab)
+  const [activeCornerDotTab, setActiveCornerDotTab] =
+    useState<StyleSettingsTabId>(initialCornerDotTab)
   const contentError = state.data.trim() ? null : "Add text or a URL to encode"
   const activeCustomDotShape = getActiveCustomDotShape(state.dotsOptions.type)
   const backgroundImageActive = hasBackgroundImage(state)
+  const backgroundColorMode = getBackgroundColorMode(state)
   const isDashboardMode = activeSection !== undefined
   const isDashboardStyleSection = activeSection === "style"
+  const isDashboardBackgroundSection = activeSection === "background"
   const isDashboardCornerSquareSection = activeSection === "corner-square"
   const isDashboardCornerDotSection = activeSection === "corner-dot"
   const stackClassName = isDashboardMode ? "gap-3" : "grid gap-4 md:grid-cols-2"
   const encodingStackClassName = isDashboardMode ? "gap-3" : "grid gap-4 md:grid-cols-3"
+  const dashboardTopTabListClassName =
+    "mx-auto w-fit border border-border/60 bg-background/35 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+  const dashboardTopTabContainerClassName = "items-center gap-4"
+  const dashboardTopTabClassName =
+    "justify-center px-4 py-2 text-sm text-foreground/72 hover:text-foreground data-[active=true]:text-background"
 
   const showsSection = (section: QrEditorSectionId) =>
     activeSection === undefined || activeSection === section
@@ -398,37 +419,65 @@ export function QrControlSections({
     />
   )
 
-  const cornerSquareColorControls = (
-    <div className="flex flex-col gap-4">
-      <ColorField
-        id="corner-square-color"
-        isDashboardMode={isDashboardMode}
-        label="Corner square color"
-        onValueChange={(value) =>
-          setState((current) => ({
-            ...current,
-            cornersSquareOptions: {
-              ...current.cornersSquareOptions,
-              color: value,
-            },
-          }))
-        }
-        value={state.cornersSquareOptions.color}
-      />
+  const dashboardCornerSquareColorAccordion = (
+    <MotionAccordion
+      allowCollapse={false}
+      gap={0}
+      openItemId={state.cornersSquareGradient.enabled ? "gradient" : "solid"}
+      onOpenItemChange={(value) => {
+        if (!value) return
 
-      <GradientEditor
-        gradient={state.cornersSquareGradient}
-        idPrefix="corner-square-gradient"
-        isDashboardMode={isDashboardMode}
-        onGradientChange={(gradient) =>
-          setState((current) => ({
-            ...current,
-            cornersSquareGradient: gradient,
-          }))
-        }
-        title="Corner square gradient"
-      />
-    </div>
+        setState((current) => ({
+          ...current,
+          cornersSquareGradient: {
+            ...current.cornersSquareGradient,
+            enabled: value === "gradient",
+          },
+        }))
+      }}
+      variant="settings"
+      items={[
+        {
+          id: "solid",
+          title: "Solid",
+          content: (
+            <EmbeddedColorPickerField
+              label="Solid color"
+              onValueChange={(value) =>
+                setState((current) => ({
+                  ...current,
+                  cornersSquareOptions: {
+                    ...current.cornersSquareOptions,
+                    color: value,
+                  },
+                }))
+              }
+              value={state.cornersSquareOptions.color}
+            />
+          ),
+        },
+        {
+          id: "gradient",
+          title: "Gradient",
+          content: (
+            <GradientEditor
+              gradient={{ ...state.cornersSquareGradient, enabled: true }}
+              hideToggle
+              idPrefix="corner-square-gradient"
+              isDashboardMode={isDashboardMode}
+              onGradientChange={(gradient) =>
+                setState((current) => ({
+                  ...current,
+                  cornersSquareGradient: { ...gradient, enabled: true },
+                }))
+              }
+              title="Corner square gradient"
+              variant="dot-enhanced"
+            />
+          ),
+        },
+      ]}
+    />
   )
 
   const cornerDotStyleControl = isDashboardMode ? (
@@ -465,34 +514,265 @@ export function QrControlSections({
     />
   )
 
-  const cornerDotColorControls = (
+  const dashboardCornerDotColorAccordion = (
+    <MotionAccordion
+      allowCollapse={false}
+      gap={0}
+      openItemId={state.cornersDotGradient.enabled ? "gradient" : "solid"}
+      onOpenItemChange={(value) => {
+        if (!value) return
+
+        setState((current) => ({
+          ...current,
+          cornersDotGradient: {
+            ...current.cornersDotGradient,
+            enabled: value === "gradient",
+          },
+        }))
+      }}
+      variant="settings"
+      items={[
+        {
+          id: "solid",
+          title: "Solid",
+          content: (
+            <EmbeddedColorPickerField
+              label="Solid color"
+              onValueChange={(value) =>
+                setState((current) => ({
+                  ...current,
+                  cornersDotOptions: {
+                    ...current.cornersDotOptions,
+                    color: value,
+                  },
+                }))
+              }
+              value={state.cornersDotOptions.color}
+            />
+          ),
+        },
+        {
+          id: "gradient",
+          title: "Gradient",
+          content: (
+            <GradientEditor
+              gradient={{ ...state.cornersDotGradient, enabled: true }}
+              hideToggle
+              idPrefix="corner-dot-gradient"
+              isDashboardMode={isDashboardMode}
+              onGradientChange={(gradient) =>
+                setState((current) => ({
+                  ...current,
+                  cornersDotGradient: { ...gradient, enabled: true },
+                }))
+              }
+              title="Corner dot gradient"
+              variant="dot-enhanced"
+            />
+          ),
+        },
+      ]}
+    />
+  )
+
+  const dashboardBackgroundColorAccordion = (
     <div className="flex flex-col gap-4">
-      <ColorField
-        id="corner-dot-color"
-        isDashboardMode={isDashboardMode}
-        label="Corner dot color"
-        onValueChange={(value) =>
+      <MotionAccordion
+        allowCollapse={false}
+        gap={0}
+        openItemId={backgroundColorMode}
+        onOpenItemChange={(value) => {
+          if (!value || backgroundImageActive) return
+
           setState((current) => ({
             ...current,
-            cornersDotOptions: {
-              ...current.cornersDotOptions,
-              color: value,
+            backgroundOptions: {
+              ...current.backgroundOptions,
+              transparent: value === "transparent",
+            },
+            backgroundGradient: {
+              ...current.backgroundGradient,
+              enabled: value === "gradient",
             },
           }))
-        }
-        value={state.cornersDotOptions.color}
+        }}
+        variant="settings"
+        items={[
+          {
+            id: "solid",
+            title: "Solid",
+            content: (
+              <EmbeddedColorPickerField
+                className={cn(backgroundImageActive && "pointer-events-none opacity-50")}
+                label="Solid color"
+                onValueChange={(value) =>
+                  setState((current) => ({
+                    ...current,
+                    backgroundOptions: {
+                      ...current.backgroundOptions,
+                      color: value,
+                    },
+                  }))
+                }
+                value={state.backgroundOptions.color}
+              />
+            ),
+          },
+          {
+            id: "gradient",
+            title: "Gradient",
+            content: (
+              <GradientEditor
+                disabled={backgroundImageActive}
+                gradient={{ ...state.backgroundGradient, enabled: true }}
+                hideToggle
+                idPrefix="background-gradient"
+                isDashboardMode={isDashboardMode}
+                onGradientChange={(gradient) =>
+                  setState((current) => ({
+                    ...current,
+                    backgroundGradient: { ...gradient, enabled: true },
+                  }))
+                }
+                title="Background gradient"
+                variant="dot-enhanced"
+              />
+            ),
+          },
+          {
+            id: "transparent",
+            title: "Transparent",
+            content: null,
+          },
+        ]}
       />
 
-      <GradientEditor
-        gradient={state.cornersDotGradient}
-        idPrefix="corner-dot-gradient"
-        isDashboardMode={isDashboardMode}
-        onGradientChange={(gradient) =>
-          setState((current) => ({ ...current, cornersDotGradient: gradient }))
-        }
-        title="Corner dot gradient"
-      />
+      {backgroundImageActive ? (
+        <p className="text-sm text-muted-foreground">
+          Remove the background image to edit the background fill or gradient.
+        </p>
+      ) : null}
     </div>
+  )
+
+  const dashboardBackgroundUploadAccordion = (
+    <MotionAccordion
+      allowCollapse={false}
+      gap={0}
+      openItemId={backgroundSourceMode}
+      onOpenItemChange={(value) => {
+        if (!value) return
+
+        onBackgroundModeChange(value as AssetSourceMode)
+      }}
+      variant="settings"
+      items={[
+        {
+          id: "none",
+          title: "None",
+          content: null,
+        },
+        {
+          id: "upload",
+          title: "Upload file",
+          content: (
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-foreground">Upload background image</p>
+              <FileUpload
+                acceptedFileTypes={["image/*"]}
+                className="mx-0 max-w-full"
+                onUploadError={(error) => onBackgroundUploadError(error.message)}
+                onUploadSuccess={onBackgroundUploadSuccess}
+                uploadDelay={0}
+              />
+            </div>
+          ),
+        },
+        {
+          id: "url",
+          title: "Remote URL",
+          content: (
+            <Field>
+              <FieldLabel htmlFor="background-url">Remote background URL</FieldLabel>
+              <Input
+                id="background-url"
+                placeholder="https://example.com/background.png"
+                value={state.backgroundImage.value ?? ""}
+                onChange={(event) =>
+                  setState((current) => ({
+                    ...current,
+                    backgroundImage: {
+                      source: "url",
+                      value: event.target.value,
+                    },
+                  }))
+                }
+              />
+            </Field>
+          ),
+        },
+      ]}
+    />
+  )
+
+  const dashboardLogoSourceAccordion = (
+    <MotionAccordion
+      allowCollapse={false}
+      gap={0}
+      openItemId={logoSourceMode}
+      onOpenItemChange={(value) => {
+        if (!value) return
+
+        onLogoModeChange(value as AssetSourceMode)
+      }}
+      variant="settings"
+      items={[
+        {
+          id: "none",
+          title: "None",
+          content: null,
+        },
+        {
+          id: "upload",
+          title: "Upload file",
+          content: (
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-foreground">Upload logo</p>
+              <FileUpload
+                acceptedFileTypes={["image/*"]}
+                className="mx-0 max-w-full"
+                onUploadError={(error) => onLogoUploadError(error.message)}
+                onUploadSuccess={onLogoUploadSuccess}
+                uploadDelay={0}
+              />
+            </div>
+          ),
+        },
+        {
+          id: "url",
+          title: "Remote URL",
+          content: (
+            <Field>
+              <FieldLabel htmlFor="logo-url">Remote logo URL</FieldLabel>
+              <Input
+                id="logo-url"
+                placeholder="https://example.com/logo.png"
+                value={state.logo.value ?? ""}
+                onChange={(event) =>
+                  setState((current) => ({
+                    ...current,
+                    logo: {
+                      source: "url",
+                      value: event.target.value,
+                    },
+                  }))
+                }
+              />
+            </Field>
+          ),
+        },
+      ]}
+    />
   )
 
   return (
@@ -580,12 +860,12 @@ export function QrControlSections({
                 <DirectionAwareTabs
                   activeTab={activeStyleTab}
                   bubbleClassName="bg-foreground text-background mix-blend-normal shadow-none"
-                  className="border border-border/60 bg-background/35 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-                  containerClassName="items-stretch gap-4"
-                  contentClassName="min-h-0 overflow-visible"
+                  className={dashboardTopTabListClassName}
+                  containerClassName={dashboardTopTabContainerClassName}
+                  contentClassName="min-h-0"
                   onTabChange={(tabId) => setActiveStyleTab(tabId as StyleSettingsTabId)}
                   showContent
-                  tabClassName="justify-center px-4 py-2 text-sm text-foreground/72 hover:text-foreground data-[active=true]:text-background"
+                  tabClassName={dashboardTopTabClassName}
                   tabListLabel="Style settings groups"
                   tabs={[
                     {
@@ -748,12 +1028,12 @@ export function QrControlSections({
             <DirectionAwareTabs
               activeTab={activeCornerSquareTab}
               bubbleClassName="bg-foreground text-background mix-blend-normal shadow-none"
-              className="border border-border/60 bg-background/35 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-              containerClassName="items-stretch gap-4"
-              contentClassName="min-h-0 overflow-visible"
+              className={dashboardTopTabListClassName}
+              containerClassName={dashboardTopTabContainerClassName}
+              contentClassName="min-h-0"
               onTabChange={(tabId) => setActiveCornerSquareTab(tabId as StyleSettingsTabId)}
               showContent
-              tabClassName="justify-center px-4 py-2 text-sm text-foreground/72 hover:text-foreground data-[active=true]:text-background"
+              tabClassName={dashboardTopTabClassName}
               tabListLabel="Corner square settings groups"
               tabs={[
                 {
@@ -766,7 +1046,11 @@ export function QrControlSections({
                 {
                   id: "color",
                   label: "Color",
-                  content: cornerSquareColorControls,
+                  content: (
+                    <div className="flex flex-col gap-4">
+                      {dashboardCornerSquareColorAccordion}
+                    </div>
+                  ),
                 },
               ]}
             />
@@ -783,12 +1067,12 @@ export function QrControlSections({
             <DirectionAwareTabs
               activeTab={activeCornerDotTab}
               bubbleClassName="bg-foreground text-background mix-blend-normal shadow-none"
-              className="border border-border/60 bg-background/35 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-              containerClassName="items-stretch gap-4"
-              contentClassName="min-h-0 overflow-visible"
+              className={dashboardTopTabListClassName}
+              containerClassName={dashboardTopTabContainerClassName}
+              contentClassName="min-h-0"
               onTabChange={(tabId) => setActiveCornerDotTab(tabId as StyleSettingsTabId)}
               showContent
-              tabClassName="justify-center px-4 py-2 text-sm text-foreground/72 hover:text-foreground data-[active=true]:text-background"
+              tabClassName={dashboardTopTabClassName}
               tabListLabel="Corner dot settings groups"
               tabs={[
                 {
@@ -799,7 +1083,11 @@ export function QrControlSections({
                 {
                   id: "color",
                   label: "Color",
-                  content: cornerDotColorControls,
+                  content: (
+                    <div className="flex flex-col gap-4">
+                      {dashboardCornerDotColorAccordion}
+                    </div>
+                  ),
                 },
               ]}
             />
@@ -808,110 +1096,145 @@ export function QrControlSections({
       ) : null}
 
       {showsSection("background") ? (
-        renderSection({
-          title: "Background",
-          description: "Choose a fill or layer in a gradient behind the code.",
-          contentClassName: "flex flex-col gap-4",
-          children: (
-            <>
-          <AssetSourceField
-            idPrefix="background"
-            isDashboardMode={isDashboardMode}
-            mode={backgroundSourceMode}
-            noneLabel="No background image"
-            onModeChange={onBackgroundModeChange}
-            onRemove={() =>
-              setState((current) => ({
-                ...current,
-                backgroundImage: { source: "none", value: undefined },
-              }))
-            }
-            onUploadError={onBackgroundUploadError}
-            onUploadSuccess={onBackgroundUploadSuccess}
-            onValueChange={(value) =>
-              setState((current) => ({
-                ...current,
-                backgroundImage: {
-                  source: "url",
-                  value,
-                },
-              }))
-            }
-            options={BACKGROUND_MODES}
-            removeLabel="Remove background image"
-            sourceLabel="Background source"
-            uploadLabel="Upload background image"
-            urlLabel="Remote background URL"
-            urlPlaceholder="https://example.com/background.png"
-            value={state.backgroundImage.value ?? ""}
-          />
-
-          {backgroundImageActive ? (
-            <p className="text-sm text-muted-foreground">
-              Background image replaces the background fill and gradient.
-            </p>
-          ) : null}
-
-          <Field orientation="horizontal">
-            <FieldContent>
-              <FieldLabel htmlFor="background-transparent">Transparent background</FieldLabel>
-              {!isDashboardMode ? (
-                <FieldDescription>
-                  Use this when the QR should sit on top of another surface.
-                </FieldDescription>
-              ) : null}
-            </FieldContent>
-            <Switch
-              id="background-transparent"
-              disabled={backgroundImageActive}
-              checked={state.backgroundOptions.transparent}
-              onCheckedChange={(checked) =>
-                setState((current) => ({
-                  ...current,
-                  backgroundOptions: {
-                    ...current.backgroundOptions,
-                    transparent: checked,
+        isDashboardBackgroundSection ? (
+          renderSection({
+            title: "Background",
+            description: "Choose a fill or layer in a gradient behind the code.",
+            contentClassName: "flex flex-col gap-4",
+            children: (
+              <DirectionAwareTabs
+                activeTab={activeBackgroundTab}
+                bubbleClassName="bg-foreground text-background mix-blend-normal shadow-none"
+                className={dashboardTopTabListClassName}
+                containerClassName={dashboardTopTabContainerClassName}
+                contentClassName="min-h-0"
+                onTabChange={(tabId) =>
+                  setActiveBackgroundTab(tabId as BackgroundSettingsTabId)
+                }
+                showContent
+                tabClassName={dashboardTopTabClassName}
+                tabListLabel="Background settings groups"
+                tabs={[
+                  {
+                    id: "colors",
+                    label: "Colors",
+                    content: dashboardBackgroundColorAccordion,
                   },
-                  backgroundGradient: checked
-                    ? { ...current.backgroundGradient, enabled: false }
-                    : current.backgroundGradient,
-                }))
-              }
-            />
-          </Field>
+                  {
+                    id: "upload",
+                    label: "Upload",
+                    content: dashboardBackgroundUploadAccordion,
+                  },
+                ]}
+              />
+            ),
+          })
+        ) : (
+          renderSection({
+            title: "Background",
+            description: "Choose a fill or layer in a gradient behind the code.",
+            contentClassName: "flex flex-col gap-4",
+            children: (
+              <>
+                <AssetSourceField
+                  idPrefix="background"
+                  isDashboardMode={isDashboardMode}
+                  mode={backgroundSourceMode}
+                  noneLabel="No background image"
+                  onModeChange={onBackgroundModeChange}
+                  onRemove={() =>
+                    setState((current) => ({
+                      ...current,
+                      backgroundImage: { source: "none", value: undefined },
+                    }))
+                  }
+                  onUploadError={onBackgroundUploadError}
+                  onUploadSuccess={onBackgroundUploadSuccess}
+                  onValueChange={(value) =>
+                    setState((current) => ({
+                      ...current,
+                      backgroundImage: {
+                        source: "url",
+                        value,
+                      },
+                    }))
+                  }
+                  options={BACKGROUND_MODES}
+                  removeLabel="Remove background image"
+                  sourceLabel="Background source"
+                  uploadLabel="Upload background image"
+                  urlLabel="Remote background URL"
+                  urlPlaceholder="https://example.com/background.png"
+                  value={state.backgroundImage.value ?? ""}
+                />
 
-          <ColorField
-            id="background-color"
-            disabled={backgroundImageActive}
-            isDashboardMode={isDashboardMode}
-            label="Background color"
-            onValueChange={(value) =>
-              setState((current) => ({
-                ...current,
-                backgroundOptions: { ...current.backgroundOptions, color: value },
-              }))
-            }
-            value={state.backgroundOptions.color}
-          />
+                {backgroundImageActive ? (
+                  <p className="text-sm text-muted-foreground">
+                    Background image replaces the background fill and gradient.
+                  </p>
+                ) : null}
 
-          <GradientEditor
-            disabled={backgroundImageActive || state.backgroundOptions.transparent}
-            disabledText={
-              backgroundImageActive
-                ? "Remove the background image to edit the background fill or gradient."
-                : "Disable transparency to apply a background gradient."
-            }
-            gradient={state.backgroundGradient}
-            idPrefix="background-gradient"
-            isDashboardMode={isDashboardMode}
-            onGradientChange={(gradient) =>
-              setState((current) => ({ ...current, backgroundGradient: gradient }))
-            }
-            title="Background gradient"
-          />
-            </>
-          ),
-        })
+                <Field orientation="horizontal">
+                  <FieldContent>
+                    <FieldLabel htmlFor="background-transparent">Transparent background</FieldLabel>
+                    {!isDashboardMode ? (
+                      <FieldDescription>
+                        Use this when the QR should sit on top of another surface.
+                      </FieldDescription>
+                    ) : null}
+                  </FieldContent>
+                  <Switch
+                    id="background-transparent"
+                    disabled={backgroundImageActive}
+                    checked={state.backgroundOptions.transparent}
+                    onCheckedChange={(checked) =>
+                      setState((current) => ({
+                        ...current,
+                        backgroundOptions: {
+                          ...current.backgroundOptions,
+                          transparent: checked,
+                        },
+                        backgroundGradient: checked
+                          ? { ...current.backgroundGradient, enabled: false }
+                          : current.backgroundGradient,
+                      }))
+                    }
+                  />
+                </Field>
+
+                <ColorField
+                  id="background-color"
+                  disabled={backgroundImageActive}
+                  isDashboardMode={isDashboardMode}
+                  label="Background color"
+                  onValueChange={(value) =>
+                    setState((current) => ({
+                      ...current,
+                      backgroundOptions: { ...current.backgroundOptions, color: value },
+                    }))
+                  }
+                  value={state.backgroundOptions.color}
+                />
+
+                <GradientEditor
+                  disabled={backgroundImageActive || state.backgroundOptions.transparent}
+                  disabledText={
+                    backgroundImageActive
+                      ? "Remove the background image to edit the background fill or gradient."
+                      : "Disable transparency to apply a background gradient."
+                  }
+                  gradient={state.backgroundGradient}
+                  idPrefix="background-gradient"
+                  isDashboardMode={isDashboardMode}
+                  onGradientChange={(gradient) =>
+                    setState((current) => ({ ...current, backgroundGradient: gradient }))
+                  }
+                  title="Background gradient"
+                />
+              </>
+            ),
+          })
+        )
       ) : null}
 
       {showsSection("logo") ? (
@@ -922,153 +1245,159 @@ export function QrControlSections({
           contentClassName: "flex flex-col gap-4",
           children: (
             <>
-          <SelectField
-            id="logo-source-mode"
-            label="Logo source"
-            onValueChange={(value) => onLogoModeChange(value as AssetSourceMode)}
-            options={LOGO_MODES}
-            value={logoSourceMode}
-          />
+              {isDashboardMode ? (
+                dashboardLogoSourceAccordion
+              ) : (
+                <>
+                  <SelectField
+                    id="logo-source-mode"
+                    label="Logo source"
+                    onValueChange={(value) => onLogoModeChange(value as AssetSourceMode)}
+                    options={LOGO_MODES}
+                    value={logoSourceMode}
+                  />
 
-          {logoSourceMode === "url" ? (
-            <Field>
-              <FieldLabel htmlFor="logo-url">Remote logo URL</FieldLabel>
-              <Input
-                id="logo-url"
-                placeholder="https://example.com/logo.png"
-                value={state.logo.value ?? ""}
-                onChange={(event) =>
+                  {logoSourceMode === "url" ? (
+                    <Field>
+                      <FieldLabel htmlFor="logo-url">Remote logo URL</FieldLabel>
+                      <Input
+                        id="logo-url"
+                        placeholder="https://example.com/logo.png"
+                        value={state.logo.value ?? ""}
+                        onChange={(event) =>
+                          setState((current) => ({
+                            ...current,
+                            logo: {
+                              source: "url",
+                              value: event.target.value,
+                            },
+                          }))
+                        }
+                      />
+                      {!isDashboardMode ? (
+                        <FieldDescription>
+                          Use a public image URL if you want exportable SVG output with a
+                          hosted asset.
+                        </FieldDescription>
+                      ) : null}
+                    </Field>
+                  ) : null}
+
+                  {logoSourceMode === "upload" ? (
+                    <FileUpload
+                      acceptedFileTypes={["image/*"]}
+                      className={cn("mx-0 max-w-none", isDashboardMode ? "max-w-full" : undefined)}
+                      onUploadError={(error) => onLogoUploadError(error.message)}
+                      onUploadSuccess={onLogoUploadSuccess}
+                      uploadDelay={0}
+                    />
+                  ) : null}
+
+                  {logoSourceMode !== "none" ? (
+                    <Button
+                      variant="ghost"
+                      className="self-start"
+                      onClick={() => {
+                        onLogoModeChange("none")
+                        setState((current) => ({
+                          ...current,
+                          logo: { source: "none", value: undefined },
+                        }))
+                      }}
+                    >
+                      <XIcon data-icon="inline-start" />
+                      Remove logo
+                    </Button>
+                  ) : null}
+                </>
+              )}
+
+              <Field>
+                <FieldLabel htmlFor="logo-size">Logo size</FieldLabel>
+                <Slider
+                  id="logo-size"
+                  max={0.5}
+                  min={0.1}
+                  step={0.01}
+                  value={[state.imageOptions.imageSize]}
+                  onValueChange={([value]) =>
+                    setState((current) => ({
+                      ...current,
+                      imageOptions: { ...current.imageOptions, imageSize: value },
+                    }))
+                  }
+                />
+                {isDashboardMode ? (
+                  <p className="font-mono text-xs text-muted-foreground">
+                    {(state.imageOptions.imageSize * 100).toFixed(0)}% of the QR width
+                  </p>
+                ) : (
+                  <FieldDescription>
+                    {(state.imageOptions.imageSize * 100).toFixed(0)}% of the QR width
+                  </FieldDescription>
+                )}
+              </Field>
+
+              <NumberField
+                id="logo-margin"
+                label="Logo margin"
+                max={40}
+                min={0}
+                onValueChange={(value) =>
                   setState((current) => ({
                     ...current,
-                    logo: {
-                      source: "url",
-                      value: event.target.value,
-                    },
+                    imageOptions: { ...current.imageOptions, margin: value },
                   }))
                 }
+                value={state.imageOptions.margin}
               />
-              {!isDashboardMode ? (
-                <FieldDescription>
-                  Use a public image URL if you want exportable SVG output with a
-                  hosted asset.
-                </FieldDescription>
-              ) : null}
-            </Field>
-          ) : null}
 
-          {logoSourceMode === "upload" ? (
-            <FileUpload
-              acceptedFileTypes={["image/*"]}
-              className={cn("mx-0 max-w-none", isDashboardMode ? "max-w-full" : undefined)}
-              onUploadError={(error) => onLogoUploadError(error.message)}
-              onUploadSuccess={onLogoUploadSuccess}
-              uploadDelay={0}
-            />
-          ) : null}
+              <Field orientation="horizontal">
+                <FieldContent>
+                  <FieldLabel htmlFor="hide-background-dots">Hide background dots</FieldLabel>
+                  {!isDashboardMode ? (
+                    <FieldDescription>
+                      Clears the modules directly under the logo so the image reads
+                      cleanly.
+                    </FieldDescription>
+                  ) : null}
+                </FieldContent>
+                <Switch
+                  id="hide-background-dots"
+                  checked={state.imageOptions.hideBackgroundDots}
+                  onCheckedChange={(checked) =>
+                    setState((current) => ({
+                      ...current,
+                      imageOptions: {
+                        ...current.imageOptions,
+                        hideBackgroundDots: checked,
+                      },
+                    }))
+                  }
+                />
+              </Field>
 
-          {logoSourceMode !== "none" ? (
-            <Button
-              variant="ghost"
-              className="self-start"
-              onClick={() => {
-                onLogoModeChange("none")
-                setState((current) => ({
-                  ...current,
-                  logo: { source: "none", value: undefined },
-                }))
-              }}
-            >
-              <XIcon data-icon="inline-start" />
-              Remove logo
-            </Button>
-          ) : null}
-
-          <Field>
-            <FieldLabel htmlFor="logo-size">Logo size</FieldLabel>
-            <Slider
-              id="logo-size"
-              max={0.5}
-              min={0.1}
-              step={0.01}
-              value={[state.imageOptions.imageSize]}
-              onValueChange={([value]) =>
-                setState((current) => ({
-                  ...current,
-                  imageOptions: { ...current.imageOptions, imageSize: value },
-                }))
-              }
-            />
-            {isDashboardMode ? (
-              <p className="font-mono text-xs text-muted-foreground">
-                {(state.imageOptions.imageSize * 100).toFixed(0)}% of the QR width
-              </p>
-            ) : (
-              <FieldDescription>
-                {(state.imageOptions.imageSize * 100).toFixed(0)}% of the QR width
-              </FieldDescription>
-            )}
-          </Field>
-
-          <NumberField
-            id="logo-margin"
-            label="Logo margin"
-            max={40}
-            min={0}
-            onValueChange={(value) =>
-              setState((current) => ({
-                ...current,
-                imageOptions: { ...current.imageOptions, margin: value },
-              }))
-            }
-            value={state.imageOptions.margin}
-          />
-
-          <Field orientation="horizontal">
-            <FieldContent>
-              <FieldLabel htmlFor="hide-background-dots">Hide background dots</FieldLabel>
-              {!isDashboardMode ? (
-                <FieldDescription>
-                  Clears the modules directly under the logo so the image reads
-                  cleanly.
-                </FieldDescription>
-              ) : null}
-            </FieldContent>
-            <Switch
-              id="hide-background-dots"
-              checked={state.imageOptions.hideBackgroundDots}
-              onCheckedChange={(checked) =>
-                setState((current) => ({
-                  ...current,
-                  imageOptions: {
-                    ...current.imageOptions,
-                    hideBackgroundDots: checked,
-                  },
-                }))
-              }
-            />
-          </Field>
-
-          <Field orientation="horizontal">
-            <FieldContent>
-              <FieldLabel htmlFor="save-as-blob">Save embedded image as blob</FieldLabel>
-              {!isDashboardMode ? (
-                <FieldDescription>
-                  Larger SVG files, but better compatibility when the QR is opened
-                  elsewhere.
-                </FieldDescription>
-              ) : null}
-            </FieldContent>
-            <Switch
-              id="save-as-blob"
-              checked={state.imageOptions.saveAsBlob}
-              onCheckedChange={(checked) =>
-                setState((current) => ({
-                  ...current,
-                  imageOptions: { ...current.imageOptions, saveAsBlob: checked },
-                }))
-              }
-            />
-          </Field>
+              <Field orientation="horizontal">
+                <FieldContent>
+                  <FieldLabel htmlFor="save-as-blob">Save embedded image as blob</FieldLabel>
+                  {!isDashboardMode ? (
+                    <FieldDescription>
+                      Larger SVG files, but better compatibility when the QR is opened
+                      elsewhere.
+                    </FieldDescription>
+                  ) : null}
+                </FieldContent>
+                <Switch
+                  id="save-as-blob"
+                  checked={state.imageOptions.saveAsBlob}
+                  onCheckedChange={(checked) =>
+                    setState((current) => ({
+                      ...current,
+                      imageOptions: { ...current.imageOptions, saveAsBlob: checked },
+                    }))
+                  }
+                />
+              </Field>
             </>
           ),
         })
@@ -1507,6 +1836,18 @@ function DotsPaletteCard({
       </div>
     </div>
   )
+}
+
+function getBackgroundColorMode(state: QrStudioState): BackgroundColorMode {
+  if (state.backgroundOptions.transparent) {
+    return "transparent"
+  }
+
+  if (state.backgroundGradient.enabled) {
+    return "gradient"
+  }
+
+  return "solid"
 }
 
 function NumberField({

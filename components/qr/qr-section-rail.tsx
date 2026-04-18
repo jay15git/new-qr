@@ -52,14 +52,8 @@ export function QrSectionRail({
     >
       <nav
         aria-label="QR editor sections"
-        className="flex flex-col gap-4 lg:min-h-0 lg:flex-1"
+        className="flex flex-col lg:min-h-0 lg:flex-1"
       >
-        <div className="px-1">
-          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
-            Sections
-          </p>
-        </div>
-
         <DirectionAwareTabs
           activeTab={activeSection}
           bubbleClassName="hidden"

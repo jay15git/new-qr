@@ -61,6 +61,9 @@ describe("QrControlSections", () => {
     expect(markup).toContain("Diamond")
     expect(markup).toContain("Heart")
     expect(markup).not.toContain('grid-cols-3 gap-2')
+    expect(markup).toMatch(
+      /data-slot="direction-aware-tab-panels" class="relative mx-auto h-full w-full min-h-0 overflow-hidden"/,
+    )
   })
 
   it("renders the dashboard color tab as a mutually exclusive accordion", () => {
@@ -152,6 +155,9 @@ describe("QrControlSections", () => {
     expect(markup).toContain("Classy")
     expect(markup).toContain("Classy rounded")
     expect(markup).toContain("Dot")
+    expect(markup).toMatch(
+      /data-slot="direction-aware-tab-panels" class="relative mx-auto h-full w-full min-h-0 overflow-hidden"/,
+    )
   })
 
   it("shows the corner dot style tab by default in its own dashboard section", () => {
@@ -174,6 +180,196 @@ describe("QrControlSections", () => {
     expect(markup).toContain("Classy")
     expect(markup).toContain("Classy rounded")
     expect(markup).toContain("Extra rounded")
+    expect(markup).toMatch(
+      /data-slot="direction-aware-tab-panels" class="relative mx-auto h-full w-full min-h-0 overflow-hidden"/,
+    )
+  })
+
+  it("renders the corner square color tab as a solid or gradient accordion without palette", () => {
+    const markup = renderToStaticMarkup(
+      <QrControlSections
+        {...baseProps}
+        activeSection="corner-square"
+        initialCornerSquareTab="color"
+      />,
+    )
+
+    expect(markup).toContain('data-slot="motion-accordion"')
+    expect(markup).toContain(">Solid<")
+    expect(markup).toContain(">Gradient<")
+    expect(markup).not.toContain(">Palette<")
+    expect(markup.match(/data-slot="motion-accordion-toggle"/g)?.length).toBe(2)
+    expect(markup).toMatch(/data-item-id="solid"[^>]*data-state="open"/)
+    expect(markup).toMatch(/data-item-id="gradient"[^>]*data-state="closed"/)
+    expect(markup).toContain("Solid color")
+    expect(markup).toContain("Corner square gradient")
+  })
+
+  it("uses the enhanced gradient controls for corner square in dashboard mode", () => {
+    const state = createDefaultQrStudioState()
+    state.cornersSquareGradient.enabled = true
+
+    const markup = renderToStaticMarkup(
+      <QrControlSections
+        {...baseProps}
+        activeSection="corner-square"
+        initialCornerSquareTab="color"
+        state={state}
+      />,
+    )
+
+    expect(markup).toContain("Color stop range")
+    expect(markup).toContain('data-slot="adaptive-offset-range-slider"')
+    expect(markup).toContain('data-slot="adaptive-offset-track"')
+    expect(markup).toContain("Rotation")
+    expect(markup).toContain("0°")
+    expect(markup).not.toContain('id="corner-square-gradient-rotation"')
+    expect(markup).not.toContain('id="corner-square-gradient-start-color"')
+    expect(markup).not.toContain('id="corner-square-gradient-end-color"')
+  })
+
+  it("opens the corner dot gradient accordion item when its gradient is enabled", () => {
+    const state = createDefaultQrStudioState()
+    state.cornersDotGradient.enabled = true
+
+    const markup = renderToStaticMarkup(
+      <QrControlSections
+        {...baseProps}
+        activeSection="corner-dot"
+        initialCornerDotTab="color"
+        state={state}
+      />,
+    )
+
+    expect(markup).toMatch(/data-item-id="gradient"[^>]*data-state="open"/)
+    expect(markup).toMatch(/data-item-id="solid"[^>]*data-state="closed"/)
+    expect(markup).toContain("Corner dot gradient")
+    expect(markup).toContain("Solid color")
+    expect(markup).not.toContain(">Palette<")
+  })
+
+  it("uses the enhanced gradient controls for corner dot in dashboard mode", () => {
+    const state = createDefaultQrStudioState()
+    state.cornersDotGradient.enabled = true
+
+    const markup = renderToStaticMarkup(
+      <QrControlSections
+        {...baseProps}
+        activeSection="corner-dot"
+        initialCornerDotTab="color"
+        state={state}
+      />,
+    )
+
+    expect(markup).toContain("Color stop range")
+    expect(markup).toContain('data-slot="adaptive-offset-range-slider"')
+    expect(markup).toContain('data-slot="adaptive-offset-track"')
+    expect(markup).toContain("Rotation")
+    expect(markup).toContain("0°")
+    expect(markup).not.toContain('id="corner-dot-gradient-rotation"')
+    expect(markup).not.toContain('id="corner-dot-gradient-start-color"')
+    expect(markup).not.toContain('id="corner-dot-gradient-end-color"')
+  })
+
+  it("renders background dashboard tabs and defaults to colors when no image source is active", () => {
+    const markup = renderToStaticMarkup(
+      <QrControlSections {...baseProps} activeSection="background" />,
+    )
+
+    expect(markup).toContain(">Colors<")
+    expect(markup).toContain(">Upload<")
+    expect(markup).toContain('data-slot="motion-accordion"')
+    expect(markup).toContain(">Solid<")
+    expect(markup).toContain(">Gradient<")
+    expect(markup).toContain(">Transparent<")
+    expect(markup).not.toContain(">Upload file<")
+    expect(markup).not.toContain(">Remote URL<")
+    expect(markup).not.toContain(">None<")
+    expect(markup).toContain("Solid color")
+  })
+
+  it("defaults the dashboard background panel to upload when an image source is active", () => {
+    const state = createDefaultQrStudioState()
+    state.backgroundImage = {
+      source: "upload",
+      value: "blob:https://new-qr-studio.local/background.png",
+    }
+
+    const markup = renderToStaticMarkup(
+      <QrControlSections
+        {...baseProps}
+        activeSection="background"
+        backgroundSourceMode="upload"
+        state={state}
+      />,
+    )
+
+    expect(markup).toContain(">Colors<")
+    expect(markup).toContain(">Upload<")
+    expect(markup).toContain(">None<")
+    expect(markup).toContain(">Upload file<")
+    expect(markup).toContain(">Remote URL<")
+    expect(markup).not.toContain(">Transparent<")
+    expect(markup).toContain('aria-label="File upload"')
+  })
+
+  it("opens the transparent background color item without rendering a toggle body", () => {
+    const state = createDefaultQrStudioState()
+    state.backgroundOptions.transparent = true
+
+    const markup = renderToStaticMarkup(
+      <QrControlSections {...baseProps} activeSection="background" state={state} />,
+    )
+
+    expect(markup).toMatch(/data-item-id="transparent"[^>]*data-state="open"/)
+    expect(markup).toMatch(/data-item-id="solid"[^>]*data-state="closed"/)
+    expect(markup).toMatch(/data-item-id="gradient"[^>]*data-state="closed"/)
+    expect(markup).not.toContain("Transparent background")
+    expect(markup).not.toContain('id="background-transparent"')
+  })
+
+  it("shows disabled guidance in the background colors tab when an image is active", () => {
+    const state = createDefaultQrStudioState()
+    state.backgroundGradient.enabled = true
+    state.backgroundImage = {
+      source: "upload",
+      value: "blob:https://new-qr-studio.local/background.png",
+    }
+
+    const markup = renderToStaticMarkup(
+      <QrControlSections
+        {...baseProps}
+        activeSection="background"
+        backgroundSourceMode="upload"
+        initialBackgroundTab="colors"
+        state={state}
+      />,
+    )
+
+    expect(markup).toContain("Remove the background image to edit the background fill or gradient.")
+  })
+
+  it("uses the enhanced gradient controls for background in dashboard mode", () => {
+    const state = createDefaultQrStudioState()
+    state.backgroundGradient.enabled = true
+
+    const markup = renderToStaticMarkup(
+      <QrControlSections
+        {...baseProps}
+        activeSection="background"
+        initialBackgroundTab="colors"
+        state={state}
+      />,
+    )
+
+    expect(markup).toContain("Color stop range")
+    expect(markup).toContain('data-slot="adaptive-offset-range-slider"')
+    expect(markup).toContain('data-slot="adaptive-offset-track"')
+    expect(markup).toContain("Rotation")
+    expect(markup).toContain("0°")
+    expect(markup).not.toContain('id="background-gradient-rotation"')
+    expect(markup).not.toContain('id="background-gradient-start-color"')
+    expect(markup).not.toContain('id="background-gradient-end-color"')
   })
 
   it("renders the full stacked editor in settings mode", () => {
@@ -262,25 +458,46 @@ describe("QrControlSections", () => {
     )
   })
 
-  it("keeps disabled-state guidance in dashboard mode when a control is unavailable", () => {
-    const state = createDefaultQrStudioState()
-    state.backgroundOptions.transparent = true
-
-    const markup = renderToStaticMarkup(
-      <QrControlSections {...baseProps} activeSection="background" state={state} />,
-    )
-
-    expect(markup).toContain("Disable transparency to apply a background gradient.")
-  })
-
   it("uses the shared file upload component for logo uploads", () => {
     const markup = renderToStaticMarkup(
       <QrControlSections {...baseProps} activeSection="logo" logoSourceMode="upload" />,
     )
 
+    expect(markup).toContain('data-slot="motion-accordion"')
+    expect(markup).toContain(">None<")
+    expect(markup).toContain(">Upload file<")
+    expect(markup).toContain(">Remote URL<")
+    expect(markup).not.toContain('data-slot="direction-aware-tabs"')
     expect(markup).toContain('aria-label="File upload"')
     expect(markup).toContain("Upload File Illustration")
     expect(markup).not.toContain("Choose file")
+  })
+
+  it("keeps logo adjustment controls below the dashboard logo source options", () => {
+    const markup = renderToStaticMarkup(
+      <QrControlSections {...baseProps} activeSection="logo" />,
+    )
+
+    expect(markup).toContain("Logo size")
+    expect(markup).toContain("Logo margin")
+    expect(markup).toContain("Hide background dots")
+    expect(markup).toContain("Save embedded image as blob")
+    expect(markup).toContain(">None<")
+    expect(markup).toContain(">Upload file<")
+    expect(markup).toContain(">Remote URL<")
+  })
+
+  it("keeps the stacked logo editor unchanged outside dashboard mode", () => {
+    const markup = renderToStaticMarkup(<QrControlSections {...baseProps} />)
+
+    expect(markup).toContain("Logo source")
+    expect(markup).toContain("Logo size")
+    expect(markup).toContain("Logo margin")
+    expect(markup).toContain("Hide background dots")
+    expect(markup).toContain("Save embedded image as blob")
+    expect(markup).toContain('data-slot="select-trigger"')
+    expect(markup).not.toContain(">Upload file<")
+    expect(markup).not.toContain(">Remote URL<")
   })
 
   it("adds background asset source controls alongside the existing fill controls", () => {
@@ -298,7 +515,19 @@ describe("QrControlSections", () => {
     expect(markup).toContain("Background gradient")
   })
 
-  it("subordinates background fill controls when a background image is active", () => {
+  it("keeps the stacked background editor unchanged outside dashboard mode", () => {
+    const markup = renderToStaticMarkup(<QrControlSections {...baseProps} />)
+
+    expect(markup).toContain("Background source")
+    expect(markup).toContain("No background image")
+    expect(markup).toContain("Transparent background")
+    expect(markup).toContain("Background color")
+    expect(markup).toContain("Background gradient")
+    expect(markup).not.toContain(">Colors<")
+    expect(markup).not.toContain(">Upload<")
+  })
+
+  it("prioritizes the upload tab when a background image is active", () => {
     const state = createDefaultQrStudioState()
     state.backgroundImage = {
       source: "upload",
@@ -315,6 +544,8 @@ describe("QrControlSections", () => {
       }),
     )
 
-    expect(markup).toContain("Background image replaces the background fill and gradient.")
+    expect(markup).toMatch(/data-tab="upload"[^>]*aria-selected="true"/)
+    expect(markup).toContain(">Upload file<")
+    expect(markup).toContain('aria-label="File upload"')
   })
 })

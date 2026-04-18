@@ -178,7 +178,11 @@ function DirectionAwareTabs({
         <MotionConfig transition={{ duration: 0.4, type: "spring", bounce: 0.2 }}>
           <motion.div
             data-slot="direction-aware-tab-panels"
-            className={cn("relative mx-auto h-full w-full overflow-hidden", contentClassName)}
+            className={cn(
+              "relative mx-auto h-full w-full",
+              contentClassName,
+              "overflow-hidden",
+            )}
             initial={false}
             animate={{ height: bounds.height }}
           >

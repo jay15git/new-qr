@@ -13,7 +13,6 @@ import QRCodeStyling from "qr-code-styling"
 
 import {
   DEFAULT_QR_EDITOR_SECTION,
-  getQrEditorSection,
   getQrEditorSectionChangeDirection,
   type QrEditorSectionDirection,
   type QrEditorSectionId,
@@ -208,8 +207,6 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
   }
 
   if (variant === "dashboard") {
-    const activeSectionMeta = getQrEditorSection(activeSection)
-
     return (
       <div className="flex min-h-screen w-full bg-[linear-gradient(180deg,color-mix(in_oklch,var(--color-background)_96%,black_4%),var(--color-background))] lg:h-screen lg:overflow-hidden">
         <main
@@ -282,17 +279,9 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
                           animate="active"
                           exit="exit"
                         >
-                          <div className="border-b border-border/70 px-4 py-5 sm:px-5 lg:px-6">
-                            <h2
-                              className="font-heading text-2xl font-medium tracking-[-0.03em] text-foreground"
-                            >
-                              {activeSectionMeta.title}
-                            </h2>
-                          </div>
-
                           <div
                             data-slot="dashboard-settings-scroll"
-                            className="min-h-0 flex-1 overflow-x-visible overflow-y-auto px-4 py-5 pb-8 sm:px-5 lg:px-6 lg:py-6 lg:pb-10"
+                            className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-5 pb-8 sm:px-5 lg:px-6 lg:py-6 lg:pb-10"
                           >
                             <QrControlSections
                               {...controlSectionProps}
