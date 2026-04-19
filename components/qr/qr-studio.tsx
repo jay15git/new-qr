@@ -42,8 +42,11 @@ import {
   type AssetSourceMode,
   createDefaultQrStudioState,
   type QrStudioState,
+  setSquareQrSize,
   toQrCodeOptions,
 } from "@/components/qr/qr-studio-state"
+import { DEFAULT_BRAND_ICON_COLOR } from "@/components/qr/brand-icon-svg"
+import { ModeToggle } from "@/components/mode-toggle"
 
 const DEFAULT_DOWNLOAD_NAME = "new-qr-studio"
 type UploadedAssetKey = "logo" | "backgroundImage"
@@ -96,6 +99,10 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
   })
   const dashboardFilenameId = useId()
   const canDownload = Boolean(state.data.trim())
+
+  function handleQrSizeChange(nextSize: number) {
+    setState((current) => setSquareQrSize(current, nextSize))
+  }
 
   useEffect(() => {
     const previewElement = previewRef.current
@@ -194,6 +201,11 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
     setState((current) => ({
       ...current,
       [assetKey]: {
+        presetColor:
+          assetKey === "logo" && mode === "preset"
+            ? DEFAULT_BRAND_ICON_COLOR
+            : undefined,
+        presetId: undefined,
         source: mode,
         value: undefined,
       },
@@ -208,6 +220,8 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
       setState((current) => ({
         ...current,
         [assetKey]: {
+          presetColor: undefined,
+          presetId: undefined,
           source: "upload",
           value: nextUrl,
         },
@@ -287,44 +301,47 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
                 </div>
 
                 <div className="flex justify-center md:justify-end">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        disabled={!canDownload}
-                        variant="secondary"
-                        className="rounded-full border border-white/10 bg-white/[0.08] px-4 text-foreground shadow-none hover:bg-white/[0.12]"
+                  <div className="flex items-center gap-2">
+                    <ModeToggle />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          disabled={!canDownload}
+                          variant="secondary"
+                          className="rounded-full border border-white/10 bg-white/[0.08] px-4 text-foreground shadow-none hover:bg-white/[0.12]"
+                        >
+                          <DownloadIcon data-icon="inline-start" />
+                          Download
+                          <ChevronDownIcon data-icon="inline-end" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        align="end"
+                        className="w-52 rounded-2xl border-white/10 bg-[color-mix(in_oklch,var(--color-popover)_90%,black_10%)] p-2"
                       >
-                        <DownloadIcon data-icon="inline-start" />
-                        Download
-                        <ChevronDownIcon data-icon="inline-end" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      align="end"
-                      className="w-52 rounded-2xl border-white/10 bg-[color-mix(in_oklch,var(--color-popover)_90%,black_10%)] p-2"
-                    >
-                      <div className="grid gap-1">
-                        {DOWNLOAD_EXTENSIONS.map((extension) => (
-                          <Button
-                            key={extension}
-                            disabled={!canDownload}
-                            variant={extension === state.type ? "secondary" : "ghost"}
-                            className={
-                              extension === state.type
-                                ? "justify-start rounded-xl border border-white/10 bg-white/[0.08] text-foreground shadow-none hover:bg-white/[0.12]"
-                                : "justify-start rounded-xl border border-transparent text-foreground/70 shadow-none hover:border-white/8 hover:bg-white/[0.04] hover:text-foreground"
-                            }
-                            onClick={() => {
-                              void handleDownload(extension)
-                            }}
-                          >
-                            <DownloadIcon data-icon="inline-start" />
-                            {extension.toUpperCase()}
-                          </Button>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+                        <div className="grid gap-1">
+                          {DOWNLOAD_EXTENSIONS.map((extension) => (
+                            <Button
+                              key={extension}
+                              disabled={!canDownload}
+                              variant={extension === state.type ? "secondary" : "ghost"}
+                              className={
+                                extension === state.type
+                                  ? "justify-start rounded-xl border border-white/10 bg-white/[0.08] text-foreground shadow-none hover:bg-white/[0.12]"
+                                  : "justify-start rounded-xl border border-transparent text-foreground/70 shadow-none hover:border-white/8 hover:bg-white/[0.04] hover:text-foreground"
+                              }
+                              onClick={() => {
+                                void handleDownload(extension)
+                              }}
+                            >
+                              <DownloadIcon data-icon="inline-start" />
+                              {extension.toUpperCase()}
+                            </Button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </div>
               </div>
             </section>
@@ -409,7 +426,9 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
                 <DashboardComposeSurface
                   errorMessage={errorMessage}
                   onReset={handleReset}
+                  onQrSizeChange={handleQrSizeChange}
                   onSceneChange={setDashboardScene}
+                  qrSize={state.width}
                   scene={dashboardScene}
                 />
               </section>

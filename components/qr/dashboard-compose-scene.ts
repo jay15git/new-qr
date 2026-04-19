@@ -227,7 +227,7 @@ function normalizeDashboardComposeNode(
     naturalHeight: Math.max(1, node.naturalHeight),
     naturalWidth: Math.max(1, node.naturalWidth),
     opacity: clamp(node.opacity, 0, 1),
-    rotation: Number.isFinite(node.rotation) ? node.rotation : 0,
+    rotation: normalizeRotation(node.rotation),
     scale: Number.isFinite(node.scale) && node.scale > 0 ? node.scale : 1,
     x: Number.isFinite(node.x) ? node.x : 0,
     y: Number.isFinite(node.y) ? node.y : 0,
@@ -252,4 +252,14 @@ function clamp(value: number, min: number, max: number) {
   }
 
   return Math.min(max, Math.max(min, value))
+}
+
+function normalizeRotation(rotation: number) {
+  if (!Number.isFinite(rotation)) {
+    return 0
+  }
+
+  const normalized = rotation % 360
+
+  return normalized < 0 ? normalized + 360 : normalized
 }

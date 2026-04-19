@@ -50,6 +50,14 @@ import type {
 
 import { getActiveCustomDotShape } from "@/components/qr/custom-dot-shapes"
 import {
+  type BrandIconCategory,
+  filterBrandIcons,
+  findBrandIconById,
+  getBrandIconById,
+  POPULAR_BRAND_ICON_IDS,
+  type BrandIconEntry,
+} from "@/components/qr/brand-icon-catalog"
+import {
   degreesToRadians,
   normalizeGradientOffsetRange,
   radiansToDegrees,
@@ -67,7 +75,16 @@ import type {
   StudioDotType,
   StudioGradient,
 } from "@/components/qr/qr-studio-state"
-import { hasBackgroundImage } from "@/components/qr/qr-studio-state"
+import {
+  createBrandIconDataUrl,
+  DEFAULT_BRAND_ICON_COLOR,
+} from "@/components/qr/brand-icon-svg"
+import {
+  hasBackgroundImage,
+  QR_SIZE_MAX,
+  QR_SIZE_MIN,
+  setSquareQrSize,
+} from "@/components/qr/qr-studio-state"
 
 type QrControlSectionsProps = {
   backgroundSourceMode: AssetSourceMode
@@ -94,10 +111,25 @@ type StyleOption = {
 
 type StyleSettingsTabId = "style" | "color"
 type BackgroundSettingsTabId = "colors" | "upload"
+type LogoSettingsTabId = "brand-icons" | "upload"
+type BrandIconCategoryFilter = BrandIconCategory | "all"
 type BackgroundColorMode = "solid" | "gradient" | "transparent"
 type GradientEditorVariant = "default" | "dot-enhanced"
 type DashboardCornerColorKey = "cornersSquare" | "cornersDot"
 type DashboardAssetKey = "backgroundImage" | "logo"
+
+const BRAND_ICON_CATEGORY_OPTIONS: Array<{
+  label: string
+  value: BrandIconCategoryFilter
+}> = [
+  { label: "All", value: "all" },
+  { label: "Social", value: "social" },
+  { label: "Business", value: "business" },
+  { label: "Payments", value: "payments" },
+  { label: "Travel", value: "travel" },
+  { label: "Media", value: "media" },
+  { label: "Web", value: "web" },
+]
 
 const DRAW_TYPES: Array<{ label: string; value: DrawType }> = [
   { label: "SVG", value: "svg" },
@@ -163,6 +195,7 @@ const DOT_COLOR_MODES: Array<{ label: string; value: DotsColorMode }> = [
 
 const LOGO_MODES: Array<{ label: string; value: AssetSourceMode }> = [
   { label: "No logo", value: "none" },
+  { label: "Built-in brand icon", value: "preset" },
   { label: "Remote URL", value: "url" },
   { label: "Upload file", value: "upload" },
 ]
@@ -197,14 +230,23 @@ export function QrControlSections({
       initialBackgroundTab ??
         (backgroundSourceMode === "none" ? "colors" : "upload"),
     )
+  const [activeLogoTab, setActiveLogoTab] = useState<LogoSettingsTabId>(
+    logoSourceMode === "preset" ? "brand-icons" : "upload",
+  )
   const [activeCornerSquareTab, setActiveCornerSquareTab] =
     useState<StyleSettingsTabId>(initialCornerSquareTab)
   const [activeCornerDotTab, setActiveCornerDotTab] =
     useState<StyleSettingsTabId>(initialCornerDotTab)
+  const [brandIconQuery, setBrandIconQuery] = useState("")
+  const [brandIconCategory, setBrandIconCategory] =
+    useState<BrandIconCategoryFilter>("all")
   const contentError = state.data.trim() ? null : "Add text or a URL to encode"
   const qrSize = state.width === state.height ? state.width : Math.max(state.width, state.height)
   const activeCustomDotShape = getActiveCustomDotShape(state.dotsOptions.type)
   const backgroundImageActive = hasBackgroundImage(state)
+  const filteredBrandIcons = filterBrandIcons(brandIconQuery, brandIconCategory)
+  const popularBrandIcons = POPULAR_BRAND_ICON_IDS.map((id) => getBrandIconById(id))
+  const presetLogoColor = state.logo.presetColor ?? DEFAULT_BRAND_ICON_COLOR
   const backgroundColorMode = getBackgroundColorMode(state)
   const selectedCornerSquareColorItemId = state.cornersSquareGradient.enabled
     ? "gradient"
@@ -725,7 +767,61 @@ export function QrControlSections({
     />
   )
 
-  const dashboardLogoSourceAccordion = (
+  function handlePresetLogoSelection(brandIcon: BrandIconEntry) {
+    const nextColor = presetLogoColor
+
+    setActiveLogoTab("brand-icons")
+    onLogoModeChange("preset")
+    setState((current) =>
+      applyLogoPresetSelection(
+        current,
+        brandIcon,
+        createBrandIconDataUrl(brandIcon, nextColor),
+        nextColor,
+      ),
+    )
+  }
+
+  function handlePresetLogoColorChange(color: string) {
+    setState((current) => {
+      const selectedIcon = findBrandIconById(current.logo.presetId)
+
+      if (!selectedIcon) {
+        return {
+          ...current,
+          logo: {
+            ...current.logo,
+            presetColor: color,
+            source: "preset",
+            value: undefined,
+          },
+        }
+      }
+
+      return applyLogoPresetColor(
+        current,
+        createBrandIconDataUrl(selectedIcon, color),
+        color,
+      )
+    })
+  }
+
+  const presetLogoPicker = (
+    <BrandIconPicker
+      brandIconQuery={brandIconQuery}
+      filteredBrandIcons={filteredBrandIcons}
+      onBrandIconCategoryChange={setBrandIconCategory}
+      onBrandIconQueryChange={setBrandIconQuery}
+      onSelect={handlePresetLogoSelection}
+      popularBrandIcons={popularBrandIcons}
+      selectedBrandIconId={state.logo.presetId}
+      selectedCategory={brandIconCategory}
+      showCategoryFilter={isDashboardMode}
+      showPopular={!isDashboardMode}
+    />
+  )
+
+  const dashboardLogoUploadAccordion = (
     <MotionAccordion
       allowCollapse
       gap={0}
@@ -776,6 +872,23 @@ export function QrControlSections({
         },
       ]}
     />
+  )
+
+  const dashboardBrandIconsPanel = (
+    <div className="flex flex-col gap-4">
+      {presetLogoPicker}
+      {logoSourceMode === "preset" ? (
+        <Field>
+          <FieldLabel htmlFor="logo-icon-color">Logo icon color</FieldLabel>
+          <ColorPicker
+            chrome="embedded"
+            onColorChange={handlePresetLogoColorChange}
+            size={280}
+            value={presetLogoColor}
+          />
+        </Field>
+      ) : null}
+    </div>
   )
 
   return (
@@ -844,16 +957,12 @@ export function QrControlSections({
                 id="qr-size"
                 label="Size"
                 formatValue={(value) => `${Math.round(value)} px`}
-                max={1200}
-                min={120}
+                max={QR_SIZE_MAX}
+                min={QR_SIZE_MIN}
                 onChange={(value) => {
                   const nextSize = Array.isArray(value) ? value[0] : value
 
-                  setState((current) => ({
-                    ...current,
-                    height: nextSize,
-                    width: nextSize,
-                  }))
+                  setState((current) => setSquareQrSize(current, nextSize))
                 }}
                 showValue
                 step={1}
@@ -1161,7 +1270,12 @@ export function QrControlSections({
                   onRemove={() =>
                     setState((current) => ({
                       ...current,
-                      backgroundImage: { source: "none", value: undefined },
+                      backgroundImage: {
+                        presetColor: undefined,
+                        presetId: undefined,
+                        source: "none",
+                        value: undefined,
+                      },
                     }))
                   }
                   onUploadError={onBackgroundUploadError}
@@ -1262,7 +1376,29 @@ export function QrControlSections({
           children: (
             <>
               {isDashboardMode ? (
-                dashboardLogoSourceAccordion
+                <DirectionAwareTabs
+                  activeTab={activeLogoTab}
+                  bubbleClassName={dashboardTopTabBubbleClassName}
+                  className={dashboardTopTabListClassName}
+                  containerClassName={dashboardTopTabContainerClassName}
+                  contentClassName="min-h-0"
+                  onTabChange={(tabId) => setActiveLogoTab(tabId as LogoSettingsTabId)}
+                  showContent
+                  tabClassName={dashboardTopTabClassName}
+                  tabListLabel="Logo settings groups"
+                  tabs={[
+                    {
+                      id: "brand-icons",
+                      label: "Brand Icons",
+                      content: dashboardBrandIconsPanel,
+                    },
+                    {
+                      id: "upload",
+                      label: "Upload",
+                      content: dashboardLogoUploadAccordion,
+                    },
+                  ]}
+                />
               ) : (
                 <>
                   <SelectField
@@ -1273,6 +1409,21 @@ export function QrControlSections({
                     value={logoSourceMode}
                   />
 
+                  {logoSourceMode === "preset" ? (
+                    <>
+                      {presetLogoPicker}
+
+                      <Field>
+                        <FieldLabel htmlFor="logo-icon-color">Logo icon color</FieldLabel>
+                        <ColorPicker
+                          onColorChange={handlePresetLogoColorChange}
+                          size={320}
+                          value={presetLogoColor}
+                        />
+                      </Field>
+                    </>
+                  ) : null}
+
                   {logoSourceMode === "url" ? (
                     <Field>
                       <FieldLabel htmlFor="logo-url">Remote logo URL</FieldLabel>
@@ -1281,13 +1432,9 @@ export function QrControlSections({
                         placeholder="https://example.com/logo.png"
                         value={state.logo.value ?? ""}
                         onChange={(event) =>
-                          setState((current) => ({
-                            ...current,
-                            logo: {
-                              source: "url",
-                              value: event.target.value,
-                            },
-                          }))
+                          setState((current) =>
+                            applyAssetUrlValue(current, "logo", event.target.value),
+                          )
                         }
                       />
                       {!isDashboardMode ? (
@@ -1315,10 +1462,7 @@ export function QrControlSections({
                       className="self-start"
                       onClick={() => {
                         onLogoModeChange("none")
-                        setState((current) => ({
-                          ...current,
-                          logo: { source: "none", value: undefined },
-                        }))
+                        setState((current) => applyAssetNoneSelection(current, "logo"))
                       }}
                     >
                       <XIcon data-icon="inline-start" />
@@ -2052,6 +2196,8 @@ export function applyAssetNoneSelection(
   return {
     ...state,
     [assetKey]: {
+      presetColor: undefined,
+      presetId: undefined,
       source: "none",
       value: undefined,
     },
@@ -2066,7 +2212,42 @@ export function applyAssetUrlValue(
   return {
     ...state,
     [assetKey]: {
+      presetColor: undefined,
+      presetId: undefined,
       source: "url",
+      value,
+    },
+  }
+}
+
+export function applyLogoPresetSelection(
+  state: QrStudioState,
+  brandIcon: BrandIconEntry,
+  value: string,
+  presetColor: string,
+) {
+  return {
+    ...state,
+    logo: {
+      presetColor,
+      presetId: brandIcon.id as QrStudioState["logo"]["presetId"],
+      source: "preset" as const,
+      value,
+    },
+  }
+}
+
+export function applyLogoPresetColor(
+  state: QrStudioState,
+  value: string | undefined,
+  presetColor: string,
+) {
+  return {
+    ...state,
+    logo: {
+      ...state.logo,
+      presetColor,
+      source: "preset" as const,
       value,
     },
   }
@@ -3209,6 +3390,150 @@ function buildHeartPath(x: number, y: number, size: number) {
     `C ${right} ${y + size * 0.35}, ${center + size * 0.55} ${y + size * 0.62}, ${center} ${bottom}`,
     "Z",
   ].join(" ")
+}
+
+function BrandIconPicker({
+  brandIconQuery,
+  filteredBrandIcons,
+  onBrandIconCategoryChange,
+  onBrandIconQueryChange,
+  onSelect,
+  popularBrandIcons,
+  selectedBrandIconId,
+  selectedCategory = "all",
+  showCategoryFilter = false,
+  showPopular = true,
+}: {
+  brandIconQuery: string
+  filteredBrandIcons: readonly BrandIconEntry[]
+  onBrandIconCategoryChange?: (value: BrandIconCategoryFilter) => void
+  onBrandIconQueryChange: (value: string) => void
+  onSelect: (brandIcon: BrandIconEntry) => void
+  popularBrandIcons: readonly BrandIconEntry[]
+  selectedBrandIconId?: string
+  selectedCategory?: BrandIconCategoryFilter
+  showCategoryFilter?: boolean
+  showPopular?: boolean
+}) {
+  return (
+    <div data-slot="brand-icon-picker" className="space-y-4">
+      {showCategoryFilter ? (
+        <Field>
+          <FieldLabel id="brand-icon-category-label">Icon category</FieldLabel>
+          <div
+            aria-labelledby="brand-icon-category-label"
+            className="flex flex-wrap gap-2"
+            data-slot="brand-icon-category-picker"
+            role="radiogroup"
+          >
+            {BRAND_ICON_CATEGORY_OPTIONS.map((option) => {
+              const isSelected = option.value === selectedCategory
+
+              return (
+                <label
+                  key={option.value}
+                  className={cn(
+                    "cursor-pointer rounded-full border px-3 py-2 text-sm transition-colors",
+                    isSelected
+                      ? "border-white/10 bg-white/[0.07] text-foreground shadow-none"
+                      : "border-transparent bg-white/[0.02] text-muted-foreground hover:bg-white/[0.04] hover:text-foreground/78",
+                  )}
+                >
+                  <input
+                    aria-label={option.label}
+                    checked={isSelected}
+                    className="sr-only"
+                    name="brand-icon-category"
+                    onChange={() => onBrandIconCategoryChange?.(option.value)}
+                    type="radio"
+                    value={option.value}
+                  />
+                  <span>{option.label}</span>
+                </label>
+              )
+            })}
+          </div>
+        </Field>
+      ) : null}
+
+      <Field>
+        <FieldLabel htmlFor="brand-icon-search">Search brand icons</FieldLabel>
+        <Input
+          id="brand-icon-search"
+          placeholder="Search brand icons"
+          value={brandIconQuery}
+          onChange={(event) => onBrandIconQueryChange(event.target.value)}
+        />
+      </Field>
+
+      {showPopular ? (
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-foreground">Popular</p>
+          <div
+            data-slot="brand-icon-popular-row"
+            className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4"
+          >
+            {popularBrandIcons.map((brandIcon) => (
+              <BrandIconOption
+                brandIcon={brandIcon}
+                isSelected={brandIcon.id === selectedBrandIconId}
+                key={brandIcon.id}
+                onSelect={onSelect}
+              />
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-foreground">
+          {showCategoryFilter && selectedCategory !== "all"
+            ? `${BRAND_ICON_CATEGORY_OPTIONS.find((option) => option.value === selectedCategory)?.label ?? "Selected"} icons`
+            : "All brand icons"}
+        </p>
+        <div
+          data-slot="brand-icon-grid"
+          className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4"
+        >
+          {filteredBrandIcons.map((brandIcon) => (
+            <BrandIconOption
+              brandIcon={brandIcon}
+              isSelected={brandIcon.id === selectedBrandIconId}
+              key={brandIcon.id}
+              onSelect={onSelect}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function BrandIconOption({
+  brandIcon,
+  isSelected,
+  onSelect,
+}: {
+  brandIcon: BrandIconEntry
+  isSelected: boolean
+  onSelect: (brandIcon: BrandIconEntry) => void
+}) {
+  const Icon = brandIcon.icon
+
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      className={cn(
+        "h-auto min-h-20 flex-col items-start gap-2 rounded-[1rem] border-border/60 px-3 py-3 text-left",
+        isSelected && "border-foreground/40 bg-accent/60",
+      )}
+      onClick={() => onSelect(brandIcon)}
+    >
+      <Icon className="size-5" />
+      <span className="line-clamp-2 text-xs font-medium leading-snug">{brandIcon.label}</span>
+    </Button>
+  )
 }
 
 function SelectField({

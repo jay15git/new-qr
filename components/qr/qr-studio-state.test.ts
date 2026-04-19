@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  clampQrSize,
   createDefaultQrStudioState,
+  setSquareQrSize,
   toQrCodeOptions,
 } from "./qr-studio-state";
 
@@ -9,10 +11,17 @@ describe("qr studio state helpers", () => {
   it("starts with shared asset state for logo and background", () => {
     const state = createDefaultQrStudioState();
 
-    expect(state.logo).toEqual({ source: "none", value: undefined });
+    expect(state.logo).toEqual({
+      source: "none",
+      value: undefined,
+      presetId: undefined,
+      presetColor: undefined,
+    });
     expect(state.backgroundImage).toEqual({
       source: "none",
       value: undefined,
+      presetId: undefined,
+      presetColor: undefined,
     });
   });
 
@@ -25,6 +34,18 @@ describe("qr studio state helpers", () => {
     expect(options.height).toBe(320);
     expect(options.data).toContain("https://");
     expect(options.image).toBeUndefined();
+  });
+
+  it("clamps shared qr size updates to the supported square range", () => {
+    const state = createDefaultQrStudioState();
+    const undersized = setSquareQrSize(state, 24);
+    const oversized = setSquareQrSize(state, 2400);
+
+    expect(undersized.width).toBe(120);
+    expect(undersized.height).toBe(120);
+    expect(oversized.width).toBe(1200);
+    expect(oversized.height).toBe(1200);
+    expect(clampQrSize(Number.NaN)).toBe(320);
   });
 
   it("uses the reference swatch colors as the default body palette", () => {
@@ -162,6 +183,22 @@ describe("qr studio state helpers", () => {
     const options = toQrCodeOptions(state);
 
     expect(options.image).toBe("https://example.com/logo.png");
+  });
+
+  it("maps preset logo assets onto the upstream image field", () => {
+    const state = createDefaultQrStudioState();
+    state.logo = {
+      source: "preset",
+      presetId: "whatsapp" as never,
+      presetColor: "#111827",
+      value: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http://www.w3.org/2000/svg%22%20/%3E",
+    };
+
+    const options = toQrCodeOptions(state);
+
+    expect(options.image).toBe(
+      "data:image/svg+xml,%3Csvg%20xmlns%3D%22http://www.w3.org/2000/svg%22%20/%3E",
+    );
   });
 
   it("suppresses background fill and gradient when a background image is active", () => {

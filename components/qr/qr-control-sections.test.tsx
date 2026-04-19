@@ -536,19 +536,59 @@ describe("QrControlSections", () => {
     expect(markup).toContain("Outer margin")
   })
 
-  it("uses the shared file upload component for logo uploads", () => {
+  it("renders the upload tab with the shared file upload component for dashboard logos", () => {
     const markup = renderToStaticMarkup(
       <QrControlSections {...baseProps} activeSection="logo" logoSourceMode="upload" />,
     )
 
+    expect(markup).toContain('data-slot="direction-aware-tabs"')
+    expect(markup).toContain(">Brand Icons<")
+    expect(markup).toContain(">Upload<")
+    expect(markup).toMatch(/data-tab="upload"[^>]*aria-selected="true"/)
     expect(markup).toContain('data-slot="motion-accordion"')
     expect(markup).toContain(">None<")
     expect(markup).toContain(">Upload file<")
     expect(markup).toContain(">Remote URL<")
-    expect(markup).not.toContain('data-slot="direction-aware-tabs"')
     expect(markup).toContain('aria-label="File upload"')
     expect(markup).toContain("Upload File Illustration")
     expect(markup).not.toContain("Choose file")
+  })
+
+  it("renders the brand icon tab with category filters for preset logos", () => {
+    const state = createDefaultQrStudioState()
+    state.logo = {
+      source: "preset",
+      presetId: "whatsapp" as never,
+      presetColor: "#111827",
+      value: "data:image/svg+xml,%3Csvg%20/%3E",
+    }
+
+    const markup = renderToStaticMarkup(
+      <QrControlSections
+        {...baseProps}
+        activeSection="logo"
+        logoSourceMode="preset"
+        state={state}
+      />,
+    )
+
+    expect(markup).toContain(">Brand Icons<")
+    expect(markup).toContain(">Upload<")
+    expect(markup).toMatch(/data-tab="brand-icons"[^>]*aria-selected="true"/)
+    expect(markup).toContain("Search brand icons")
+    expect(markup).toContain("Icon category")
+    expect(markup).toContain(">All<")
+    expect(markup).toContain(">Social<")
+    expect(markup).toContain(">Business<")
+    expect(markup).toContain(">Payments<")
+    expect(markup).toContain(">Travel<")
+    expect(markup).toContain(">Media<")
+    expect(markup).toContain(">Web<")
+    expect(markup).not.toContain("Popular")
+    expect(markup).toContain("WhatsApp")
+    expect(markup).toContain("Instagram")
+    expect(markup).toContain("GitHub")
+    expect(markup).toContain("Logo icon color")
   })
 
   it("keeps logo adjustment controls below the dashboard logo source options", () => {
@@ -556,15 +596,38 @@ describe("QrControlSections", () => {
       <QrControlSections {...baseProps} activeSection="logo" />,
     )
 
+    expect(markup).toContain(">Brand Icons<")
+    expect(markup).toContain(">Upload<")
     expect(markup).toContain("Logo size")
     expect(markup).toContain('data-slot="logo-size-slider"')
     expect(markup).toContain("40%")
     expect(markup).toContain("Logo margin")
     expect(markup).toContain("Hide background dots")
     expect(markup).toContain("Save embedded image as blob")
-    expect(markup).toContain(">None<")
-    expect(markup).toContain(">Upload file<")
-    expect(markup).toContain(">Remote URL<")
+  })
+
+  it("shows the preset logo color control only for preset logos", () => {
+    const presetState = createDefaultQrStudioState()
+    presetState.logo = {
+      source: "preset",
+      presetId: "github" as never,
+      presetColor: "#111827",
+      value: "data:image/svg+xml,%3Csvg%20/%3E",
+    }
+
+    const presetMarkup = renderToStaticMarkup(
+      <QrControlSections
+        {...baseProps}
+        activeSection="logo"
+        logoSourceMode="preset"
+        state={presetState}
+      />,
+    )
+    const defaultMarkup = renderToStaticMarkup(<QrControlSections {...baseProps} />)
+
+    expect(presetMarkup).toContain("Logo icon color")
+    expect(presetMarkup).toContain('data-slot="color-picker"')
+    expect(defaultMarkup).not.toContain("Logo icon color")
   })
 
   it("keeps the stacked logo editor unchanged outside dashboard mode", () => {

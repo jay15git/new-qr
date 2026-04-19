@@ -1,10 +1,32 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
+
+vi.mock("qr-code-styling", () => ({
+  default: class MockQRCodeStyling {
+    private options: { height?: number; width?: number }
+
+    constructor(options: { height?: number; width?: number }) {
+      this.options = options
+    }
+
+    applyExtension() {}
+
+    async getRawData() {
+      return Buffer.from(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${this.options.width}" height="${this.options.height}"></svg>`,
+      )
+    }
+  },
+}))
 
 import {
+  buildDashboardQrNodePayload,
   createDashboardSurfaceQrState,
   stripXmlDeclaration,
 } from "@/components/qr/dashboard-qr-svg"
-import { createDefaultQrStudioState } from "@/components/qr/qr-studio-state"
+import {
+  createDefaultQrStudioState,
+  setSquareQrSize,
+} from "@/components/qr/qr-studio-state"
 
 describe("dashboard qr svg helpers", () => {
   it("forces svg rendering for the dashboard surface without mutating the original state", () => {
@@ -26,5 +48,15 @@ describe("dashboard qr svg helpers", () => {
     expect(stripXmlDeclaration(markup)).toBe(
       '<svg xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10" /></svg>',
     )
+  })
+
+  it("uses the canonical qr size when building the dashboard payload", async () => {
+    const state = setSquareQrSize(createDefaultQrStudioState(), 512)
+
+    const payload = await buildDashboardQrNodePayload(state)
+
+    expect(payload.naturalWidth).toBe(512)
+    expect(payload.naturalHeight).toBe(512)
+    expect(payload.markup).toContain("<svg")
   })
 })

@@ -23,6 +23,8 @@ import { QrStudio } from "@/components/qr/qr-studio"
 describe("QrStudio", () => {
   it("renders the dashboard as a full-height three-pane shell with the preview pane itself acting as the compose surface", () => {
     const markup = renderToStaticMarkup(<QrStudio variant="dashboard" />)
+    const modeToggleIndex = markup.indexOf('data-slot="mode-toggle"')
+    const downloadLabelIndex = markup.indexOf("Download")
 
     expect(markup).toContain('aria-label="QR editor dashboard"')
     expect(markup).toContain('data-slot="dashboard-top-strip"')
@@ -50,7 +52,11 @@ describe("QrStudio", () => {
     expect(markup).toContain("h-screen")
     expect(markup).toContain("lg:h-full")
     expect(markup).toContain("Export filename")
+    expect(markup).toContain('data-slot="mode-toggle"')
+    expect(markup).toContain("Appearance")
     expect(markup).toContain("Download")
+    expect(modeToggleIndex).toBeGreaterThan(-1)
+    expect(downloadLabelIndex).toBeGreaterThan(modeToggleIndex)
     expect(markup).toContain("Reset defaults")
     expect(markup).toContain("min-h-screen")
     expect(markup).not.toContain('data-slot="dashboard-compose-meta"')

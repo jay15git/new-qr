@@ -11,9 +11,13 @@ import {
   applyDotsGradient,
   applyDotsPaletteSelection,
   applyDotsSolidColor,
+  applyLogoPresetColor,
+  applyLogoPresetSelection,
   createDashboardAccordionOpenItemIds,
   ensureDashboardAccordionItemExpanded,
 } from "@/components/qr/qr-control-sections"
+import { getBrandIconById } from "@/components/qr/brand-icon-catalog"
+import { createBrandIconDataUrl } from "@/components/qr/brand-icon-svg"
 import { createDefaultQrStudioState } from "@/components/qr/qr-studio-state"
 
 describe("dashboard settings state helpers", () => {
@@ -151,6 +155,47 @@ describe("dashboard settings state helpers", () => {
     expect(nextState.logo).toEqual({
       source: "none",
       value: undefined,
+      presetId: undefined,
+      presetColor: undefined,
     })
+  })
+
+  it("applies preset logo selection with serialized svg data", () => {
+    const state = createDefaultQrStudioState()
+    const brandIcon = getBrandIconById("whatsapp")
+
+    const nextState = applyLogoPresetSelection(
+      state,
+      brandIcon,
+      createBrandIconDataUrl(brandIcon, "#111827"),
+      "#111827",
+    )
+
+    expect(nextState.logo.source).toBe("preset")
+    expect(nextState.logo.presetId).toBe("whatsapp")
+    expect(nextState.logo.presetColor).toBe("#111827")
+    expect(nextState.logo.value).toContain("data:image/svg+xml")
+  })
+
+  it("updates preset logo color while preserving the selected brand", () => {
+    const state = createDefaultQrStudioState()
+    const brandIcon = getBrandIconById("github")
+    const selectedState = applyLogoPresetSelection(
+      state,
+      brandIcon,
+      createBrandIconDataUrl(brandIcon, "#111827"),
+      "#111827",
+    )
+
+    const nextState = applyLogoPresetColor(
+      selectedState,
+      createBrandIconDataUrl(brandIcon, "#ff4f00"),
+      "#ff4f00",
+    )
+
+    expect(nextState.logo.source).toBe("preset")
+    expect(nextState.logo.presetId).toBe("github")
+    expect(nextState.logo.presetColor).toBe("#ff4f00")
+    expect(nextState.logo.value).toContain("ff4f00")
   })
 })

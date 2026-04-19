@@ -12,6 +12,8 @@ import type {
   TypeNumber,
 } from "qr-code-styling";
 
+import type { BrandIconId } from "@/components/qr/brand-icon-catalog";
+
 export type GradientStop = {
   offset: number;
   color: string;
@@ -26,9 +28,11 @@ export type StudioGradient = {
 
 export type StudioDotType = DotType | "diamond" | "heart";
 export type DotsColorMode = "solid" | "gradient" | "palette";
-export type AssetSourceMode = "none" | "url" | "upload";
+export type AssetSourceMode = "none" | "preset" | "url" | "upload";
 
 export type StudioAsset = {
+  presetColor?: string;
+  presetId?: BrandIconId;
   source: AssetSourceMode;
   value?: string;
 };
@@ -85,6 +89,10 @@ export const DOWNLOAD_EXTENSIONS: FileExtension[] = [
   "webp",
 ];
 
+export const QR_SIZE_MIN = 120;
+export const QR_SIZE_MAX = 1200;
+export const DEFAULT_QR_SIZE = 320;
+
 const DEFAULT_GRADIENT: StudioGradient = {
   enabled: false,
   type: "linear",
@@ -106,14 +114,18 @@ export function createDefaultQrStudioState(): QrStudioState {
   return {
     data: "https://new-qr-studio.local/launch",
     type: "svg",
-    width: 320,
-    height: 320,
+    width: DEFAULT_QR_SIZE,
+    height: DEFAULT_QR_SIZE,
     margin: 12,
     logo: {
+      presetColor: undefined,
+      presetId: undefined,
       source: "none",
       value: undefined,
     },
     backgroundImage: {
+      presetColor: undefined,
+      presetId: undefined,
       source: "none",
       value: undefined,
     },
@@ -174,13 +186,31 @@ export function coerceNumber(
   return Math.min(max, Math.max(min, value));
 }
 
+export function clampQrSize(value: number) {
+  return coerceNumber(value, QR_SIZE_MIN, QR_SIZE_MAX, DEFAULT_QR_SIZE);
+}
+
+export function setSquareQrSize(state: QrStudioState, size: number): QrStudioState {
+  const nextSize = clampQrSize(size);
+
+  if (state.width === nextSize && state.height === nextSize) {
+    return state;
+  }
+
+  return {
+    ...state,
+    width: nextSize,
+    height: nextSize,
+  };
+}
+
 export function toQrCodeOptions(state: QrStudioState): Options {
   const logoImage = getAssetValue(state.logo);
   const backgroundImage = getAssetValue(state.backgroundImage);
 
   return {
-    width: coerceNumber(state.width, 120, 1200, 320),
-    height: coerceNumber(state.height, 120, 1200, 320),
+    width: clampQrSize(state.width),
+    height: clampQrSize(state.height),
     type: state.type,
     data: state.data.trim(),
     margin: coerceNumber(state.margin, 0, 80, 12),

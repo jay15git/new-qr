@@ -1,9 +1,11 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import {
   Bricolage_Grotesque,
   Geist_Mono,
   Manrope,
 } from "next/font/google"
+
+import { ThemeProvider } from "@/components/theme-provider"
 
 import "./globals.css"
 
@@ -27,6 +29,13 @@ export const metadata: Metadata = {
   description: "A premium QR studio for branded codes, live refinement, and export.",
 }
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f7f5f0" },
+    { media: "(prefers-color-scheme: dark)", color: "#1f222c" },
+  ],
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -36,8 +45,11 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${displayFont.variable} ${bodyFont.variable} ${monoFont.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   )
 }

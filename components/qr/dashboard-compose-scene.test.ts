@@ -9,6 +9,7 @@ import {
   resetDashboardComposeCamera,
   resetDashboardQrNodeTransform,
   upsertDashboardQrNode,
+  updateDashboardComposeNode,
 } from "@/components/qr/dashboard-compose-scene"
 
 const QR_PAYLOAD = {
@@ -105,6 +106,40 @@ describe("dashboard compose scene helpers", () => {
     expect(nextCenterY).toBeCloseTo(previousCenterY)
   })
 
+  it("preserves the visual center when the canonical qr size changes", () => {
+    const initialScene = upsertDashboardQrNode(
+      createDashboardComposeScene(),
+      QR_PAYLOAD,
+    )
+    const resizedNode = {
+      ...initialScene.nodes[0],
+      naturalHeight: 480,
+      naturalWidth: 480,
+      rotation: 18,
+      x: 125.6,
+      y: 74.8,
+    }
+    const resizedScene = {
+      ...initialScene,
+      nodes: [resizedNode],
+    }
+    const updatedPayload = {
+      ...QR_PAYLOAD,
+      naturalHeight: 480,
+      naturalWidth: 480,
+    }
+
+    const nextScene = upsertDashboardQrNode(resizedScene, updatedPayload)
+    const nextNode = nextScene.nodes[0]
+
+    expect(nextNode.rotation).toBe(18)
+    expect(nextNode.scale).toBe(resizedNode.scale)
+    expect(nextNode.naturalWidth).toBe(480)
+    expect(nextNode.naturalHeight).toBe(480)
+    expect(nextNode.x).toBeCloseTo(resizedNode.x)
+    expect(nextNode.y).toBeCloseTo(resizedNode.y)
+  })
+
   it("resets both the dashboard camera and qr transform to the centered defaults", () => {
     const seededScene = upsertDashboardQrNode(
       createDashboardComposeScene(),
@@ -141,5 +176,17 @@ describe("dashboard compose scene helpers", () => {
     expect(resetNode.x).toBeCloseTo(seededScene.nodes[0].x)
     expect(resetNode.y).toBeCloseTo(seededScene.nodes[0].y)
     expect(resetNode.scale).toBeCloseTo(seededScene.nodes[0].scale)
+  })
+
+  it("normalizes negative rotation updates into positive degrees", () => {
+    const seededScene = upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD)
+
+    const rotatedScene = updateDashboardComposeNode(
+      seededScene,
+      DASHBOARD_QR_NODE_ID,
+      { rotation: -90 },
+    )
+
+    expect(rotatedScene.nodes[0]?.rotation).toBe(270)
   })
 })

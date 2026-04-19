@@ -21,12 +21,15 @@ import {
   updateDashboardComposeCamera,
   updateDashboardComposeNode,
 } from "@/components/qr/dashboard-compose-scene"
+import { clampQrSize } from "@/components/qr/qr-studio-state"
 import { Button } from "@/components/ui/button"
 
 type DashboardComposeSurfaceProps = {
   errorMessage?: string | null
   onReset: () => void
+  onQrSizeChange: (nextSize: number) => void
   onSceneChange: React.Dispatch<React.SetStateAction<DashboardComposeScene>>
+  qrSize: number
   scene: DashboardComposeScene
 }
 
@@ -50,11 +53,10 @@ type Interaction =
       kind: "resize-node"
       centerX: number
       centerY: number
-      naturalHeight: number
-      naturalWidth: number
       nodeId: string
+      qrSize: number
+      scale: number
       startDistance: number
-      startScale: number
     }
   | {
       kind: "rotate-node"
@@ -68,7 +70,9 @@ type Interaction =
 export function DashboardComposeSurface({
   errorMessage,
   onReset,
+  onQrSizeChange,
   onSceneChange,
+  qrSize,
   scene,
 }: DashboardComposeSurfaceProps) {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(DASHBOARD_QR_NODE_ID)
@@ -132,20 +136,23 @@ export function DashboardComposeSurface({
           1,
           Math.hypot(worldPoint.x - interaction.centerX, worldPoint.y - interaction.centerY),
         )
-        const nextScale = Math.max(
-          0.1,
-          interaction.startScale * (nextDistance / interaction.startDistance),
-        )
-        const nextWidth = interaction.naturalWidth * nextScale
-        const nextHeight = interaction.naturalHeight * nextScale
+        const nextSize = getNextDashboardQrSize({
+          nextDistance,
+          startDistance: interaction.startDistance,
+          startSize: interaction.qrSize,
+        })
+        const nextWidth = nextSize * interaction.scale
+        const nextHeight = nextSize * interaction.scale
 
         onSceneChange((current) =>
           updateDashboardComposeNode(current, interaction.nodeId, {
-            scale: nextScale,
+            naturalHeight: nextSize,
+            naturalWidth: nextSize,
             x: interaction.centerX - nextWidth * 0.5,
             y: interaction.centerY - nextHeight * 0.5,
           }),
         )
+        onQrSizeChange(nextSize)
         return
       }
 
@@ -176,7 +183,7 @@ export function DashboardComposeSurface({
       window.removeEventListener("pointermove", onPointerMove)
       window.removeEventListener("pointerup", onPointerUp)
     }
-  }, [onSceneChange, scene])
+  }, [onQrSizeChange, onSceneChange, scene])
 
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
     event.preventDefault()
@@ -193,6 +200,33 @@ export function DashboardComposeSurface({
       ...current,
       camera: computeDashboardZoomedCamera(current, current.camera.zoom * multiplier, anchor),
     }))
+  }
+
+  const startResizeInteraction = (
+    event: ReactPointerEvent<HTMLButtonElement>,
+    node: DashboardComposeScene["nodes"][number],
+    width: number,
+    height: number,
+  ) => {
+    event.stopPropagation()
+    const centerX = node.x + width * 0.5
+    const centerY = node.y + height * 0.5
+    const worldPoint = getWorldPoint(event.nativeEvent, canvasRef.current, scene)
+
+    if (!worldPoint) {
+      return
+    }
+
+    setSelectedNodeId(node.id)
+    interactionRef.current = {
+      kind: "resize-node",
+      nodeId: node.id,
+      centerX,
+      centerY,
+      qrSize: node.naturalWidth,
+      scale: node.scale,
+      startDistance: Math.max(1, Math.hypot(worldPoint.x - centerX, worldPoint.y - centerY)),
+    }
   }
 
   return (
@@ -327,7 +361,7 @@ export function DashboardComposeSurface({
                         className="absolute left-0 top-0 cursor-grab active:cursor-grabbing"
                         style={{
                           height: `${(height / scene.canvasSize.height) * 100}%`,
-                          transform: `translate(${(node.x / scene.canvasSize.width) * 100}%, ${(node.y / scene.canvasSize.height) * 100}%) rotate(${node.rotation}deg)`,
+                          transform: `translate(${node.x}px, ${node.y}px) rotate(${node.rotation}deg)`,
                           transformOrigin: "center center",
                           width: `${(width / scene.canvasSize.width) * 100}%`,
                         }}
@@ -359,8 +393,8 @@ export function DashboardComposeSurface({
                           {isSelected ? (
                             <>
                               <div className="pointer-events-none absolute inset-[-10px] rounded-[2px] border border-sky-600 shadow-[0_0_0_1px_rgba(255,255,255,0.72)]" />
-                              <div className="pointer-events-none absolute left-1/2 top-[-2.75rem] -translate-x-1/2 rounded-full border border-slate-300/90 bg-white/92 px-3 py-1 text-[0.72rem] font-semibold text-slate-600 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)]">
-                                {Math.round(width)} × {Math.round(height)}
+                              <div className="pointer-events-none absolute bottom-[-2.75rem] left-1/2 -translate-x-1/2 rounded-full border border-slate-300/90 bg-white/92 px-3 py-1 text-[0.72rem] font-semibold text-slate-600 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)]">
+                                {Math.round(qrSize)} × {Math.round(qrSize)}
                               </div>
                               {isRotating ? (
                                 <div className="pointer-events-none absolute left-1/2 top-[-4.7rem] -translate-x-1/2 rounded-full border border-slate-300/90 bg-white/92 px-2 py-1 text-[0.72rem] font-semibold text-slate-600 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)]">
@@ -404,42 +438,37 @@ export function DashboardComposeSurface({
                                   }
                                 }}
                               />
-                              <CornerHandle className="left-[-0.9rem] top-[-0.9rem]" />
-                              <CornerHandle className="right-[-0.9rem] top-[-0.9rem]" />
-                              <CornerHandle className="bottom-[-0.9rem] left-[-0.9rem]" />
                               <HandleButton
-                                ariaLabel="Resize QR"
+                                ariaLabel="Resize QR from top left"
+                                className="left-[-0.9rem] top-[-0.9rem]"
+                                icon={null}
+                                onPointerDown={(event) =>
+                                  startResizeInteraction(event, node, width, height)
+                                }
+                              />
+                              <HandleButton
+                                ariaLabel="Resize QR from top right"
+                                className="right-[-0.9rem] top-[-0.9rem]"
+                                icon={null}
+                                onPointerDown={(event) =>
+                                  startResizeInteraction(event, node, width, height)
+                                }
+                              />
+                              <HandleButton
+                                ariaLabel="Resize QR from bottom left"
+                                className="bottom-[-0.9rem] left-[-0.9rem]"
+                                icon={null}
+                                onPointerDown={(event) =>
+                                  startResizeInteraction(event, node, width, height)
+                                }
+                              />
+                              <HandleButton
+                                ariaLabel="Resize QR from bottom right"
                                 className="bottom-[-0.9rem] right-[-0.9rem]"
                                 icon={null}
-                                onPointerDown={(event) => {
-                                  event.stopPropagation()
-                                  const centerX = node.x + width * 0.5
-                                  const centerY = node.y + height * 0.5
-                                  const worldPoint = getWorldPoint(
-                                    event.nativeEvent,
-                                    canvasRef.current,
-                                    scene,
-                                  )
-
-                                  if (!worldPoint) {
-                                    return
-                                  }
-
-                                  setSelectedNodeId(node.id)
-                                  interactionRef.current = {
-                                    kind: "resize-node",
-                                    nodeId: node.id,
-                                    centerX,
-                                    centerY,
-                                    naturalHeight: node.naturalHeight,
-                                    naturalWidth: node.naturalWidth,
-                                    startDistance: Math.max(
-                                      1,
-                                      Math.hypot(worldPoint.x - centerX, worldPoint.y - centerY),
-                                    ),
-                                    startScale: node.scale,
-                                  }
-                                }}
+                                onPointerDown={(event) =>
+                                  startResizeInteraction(event, node, width, height)
+                                }
                               />
                             </>
                           ) : null}
@@ -508,15 +537,6 @@ function HandleButton({
   )
 }
 
-function CornerHandle({ className }: { className: string }) {
-  return (
-    <div
-      aria-hidden="true"
-      className={`pointer-events-none absolute h-5 w-5 rounded-[0.45rem] border border-sky-600 bg-white shadow-[0_8px_20px_-18px_rgba(15,23,42,0.9)] ${className}`}
-    />
-  )
-}
-
 function getWorldPoint(
   event: Pick<PointerEvent, "clientX" | "clientY">,
   canvas: HTMLDivElement | null,
@@ -535,4 +555,20 @@ function getWorldPoint(
     x: (localX - scene.camera.panX) / scene.camera.zoom,
     y: (localY - scene.camera.panY) / scene.camera.zoom,
   }
+}
+
+export function getNextDashboardQrSize({
+  nextDistance,
+  startDistance,
+  startSize,
+}: {
+  nextDistance: number
+  startDistance: number
+  startSize: number
+}) {
+  if (!Number.isFinite(nextDistance) || !Number.isFinite(startDistance) || startDistance <= 0) {
+    return clampQrSize(startSize)
+  }
+
+  return clampQrSize(startSize * (nextDistance / startDistance))
 }
