@@ -180,60 +180,64 @@ async function renderLogoWidth(imageSize: number) {
   return Number.parseFloat(logoImage?.getAttribute("width") ?? "0")
 }
 
+function getDotRects(svg: StubElement) {
+  return walk(svg)
+    .filter(
+      (node) =>
+        node.tagName === "rect" &&
+        node.parentNode?.tagName === "clipPath" &&
+        (node.parentNode.getAttribute("id") ?? "").startsWith("clip-path-dot-color-"),
+    )
+    .map((node) => ({
+      x: Number.parseFloat(node.getAttribute("x") ?? "0"),
+      y: Number.parseFloat(node.getAttribute("y") ?? "0"),
+      width: Number.parseFloat(node.getAttribute("width") ?? "0"),
+      height: Number.parseFloat(node.getAttribute("height") ?? "0"),
+    }))
+}
+
+function getRectFromImage(image: StubElement) {
+  return {
+    x: Number.parseFloat(image.getAttribute("x") ?? "0"),
+    y: Number.parseFloat(image.getAttribute("y") ?? "0"),
+    width: Number.parseFloat(image.getAttribute("width") ?? "0"),
+    height: Number.parseFloat(image.getAttribute("height") ?? "0"),
+  }
+}
+
 afterEach(() => {
   globalThis.window = originalWindow
   globalThis.XMLSerializer = originalXMLSerializer
 })
 
-describe("qr-code-styling patch integration", () => {
-  it("records qr-code-styling as a checked-in patched dependency", () => {
+describe("qr-code-styling logo geometry integration", () => {
+  it("does not declare a checked-in patch for qr-code-styling", () => {
     const workspaceConfig = readFileSync(
       resolve(process.cwd(), "pnpm-workspace.yaml"),
       "utf8",
     )
 
-    expect(workspaceConfig).toContain("patchedDependencies:")
-    expect(workspaceConfig).toContain(
-      "qr-code-styling@1.9.2: patches/qr-code-styling@1.9.2.patch",
-    )
+    expect(workspaceConfig).not.toContain("patchedDependencies:")
+    expect(workspaceConfig).not.toContain("qr-code-styling@1.9.2")
   })
 
-  it("renders different logo widths for nearby imageSize values", async () => {
+  it("allows nearby imageSize values to resolve to the same snapped logo width", async () => {
     const smallerWidth = await renderLogoWidth(0.33)
     const largerWidth = await renderLogoWidth(0.331)
 
-    expect(largerWidth).toBeGreaterThan(smallerWidth)
+    expect(largerWidth).toBe(smallerWidth)
   })
 
   it("clears all QR modules from the rendered logo bounds", async () => {
     const svg = await renderSvgForOverlapCheck()
     expect(svg).toBeDefined()
 
-    const nodes = svg ? walk(svg) : []
     const logoImage = svg ? getLogoImage(svg) : null
 
     expect(logoImage).toBeDefined()
 
-    const logoBounds = {
-      x: Number.parseFloat(logoImage?.getAttribute("x") ?? "0"),
-      y: Number.parseFloat(logoImage?.getAttribute("y") ?? "0"),
-      width: Number.parseFloat(logoImage?.getAttribute("width") ?? "0"),
-      height: Number.parseFloat(logoImage?.getAttribute("height") ?? "0"),
-    }
-
-    const dotRects = nodes
-      .filter(
-        (node) =>
-          node.tagName === "rect" &&
-          node.parentNode?.tagName === "clipPath" &&
-          (node.parentNode.getAttribute("id") ?? "").startsWith("clip-path-dot-color-"),
-      )
-      .map((node) => ({
-        x: Number.parseFloat(node.getAttribute("x") ?? "0"),
-        y: Number.parseFloat(node.getAttribute("y") ?? "0"),
-        width: Number.parseFloat(node.getAttribute("width") ?? "0"),
-        height: Number.parseFloat(node.getAttribute("height") ?? "0"),
-      }))
+    const logoBounds = getRectFromImage(logoImage as StubElement)
+    const dotRects = svg ? getDotRects(svg) : []
 
     const overlappingDots = dotRects.filter((dotRect) =>
       intersects(dotRect, logoBounds),

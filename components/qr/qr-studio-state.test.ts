@@ -185,6 +185,17 @@ describe("qr studio state helpers", () => {
     expect(options.image).toBe("https://example.com/logo.png");
   });
 
+  it("keeps upstream logo size coefficients within the full 0 to 1 range", () => {
+    const zeroSizeState = createDefaultQrStudioState();
+    zeroSizeState.imageOptions.imageSize = -0.2;
+
+    const fullSizeState = createDefaultQrStudioState();
+    fullSizeState.imageOptions.imageSize = 1.4;
+
+    expect(toQrCodeOptions(zeroSizeState).imageOptions?.imageSize).toBe(0);
+    expect(toQrCodeOptions(fullSizeState).imageOptions?.imageSize).toBe(1);
+  });
+
   it("maps preset logo assets onto the upstream image field", () => {
     const state = createDefaultQrStudioState();
     state.logo = {

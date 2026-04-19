@@ -602,6 +602,7 @@ describe("QrControlSections", () => {
     expect(markup).toContain('data-slot="logo-size-slider"')
     expect(markup).toContain("40%")
     expect(markup).toContain("Logo margin")
+    expect(markup).toContain('data-slot="logo-margin-slider"')
     expect(markup).toContain("Hide background dots")
     expect(markup).toContain("Save embedded image as blob")
   })

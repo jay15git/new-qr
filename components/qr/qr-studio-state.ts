@@ -220,7 +220,7 @@ export function toQrCodeOptions(state: QrStudioState): Options {
     },
     imageOptions: {
       ...state.imageOptions,
-      imageSize: coerceNumber(state.imageOptions.imageSize, 0.1, 0.5, 0.4),
+      imageSize: coerceNumber(state.imageOptions.imageSize, 0, 1, 0.4),
       margin: coerceNumber(state.imageOptions.margin, 0, 40, 12),
     },
     dotsOptions: {

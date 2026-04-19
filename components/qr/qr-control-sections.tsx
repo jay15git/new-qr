@@ -1477,21 +1477,23 @@ export function QrControlSections({
                   data-slot="logo-size-slider"
                   id="logo-size"
                   label="Logo size"
-                  formatValue={(value) => `${(value * 100).toFixed(0)}%`}
-                  max={0.5}
-                  min={0.1}
+                  formatValue={(value) => `${Math.round(value)}%`}
+                  max={100}
+                  min={0}
                   onChange={(value) =>
                     setState((current) => ({
                       ...current,
                       imageOptions: {
                         ...current.imageOptions,
-                        imageSize: Array.isArray(value) ? value[0] : value,
+                        imageSize:
+                          (Array.isArray(value) ? value[0] : value) / 100,
                       },
                     }))
                   }
+                  showSteps
                   showValue
-                  step={0.01}
-                  value={state.imageOptions.imageSize}
+                  step={10}
+                  value={state.imageOptions.imageSize * 100}
                 />
                 {!isDashboardMode ? (
                   <FieldDescription>
@@ -1500,19 +1502,28 @@ export function QrControlSections({
                 ) : null}
               </Field>
 
-              <NumberField
-                id="logo-margin"
-                label="Logo margin"
-                max={40}
-                min={0}
-                onValueChange={(value) =>
-                  setState((current) => ({
-                    ...current,
-                    imageOptions: { ...current.imageOptions, margin: value },
-                  }))
-                }
-                value={state.imageOptions.margin}
-              />
+              <Field>
+                <UnlumenSlider
+                  data-slot="logo-margin-slider"
+                  id="logo-margin"
+                  label="Logo margin"
+                  formatValue={(value) => `${Math.round(value)} px`}
+                  max={40}
+                  min={0}
+                  onChange={(value) =>
+                    setState((current) => ({
+                      ...current,
+                      imageOptions: {
+                        ...current.imageOptions,
+                        margin: Array.isArray(value) ? value[0] : value,
+                      },
+                    }))
+                  }
+                  showValue
+                  step={1}
+                  value={state.imageOptions.margin}
+                />
+              </Field>
 
               <Field orientation="horizontal">
                 <FieldContent>
