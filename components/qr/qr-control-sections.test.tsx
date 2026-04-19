@@ -83,7 +83,7 @@ describe("QrControlSections", () => {
     )
   })
 
-  it("keeps the corner style pickers on dedicated icon previews", () => {
+  it("keeps the corner dot picker on icon previews and renders finder-frame previews for corner squares", () => {
     const cornerSquareMarkup = renderToStaticMarkup(
       <QrControlSections {...baseProps} activeSection="corner-square" />,
     )
@@ -91,12 +91,34 @@ describe("QrControlSections", () => {
       <QrControlSections {...baseProps} activeSection="corner-dot" />,
     )
 
-    expect(cornerSquareMarkup).toContain('data-slot="style-preview-icon"')
     expect(cornerSquareMarkup).toContain('data-preview-kind="corner-square"')
+    expect(cornerSquareMarkup).toContain('data-slot="style-preview-corner-square"')
+    expect(cornerSquareMarkup).toContain('data-slot="style-preview-corner-square-frame"')
+    expect(cornerSquareMarkup).toContain('data-slot="style-preview-corner-square-cutout"')
+    expect(cornerSquareMarkup).not.toContain('data-slot="style-preview-icon"')
     expect(cornerSquareMarkup).not.toContain('data-slot="style-preview-fragment"')
     expect(cornerDotMarkup).toContain('data-slot="style-preview-icon"')
     expect(cornerDotMarkup).toContain('data-preview-kind="corner-dot"')
     expect(cornerDotMarkup).not.toContain('data-slot="style-preview-fragment"')
+  })
+
+  it("renders distinct corner-square finder-frame variants in the style picker", () => {
+    const markup = renderToStaticMarkup(
+      <QrControlSections {...baseProps} activeSection="corner-square" />,
+    )
+
+    expect(markup).toMatch(
+      /data-preview-style="square"[\s\S]*?data-corner-frame-variant="square"/,
+    )
+    expect(markup).toMatch(
+      /data-preview-style="extra-rounded"[\s\S]*?data-corner-frame-variant="extra-rounded"/,
+    )
+    expect(markup).toMatch(
+      /data-preview-style="dot"[\s\S]*?data-corner-frame-variant="dot"/,
+    )
+    expect(markup).toMatch(
+      /data-preview-style="classy-rounded"[\s\S]*?data-corner-frame-variant="classy-rounded"/,
+    )
   })
 
   it("renders the dashboard color tab as a mutually exclusive accordion", () => {

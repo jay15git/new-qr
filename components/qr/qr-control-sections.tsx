@@ -2483,6 +2483,10 @@ function StylePreview({
   previewKind: StylePreviewKind
   value: string
 }) {
+  if (previewKind === "corner-square") {
+    return <CornerSquareStylePreview value={value as CornerSquareType} />
+  }
+
   if (previewKind !== "dots") {
     return <StyleIconPreview previewKind={previewKind} value={value} />
   }
@@ -2532,6 +2536,230 @@ function StylePreview({
       )}
     </svg>
   )
+}
+
+function CornerSquareStylePreview({
+  value,
+}: {
+  value: CornerSquareType
+}) {
+  const maskId = `corner-square-preview-mask-${value}`
+
+  return (
+    <svg
+      aria-hidden="true"
+      className="size-16 text-foreground/80"
+      data-preview-kind="corner-square"
+      data-preview-style={value}
+      data-slot="style-preview-corner-square"
+      fill="none"
+      viewBox="0 0 48 48"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect
+        fill="currentColor"
+        height={40}
+        opacity={0.08}
+        rx={12}
+        width={40}
+        x={4}
+        y={4}
+      />
+      <defs>
+        <mask id={maskId}>
+          <rect fill="white" height={48} width={48} />
+          <CornerSquareCutout value={value} />
+        </mask>
+      </defs>
+      <g
+        data-corner-frame-variant={value}
+        data-slot="style-preview-corner-square-frame"
+        fill="currentColor"
+        mask={`url(#${maskId})`}
+      >
+        <CornerSquareFrame value={value} />
+      </g>
+    </svg>
+  )
+}
+
+function CornerSquareFrame({
+  value,
+}: {
+  value: CornerSquareType
+}) {
+  switch (value) {
+    case "dot":
+      return (
+        <circle
+          cx={24}
+          cy={24}
+          data-slot="style-preview-native-module"
+          r={14}
+        />
+      )
+    case "dots":
+      return (
+        <>
+          {[
+            [16, 12],
+            [24, 10.5],
+            [32, 12],
+            [36, 16],
+            [37.5, 24],
+            [36, 32],
+            [32, 36],
+            [24, 37.5],
+            [16, 36],
+            [12, 32],
+            [10.5, 24],
+            [12, 16],
+          ].map(([cx, cy], index) => (
+            <circle
+              key={`${value}-${index}`}
+              cx={cx}
+              cy={cy}
+              data-slot="style-preview-native-module"
+              r={3}
+            />
+          ))}
+        </>
+      )
+    case "classy":
+      return (
+        <path
+          data-slot="style-preview-native-module"
+          d="M 12 10 H 31 Q 38 10 38 17 V 30 Q 38 38 30 38 H 17 Q 10 38 10 31 V 10 Z"
+          fillRule="nonzero"
+        />
+      )
+    case "classy-rounded":
+      return (
+        <path
+          data-slot="style-preview-native-module"
+          d="M 15 10.5 H 30 Q 37.5 10.5 37.5 18 V 30 Q 37.5 37.5 30 37.5 H 18 Q 10.5 37.5 10.5 30 V 15 Q 10.5 10.5 15 10.5 Z"
+          fillRule="nonzero"
+        />
+      )
+    case "rounded":
+      return (
+        <rect
+          data-slot="style-preview-native-module"
+          height={28}
+          rx={7}
+          width={28}
+          x={10}
+          y={10}
+        />
+      )
+    case "extra-rounded":
+      return (
+        <rect
+          data-slot="style-preview-native-module"
+          height={28}
+          rx={10}
+          width={28}
+          x={10}
+          y={10}
+        />
+      )
+    case "square":
+    default:
+      return (
+        <rect
+          data-slot="style-preview-native-module"
+          height={28}
+          rx={2.5}
+          width={28}
+          x={10}
+          y={10}
+        />
+      )
+  }
+}
+
+function CornerSquareCutout({
+  value,
+}: {
+  value: CornerSquareType
+}) {
+  switch (value) {
+    case "dot":
+      return (
+        <circle
+          cx={24}
+          cy={24}
+          data-slot="style-preview-corner-square-cutout"
+          fill="black"
+          r={6.75}
+        />
+      )
+    case "dots":
+      return (
+        <rect
+          data-slot="style-preview-corner-square-cutout"
+          fill="black"
+          height={12}
+          rx={3}
+          width={12}
+          x={18}
+          y={18}
+        />
+      )
+    case "classy":
+      return (
+        <path
+          data-slot="style-preview-corner-square-cutout"
+          d="M 19 17.5 H 27 Q 31 17.5 31 21.5 V 26 Q 31 30.5 26.5 30.5 H 21.5 Q 17 30.5 17 26 V 17.5 Z"
+          fill="black"
+        />
+      )
+    case "classy-rounded":
+      return (
+        <path
+          data-slot="style-preview-corner-square-cutout"
+          d="M 20 18 H 26 Q 30 18 30 22 V 26 Q 30 30 26 30 H 22 Q 18 30 18 26 V 20 Q 18 18 20 18 Z"
+          fill="black"
+        />
+      )
+    case "rounded":
+      return (
+        <rect
+          data-slot="style-preview-corner-square-cutout"
+          fill="black"
+          height={12}
+          rx={3.5}
+          width={12}
+          x={18}
+          y={18}
+        />
+      )
+    case "extra-rounded":
+      return (
+        <rect
+          data-slot="style-preview-corner-square-cutout"
+          fill="black"
+          height={12}
+          rx={5}
+          width={12}
+          x={18}
+          y={18}
+        />
+      )
+    case "square":
+    default:
+      return (
+        <rect
+          data-slot="style-preview-corner-square-cutout"
+          fill="black"
+          height={12}
+          rx={1.5}
+          width={12}
+          x={18}
+          y={18}
+        />
+      )
+  }
 }
 
 function DotPreviewShape({

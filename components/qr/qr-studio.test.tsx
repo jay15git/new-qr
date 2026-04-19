@@ -21,7 +21,7 @@ vi.mock("@/components/qr/qr-control-sections", () => ({
 import { QrStudio } from "@/components/qr/qr-studio"
 
 describe("QrStudio", () => {
-  it("renders the dashboard as a full-height three-pane shell with scrollable settings controls", () => {
+  it("renders the dashboard as a full-height three-pane shell with the preview pane itself acting as the compose surface", () => {
     const markup = renderToStaticMarkup(<QrStudio variant="dashboard" />)
 
     expect(markup).toContain('aria-label="QR editor dashboard"')
@@ -37,8 +37,13 @@ describe("QrStudio", () => {
     expect(markup).toContain("pb-10")
     expect(markup).toContain('data-direction="0"')
     expect(markup).toContain('data-slot="dashboard-preview-pane"')
-    expect(markup).toContain('data-slot="dashboard-preview-canvas"')
-    expect(markup).toContain('data-slot="dashboard-preview-footer"')
+    expect(markup).toContain('data-slot="dashboard-compose-surface"')
+    expect(markup).toContain('data-slot="dashboard-compose-controls"')
+    expect(markup).toContain('data-slot="dashboard-compose-viewport"')
+    expect(markup).toContain('data-slot="dashboard-compose-reset"')
+    expect(markup).toContain(
+      'data-slot="dashboard-compose-controls" class="pointer-events-none absolute inset-x-5 bottom-4 z-20 flex justify-center px-2 sm:inset-x-6 lg:inset-x-8"',
+    )
     expect(markup).toContain('aria-label="Export controls"')
     expect(markup).toContain("lg:grid-cols-[5.75rem_minmax(22rem,29rem)_minmax(24rem,1fr)]")
     expect(markup).toContain("xl:grid-cols-[6rem_minmax(24rem,31rem)_minmax(26rem,1fr)]")
@@ -48,7 +53,17 @@ describe("QrStudio", () => {
     expect(markup).toContain("Download")
     expect(markup).toContain("Reset defaults")
     expect(markup).toContain("min-h-screen")
+    expect(markup).not.toContain('data-slot="dashboard-compose-meta"')
+    expect(markup).not.toContain('data-slot="dashboard-compose-frame"')
+    expect(markup).not.toContain('data-slot="dashboard-compose-label"')
+    expect(markup).not.toContain('data-slot="dashboard-compose-size"')
+    expect(markup).not.toContain('data-slot="dashboard-proof-stage"')
+    expect(markup).not.toContain('data-slot="dashboard-preview-footer"')
+    expect(markup).not.toContain('data-slot="dashboard-preview-shell"')
+    expect(markup).not.toContain("aspect-square")
+    expect(markup).not.toContain("Compose surface")
     expect(markup).not.toContain("Content")
+    expect(markup).not.toContain("960 × 640")
     expect(markup).not.toContain(">Dashboard<")
     expect(markup).not.toContain(">QR Studio<")
     expect(markup).not.toContain("lg:grid-cols-[6.5rem_minmax(20rem,26rem)_minmax(22rem,1fr)]")

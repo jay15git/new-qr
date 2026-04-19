@@ -21,6 +21,13 @@ import {
 } from "@/components/qr/qr-sections"
 import { QrSectionRail } from "@/components/qr/qr-section-rail"
 import { QrControlSections } from "@/components/qr/qr-control-sections"
+import { DashboardComposeSurface } from "@/components/qr/dashboard-compose-surface"
+import {
+  createDashboardComposeScene,
+  type DashboardComposeScene,
+  upsertDashboardQrNode,
+} from "@/components/qr/dashboard-compose-scene"
+import { buildDashboardQrNodePayload } from "@/components/qr/dashboard-qr-svg"
 import { QrPreviewCard } from "@/components/qr/qr-preview-card"
 import { buildQrExtension, getQrExtensionKey } from "@/components/qr/qr-rendering"
 import { Button } from "@/components/ui/button"
@@ -71,6 +78,9 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [activeSection, setActiveSection] =
     useState<QrEditorSectionId>(DEFAULT_QR_EDITOR_SECTION)
+  const [dashboardScene, setDashboardScene] = useState<DashboardComposeScene>(() =>
+    createDashboardComposeScene(),
+  )
   const [sectionDirection, setSectionDirection] =
     useState<QrEditorSectionDirection>(0)
 
@@ -79,6 +89,7 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
   const initialStateRef = useRef(state)
   const qrCodeRef = useRef<QRCodeStyling | null>(null)
   const qrExtensionKeyRef = useRef(getQrExtensionKey(state))
+  const dashboardPayloadRequestRef = useRef(0)
   const uploadedAssetUrlsRef = useRef<Record<UploadedAssetKey, string | null>>({
     logo: null,
     backgroundImage: null,
@@ -88,28 +99,24 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
 
   useEffect(() => {
     const previewElement = previewRef.current
-
-    if (!previewElement) {
-      return
-    }
-
     const qrCode = createQrCodeInstance(initialStateRef.current)
     qrCodeRef.current = qrCode
     qrExtensionKeyRef.current = getQrExtensionKey(initialStateRef.current)
-    previewElement.replaceChildren()
-    qrCode.append(previewElement)
+    previewElement?.replaceChildren()
+
+    if (previewElement) {
+      qrCode.append(previewElement)
+    }
 
     return () => {
-      previewElement.replaceChildren()
+      previewElement?.replaceChildren()
       qrCodeRef.current = null
       cleanupUploadedAssets(uploadedAssetUrlsRef)
     }
   }, [])
 
   useEffect(() => {
-    const previewElement = previewRef.current
-
-    if (!qrCodeRef.current || !previewElement) {
+    if (!qrCodeRef.current) {
       return
     }
 
@@ -118,11 +125,15 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
 
       if (nextExtensionKey !== qrExtensionKeyRef.current) {
         const qrCode = createQrCodeInstance(deferredState)
+        const previewElement = previewRef.current
 
         qrCodeRef.current = qrCode
         qrExtensionKeyRef.current = nextExtensionKey
-        previewElement.replaceChildren()
-        qrCode.append(previewElement)
+
+        if (previewElement) {
+          previewElement.replaceChildren()
+          qrCode.append(previewElement)
+        }
       } else {
         qrCodeRef.current.update(toQrCodeOptions(deferredState))
       }
@@ -134,6 +145,33 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
       })
     }
   }, [deferredState])
+
+  useEffect(() => {
+    if (variant !== "dashboard") {
+      return
+    }
+
+    const requestId = ++dashboardPayloadRequestRef.current
+
+    void buildDashboardQrNodePayload(deferredState)
+      .then((payload) => {
+        if (dashboardPayloadRequestRef.current !== requestId) {
+          return
+        }
+
+        setDashboardScene((current) => upsertDashboardQrNode(current, payload))
+        queueMicrotask(() => setErrorMessage(null))
+      })
+      .catch(() => {
+        if (dashboardPayloadRequestRef.current !== requestId) {
+          return
+        }
+
+        queueMicrotask(() => {
+          setErrorMessage("The preview could not be updated with the current settings.")
+        })
+      })
+  }, [deferredState, variant])
 
   async function handleDownload(extension: FileExtension) {
     if (!qrCodeRef.current) {
@@ -184,6 +222,7 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
   function handleReset() {
     cleanupUploadedAssets(uploadedAssetUrlsRef)
     setDownloadName(DEFAULT_DOWNLOAD_NAME)
+    setDashboardScene(createDashboardComposeScene())
     setState(createDefaultQrStudioState())
     setErrorMessage(null)
   }
@@ -198,7 +237,6 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
       onReset={handleReset}
       previewRef={previewRef}
       state={state}
-      variant={variant}
     />
   )
 
@@ -365,10 +403,15 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
 
               <section
                 data-slot="dashboard-preview-pane"
-                className="min-w-0 border-t border-white/6 bg-[linear-gradient(180deg,color-mix(in_oklch,var(--color-muted)_14%,transparent),color-mix(in_oklch,var(--color-background)_92%,black_8%))] lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:border-l lg:border-white/6 lg:border-t-0"
+                className="min-w-0 overflow-hidden border-t border-white/6 bg-[linear-gradient(180deg,color-mix(in_oklch,var(--color-muted)_14%,transparent),color-mix(in_oklch,var(--color-background)_92%,black_8%))] lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:border-l lg:border-white/6 lg:border-t-0"
                 aria-label="Preview"
               >
-                <div className="h-full min-h-[22rem] lg:h-full">{previewCard}</div>
+                <DashboardComposeSurface
+                  errorMessage={errorMessage}
+                  onReset={handleReset}
+                  onSceneChange={setDashboardScene}
+                  scene={dashboardScene}
+                />
               </section>
             </section>
           </div>

@@ -9,6 +9,7 @@ export default defineConfig({
     },
   },
   test: {
+    exclude: [".portable-compose-editor/**", "node_modules/**", ".next/**"],
     environment: "node",
   },
 });
