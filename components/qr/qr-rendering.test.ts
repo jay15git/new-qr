@@ -101,6 +101,18 @@ function createStubElement(tagName: string): StubElement {
 }
 
 describe("qr rendering helpers", () => {
+  it("keeps logo-only changes on the upstream image path instead of the extension pipeline", () => {
+    const defaultState = createDefaultQrStudioState()
+    const stateWithLogo = createDefaultQrStudioState()
+    stateWithLogo.logo = {
+      source: "url",
+      value: "https://example.com/logo.png",
+    }
+
+    expect(buildQrExtension(stateWithLogo)).toBeNull()
+    expect(getQrExtensionKey(stateWithLogo)).toBe(getQrExtensionKey(defaultState))
+  })
+
   it("changes the extension key when a background image is active", () => {
     const defaultState = createDefaultQrStudioState()
     const stateWithBackgroundImage = createDefaultQrStudioState()

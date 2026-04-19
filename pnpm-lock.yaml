@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  qr-code-styling@1.9.2:
+    hash: 24ddd3681868dfa5015a34e8212d346d4bcc5d7b304e97494ce5619afd413e93
+    path: patches/qr-code-styling@1.9.2.patch
+
 importers:
 
   .:
@@ -76,7 +81,7 @@ importers:
         version: 1.0.11
       qr-code-styling:
         specifier: ^1.9.2
-        version: 1.9.2
+        version: 1.9.2(patch_hash=24ddd3681868dfa5015a34e8212d346d4bcc5d7b304e97494ce5619afd413e93)
       qrcode-generator:
         specifier: ^2.0.4
         version: 2.0.4
@@ -9087,7 +9092,7 @@ snapshots:
 
   punycode@2.3.1: {}
 
-  qr-code-styling@1.9.2:
+  qr-code-styling@1.9.2(patch_hash=24ddd3681868dfa5015a34e8212d346d4bcc5d7b304e97494ce5619afd413e93):
     dependencies:
       qrcode-generator: 1.5.2
 

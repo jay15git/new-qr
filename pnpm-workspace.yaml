@@ -3,3 +3,5 @@ ignoredBuiltDependencies:
   - unrs-resolver
 onlyBuiltDependencies:
   - msw
+patchedDependencies:
+  qr-code-styling@1.9.2: patches/qr-code-styling@1.9.2.patch
