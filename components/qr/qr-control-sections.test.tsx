@@ -66,6 +66,39 @@ describe("QrControlSections", () => {
     )
   })
 
+  it("renders qr-fragment previews for the dashboard dot styles", () => {
+    const markup = renderToStaticMarkup(
+      <QrControlSections {...baseProps} activeSection="style" />,
+    )
+
+    expect(markup).toContain('data-slot="style-preview-fragment"')
+    expect(markup).toContain('data-preview-kind="dots"')
+    expect(markup).toContain("min-h-28")
+    expect(markup).toContain('class="size-16 text-foreground/80"')
+    expect(markup).toMatch(
+      /data-preview-style="classy"[\s\S]*?data-slot="style-preview-native-module"/,
+    )
+    expect(markup).toMatch(
+      /data-preview-style="classy-rounded"[\s\S]*?data-slot="style-preview-native-module"/,
+    )
+  })
+
+  it("keeps the corner style pickers on dedicated icon previews", () => {
+    const cornerSquareMarkup = renderToStaticMarkup(
+      <QrControlSections {...baseProps} activeSection="corner-square" />,
+    )
+    const cornerDotMarkup = renderToStaticMarkup(
+      <QrControlSections {...baseProps} activeSection="corner-dot" />,
+    )
+
+    expect(cornerSquareMarkup).toContain('data-slot="style-preview-icon"')
+    expect(cornerSquareMarkup).toContain('data-preview-kind="corner-square"')
+    expect(cornerSquareMarkup).not.toContain('data-slot="style-preview-fragment"')
+    expect(cornerDotMarkup).toContain('data-slot="style-preview-icon"')
+    expect(cornerDotMarkup).toContain('data-preview-kind="corner-dot"')
+    expect(cornerDotMarkup).not.toContain('data-slot="style-preview-fragment"')
+  })
+
   it("renders the dashboard color tab as a mutually exclusive accordion", () => {
     const state = createDefaultQrStudioState()
     state.dotsColorMode = "palette"
@@ -459,6 +492,26 @@ describe("QrControlSections", () => {
     expect(markup).not.toContain(
       "The value you enter here is encoded directly into the QR code.",
     )
+  })
+
+  it("uses one square size slider instead of separate width and height controls", () => {
+    const markup = renderToStaticMarkup(
+      <QrControlSections {...baseProps} activeSection="content" />,
+    )
+
+    expect(markup).toContain('data-slot="qr-size-slider"')
+    expect(markup).toContain("Size")
+    expect(markup).not.toContain(">Width<")
+    expect(markup).not.toContain(">Height<")
+  })
+
+  it("uses a slider for outer margin in the content section", () => {
+    const markup = renderToStaticMarkup(
+      <QrControlSections {...baseProps} activeSection="content" />,
+    )
+
+    expect(markup).toContain('data-slot="qr-margin-slider"')
+    expect(markup).toContain("Outer margin")
   })
 
   it("uses the shared file upload component for logo uploads", () => {

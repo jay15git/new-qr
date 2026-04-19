@@ -54,6 +54,11 @@ import {
   normalizeGradientOffsetRange,
   radiansToDegrees,
 } from "@/components/qr/qr-gradient-controls"
+import {
+  DOT_STYLE_PREVIEW_ROWS,
+  getDotStylePreviewNeighbor,
+  isDotStylePreviewDark,
+} from "@/components/qr/qr-style-preview"
 import type { QrEditorSectionId } from "@/components/qr/qr-sections"
 import type {
   AssetSourceMode,
@@ -197,6 +202,7 @@ export function QrControlSections({
   const [activeCornerDotTab, setActiveCornerDotTab] =
     useState<StyleSettingsTabId>(initialCornerDotTab)
   const contentError = state.data.trim() ? null : "Add text or a URL to encode"
+  const qrSize = state.width === state.height ? state.width : Math.max(state.width, state.height)
   const activeCustomDotShape = getActiveCustomDotShape(state.dotsOptions.type)
   const backgroundImageActive = hasBackgroundImage(state)
   const backgroundColorMode = getBackgroundColorMode(state)
@@ -299,6 +305,7 @@ export function QrControlSections({
         }))
       }
       options={DOT_TYPES}
+      previewKind="dots"
       value={state.dotsOptions.type}
     />
   ) : (
@@ -439,6 +446,7 @@ export function QrControlSections({
         }))
       }
       options={CORNER_SQUARE_TYPES}
+      previewKind="corner-square"
       value={state.cornersSquareOptions.type}
     />
   ) : (
@@ -523,6 +531,7 @@ export function QrControlSections({
         }))
       }
       options={CORNER_DOT_TYPES}
+      previewKind="corner-dot"
       value={state.cornersDotOptions.type}
     />
   ) : (
@@ -807,37 +816,50 @@ export function QrControlSections({
                 options={DRAW_TYPES}
                 value={state.type}
               />
-              <NumberField
+            </FieldGroup>
+
+            <Field>
+              <UnlumenSlider
+                data-slot="qr-margin-slider"
                 id="qr-margin"
                 label="Outer margin"
+                formatValue={(value) => `${Math.round(value)} px`}
                 max={80}
                 min={0}
-                onValueChange={(value) =>
-                  setState((current) => ({ ...current, margin: value }))
+                onChange={(value) =>
+                  setState((current) => ({
+                    ...current,
+                    margin: Array.isArray(value) ? value[0] : value,
+                  }))
                 }
+                showValue
+                step={1}
                 value={state.margin}
               />
-              <NumberField
-                id="qr-width"
-                label="Width"
+            </Field>
+
+            <Field>
+              <UnlumenSlider
+                data-slot="qr-size-slider"
+                id="qr-size"
+                label="Size"
+                formatValue={(value) => `${Math.round(value)} px`}
                 max={1200}
                 min={120}
-                onValueChange={(value) =>
-                  setState((current) => ({ ...current, width: value }))
-                }
-                value={state.width}
+                onChange={(value) => {
+                  const nextSize = Array.isArray(value) ? value[0] : value
+
+                  setState((current) => ({
+                    ...current,
+                    height: nextSize,
+                    width: nextSize,
+                  }))
+                }}
+                showValue
+                step={1}
+                value={qrSize}
               />
-              <NumberField
-                id="qr-height"
-                label="Height"
-                max={1200}
-                min={120}
-                onValueChange={(value) =>
-                  setState((current) => ({ ...current, height: value }))
-                }
-                value={state.height}
-              />
-            </FieldGroup>
+            </Field>
           </FieldGroup>
           ),
         })
@@ -2329,12 +2351,14 @@ function VisualStylePicker({
   label,
   onValueChange,
   options,
+  previewKind,
   value,
 }: {
   id: string
   label: string
   onValueChange: (value: string) => void
   options: StyleOption[]
+  previewKind: StylePreviewKind
   value: string
 }) {
   const labelId = `${id}-label`
@@ -2356,12 +2380,12 @@ function VisualStylePicker({
             <label
               key={option.value}
               className={cn(
-                "flex min-h-20 cursor-pointer flex-col items-center justify-center gap-2 rounded-[1.25rem] px-3 py-3 text-center transition-colors",
+                "flex min-h-28 cursor-pointer flex-col items-center justify-center gap-3 rounded-[1.4rem] px-4 py-4 text-center transition-colors",
                 isSelected
                   ? "border border-white/10 bg-white/[0.07] text-foreground"
                   : "border border-transparent bg-white/[0.02] text-muted-foreground hover:bg-white/[0.04] hover:text-foreground/78",
               )}
-            >
+              >
               <input
                 aria-label={option.label}
                 checked={isSelected}
@@ -2371,7 +2395,7 @@ function VisualStylePicker({
                 type="radio"
                 value={option.value}
               />
-              <StylePreview value={option.value} />
+              <StylePreview previewKind={previewKind} value={option.value} />
               <span className={cn("text-xs leading-tight", isSelected && "text-foreground")}>
                 {option.label}
               </span>
@@ -2450,29 +2474,147 @@ function SegmentedOptionPicker({
   )
 }
 
-function StylePreview({ value }: { value: string }) {
+type StylePreviewKind = "corner-dot" | "corner-square" | "dots"
+
+function StylePreview({
+  previewKind,
+  value,
+}: {
+  previewKind: StylePreviewKind
+  value: string
+}) {
+  if (previewKind !== "dots") {
+    return <StyleIconPreview previewKind={previewKind} value={value} />
+  }
+
+  const modulePitch = 5.25
+  const moduleSize = 4.85
+  const start = 5.7
+
   return (
     <svg
       aria-hidden="true"
-      className="size-12 text-foreground/80"
+      className="size-16 text-foreground/80"
+      fill="none"
+      data-preview-kind={previewKind}
+      data-preview-style={value}
+      data-slot="style-preview-fragment"
+      viewBox="0 0 48 48"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect
+        fill="currentColor"
+        height={40}
+        opacity={0.08}
+        rx={12}
+        width={40}
+        x={4}
+        y={4}
+      />
+      {DOT_STYLE_PREVIEW_ROWS.flatMap((row, rowIndex) =>
+        [...row].map((_, columnIndex) => {
+          if (!isDotStylePreviewDark(rowIndex, columnIndex)) {
+            return null
+          }
+
+          return (
+            <DotPreviewShape
+              key={`${rowIndex}-${columnIndex}`}
+              columnIndex={columnIndex}
+              rowIndex={rowIndex}
+              size={moduleSize}
+              value={value}
+              x={start + columnIndex * modulePitch}
+              y={start + rowIndex * modulePitch}
+            />
+          )
+        }),
+      )}
+    </svg>
+  )
+}
+
+function DotPreviewShape({
+  columnIndex,
+  rowIndex,
+  size,
+  value,
+  x,
+  y,
+}: {
+  columnIndex: number
+  rowIndex: number
+  size: number
+  value: string
+  x: number
+  y: number
+}) {
+  if (value === "diamond" || value === "heart") {
+    return (
+      <PreviewShape
+        size={size}
+        slotName="style-preview-custom-module"
+        value={value}
+        x={x}
+        y={y}
+      />
+    )
+  }
+
+  const getNeighbor = (offsetX: number, offsetY: number) =>
+    getDotStylePreviewNeighbor(rowIndex, columnIndex, offsetX, offsetY)
+
+  switch (value) {
+    case "dots":
+      return renderPreviewDotShape("dot", { size, x, y })
+    case "rounded":
+      return renderRoundedPreviewShape({ getNeighbor, size, x, y })
+    case "extra-rounded":
+      return renderExtraRoundedPreviewShape({ getNeighbor, size, x, y })
+    case "classy":
+      return renderClassyPreviewShape({ getNeighbor, size, x, y })
+    case "classy-rounded":
+      return renderClassyRoundedPreviewShape({ getNeighbor, size, x, y })
+    case "square":
+    default:
+      return renderPreviewDotShape("square", { size, x, y })
+  }
+}
+
+function StyleIconPreview({
+  previewKind,
+  value,
+}: {
+  previewKind: Exclude<StylePreviewKind, "dots">
+  value: string
+}) {
+  return (
+    <svg
+      aria-hidden="true"
+      className="size-16 text-foreground/80"
+      data-preview-kind={previewKind}
+      data-slot="style-preview-icon"
+      data-preview-style={value}
       fill="none"
       viewBox="0 0 48 48"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <PreviewShape size={12} value={value} x={8} y={8} />
-      <PreviewShape size={12} value={value} x={28} y={8} />
-      <PreviewShape size={12} value={value} x={18} y={28} />
+      <PreviewShape size={14} value={value} x={7} y={7} />
+      <PreviewShape size={14} value={value} x={27} y={7} />
+      <PreviewShape size={14} value={value} x={17} y={27} />
     </svg>
   )
 }
 
 function PreviewShape({
   size,
+  slotName = "style-preview-module",
   value,
   x,
   y,
 }: {
   size: number
+  slotName?: string
   value: string
   x: number
   y: number
@@ -2484,6 +2626,7 @@ function PreviewShape({
         <circle
           cx={x + size / 2}
           cy={y + size / 2}
+          data-slot={slotName}
           fill="currentColor"
           r={size / 2}
         />
@@ -2491,9 +2634,10 @@ function PreviewShape({
     case "rounded":
       return (
         <rect
+          data-slot={slotName}
           fill="currentColor"
           height={size}
-          rx={3.5}
+          rx={size * 0.3}
           width={size}
           x={x}
           y={y}
@@ -2502,9 +2646,10 @@ function PreviewShape({
     case "extra-rounded":
       return (
         <rect
+          data-slot={slotName}
           fill="currentColor"
           height={size}
-          rx={5.5}
+          rx={size * 0.48}
           width={size}
           x={x}
           y={y}
@@ -2513,6 +2658,7 @@ function PreviewShape({
     case "diamond":
       return (
         <path
+          data-slot={slotName}
           d={`M ${x + size / 2} ${y} L ${x + size} ${y + size / 2} L ${x + size / 2} ${y + size} L ${x} ${y + size / 2} Z`}
           fill="currentColor"
         />
@@ -2520,6 +2666,7 @@ function PreviewShape({
     case "heart":
       return (
         <path
+          data-slot={slotName}
           d={buildHeartPath(x, y, size)}
           fill="currentColor"
         />
@@ -2527,14 +2674,16 @@ function PreviewShape({
     case "classy":
       return (
         <path
-          d={`M ${x + 2} ${y} H ${x + size} V ${y + size - 2} Q ${x + size - 1} ${y + 1} ${x + 2} ${y + size - 2} Z`}
+          data-slot={slotName}
+          d={`M ${x + size * 0.16} ${y} H ${x + size} V ${y + size * 0.82} Q ${x + size * 0.92} ${y + size * 0.08} ${x + size * 0.16} ${y + size * 0.82} Z`}
           fill="currentColor"
         />
       )
     case "classy-rounded":
       return (
         <path
-          d={`M ${x + 3} ${y} H ${x + size - 2} Q ${x + size} ${y} ${x + size} ${y + 2} V ${y + size - 3} Q ${x + size - 2} ${y + size} ${x + size - 4} ${y + size} H ${x + 5} Q ${x + 1} ${y + size} ${x + 1} ${y + size - 4} V ${y + 3} Q ${x + 1} ${y + 1} ${x + 3} ${y} Z`}
+          data-slot={slotName}
+          d={`M ${x + size * 0.22} ${y + size * 0.02} H ${x + size * 0.84} Q ${x + size} ${y + size * 0.02} ${x + size} ${y + size * 0.18} V ${y + size * 0.78} Q ${x + size * 0.86} ${y + size} ${x + size * 0.7} ${y + size} H ${x + size * 0.34} Q ${x + size * 0.04} ${y + size} ${x + size * 0.04} ${y + size * 0.7} V ${y + size * 0.28} Q ${x + size * 0.04} ${y + size * 0.08} ${x + size * 0.22} ${y + size * 0.02} Z`}
           fill="currentColor"
         />
       )
@@ -2542,15 +2691,279 @@ function PreviewShape({
     default:
       return (
         <rect
+          data-slot={slotName}
           fill="currentColor"
           height={size}
-          rx={1.5}
+          rx={size * 0.12}
           width={size}
           x={x}
           y={y}
         />
       )
   }
+}
+
+type PreviewDotShapeKind =
+  | "corner-extra-rounded"
+  | "corner-rounded"
+  | "corners-rounded"
+  | "dot"
+  | "side-rounded"
+  | "square"
+
+function renderRoundedPreviewShape({
+  getNeighbor,
+  size,
+  x,
+  y,
+}: {
+  getNeighbor: (offsetX: number, offsetY: number) => boolean
+  size: number
+  x: number
+  y: number
+}) {
+  const left = getNeighbor(-1, 0)
+  const right = getNeighbor(1, 0)
+  const up = getNeighbor(0, -1)
+  const down = getNeighbor(0, 1)
+  const neighborCount = Number(left) + Number(right) + Number(up) + Number(down)
+
+  if (neighborCount === 0) {
+    return renderPreviewDotShape("dot", { size, x, y })
+  }
+
+  if (neighborCount > 2 || (left && right) || (up && down)) {
+    return renderPreviewDotShape("square", { size, x, y })
+  }
+
+  if (neighborCount === 2) {
+    const rotation = left && up ? Math.PI / 2 : up && right ? Math.PI : right && down ? -Math.PI / 2 : 0
+
+    return renderPreviewDotShape("corner-rounded", { rotation, size, x, y })
+  }
+
+  const rotation = up ? Math.PI / 2 : right ? Math.PI : down ? -Math.PI / 2 : 0
+
+  return renderPreviewDotShape("side-rounded", { rotation, size, x, y })
+}
+
+function renderExtraRoundedPreviewShape({
+  getNeighbor,
+  size,
+  x,
+  y,
+}: {
+  getNeighbor: (offsetX: number, offsetY: number) => boolean
+  size: number
+  x: number
+  y: number
+}) {
+  const left = getNeighbor(-1, 0)
+  const right = getNeighbor(1, 0)
+  const up = getNeighbor(0, -1)
+  const down = getNeighbor(0, 1)
+  const neighborCount = Number(left) + Number(right) + Number(up) + Number(down)
+
+  if (neighborCount === 0) {
+    return renderPreviewDotShape("dot", { size, x, y })
+  }
+
+  if (neighborCount > 2 || (left && right) || (up && down)) {
+    return renderPreviewDotShape("square", { size, x, y })
+  }
+
+  if (neighborCount === 2) {
+    const rotation = left && up ? Math.PI / 2 : up && right ? Math.PI : right && down ? -Math.PI / 2 : 0
+
+    return renderPreviewDotShape("corner-extra-rounded", {
+      rotation,
+      size,
+      x,
+      y,
+    })
+  }
+
+  const rotation = up ? Math.PI / 2 : right ? Math.PI : down ? -Math.PI / 2 : 0
+
+  return renderPreviewDotShape("side-rounded", { rotation, size, x, y })
+}
+
+function renderClassyPreviewShape({
+  getNeighbor,
+  size,
+  x,
+  y,
+}: {
+  getNeighbor: (offsetX: number, offsetY: number) => boolean
+  size: number
+  x: number
+  y: number
+}) {
+  const left = getNeighbor(-1, 0)
+  const right = getNeighbor(1, 0)
+  const up = getNeighbor(0, -1)
+  const down = getNeighbor(0, 1)
+
+  if (!left && !right && !up && !down) {
+    return renderPreviewDotShape("corners-rounded", {
+      rotation: Math.PI / 2,
+      size,
+      x,
+      y,
+    })
+  }
+
+  if (left || up) {
+    if (right || down) {
+      return renderPreviewDotShape("square", { size, x, y })
+    }
+
+    return renderPreviewDotShape("corner-rounded", {
+      rotation: Math.PI / 2,
+      size,
+      x,
+      y,
+    })
+  }
+
+  return renderPreviewDotShape("corner-rounded", {
+    rotation: -Math.PI / 2,
+    size,
+    x,
+    y,
+  })
+}
+
+function renderClassyRoundedPreviewShape({
+  getNeighbor,
+  size,
+  x,
+  y,
+}: {
+  getNeighbor: (offsetX: number, offsetY: number) => boolean
+  size: number
+  x: number
+  y: number
+}) {
+  const left = getNeighbor(-1, 0)
+  const right = getNeighbor(1, 0)
+  const up = getNeighbor(0, -1)
+  const down = getNeighbor(0, 1)
+
+  if (!left && !right && !up && !down) {
+    return renderPreviewDotShape("corners-rounded", {
+      rotation: Math.PI / 2,
+      size,
+      x,
+      y,
+    })
+  }
+
+  if (left || up) {
+    if (right || down) {
+      return renderPreviewDotShape("square", { size, x, y })
+    }
+
+    return renderPreviewDotShape("corner-extra-rounded", {
+      rotation: Math.PI / 2,
+      size,
+      x,
+      y,
+    })
+  }
+
+  return renderPreviewDotShape("corner-extra-rounded", {
+    rotation: -Math.PI / 2,
+    size,
+    x,
+    y,
+  })
+}
+
+function renderPreviewDotShape(
+  kind: PreviewDotShapeKind,
+  {
+    rotation = 0,
+    size,
+    x,
+    y,
+  }: {
+    rotation?: number
+    size: number
+    x: number
+    y: number
+  },
+) {
+  switch (kind) {
+    case "dot":
+      return (
+        <circle
+          cx={x + size / 2}
+          cy={y + size / 2}
+          data-slot="style-preview-native-module"
+          fill="currentColor"
+          r={size / 2}
+        />
+      )
+    case "square":
+      return (
+        <rect
+          data-slot="style-preview-native-module"
+          fill="currentColor"
+          height={size}
+          width={size}
+          x={x}
+          y={y}
+        />
+      )
+    case "side-rounded":
+      return renderPreviewPath(
+        `M ${x} ${y}v ${size}h ${size / 2}a ${size / 2} ${size / 2}, 0, 0, 0, 0 ${-size}`,
+        { rotation, size, x, y },
+      )
+    case "corner-rounded":
+      return renderPreviewPath(
+        `M ${x} ${y}v ${size}h ${size}v ${-size / 2}a ${size / 2} ${size / 2}, 0, 0, 0, ${-size / 2} ${-size / 2}`,
+        { rotation, size, x, y },
+      )
+    case "corner-extra-rounded":
+      return renderPreviewPath(
+        `M ${x} ${y}v ${size}h ${size}a ${size} ${size}, 0, 0, 0, ${-size} ${-size}`,
+        { rotation, size, x, y },
+      )
+    case "corners-rounded":
+      return renderPreviewPath(
+        `M ${x} ${y}v ${size / 2}a ${size / 2} ${size / 2}, 0, 0, 0, ${size / 2} ${size / 2}h ${size / 2}v ${-size / 2}a ${size / 2} ${size / 2}, 0, 0, 0, ${-size / 2} ${-size / 2}`,
+        { rotation, size, x, y },
+      )
+  }
+}
+
+function renderPreviewPath(
+  d: string,
+  {
+    rotation = 0,
+    size,
+    x,
+    y,
+  }: {
+    rotation?: number
+    size: number
+    x: number
+    y: number
+  },
+) {
+  const centerX = x + size / 2
+  const centerY = y + size / 2
+
+  return (
+    <path
+      data-slot="style-preview-native-module"
+      d={d}
+      fill="currentColor"
+      transform={`rotate(${(rotation * 180) / Math.PI}, ${centerX}, ${centerY})`}
+    />
+  )
 }
 
 function buildHeartPath(x: number, y: number, size: number) {
