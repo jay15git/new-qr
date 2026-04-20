@@ -12,12 +12,16 @@ import {
   applyDotsPaletteSelection,
   applyDotsSolidColor,
   applyLogoPresetColor,
+  applyLogoPresetGradient,
   applyLogoPresetSelection,
   createDashboardAccordionOpenItemIds,
   ensureDashboardAccordionItemExpanded,
 } from "@/components/qr/qr-control-sections"
 import { getBrandIconById } from "@/components/qr/brand-icon-catalog"
-import { createBrandIconDataUrl } from "@/components/qr/brand-icon-svg"
+import {
+  createBrandIconDataUrl,
+  createBrandIconGradientDataUrl,
+} from "@/components/qr/brand-icon-svg"
 import { createDefaultQrStudioState } from "@/components/qr/qr-studio-state"
 
 describe("dashboard settings state helpers", () => {
@@ -197,5 +201,48 @@ describe("dashboard settings state helpers", () => {
     expect(nextState.logo.presetId).toBe("github")
     expect(nextState.logo.presetColor).toBe("#ff4f00")
     expect(nextState.logo.value).toContain("ff4f00")
+    expect(nextState.logoGradient.enabled).toBe(false)
+  })
+
+  it("applies preset logo gradient editing without replacing the saved solid color", () => {
+    const state = createDefaultQrStudioState()
+    const brandIcon = getBrandIconById("github")
+    const selectedState = applyLogoPresetSelection(
+      state,
+      brandIcon,
+      createBrandIconDataUrl(brandIcon, "#111827"),
+      "#111827",
+    )
+
+    const nextState = applyLogoPresetGradient(
+      selectedState,
+      createBrandIconGradientDataUrl(brandIcon, {
+        ...state.logoGradient,
+        enabled: true,
+        type: "linear",
+        rotation: Math.PI / 2,
+        colorStops: [
+          { offset: 0, color: "#ff4f00" },
+          { offset: 1, color: "#facc15" },
+        ],
+      }),
+      {
+        ...state.logoGradient,
+        enabled: true,
+        type: "linear",
+        rotation: Math.PI / 2,
+        colorStops: [
+          { offset: 0, color: "#ff4f00" },
+          { offset: 1, color: "#facc15" },
+        ],
+      },
+    )
+
+    expect(nextState.logo.source).toBe("preset")
+    expect(nextState.logo.presetId).toBe("github")
+    expect(nextState.logo.presetColor).toBe("#111827")
+    expect(nextState.logoGradient.enabled).toBe(true)
+    expect(nextState.logoGradient.type).toBe("linear")
+    expect(nextState.logo.value).toContain("brand-icon-gradient")
   })
 })

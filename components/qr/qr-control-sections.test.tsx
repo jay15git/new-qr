@@ -543,7 +543,9 @@ describe("QrControlSections", () => {
 
     expect(markup).toContain('data-slot="direction-aware-tabs"')
     expect(markup).toContain(">Brand Icons<")
+    expect(markup).toContain(">COLORS<")
     expect(markup).toContain(">Upload<")
+    expect(markup).toContain(">Size<")
     expect(markup).toMatch(/data-tab="upload"[^>]*aria-selected="true"/)
     expect(markup).toContain('data-slot="motion-accordion"')
     expect(markup).toContain(">None<")
@@ -573,7 +575,9 @@ describe("QrControlSections", () => {
     )
 
     expect(markup).toContain(">Brand Icons<")
+    expect(markup).toContain(">COLORS<")
     expect(markup).toContain(">Upload<")
+    expect(markup).toContain(">Size<")
     expect(markup).toMatch(/data-tab="brand-icons"[^>]*aria-selected="true"/)
     expect(markup).toContain("Search brand icons")
     expect(markup).toContain("Icon category")
@@ -588,26 +592,27 @@ describe("QrControlSections", () => {
     expect(markup).toContain("WhatsApp")
     expect(markup).toContain("Instagram")
     expect(markup).toContain("GitHub")
-    expect(markup).toContain("Logo icon color")
+    expect(markup).not.toContain("Logo icon color")
   })
 
-  it("keeps logo adjustment controls below the dashboard logo source options", () => {
+  it("keeps dashboard logo size controls inside the size tab", () => {
     const markup = renderToStaticMarkup(
       <QrControlSections {...baseProps} activeSection="logo" />,
     )
 
     expect(markup).toContain(">Brand Icons<")
+    expect(markup).toContain(">COLORS<")
     expect(markup).toContain(">Upload<")
-    expect(markup).toContain("Logo size")
-    expect(markup).toContain('data-slot="logo-size-slider"')
-    expect(markup).toContain("40%")
-    expect(markup).toContain("Logo margin")
-    expect(markup).toContain('data-slot="logo-margin-slider"')
-    expect(markup).toContain("Hide background dots")
-    expect(markup).toContain("Save embedded image as blob")
+    expect(markup).toContain(">Size<")
+    expect(markup).not.toContain("Logo size")
+    expect(markup).not.toContain('data-slot="logo-size-slider"')
+    expect(markup).not.toContain("Logo margin")
+    expect(markup).not.toContain('data-slot="logo-margin-slider"')
+    expect(markup).not.toContain("Hide background dots")
+    expect(markup).not.toContain("Save embedded image as blob")
   })
 
-  it("shows the preset logo color control only for preset logos", () => {
+  it("keeps the colors tab out of the stacked logo editor", () => {
     const presetState = createDefaultQrStudioState()
     presetState.logo = {
       source: "preset",
@@ -619,16 +624,17 @@ describe("QrControlSections", () => {
     const presetMarkup = renderToStaticMarkup(
       <QrControlSections
         {...baseProps}
-        activeSection="logo"
-        logoSourceMode="preset"
         state={presetState}
+        logoSourceMode="preset"
       />,
     )
     const defaultMarkup = renderToStaticMarkup(<QrControlSections {...baseProps} />)
 
     expect(presetMarkup).toContain("Logo icon color")
     expect(presetMarkup).toContain('data-slot="color-picker"')
+    expect(presetMarkup).not.toContain(">COLORS<")
     expect(defaultMarkup).not.toContain("Logo icon color")
+    expect(defaultMarkup).not.toContain(">COLORS<")
   })
 
   it("keeps the stacked logo editor unchanged outside dashboard mode", () => {

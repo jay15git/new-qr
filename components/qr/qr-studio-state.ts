@@ -76,6 +76,7 @@ export type QrStudioState = {
     color: string;
     transparent: boolean;
   };
+  logoGradient: StudioGradient;
   dotsGradient: StudioGradient;
   cornersSquareGradient: StudioGradient;
   cornersDotGradient: StudioGradient;
@@ -160,6 +161,7 @@ export function createDefaultQrStudioState(): QrStudioState {
       color: "#f8fafc",
       transparent: false,
     },
+    logoGradient: structuredClone(DEFAULT_GRADIENT),
     dotsGradient: structuredClone(DEFAULT_GRADIENT),
     cornersSquareGradient: structuredClone(DEFAULT_GRADIENT),
     cornersDotGradient: structuredClone(DEFAULT_GRADIENT),

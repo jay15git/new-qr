@@ -6,7 +6,11 @@ import {
   filterBrandIcons,
   getBrandIconById,
 } from "@/components/qr/brand-icon-catalog"
-import { createBrandIconDataUrl } from "@/components/qr/brand-icon-svg"
+import {
+  createBrandIconDataUrl,
+  createBrandIconGradientDataUrl,
+} from "@/components/qr/brand-icon-svg"
+import { createDefaultQrStudioState } from "@/components/qr/qr-studio-state"
 
 describe("brand icon catalog", () => {
   it("ships the curated brand icon catalog without unavailable brands", () => {
@@ -55,10 +59,20 @@ describe("brand icon catalog", () => {
     const icon = getBrandIconById("whatsapp")
     const neutralDataUrl = createBrandIconDataUrl(icon, "#111827")
     const accentDataUrl = createBrandIconDataUrl(icon, "#ff4f00")
+    const gradientDataUrl = createBrandIconGradientDataUrl(icon, {
+      ...createDefaultQrStudioState().logoGradient,
+      enabled: true,
+      colorStops: [
+        { offset: 0, color: "#ff4f00" },
+        { offset: 1, color: "#facc15" },
+      ],
+    })
 
     expect(neutralDataUrl).toContain("data:image/svg+xml")
     expect(neutralDataUrl).toContain("111827")
     expect(accentDataUrl).toContain("ff4f00")
     expect(accentDataUrl).not.toBe(neutralDataUrl)
+    expect(gradientDataUrl).toContain("brand-icon-gradient")
+    expect(gradientDataUrl).toContain("linearGradient")
   })
 })

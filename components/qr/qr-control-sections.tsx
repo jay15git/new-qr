@@ -77,6 +77,7 @@ import type {
 } from "@/components/qr/qr-studio-state"
 import {
   createBrandIconDataUrl,
+  createBrandIconGradientDataUrl,
   DEFAULT_BRAND_ICON_COLOR,
 } from "@/components/qr/brand-icon-svg"
 import {
@@ -111,7 +112,7 @@ type StyleOption = {
 
 type StyleSettingsTabId = "style" | "color"
 type BackgroundSettingsTabId = "colors" | "upload"
-type LogoSettingsTabId = "brand-icons" | "upload"
+type LogoSettingsTabId = "brand-icons" | "colors" | "upload" | "size"
 type BrandIconCategoryFilter = BrandIconCategory | "all"
 type BackgroundColorMode = "solid" | "gradient" | "transparent"
 type GradientEditorVariant = "default" | "dot-enhanced"
@@ -247,6 +248,7 @@ export function QrControlSections({
   const filteredBrandIcons = filterBrandIcons(brandIconQuery, brandIconCategory)
   const popularBrandIcons = POPULAR_BRAND_ICON_IDS.map((id) => getBrandIconById(id))
   const presetLogoColor = state.logo.presetColor ?? DEFAULT_BRAND_ICON_COLOR
+  const selectedLogoColorItemId = state.logoGradient.enabled ? "gradient" : "solid"
   const backgroundColorMode = getBackgroundColorMode(state)
   const selectedCornerSquareColorItemId = state.cornersSquareGradient.enabled
     ? "gradient"
@@ -280,6 +282,8 @@ export function QrControlSections({
     useExpandedDashboardAccordionIds(backgroundSourceMode)
   const [logoSourceOpenItemIds, setLogoSourceOpenItemIds] =
     useExpandedDashboardAccordionIds(logoSourceMode)
+  const [logoColorOpenItemIds, setLogoColorOpenItemIds] =
+    useExpandedDashboardAccordionIds(selectedLogoColorItemId)
   const expandDotsColorItem = (itemId: DotsColorMode) =>
     setDotsColorOpenItemIds((current) =>
       ensureDashboardAccordionItemExpanded(current, itemId),
@@ -294,6 +298,10 @@ export function QrControlSections({
     )
   const expandBackgroundColorItem = (itemId: BackgroundColorMode) =>
     setBackgroundColorOpenItemIds((current) =>
+      ensureDashboardAccordionItemExpanded(current, itemId),
+    )
+  const expandLogoColorItem = (itemId: "solid" | "gradient") =>
+    setLogoColorOpenItemIds((current) =>
       ensureDashboardAccordionItemExpanded(current, itemId),
     )
 
@@ -768,21 +776,28 @@ export function QrControlSections({
   )
 
   function handlePresetLogoSelection(brandIcon: BrandIconEntry) {
-    const nextColor = presetLogoColor
-
     setActiveLogoTab("brand-icons")
     onLogoModeChange("preset")
     setState((current) =>
       applyLogoPresetSelection(
         current,
         brandIcon,
-        createBrandIconDataUrl(brandIcon, nextColor),
-        nextColor,
+        current.logoGradient.enabled
+          ? createBrandIconGradientDataUrl(brandIcon, {
+              ...current.logoGradient,
+              enabled: true,
+            })
+          : createBrandIconDataUrl(
+              brandIcon,
+              current.logo.presetColor ?? DEFAULT_BRAND_ICON_COLOR,
+            ),
+        current.logo.presetColor ?? DEFAULT_BRAND_ICON_COLOR,
       ),
     )
   }
 
   function handlePresetLogoColorChange(color: string) {
+    expandLogoColorItem("solid")
     setState((current) => {
       const selectedIcon = findBrandIconById(current.logo.presetId)
 
@@ -795,6 +810,10 @@ export function QrControlSections({
             source: "preset",
             value: undefined,
           },
+          logoGradient: {
+            ...current.logoGradient,
+            enabled: false,
+          },
         }
       }
 
@@ -802,6 +821,32 @@ export function QrControlSections({
         current,
         createBrandIconDataUrl(selectedIcon, color),
         color,
+      )
+    })
+  }
+
+  function handlePresetLogoGradientChange(gradient: StudioGradient) {
+    expandLogoColorItem("gradient")
+    setState((current) => {
+      const nextGradient = { ...gradient, enabled: true }
+      const selectedIcon = findBrandIconById(current.logo.presetId)
+
+      if (!selectedIcon) {
+        return {
+          ...current,
+          logo: {
+            ...current.logo,
+            source: "preset",
+            value: undefined,
+          },
+          logoGradient: nextGradient,
+        }
+      }
+
+      return applyLogoPresetGradient(
+        current,
+        createBrandIconGradientDataUrl(selectedIcon, nextGradient),
+        nextGradient,
       )
     })
   }
@@ -875,20 +920,165 @@ export function QrControlSections({
   )
 
   const dashboardBrandIconsPanel = (
-    <div className="flex flex-col gap-4">
-      {presetLogoPicker}
-      {logoSourceMode === "preset" ? (
-        <Field>
-          <FieldLabel htmlFor="logo-icon-color">Logo icon color</FieldLabel>
-          <ColorPicker
-            chrome="embedded"
-            onColorChange={handlePresetLogoColorChange}
-            size={280}
-            value={presetLogoColor}
-          />
-        </Field>
-      ) : null}
-    </div>
+    <div className="flex flex-col gap-4">{presetLogoPicker}</div>
+  )
+
+  const dashboardLogoColorsPanel =
+    logoSourceMode === "preset" ? (
+      <MotionAccordion
+        allowCollapse
+        gap={0}
+        openItemIds={logoColorOpenItemIds}
+        onOpenItemIdsChange={setLogoColorOpenItemIds}
+        variant="settings"
+        items={[
+          {
+            id: "solid",
+            title: "Solid",
+            content: (
+              <EmbeddedColorPickerField
+                chrome="minimal"
+                label="Logo icon color"
+                onValueChange={handlePresetLogoColorChange}
+                pickerClassName="mx-auto"
+                value={presetLogoColor}
+              />
+            ),
+          },
+          {
+            id: "gradient",
+            title: "Gradient",
+            content: (
+              <GradientEditor
+                gradient={{ ...state.logoGradient, enabled: true }}
+                hideToggle
+                idPrefix="logo-gradient"
+                isDashboardMode={isDashboardMode}
+                onGradientChange={handlePresetLogoGradientChange}
+                title="Logo icon gradient"
+                variant="dot-enhanced"
+              />
+            ),
+          },
+        ]}
+      />
+    ) : (
+      <div className="rounded-[1.25rem] border border-white/8 bg-white/[0.03] px-4 py-4 text-sm text-foreground/72">
+        <p className="font-medium text-foreground">
+          Icon color applies only to built-in brand icons.
+        </p>
+        <p className="mt-1 text-foreground/58">
+          Choose a brand icon in the Brand Icons tab to edit its color.
+        </p>
+      </div>
+    )
+
+  const logoSizeControls = (
+    <>
+      <Field>
+        <UnlumenSlider
+          data-slot="logo-size-slider"
+          id="logo-size"
+          label="Logo size"
+          formatValue={(value) => `${Math.round(value)}%`}
+          max={100}
+          min={0}
+          onChange={(value) =>
+            setState((current) => ({
+              ...current,
+              imageOptions: {
+                ...current.imageOptions,
+                imageSize:
+                  (Array.isArray(value) ? value[0] : value) / 100,
+              },
+            }))
+          }
+          showSteps
+          showValue
+          step={10}
+          value={state.imageOptions.imageSize * 100}
+        />
+        {!isDashboardMode ? (
+          <FieldDescription>
+            Sets the logo width as a percentage of the QR code.
+          </FieldDescription>
+        ) : null}
+      </Field>
+
+      <Field>
+        <UnlumenSlider
+          data-slot="logo-margin-slider"
+          id="logo-margin"
+          label="Logo margin"
+          formatValue={(value) => `${Math.round(value)} px`}
+          max={40}
+          min={0}
+          onChange={(value) =>
+            setState((current) => ({
+              ...current,
+              imageOptions: {
+                ...current.imageOptions,
+                margin: Array.isArray(value) ? value[0] : value,
+              },
+            }))
+          }
+          showValue
+          step={1}
+          value={state.imageOptions.margin}
+        />
+      </Field>
+
+      <Field orientation="horizontal">
+        <FieldContent>
+          <FieldLabel htmlFor="hide-background-dots">Hide background dots</FieldLabel>
+          {!isDashboardMode ? (
+            <FieldDescription>
+              Clears the modules directly under the logo so the image reads
+              cleanly.
+            </FieldDescription>
+          ) : null}
+        </FieldContent>
+        <Switch
+          id="hide-background-dots"
+          checked={state.imageOptions.hideBackgroundDots}
+          onCheckedChange={(checked) =>
+            setState((current) => ({
+              ...current,
+              imageOptions: {
+                ...current.imageOptions,
+                hideBackgroundDots: checked,
+              },
+            }))
+          }
+        />
+      </Field>
+
+      <Field orientation="horizontal">
+        <FieldContent>
+          <FieldLabel htmlFor="save-as-blob">Save embedded image as blob</FieldLabel>
+          {!isDashboardMode ? (
+            <FieldDescription>
+              Larger SVG files, but better compatibility when the QR is opened
+              elsewhere.
+            </FieldDescription>
+          ) : null}
+        </FieldContent>
+        <Switch
+          id="save-as-blob"
+          checked={state.imageOptions.saveAsBlob}
+          onCheckedChange={(checked) =>
+            setState((current) => ({
+              ...current,
+              imageOptions: { ...current.imageOptions, saveAsBlob: checked },
+            }))
+          }
+        />
+      </Field>
+    </>
+  )
+
+  const dashboardLogoSizePanel = (
+    <div className="flex flex-col gap-4">{logoSizeControls}</div>
   )
 
   return (
@@ -1393,9 +1583,19 @@ export function QrControlSections({
                       content: dashboardBrandIconsPanel,
                     },
                     {
+                      id: "colors",
+                      label: "COLORS",
+                      content: dashboardLogoColorsPanel,
+                    },
+                    {
                       id: "upload",
                       label: "Upload",
                       content: dashboardLogoUploadAccordion,
+                    },
+                    {
+                      id: "size",
+                      label: "Size",
+                      content: dashboardLogoSizePanel,
                     },
                   ]}
                 />
@@ -1472,105 +1672,7 @@ export function QrControlSections({
                 </>
               )}
 
-              <Field>
-                <UnlumenSlider
-                  data-slot="logo-size-slider"
-                  id="logo-size"
-                  label="Logo size"
-                  formatValue={(value) => `${Math.round(value)}%`}
-                  max={100}
-                  min={0}
-                  onChange={(value) =>
-                    setState((current) => ({
-                      ...current,
-                      imageOptions: {
-                        ...current.imageOptions,
-                        imageSize:
-                          (Array.isArray(value) ? value[0] : value) / 100,
-                      },
-                    }))
-                  }
-                  showSteps
-                  showValue
-                  step={10}
-                  value={state.imageOptions.imageSize * 100}
-                />
-                {!isDashboardMode ? (
-                  <FieldDescription>
-                    Sets the logo width as a percentage of the QR code.
-                  </FieldDescription>
-                ) : null}
-              </Field>
-
-              <Field>
-                <UnlumenSlider
-                  data-slot="logo-margin-slider"
-                  id="logo-margin"
-                  label="Logo margin"
-                  formatValue={(value) => `${Math.round(value)} px`}
-                  max={40}
-                  min={0}
-                  onChange={(value) =>
-                    setState((current) => ({
-                      ...current,
-                      imageOptions: {
-                        ...current.imageOptions,
-                        margin: Array.isArray(value) ? value[0] : value,
-                      },
-                    }))
-                  }
-                  showValue
-                  step={1}
-                  value={state.imageOptions.margin}
-                />
-              </Field>
-
-              <Field orientation="horizontal">
-                <FieldContent>
-                  <FieldLabel htmlFor="hide-background-dots">Hide background dots</FieldLabel>
-                  {!isDashboardMode ? (
-                    <FieldDescription>
-                      Clears the modules directly under the logo so the image reads
-                      cleanly.
-                    </FieldDescription>
-                  ) : null}
-                </FieldContent>
-                <Switch
-                  id="hide-background-dots"
-                  checked={state.imageOptions.hideBackgroundDots}
-                  onCheckedChange={(checked) =>
-                    setState((current) => ({
-                      ...current,
-                      imageOptions: {
-                        ...current.imageOptions,
-                        hideBackgroundDots: checked,
-                      },
-                    }))
-                  }
-                />
-              </Field>
-
-              <Field orientation="horizontal">
-                <FieldContent>
-                  <FieldLabel htmlFor="save-as-blob">Save embedded image as blob</FieldLabel>
-                  {!isDashboardMode ? (
-                    <FieldDescription>
-                      Larger SVG files, but better compatibility when the QR is opened
-                      elsewhere.
-                    </FieldDescription>
-                  ) : null}
-                </FieldContent>
-                <Switch
-                  id="save-as-blob"
-                  checked={state.imageOptions.saveAsBlob}
-                  onCheckedChange={(checked) =>
-                    setState((current) => ({
-                      ...current,
-                      imageOptions: { ...current.imageOptions, saveAsBlob: checked },
-                    }))
-                  }
-                />
-              </Field>
+              {!isDashboardMode ? logoSizeControls : null}
             </>
           ),
         })
@@ -2260,6 +2362,29 @@ export function applyLogoPresetColor(
       presetColor,
       source: "preset" as const,
       value,
+    },
+    logoGradient: {
+      ...state.logoGradient,
+      enabled: false,
+    },
+  }
+}
+
+export function applyLogoPresetGradient(
+  state: QrStudioState,
+  value: string | undefined,
+  gradient: StudioGradient,
+) {
+  return {
+    ...state,
+    logo: {
+      ...state.logo,
+      source: "preset" as const,
+      value,
+    },
+    logoGradient: {
+      ...gradient,
+      enabled: true,
     },
   }
 }
