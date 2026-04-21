@@ -25,6 +25,7 @@
     "@blocks-so": "https://blocks.so/r/{name}.json",
     "@kokonutui": "https://kokonutui.com/r/{name}.json",
     "@react-bits": "https://reactbits.dev/r/{name}.json",
-    "@unlumen-ui": "https://ui.unlumen.com/r/{name}.json"
+    "@unlumen-ui": "https://ui.unlumen.com/r/{name}.json",
+    "@cardcn": "https://cardcn.dev/r/{name}.json"
   }
 }
