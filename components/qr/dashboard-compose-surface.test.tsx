@@ -13,6 +13,7 @@ import {
   DashboardComposeSurface,
   getNextDashboardQrSize,
 } from "@/components/qr/dashboard-compose-surface"
+import type { QrQualityReport } from "@/components/qr/qr-quality"
 
 const QR_PAYLOAD = {
   markup:
@@ -374,6 +375,117 @@ describe("DashboardComposeSurface", () => {
     expect(markup).toContain('data-slot="dashboard-compose-viewport"')
     expect(markup).toContain("background:#ff7a59")
   })
+
+  it("renders the dashboard quality panel with the current status", () => {
+    const scene = upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD)
+
+    const markup = renderToStaticMarkup(
+      <DashboardComposeSurface
+        errorMessage={null}
+        isEditMode={false}
+        onEditModeChange={vi.fn()}
+        onReset={vi.fn()}
+        onQrSizeChange={vi.fn()}
+        onSceneChange={vi.fn()}
+        onSelectedNodeChange={vi.fn()}
+        qualityReport={createQualityReport({
+          status: "readable",
+          summary: "The composed dashboard scene decoded successfully at 2x.",
+        })}
+        qrSize={QR_PAYLOAD.naturalWidth}
+        scene={scene}
+        selectedNodeId={null}
+      />,
+    )
+
+    expect(markup).toContain('data-slot="dashboard-quality-panel"')
+    expect(markup).toContain("Quality check")
+    expect(markup).toContain("Readable")
+  })
+
+  it("renders risky reports with issue summaries and fix actions", () => {
+    const scene = upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD)
+
+    const markup = renderToStaticMarkup(
+      <DashboardComposeSurface
+        errorMessage={null}
+        isEditMode={false}
+        onApplyQualitySuggestionPath={vi.fn()}
+        onEditModeChange={vi.fn()}
+        onReset={vi.fn()}
+        onQrSizeChange={vi.fn()}
+        onSceneChange={vi.fn()}
+        onSelectedNodeChange={vi.fn()}
+        qualityReport={createQualityReport({
+          issues: [
+            {
+              detail: "The weakest sampled contrast is 2.1:1.",
+              paths: [
+                {
+                  actions: [
+                    {
+                      target: "dots",
+                      type: "set-solid-color",
+                      value: "#111827",
+                    },
+                  ],
+                  detail: "Use #111827 on the dots to restore separation from the background.",
+                  id: "dots-contrast-target-only",
+                  impact: "target-only",
+                  recommended: true,
+                  title: "Change dots color",
+                },
+              ],
+              id: "dots-contrast",
+              scope: "Dots",
+              severity: "error",
+              title: "Body dots do not contrast enough against the QR background.",
+            },
+          ],
+          status: "risky",
+          summary: "The scene decoded at 2x, but 1 blocking issue still deserves attention.",
+        })}
+        qrSize={QR_PAYLOAD.naturalWidth}
+        scene={scene}
+        selectedNodeId={null}
+      />,
+    )
+
+    expect(markup).toContain("Risky")
+    expect(markup).toContain("Body dots do not contrast enough")
+    expect(markup).toContain("Change dots color")
+  })
+
+  it("renders unverified reports with the verification summary", () => {
+    const scene = upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD)
+
+    const markup = renderToStaticMarkup(
+      <DashboardComposeSurface
+        errorMessage={null}
+        isEditMode={false}
+        onEditModeChange={vi.fn()}
+        onReset={vi.fn()}
+        onQrSizeChange={vi.fn()}
+        onSceneChange={vi.fn()}
+        onSelectedNodeChange={vi.fn()}
+        qualityReport={createQualityReport({
+          decode: {
+            kind: "unverified",
+            reason: "Remote QR assets blocked pixel-level verification.",
+          },
+          status: "unverified",
+          summary:
+            "Remote QR assets blocked pixel-level verification. Heuristic checks found 0 blocking issues.",
+        })}
+        qrSize={QR_PAYLOAD.naturalWidth}
+        scene={scene}
+        selectedNodeId={null}
+      />,
+    )
+
+    expect(markup).toContain("Unverified")
+    expect(markup).toContain("Remote QR assets blocked pixel-level verification.")
+  })
 })
 
 function createLayeredScene(): DashboardComposeScene {
@@ -386,4 +498,22 @@ function createLayeredScene(): DashboardComposeScene {
     naturalHeight: 600,
     naturalWidth: 1200,
   })
+}
+
+function createQualityReport(
+  overrides: Partial<QrQualityReport>,
+): QrQualityReport {
+  return {
+    blockingIssueCount: 0,
+    decode: {
+      kind: "success",
+      data: "https://new-qr-studio.local/launch",
+      scale: 2,
+    },
+    issues: [],
+    status: "readable",
+    summary: "The composed dashboard scene decoded successfully at 2x.",
+    warningIssueCount: 0,
+    ...overrides,
+  }
 }

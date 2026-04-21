@@ -1,6 +1,12 @@
 "use client"
 
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react"
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from "react"
 import {
   MaximizeIcon,
   RefreshCcwIcon,
@@ -17,12 +23,17 @@ import {
   getDashboardComposeNode,
   resetDashboardComposeCamera,
   resetDashboardQrNodeTransform,
-  type DashboardComposeNode,
   type DashboardComposeBackground,
+  type DashboardComposeNode,
   type DashboardComposeScene,
   updateDashboardComposeCamera,
   updateDashboardComposeNode,
 } from "@/components/qr/dashboard-compose-scene"
+import { QrQualityPanel } from "@/components/qr/qr-quality-panel"
+import type {
+  QrQualityReport,
+  QrQualitySuggestionPath,
+} from "@/components/qr/qr-quality"
 import { clampQrSize } from "@/components/qr/qr-studio-state"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -31,32 +42,38 @@ type DashboardComposeSurfaceProps = {
   errorMessage?: string | null
   isEditMode: boolean
   onEditModeChange: (checked: boolean) => void
+  onApplyQualitySuggestionPath?: (path: QrQualitySuggestionPath) => void
   onReset: () => void
   onQrSizeChange: (nextSize: number) => void
   onSceneChange: React.Dispatch<React.SetStateAction<DashboardComposeScene>>
   onSelectedNodeChange: (nodeId: string | null) => void
   qrSize: number
+  qualityReport?: QrQualityReport | null
   scene: DashboardComposeScene
   selectedNodeId: string | null
 }
 
+type InteractionBase = {
+  scene: DashboardComposeScene
+}
+
 type Interaction =
-  | {
+  | (InteractionBase & {
       kind: "drag-node"
       nodeId: string
       startWorldX: number
       startWorldY: number
       startX: number
       startY: number
-    }
-  | {
+    })
+  | (InteractionBase & {
       kind: "pan-canvas"
       startClientX: number
       startClientY: number
       startPanX: number
       startPanY: number
-    }
-  | {
+    })
+  | (InteractionBase & {
       kind: "resize-node"
       centerX: number
       centerY: number
@@ -68,35 +85,161 @@ type Interaction =
       scale: number
       startScale: number
       startDistance: number
-    }
-  | {
+    })
+  | (InteractionBase & {
       kind: "rotate-node"
       centerX: number
       centerY: number
       nodeId: string
       startAngle: number
       startRotation: number
-    }
+    })
+
+type InteractionResult = {
+  scene: DashboardComposeScene
+  qrSize?: number
+}
 
 export function DashboardComposeSurface({
   errorMessage,
   isEditMode,
   onEditModeChange,
+  onApplyQualitySuggestionPath,
   onReset,
   onQrSizeChange,
   onSceneChange,
   onSelectedNodeChange,
   qrSize,
+  qualityReport,
   scene,
   selectedNodeId,
 }: DashboardComposeSurfaceProps) {
+  const [draftScene, setDraftScene] = useState(scene)
+  const [isDraftActive, setIsDraftActive] = useState(false)
   const [rotatingNodeId, setRotatingNodeId] = useState<string | null>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
   const interactionRef = useRef<Interaction | null>(null)
+  const draftSceneRef = useRef(scene)
+  const isEditModeRef = useRef(isEditMode)
+  const onSceneChangeRef = useRef(onSceneChange)
+  const onQrSizeChangeRef = useRef(onQrSizeChange)
+  const pendingSceneRef = useRef<DashboardComposeScene | null>(null)
+  const pendingQrSizeRef = useRef<number | null>(null)
+  const rafIdRef = useRef<number | null>(null)
 
-  const qrNode = getDashboardComposeNode(scene)
-  const zoomPercent = `${Math.round(scene.camera.zoom * 100)}%`
-  const canvasBackgroundStyle = getDashboardCanvasBackgroundStyle(scene.background)
+  const renderedScene = isDraftActive ? draftScene : scene
+  const qrNode = getDashboardComposeNode(renderedScene)
+  const renderedQrNode = getDashboardComposeNode(renderedScene)
+  const renderedQrSize = renderedQrNode ? renderedQrNode.naturalWidth : qrSize
+  const zoomPercent = `${Math.round(renderedScene.camera.zoom * 100)}%`
+  const canvasBackgroundStyle = getDashboardCanvasBackgroundStyle(renderedScene.background)
+
+  const applyDraftScene = useCallback((nextScene: DashboardComposeScene) => {
+    draftSceneRef.current = nextScene
+    setIsDraftActive(true)
+    setDraftScene(nextScene)
+  }, [])
+
+  const flushScheduledDraftScene = useCallback(() => {
+    if (rafIdRef.current !== null) {
+      cancelAnimationFrame(rafIdRef.current)
+      rafIdRef.current = null
+    }
+
+    const pendingScene = pendingSceneRef.current
+
+    if (!pendingScene) {
+      return draftSceneRef.current
+    }
+
+    pendingSceneRef.current = null
+    applyDraftScene(pendingScene)
+    return pendingScene
+  }, [applyDraftScene])
+
+  const scheduleDraftScene = useCallback(
+    (nextScene: DashboardComposeScene, nextQrSize?: number) => {
+      pendingSceneRef.current = nextScene
+
+      if (typeof nextQrSize === "number") {
+        pendingQrSizeRef.current = nextQrSize
+      }
+
+      if (rafIdRef.current !== null) {
+        return
+      }
+
+      rafIdRef.current = window.requestAnimationFrame(() => {
+        rafIdRef.current = null
+
+        const pendingScene = pendingSceneRef.current
+
+        if (!pendingScene) {
+          return
+        }
+
+        pendingSceneRef.current = null
+        applyDraftScene(pendingScene)
+      })
+    },
+    [applyDraftScene],
+  )
+
+  const commitActiveInteraction = useCallback(
+    ({
+      shouldCommit,
+    }: {
+      shouldCommit: boolean
+    }) => {
+      const interaction = interactionRef.current
+      const committedScene = flushScheduledDraftScene()
+      const nextQrSize = pendingQrSizeRef.current
+
+      interactionRef.current = null
+      pendingQrSizeRef.current = null
+      setIsDraftActive(false)
+      setRotatingNodeId(null)
+
+      if (!interaction || !shouldCommit) {
+        return
+      }
+
+      onSceneChangeRef.current(committedScene)
+
+      if (
+        interaction.kind === "resize-node" &&
+        interaction.nodeId === DASHBOARD_QR_NODE_ID &&
+        typeof nextQrSize === "number"
+      ) {
+        onQrSizeChangeRef.current(nextQrSize)
+      }
+    },
+    [flushScheduledDraftScene],
+  )
+
+  useEffect(() => {
+    isEditModeRef.current = isEditMode
+    onSceneChangeRef.current = onSceneChange
+    onQrSizeChangeRef.current = onQrSizeChange
+  }, [isEditMode, onQrSizeChange, onSceneChange])
+
+  useEffect(() => {
+    if (interactionRef.current) {
+      return
+    }
+
+    draftSceneRef.current = scene
+    pendingSceneRef.current = null
+    pendingQrSizeRef.current = null
+  }, [scene])
+
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current)
+      }
+    }
+  }, [commitActiveInteraction, scheduleDraftScene])
 
   useEffect(() => {
     const onPointerMove = (event: PointerEvent) => {
@@ -108,139 +251,75 @@ export function DashboardComposeSurface({
 
       event.preventDefault()
 
-      if (!isEditMode && interaction.kind !== "pan-canvas") {
-        interactionRef.current = null
-        setRotatingNodeId(null)
+      if (!isEditModeRef.current && interaction.kind !== "pan-canvas") {
+        commitActiveInteraction({ shouldCommit: true })
         return
       }
 
-      if (interaction.kind === "pan-canvas") {
-        const canvasRect = canvasRef.current?.getBoundingClientRect()
+      const nextInteractionResult = getNextInteractionResult({
+        canvas: canvasRef.current,
+        event,
+        interaction,
+      })
 
-        if (!canvasRect) {
-          return
-        }
-
-        onSceneChange((current) =>
-          updateDashboardComposeCamera(current, {
-            panX:
-              interaction.startPanX +
-              ((event.clientX - interaction.startClientX) / canvasRect.width) *
-                current.canvasSize.width,
-            panY:
-              interaction.startPanY +
-              ((event.clientY - interaction.startClientY) / canvasRect.height) *
-                current.canvasSize.height,
-          }),
-        )
+      if (!nextInteractionResult) {
         return
       }
 
-      const worldPoint = getWorldPoint(event, canvasRef.current, scene)
-
-      if (!worldPoint) {
-        return
-      }
-
-      if (interaction.kind === "drag-node") {
-        onSceneChange((current) =>
-          updateDashboardComposeNode(current, interaction.nodeId, {
-            x: interaction.startX + (worldPoint.x - interaction.startWorldX),
-            y: interaction.startY + (worldPoint.y - interaction.startWorldY),
-          }),
-        )
-        return
-      }
-
-      if (interaction.kind === "resize-node") {
-        const nextDistance = Math.max(
-          1,
-          Math.hypot(worldPoint.x - interaction.centerX, worldPoint.y - interaction.centerY),
-        )
-        const resizeRatio = nextDistance / interaction.startDistance
-
-        if (
-          interaction.nodeKind === "svg" &&
-          interaction.nodeId === DASHBOARD_QR_NODE_ID
-        ) {
-          const nextSize = getNextDashboardQrSize({
-            nextDistance,
-            startDistance: interaction.startDistance,
-            startSize: interaction.qrSize,
-          })
-          const nextWidth = nextSize * interaction.scale
-          const nextHeight = nextSize * interaction.scale
-
-          onSceneChange((current) =>
-            updateDashboardComposeNode(current, interaction.nodeId, {
-              naturalHeight: nextSize,
-              naturalWidth: nextSize,
-              x: interaction.centerX - nextWidth * 0.5,
-              y: interaction.centerY - nextHeight * 0.5,
-            }),
-          )
-          onQrSizeChange(nextSize)
-          return
-        }
-
-        const nextScale = clampDashboardLayerScale(interaction.startScale * resizeRatio)
-        const nextWidth = interaction.naturalWidth * nextScale
-        const nextHeight = interaction.naturalHeight * nextScale
-
-        onSceneChange((current) =>
-          updateDashboardComposeNode(current, interaction.nodeId, {
-            scale: nextScale,
-            x: interaction.centerX - nextWidth * 0.5,
-            y: interaction.centerY - nextHeight * 0.5,
-          }),
-        )
-        return
-      }
-
-      const angle =
-        (Math.atan2(
-          worldPoint.y - interaction.centerY,
-          worldPoint.x - interaction.centerX,
-        ) *
-          180) /
-        Math.PI
-
-      onSceneChange((current) =>
-        updateDashboardComposeNode(current, interaction.nodeId, {
-          rotation: angle - interaction.startAngle + interaction.startRotation,
-        }),
-      )
+      scheduleDraftScene(nextInteractionResult.scene, nextInteractionResult.qrSize)
     }
 
-    const onPointerUp = () => {
-      interactionRef.current = null
-      setRotatingNodeId(null)
+    const onPointerEnd = () => {
+      commitActiveInteraction({ shouldCommit: true })
     }
 
     window.addEventListener("pointermove", onPointerMove)
-    window.addEventListener("pointerup", onPointerUp)
+    window.addEventListener("pointerup", onPointerEnd)
+    window.addEventListener("pointercancel", onPointerEnd)
 
     return () => {
       window.removeEventListener("pointermove", onPointerMove)
-      window.removeEventListener("pointerup", onPointerUp)
+      window.removeEventListener("pointerup", onPointerEnd)
+      window.removeEventListener("pointercancel", onPointerEnd)
     }
-  }, [isEditMode, onQrSizeChange, onSceneChange, scene])
+  }, [commitActiveInteraction, scheduleDraftScene])
+
+  useEffect(() => {
+    if (isEditMode || !interactionRef.current) {
+      return
+    }
+
+    queueMicrotask(() => {
+      if (isEditModeRef.current || !interactionRef.current) {
+        return
+      }
+
+      commitActiveInteraction({ shouldCommit: true })
+    })
+  }, [commitActiveInteraction, isEditMode])
 
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
     event.preventDefault()
 
-    const anchor = getWorldPoint(event.nativeEvent, canvasRef.current, scene)
+    const anchor = getWorldPoint(event.nativeEvent, canvasRef.current, draftSceneRef.current)
 
     if (!anchor) {
       return
     }
 
     const multiplier = event.deltaY < 0 ? 1.1 : 0.9
+    const currentScene = draftSceneRef.current
+    const nextScene = {
+      ...currentScene,
+      camera: computeDashboardZoomedCamera(
+        currentScene,
+        currentScene.camera.zoom * multiplier,
+        anchor,
+      ),
+    }
 
-    onSceneChange((current) => ({
-      ...current,
-      camera: computeDashboardZoomedCamera(current, current.camera.zoom * multiplier, anchor),
-    }))
+    draftSceneRef.current = nextScene
+    onSceneChangeRef.current(nextScene)
   }
 
   const startResizeInteraction = (
@@ -250,9 +329,10 @@ export function DashboardComposeSurface({
     height: number,
   ) => {
     event.stopPropagation()
+    const baseScene = draftSceneRef.current
     const centerX = node.x + width * 0.5
     const centerY = node.y + height * 0.5
-    const worldPoint = getWorldPoint(event.nativeEvent, canvasRef.current, scene)
+    const worldPoint = getWorldPoint(event.nativeEvent, canvasRef.current, baseScene)
 
     if (!worldPoint) {
       return
@@ -261,6 +341,7 @@ export function DashboardComposeSurface({
     onSelectedNodeChange(node.id)
     interactionRef.current = {
       kind: "resize-node",
+      scene: baseScene,
       nodeId: node.id,
       naturalHeight: node.naturalHeight,
       naturalWidth: node.naturalWidth,
@@ -275,8 +356,10 @@ export function DashboardComposeSurface({
   }
 
   const handleEditModeChange = (checked: boolean) => {
-    interactionRef.current = checked ? interactionRef.current : null
-    setRotatingNodeId(null)
+    if (!checked) {
+      commitActiveInteraction({ shouldCommit: true })
+    }
+
     onEditModeChange(checked)
   }
 
@@ -294,23 +377,37 @@ export function DashboardComposeSurface({
     >
       <div
         data-slot="dashboard-compose-viewport"
-        data-background-mode={scene.background.mode}
+        data-background-mode={renderedScene.background.mode}
         className="absolute inset-0"
         style={canvasBackgroundStyle}
         onPointerDown={(event) => {
+          const baseScene = draftSceneRef.current
+
           onSelectedNodeChange(null)
           interactionRef.current = {
             kind: "pan-canvas",
+            scene: baseScene,
             startClientX: event.clientX,
             startClientY: event.clientY,
-            startPanX: scene.camera.panX,
-            startPanY: scene.camera.panY,
+            startPanX: baseScene.camera.panX,
+            startPanY: baseScene.camera.panY,
           }
         }}
         onWheel={handleWheel}
       >
-        {errorMessage ? (
+        {qualityReport ? (
           <div className="pointer-events-none absolute inset-x-5 top-4 z-20 flex sm:inset-x-6 lg:inset-x-8">
+            <div className="pointer-events-auto">
+              <QrQualityPanel
+                onApplySuggestionPath={onApplyQualitySuggestionPath}
+                report={qualityReport}
+              />
+            </div>
+          </div>
+        ) : null}
+
+        {errorMessage ? (
+          <div className="pointer-events-none absolute inset-x-5 top-4 z-20 flex justify-end sm:inset-x-6 lg:inset-x-8">
             <p
               aria-live="polite"
               role="alert"
@@ -342,13 +439,15 @@ export function DashboardComposeSurface({
               <IconButton
                 ariaLabel="Zoom out preview"
                 icon={<ZoomOutIcon />}
-                onClick={() =>
-                  onSceneChange((current) =>
-                    updateDashboardComposeCamera(current, {
-                      zoom: clampDashboardZoom(current.camera.zoom - 0.1),
-                    }),
-                  )
-                }
+                onClick={() => {
+                  const currentScene = draftSceneRef.current
+                  const nextScene = updateDashboardComposeCamera(currentScene, {
+                    zoom: clampDashboardZoom(currentScene.camera.zoom - 0.1),
+                  })
+
+                  draftSceneRef.current = nextScene
+                  onSceneChangeRef.current(nextScene)
+                }}
               />
               <div className="min-w-12 px-1 text-center text-[0.72rem] font-semibold text-foreground/65">
                 {zoomPercent}
@@ -356,13 +455,15 @@ export function DashboardComposeSurface({
               <IconButton
                 ariaLabel="Zoom in preview"
                 icon={<ZoomInIcon />}
-                onClick={() =>
-                  onSceneChange((current) =>
-                    updateDashboardComposeCamera(current, {
-                      zoom: clampDashboardZoom(current.camera.zoom + 0.1),
-                    }),
-                  )
-                }
+                onClick={() => {
+                  const currentScene = draftSceneRef.current
+                  const nextScene = updateDashboardComposeCamera(currentScene, {
+                    zoom: clampDashboardZoom(currentScene.camera.zoom + 0.1),
+                  })
+
+                  draftSceneRef.current = nextScene
+                  onSceneChangeRef.current(nextScene)
+                }}
               />
             </div>
 
@@ -370,12 +471,22 @@ export function DashboardComposeSurface({
               <IconButton
                 ariaLabel="Reset preview position"
                 icon={<SearchIcon />}
-                onClick={() => onSceneChange((current) => resetDashboardComposeCamera(current))}
+                onClick={() => {
+                  const nextScene = resetDashboardComposeCamera(draftSceneRef.current)
+
+                  draftSceneRef.current = nextScene
+                  onSceneChangeRef.current(nextScene)
+                }}
               />
               <IconButton
                 ariaLabel="Reset QR transform"
                 icon={<MaximizeIcon />}
-                onClick={() => onSceneChange((current) => resetDashboardQrNodeTransform(current))}
+                onClick={() => {
+                  const nextScene = resetDashboardQrNodeTransform(draftSceneRef.current)
+
+                  draftSceneRef.current = nextScene
+                  onSceneChangeRef.current(nextScene)
+                }}
               />
             </div>
 
@@ -402,12 +513,12 @@ export function DashboardComposeSurface({
               data-slot="dashboard-compose-world"
               className="absolute inset-0"
               style={{
-                transform: `translate(${(scene.camera.panX / scene.canvasSize.width) * 100}%, ${(scene.camera.panY / scene.canvasSize.height) * 100}%) scale(${scene.camera.zoom})`,
+                transform: `translate(${(renderedScene.camera.panX / renderedScene.canvasSize.width) * 100}%, ${(renderedScene.camera.panY / renderedScene.canvasSize.height) * 100}%) scale(${renderedScene.camera.zoom})`,
                 transformOrigin: "0 0",
               }}
             >
               <div data-slot="dashboard-compose-stage" className="absolute inset-0 overflow-visible">
-                {[...scene.nodes]
+                {[...renderedScene.nodes]
                   .filter((node) => node.isVisible)
                   // Lower zIndex values render first so higher ones paint above them.
                   .sort((left, right) => left.zIndex - right.zIndex)
@@ -435,13 +546,13 @@ export function DashboardComposeSurface({
                               : "pointer-events-none absolute left-0 top-0"
                         }
                         style={{
-                          height: `${(height / scene.canvasSize.height) * 100}%`,
+                          height: `${(height / renderedScene.canvasSize.height) * 100}%`,
                           mixBlendMode:
                             node.blendMode as React.CSSProperties["mixBlendMode"],
                           opacity: node.opacity,
                           transform: `translate(${node.x}px, ${node.y}px) rotate(${node.rotation}deg)`,
                           transformOrigin: "center center",
-                          width: `${(width / scene.canvasSize.width) * 100}%`,
+                          width: `${(width / renderedScene.canvasSize.width) * 100}%`,
                         }}
                         onPointerDown={(event) => {
                           if (!isEditMode) {
@@ -456,7 +567,12 @@ export function DashboardComposeSurface({
                             return
                           }
 
-                          const worldPoint = getWorldPoint(event.nativeEvent, canvasRef.current, scene)
+                          const baseScene = draftSceneRef.current
+                          const worldPoint = getWorldPoint(
+                            event.nativeEvent,
+                            canvasRef.current,
+                            baseScene,
+                          )
 
                           if (!worldPoint) {
                             return
@@ -464,6 +580,7 @@ export function DashboardComposeSurface({
 
                           interactionRef.current = {
                             kind: "drag-node",
+                            scene: baseScene,
                             nodeId: node.id,
                             startWorldX: worldPoint.x,
                             startWorldY: worldPoint.y,
@@ -493,7 +610,7 @@ export function DashboardComposeSurface({
                               <div className="pointer-events-none absolute inset-[-10px] rounded-[2px] border border-sky-600 shadow-[0_0_0_1px_rgba(255,255,255,0.72)]" />
                               {isQrNode ? (
                                 <div className="pointer-events-none absolute bottom-[-2.75rem] left-1/2 -translate-x-1/2 rounded-full border border-slate-300/90 bg-white/92 px-3 py-1 text-[0.72rem] font-semibold text-slate-600 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)]">
-                                  {Math.round(qrSize)} × {Math.round(qrSize)}
+                                  {Math.round(renderedQrSize)} × {Math.round(renderedQrSize)}
                                 </div>
                               ) : null}
                               {isRotating ? (
@@ -510,12 +627,13 @@ export function DashboardComposeSurface({
                                     icon={<RotateCwIcon className="size-3" />}
                                     onPointerDown={(event) => {
                                       event.stopPropagation()
+                                      const baseScene = draftSceneRef.current
                                       const centerX = node.x + width * 0.5
                                       const centerY = node.y + height * 0.5
                                       const worldPoint = getWorldPoint(
                                         event.nativeEvent,
                                         canvasRef.current,
-                                        scene,
+                                        baseScene,
                                       )
 
                                       if (!worldPoint) {
@@ -526,6 +644,7 @@ export function DashboardComposeSurface({
                                       setRotatingNodeId(node.id)
                                       interactionRef.current = {
                                         kind: "rotate-node",
+                                        scene: baseScene,
                                         nodeId: node.id,
                                         centerX,
                                         centerY,
@@ -655,6 +774,106 @@ function HandleButton({
       {icon}
     </button>
   )
+}
+
+function getNextInteractionResult({
+  canvas,
+  event,
+  interaction,
+}: {
+  canvas: HTMLDivElement | null
+  event: PointerEvent
+  interaction: Interaction
+}): InteractionResult | null {
+  if (interaction.kind === "pan-canvas") {
+    const canvasRect = canvas?.getBoundingClientRect()
+
+    if (!canvasRect) {
+      return null
+    }
+
+    return {
+      scene: updateDashboardComposeCamera(interaction.scene, {
+        panX:
+          interaction.startPanX +
+          ((event.clientX - interaction.startClientX) / canvasRect.width) *
+            interaction.scene.canvasSize.width,
+        panY:
+          interaction.startPanY +
+          ((event.clientY - interaction.startClientY) / canvasRect.height) *
+            interaction.scene.canvasSize.height,
+      }),
+    }
+  }
+
+  const worldPoint = getWorldPoint(event, canvas, interaction.scene)
+
+  if (!worldPoint) {
+    return null
+  }
+
+  if (interaction.kind === "drag-node") {
+    return {
+      scene: updateDashboardComposeNode(interaction.scene, interaction.nodeId, {
+        x: interaction.startX + (worldPoint.x - interaction.startWorldX),
+        y: interaction.startY + (worldPoint.y - interaction.startWorldY),
+      }),
+    }
+  }
+
+  if (interaction.kind === "resize-node") {
+    const nextDistance = Math.max(
+      1,
+      Math.hypot(worldPoint.x - interaction.centerX, worldPoint.y - interaction.centerY),
+    )
+    const resizeRatio = nextDistance / interaction.startDistance
+
+    if (interaction.nodeKind === "svg" && interaction.nodeId === DASHBOARD_QR_NODE_ID) {
+      const nextSize = getNextDashboardQrSize({
+        nextDistance,
+        startDistance: interaction.startDistance,
+        startSize: interaction.qrSize,
+      })
+      const nextWidth = nextSize * interaction.scale
+      const nextHeight = nextSize * interaction.scale
+
+      return {
+        scene: updateDashboardComposeNode(interaction.scene, interaction.nodeId, {
+          naturalHeight: nextSize,
+          naturalWidth: nextSize,
+          x: interaction.centerX - nextWidth * 0.5,
+          y: interaction.centerY - nextHeight * 0.5,
+        }),
+        qrSize: nextSize,
+      }
+    }
+
+    const nextScale = clampDashboardLayerScale(interaction.startScale * resizeRatio)
+    const nextWidth = interaction.naturalWidth * nextScale
+    const nextHeight = interaction.naturalHeight * nextScale
+
+    return {
+      scene: updateDashboardComposeNode(interaction.scene, interaction.nodeId, {
+        scale: nextScale,
+        x: interaction.centerX - nextWidth * 0.5,
+        y: interaction.centerY - nextHeight * 0.5,
+      }),
+    }
+  }
+
+  const angle =
+    (Math.atan2(
+      worldPoint.y - interaction.centerY,
+      worldPoint.x - interaction.centerX,
+    ) *
+      180) /
+    Math.PI
+
+  return {
+    scene: updateDashboardComposeNode(interaction.scene, interaction.nodeId, {
+      rotation: angle - interaction.startAngle + interaction.startRotation,
+    }),
+  }
 }
 
 function getWorldPoint(

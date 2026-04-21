@@ -35,9 +35,18 @@ import {
   addDashboardComposeImageNode,
   DASHBOARD_QR_NODE_ID,
   createDashboardComposeScene,
+  getDashboardComposeNode,
   type DashboardComposeScene,
   upsertDashboardQrNode,
 } from "@/components/qr/dashboard-compose-scene"
+import { decodeDashboardQrScene } from "@/components/qr/qr-quality-decode"
+import {
+  analyzeQrQuality,
+  applyQrQualitySuggestionPath,
+  mergeQrQualityReportWithDecode,
+  type QrQualityDecodeResult,
+  type QrQualitySuggestionPath,
+} from "@/components/qr/qr-quality"
 import { buildDashboardQrNodePayload } from "@/components/qr/dashboard-qr-svg"
 import { QrPreviewCard } from "@/components/qr/qr-preview-card"
 import { buildQrExtension, getQrExtensionKey } from "@/components/qr/qr-rendering"
@@ -117,19 +126,58 @@ export function QrStudio({
   )
 
   const deferredState = useDeferredValue(state)
+  const deferredDashboardScene = useDeferredValue(dashboardScene)
   const previewRef = useRef<HTMLDivElement>(null)
   const initialStateRef = useRef(state)
   const qrCodeRef = useRef<QRCodeStyling | null>(null)
   const qrExtensionKeyRef = useRef(getQrExtensionKey(state))
   const dashboardPayloadRequestRef = useRef(0)
+  const dashboardQualityRequestRef = useRef(0)
   const lastDashboardEditorSectionRef = useRef<QrEditorSectionId>(initialActiveSection)
   const uploadedAssetUrlsRef = useRef<Record<UploadedAssetKey, string | null>>({
     logo: null,
     backgroundImage: null,
   })
   const composeImageUrlsRef = useRef<ComposeImageUrlRegistry>({})
+  const latestStateRef = useRef(state)
+  const latestDashboardSceneRef = useRef(dashboardScene)
   const dashboardFilenameId = useId()
   const canDownload = Boolean(state.data.trim())
+  const [qrQualityDecodeState, setQrQualityDecodeState] = useState<{
+    key: string
+    result: QrQualityDecodeResult
+  }>({
+    key: "",
+    result: {
+      kind: "pending",
+    },
+  })
+  const hasDashboardQrNode = Boolean(getDashboardComposeNode(deferredDashboardScene))
+  const qrQualityDecodeKey =
+    variant === "dashboard"
+      ? JSON.stringify({
+          scene: deferredDashboardScene,
+          state: deferredState,
+        })
+      : ""
+  const effectiveQrQualityDecodeResult =
+    variant === "dashboard" && !hasDashboardQrNode
+      ? ({
+          kind: "pending",
+        } satisfies QrQualityDecodeResult)
+      : qrQualityDecodeState.key === qrQualityDecodeKey
+        ? qrQualityDecodeState.result
+        : ({
+            kind: "pending",
+          } satisfies QrQualityDecodeResult)
+
+  const qrQualityReport =
+    variant === "dashboard"
+      ? mergeQrQualityReportWithDecode(
+          analyzeQrQuality(deferredState, deferredDashboardScene),
+          effectiveQrQualityDecodeResult,
+        )
+      : null
 
   function handleQrSizeChange(nextSize: number) {
     setState((current) => setSquareQrSize(current, nextSize))
@@ -153,6 +201,11 @@ export function QrStudio({
       cleanupComposeImageUrls(composeImageUrlsRef)
     }
   }, [])
+
+  useEffect(() => {
+    latestStateRef.current = state
+    latestDashboardSceneRef.current = dashboardScene
+  }, [dashboardScene, state])
 
   useEffect(() => {
     if (variant !== "dashboard") {
@@ -219,6 +272,49 @@ export function QrStudio({
         })
       })
   }, [deferredState, variant])
+
+  useEffect(() => {
+    if (variant !== "dashboard") {
+      return
+    }
+
+    if (!hasDashboardQrNode) {
+      return
+    }
+
+    const requestId = ++dashboardQualityRequestRef.current
+
+    void decodeDashboardQrScene(deferredState, deferredDashboardScene)
+      .then((result) => {
+        if (dashboardQualityRequestRef.current !== requestId) {
+          return
+        }
+
+        setQrQualityDecodeState({
+          key: qrQualityDecodeKey,
+          result,
+        })
+      })
+      .catch(() => {
+        if (dashboardQualityRequestRef.current !== requestId) {
+          return
+        }
+
+        setQrQualityDecodeState({
+          key: qrQualityDecodeKey,
+          result: {
+            kind: "unverified",
+            reason: "The composed dashboard scene could not be verified.",
+          },
+        })
+      })
+  }, [
+    deferredDashboardScene,
+    deferredState,
+    hasDashboardQrNode,
+    qrQualityDecodeKey,
+    variant,
+  ])
 
   async function handleDownload(extension: FileExtension) {
     if (!qrCodeRef.current) {
@@ -334,6 +430,17 @@ export function QrStudio({
     }
 
     setSelectedDashboardNodeId(null)
+  }
+
+  function handleApplyQrQualitySuggestionPath(path: QrQualitySuggestionPath) {
+    const nextResult = applyQrQualitySuggestionPath(
+      latestStateRef.current,
+      latestDashboardSceneRef.current,
+      path,
+    )
+
+    setState(nextResult.state)
+    setDashboardScene(nextResult.scene)
   }
 
   const previewCard = (
@@ -577,10 +684,12 @@ export function QrStudio({
                   errorMessage={errorMessage}
                   isEditMode={isDashboardEditMode}
                   onEditModeChange={handleDashboardEditModeChange}
+                  onApplyQualitySuggestionPath={handleApplyQrQualitySuggestionPath}
                   onReset={handleReset}
                   onQrSizeChange={handleQrSizeChange}
                   onSceneChange={setDashboardScene}
                   onSelectedNodeChange={setSelectedDashboardNodeId}
+                  qualityReport={qrQualityReport}
                   qrSize={state.width}
                   scene={dashboardScene}
                   selectedNodeId={selectedDashboardNodeId}
