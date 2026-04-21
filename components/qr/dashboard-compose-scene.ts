@@ -1,15 +1,19 @@
+import type { StudioGradient } from "@/components/qr/qr-studio-state"
+
 export const DASHBOARD_COMPOSE_CANVAS_SIZE = 960
 export const DASHBOARD_COMPOSE_CANVAS_HEIGHT = 640
 export const DASHBOARD_QR_STAGE_FIT_RATIO = 0.74
+export const DASHBOARD_IMAGE_STAGE_FIT_RATIO = 0.48
 export const DASHBOARD_QR_NODE_ID = "dashboard-qr-node"
 const MIN_DASHBOARD_ZOOM = 0.2
 const MAX_DASHBOARD_ZOOM = 4
 
-export type DashboardComposeBackgroundMode = "transparent" | "solid"
+export type DashboardComposeBackgroundMode = "transparent" | "solid" | "gradient"
 
 export type DashboardComposeBackground = {
   mode: DashboardComposeBackgroundMode
   color: string
+  gradient: StudioGradient
 }
 
 export type DashboardComposeCamera = {
@@ -18,10 +22,9 @@ export type DashboardComposeCamera = {
   panY: number
 }
 
-export type DashboardComposeNode = {
+export type DashboardComposeNodeBase = {
   id: string
-  kind: "svg"
-  originalSvgMarkup: string
+  name: string
   naturalWidth: number
   naturalHeight: number
   x: number
@@ -31,7 +34,21 @@ export type DashboardComposeNode = {
   zIndex: number
   opacity: number
   blendMode: string
+  isVisible: boolean
+  isLocked: boolean
 }
+
+export type DashboardComposeSvgNode = DashboardComposeNodeBase & {
+  kind: "svg"
+  originalSvgMarkup: string
+}
+
+export type DashboardComposeImageNode = DashboardComposeNodeBase & {
+  kind: "image"
+  imageUrl: string
+}
+
+export type DashboardComposeNode = DashboardComposeSvgNode | DashboardComposeImageNode
 
 export type DashboardComposeScene = {
   background: DashboardComposeBackground
@@ -49,6 +66,14 @@ export type DashboardQrNodePayload = {
   naturalHeight: number
 }
 
+export type DashboardComposeImageNodePayload = {
+  id?: string
+  imageUrl: string
+  name?: string
+  naturalWidth: number
+  naturalHeight: number
+}
+
 const DEFAULT_CAMERA: DashboardComposeCamera = {
   zoom: 1,
   panX: 0,
@@ -58,11 +83,12 @@ const DEFAULT_CAMERA: DashboardComposeCamera = {
 const DEFAULT_BACKGROUND: DashboardComposeBackground = {
   mode: "transparent",
   color: "#ffffff",
+  gradient: createDefaultDashboardComposeBackgroundGradient(),
 }
 
 export function createDashboardComposeScene(): DashboardComposeScene {
   return {
-    background: { ...DEFAULT_BACKGROUND },
+    background: normalizeDashboardComposeBackground(DEFAULT_BACKGROUND),
     canvasSize: {
       width: DASHBOARD_COMPOSE_CANVAS_SIZE,
       height: DASHBOARD_COMPOSE_CANVAS_HEIGHT,
@@ -110,6 +136,19 @@ export function updateDashboardComposeCamera(
   }
 }
 
+export function updateDashboardComposeBackground(
+  scene: DashboardComposeScene,
+  patch: Partial<DashboardComposeBackground>,
+) {
+  return {
+    ...scene,
+    background: normalizeDashboardComposeBackground({
+      ...scene.background,
+      ...patch,
+    }),
+  }
+}
+
 export function updateDashboardComposeNode(
   scene: DashboardComposeScene,
   nodeId: string,
@@ -117,8 +156,128 @@ export function updateDashboardComposeNode(
 ) {
   return {
     ...scene,
+    nodes: scene.nodes.map((node) => {
+      if (node.id !== nodeId) {
+        return node
+      }
+
+      if (node.kind === "image") {
+        return normalizeDashboardComposeNode({
+          ...node,
+          ...patch,
+          kind: "image",
+          imageUrl:
+            "imageUrl" in patch && patch.imageUrl ? patch.imageUrl : node.imageUrl,
+        })
+      }
+
+      return normalizeDashboardComposeNode({
+        ...node,
+        ...patch,
+        kind: "svg",
+        originalSvgMarkup:
+          "originalSvgMarkup" in patch && patch.originalSvgMarkup
+            ? patch.originalSvgMarkup
+            : node.originalSvgMarkup,
+      })
+    }),
+  }
+}
+
+export function addDashboardComposeImageNode(
+  scene: DashboardComposeScene,
+  payload: DashboardComposeImageNodePayload,
+) {
+  const fitScale = Math.min(
+    1,
+    (scene.canvasSize.width * DASHBOARD_IMAGE_STAGE_FIT_RATIO) / payload.naturalWidth,
+    (scene.canvasSize.height * DASHBOARD_IMAGE_STAGE_FIT_RATIO) / payload.naturalHeight,
+  )
+  const scale = Number.isFinite(fitScale) && fitScale > 0 ? fitScale : 1
+  const width = payload.naturalWidth * scale
+  const height = payload.naturalHeight * scale
+
+  const imageNode = normalizeDashboardComposeNode({
+    id: payload.id ?? `dashboard-image-node-${crypto.randomUUID()}`,
+    kind: "image",
+    imageUrl: payload.imageUrl,
+    name: payload.name?.trim() || "Image",
+    naturalWidth: payload.naturalWidth,
+    naturalHeight: payload.naturalHeight,
+    x: (scene.canvasSize.width - width) * 0.5,
+    y: (scene.canvasSize.height - height) * 0.5,
+    scale,
+    rotation: 0,
+    zIndex: getNextDashboardComposeZIndex(scene),
+    opacity: 1,
+    blendMode: "normal",
+    isVisible: true,
+    isLocked: false,
+  })
+
+  return {
+    ...scene,
+    nodes: [...scene.nodes, imageNode],
+  }
+}
+
+export function removeDashboardComposeNode(
+  scene: DashboardComposeScene,
+  nodeId: string,
+) {
+  if (nodeId === DASHBOARD_QR_NODE_ID) {
+    return scene
+  }
+
+  const nextNodes = scene.nodes.filter((node) => node.id !== nodeId)
+
+  if (nextNodes.length === scene.nodes.length) {
+    return scene
+  }
+
+  return {
+    ...scene,
+    nodes: nextNodes,
+  }
+}
+
+export function reorderDashboardComposeNodes(
+  scene: DashboardComposeScene,
+  orderedNodeIds: string[],
+) {
+  if (scene.nodes.length <= 1) {
+    return scene
+  }
+
+  const currentOrder = getDashboardComposeNodeIdsByStackOrder(scene.nodes)
+  const nextOrder = [
+    ...new Set([
+      ...orderedNodeIds.filter((nodeId) => currentOrder.includes(nodeId)),
+      ...currentOrder,
+    ]),
+  ]
+
+  if (
+    nextOrder.length === currentOrder.length &&
+    nextOrder.every((nodeId, index) => nodeId === currentOrder[index])
+  ) {
+    return scene
+  }
+
+  const zIndexByNodeId = new Map(
+    nextOrder.map((nodeId, index) => [nodeId, nextOrder.length - index]),
+  )
+
+  return {
+    ...scene,
     nodes: scene.nodes.map((node) =>
-      node.id === nodeId ? normalizeDashboardComposeNode({ ...node, ...patch }) : node,
+      zIndexByNodeId.has(node.id)
+        ? normalizeDashboardComposeNode({
+            ...node,
+            // Higher zIndex values paint above lower ones on the compose surface.
+            zIndex: zIndexByNodeId.get(node.id) ?? node.zIndex,
+          })
+        : node,
     ),
   }
 }
@@ -135,11 +294,12 @@ export function upsertDashboardQrNode(
   payload: DashboardQrNodePayload,
 ) {
   const existingNode = getDashboardComposeNode(scene)
+  const otherNodes = scene.nodes.filter((node) => node.id !== DASHBOARD_QR_NODE_ID)
 
-  if (!existingNode || !hasFiniteTransform(existingNode)) {
+  if (!existingNode || existingNode.kind !== "svg" || !hasFiniteTransform(existingNode)) {
     return {
       ...scene,
-      nodes: [createDashboardQrNode(scene, payload)],
+      nodes: [...otherNodes, createDashboardQrNode(scene, payload)],
     }
   }
 
@@ -153,6 +313,7 @@ export function upsertDashboardQrNode(
   return {
     ...scene,
     nodes: [
+      ...otherNodes,
       normalizeDashboardComposeNode({
         ...existingNode,
         originalSvgMarkup: payload.markup,
@@ -175,17 +336,21 @@ export function resetDashboardComposeCamera(scene: DashboardComposeScene) {
 export function resetDashboardQrNodeTransform(scene: DashboardComposeScene) {
   const node = getDashboardComposeNode(scene)
 
-  if (!node) {
+  if (!node || node.kind !== "svg") {
     return scene
   }
 
   return {
     ...scene,
     nodes: [
-      createDashboardQrNode(scene, {
-        markup: node.originalSvgMarkup,
-        naturalHeight: node.naturalHeight,
-        naturalWidth: node.naturalWidth,
+      ...scene.nodes.filter((existingNode) => existingNode.id !== DASHBOARD_QR_NODE_ID),
+      normalizeDashboardComposeNode({
+        ...createDashboardQrNode(scene, {
+          markup: node.originalSvgMarkup,
+          naturalHeight: node.naturalHeight,
+          naturalWidth: node.naturalWidth,
+        }),
+        zIndex: node.zIndex,
       }),
     ],
   }
@@ -194,7 +359,7 @@ export function resetDashboardQrNodeTransform(scene: DashboardComposeScene) {
 function createDashboardQrNode(
   scene: DashboardComposeScene,
   payload: DashboardQrNodePayload,
-): DashboardComposeNode {
+): DashboardComposeSvgNode {
   const fitScale = Math.min(
     (scene.canvasSize.width * DASHBOARD_QR_STAGE_FIT_RATIO) / payload.naturalWidth,
     (scene.canvasSize.height * DASHBOARD_QR_STAGE_FIT_RATIO) / payload.naturalHeight,
@@ -206,6 +371,7 @@ function createDashboardQrNode(
   return normalizeDashboardComposeNode({
     id: DASHBOARD_QR_NODE_ID,
     kind: "svg",
+    name: "QR Code",
     originalSvgMarkup: payload.markup,
     naturalWidth: payload.naturalWidth,
     naturalHeight: payload.naturalHeight,
@@ -213,17 +379,20 @@ function createDashboardQrNode(
     y: (scene.canvasSize.height - height) * 0.5,
     scale,
     rotation: 0,
-    zIndex: 1,
+    zIndex: getNextDashboardComposeZIndex(scene),
     opacity: 1,
     blendMode: "normal",
-  })
+    isVisible: true,
+    isLocked: false,
+  }) as DashboardComposeSvgNode
 }
 
 function normalizeDashboardComposeNode(
   node: DashboardComposeNode,
 ): DashboardComposeNode {
-  return {
+  const normalizedSharedNode = {
     ...node,
+    name: node.name?.trim() || "Untitled layer",
     naturalHeight: Math.max(1, node.naturalHeight),
     naturalWidth: Math.max(1, node.naturalWidth),
     opacity: clamp(node.opacity, 0, 1),
@@ -233,7 +402,68 @@ function normalizeDashboardComposeNode(
     y: Number.isFinite(node.y) ? node.y : 0,
     zIndex: Number.isFinite(node.zIndex) ? node.zIndex : 0,
     blendMode: node.blendMode || "normal",
+    isVisible: node.isVisible ?? true,
+    isLocked: node.isLocked ?? false,
   }
+
+  if (node.kind === "image") {
+    return {
+      ...normalizedSharedNode,
+      kind: "image",
+      imageUrl: node.imageUrl,
+    }
+  }
+
+  return {
+    ...normalizedSharedNode,
+    kind: "svg",
+    originalSvgMarkup: node.originalSvgMarkup,
+  }
+}
+
+function getDashboardComposeNodeIdsByStackOrder(nodes: DashboardComposeNode[]) {
+  return [...nodes]
+    .sort((left, right) => right.zIndex - left.zIndex)
+    .map((node) => node.id)
+}
+
+function normalizeDashboardComposeBackground(
+  background: DashboardComposeBackground,
+): DashboardComposeBackground {
+  const gradient = structuredClone(
+    background.gradient ?? createDefaultDashboardComposeBackgroundGradient(),
+  )
+
+  return {
+    ...background,
+    color: background.color || "#ffffff",
+    gradient: {
+      ...gradient,
+      enabled: background.mode === "gradient",
+    },
+    mode: background.mode ?? "transparent",
+  }
+}
+
+function createDefaultDashboardComposeBackgroundGradient(): StudioGradient {
+  return {
+    enabled: false,
+    type: "linear",
+    rotation: 0,
+    colorStops: [
+      { offset: 0, color: "#f8fafc" },
+      { offset: 1, color: "#dbeafe" },
+    ],
+  }
+}
+
+function getNextDashboardComposeZIndex(scene: DashboardComposeScene) {
+  const maxZIndex = scene.nodes.reduce(
+    (currentMax, node) => Math.max(currentMax, node.zIndex),
+    0,
+  )
+
+  return maxZIndex + 1
 }
 
 function hasFiniteTransform(node: DashboardComposeNode) {

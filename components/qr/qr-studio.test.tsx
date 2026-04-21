@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server"
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 vi.mock("qr-code-styling", () => ({
   default: class MockQRCodeStyling {
@@ -18,7 +18,25 @@ vi.mock("@/components/qr/qr-control-sections", () => ({
   QrControlSections: () => <div data-testid="control-sections" />,
 }))
 
-import { QrStudio } from "@/components/qr/qr-studio"
+vi.mock("@/components/qr/dashboard-edit-controls", () => ({
+  DashboardEditControls: () => <div data-testid="dashboard-edit-controls" />,
+}))
+
+import { getNextDashboardSectionStateForEditMode } from "@/components/qr/dashboard-edit-sections"
+import {
+  cleanupComposeImageUrls,
+  cleanupRemovedComposeImageUrls,
+  getComposeImageLayerName,
+  QrStudio,
+} from "@/components/qr/qr-studio"
+import {
+  addDashboardComposeImageNode,
+  createDashboardComposeScene,
+} from "@/components/qr/dashboard-compose-scene"
+
+afterEach(() => {
+  vi.restoreAllMocks()
+})
 
 describe("QrStudio", () => {
   it("renders the dashboard as a full-height three-pane shell with the preview pane itself acting as the compose surface", () => {
@@ -41,6 +59,7 @@ describe("QrStudio", () => {
     expect(markup).toContain('data-slot="dashboard-preview-pane"')
     expect(markup).toContain('data-slot="dashboard-compose-surface"')
     expect(markup).toContain('data-slot="dashboard-compose-controls"')
+    expect(markup).toContain('data-slot="dashboard-compose-edit-mode"')
     expect(markup).toContain('data-slot="dashboard-compose-viewport"')
     expect(markup).toContain('data-slot="dashboard-compose-reset"')
     expect(markup).toContain(
@@ -54,10 +73,14 @@ describe("QrStudio", () => {
     expect(markup).toContain("Export filename")
     expect(markup).toContain('data-slot="mode-toggle"')
     expect(markup).toContain("Appearance")
+    expect(markup).toContain("Edit mode")
+    expect(markup).toContain('aria-label="Toggle edit mode"')
     expect(markup).toContain("Download")
     expect(modeToggleIndex).toBeGreaterThan(-1)
     expect(downloadLabelIndex).toBeGreaterThan(modeToggleIndex)
     expect(markup).toContain("Reset defaults")
+    expect(markup).not.toContain('aria-label="Resize QR from top left"')
+    expect(markup).not.toContain('aria-label="Rotate QR"')
     expect(markup).toContain("min-h-screen")
     expect(markup).not.toContain('data-slot="dashboard-compose-meta"')
     expect(markup).not.toContain('data-slot="dashboard-compose-frame"')
@@ -78,5 +101,89 @@ describe("QrStudio", () => {
     expect(markup).not.toContain("dashboard-sidebar")
     expect(markup).not.toContain("sidebar-provider")
     expect(markup).not.toContain('data-slot="dashboard-settings-stage" class="relative flex min-h-0 flex-1 flex-col overflow-hidden"')
+  })
+
+  it("replaces the editor rail with layers and background tabs when edit mode starts enabled", () => {
+    const markup = renderToStaticMarkup(
+      <QrStudio
+        initialDashboardEditMode
+        initialDashboardEditSection="background"
+        variant="dashboard"
+      />,
+    )
+
+    expect(markup).toContain('data-slot="dashboard-edit-rail"')
+    expect(markup).toContain("Layers")
+    expect(markup).toContain("Background")
+    expect(markup).toContain('data-testid="dashboard-edit-controls"')
+    expect(markup).not.toContain('data-testid="section-rail"')
+    expect(markup).not.toContain('data-testid="control-sections"')
+  })
+
+  it("restores the previous QR section when edit mode is turned off", () => {
+    expect(
+      getNextDashboardSectionStateForEditMode({
+        activeSection: "background",
+        lastEditorSection: "logo",
+        nextIsEditMode: false,
+      }),
+    ).toEqual({
+      activeSection: "logo",
+      lastEditorSection: "logo",
+    })
+  })
+
+  it("derives a clean default layer name from uploaded filenames", () => {
+    expect(getComposeImageLayerName("hero-shot.final.png")).toBe("hero-shot.final")
+    expect(getComposeImageLayerName("   ")).toBe("Image")
+  })
+
+  it("revokes compose image urls when image nodes leave the scene", () => {
+    const revokeObjectUrl = vi.fn()
+    Object.defineProperty(URL, "revokeObjectURL", {
+      configurable: true,
+      value: revokeObjectUrl,
+    })
+
+    const composeImageUrlsRef = {
+      current: {
+        "image-node": "blob:image-node",
+        "other-image": "blob:other-image",
+      },
+    }
+    const scene = addDashboardComposeImageNode(createDashboardComposeScene(), {
+      id: "image-node",
+      imageUrl: "blob:image-node",
+      name: "Poster",
+      naturalHeight: 500,
+      naturalWidth: 700,
+    })
+
+    cleanupRemovedComposeImageUrls(composeImageUrlsRef, scene)
+
+    expect(revokeObjectUrl).toHaveBeenCalledWith("blob:other-image")
+    expect(composeImageUrlsRef.current).toEqual({
+      "image-node": "blob:image-node",
+    })
+  })
+
+  it("clears all compose image urls during reset-style cleanup", () => {
+    const revokeObjectUrl = vi.fn()
+    Object.defineProperty(URL, "revokeObjectURL", {
+      configurable: true,
+      value: revokeObjectUrl,
+    })
+
+    const composeImageUrlsRef = {
+      current: {
+        "image-node": "blob:image-node",
+        "image-node-2": "blob:image-node-2",
+      },
+    }
+
+    cleanupComposeImageUrls(composeImageUrlsRef)
+
+    expect(revokeObjectUrl).toHaveBeenCalledTimes(2)
+    expect(composeImageUrlsRef.current).toEqual({})
   })
 })

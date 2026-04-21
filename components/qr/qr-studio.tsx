@@ -19,10 +19,21 @@ import {
   type QrEditorSectionDirection,
   type QrEditorSectionId,
 } from "@/components/qr/qr-sections"
+import {
+  DEFAULT_DASHBOARD_EDIT_SECTION,
+  getDashboardEditSectionChangeDirection,
+  getNextDashboardSectionStateForEditMode,
+  type DashboardEditSectionDirection,
+  type DashboardEditSectionId,
+} from "@/components/qr/dashboard-edit-sections"
+import { DashboardEditRail } from "@/components/qr/dashboard-edit-rail"
+import { DashboardEditControls } from "@/components/qr/dashboard-edit-controls"
 import { QrSectionRail } from "@/components/qr/qr-section-rail"
 import { QrControlSections } from "@/components/qr/qr-control-sections"
 import { DashboardComposeSurface } from "@/components/qr/dashboard-compose-surface"
 import {
+  addDashboardComposeImageNode,
+  DASHBOARD_QR_NODE_ID,
   createDashboardComposeScene,
   type DashboardComposeScene,
   upsertDashboardQrNode,
@@ -50,6 +61,7 @@ import { ModeToggle } from "@/components/mode-toggle"
 
 const DEFAULT_DOWNLOAD_NAME = "new-qr-studio"
 type UploadedAssetKey = "logo" | "backgroundImage"
+type ComposeImageUrlRegistry = Record<string, string>
 const DASHBOARD_SECTION_PANE_VARIANTS = {
   active: {
     filter: "blur(0px)",
@@ -73,19 +85,36 @@ const DASHBOARD_SECTION_PANE_VARIANTS = {
 
 type QrStudioProps = {
   variant?: "settings" | "dashboard"
+  initialActiveSection?: QrEditorSectionId
+  initialDashboardEditMode?: boolean
+  initialDashboardEditSection?: DashboardEditSectionId
 }
 
-export function QrStudio({ variant = "settings" }: QrStudioProps) {
+export function QrStudio({
+  variant = "settings",
+  initialActiveSection = DEFAULT_QR_EDITOR_SECTION,
+  initialDashboardEditMode = false,
+  initialDashboardEditSection = DEFAULT_DASHBOARD_EDIT_SECTION,
+}: QrStudioProps) {
   const [state, setState] = useState(() => createDefaultQrStudioState())
   const [downloadName, setDownloadName] = useState(DEFAULT_DOWNLOAD_NAME)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [activeSection, setActiveSection] =
-    useState<QrEditorSectionId>(DEFAULT_QR_EDITOR_SECTION)
+    useState<QrEditorSectionId>(initialActiveSection)
+  const [isDashboardEditMode, setIsDashboardEditMode] =
+    useState(initialDashboardEditMode)
+  const [activeDashboardEditSection, setActiveDashboardEditSection] =
+    useState<DashboardEditSectionId>(initialDashboardEditSection)
   const [dashboardScene, setDashboardScene] = useState<DashboardComposeScene>(() =>
     createDashboardComposeScene(),
   )
   const [sectionDirection, setSectionDirection] =
     useState<QrEditorSectionDirection>(0)
+  const [dashboardEditSectionDirection, setDashboardEditSectionDirection] =
+    useState<DashboardEditSectionDirection>(0)
+  const [selectedDashboardNodeId, setSelectedDashboardNodeId] = useState<string | null>(
+    initialDashboardEditMode ? DASHBOARD_QR_NODE_ID : null,
+  )
 
   const deferredState = useDeferredValue(state)
   const previewRef = useRef<HTMLDivElement>(null)
@@ -93,10 +122,12 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
   const qrCodeRef = useRef<QRCodeStyling | null>(null)
   const qrExtensionKeyRef = useRef(getQrExtensionKey(state))
   const dashboardPayloadRequestRef = useRef(0)
+  const lastDashboardEditorSectionRef = useRef<QrEditorSectionId>(initialActiveSection)
   const uploadedAssetUrlsRef = useRef<Record<UploadedAssetKey, string | null>>({
     logo: null,
     backgroundImage: null,
   })
+  const composeImageUrlsRef = useRef<ComposeImageUrlRegistry>({})
   const dashboardFilenameId = useId()
   const canDownload = Boolean(state.data.trim())
 
@@ -119,8 +150,17 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
       previewElement?.replaceChildren()
       qrCodeRef.current = null
       cleanupUploadedAssets(uploadedAssetUrlsRef)
+      cleanupComposeImageUrls(composeImageUrlsRef)
     }
   }, [])
+
+  useEffect(() => {
+    if (variant !== "dashboard") {
+      return
+    }
+
+    cleanupRemovedComposeImageUrls(composeImageUrlsRef, dashboardScene)
+  }, [dashboardScene, variant])
 
   useEffect(() => {
     if (!qrCodeRef.current) {
@@ -233,12 +273,67 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
     }
   }
 
+  async function handleComposeImageUploadSuccess(file: File) {
+    let objectUrl: string | null = null
+
+    try {
+      objectUrl = URL.createObjectURL(file)
+      const naturalSize = await loadComposeImageDimensions(objectUrl)
+      const nodeId = `dashboard-image-node-${crypto.randomUUID()}`
+      const nextObjectUrl = objectUrl
+
+      composeImageUrlsRef.current[nodeId] = nextObjectUrl
+      setDashboardScene((current) =>
+        addDashboardComposeImageNode(current, {
+          id: nodeId,
+          imageUrl: nextObjectUrl,
+          name: getComposeImageLayerName(file.name),
+          naturalHeight: naturalSize.height,
+          naturalWidth: naturalSize.width,
+        }),
+      )
+      setSelectedDashboardNodeId(nodeId)
+      setErrorMessage(null)
+    } catch {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl)
+      }
+
+      setErrorMessage("The image layer could not be added. Try another image.")
+    }
+  }
+
   function handleReset() {
     cleanupUploadedAssets(uploadedAssetUrlsRef)
+    cleanupComposeImageUrls(composeImageUrlsRef)
     setDownloadName(DEFAULT_DOWNLOAD_NAME)
+    setIsDashboardEditMode(false)
+    setActiveDashboardEditSection(DEFAULT_DASHBOARD_EDIT_SECTION)
+    setSelectedDashboardNodeId(null)
     setDashboardScene(createDashboardComposeScene())
     setState(createDefaultQrStudioState())
     setErrorMessage(null)
+  }
+
+  function handleDashboardEditModeChange(checked: boolean) {
+    const nextState = getNextDashboardSectionStateForEditMode({
+      activeSection,
+      lastEditorSection: lastDashboardEditorSectionRef.current,
+      nextIsEditMode: checked,
+    })
+
+    lastDashboardEditorSectionRef.current = nextState.lastEditorSection
+    setActiveSection(nextState.activeSection)
+    setIsDashboardEditMode(checked)
+    setDashboardEditSectionDirection(0)
+
+    if (checked) {
+      setActiveDashboardEditSection(DEFAULT_DASHBOARD_EDIT_SECTION)
+      setSelectedDashboardNodeId(DASHBOARD_QR_NODE_ID)
+      return
+    }
+
+    setSelectedDashboardNodeId(null)
   }
 
   const previewCard = (
@@ -350,24 +445,47 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
               data-slot="dashboard-workspace"
               className="flex flex-1 flex-col lg:h-full lg:min-h-0 lg:grid lg:grid-cols-[5.75rem_minmax(22rem,29rem)_minmax(24rem,1fr)] lg:overflow-hidden xl:grid-cols-[6rem_minmax(24rem,31rem)_minmax(26rem,1fr)]"
             >
-              <QrSectionRail
-                activeSection={activeSection}
-                onSectionChange={(section) => {
-                  if (section === activeSection) {
-                    return
-                  }
+              {isDashboardEditMode ? (
+                <DashboardEditRail
+                  activeSection={activeDashboardEditSection}
+                  onSectionChange={(section) => {
+                    if (section === activeDashboardEditSection) {
+                      return
+                    }
 
-                  const nextDirection = getQrEditorSectionChangeDirection(
-                    activeSection,
-                    section,
-                  )
+                    const nextDirection = getDashboardEditSectionChangeDirection(
+                      activeDashboardEditSection,
+                      section,
+                    )
 
-                  startTransition(() => {
-                    setSectionDirection(nextDirection)
-                    setActiveSection(section)
-                  })
-                }}
-              />
+                    startTransition(() => {
+                      setDashboardEditSectionDirection(nextDirection)
+                      setActiveDashboardEditSection(section)
+                    })
+                  }}
+                />
+              ) : (
+                <QrSectionRail
+                  activeSection={activeSection}
+                  onSectionChange={(section) => {
+                    if (section === activeSection) {
+                      return
+                    }
+
+                    lastDashboardEditorSectionRef.current = section
+
+                    const nextDirection = getQrEditorSectionChangeDirection(
+                      activeSection,
+                      section,
+                    )
+
+                    startTransition(() => {
+                      setSectionDirection(nextDirection)
+                      setActiveSection(section)
+                    })
+                  }}
+                />
+              )}
 
               <aside
                 data-slot="dashboard-settings-panel"
@@ -389,14 +507,30 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
                       <AnimatePresence
                         initial={false}
                         mode="popLayout"
-                        custom={sectionDirection}
+                        custom={
+                          isDashboardEditMode
+                            ? dashboardEditSectionDirection
+                            : sectionDirection
+                        }
                       >
                         <motion.div
-                          key={activeSection}
+                          key={
+                            isDashboardEditMode
+                              ? activeDashboardEditSection
+                              : activeSection
+                          }
                           data-slot="dashboard-settings-motion"
-                          data-direction={sectionDirection}
+                          data-direction={
+                            isDashboardEditMode
+                              ? dashboardEditSectionDirection
+                              : sectionDirection
+                          }
                           className="flex min-h-0 flex-1 flex-col"
-                          custom={sectionDirection}
+                          custom={
+                            isDashboardEditMode
+                              ? dashboardEditSectionDirection
+                              : sectionDirection
+                          }
                           variants={DASHBOARD_SECTION_PANE_VARIANTS}
                           initial="initial"
                           animate="active"
@@ -406,10 +540,26 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
                             data-slot="dashboard-settings-scroll"
                             className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-5 py-6 pb-10 sm:px-6 lg:px-8 lg:py-8 lg:pb-12"
                           >
-                            <QrControlSections
-                              {...controlSectionProps}
-                              activeSection={activeSection}
-                            />
+                            {isDashboardEditMode ? (
+                              <DashboardEditControls
+                                activeSection={activeDashboardEditSection}
+                                onComposeImageUploadError={(message: string) =>
+                                  setErrorMessage(message)
+                                }
+                                onComposeImageUploadSuccess={(file: File) => {
+                                  void handleComposeImageUploadSuccess(file)
+                                }}
+                                onSceneChange={setDashboardScene}
+                                onSelectedNodeChange={setSelectedDashboardNodeId}
+                                scene={dashboardScene}
+                                selectedNodeId={selectedDashboardNodeId}
+                              />
+                            ) : (
+                              <QrControlSections
+                                {...controlSectionProps}
+                                activeSection={activeSection}
+                              />
+                            )}
                           </div>
                         </motion.div>
                       </AnimatePresence>
@@ -425,11 +575,15 @@ export function QrStudio({ variant = "settings" }: QrStudioProps) {
               >
                 <DashboardComposeSurface
                   errorMessage={errorMessage}
+                  isEditMode={isDashboardEditMode}
+                  onEditModeChange={handleDashboardEditModeChange}
                   onReset={handleReset}
                   onQrSizeChange={handleQrSizeChange}
                   onSceneChange={setDashboardScene}
+                  onSelectedNodeChange={setSelectedDashboardNodeId}
                   qrSize={state.width}
                   scene={dashboardScene}
+                  selectedNodeId={selectedDashboardNodeId}
                 />
               </section>
             </section>
@@ -470,6 +624,34 @@ function cleanupUploadedAssets(
   cleanupUploadedAsset(uploadedAssetUrlsRef, "backgroundImage")
 }
 
+export function cleanupRemovedComposeImageUrls(
+  composeImageUrlsRef: React.MutableRefObject<ComposeImageUrlRegistry>,
+  scene: DashboardComposeScene,
+) {
+  const activeImageNodeIds = new Set(
+    scene.nodes.filter((node) => node.kind === "image").map((node) => node.id),
+  )
+
+  for (const [nodeId, imageUrl] of Object.entries(composeImageUrlsRef.current)) {
+    if (activeImageNodeIds.has(nodeId)) {
+      continue
+    }
+
+    URL.revokeObjectURL(imageUrl)
+    delete composeImageUrlsRef.current[nodeId]
+  }
+}
+
+export function cleanupComposeImageUrls(
+  composeImageUrlsRef: React.MutableRefObject<ComposeImageUrlRegistry>,
+) {
+  for (const imageUrl of Object.values(composeImageUrlsRef.current)) {
+    URL.revokeObjectURL(imageUrl)
+  }
+
+  composeImageUrlsRef.current = {}
+}
+
 function createQrCodeInstance(state: QrStudioState) {
   const qrCode = new QRCodeStyling(toQrCodeOptions(state))
   const extension = buildQrExtension(state)
@@ -479,4 +661,25 @@ function createQrCodeInstance(state: QrStudioState) {
   }
 
   return qrCode
+}
+
+export function getComposeImageLayerName(fileName: string) {
+  const normalizedName = fileName.replace(/\.[^./\\]+$/, "").trim()
+
+  return normalizedName || "Image"
+}
+
+async function loadComposeImageDimensions(imageUrl: string) {
+  return await new Promise<{ width: number; height: number }>((resolve, reject) => {
+    const image = new Image()
+
+    image.onload = () => {
+      resolve({
+        width: image.naturalWidth,
+        height: image.naturalHeight,
+      })
+    }
+    image.onerror = () => reject(new Error("Failed to load image dimensions."))
+    image.src = imageUrl
+  })
 }

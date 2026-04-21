@@ -1882,7 +1882,7 @@ function AssetSourceField({
   )
 }
 
-function GradientEditor({
+export function GradientEditor({
   disabled,
   disabledText,
   gradient,
@@ -2625,7 +2625,7 @@ function KnobSliderField({
   )
 }
 
-function EmbeddedColorPickerField({
+export function EmbeddedColorPickerField({
   chrome = "default",
   className,
   label,

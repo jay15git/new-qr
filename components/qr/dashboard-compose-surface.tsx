@@ -17,20 +17,27 @@ import {
   getDashboardComposeNode,
   resetDashboardComposeCamera,
   resetDashboardQrNodeTransform,
+  type DashboardComposeNode,
+  type DashboardComposeBackground,
   type DashboardComposeScene,
   updateDashboardComposeCamera,
   updateDashboardComposeNode,
 } from "@/components/qr/dashboard-compose-scene"
 import { clampQrSize } from "@/components/qr/qr-studio-state"
 import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
 
 type DashboardComposeSurfaceProps = {
   errorMessage?: string | null
+  isEditMode: boolean
+  onEditModeChange: (checked: boolean) => void
   onReset: () => void
   onQrSizeChange: (nextSize: number) => void
   onSceneChange: React.Dispatch<React.SetStateAction<DashboardComposeScene>>
+  onSelectedNodeChange: (nodeId: string | null) => void
   qrSize: number
   scene: DashboardComposeScene
+  selectedNodeId: string | null
 }
 
 type Interaction =
@@ -53,9 +60,13 @@ type Interaction =
       kind: "resize-node"
       centerX: number
       centerY: number
+      naturalHeight: number
+      naturalWidth: number
       nodeId: string
+      nodeKind: DashboardComposeNode["kind"]
       qrSize: number
       scale: number
+      startScale: number
       startDistance: number
     }
   | {
@@ -69,19 +80,23 @@ type Interaction =
 
 export function DashboardComposeSurface({
   errorMessage,
+  isEditMode,
+  onEditModeChange,
   onReset,
   onQrSizeChange,
   onSceneChange,
+  onSelectedNodeChange,
   qrSize,
   scene,
+  selectedNodeId,
 }: DashboardComposeSurfaceProps) {
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(DASHBOARD_QR_NODE_ID)
   const [rotatingNodeId, setRotatingNodeId] = useState<string | null>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
   const interactionRef = useRef<Interaction | null>(null)
 
   const qrNode = getDashboardComposeNode(scene)
   const zoomPercent = `${Math.round(scene.camera.zoom * 100)}%`
+  const canvasBackgroundStyle = getDashboardCanvasBackgroundStyle(scene.background)
 
   useEffect(() => {
     const onPointerMove = (event: PointerEvent) => {
@@ -92,6 +107,12 @@ export function DashboardComposeSurface({
       }
 
       event.preventDefault()
+
+      if (!isEditMode && interaction.kind !== "pan-canvas") {
+        interactionRef.current = null
+        setRotatingNodeId(null)
+        return
+      }
 
       if (interaction.kind === "pan-canvas") {
         const canvasRect = canvasRef.current?.getBoundingClientRect()
@@ -136,23 +157,43 @@ export function DashboardComposeSurface({
           1,
           Math.hypot(worldPoint.x - interaction.centerX, worldPoint.y - interaction.centerY),
         )
-        const nextSize = getNextDashboardQrSize({
-          nextDistance,
-          startDistance: interaction.startDistance,
-          startSize: interaction.qrSize,
-        })
-        const nextWidth = nextSize * interaction.scale
-        const nextHeight = nextSize * interaction.scale
+        const resizeRatio = nextDistance / interaction.startDistance
+
+        if (
+          interaction.nodeKind === "svg" &&
+          interaction.nodeId === DASHBOARD_QR_NODE_ID
+        ) {
+          const nextSize = getNextDashboardQrSize({
+            nextDistance,
+            startDistance: interaction.startDistance,
+            startSize: interaction.qrSize,
+          })
+          const nextWidth = nextSize * interaction.scale
+          const nextHeight = nextSize * interaction.scale
+
+          onSceneChange((current) =>
+            updateDashboardComposeNode(current, interaction.nodeId, {
+              naturalHeight: nextSize,
+              naturalWidth: nextSize,
+              x: interaction.centerX - nextWidth * 0.5,
+              y: interaction.centerY - nextHeight * 0.5,
+            }),
+          )
+          onQrSizeChange(nextSize)
+          return
+        }
+
+        const nextScale = clampDashboardLayerScale(interaction.startScale * resizeRatio)
+        const nextWidth = interaction.naturalWidth * nextScale
+        const nextHeight = interaction.naturalHeight * nextScale
 
         onSceneChange((current) =>
           updateDashboardComposeNode(current, interaction.nodeId, {
-            naturalHeight: nextSize,
-            naturalWidth: nextSize,
+            scale: nextScale,
             x: interaction.centerX - nextWidth * 0.5,
             y: interaction.centerY - nextHeight * 0.5,
           }),
         )
-        onQrSizeChange(nextSize)
         return
       }
 
@@ -183,7 +224,7 @@ export function DashboardComposeSurface({
       window.removeEventListener("pointermove", onPointerMove)
       window.removeEventListener("pointerup", onPointerUp)
     }
-  }, [onQrSizeChange, onSceneChange, scene])
+  }, [isEditMode, onQrSizeChange, onSceneChange, scene])
 
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
     event.preventDefault()
@@ -217,16 +258,26 @@ export function DashboardComposeSurface({
       return
     }
 
-    setSelectedNodeId(node.id)
+    onSelectedNodeChange(node.id)
     interactionRef.current = {
       kind: "resize-node",
       nodeId: node.id,
+      naturalHeight: node.naturalHeight,
+      naturalWidth: node.naturalWidth,
+      nodeKind: node.kind,
       centerX,
       centerY,
       qrSize: node.naturalWidth,
       scale: node.scale,
+      startScale: node.scale,
       startDistance: Math.max(1, Math.hypot(worldPoint.x - centerX, worldPoint.y - centerY)),
     }
+  }
+
+  const handleEditModeChange = (checked: boolean) => {
+    interactionRef.current = checked ? interactionRef.current : null
+    setRotatingNodeId(null)
+    onEditModeChange(checked)
   }
 
   return (
@@ -245,8 +296,9 @@ export function DashboardComposeSurface({
         data-slot="dashboard-compose-viewport"
         data-background-mode={scene.background.mode}
         className="absolute inset-0"
+        style={canvasBackgroundStyle}
         onPointerDown={(event) => {
-          setSelectedNodeId(null)
+          onSelectedNodeChange(null)
           interactionRef.current = {
             kind: "pan-canvas",
             startClientX: event.clientX,
@@ -274,6 +326,18 @@ export function DashboardComposeSurface({
           className="pointer-events-none absolute inset-x-5 bottom-4 z-20 flex justify-center px-2 sm:inset-x-6 lg:inset-x-8"
         >
           <div className="pointer-events-auto inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-[1.75rem] border border-slate-300/80 bg-white/84 px-2 py-2 text-foreground/70 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)] backdrop-blur">
+            <div
+              data-slot="dashboard-compose-edit-mode"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-300/80 bg-white/84 px-3 py-1.5 text-sm font-medium text-foreground/70 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)]"
+            >
+              <span>Edit mode</span>
+              <Switch
+                aria-label="Toggle edit mode"
+                checked={isEditMode}
+                onCheckedChange={handleEditModeChange}
+              />
+            </div>
+
             <div className="inline-flex items-center gap-1 rounded-full border border-slate-300/80 bg-white/84 p-1 text-foreground/70 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)]">
               <IconButton
                 ariaLabel="Zoom out preview"
@@ -332,9 +396,7 @@ export function DashboardComposeSurface({
             ref={canvasRef}
             data-slot="dashboard-compose-canvas"
             className="absolute left-1/2 top-1/2 aspect-[3/2] w-[min(100%,960px)] max-w-full -translate-x-1/2 -translate-y-1/2"
-            style={{
-              background: scene.background.mode === "solid" ? scene.background.color : "transparent",
-            }}
+            style={{ background: "transparent" }}
           >
             <div
               data-slot="dashboard-compose-world"
@@ -346,34 +408,60 @@ export function DashboardComposeSurface({
             >
               <div data-slot="dashboard-compose-stage" className="absolute inset-0 overflow-visible">
                 {[...scene.nodes]
+                  .filter((node) => node.isVisible)
+                  // Lower zIndex values render first so higher ones paint above them.
                   .sort((left, right) => left.zIndex - right.zIndex)
                   .map((node) => {
-                    const isSelected = node.id === selectedNodeId
+                    const isSelected = isEditMode && node.id === selectedNodeId
                     const isRotating = node.id === rotatingNodeId
+                    const isInteractive = isEditMode && !node.isLocked
+                    const isQrNode = node.id === DASHBOARD_QR_NODE_ID
                     const width = node.naturalWidth * node.scale
                     const height = node.naturalHeight * node.scale
 
                     return (
                       <div
                         key={node.id}
+                        data-node-id={node.id}
                         data-slot="dashboard-compose-node"
+                        data-z-index={node.zIndex}
                         data-selected={isSelected ? "true" : "false"}
-                        className="absolute left-0 top-0 cursor-grab active:cursor-grabbing"
+                        data-locked={node.isLocked ? "true" : "false"}
+                        className={
+                          isInteractive
+                            ? "absolute left-0 top-0 cursor-grab active:cursor-grabbing"
+                            : isEditMode
+                              ? "absolute left-0 top-0"
+                              : "pointer-events-none absolute left-0 top-0"
+                        }
                         style={{
                           height: `${(height / scene.canvasSize.height) * 100}%`,
+                          mixBlendMode:
+                            node.blendMode as React.CSSProperties["mixBlendMode"],
+                          opacity: node.opacity,
                           transform: `translate(${node.x}px, ${node.y}px) rotate(${node.rotation}deg)`,
                           transformOrigin: "center center",
                           width: `${(width / scene.canvasSize.width) * 100}%`,
                         }}
                         onPointerDown={(event) => {
+                          if (!isEditMode) {
+                            return
+                          }
+
                           event.stopPropagation()
+                          onSelectedNodeChange(node.id)
+
+                          if (node.isLocked) {
+                            interactionRef.current = null
+                            return
+                          }
+
                           const worldPoint = getWorldPoint(event.nativeEvent, canvasRef.current, scene)
 
                           if (!worldPoint) {
                             return
                           }
 
-                          setSelectedNodeId(node.id)
                           interactionRef.current = {
                             kind: "drag-node",
                             nodeId: node.id,
@@ -385,91 +473,123 @@ export function DashboardComposeSurface({
                         }}
                       >
                         <div className="relative h-full w-full overflow-visible">
-                          <div
-                            className="pointer-events-none h-full w-full [&_svg]:h-full [&_svg]:w-full"
-                            dangerouslySetInnerHTML={{ __html: node.originalSvgMarkup }}
-                          />
+                          {node.kind === "svg" ? (
+                            <div
+                              className="pointer-events-none h-full w-full [&_svg]:h-full [&_svg]:w-full"
+                              dangerouslySetInnerHTML={{ __html: node.originalSvgMarkup }}
+                            />
+                          ) : (
+                            /* eslint-disable-next-line @next/next/no-img-element -- Object URLs back uploaded compose images. */
+                            <img
+                              alt={node.name}
+                              className="pointer-events-none h-full w-full select-none"
+                              draggable={false}
+                              src={node.imageUrl}
+                            />
+                          )}
 
                           {isSelected ? (
                             <>
                               <div className="pointer-events-none absolute inset-[-10px] rounded-[2px] border border-sky-600 shadow-[0_0_0_1px_rgba(255,255,255,0.72)]" />
-                              <div className="pointer-events-none absolute bottom-[-2.75rem] left-1/2 -translate-x-1/2 rounded-full border border-slate-300/90 bg-white/92 px-3 py-1 text-[0.72rem] font-semibold text-slate-600 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)]">
-                                {Math.round(qrSize)} × {Math.round(qrSize)}
-                              </div>
+                              {isQrNode ? (
+                                <div className="pointer-events-none absolute bottom-[-2.75rem] left-1/2 -translate-x-1/2 rounded-full border border-slate-300/90 bg-white/92 px-3 py-1 text-[0.72rem] font-semibold text-slate-600 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)]">
+                                  {Math.round(qrSize)} × {Math.round(qrSize)}
+                                </div>
+                              ) : null}
                               {isRotating ? (
                                 <div className="pointer-events-none absolute left-1/2 top-[-4.7rem] -translate-x-1/2 rounded-full border border-slate-300/90 bg-white/92 px-2 py-1 text-[0.72rem] font-semibold text-slate-600 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)]">
                                   {Math.round(node.rotation)}°
                                 </div>
                               ) : null}
                               <div className="pointer-events-none absolute left-1/2 top-[-2.05rem] h-7 w-px -translate-x-1/2 bg-sky-600/70" />
-                              <HandleButton
-                                ariaLabel="Rotate QR"
-                                className="left-1/2 top-[-2.9rem] -translate-x-1/2"
-                                icon={<RotateCwIcon className="size-3" />}
-                                onPointerDown={(event) => {
-                                  event.stopPropagation()
-                                  const centerX = node.x + width * 0.5
-                                  const centerY = node.y + height * 0.5
-                                  const worldPoint = getWorldPoint(
-                                    event.nativeEvent,
-                                    canvasRef.current,
-                                    scene,
-                                  )
+                              {!node.isLocked ? (
+                                <>
+                                  <HandleButton
+                                    ariaLabel={isQrNode ? "Rotate QR" : `Rotate ${node.name}`}
+                                    className="left-1/2 top-[-2.9rem] -translate-x-1/2"
+                                    icon={<RotateCwIcon className="size-3" />}
+                                    onPointerDown={(event) => {
+                                      event.stopPropagation()
+                                      const centerX = node.x + width * 0.5
+                                      const centerY = node.y + height * 0.5
+                                      const worldPoint = getWorldPoint(
+                                        event.nativeEvent,
+                                        canvasRef.current,
+                                        scene,
+                                      )
 
-                                  if (!worldPoint) {
-                                    return
-                                  }
+                                      if (!worldPoint) {
+                                        return
+                                      }
 
-                                  setSelectedNodeId(node.id)
-                                  setRotatingNodeId(node.id)
-                                  interactionRef.current = {
-                                    kind: "rotate-node",
-                                    nodeId: node.id,
-                                    centerX,
-                                    centerY,
-                                    startAngle:
-                                      (Math.atan2(
-                                        worldPoint.y - centerY,
-                                        worldPoint.x - centerX,
-                                      ) *
-                                        180) /
-                                      Math.PI,
-                                    startRotation: node.rotation,
-                                  }
-                                }}
-                              />
-                              <HandleButton
-                                ariaLabel="Resize QR from top left"
-                                className="left-[-0.9rem] top-[-0.9rem]"
-                                icon={null}
-                                onPointerDown={(event) =>
-                                  startResizeInteraction(event, node, width, height)
-                                }
-                              />
-                              <HandleButton
-                                ariaLabel="Resize QR from top right"
-                                className="right-[-0.9rem] top-[-0.9rem]"
-                                icon={null}
-                                onPointerDown={(event) =>
-                                  startResizeInteraction(event, node, width, height)
-                                }
-                              />
-                              <HandleButton
-                                ariaLabel="Resize QR from bottom left"
-                                className="bottom-[-0.9rem] left-[-0.9rem]"
-                                icon={null}
-                                onPointerDown={(event) =>
-                                  startResizeInteraction(event, node, width, height)
-                                }
-                              />
-                              <HandleButton
-                                ariaLabel="Resize QR from bottom right"
-                                className="bottom-[-0.9rem] right-[-0.9rem]"
-                                icon={null}
-                                onPointerDown={(event) =>
-                                  startResizeInteraction(event, node, width, height)
-                                }
-                              />
+                                      onSelectedNodeChange(node.id)
+                                      setRotatingNodeId(node.id)
+                                      interactionRef.current = {
+                                        kind: "rotate-node",
+                                        nodeId: node.id,
+                                        centerX,
+                                        centerY,
+                                        startAngle:
+                                          (Math.atan2(
+                                            worldPoint.y - centerY,
+                                            worldPoint.x - centerX,
+                                          ) *
+                                            180) /
+                                          Math.PI,
+                                        startRotation: node.rotation,
+                                      }
+                                    }}
+                                  />
+                                  <HandleButton
+                                    ariaLabel={
+                                      isQrNode
+                                        ? "Resize QR from top left"
+                                        : `Resize ${node.name} from top left`
+                                    }
+                                    className="left-[-0.9rem] top-[-0.9rem]"
+                                    icon={null}
+                                    onPointerDown={(event) =>
+                                      startResizeInteraction(event, node, width, height)
+                                    }
+                                  />
+                                  <HandleButton
+                                    ariaLabel={
+                                      isQrNode
+                                        ? "Resize QR from top right"
+                                        : `Resize ${node.name} from top right`
+                                    }
+                                    className="right-[-0.9rem] top-[-0.9rem]"
+                                    icon={null}
+                                    onPointerDown={(event) =>
+                                      startResizeInteraction(event, node, width, height)
+                                    }
+                                  />
+                                  <HandleButton
+                                    ariaLabel={
+                                      isQrNode
+                                        ? "Resize QR from bottom left"
+                                        : `Resize ${node.name} from bottom left`
+                                    }
+                                    className="bottom-[-0.9rem] left-[-0.9rem]"
+                                    icon={null}
+                                    onPointerDown={(event) =>
+                                      startResizeInteraction(event, node, width, height)
+                                    }
+                                  />
+                                  <HandleButton
+                                    ariaLabel={
+                                      isQrNode
+                                        ? "Resize QR from bottom right"
+                                        : `Resize ${node.name} from bottom right`
+                                    }
+                                    className="bottom-[-0.9rem] right-[-0.9rem]"
+                                    icon={null}
+                                    onPointerDown={(event) =>
+                                      startResizeInteraction(event, node, width, height)
+                                    }
+                                  />
+                                </>
+                              ) : null}
                             </>
                           ) : null}
                         </div>
@@ -557,6 +677,33 @@ function getWorldPoint(
   }
 }
 
+export function getDashboardCanvasBackgroundStyle(
+  background: DashboardComposeBackground,
+) {
+  if (background.mode === "solid") {
+    return {
+      background: background.color,
+    }
+  }
+
+  if (background.mode === "gradient") {
+    const start = background.gradient.colorStops[0]
+    const end = background.gradient.colorStops[1]
+    const rotation = (background.gradient.rotation * 180) / Math.PI
+
+    return {
+      background:
+        background.gradient.type === "radial"
+          ? `radial-gradient(circle, ${start.color} ${start.offset * 100}%, ${end.color} ${end.offset * 100}%)`
+          : `linear-gradient(${rotation}deg, ${start.color} ${start.offset * 100}%, ${end.color} ${end.offset * 100}%)`,
+    }
+  }
+
+  return {
+    background: "transparent",
+  }
+}
+
 export function getNextDashboardQrSize({
   nextDistance,
   startDistance,
@@ -571,4 +718,12 @@ export function getNextDashboardQrSize({
   }
 
   return clampQrSize(startSize * (nextDistance / startDistance))
+}
+
+function clampDashboardLayerScale(scale: number) {
+  if (!Number.isFinite(scale)) {
+    return 1
+  }
+
+  return Math.min(6, Math.max(0.1, scale))
 }
