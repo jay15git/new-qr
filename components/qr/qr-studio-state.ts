@@ -43,6 +43,7 @@ export type QrStudioState = {
   width: number;
   height: number;
   margin: number;
+  rasterExportQualityPercent: number;
   logo: StudioAsset;
   backgroundImage: StudioAsset;
   qrOptions: {
@@ -93,6 +94,9 @@ export const DOWNLOAD_EXTENSIONS: FileExtension[] = [
 export const QR_SIZE_MIN = 120;
 export const QR_SIZE_MAX = 1200;
 export const DEFAULT_QR_SIZE = 320;
+export const RASTER_EXPORT_QUALITY_MIN = 25;
+export const RASTER_EXPORT_QUALITY_MAX = 100;
+export const DEFAULT_RASTER_EXPORT_QUALITY = 100;
 
 const DEFAULT_GRADIENT: StudioGradient = {
   enabled: false,
@@ -118,6 +122,7 @@ export function createDefaultQrStudioState(): QrStudioState {
     width: DEFAULT_QR_SIZE,
     height: DEFAULT_QR_SIZE,
     margin: 12,
+    rasterExportQualityPercent: DEFAULT_RASTER_EXPORT_QUALITY,
     logo: {
       presetColor: undefined,
       presetId: undefined,
@@ -192,6 +197,15 @@ export function clampQrSize(value: number) {
   return coerceNumber(value, QR_SIZE_MIN, QR_SIZE_MAX, DEFAULT_QR_SIZE);
 }
 
+export function clampRasterExportQualityPercent(value: number) {
+  return coerceNumber(
+    value,
+    RASTER_EXPORT_QUALITY_MIN,
+    RASTER_EXPORT_QUALITY_MAX,
+    DEFAULT_RASTER_EXPORT_QUALITY,
+  );
+}
+
 export function setSquareQrSize(state: QrStudioState, size: number): QrStudioState {
   const nextSize = clampQrSize(size);
 
@@ -203,6 +217,22 @@ export function setSquareQrSize(state: QrStudioState, size: number): QrStudioSta
     ...state,
     width: nextSize,
     height: nextSize,
+  };
+}
+
+export function setRasterExportQualityPercent(
+  state: QrStudioState,
+  qualityPercent: number,
+): QrStudioState {
+  const nextQualityPercent = clampRasterExportQualityPercent(qualityPercent);
+
+  if (state.rasterExportQualityPercent === nextQualityPercent) {
+    return state;
+  }
+
+  return {
+    ...state,
+    rasterExportQualityPercent: nextQualityPercent,
   };
 }
 

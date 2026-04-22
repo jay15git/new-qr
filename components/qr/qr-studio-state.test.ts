@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  clampRasterExportQualityPercent,
   clampQrSize,
   createDefaultQrStudioState,
+  setRasterExportQualityPercent,
   setSquareQrSize,
   toQrCodeOptions,
 } from "./qr-studio-state";
@@ -46,6 +48,22 @@ describe("qr studio state helpers", () => {
     expect(oversized.width).toBe(1200);
     expect(oversized.height).toBe(1200);
     expect(clampQrSize(Number.NaN)).toBe(320);
+  });
+
+  it("starts dashboard raster export quality at 100 percent", () => {
+    const state = createDefaultQrStudioState();
+
+    expect(state.rasterExportQualityPercent).toBe(100);
+  });
+
+  it("clamps raster export quality updates to the supported range", () => {
+    const state = createDefaultQrStudioState();
+    const lowQuality = setRasterExportQualityPercent(state, 10);
+    const highQuality = setRasterExportQualityPercent(state, 240);
+
+    expect(lowQuality.rasterExportQualityPercent).toBe(25);
+    expect(highQuality.rasterExportQualityPercent).toBe(100);
+    expect(clampRasterExportQualityPercent(Number.NaN)).toBe(100);
   });
 
   it("uses the reference swatch colors as the default body palette", () => {

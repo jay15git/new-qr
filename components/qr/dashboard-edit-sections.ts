@@ -1,6 +1,6 @@
 import type { QrEditorSectionId } from "@/components/qr/qr-sections"
 
-export type DashboardEditSectionId = "layers" | "background"
+export type DashboardEditSectionId = "layers" | "inspector" | "background"
 export type DashboardEditSectionDirection = -1 | 0 | 1
 
 export const DEFAULT_DASHBOARD_EDIT_SECTION: DashboardEditSectionId = "layers"
@@ -12,6 +12,10 @@ export const DASHBOARD_EDIT_SECTIONS: Array<{
   {
     id: "layers",
     title: "Layers",
+  },
+  {
+    id: "inspector",
+    title: "Inspector",
   },
   {
     id: "background",

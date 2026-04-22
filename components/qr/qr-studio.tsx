@@ -48,6 +48,13 @@ import {
   type QrQualitySuggestionPath,
 } from "@/components/qr/qr-quality"
 import { buildDashboardQrNodePayload } from "@/components/qr/dashboard-qr-svg"
+import {
+  downloadDashboardRasterExport,
+  formatDashboardExportFileSize,
+  isRasterExportExtension,
+  measureDashboardRasterExport,
+  type DashboardRasterExportMeasurement,
+} from "@/components/qr/dashboard-raster-export"
 import { QrPreviewCard } from "@/components/qr/qr-preview-card"
 import { buildQrExtension, getQrExtensionKey } from "@/components/qr/qr-rendering"
 import { Button } from "@/components/ui/button"
@@ -57,11 +64,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { Slider } from "@/components/ui/slider"
 import {
   DOWNLOAD_EXTENSIONS,
   type AssetSourceMode,
   createDefaultQrStudioState,
   type QrStudioState,
+  setRasterExportQualityPercent,
   setSquareQrSize,
   toQrCodeOptions,
 } from "@/components/qr/qr-studio-state"
@@ -71,6 +80,12 @@ import { ModeToggle } from "@/components/mode-toggle"
 const DEFAULT_DOWNLOAD_NAME = "new-qr-studio"
 type UploadedAssetKey = "logo" | "backgroundImage"
 type ComposeImageUrlRegistry = Record<string, string>
+type DashboardExportSizePreview =
+  | { status: "error" }
+  | { status: "idle" }
+  | { status: "pending" }
+  | ({ status: "ready" } & DashboardRasterExportMeasurement)
+
 const DASHBOARD_SECTION_PANE_VARIANTS = {
   active: {
     filter: "blur(0px)",
@@ -124,6 +139,12 @@ export function QrStudio({
   const [selectedDashboardNodeId, setSelectedDashboardNodeId] = useState<string | null>(
     initialDashboardEditMode ? DASHBOARD_QR_NODE_ID : null,
   )
+  const [selectedDashboardExportExtension, setSelectedDashboardExportExtension] =
+    useState<FileExtension>("svg")
+  const [dashboardExportSizePreview, setDashboardExportSizePreview] =
+    useState<DashboardExportSizePreview>({
+      status: "idle",
+    })
 
   const deferredState = useDeferredValue(state)
   const deferredDashboardScene = useDeferredValue(dashboardScene)
@@ -133,6 +154,8 @@ export function QrStudio({
   const qrExtensionKeyRef = useRef(getQrExtensionKey(state))
   const dashboardPayloadRequestRef = useRef(0)
   const dashboardQualityRequestRef = useRef(0)
+  const dashboardExportPreviewRequestRef = useRef(0)
+  const dashboardExportPreviewTimeoutRef = useRef<number | null>(null)
   const lastDashboardEditorSectionRef = useRef<QrEditorSectionId>(initialActiveSection)
   const uploadedAssetUrlsRef = useRef<Record<UploadedAssetKey, string | null>>({
     logo: null,
@@ -178,6 +201,15 @@ export function QrStudio({
           effectiveQrQualityDecodeResult,
         )
       : null
+  const isDashboardRasterExport =
+    variant === "dashboard" &&
+    isRasterExportExtension(selectedDashboardExportExtension)
+  const effectiveDashboardExportSizePreview: DashboardExportSizePreview =
+    variant === "dashboard" && canDownload && isDashboardRasterExport
+      ? dashboardExportSizePreview
+      : {
+          status: "idle",
+        }
 
   function handleQrSizeChange(nextSize: number) {
     setState((current) => setSquareQrSize(current, nextSize))
@@ -197,6 +229,9 @@ export function QrStudio({
     return () => {
       previewElement?.replaceChildren()
       qrCodeRef.current = null
+      if (dashboardExportPreviewTimeoutRef.current !== null) {
+        window.clearTimeout(dashboardExportPreviewTimeoutRef.current)
+      }
       cleanupUploadedAssets(uploadedAssetUrlsRef)
       cleanupComposeImageUrls(composeImageUrlsRef)
     }
@@ -316,16 +351,87 @@ export function QrStudio({
     variant,
   ])
 
+  useEffect(() => {
+    if (variant !== "dashboard") {
+      return
+    }
+
+    if (dashboardExportPreviewTimeoutRef.current !== null) {
+      window.clearTimeout(dashboardExportPreviewTimeoutRef.current)
+    }
+
+    const requestId = ++dashboardExportPreviewRequestRef.current
+
+    if (!canDownload || !isRasterExportExtension(selectedDashboardExportExtension)) {
+      return
+    }
+
+    queueMicrotask(() => {
+      if (dashboardExportPreviewRequestRef.current !== requestId) {
+        return
+      }
+
+      setDashboardExportSizePreview({
+        status: "pending",
+      })
+    })
+
+    dashboardExportPreviewTimeoutRef.current = window.setTimeout(() => {
+      void measureDashboardRasterExport({
+        extension: selectedDashboardExportExtension,
+        qualityPercent: latestStateRef.current.rasterExportQualityPercent,
+        state: latestStateRef.current,
+      })
+        .then((result) => {
+          if (dashboardExportPreviewRequestRef.current !== requestId) {
+            return
+          }
+
+          setDashboardExportSizePreview({
+            ...result,
+            status: "ready",
+          })
+        })
+        .catch(() => {
+          if (dashboardExportPreviewRequestRef.current !== requestId) {
+            return
+          }
+
+          setDashboardExportSizePreview({
+            status: "error",
+          })
+        })
+    }, 250)
+
+    return () => {
+      if (dashboardExportPreviewTimeoutRef.current !== null) {
+        window.clearTimeout(dashboardExportPreviewTimeoutRef.current)
+      }
+    }
+  }, [canDownload, selectedDashboardExportExtension, state, variant])
+
   async function handleDownload(extension: FileExtension) {
     if (!qrCodeRef.current) {
       return
     }
 
     try {
-      await qrCodeRef.current.download({
-        extension,
-        name: downloadName.trim() || DEFAULT_DOWNLOAD_NAME,
-      })
+      const exportName = downloadName.trim() || DEFAULT_DOWNLOAD_NAME
+
+      if (variant === "dashboard" && isRasterExportExtension(extension)) {
+        await downloadDashboardRasterExport({
+          extension,
+          name: exportName,
+          qualityPercent: latestStateRef.current.rasterExportQualityPercent,
+          state: latestStateRef.current,
+        })
+      } else {
+        await qrCodeRef.current.download({
+          extension,
+          name: exportName,
+        })
+      }
+
       setErrorMessage(null)
     } catch {
       setErrorMessage("The QR image could not be exported. Try another format.")
@@ -403,6 +509,10 @@ export function QrStudio({
     cleanupUploadedAssets(uploadedAssetUrlsRef)
     cleanupComposeImageUrls(composeImageUrlsRef)
     setDownloadName(DEFAULT_DOWNLOAD_NAME)
+    setSelectedDashboardExportExtension("svg")
+    setDashboardExportSizePreview({
+      status: "idle",
+    })
     setIsDashboardEditMode(false)
     setActiveDashboardEditSection(DEFAULT_DASHBOARD_EDIT_SECTION)
     setSelectedDashboardNodeId(null)
@@ -519,27 +629,142 @@ export function QrStudio({
                       </PopoverTrigger>
                       <PopoverContent
                         align="end"
-                        className="w-52 rounded-2xl border-white/10 bg-[color-mix(in_oklch,var(--color-popover)_90%,black_10%)] p-2"
+                        className="w-80 rounded-2xl border-white/10 bg-[color-mix(in_oklch,var(--color-popover)_90%,black_10%)] p-3"
                       >
-                        <div className="grid gap-1">
-                          {DOWNLOAD_EXTENSIONS.map((extension) => (
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <div className="space-y-1">
+                              <p className="text-sm font-medium text-foreground">
+                                Export format
+                              </p>
+                              <p className="text-xs text-foreground/60">
+                                Choose a format, adjust raster quality, then download.
+                              </p>
+                            </div>
+                            <div
+                              role="radiogroup"
+                              aria-label="Export format"
+                              data-slot="dashboard-export-format-options"
+                              className="grid grid-cols-2 gap-2"
+                            >
+                              {DOWNLOAD_EXTENSIONS.map((extension) => (
+                                <Button
+                                  key={extension}
+                                  aria-checked={
+                                    extension === selectedDashboardExportExtension
+                                  }
+                                  data-slot="dashboard-export-format-option"
+                                  disabled={!canDownload}
+                                  role="radio"
+                                  type="button"
+                                  variant={
+                                    extension === selectedDashboardExportExtension
+                                      ? "secondary"
+                                      : "ghost"
+                                  }
+                                  className={
+                                    extension === selectedDashboardExportExtension
+                                      ? "justify-center rounded-xl border border-white/10 bg-white/[0.08] text-foreground shadow-none hover:bg-white/[0.12]"
+                                      : "justify-center rounded-xl border border-transparent text-foreground/70 shadow-none hover:border-white/8 hover:bg-white/[0.04] hover:text-foreground"
+                                  }
+                                  onClick={() => {
+                                    setSelectedDashboardExportExtension(extension)
+                                  }}
+                                >
+                                  {extension.toUpperCase()}
+                                </Button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {isDashboardRasterExport ? (
+                            <div
+                              data-slot="dashboard-raster-quality-controls"
+                              className="border-t border-white/8 pt-4"
+                            >
+                              <div className="flex items-center justify-between gap-3">
+                                <div className="space-y-1">
+                                  <p className="text-sm font-medium text-foreground">
+                                    Raster quality
+                                  </p>
+                                  <p className="text-xs text-foreground/60">
+                                    Measured file size for{" "}
+                                    {selectedDashboardExportExtension.toUpperCase()}.
+                                  </p>
+                                </div>
+                                <div
+                                  data-slot="dashboard-raster-quality-value"
+                                  className="rounded-full border border-white/8 bg-white/[0.04] px-2.5 py-1 text-xs font-medium text-foreground/70"
+                                >
+                                  {state.rasterExportQualityPercent}%
+                                </div>
+                              </div>
+                              <div className="mt-4 px-1">
+                                <Slider
+                                  aria-label="Raster quality"
+                                  data-slot="dashboard-raster-quality-slider"
+                                  disabled={!canDownload}
+                                  max={100}
+                                  min={25}
+                                  step={1}
+                                  value={[state.rasterExportQualityPercent]}
+                                  className="[&_[data-slot=slider-range]]:bg-white/70 [&_[data-slot=slider-thumb]]:border-white/20 [&_[data-slot=slider-thumb]]:bg-white [&_[data-slot=slider-track]]:bg-white/10"
+                                  onValueChange={(values) => {
+                                    const [qualityPercent] = values
+
+                                    if (typeof qualityPercent !== "number") {
+                                      return
+                                    }
+
+                                    setState((current) =>
+                                      setRasterExportQualityPercent(
+                                        current,
+                                        qualityPercent,
+                                      ),
+                                    )
+                                  }}
+                                />
+                              </div>
+                              <div
+                                data-slot="dashboard-export-size-preview"
+                                className="mt-4 rounded-xl border border-white/8 bg-white/[0.04] px-3 py-2 text-sm text-foreground/70"
+                              >
+                                {effectiveDashboardExportSizePreview.status === "pending" ? (
+                                  <p>Calculating size…</p>
+                                ) : effectiveDashboardExportSizePreview.status === "ready" ? (
+                                  <p>
+                                    {formatDashboardExportFileSize(
+                                      effectiveDashboardExportSizePreview.blobSizeBytes,
+                                    )}{" "}
+                                    <span className="text-foreground/45">
+                                      • {effectiveDashboardExportSizePreview.width} ×{" "}
+                                      {effectiveDashboardExportSizePreview.height}
+                                    </span>
+                                  </p>
+                                ) : effectiveDashboardExportSizePreview.status === "error" ? (
+                                  <p>Size preview unavailable.</p>
+                                ) : (
+                                  <p>Adjust quality to preview the export size.</p>
+                                )}
+                              </div>
+                            </div>
+                          ) : null}
+
+                          <div className="border-t border-white/8 pt-3">
                             <Button
-                              key={extension}
+                              data-slot="dashboard-export-submit"
                               disabled={!canDownload}
-                              variant={extension === state.type ? "secondary" : "ghost"}
-                              className={
-                                extension === state.type
-                                  ? "justify-start rounded-xl border border-white/10 bg-white/[0.08] text-foreground shadow-none hover:bg-white/[0.12]"
-                                  : "justify-start rounded-xl border border-transparent text-foreground/70 shadow-none hover:border-white/8 hover:bg-white/[0.04] hover:text-foreground"
-                              }
+                              type="button"
+                              variant="secondary"
+                              className="w-full rounded-xl border border-white/10 bg-white/[0.08] text-foreground shadow-none hover:bg-white/[0.12]"
                               onClick={() => {
-                                void handleDownload(extension)
+                                void handleDownload(selectedDashboardExportExtension)
                               }}
                             >
                               <DownloadIcon data-icon="inline-start" />
-                              {extension.toUpperCase()}
+                              Download {selectedDashboardExportExtension.toUpperCase()}
                             </Button>
-                          ))}
+                          </div>
                         </div>
                       </PopoverContent>
                     </Popover>

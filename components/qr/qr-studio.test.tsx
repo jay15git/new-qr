@@ -114,6 +114,7 @@ describe("QrStudio", () => {
 
     expect(markup).toContain('data-slot="dashboard-edit-rail"')
     expect(markup).toContain("Layers")
+    expect(markup).toContain("Inspector")
     expect(markup).toContain("Background")
     expect(markup).toContain('data-testid="dashboard-edit-controls"')
     expect(markup).not.toContain('data-testid="section-rail"')

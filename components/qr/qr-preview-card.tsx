@@ -81,7 +81,7 @@ export function QrPreviewCard({
       <CardHeader className="gap-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <CardTitle as="div" className="text-xl">
+            <CardTitle className="text-xl">
               Live preview
             </CardTitle>
             <CardDescription>
