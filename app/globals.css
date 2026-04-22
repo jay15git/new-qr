@@ -140,12 +140,14 @@
 
 [data-slot="drafting-surface"] {
   border-color: transparent;
+  isolation: isolate;
 }
 
 [data-slot="drafting-surface"]::before {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 30;
   pointer-events: none;
   background-image:
     linear-gradient(90deg, rgba(0, 0, 0, 0.12) 0 18px, transparent 18px 30px),
@@ -181,6 +183,7 @@
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   height: 1px;
   transform: translateY(-0.5px);
   background-image: repeating-linear-gradient(
@@ -196,6 +199,7 @@
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   width: 1px;
   transform: translateX(-0.5px);
   background-image: repeating-linear-gradient(
