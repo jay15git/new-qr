@@ -4,6 +4,7 @@ import { type ReactNode } from "react"
 import type {
   CornerDotType,
   CornerSquareType,
+  DrawType,
   ErrorCorrectionLevel,
   TypeNumber,
 } from "qr-code-styling"
@@ -48,7 +49,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { OptionCard } from "@/components/ui/option-card"
 import { Switch } from "@/components/ui/switch"
+import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { QR_SIZE_MAX, QR_SIZE_MIN } from "@/components/qr/qr-studio-state"
 
 type DraftingBinaryColorMode = "solid" | "gradient"
 type DraftingAssetSourceMode = "upload" | "url"
@@ -66,6 +69,170 @@ const DRAFTING_BRAND_ICON_CATEGORY_OPTIONS: Array<{
   { label: "Media", value: "media" },
   { label: "Web", value: "web" },
 ]
+
+const DRAFTING_RENDER_TYPE_OPTIONS: Array<{
+  description: string
+  summary: string
+  value: DrawType
+}> = [
+  {
+    description: "Crisp vector export",
+    summary: "Best for print, scaling, and editor-friendly assets.",
+    value: "svg",
+  },
+  {
+    description: "Pixel canvas output",
+    summary: "Useful when your downstream flow expects a raster-backed render.",
+    value: "canvas",
+  },
+]
+
+export function DraftingContentTab({
+  contentValue,
+  margin,
+  renderType,
+  size,
+  onContentValueChange,
+  onMarginChange,
+  onRenderTypeChange,
+  onSizeChange,
+}: {
+  contentValue: string
+  margin: number
+  renderType: DrawType
+  size: number
+  onContentValueChange: (value: string) => void
+  onMarginChange: (value: number) => void
+  onRenderTypeChange: (value: DrawType) => void
+  onSizeChange: (value: number) => void
+}) {
+  return (
+    <div data-slot="drafting-content-tab" className="min-w-0 space-y-4">
+      <div
+        data-slot="drafting-content-textarea-field"
+        className={cn(
+          "min-w-0 rounded-[8px] border border-[#00000017] bg-[#FFFFFFCC] px-4 py-3",
+          "shadow-[0_0_10px_0_rgba(0,0,0,0.05),0_2px_4px_0_rgba(0,0,0,0.03)]",
+          "transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
+          "hover:-translate-y-px hover:border-[#00000026] hover:bg-[#FFFFFFF2] hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.07),0_4px_10px_0_rgba(0,0,0,0.04)]",
+          "active:translate-y-0 active:border-[#00000030] active:shadow-[0_0_8px_0_rgba(0,0,0,0.07),0_1px_3px_0_rgba(0,0,0,0.06)]",
+          "focus-within:border-[#11111166] focus-within:bg-white focus-within:shadow-[0_0_18px_1px_rgba(0,0,0,0.09),0_4px_10px_0_rgba(0,0,0,0.05)]",
+        )}
+      >
+        <label
+          htmlFor="drafting-qr-data"
+          className="block text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-[#111111]"
+        >
+          Text or URL
+        </label>
+        <Textarea
+          id="drafting-qr-data"
+          aria-label="Text or URL"
+          className="mt-3 min-h-28 border-[#00000012] bg-white/90 px-3.5 py-3 text-sm text-[#111111] shadow-none placeholder:text-[#00000052] focus-visible:border-black/35 focus-visible:ring-0"
+          placeholder="https://example.com/invite"
+          value={contentValue}
+          onChange={(event) => onContentValueChange(event.target.value)}
+        />
+        <p className="mt-2 text-[0.72rem] leading-5 text-[#00000066]">
+          The value you enter here is encoded directly into the QR code.
+        </p>
+      </div>
+
+      <section data-slot="drafting-render-type-section" className="space-y-3">
+        <div className="space-y-1">
+          <h3 className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#111111]">
+            Render type
+          </h3>
+          <p className="text-[0.72rem] leading-5 text-[#00000066]">
+            Choose the output engine before exporting or embedding the QR.
+          </p>
+        </div>
+
+        <div
+          data-slot="drafting-render-type-grid"
+          role="radiogroup"
+          aria-label="Render type"
+          className="grid grid-cols-2 gap-3"
+        >
+          {DRAFTING_RENDER_TYPE_OPTIONS.map((option) => {
+            const isSelected = option.value === renderType
+
+            return (
+              <OptionCard
+                key={option.value}
+                checked={isSelected}
+                className={cn(
+                  "w-full gap-2",
+                  "[&_[data-slot=option-card]]:h-full [&_[data-slot=option-card]]:min-h-[128px] [&_[data-slot=option-card]]:w-full",
+                  "[&_[data-slot=option-card-motif]]:size-full",
+                  "[&_[data-slot=option-card-label]]:sr-only",
+                )}
+                label={option.value === "svg" ? "SVG" : "Canvas"}
+                motifClassName="size-full px-3 py-3"
+                name="drafting-render-type"
+                onSelect={() => onRenderTypeChange(option.value)}
+                value={option.value}
+              >
+                <span className="flex size-full flex-col items-start justify-between gap-3 text-left">
+                  <span
+                    className={cn(
+                      "text-[1.2rem] font-semibold uppercase leading-none tracking-[0.12em]",
+                      isSelected ? "text-[#111111]" : "text-[#00000073]",
+                    )}
+                  >
+                    {option.value}
+                  </span>
+                  <span className="space-y-1">
+                    <span
+                      className={cn(
+                        "block text-[0.68rem] font-semibold uppercase tracking-[0.14em]",
+                        isSelected ? "text-[#111111]" : "text-[#0000008A]",
+                      )}
+                    >
+                      {option.description}
+                    </span>
+                    <span
+                      className={cn(
+                        "block text-[0.72rem] leading-5",
+                        isSelected ? "text-[#111111]" : "text-[#00000066]",
+                      )}
+                    >
+                      {option.summary}
+                    </span>
+                  </span>
+                </span>
+              </OptionCard>
+            )
+          })}
+        </div>
+      </section>
+
+      <DraftingSliderField
+        dataSlot="drafting-content-margin-slider"
+        formatValue={(value) => `${Math.round(value)} px`}
+        id="drafting-qr-margin"
+        label="Outer margin"
+        max={80}
+        min={0}
+        step={1}
+        value={margin}
+        onChange={onMarginChange}
+      />
+
+      <DraftingSliderField
+        dataSlot="drafting-content-size-slider"
+        formatValue={(value) => `${Math.round(value)} px`}
+        id="drafting-qr-size"
+        label="Size"
+        max={QR_SIZE_MAX}
+        min={QR_SIZE_MIN}
+        step={1}
+        value={size}
+        onChange={onSizeChange}
+      />
+    </div>
+  )
+}
 
 export function DraftingStyleTab({
   onValueChange,

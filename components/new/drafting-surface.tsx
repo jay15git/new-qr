@@ -7,6 +7,7 @@ import { type ReactNode, useState } from "react"
 import type {
   CornerDotType,
   CornerSquareType,
+  DrawType,
   ErrorCorrectionLevel,
   TypeNumber,
 } from "qr-code-styling"
@@ -14,6 +15,7 @@ import type {
 import {
   DraftingBackgroundColorTab,
   DraftingBrandIconTab,
+  DraftingContentTab,
   DraftingBackgroundUploadTab,
   DraftingCornerDotColorTab,
   DraftingCornerDotStyleTab,
@@ -207,6 +209,18 @@ function PlusMarker({ className }: { className: string }) {
 export function DraftingSurface() {
   const [activeTool, setActiveTool] = useState<QrEditorSectionId>(
     DEFAULT_QR_EDITOR_SECTION,
+  )
+  const [selectedContentValue, setSelectedContentValue] = useState(
+    DEFAULT_DRAFTING_STUDIO_STATE.data,
+  )
+  const [selectedRenderType, setSelectedRenderType] = useState<DrawType>(
+    DEFAULT_DRAFTING_STUDIO_STATE.type,
+  )
+  const [selectedQrMargin, setSelectedQrMargin] = useState(
+    DEFAULT_DRAFTING_STUDIO_STATE.margin,
+  )
+  const [selectedQrSize, setSelectedQrSize] = useState(
+    DEFAULT_DRAFTING_STUDIO_STATE.width,
   )
   const [selectedDotType, setSelectedDotType] = useState<StudioDotType>("rounded")
   const [selectedDotsColorMode, setSelectedDotsColorMode] = useState<DotsColorMode>(
@@ -503,6 +517,21 @@ export function DraftingSurface() {
   }
 
   const renderPanelContent = (toolId: QrEditorSectionId, tabId: string) => {
+    if (toolId === "content" && tabId === "content") {
+      return (
+        <DraftingContentTab
+          contentValue={selectedContentValue}
+          margin={selectedQrMargin}
+          renderType={selectedRenderType}
+          size={selectedQrSize}
+          onContentValueChange={setSelectedContentValue}
+          onMarginChange={setSelectedQrMargin}
+          onRenderTypeChange={setSelectedRenderType}
+          onSizeChange={setSelectedQrSize}
+        />
+      )
+    }
+
     if (toolId === "style" && tabId === "style") {
       return <DraftingStyleTab onValueChange={setSelectedDotType} value={selectedDotType} />
     }
@@ -771,7 +800,11 @@ export function DraftingSurface() {
       data-logo-preset-id={selectedLogoPresetId ?? ""}
       data-logo-preset-value={selectedLogoPresetValue ?? ""}
       data-logo-source-mode={selectedLogoSourceMode}
+      data-qr-content-value={selectedContentValue}
       data-qr-error-correction-level={selectedErrorCorrectionLevel}
+      data-qr-margin={selectedQrMargin}
+      data-qr-render-type={selectedRenderType}
+      data-qr-size={selectedQrSize}
       data-qr-type-number={selectedTypeNumber}
       data-slot="drafting-surface"
       className="relative grid h-[calc(100dvh-3rem)] w-full grid-rows-[var(--new-header-height)_minmax(0,1fr)] overflow-visible border border-dashed border-black/18 bg-[#f4f6f8] shadow-[0_18px_48px_rgba(15,23,42,0.06)] sm:h-[calc(100dvh-4rem)] [--new-header-height:4.5rem] [--new-left-rail-width:clamp(6.25rem,10vw,7.5rem)] [--new-middle-rail-width:clamp(15rem,24vw,18.5rem)]"

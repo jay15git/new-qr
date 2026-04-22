@@ -102,6 +102,67 @@ describe("DraftingSurface", () => {
     ])
   })
 
+  it("ports the content controls into the default /new panel with render type cards and drafting sliders", () => {
+    const surface = renderSurface()
+    const contentTab = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-content-tab"]',
+    )
+    const contentField = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-content-textarea-field"]',
+    )
+    const renderTypeGrid = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-render-type-grid"]',
+    )
+    const svgInput = getRequiredElement(
+      surface.container,
+      'input[type="radio"][aria-label="SVG"]',
+    ) as HTMLInputElement
+    const canvasInput = getRequiredElement(
+      surface.container,
+      'input[type="radio"][aria-label="Canvas"]',
+    ) as HTMLInputElement
+    const qrData = getRequiredElement(
+      surface.container,
+      'textarea[aria-label="Text or URL"]',
+    ) as HTMLTextAreaElement
+
+    expect(contentTab).not.toBeNull()
+    expect(contentField.textContent).toContain("Text or URL")
+    expect(qrData.value).toBe("https://new-qr-studio.local/launch")
+    expect(renderTypeGrid.getAttribute("role")).toBe("radiogroup")
+    expect(renderTypeGrid.querySelectorAll('[data-slot="option-card"]').length).toBe(2)
+    expect(svgInput.checked).toBe(true)
+    expect(canvasInput.checked).toBe(false)
+    expect(
+      surface.container.querySelector('[data-slot="drafting-content-margin-slider"]'),
+    ).not.toBeNull()
+    expect(
+      surface.container.querySelector('[data-slot="drafting-content-size-slider"]'),
+    ).not.toBeNull()
+  })
+
+  it("updates the selected render type from the content option cards", () => {
+    const surface = renderSurface()
+    const canvasInput = getRequiredElement(
+      surface.container,
+      'input[type="radio"][aria-label="Canvas"]',
+    ) as HTMLInputElement
+
+    act(() => {
+      activateElement(canvasInput)
+    })
+
+    expect(canvasInput.checked).toBe(true)
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
+        "data-qr-render-type",
+      ),
+    ).toBe("canvas")
+  })
+
   it("renders a selectable option-card grid for the style tab", () => {
     const surface = renderSurface()
     const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Style"]')
