@@ -18,6 +18,16 @@ const baseProps = {
   state: createDefaultQrStudioState(),
 }
 
+function getStylePreviewMarkup(markup: string, style: string) {
+  const match = markup.match(
+    new RegExp(`<svg[^>]*data-preview-style="${style}"[\\s\\S]*?<\\/svg>`),
+  )
+
+  expect(match).not.toBeNull()
+
+  return match![0]
+}
+
 describe("QrControlSections", () => {
   it("renders only the selected section in dashboard mode without a duplicate section header", () => {
     const markup = renderToStaticMarkup(
@@ -73,6 +83,9 @@ describe("QrControlSections", () => {
 
     expect(markup).toContain('data-slot="style-preview-fragment"')
     expect(markup).toContain('data-preview-kind="dots"')
+    expect(markup).toContain('data-preview-fragment-size="9"')
+    expect(markup).toContain('data-preview-module-pitch="4"')
+    expect(markup).toContain('data-preview-module-size="4"')
     expect(markup).toContain("min-h-28")
     expect(markup).toContain('class="size-16 text-foreground/80"')
     expect(markup).toMatch(
@@ -81,9 +94,15 @@ describe("QrControlSections", () => {
     expect(markup).toMatch(
       /data-preview-style="classy-rounded"[\s\S]*?data-slot="style-preview-native-module"/,
     )
+    expect(markup).toMatch(
+      /data-preview-style="diamond"[\s\S]*?data-slot="style-preview-custom-module"/,
+    )
+    expect(markup).toMatch(
+      /data-preview-style="heart"[\s\S]*?data-slot="style-preview-custom-module"/,
+    )
   })
 
-  it("keeps the corner dot picker on icon previews and renders finder-frame previews for corner squares", () => {
+  it("renders dedicated corner-dot finder previews and finder-frame previews for corner squares", () => {
     const cornerSquareMarkup = renderToStaticMarkup(
       <QrControlSections {...baseProps} activeSection="corner-square" />,
     )
@@ -93,32 +112,76 @@ describe("QrControlSections", () => {
 
     expect(cornerSquareMarkup).toContain('data-preview-kind="corner-square"')
     expect(cornerSquareMarkup).toContain('data-slot="style-preview-corner-square"')
-    expect(cornerSquareMarkup).toContain('data-slot="style-preview-corner-square-frame"')
-    expect(cornerSquareMarkup).toContain('data-slot="style-preview-corner-square-cutout"')
     expect(cornerSquareMarkup).not.toContain('data-slot="style-preview-icon"')
     expect(cornerSquareMarkup).not.toContain('data-slot="style-preview-fragment"')
-    expect(cornerDotMarkup).toContain('data-slot="style-preview-icon"')
+    expect(cornerDotMarkup).toContain('data-slot="style-preview-corner-dot"')
     expect(cornerDotMarkup).toContain('data-preview-kind="corner-dot"')
+    expect(cornerDotMarkup).not.toContain('data-slot="style-preview-icon"')
     expect(cornerDotMarkup).not.toContain('data-slot="style-preview-fragment"')
   })
 
-  it("renders distinct corner-square finder-frame variants in the style picker", () => {
+  it("renders distinct corner-dot preview markup for filled and fallback-grid styles", () => {
+    const markup = renderToStaticMarkup(
+      <QrControlSections {...baseProps} activeSection="corner-dot" />,
+    )
+
+    const dotMarkup = getStylePreviewMarkup(markup, "dot")
+    const squareMarkup = getStylePreviewMarkup(markup, "square")
+    const extraRoundedMarkup = getStylePreviewMarkup(markup, "extra-rounded")
+    const classyRoundedMarkup = getStylePreviewMarkup(markup, "classy-rounded")
+
+    expect(dotMarkup).toContain('data-corner-dot-renderer="center-shape"')
+    expect(dotMarkup).toContain('data-corner-dot-shape="dot"')
+    expect(dotMarkup).toContain('data-slot="style-preview-corner-dot-center"')
+    expect(squareMarkup).toContain('data-corner-dot-renderer="center-shape"')
+    expect(squareMarkup).toContain('data-corner-dot-shape="square"')
+    expect(squareMarkup).toContain('data-slot="style-preview-corner-dot-center"')
+    expect(extraRoundedMarkup).toContain('data-corner-dot-renderer="grid"')
+    expect(extraRoundedMarkup).toContain(
+      'data-corner-dot-fallback-style="extra-rounded"',
+    )
+    expect(classyRoundedMarkup).toContain('data-corner-dot-renderer="grid"')
+    expect(classyRoundedMarkup).toContain(
+      'data-corner-dot-fallback-style="classy-rounded"',
+    )
+    expect(dotMarkup).not.toBe(squareMarkup)
+    expect(squareMarkup).not.toBe(extraRoundedMarkup)
+    expect(extraRoundedMarkup).not.toBe(classyRoundedMarkup)
+  })
+
+  it("renders distinct corner-square preview markup for ring and fallback-grid styles", () => {
     const markup = renderToStaticMarkup(
       <QrControlSections {...baseProps} activeSection="corner-square" />,
     )
 
-    expect(markup).toMatch(
-      /data-preview-style="square"[\s\S]*?data-corner-frame-variant="square"/,
+    const dotMarkup = getStylePreviewMarkup(markup, "dot")
+    const squareMarkup = getStylePreviewMarkup(markup, "square")
+    const extraRoundedMarkup = getStylePreviewMarkup(markup, "extra-rounded")
+    const classyRoundedMarkup = getStylePreviewMarkup(markup, "classy-rounded")
+
+    expect(dotMarkup).toContain('data-corner-square-renderer="ring"')
+    expect(dotMarkup).toContain('data-corner-square-shape="dot"')
+    expect(dotMarkup).toContain('data-slot="style-preview-corner-square-ring"')
+    expect(squareMarkup).toContain('data-corner-square-renderer="ring"')
+    expect(squareMarkup).toContain('data-corner-square-shape="square"')
+    expect(squareMarkup).toContain('data-slot="style-preview-corner-square-ring"')
+    expect(extraRoundedMarkup).toContain('data-corner-square-renderer="ring"')
+    expect(extraRoundedMarkup).toContain(
+      'data-corner-square-shape="extra-rounded"',
     )
-    expect(markup).toMatch(
-      /data-preview-style="extra-rounded"[\s\S]*?data-corner-frame-variant="extra-rounded"/,
+    expect(extraRoundedMarkup).toContain(
+      'data-slot="style-preview-corner-square-ring"',
     )
-    expect(markup).toMatch(
-      /data-preview-style="dot"[\s\S]*?data-corner-frame-variant="dot"/,
+    expect(classyRoundedMarkup).toContain('data-corner-square-renderer="grid"')
+    expect(classyRoundedMarkup).toContain(
+      'data-corner-square-fallback-style="classy-rounded"',
     )
-    expect(markup).toMatch(
-      /data-preview-style="classy-rounded"[\s\S]*?data-corner-frame-variant="classy-rounded"/,
+    expect(classyRoundedMarkup).toContain(
+      'data-slot="style-preview-corner-square-grid"',
     )
+    expect(dotMarkup).not.toBe(squareMarkup)
+    expect(squareMarkup).not.toBe(extraRoundedMarkup)
+    expect(extraRoundedMarkup).not.toBe(classyRoundedMarkup)
   })
 
   it("renders the dashboard color tab as a mutually exclusive accordion", () => {

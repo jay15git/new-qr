@@ -2,8 +2,9 @@ import qrcode from "qrcode-generator"
 
 export const STYLE_PREVIEW_SAMPLE_DATA = "https://example.com"
 
-const STYLE_PREVIEW_CROP_SIZE = 7
-const STYLE_PREVIEW_CROP_START = 6
+const STYLE_PREVIEW_CROP_SIZE = 9
+const STYLE_PREVIEW_CROP_START_COLUMN = 0
+const STYLE_PREVIEW_CROP_START_ROW = 8
 const STYLE_PREVIEW_ERROR_CORRECTION_LEVEL = "Q"
 const STYLE_PREVIEW_MODE = "Byte"
 
@@ -30,15 +31,21 @@ function buildDotStylePreviewRows() {
   qr.make()
 
   const moduleCount = qr.getModuleCount()
-  const start = STYLE_PREVIEW_CROP_START
+  const startColumn = STYLE_PREVIEW_CROP_START_COLUMN
+  const startRow = STYLE_PREVIEW_CROP_START_ROW
 
-  if (start < 0 || start + STYLE_PREVIEW_CROP_SIZE > moduleCount) {
+  if (
+    startRow < 0 ||
+    startColumn < 0 ||
+    startRow + STYLE_PREVIEW_CROP_SIZE > moduleCount ||
+    startColumn + STYLE_PREVIEW_CROP_SIZE > moduleCount
+  ) {
     throw new Error("QR preview crop exceeds the generated module matrix.")
   }
 
   return Array.from({ length: STYLE_PREVIEW_CROP_SIZE }, (_, rowOffset) =>
     Array.from({ length: STYLE_PREVIEW_CROP_SIZE }, (_, columnOffset) =>
-      qr.isDark(start + rowOffset, start + columnOffset) ? "1" : "0",
+      qr.isDark(startRow + rowOffset, startColumn + columnOffset) ? "1" : "0",
     ).join(""),
   )
 }
