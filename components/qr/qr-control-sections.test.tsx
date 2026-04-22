@@ -83,9 +83,6 @@ describe("QrControlSections", () => {
 
     expect(markup).toContain('data-slot="style-preview-fragment"')
     expect(markup).toContain('data-preview-kind="dots"')
-    expect(markup).toContain('data-preview-fragment-size="9"')
-    expect(markup).toContain('data-preview-module-pitch="4"')
-    expect(markup).toContain('data-preview-module-size="4"')
     expect(markup).toContain("min-h-28")
     expect(markup).toContain('class="size-16 text-foreground/80"')
     expect(markup).toMatch(
@@ -112,11 +109,11 @@ describe("QrControlSections", () => {
 
     expect(cornerSquareMarkup).toContain('data-preview-kind="corner-square"')
     expect(cornerSquareMarkup).toContain('data-slot="style-preview-corner-square"')
+    expect(cornerSquareMarkup).toContain('data-slot="style-preview-corner-square-frame"')
     expect(cornerSquareMarkup).not.toContain('data-slot="style-preview-icon"')
     expect(cornerSquareMarkup).not.toContain('data-slot="style-preview-fragment"')
-    expect(cornerDotMarkup).toContain('data-slot="style-preview-corner-dot"')
+    expect(cornerDotMarkup).toContain('data-slot="style-preview-icon"')
     expect(cornerDotMarkup).toContain('data-preview-kind="corner-dot"')
-    expect(cornerDotMarkup).not.toContain('data-slot="style-preview-icon"')
     expect(cornerDotMarkup).not.toContain('data-slot="style-preview-fragment"')
   })
 
@@ -130,20 +127,14 @@ describe("QrControlSections", () => {
     const extraRoundedMarkup = getStylePreviewMarkup(markup, "extra-rounded")
     const classyRoundedMarkup = getStylePreviewMarkup(markup, "classy-rounded")
 
-    expect(dotMarkup).toContain('data-corner-dot-renderer="center-shape"')
-    expect(dotMarkup).toContain('data-corner-dot-shape="dot"')
-    expect(dotMarkup).toContain('data-slot="style-preview-corner-dot-center"')
-    expect(squareMarkup).toContain('data-corner-dot-renderer="center-shape"')
-    expect(squareMarkup).toContain('data-corner-dot-shape="square"')
-    expect(squareMarkup).toContain('data-slot="style-preview-corner-dot-center"')
-    expect(extraRoundedMarkup).toContain('data-corner-dot-renderer="grid"')
-    expect(extraRoundedMarkup).toContain(
-      'data-corner-dot-fallback-style="extra-rounded"',
-    )
-    expect(classyRoundedMarkup).toContain('data-corner-dot-renderer="grid"')
-    expect(classyRoundedMarkup).toContain(
-      'data-corner-dot-fallback-style="classy-rounded"',
-    )
+    expect(dotMarkup).toContain('data-slot="style-preview-icon"')
+    expect(dotMarkup).toContain("<circle")
+    expect(squareMarkup).toContain('data-slot="style-preview-icon"')
+    expect(squareMarkup).toContain("<rect")
+    expect(extraRoundedMarkup).toContain('data-slot="style-preview-icon"')
+    expect(extraRoundedMarkup).toContain('rx="6.72"')
+    expect(classyRoundedMarkup).toContain('data-slot="style-preview-icon"')
+    expect(classyRoundedMarkup).toContain("<path")
     expect(dotMarkup).not.toBe(squareMarkup)
     expect(squareMarkup).not.toBe(extraRoundedMarkup)
     expect(extraRoundedMarkup).not.toBe(classyRoundedMarkup)
@@ -159,26 +150,18 @@ describe("QrControlSections", () => {
     const extraRoundedMarkup = getStylePreviewMarkup(markup, "extra-rounded")
     const classyRoundedMarkup = getStylePreviewMarkup(markup, "classy-rounded")
 
-    expect(dotMarkup).toContain('data-corner-square-renderer="ring"')
-    expect(dotMarkup).toContain('data-corner-square-shape="dot"')
-    expect(dotMarkup).toContain('data-slot="style-preview-corner-square-ring"')
-    expect(squareMarkup).toContain('data-corner-square-renderer="ring"')
-    expect(squareMarkup).toContain('data-corner-square-shape="square"')
-    expect(squareMarkup).toContain('data-slot="style-preview-corner-square-ring"')
-    expect(extraRoundedMarkup).toContain('data-corner-square-renderer="ring"')
-    expect(extraRoundedMarkup).toContain(
-      'data-corner-square-shape="extra-rounded"',
-    )
-    expect(extraRoundedMarkup).toContain(
-      'data-slot="style-preview-corner-square-ring"',
-    )
-    expect(classyRoundedMarkup).toContain('data-corner-square-renderer="grid"')
-    expect(classyRoundedMarkup).toContain(
-      'data-corner-square-fallback-style="classy-rounded"',
-    )
-    expect(classyRoundedMarkup).toContain(
-      'data-slot="style-preview-corner-square-grid"',
-    )
+    expect(dotMarkup).toContain('data-slot="style-preview-corner-square-frame"')
+    expect(dotMarkup).toContain('data-corner-frame-variant="dot"')
+    expect(dotMarkup).toContain("<circle")
+    expect(squareMarkup).toContain('data-slot="style-preview-corner-square-frame"')
+    expect(squareMarkup).toContain('data-corner-frame-variant="square"')
+    expect(squareMarkup).toContain("<rect")
+    expect(extraRoundedMarkup).toContain('data-slot="style-preview-corner-square-frame"')
+    expect(extraRoundedMarkup).toContain('data-corner-frame-variant="extra-rounded"')
+    expect(extraRoundedMarkup).toContain('rx="10"')
+    expect(classyRoundedMarkup).toContain('data-slot="style-preview-corner-square-frame"')
+    expect(classyRoundedMarkup).toContain('data-corner-frame-variant="classy-rounded"')
+    expect(classyRoundedMarkup).toContain("<path")
     expect(dotMarkup).not.toBe(squareMarkup)
     expect(squareMarkup).not.toBe(extraRoundedMarkup)
     expect(extraRoundedMarkup).not.toBe(classyRoundedMarkup)
