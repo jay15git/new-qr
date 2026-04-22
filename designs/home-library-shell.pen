@@ -1,0 +1,917 @@
+{
+  "version": "2.11",
+  "variables": {
+    "body-font": {
+      "type": "string",
+      "value": "Manrope"
+    },
+    "body-height": {
+      "type": "number",
+      "value": 896
+    },
+    "chip-button-bg": {
+      "type": "color",
+      "value": "#F0EFF6"
+    },
+    "chip-button-fg": {
+      "type": "color",
+      "value": "#696871"
+    },
+    "corner-mark": {
+      "type": "color",
+      "value": "#00000059"
+    },
+    "display-font": {
+      "type": "string",
+      "value": "Bricolage Grotesque"
+    },
+    "left-rail-width": {
+      "type": "number",
+      "value": 128
+    },
+    "middle-rail-width": {
+      "type": "number",
+      "value": 256
+    },
+    "nav-selected-bg": {
+      "type": "color",
+      "value": "#000000"
+    },
+    "nav-selected-fg": {
+      "type": "color",
+      "value": "#FFFFFF"
+    },
+    "outer-padding": {
+      "type": "number",
+      "value": 32
+    },
+    "page-bg": {
+      "type": "color",
+      "value": "#FFFFFF"
+    },
+    "panel-border": {
+      "type": "color",
+      "value": "#00000033"
+    },
+    "text-muted": {
+      "type": "color",
+      "value": "#000000B3"
+    },
+    "text-primary": {
+      "type": "color",
+      "value": "#262626"
+    },
+    "topbar-height": {
+      "type": "number",
+      "value": 64
+    }
+  },
+  "children": [
+    {
+      "type": "frame",
+      "id": "AsT01",
+      "x": -420,
+      "y": 0,
+      "name": "Component Assets",
+      "width": 320,
+      "layout": "vertical",
+      "gap": 24,
+      "children": [
+        {
+          "type": "frame",
+          "id": "uFBjP",
+          "name": "Wireframe / Corner Mark",
+          "reusable": true,
+          "width": 16,
+          "height": 16,
+          "layout": "none",
+          "children": [
+            {
+              "type": "path",
+              "id": "Q8fZi",
+              "x": 7.5,
+              "y": 0,
+              "geometry": "M0.5 0v16",
+              "viewBox": [
+                0,
+                0,
+                1,
+                16
+              ],
+              "width": 1,
+              "height": 16,
+              "stroke": {
+                "align": "center",
+                "thickness": 1.25,
+                "fill": "$corner-mark"
+              }
+            },
+            {
+              "type": "path",
+              "id": "2wbVT",
+              "x": 0,
+              "y": 7.5,
+              "geometry": "M0 0.5h16",
+              "viewBox": [
+                0,
+                0,
+                16,
+                1
+              ],
+              "width": 16,
+              "height": 1,
+              "stroke": {
+                "align": "center",
+                "thickness": 1.25,
+                "fill": "$corner-mark"
+              }
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Mr9kJ",
+          "name": "Wireframe / Dashed Panel",
+          "reusable": true,
+          "width": 320,
+          "height": 200,
+          "fill": "$page-bg",
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "r0tgl",
+              "x": 0,
+              "y": 0,
+              "fill": "$page-bg",
+              "width": 320,
+              "height": 200
+            },
+            {
+              "type": "path",
+              "id": "T5JNW",
+              "x": 0,
+              "y": 0,
+              "geometry": "M0 0.5h320",
+              "viewBox": [
+                0,
+                0,
+                320,
+                1
+              ],
+              "width": 320,
+              "height": 1,
+              "stroke": {
+                "align": "center",
+                "thickness": 1,
+                "dashPattern": [
+                  4,
+                  4
+                ],
+                "fill": "$panel-border"
+              }
+            },
+            {
+              "type": "path",
+              "id": "4pcdo",
+              "x": 319,
+              "y": 0,
+              "geometry": "M0.5 0v200",
+              "viewBox": [
+                0,
+                0,
+                1,
+                200
+              ],
+              "width": 1,
+              "height": 200,
+              "stroke": {
+                "align": "center",
+                "thickness": 1,
+                "dashPattern": [
+                  4,
+                  4
+                ],
+                "fill": "$panel-border"
+              }
+            },
+            {
+              "type": "path",
+              "id": "wVh2d",
+              "x": 0,
+              "y": 199,
+              "geometry": "M0 0.5h320",
+              "viewBox": [
+                0,
+                0,
+                320,
+                1
+              ],
+              "width": 320,
+              "height": 1,
+              "stroke": {
+                "align": "center",
+                "thickness": 1,
+                "dashPattern": [
+                  4,
+                  4
+                ],
+                "fill": "$panel-border"
+              }
+            },
+            {
+              "type": "path",
+              "id": "MCX9Y",
+              "x": 0,
+              "y": 0,
+              "geometry": "M0.5 0v200",
+              "viewBox": [
+                0,
+                0,
+                1,
+                200
+              ],
+              "width": 1,
+              "height": 200,
+              "stroke": {
+                "align": "center",
+                "thickness": 1,
+                "dashPattern": [
+                  4,
+                  4
+                ],
+                "fill": "$panel-border"
+              }
+            },
+            {
+              "type": "frame",
+              "id": "zCSOv",
+              "x": -8,
+              "y": -8,
+              "width": 16,
+              "height": 16,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "path",
+                  "id": "j0y4K",
+                  "x": 7.5,
+                  "y": 0,
+                  "geometry": "M0.5 0v16",
+                  "viewBox": [
+                    0,
+                    0,
+                    1,
+                    16
+                  ],
+                  "width": 1,
+                  "height": 16,
+                  "stroke": {
+                    "align": "center",
+                    "thickness": 1.25,
+                    "fill": "$corner-mark"
+                  }
+                },
+                {
+                  "type": "path",
+                  "id": "Ypu4H",
+                  "x": 0,
+                  "y": 7.5,
+                  "geometry": "M0 0.5h16",
+                  "viewBox": [
+                    0,
+                    0,
+                    16,
+                    1
+                  ],
+                  "width": 16,
+                  "height": 1,
+                  "stroke": {
+                    "align": "center",
+                    "thickness": 1.25,
+                    "fill": "$corner-mark"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "LpuFf",
+              "x": 312,
+              "y": -8,
+              "width": 16,
+              "height": 16,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "path",
+                  "id": "MB43h",
+                  "x": 7.5,
+                  "y": 0,
+                  "geometry": "M0.5 0v16",
+                  "viewBox": [
+                    0,
+                    0,
+                    1,
+                    16
+                  ],
+                  "width": 1,
+                  "height": 16,
+                  "stroke": {
+                    "align": "center",
+                    "thickness": 1.25,
+                    "fill": "$corner-mark"
+                  }
+                },
+                {
+                  "type": "path",
+                  "id": "8Ai4M",
+                  "x": 0,
+                  "y": 7.5,
+                  "geometry": "M0 0.5h16",
+                  "viewBox": [
+                    0,
+                    0,
+                    16,
+                    1
+                  ],
+                  "width": 16,
+                  "height": 1,
+                  "stroke": {
+                    "align": "center",
+                    "thickness": 1.25,
+                    "fill": "$corner-mark"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ClN9k",
+              "x": -8,
+              "y": 192,
+              "width": 16,
+              "height": 16,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "path",
+                  "id": "2xisA",
+                  "x": 7.5,
+                  "y": 0,
+                  "geometry": "M0.5 0v16",
+                  "viewBox": [
+                    0,
+                    0,
+                    1,
+                    16
+                  ],
+                  "width": 1,
+                  "height": 16,
+                  "stroke": {
+                    "align": "center",
+                    "thickness": 1.25,
+                    "fill": "$corner-mark"
+                  }
+                },
+                {
+                  "type": "path",
+                  "id": "KsESq",
+                  "x": 0,
+                  "y": 7.5,
+                  "geometry": "M0 0.5h16",
+                  "viewBox": [
+                    0,
+                    0,
+                    16,
+                    1
+                  ],
+                  "width": 16,
+                  "height": 1,
+                  "stroke": {
+                    "align": "center",
+                    "thickness": 1.25,
+                    "fill": "$corner-mark"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "hWQHr",
+              "x": 312,
+              "y": 192,
+              "width": 16,
+              "height": 16,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "path",
+                  "id": "gXRcW",
+                  "x": 7.5,
+                  "y": 0,
+                  "geometry": "M0.5 0v16",
+                  "viewBox": [
+                    0,
+                    0,
+                    1,
+                    16
+                  ],
+                  "width": 1,
+                  "height": 16,
+                  "stroke": {
+                    "align": "center",
+                    "thickness": 1.25,
+                    "fill": "$corner-mark"
+                  }
+                },
+                {
+                  "type": "path",
+                  "id": "mEq47",
+                  "x": 0,
+                  "y": 7.5,
+                  "geometry": "M0 0.5h16",
+                  "viewBox": [
+                    0,
+                    0,
+                    16,
+                    1
+                  ],
+                  "width": 16,
+                  "height": 1,
+                  "stroke": {
+                    "align": "center",
+                    "thickness": 1.25,
+                    "fill": "$corner-mark"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "9YcDE",
+          "name": "Wireframe / Tool Button",
+          "reusable": true,
+          "width": 80,
+          "layout": "vertical",
+          "gap": 10,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "SQuml",
+              "name": "iconStage",
+              "width": 40,
+              "height": 40,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "u2mGa",
+                  "x": 0,
+                  "y": 3,
+                  "name": "shadowPlate",
+                  "enabled": false,
+                  "opacity": 0.18,
+                  "fill": "#00000012",
+                  "width": 40,
+                  "height": 40
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "pwK8d",
+                  "x": 0,
+                  "y": 0,
+                  "name": "surface",
+                  "fill": "#00000003",
+                  "width": 40,
+                  "height": 40,
+                  "effect": [
+                    {
+                      "type": "shadow",
+                      "shadowType": "outer",
+                      "color": "#00000010",
+                      "blur": 18,
+                      "spread": 2
+                    },
+                    {
+                      "type": "shadow",
+                      "shadowType": "outer",
+                      "color": "#00000009",
+                      "offset": {
+                        "x": 0,
+                        "y": 3
+                      },
+                      "blur": 8,
+                      "spread": 1
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "7gsxf",
+                  "x": 10,
+                  "y": 10,
+                  "name": "iconHolder",
+                  "width": 20,
+                  "height": 20,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "path",
+                      "id": "cby3W",
+                      "x": 0,
+                      "y": 0,
+                      "name": "iconGlyph",
+                      "geometry": "M5.75 8.75h5.5v5.5h-5.5z m7 0h5.5v5.5h-5.5z m-7 7h5.5v5.5h-5.5z m7 0h5.5v5.5h-5.5z",
+                      "viewBox": [
+                        0,
+                        0,
+                        24,
+                        24
+                      ],
+                      "width": 20,
+                      "height": 20,
+                      "stroke": {
+                        "align": "center",
+                        "thickness": 1.25,
+                        "fill": "$text-primary"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "Xkuua",
+              "name": "label",
+              "fill": "#00000073",
+              "textGrowth": "fixed-width",
+              "width": 80,
+              "content": "Tool",
+              "lineHeight": 1.08,
+              "textAlign": "center",
+              "fontFamily": "Manrope",
+              "fontSize": 10,
+              "fontWeight": "500"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "HmL01",
+      "x": 0,
+      "y": 0,
+      "name": "/home Library Shell",
+      "width": 1440,
+      "height": 1024,
+      "fill": "$page-bg",
+      "layout": "none",
+      "children": [
+        {
+          "id": "Shl01",
+          "type": "ref",
+          "ref": "Mr9kJ",
+          "name": "Outer Shell",
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 1024,
+          "descendants": {
+            "r0tgl": {
+              "width": 1440,
+              "height": 1024
+            },
+            "T5JNW": {
+              "geometry": "M0 0.5h1440",
+              "viewBox": [
+                0,
+                0,
+                1440,
+                1
+              ],
+              "width": 1440,
+              "height": 1
+            },
+            "4pcdo": {
+              "x": 1439,
+              "geometry": "M0.5 0v1024",
+              "viewBox": [
+                0,
+                0,
+                1,
+                1024
+              ],
+              "width": 1,
+              "height": 1024
+            },
+            "wVh2d": {
+              "y": 1023,
+              "geometry": "M0 0.5h1440",
+              "viewBox": [
+                0,
+                0,
+                1440,
+                1
+              ],
+              "width": 1440,
+              "height": 1
+            },
+            "MCX9Y": {
+              "geometry": "M0.5 0v1024",
+              "viewBox": [
+                0,
+                0,
+                1,
+                1024
+              ],
+              "width": 1,
+              "height": 1024
+            },
+            "LpuFf": {
+              "x": 1432
+            },
+            "ClN9k": {
+              "y": 1016
+            },
+            "hWQHr": {
+              "x": 1432,
+              "y": 1016
+            }
+          }
+        },
+        {
+          "type": "path",
+          "id": "GdL01",
+          "name": "Top Guide",
+          "x": 0,
+          "y": 112,
+          "geometry": "M0 0.5h1440",
+          "viewBox": [
+            0,
+            0,
+            1440,
+            1
+          ],
+          "width": 1440,
+          "height": 1,
+          "stroke": {
+            "align": "center",
+            "thickness": 1,
+            "dashPattern": [
+              4,
+              4
+            ],
+            "fill": "$panel-border"
+          }
+        },
+        {
+          "type": "path",
+          "id": "GdL02",
+          "name": "Rail Divider",
+          "x": 176,
+          "y": 112,
+          "geometry": "M0.5 0v912",
+          "viewBox": [
+            0,
+            0,
+            1,
+            912
+          ],
+          "width": 1,
+          "height": 912,
+          "stroke": {
+            "align": "center",
+            "thickness": 1,
+            "dashPattern": [
+              4,
+              4
+            ],
+            "fill": "$panel-border"
+          }
+        },
+        {
+          "type": "path",
+          "id": "GdL03",
+          "name": "Stage Divider",
+          "x": 512,
+          "y": 112,
+          "geometry": "M0.5 0v912",
+          "viewBox": [
+            0,
+            0,
+            1,
+            912
+          ],
+          "width": 1,
+          "height": 912,
+          "stroke": {
+            "align": "center",
+            "thickness": 1,
+            "dashPattern": [
+              4,
+              4
+            ],
+            "fill": "$panel-border"
+          }
+        },
+        {
+          "id": "Mrk01",
+          "type": "ref",
+          "ref": "uFBjP",
+          "name": "Top Guide Left Mark",
+          "x": -8,
+          "y": 104
+        },
+        {
+          "id": "Mrk02",
+          "type": "ref",
+          "ref": "uFBjP",
+          "name": "Top Guide Rail Mark",
+          "x": 168,
+          "y": 104
+        },
+        {
+          "id": "Mrk03",
+          "type": "ref",
+          "ref": "uFBjP",
+          "name": "Top Guide Stage Mark",
+          "x": 504,
+          "y": 104
+        },
+        {
+          "id": "Mrk04",
+          "type": "ref",
+          "ref": "uFBjP",
+          "name": "Top Guide Right Mark",
+          "x": 1432,
+          "y": 104
+        },
+        {
+          "id": "Mrk05",
+          "type": "ref",
+          "ref": "uFBjP",
+          "name": "Rail Bottom Mark",
+          "x": 168,
+          "y": 1016
+        },
+        {
+          "id": "Mrk06",
+          "type": "ref",
+          "ref": "uFBjP",
+          "name": "Stage Bottom Mark",
+          "x": 504,
+          "y": 1016
+        },
+        {
+          "type": "frame",
+          "id": "Ral01",
+          "x": 56,
+          "y": 164,
+          "name": "Left Rail Content",
+          "width": 80,
+          "layout": "vertical",
+          "gap": 56,
+          "alignItems": "center",
+          "children": [
+            {
+              "id": "Btn01",
+              "type": "ref",
+              "ref": "9YcDE",
+              "name": "homeBtn",
+              "descendants": {
+                "u2mGa": {
+                  "enabled": false
+                },
+                "pwK8d": {
+                  "fill": "#111111",
+                  "effect": [
+                    {
+                      "type": "shadow",
+                      "shadowType": "outer",
+                      "color": "#00000030",
+                      "blur": 24,
+                      "spread": 3
+                    },
+                    {
+                      "type": "shadow",
+                      "shadowType": "outer",
+                      "color": "#00000018",
+                      "offset": {
+                        "x": 0,
+                        "y": 4
+                      },
+                      "blur": 10,
+                      "spread": 1
+                    }
+                  ]
+                },
+                "7gsxf": {
+                  "type": "frame",
+                  "id": "HmIc1",
+                  "x": 10,
+                  "y": 10,
+                  "width": 20,
+                  "height": 20,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "path",
+                      "id": "HmPg1",
+                      "x": 0,
+                      "y": 0,
+                      "geometry": "M5.75 8.75h5.5v5.5h-5.5z m7 0h5.5v5.5h-5.5z m-7 7h5.5v5.5h-5.5z m7 0h5.5v5.5h-5.5z",
+                      "viewBox": [
+                        0,
+                        0,
+                        24,
+                        24
+                      ],
+                      "width": 20,
+                      "height": 20,
+                      "stroke": {
+                        "align": "center",
+                        "thickness": 1.25,
+                        "fill": "$nav-selected-fg"
+                      }
+                    }
+                  ]
+                },
+                "Xkuua": {
+                  "content": "Home",
+                  "fill": "#111111",
+                  "fontFamily": "Manrope",
+                  "fontSize": 11,
+                  "fontWeight": "600",
+                  "lineHeight": 1.08
+                }
+              }
+            },
+            {
+              "id": "Btn02",
+              "type": "ref",
+              "ref": "9YcDE",
+              "name": "libraryBtn",
+              "descendants": {
+                "u2mGa": {
+                  "enabled": false
+                },
+                "pwK8d": {
+                  "fill": "#00000000",
+                  "effect": []
+                },
+                "7gsxf": {
+                  "type": "frame",
+                  "id": "LbIc1",
+                  "x": 10,
+                  "y": 10,
+                  "width": 20,
+                  "height": 20,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "path",
+                      "id": "LbPg1",
+                      "x": 0,
+                      "y": 0,
+                      "geometry": "M7 5.75h10m-10 5h10m-10 5h10m-11.25-10h0.5m-0.5 5h0.5m-0.5 5h0.5",
+                      "viewBox": [
+                        0,
+                        0,
+                        24,
+                        24
+                      ],
+                      "width": 20,
+                      "height": 20,
+                      "stroke": {
+                        "align": "center",
+                        "thickness": 1.25,
+                        "cap": "round",
+                        "fill": "$text-primary"
+                      }
+                    }
+                  ]
+                },
+                "Xkuua": {
+                  "content": "Library",
+                  "fill": "$text-primary",
+                  "fontFamily": "Manrope",
+                  "fontSize": 11,
+                  "fontWeight": "500",
+                  "lineHeight": 1.08
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
