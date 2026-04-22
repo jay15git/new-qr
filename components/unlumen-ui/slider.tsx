@@ -605,19 +605,24 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
             renderThumb(index, thumbState)
           ) : (
             <motion.span
-              className="block rounded-full"
+              className="flex items-center justify-center rounded-[4px] border border-black/10 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.06)]"
               initial={false}
               animate={{
-                width: thumbState.isActive ? THUMB_SIZE : THUMB_SIZE_REST,
-                height: thumbState.isActive ? THUMB_SIZE : THUMB_SIZE_REST,
+                width: THUMB_SIZE,
+                height: THUMB_SIZE,
               }}
               transition={springs.fast}
-              style={{
-                backgroundColor: "white",
-                boxShadow:
-                  "0 1px 4px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.06)",
-              }}
-            />
+            >
+              <span
+                className="rounded-[2px] border border-black/10"
+                style={{
+                  width: thumbState.isActive ? 10 : 8,
+                  height: thumbState.isActive ? 10 : 8,
+                  backgroundColor:
+                    "color-mix(in srgb, var(--foreground) 84%, white)",
+                }}
+              />
+            </motion.span>
           )}
         </motion.span>
       );
@@ -750,7 +755,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
             <motion.div
               data-slot={trackDataSlot}
               className={cn(
-                "absolute left-0 right-0 rounded-full",
+                "absolute left-0 right-0 rounded-[4px]",
                 trackClassName,
               )}
               initial={false}
@@ -765,7 +770,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
               style={{ backgroundColor: "var(--accent)", ...trackStyle }}
             >
               <motion.div
-                className={cn("absolute h-full rounded-full", rangeClassName)}
+                className={cn("absolute h-full rounded-[4px]", rangeClassName)}
                 style={{
                   left: fillLeft,
                   width: fillWidth,
@@ -775,7 +780,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
               />
 
               <motion.div
-                className="absolute h-full pointer-events-none rounded-full"
+                className="absolute h-full pointer-events-none rounded-[4px]"
                 initial={false}
                 animate={{
                   left:
@@ -802,7 +807,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
               />
 
               <motion.div
-                className="absolute h-full pointer-events-none z-[2] rounded-full"
+                className="absolute h-full pointer-events-none z-[2] rounded-[4px]"
                 initial={false}
                 animate={{
                   left: hoverPreview?.onFilledSide ? hoverPreview.left : 0,

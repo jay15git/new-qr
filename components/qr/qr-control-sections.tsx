@@ -1,12 +1,16 @@
 "use client"
 
 import { useState } from "react"
+import { RadiusIcon, StraightEdgeIcon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import { XIcon } from "lucide-react"
 
 import FileUpload from "@/components/kokonutui/file-upload"
+import { DotsPaletteCard } from "@/components/qr/dots-palette-card"
 import { DirectionAwareTabs } from "@/components/ui/direction-aware-tabs"
 import { MotionAccordion } from "@/components/unlumen-ui/motion-accordion"
 import { Button } from "@/components/ui/button"
+import { OptionCard } from "@/components/ui/option-card"
 import {
   Card,
   CardContent,
@@ -22,7 +26,6 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
-import { ColorPaletteCard } from "@/components/ui/color-palette-card"
 import ColorPicker from "@/components/ui/color-picker"
 import { Input } from "@/components/ui/input"
 import { KnobSlider } from "@/components/ui/knob-slider"
@@ -68,6 +71,10 @@ import {
   CORNER_SQUARE_STYLE_OPTIONS,
   DOT_STYLE_OPTIONS,
 } from "@/components/qr/qr-style-options"
+import {
+  ERROR_CORRECTION_LEVEL_OPTIONS,
+  TYPE_NUMBERS,
+} from "@/components/qr/qr-encoding-options"
 import {
   StylePreview,
   type StylePreviewKind,
@@ -120,6 +127,7 @@ type LogoSettingsTabId = "brand-icons" | "colors" | "upload" | "size"
 type BrandIconCategoryFilter = BrandIconCategory | "all"
 type BackgroundColorMode = "solid" | "gradient" | "transparent"
 type GradientEditorVariant = "default" | "dot-enhanced"
+type GradientEditorLayout = "default" | "drafting"
 type DashboardCornerColorKey = "cornersSquare" | "cornersDot"
 type DashboardAssetKey = "backgroundImage" | "logo"
 
@@ -146,14 +154,6 @@ const QR_MODES: Array<{ label: string; value: Mode }> = [
   { label: "Alphanumeric", value: "Alphanumeric" },
   { label: "Numeric", value: "Numeric" },
   { label: "Kanji", value: "Kanji" },
-]
-
-const TYPE_NUMBERS: Array<{ label: string; value: TypeNumber }> = [
-  { label: "Auto", value: 0 },
-  ...Array.from({ length: 40 }, (_, index) => ({
-    label: String(index + 1),
-    value: (index + 1) as TypeNumber,
-  })),
 ]
 
 const GRADIENT_TYPES: Array<{ label: string; value: GradientType }> = [
@@ -1699,12 +1699,10 @@ export function QrControlSections({
                   },
                 }))
               }
-              options={[
-                { label: "L", value: "L" },
-                { label: "M", value: "M" },
-                { label: "Q", value: "Q" },
-                { label: "H", value: "H" },
-              ]}
+              options={ERROR_CORRECTION_LEVEL_OPTIONS.map((option) => ({
+                label: option.label,
+                value: option.value,
+              }))}
               value={state.qrOptions.errorCorrectionLevel}
             />
           </FieldGroup>
@@ -1862,6 +1860,7 @@ export function GradientEditor({
   hideToggle,
   idPrefix,
   isDashboardMode,
+  layout = "default",
   onGradientChange,
   title,
   variant = "default",
@@ -1872,11 +1871,13 @@ export function GradientEditor({
   hideToggle?: boolean
   idPrefix: string
   isDashboardMode?: boolean
+  layout?: GradientEditorLayout
   onGradientChange: (gradient: StudioGradient) => void
   title: string
   variant?: GradientEditorVariant
 }) {
   const isDotEnhanced = variant === "dot-enhanced"
+  const isDraftingLayout = layout === "drafting"
   const rotationDegrees = Math.min(360, Math.max(0, radiansToDegrees(gradient.rotation)))
   const gradientOffsetRange = normalizeGradientOffsetRange([
     gradient.colorStops[0].offset,
@@ -1900,17 +1901,23 @@ export function GradientEditor({
       className={cn(
         isDashboardMode
           ? "border-0 bg-transparent p-0"
-          : "rounded-[var(--radius-xl)] border border-border/70 bg-muted/20 p-4",
+          : isDraftingLayout
+            ? "border-0 bg-transparent p-0"
+            : "rounded-[var(--radius-xl)] border border-border/70 bg-muted/20 p-4",
       )}
     >
       {hideToggle ? (
         !isDashboardMode ? (
-          <div className="flex flex-col gap-0.5">
-            <p className="text-sm font-medium">{title}</p>
-            <p className="text-sm text-muted-foreground">
-              Adjust the two-stop gradient for this region.
-            </p>
-          </div>
+          isDraftingLayout ? (
+            null
+          ) : (
+            <div className="flex flex-col gap-0.5">
+              <p className="text-sm font-medium">{title}</p>
+              <p className="text-sm text-muted-foreground">
+                Adjust the two-stop gradient for this region.
+              </p>
+            </div>
+          )
         ) : null
       ) : (
         <Field orientation="horizontal">
@@ -1938,53 +1945,79 @@ export function GradientEditor({
       ) : null}
 
       {(hideToggle || gradient.enabled) && !disabled ? (
-        <FieldGroup className={cn("mt-4", isDashboardMode ? "gap-3" : "grid gap-4 md:grid-cols-2")}>
-          <SegmentedOptionPicker
-            columns={2}
-            hideLabel
-            id={`${idPrefix}-type`}
-            label="Gradient type"
-            onValueChange={(value) =>
-              onGradientChange({ ...gradient, type: value as GradientType })
-            }
-            options={GRADIENT_TYPES}
-            value={gradient.type}
-          />
+        <FieldGroup
+          className={cn(
+            "mt-4",
+            isDashboardMode
+              ? "gap-3"
+              : isDraftingLayout
+                ? "gap-4"
+                : "grid gap-4 md:grid-cols-2",
+          )}
+        >
+          {isDraftingLayout ? (
+            <GradientTypeOptionCardPicker
+              id={`${idPrefix}-type`}
+              label="Gradient type"
+              onValueChange={(value) =>
+                onGradientChange({ ...gradient, type: value as GradientType })
+              }
+              value={gradient.type}
+            />
+          ) : (
+            <SegmentedOptionPicker
+              columns={2}
+              hideLabel
+              id={`${idPrefix}-type`}
+              label="Gradient type"
+              onValueChange={(value) =>
+                onGradientChange({ ...gradient, type: value as GradientType })
+              }
+              options={GRADIENT_TYPES}
+              value={gradient.type}
+            />
+          )}
           {isDotEnhanced ? (
-            <>
-              <div className={cn("grid gap-4 md:grid-cols-2", !isDashboardMode && "md:col-span-2")}>
-                <EmbeddedColorPickerField
-                  chrome="minimal"
-                  label="Start color"
-                  onValueChange={(value) =>
-                    onGradientChange({
-                      ...gradient,
-                      colorStops: [
-                        { ...gradient.colorStops[0], color: value },
-                        gradient.colorStops[1],
-                      ],
-                    })
-                  }
-                  value={gradient.colorStops[0].color}
-                />
-                <EmbeddedColorPickerField
-                  chrome="minimal"
-                  label="End color"
-                  onValueChange={(value) =>
-                    onGradientChange({
-                      ...gradient,
-                      colorStops: [
-                        gradient.colorStops[0],
-                        { ...gradient.colorStops[1], color: value },
-                      ],
-                    })
-                  }
-                  value={gradient.colorStops[1].color}
-                />
-              </div>
-              <div className={cn(!isDashboardMode && "md:col-span-2")}>
+            isDraftingLayout ? (
+              <>
+                <div className="space-y-4">
+                  <EmbeddedColorPickerField
+                    chrome="minimal"
+                    label="Start color"
+                    onValueChange={(value) =>
+                      onGradientChange({
+                        ...gradient,
+                        colorStops: [
+                          { ...gradient.colorStops[0], color: value },
+                          gradient.colorStops[1],
+                        ],
+                      })
+                    }
+                    pickerChrome="drafting"
+                    pickerClassName="mx-auto max-w-full"
+                    size={320}
+                    value={gradient.colorStops[0].color}
+                  />
+                  <EmbeddedColorPickerField
+                    chrome="minimal"
+                    label="End color"
+                    onValueChange={(value) =>
+                      onGradientChange({
+                        ...gradient,
+                        colorStops: [
+                          gradient.colorStops[0],
+                          { ...gradient.colorStops[1], color: value },
+                        ],
+                      })
+                    }
+                    pickerChrome="drafting"
+                    pickerClassName="mx-auto max-w-full"
+                    size={320}
+                    value={gradient.colorStops[1].color}
+                  />
+                </div>
                 <GradientOffsetRangeField
-                  className={cn(!isDashboardMode && "max-w-full")}
+                  className="max-w-full"
                   hideHeader
                   id={`${idPrefix}-offset-range`}
                   endColor={gradient.colorStops[1].color}
@@ -1998,21 +2031,90 @@ export function GradientEditor({
                   step={0.01}
                   valueFormatter={(value) => value.toFixed(2)}
                 />
-              </div>
-              <KnobSliderField
-                id={`${idPrefix}-rotation`}
-                hideLabel
-                hideValue
-                label="Rotation"
-                max={360}
-                min={0}
-                onValueChange={(value) =>
-                  onGradientChange({ ...gradient, rotation: degreesToRadians(value) })
-                }
-                value={rotationDegrees}
-                valueFormatter={(value) => `${Math.round(value)}°`}
-              />
-            </>
+                <KnobSliderField
+                  className="mx-auto w-full max-w-fit"
+                  id={`${idPrefix}-rotation`}
+                  hideLabel
+                  hideValue
+                  label="Rotation"
+                  max={360}
+                  min={0}
+                  onValueChange={(value) =>
+                    onGradientChange({ ...gradient, rotation: degreesToRadians(value) })
+                  }
+                  value={rotationDegrees}
+                  valueFormatter={(value) => `${Math.round(value)}°`}
+                />
+              </>
+            ) : (
+              <>
+                <div
+                  className={cn(
+                    "grid gap-4 md:grid-cols-2",
+                    !isDashboardMode && "md:col-span-2",
+                  )}
+                >
+                  <EmbeddedColorPickerField
+                    chrome="minimal"
+                    label="Start color"
+                    onValueChange={(value) =>
+                      onGradientChange({
+                        ...gradient,
+                        colorStops: [
+                          { ...gradient.colorStops[0], color: value },
+                          gradient.colorStops[1],
+                        ],
+                      })
+                    }
+                    value={gradient.colorStops[0].color}
+                  />
+                  <EmbeddedColorPickerField
+                    chrome="minimal"
+                    label="End color"
+                    onValueChange={(value) =>
+                      onGradientChange({
+                        ...gradient,
+                        colorStops: [
+                          gradient.colorStops[0],
+                          { ...gradient.colorStops[1], color: value },
+                        ],
+                      })
+                    }
+                    value={gradient.colorStops[1].color}
+                  />
+                </div>
+                <div className={cn(!isDashboardMode && "md:col-span-2")}>
+                  <GradientOffsetRangeField
+                    className={cn(!isDashboardMode && "max-w-full")}
+                    hideHeader
+                    id={`${idPrefix}-offset-range`}
+                    endColor={gradient.colorStops[1].color}
+                    endValue={gradientOffsetRange[1]}
+                    label="Color stop range"
+                    max={1}
+                    min={0}
+                    onValueChange={updateGradientOffsetRange}
+                    startColor={gradient.colorStops[0].color}
+                    startValue={gradientOffsetRange[0]}
+                    step={0.01}
+                    valueFormatter={(value) => value.toFixed(2)}
+                  />
+                </div>
+                <KnobSliderField
+                  id={`${idPrefix}-rotation`}
+                  hideLabel
+                  hideValue
+                  label="Rotation"
+                  max={360}
+                  min={0}
+                  onValueChange={(value) =>
+                    onGradientChange({ ...gradient, rotation: degreesToRadians(value) })
+                  }
+                  value={rotationDegrees}
+                  valueFormatter={(value) => `${Math.round(value)}°`}
+                />
+              </>
+            )
           ) : (
             <>
               <NumberField
@@ -2080,52 +2182,6 @@ export function GradientEditor({
             </>
           )}
         </FieldGroup>
-      ) : null}
-    </div>
-  )
-}
-
-function DotsPaletteCard({
-  isDashboardMode,
-  onApply,
-  palette,
-}: {
-  isDashboardMode?: boolean
-  onApply?: () => void
-  palette: string[]
-}) {
-  const paletteLabel = `${palette.length} ${palette.length === 1 ? "swatch" : "swatches"}`
-  const cardColors = palette.map((color) => color.replace(/^#/, ""))
-
-  return (
-    <div
-      data-slot="dots-palette-card"
-      className={cn(
-        isDashboardMode
-          ? "border-0 bg-transparent p-0"
-          : "rounded-[var(--radius-xl)] border border-border/70 bg-muted/20 p-4",
-      )}
-    >
-      <div className="space-y-1">
-        <p className="text-sm font-medium">Palette preview</p>
-        <p className="text-sm text-muted-foreground">
-          Dot coloring rotates through the active palette in a fixed order.
-        </p>
-      </div>
-
-      <div className="mt-4 flex min-h-[232px] w-full items-center justify-center">
-        <ColorPaletteCard colors={cardColors} statsText={paletteLabel} />
-      </div>
-
-      {onApply ? (
-        <Button
-          type="button"
-          variant="outline"
-          className="mt-4 w-full rounded-full border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
-          onClick={onApply}
-        >
-          Use palette
-        </Button>
       ) : null}
     </div>
   )
@@ -2519,12 +2575,12 @@ function GradientSliderThumb({
   return (
     <span
       className={cn(
-        "flex size-[18px] items-center justify-center rounded-full border border-black/10 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.06)] transition-transform",
+        "flex size-[18px] items-center justify-center rounded-[4px] border border-black/10 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.06)] transition-transform",
         isActive && "scale-105",
       )}
     >
       <span
-        className="size-2.5 rounded-full border border-black/10"
+        className="size-2.5 rounded-[2px] border border-black/10"
         style={{ backgroundColor: accentColor }}
       />
     </span>
@@ -2547,6 +2603,7 @@ function GradientValueChip({
 }
 
 function KnobSliderField({
+  className,
   hideLabel = false,
   hideValue = false,
   id,
@@ -2557,6 +2614,7 @@ function KnobSliderField({
   value,
   valueFormatter,
 }: {
+  className?: string
   hideLabel?: boolean
   hideValue?: boolean
   id: string
@@ -2568,7 +2626,7 @@ function KnobSliderField({
   valueFormatter: (value: number) => string
 }) {
   return (
-    <Field>
+    <Field className={className}>
       {!hideLabel || !hideValue ? (
         <div className="mb-2 flex items-center justify-between gap-3">
           <FieldLabel htmlFor={id} className={cn(hideLabel && "sr-only")}>
@@ -2598,19 +2656,80 @@ function KnobSliderField({
   )
 }
 
+function GradientTypeOptionCardPicker({
+  id,
+  label,
+  onValueChange,
+  value,
+}: {
+  id: string
+  label: string
+  onValueChange: (value: string) => void
+  value: string
+}) {
+  const labelId = `${id}-label`
+
+  return (
+    <Field>
+      <FieldLabel id={labelId} className="sr-only">
+        {label}
+      </FieldLabel>
+      <div
+        aria-labelledby={labelId}
+        className="grid grid-cols-2 justify-items-center gap-x-2 gap-y-3"
+        data-slot="gradient-type-option-grid"
+        id={id}
+        role="radiogroup"
+      >
+        {GRADIENT_TYPES.map((option) => (
+          <OptionCard
+            key={option.value}
+            checked={option.value === value}
+            label={option.label}
+            name={id}
+            onSelect={() => onValueChange(option.value)}
+            size="compact"
+            value={option.value}
+          >
+            <GradientTypePreview type={option.value} />
+          </OptionCard>
+        ))}
+      </div>
+    </Field>
+  )
+}
+
+function GradientTypePreview({ type }: { type: GradientType }) {
+  return (
+    <div className="flex size-full items-center justify-center">
+      <HugeiconsIcon
+        aria-hidden="true"
+        color="#111111"
+        icon={type === "radial" ? RadiusIcon : StraightEdgeIcon}
+        size={24}
+        strokeWidth={1.9}
+      />
+    </div>
+  )
+}
+
 export function EmbeddedColorPickerField({
   chrome = "default",
   className,
   label,
   onValueChange,
+  pickerChrome,
   pickerClassName,
+  size,
   value,
 }: {
   chrome?: "default" | "minimal"
   className?: string
   label: string
   onValueChange: (value: string) => void
+  pickerChrome?: "default" | "embedded" | "drafting"
   pickerClassName?: string
+  size?: number
   value: string
 }) {
   const isMinimal = chrome === "minimal"
@@ -2627,9 +2746,9 @@ export function EmbeddedColorPickerField({
       )}
       <ColorPicker
         className={pickerClassName}
-        chrome="embedded"
+        chrome={pickerChrome ?? "embedded"}
         onColorChange={onValueChange}
-        size={320}
+        size={size ?? 320}
         value={value}
       />
     </Field>

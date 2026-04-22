@@ -596,6 +596,445 @@
         },
         {
           "type": "frame",
+          "id": "Acd1",
+          "name": "Wireframe / Color Accordion",
+          "reusable": true,
+          "width": 320,
+          "height": "fit_content(360)",
+          "layout": "vertical",
+          "gap": 10,
+          "children": [
+            {
+              "type": "frame",
+              "id": "Acca",
+              "name": "SolidAccordionItem",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 0,
+              "fill": "$page-bg",
+              "stroke": {
+                "align": "inside",
+                "thickness": 1,
+                "fill": "$panel-border"
+              },
+              "cornerRadius": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Hdrb",
+                  "name": "SolidAccordionHeader",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Txtc",
+                      "name": "SolidAccordionLabel",
+                      "content": "Solid",
+                      "fill": "$text-primary",
+                      "fontFamily": "$body-font",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Bdgd",
+                      "name": "ClosedBadge",
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "$panel-border"
+                      },
+                      "cornerRadius": 999,
+                      "padding": [
+                        8,
+                        12
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Txte",
+                          "name": "ClosedBadgeLabel",
+                          "content": "Closed",
+                          "fill": "$text-muted",
+                          "fontFamily": "$body-font",
+                          "fontSize": 10,
+                          "fontWeight": "700",
+                          "letterSpacing": 0.4
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Accx",
+              "name": "GradientAccordionItem",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 0,
+              "fill": "$page-bg",
+              "stroke": {
+                "align": "inside",
+                "thickness": 1,
+                "fill": "$panel-border"
+              },
+              "cornerRadius": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Hdry",
+                  "name": "GradientAccordionHeader",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Txtz",
+                      "name": "GradientAccordionLabel",
+                      "content": "Gradient",
+                      "fill": "$text-primary",
+                      "fontFamily": "$body-font",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Bdg10",
+                      "name": "OpenBadge",
+                      "fill": "#111111",
+                      "cornerRadius": 999,
+                      "padding": [
+                        8,
+                        12
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Txt11",
+                          "name": "OpenBadgeLabel",
+                          "content": "Open",
+                          "fill": "$nav-selected-fg",
+                          "fontFamily": "$body-font",
+                          "fontSize": 10,
+                          "fontWeight": "700",
+                          "letterSpacing": 0.4
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "path",
+                  "id": "Pth12",
+                  "name": "GradientAccordionDivider",
+                  "geometry": "M0 0.5 H320",
+                  "viewBox": [
+                    0,
+                    0,
+                    320,
+                    1
+                  ],
+                  "width": 320,
+                  "height": 1,
+                  "stroke": {
+                    "align": "center",
+                    "thickness": 1,
+                    "cap": "round",
+                    "fill": "$panel-border"
+                  }
+                },
+                {
+                  "type": "frame",
+                  "id": "Bdyf",
+                  "name": "gradientBody",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 10,
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Gstg",
+                      "name": "gradientStrip",
+                      "width": 292,
+                      "height": 18,
+                      "layout": "none",
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "$panel-border"
+                      },
+                      "cornerRadius": 999,
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "Rech",
+                          "name": "gradientBand1",
+                          "width": 97,
+                          "height": 18,
+                          "x": 0,
+                          "y": 0,
+                          "fill": "#18181B",
+                          "cornerRadius": 999
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "Reci",
+                          "name": "gradientBand2",
+                          "width": 97,
+                          "height": 18,
+                          "x": 97,
+                          "y": 0,
+                          "fill": "#6B7280",
+                          "cornerRadius": 0
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "Recj",
+                          "name": "gradientBand3",
+                          "width": 98,
+                          "height": 18,
+                          "x": 194,
+                          "y": 0,
+                          "fill": "#D6D3D1",
+                          "cornerRadius": 999
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Rowk",
+                      "name": "gradientStopsRow",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Stpl",
+                          "name": "Start · InkStopChip",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "ellipse",
+                              "id": "Ellm",
+                              "name": "Start · InkStopSwatch",
+                              "width": 12,
+                              "height": 12,
+                              "fill": "#18181B"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Txtn",
+                              "name": "Start · InkStopLabel",
+                              "content": "Start · Ink",
+                              "fill": "$text-primary",
+                              "fontFamily": "$body-font",
+                              "fontSize": 11,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Stpo",
+                          "name": "End · StoneStopChip",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "ellipse",
+                              "id": "Ellp",
+                              "name": "End · StoneStopSwatch",
+                              "width": 12,
+                              "height": 12,
+                              "fill": "#D6D3D1"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Txtq",
+                              "name": "End · StoneStopLabel",
+                              "content": "End · Stone",
+                              "fill": "$text-primary",
+                              "fontFamily": "$body-font",
+                              "fontSize": 11,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Rowr",
+                      "name": "gradientMetaRow",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Chps",
+                          "name": "LinearChip",
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "$panel-border"
+                          },
+                          "cornerRadius": 999,
+                          "padding": [
+                            8,
+                            12
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Txtt",
+                              "name": "LinearChipLabel",
+                              "content": "Linear",
+                              "fill": "$text-primary",
+                              "fontFamily": "$body-font",
+                              "fontSize": 10,
+                              "fontWeight": "600",
+                              "letterSpacing": 0.3
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Chpu",
+                          "name": "36°Chip",
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "$panel-border"
+                          },
+                          "cornerRadius": 999,
+                          "padding": [
+                            8,
+                            12
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Txtv",
+                              "name": "36°ChipLabel",
+                              "content": "36°",
+                              "fill": "$text-primary",
+                              "fontFamily": "$body-font",
+                              "fontSize": 10,
+                              "fontWeight": "600",
+                              "letterSpacing": 0.3
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "Txtw",
+                      "name": "gradientHelper",
+                      "content": "The open state previews a restrained gradient strip, stop chips, and compact direction metadata.",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": 292,
+                      "lineHeight": 1.45,
+                      "fontFamily": "$body-font",
+                      "fontSize": 11,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Acc1n",
+              "name": "PatternsAccordionItem",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 0,
+              "fill": "$page-bg",
+              "stroke": {
+                "align": "inside",
+                "thickness": 1,
+                "fill": "$panel-border"
+              },
+              "cornerRadius": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Hdr1o",
+                  "name": "PatternsAccordionHeader",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Txt1p",
+                      "name": "PatternsAccordionLabel",
+                      "content": "Patterns",
+                      "fill": "$text-primary",
+                      "fontFamily": "$body-font",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Bdg1q",
+                      "name": "ClosedBadge",
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "$panel-border"
+                      },
+                      "cornerRadius": 999,
+                      "padding": [
+                        8,
+                        12
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Txt1r",
+                          "name": "ClosedBadgeLabel",
+                          "content": "Closed",
+                          "fill": "$text-muted",
+                          "fontFamily": "$body-font",
+                          "fontSize": 10,
+                          "fontWeight": "700",
+                          "letterSpacing": 0.4
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
           "id": "c5b1K",
           "name": "Tool Button States",
           "layout": "vertical",
@@ -2900,7 +3339,7 @@
                   "fontFamily": "$body-font",
                   "fontSize": 12,
                   "fontWeight": "500",
-                  "lineHeight": 1.0
+                  "lineHeight": 1
                 }
               }
             },
@@ -2958,7 +3397,7 @@
                   "fontFamily": "$body-font",
                   "fontSize": 12,
                   "fontWeight": "500",
-                  "lineHeight": 1.0
+                  "lineHeight": 1
                 }
               }
             }

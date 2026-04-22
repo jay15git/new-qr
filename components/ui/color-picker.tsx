@@ -5,6 +5,7 @@ import {
   hslaToHsva,
   hsvaToHex,
   hsvaToHsla,
+  hsvaToHslaString,
   hsvaToRgba,
   type HsvaColor,
   rgbaToHsva,
@@ -32,7 +33,7 @@ import {
 
 type ColorPickerProps = {
   className?: string
-  chrome?: "default" | "embedded"
+  chrome?: "default" | "embedded" | "drafting"
   onColorChange: (value: string) => void
   size?: number
   value: string
@@ -48,14 +49,41 @@ export default function ColorPicker({
   value,
 }: ColorPickerProps) {
   const [colorType, setColorType] = React.useState<ColorType>("hsl")
-  const hsva = toHsvaColor(value)
+  const isDrafting = chrome === "drafting"
+  const externalHexValue = coerceHexColor(value)
+  const [hsva, setHsva] = React.useState<HsvaColor>(() => toHsvaColor(externalHexValue))
+  const currentHexValue = coerceHexColor(hsvaToHex(hsva))
   const hsl = hsvaToHsla(hsva)
   const rgb = hsvaToRgba(hsva)
+  const huePointerColor = hsvaToHslaString({ ...hsva, s: 100, v: 100, a: 1 })
+
+  React.useEffect(() => {
+    if (currentHexValue === externalHexValue) {
+      return
+    }
+
+    setHsva(toHsvaColor(externalHexValue))
+  }, [currentHexValue, externalHexValue])
 
   function emitColor(nextColor: Partial<HsvaColor>) {
-    const mergedColor = { ...hsva, ...nextColor }
+    const mergedColor = {
+      ...hsva,
+      ...nextColor,
+      ...(nextColor.h !== undefined
+        ? { h: Math.min(359.99, Math.max(0, nextColor.h)) }
+        : null),
+    }
+    setHsva(mergedColor)
     onColorChange(coerceHexColor(hsvaToHex(mergedColor)))
   }
+
+  const saturationPointer = ({ color, left, top }: PickerPointerProps) => (
+    <ColorPickerPointer color={color} left={left} top={top} />
+  )
+
+  const huePointer = ({ left, top }: PickerPointerProps) => (
+    <ColorPickerPointer color={huePointerColor} left={left} top={top} variant="bar" />
+  )
 
   return (
     <div
@@ -67,9 +95,10 @@ export default function ColorPicker({
       <Saturation
         hsva={hsva}
         onChange={(newColor) => emitColor({ ...newColor, a: hsva.a })}
+        pointer={saturationPointer}
         style={{
           aspectRatio: "4 / 2",
-          borderRadius: "0.75rem",
+          borderRadius: isDrafting ? "0" : "0.75rem",
           height: "auto",
           width: "100%",
         }}
@@ -77,20 +106,27 @@ export default function ColorPicker({
           "overflow-hidden",
           chrome === "default" && "border border-border bg-background",
           chrome === "embedded" && "border border-white/8 bg-white/[0.03]",
+          chrome === "drafting" && "bg-transparent",
         )}
       />
       <Hue
         hue={hsva.h}
         onChange={(newHue) => emitColor(newHue)}
+        pointer={huePointer}
         style={
           {
             "--alpha-pointer-background-color": "hsl(var(--foreground))",
-            borderRadius: "0.5rem",
+            borderRadius: isDrafting ? "0" : "0.5rem",
             height: "0.875rem",
             width: "100%",
           } as React.CSSProperties
         }
-        className="[&>div:first-child]:overflow-hidden [&>div:first-child]:rounded-lg"
+        className={cn(
+          "[&>div:first-child]:overflow-hidden",
+          isDrafting
+            ? "[&>div:first-child]:rounded-none"
+            : "[&>div:first-child]:rounded-lg",
+        )}
       />
 
       <div className="flex items-center gap-2">
@@ -101,8 +137,10 @@ export default function ColorPicker({
                 "shrink-0 justify-between uppercase",
                 chrome === "embedded" &&
                   "border-white/8 bg-white/[0.03] hover:bg-white/[0.05]",
+                chrome === "drafting" &&
+                  "rounded-none border-transparent bg-black/[0.04] text-[#111111] shadow-none hover:bg-black/[0.06] focus-visible:border-black/15 focus-visible:ring-0",
               )}
-              variant="outline"
+              variant={isDrafting ? "ghost" : "outline"}
             >
               {colorType}
               <ChevronDownIcon
@@ -138,7 +176,11 @@ export default function ColorPicker({
         <div className="flex grow">
           {colorType === "hex" ? (
             <Input
-              className="flex"
+              className={cn(
+                "flex",
+                isDrafting &&
+                  "rounded-none border-transparent bg-black/[0.04] text-[#111111] shadow-none focus-visible:border-black/15 focus-visible:ring-0",
+              )}
               value={hsvaToHex(hsva)}
               onChange={(event) => {
                 const nextValue = event.target.value.startsWith("#")
@@ -146,7 +188,9 @@ export default function ColorPicker({
                   : `#${event.target.value}`
 
                 if (/^#[0-9a-f]{6}$/i.test(nextValue)) {
-                  onColorChange(nextValue)
+                  const nextHexValue = coerceHexColor(nextValue)
+                  setHsva(toHsvaColor(nextHexValue))
+                  onColorChange(nextHexValue)
                 }
               }}
             />
@@ -154,6 +198,7 @@ export default function ColorPicker({
 
           {colorType === "hsl" ? (
             <HslColorInput
+              chrome={chrome}
               channels={[
                 { key: "h", value: hsl.h.toFixed(0) },
                 { key: "s", value: hsl.s.toFixed(0) },
@@ -167,6 +212,7 @@ export default function ColorPicker({
 
           {colorType === "rgb" ? (
             <RgbColorInput
+              chrome={chrome}
               channels={[
                 { key: "r", value: String(rgb.r) },
                 { key: "g", value: String(rgb.g) },
@@ -183,14 +229,51 @@ export default function ColorPicker({
   )
 }
 
+type PickerPointerProps = {
+  color?: string
+  left?: React.CSSProperties["left"]
+  top?: React.CSSProperties["top"]
+  variant?: "bar" | "surface"
+}
+
+function ColorPickerPointer({
+  color,
+  left,
+  top,
+  variant = "surface",
+}: PickerPointerProps) {
+  const isBarPointer = variant === "bar"
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left,
+        top: top ?? (isBarPointer ? "50%" : undefined),
+      }}
+    >
+      <span
+        className="pointer-events-none flex size-[18px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[4px] border border-black/10 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.06)]"
+      >
+        <span
+          className="size-2.5 rounded-[2px] border border-black/10"
+          style={{ backgroundColor: color ?? "#111111" }}
+        />
+      </span>
+    </div>
+  )
+}
+
 function HslColorInput({
   channels,
+  chrome,
   onValueChange,
 }: {
   channels: Array<{
     key: "h" | "l" | "s"
     value: string
   }>
+  chrome?: "default" | "embedded" | "drafting"
   onValueChange: (channel: "h" | "l" | "s", nextValue: string) => void
 }) {
   return (
@@ -206,6 +289,16 @@ function HslColorInput({
           <Input
             className={cn(
               "shadow-none [direction:inherit]",
+              chrome === "drafting" &&
+                "border-transparent bg-black/[0.04] text-[#111111] focus-visible:border-black/15 focus-visible:ring-0",
+              chrome === "drafting" && index === 0 && "rounded-none",
+              chrome === "drafting" &&
+                index > 0 &&
+                index < channels.length - 1 &&
+                "rounded-none",
+              chrome === "drafting" &&
+                index === channels.length - 1 &&
+                "rounded-none",
               index === 0 && "rounded-e-none",
               index > 0 && index < channels.length - 1 && "rounded-none",
               index === channels.length - 1 && "rounded-s-none",
@@ -221,12 +314,14 @@ function HslColorInput({
 
 function RgbColorInput({
   channels,
+  chrome,
   onValueChange,
 }: {
   channels: Array<{
     key: "b" | "g" | "r"
     value: string
   }>
+  chrome?: "default" | "embedded" | "drafting"
   onValueChange: (channel: "b" | "g" | "r", nextValue: string) => void
 }) {
   return (
@@ -242,6 +337,16 @@ function RgbColorInput({
           <Input
             className={cn(
               "shadow-none [direction:inherit]",
+              chrome === "drafting" &&
+                "border-transparent bg-black/[0.04] text-[#111111] focus-visible:border-black/15 focus-visible:ring-0",
+              chrome === "drafting" && index === 0 && "rounded-none",
+              chrome === "drafting" &&
+                index > 0 &&
+                index < channels.length - 1 &&
+                "rounded-none",
+              chrome === "drafting" &&
+                index === channels.length - 1 &&
+                "rounded-none",
               index === 0 && "rounded-e-none",
               index > 0 && index < channels.length - 1 && "rounded-none",
               index === channels.length - 1 && "rounded-s-none",
