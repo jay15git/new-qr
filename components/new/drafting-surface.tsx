@@ -2,7 +2,7 @@
 
 import { Image02Icon, SignalIcon, SquareIcon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { type ReactNode, useState } from "react"
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
 
 import type {
   CornerDotType,
@@ -51,6 +51,13 @@ import {
   DEFAULT_QR_EDITOR_SECTION,
   type QrEditorSectionId,
 } from "@/components/qr/qr-sections"
+import { buildDashboardQrNodePayload } from "@/components/qr/dashboard-qr-svg"
+import { DashboardComposeSurface } from "@/components/qr/dashboard-compose-surface"
+import {
+  createDashboardComposeScene,
+  DASHBOARD_QR_NODE_ID,
+  upsertDashboardQrNode,
+} from "@/components/qr/dashboard-compose-scene"
 import {
   createDefaultQrStudioState,
   type AssetSourceMode,
@@ -345,14 +352,137 @@ export function DraftingSurface() {
     useState<ErrorCorrectionLevel>(
       DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.errorCorrectionLevel,
     )
+  const [draftingScene, setDraftingScene] = useState(() => createDashboardComposeScene())
+  const [isComposeEditMode, setIsComposeEditMode] = useState(false)
+  const [selectedComposeNodeId, setSelectedComposeNodeId] = useState<string | null>(null)
+  const [composeErrorMessage, setComposeErrorMessage] = useState<string | null>(null)
   const [activePanelTabs, setActivePanelTabs] = useState<Record<QrEditorSectionId, string>>(
     DEFAULT_DRAFTING_PANEL_TABS,
   )
+  const dashboardPayloadRequestRef = useRef(0)
   const activeToolConfig =
     DRAFTING_TOOLS.find((section) => section.id === activeTool) ?? DRAFTING_TOOLS[0]
   const activeToolTabs = DRAFTING_PANEL_TABS[activeTool]
   const activePanelTab = activePanelTabs[activeTool]
   const filteredBrandIcons = filterBrandIcons(brandIconQuery, brandIconCategory)
+  const draftingStudioState = useMemo<QrStudioState>(
+    () => ({
+      ...DEFAULT_DRAFTING_STUDIO_STATE,
+      data: selectedContentValue,
+      type: selectedRenderType,
+      width: selectedQrSize,
+      height: selectedQrSize,
+      margin: selectedQrMargin,
+      logo: {
+        presetColor: selectedLogoColor,
+        presetId: selectedLogoPresetId,
+        source: selectedLogoSourceMode,
+        value:
+          selectedLogoSourceMode === "preset"
+            ? selectedLogoPresetValue
+            : selectedLogoSourceMode === "url"
+              ? selectedLogoRemoteUrl
+              : undefined,
+      },
+      backgroundImage: {
+        presetColor: undefined,
+        presetId: undefined,
+        source: selectedBackgroundAssetSourceMode === "url" ? "url" : "none",
+        value:
+          selectedBackgroundAssetSourceMode === "url"
+            ? selectedBackgroundRemoteUrl
+            : undefined,
+      },
+      qrOptions: {
+        ...DEFAULT_DRAFTING_STUDIO_STATE.qrOptions,
+        typeNumber: selectedTypeNumber,
+        errorCorrectionLevel: selectedErrorCorrectionLevel,
+      },
+      imageOptions: {
+        ...DEFAULT_DRAFTING_STUDIO_STATE.imageOptions,
+        hideBackgroundDots: selectedHideBackgroundDots,
+        imageSize: selectedLogoSize / 100,
+        margin: selectedLogoMargin,
+        saveAsBlob: selectedSaveAsBlob,
+      },
+      dotsOptions: {
+        ...DEFAULT_DRAFTING_STUDIO_STATE.dotsOptions,
+        type: selectedDotType,
+        color: selectedDotColor,
+      },
+      dotsColorMode: selectedDotsColorMode,
+      dotsPalette: [...selectedDotsPalette],
+      cornersSquareOptions: {
+        type: selectedCornerSquareType,
+        color: selectedCornerSquareColor,
+      },
+      cornersDotOptions: {
+        type: selectedCornerDotType,
+        color: selectedCornerDotColor,
+      },
+      backgroundOptions: {
+        color: selectedBackgroundColor,
+        transparent: false,
+      },
+      logoGradient: {
+        ...structuredClone(selectedLogoGradient),
+        enabled: selectedLogoColorMode === "gradient",
+      },
+      dotsGradient: {
+        ...structuredClone(selectedDotsGradient),
+        enabled: selectedDotsColorMode === "gradient",
+      },
+      cornersSquareGradient: {
+        ...structuredClone(selectedCornerSquareGradient),
+        enabled: selectedCornerSquareColorMode === "gradient",
+      },
+      cornersDotGradient: {
+        ...structuredClone(selectedCornerDotGradient),
+        enabled: selectedCornerDotColorMode === "gradient",
+      },
+      backgroundGradient: {
+        ...structuredClone(selectedBackgroundGradient),
+        enabled: selectedBackgroundColorMode === "gradient",
+      },
+    }),
+    [
+      selectedBackgroundAssetSourceMode,
+      selectedBackgroundColor,
+      selectedBackgroundColorMode,
+      selectedBackgroundGradient,
+      selectedBackgroundRemoteUrl,
+      selectedContentValue,
+      selectedCornerDotColor,
+      selectedCornerDotColorMode,
+      selectedCornerDotGradient,
+      selectedCornerDotType,
+      selectedCornerSquareColor,
+      selectedCornerSquareColorMode,
+      selectedCornerSquareGradient,
+      selectedCornerSquareType,
+      selectedDotColor,
+      selectedDotsColorMode,
+      selectedDotsGradient,
+      selectedDotsPalette,
+      selectedDotType,
+      selectedErrorCorrectionLevel,
+      selectedHideBackgroundDots,
+      selectedLogoColor,
+      selectedLogoColorMode,
+      selectedLogoGradient,
+      selectedLogoMargin,
+      selectedLogoPresetId,
+      selectedLogoPresetValue,
+      selectedLogoRemoteUrl,
+      selectedLogoSize,
+      selectedLogoSourceMode,
+      selectedQrMargin,
+      selectedQrSize,
+      selectedRenderType,
+      selectedSaveAsBlob,
+      selectedTypeNumber,
+    ],
+  )
   const ensureDotsColorItemExpanded = (itemId: DotsColorMode) =>
     setOpenDotsColorItems((current) =>
       current.includes(itemId) ? current : [...current, itemId],
@@ -515,6 +645,96 @@ export function DraftingSurface() {
 
     syncDraftingLogoAsset(nextState)
   }
+
+  function resetDraftingWorkspace() {
+    const nextState = createDefaultQrStudioState()
+
+    setActiveTool(DEFAULT_QR_EDITOR_SECTION)
+    setSelectedContentValue(nextState.data)
+    setSelectedRenderType(nextState.type)
+    setSelectedQrMargin(nextState.margin)
+    setSelectedQrSize(nextState.width)
+    setSelectedDotType(nextState.dotsOptions.type)
+    setSelectedDotsColorMode(nextState.dotsColorMode)
+    setSelectedDotColor(nextState.dotsOptions.color)
+    setSelectedDotsGradient(structuredClone(nextState.dotsGradient))
+    setOpenDotsColorItems(["solid"])
+    setSelectedCornerSquareType(nextState.cornersSquareOptions.type)
+    setSelectedCornerSquareColorMode(
+      nextState.cornersSquareGradient.enabled ? "gradient" : "solid",
+    )
+    setSelectedCornerSquareColor(nextState.cornersSquareOptions.color)
+    setSelectedCornerSquareGradient(structuredClone(nextState.cornersSquareGradient))
+    setOpenCornerSquareColorItems(["solid"])
+    setSelectedCornerDotType(nextState.cornersDotOptions.type)
+    setSelectedCornerDotColorMode(nextState.cornersDotGradient.enabled ? "gradient" : "solid")
+    setSelectedCornerDotColor(nextState.cornersDotOptions.color)
+    setSelectedCornerDotGradient(structuredClone(nextState.cornersDotGradient))
+    setOpenCornerDotColorItems(["solid"])
+    setSelectedBackgroundColorMode(
+      nextState.backgroundGradient.enabled ? "gradient" : "solid",
+    )
+    setSelectedBackgroundColor(nextState.backgroundOptions.color)
+    setSelectedBackgroundGradient(structuredClone(nextState.backgroundGradient))
+    setOpenBackgroundColorItems(["solid"])
+    setSelectedBackgroundAssetSourceMode(
+      nextState.backgroundImage.source === "url" ? "url" : "upload",
+    )
+    setSelectedBackgroundRemoteUrl(
+      nextState.backgroundImage.source === "url"
+        ? (nextState.backgroundImage.value ?? "")
+        : "",
+    )
+    setOpenBackgroundUploadItems(["upload"])
+    setSelectedLogoColorMode(nextState.logoGradient.enabled ? "gradient" : "solid")
+    setSelectedLogoSourceMode(nextState.logo.source)
+    setSelectedLogoColor(nextState.logo.presetColor ?? DEFAULT_BRAND_ICON_COLOR)
+    setSelectedLogoGradient(structuredClone(nextState.logoGradient))
+    setOpenLogoColorItems(["solid"])
+    setBrandIconQuery("")
+    setBrandIconCategory("all")
+    setSelectedLogoPresetId(nextState.logo.presetId)
+    setSelectedLogoPresetValue(nextState.logo.value)
+    setSelectedLogoAssetSourceMode(nextState.logo.source === "url" ? "url" : "upload")
+    setSelectedLogoRemoteUrl(
+      nextState.logo.source === "url" ? (nextState.logo.value ?? "") : "",
+    )
+    setOpenLogoUploadItems(["upload"])
+    setSelectedLogoSize(nextState.imageOptions.imageSize * 100)
+    setSelectedLogoMargin(nextState.imageOptions.margin)
+    setSelectedHideBackgroundDots(nextState.imageOptions.hideBackgroundDots)
+    setSelectedSaveAsBlob(nextState.imageOptions.saveAsBlob)
+    setSelectedTypeNumber(nextState.qrOptions.typeNumber)
+    setSelectedErrorCorrectionLevel(nextState.qrOptions.errorCorrectionLevel)
+    setIsComposeEditMode(false)
+    setSelectedComposeNodeId(null)
+    setComposeErrorMessage(null)
+    setDraftingScene(createDashboardComposeScene())
+    setActivePanelTabs({ ...DEFAULT_DRAFTING_PANEL_TABS })
+  }
+
+  useEffect(() => {
+    const requestId = ++dashboardPayloadRequestRef.current
+
+    void buildDashboardQrNodePayload(draftingStudioState)
+      .then((payload) => {
+        if (dashboardPayloadRequestRef.current !== requestId) {
+          return
+        }
+
+        setDraftingScene((current) => upsertDashboardQrNode(current, payload))
+        queueMicrotask(() => setComposeErrorMessage(null))
+      })
+      .catch(() => {
+        if (dashboardPayloadRequestRef.current !== requestId) {
+          return
+        }
+
+        queueMicrotask(() => {
+          setComposeErrorMessage("The compose surface could not be updated.")
+        })
+      })
+  }, [draftingStudioState])
 
   const renderPanelContent = (toolId: QrEditorSectionId, tabId: string) => {
     if (toolId === "content" && tabId === "content") {
@@ -904,7 +1124,7 @@ export function DraftingSurface() {
               forceMount
               className="w-2 border-none p-[1px]"
             >
-              <ScrollAreaThumb className="bg-black/45 hover:bg-black/55" />
+              <ScrollAreaThumb className="bg-black/16 hover:bg-black/24" />
             </ScrollAreaScrollbar>
           </ScrollArea>
         </nav>
@@ -965,7 +1185,7 @@ export function DraftingSurface() {
                       forceMount
                       className="w-2 border-none p-[1px]"
                     >
-                      <ScrollAreaThumb className="bg-black/45 hover:bg-black/55" />
+                      <ScrollAreaThumb className="bg-black/16 hover:bg-black/24" />
                     </ScrollAreaScrollbar>
                   </ScrollArea>
                 </TabsContent>
@@ -976,8 +1196,30 @@ export function DraftingSurface() {
         <section
           aria-label="Workspace frame"
           data-slot="drafting-workspace"
-          className="min-h-0"
-        />
+          className="min-h-0 overflow-hidden"
+        >
+          <div
+            data-slot="drafting-workspace-inset"
+            className="h-full min-h-0 p-4 sm:p-5 lg:p-6"
+          >
+            <DashboardComposeSurface
+              errorMessage={composeErrorMessage}
+              isEditMode={isComposeEditMode}
+              onEditModeChange={(checked) => {
+                setIsComposeEditMode(checked)
+                setSelectedComposeNodeId(checked ? DASHBOARD_QR_NODE_ID : null)
+              }}
+              onReset={resetDraftingWorkspace}
+              onQrSizeChange={setSelectedQrSize}
+              onSceneChange={setDraftingScene}
+              onSelectedNodeChange={setSelectedComposeNodeId}
+              qrSize={selectedQrSize}
+              scene={draftingScene}
+              selectedNodeId={selectedComposeNodeId}
+              surfaceAppearance="neutral"
+            />
+          </div>
+        </section>
       </div>
     </section>
   )

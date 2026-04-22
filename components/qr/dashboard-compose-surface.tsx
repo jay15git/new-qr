@@ -51,6 +51,7 @@ type DashboardComposeSurfaceProps = {
   qualityReport?: QrQualityReport | null
   scene: DashboardComposeScene
   selectedNodeId: string | null
+  surfaceAppearance?: "dashboard" | "neutral"
 }
 
 type InteractionBase = {
@@ -113,6 +114,7 @@ export function DashboardComposeSurface({
   qualityReport,
   scene,
   selectedNodeId,
+  surfaceAppearance = "dashboard",
 }: DashboardComposeSurfaceProps) {
   const [draftScene, setDraftScene] = useState(scene)
   const [isDraftActive, setIsDraftActive] = useState(false)
@@ -133,6 +135,22 @@ export function DashboardComposeSurface({
   const renderedQrSize = renderedQrNode ? renderedQrNode.naturalWidth : qrSize
   const zoomPercent = `${Math.round(renderedScene.camera.zoom * 100)}%`
   const canvasBackgroundStyle = getDashboardCanvasBackgroundStyle(renderedScene.background)
+  const surfaceBaseStyle =
+    surfaceAppearance === "neutral"
+      ? {
+          backgroundColor: "#ececec",
+          backgroundImage:
+            "linear-gradient(45deg, rgba(255,255,255,0.72) 25%, transparent 25%), linear-gradient(-45deg, rgba(255,255,255,0.72) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.72) 75%), linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.72) 75%)",
+          backgroundPosition: "0 0, 0 18px, 18px -18px, -18px 0",
+          backgroundSize: "36px 36px",
+        }
+      : {
+          backgroundColor: "#e8edf4",
+          backgroundImage:
+            "linear-gradient(45deg, rgba(255,255,255,0.56) 25%, transparent 25%), linear-gradient(-45deg, rgba(255,255,255,0.56) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.56) 75%), linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.56) 75%)",
+          backgroundPosition: "0 0, 0 18px, 18px -18px, -18px 0",
+          backgroundSize: "36px 36px",
+        }
 
   const applyDraftScene = useCallback((nextScene: DashboardComposeScene) => {
     draftSceneRef.current = nextScene
@@ -366,14 +384,9 @@ export function DashboardComposeSurface({
   return (
     <div
       data-slot="dashboard-compose-surface"
+      data-surface-appearance={surfaceAppearance}
       className="relative h-full min-h-[22rem] overflow-hidden bg-slate-100 select-none touch-none"
-      style={{
-        backgroundColor: "#e8edf4",
-        backgroundImage:
-          "linear-gradient(45deg, rgba(255,255,255,0.56) 25%, transparent 25%), linear-gradient(-45deg, rgba(255,255,255,0.56) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.56) 75%), linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.56) 75%)",
-        backgroundPosition: "0 0, 0 18px, 18px -18px, -18px 0",
-        backgroundSize: "36px 36px",
-      }}
+      style={surfaceBaseStyle}
     >
       <div
         data-slot="dashboard-compose-viewport"

@@ -4,6 +4,10 @@ import { act } from "react"
 import { createRoot } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
+vi.mock("@/components/qr/dashboard-qr-svg", () => ({
+  buildDashboardQrNodePayload: vi.fn(() => new Promise(() => undefined)),
+}))
+
 import { DraftingSurface } from "@/components/new/drafting-surface"
 import { createDefaultQrStudioState } from "@/components/qr/qr-studio-state"
 
@@ -41,9 +45,23 @@ describe("DraftingSurface", () => {
     expect(surface.container.querySelector('[data-slot="drafting-nav"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="drafting-scroll-area"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="drafting-workspace"]')).not.toBeNull()
+    expect(
+      surface.container.querySelector('[data-slot="drafting-workspace-inset"]'),
+    ).not.toBeNull()
+    expect(
+      surface.container.querySelector('[data-slot="drafting-workspace-inset"]')?.className,
+    ).toContain("p-4")
+    expect(surface.container.querySelector('[data-slot="dashboard-compose-surface"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="dashboard-compose-canvas"]')).not.toBeNull()
+    expect(
+      surface.container
+        .querySelector('[data-slot="dashboard-compose-surface"]')
+        ?.getAttribute("data-surface-appearance"),
+    ).toBe("neutral")
+    expect(surface.container.textContent).toContain("Edit mode")
+    expect(surface.container.textContent).toContain("Reset defaults")
     expect(surface.container.querySelectorAll('[data-slot="drafting-plus-marker"]')).toHaveLength(10)
     expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(7)
-    expect(surface.container.querySelectorAll('[data-slot="button"]')).toHaveLength(7)
     expect(surface.container.querySelector('[data-slot="tabs"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="tabs-list"]')).not.toBeNull()
     expect(getTabLabels(surface.container)).toEqual(["Content"])

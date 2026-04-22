@@ -51,6 +51,47 @@ describe("DashboardComposeSurface", () => {
     expect(markup).not.toContain("320 × 320")
   })
 
+  it("keeps the default dashboard surface tint and allows a neutral variant", () => {
+    const scene = upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD)
+
+    const dashboardMarkup = renderToStaticMarkup(
+      <DashboardComposeSurface
+        errorMessage={null}
+        isEditMode={false}
+        onEditModeChange={vi.fn()}
+        onReset={vi.fn()}
+        onQrSizeChange={vi.fn()}
+        onSceneChange={vi.fn()}
+        onSelectedNodeChange={vi.fn()}
+        qrSize={QR_PAYLOAD.naturalWidth}
+        scene={scene}
+        selectedNodeId={null}
+      />,
+    )
+
+    const neutralMarkup = renderToStaticMarkup(
+      <DashboardComposeSurface
+        errorMessage={null}
+        isEditMode={false}
+        onEditModeChange={vi.fn()}
+        onReset={vi.fn()}
+        onQrSizeChange={vi.fn()}
+        onSceneChange={vi.fn()}
+        onSelectedNodeChange={vi.fn()}
+        qrSize={QR_PAYLOAD.naturalWidth}
+        scene={scene}
+        selectedNodeId={null}
+        surfaceAppearance="neutral"
+      />,
+    )
+
+    expect(dashboardMarkup).toContain('data-surface-appearance="dashboard"')
+    expect(dashboardMarkup).toContain("background-color:#e8edf4")
+    expect(neutralMarkup).toContain('data-surface-appearance="neutral"')
+    expect(neutralMarkup).toContain("background-color:#ececec")
+    expect(neutralMarkup).not.toContain("background-color:#e8edf4")
+  })
+
   it("projects scene node coordinates into pixel translation so resize stays centered visually", () => {
     const scene = upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD)
     const node = scene.nodes[0]
