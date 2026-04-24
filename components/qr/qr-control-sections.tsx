@@ -1082,17 +1082,39 @@ export function QrControlSections({
               {contentError ? <FieldError>{contentError}</FieldError> : null}
             </Field>
 
-            <FieldGroup className={stackClassName}>
-              <SelectField
-                id="qr-draw-type"
-                label="Render type"
-                onValueChange={(value) =>
-                  setState((current) => ({ ...current, type: value as DrawType }))
-                }
-                options={DRAW_TYPES}
-                value={state.type}
-              />
-            </FieldGroup>
+            {!isDashboardMode ? (
+              <FieldGroup className={stackClassName}>
+                <Field>
+                  <FieldLabel htmlFor="qr-draw-type">Render type</FieldLabel>
+                  <Select
+                    value={state.type}
+                    onValueChange={(value) =>
+                      setState((current) => ({
+                        ...current,
+                        type: value as DrawType,
+                      }))
+                    }
+                  >
+                    <SelectTrigger id="qr-draw-type" className="w-full">
+                      <SelectValue placeholder="Choose an option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {DRAW_TYPES.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <FieldDescription>
+                    Changes the live preview renderer only. Export buttons still
+                    choose the downloaded file format.
+                  </FieldDescription>
+                </Field>
+              </FieldGroup>
+            ) : null}
 
             <Field>
               <UnlumenSlider

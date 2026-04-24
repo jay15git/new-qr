@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
   addDashboardComposeImageNode,
   createDashboardComposeScene,
+  createDashboardDocumentComposeScene,
   DASHBOARD_QR_NODE_ID,
   DASHBOARD_QR_STAGE_FIT_RATIO,
   type DashboardComposeScene,
@@ -37,7 +38,7 @@ describe("DashboardComposeSurface", () => {
         onSelectedNodeChange={vi.fn()}
         qrSize={QR_PAYLOAD.naturalWidth}
         scene={scene}
-        selectedNodeId={null}
+        selectedNodeId={DASHBOARD_QR_NODE_ID}
       />,
     )
 
@@ -49,6 +50,38 @@ describe("DashboardComposeSurface", () => {
     expect(markup).not.toContain('aria-label="Resize QR from bottom left"')
     expect(markup).not.toContain('aria-label="Resize QR from bottom right"')
     expect(markup).not.toContain("320 × 320")
+  })
+
+  it("can expose direct qr transform affordances without edit mode", () => {
+    const scene = upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD)
+
+    const markup = renderToStaticMarkup(
+      <DashboardComposeSurface
+        allowDirectNodeTransforms
+        errorMessage={null}
+        isEditMode={false}
+        onEditModeChange={vi.fn()}
+        onReset={vi.fn()}
+        onQrSizeChange={vi.fn()}
+        onSceneChange={vi.fn()}
+        onSelectedNodeChange={vi.fn()}
+        qrSize={QR_PAYLOAD.naturalWidth}
+        scene={scene}
+        selectedNodeId={DASHBOARD_QR_NODE_ID}
+      />,
+    )
+
+    expect(markup).toContain('aria-label="Rotate QR"')
+    expect(markup).toContain('aria-label="Resize QR from top left"')
+    expect(markup).toContain('aria-label="Resize QR from top right"')
+    expect(markup).toContain('aria-label="Resize QR from bottom left"')
+    expect(markup).toContain('aria-label="Resize QR from bottom right"')
+    expect(markup).toContain("320 × 320")
+    expect(markup).toContain("rounded-[4px] border border-black")
+    expect(markup).toContain("bg-black/72")
+    expect(markup).toContain("h-6 w-6 items-center justify-center rounded-[4px] border border-black")
+    expect(markup).not.toContain("border-sky-600")
+    expect(markup).not.toContain("text-sky-700")
   })
 
   it("keeps the default dashboard surface tint and allows a neutral variant", () => {
@@ -87,8 +120,11 @@ describe("DashboardComposeSurface", () => {
 
     expect(dashboardMarkup).toContain('data-surface-appearance="dashboard"')
     expect(dashboardMarkup).toContain("background-color:#e8edf4")
+    expect(dashboardMarkup).toContain('data-toolbar-appearance="dashboard"')
     expect(neutralMarkup).toContain('data-surface-appearance="neutral"')
     expect(neutralMarkup).toContain("background-color:#ececec")
+    expect(neutralMarkup).toContain('data-toolbar-appearance="neutral"')
+    expect(neutralMarkup).toContain("border-[#00000017]")
     expect(neutralMarkup).not.toContain("background-color:#e8edf4")
   })
 
@@ -134,11 +170,108 @@ describe("DashboardComposeSurface", () => {
       />,
     )
 
-    expect(markup).toContain('aria-label="Rotate QR"')
+    expect(markup).not.toContain('aria-label="Rotate QR"')
     expect(markup).toContain('aria-label="Resize QR from top left"')
     expect(markup).toContain('aria-label="Resize QR from top right"')
     expect(markup).toContain('aria-label="Resize QR from bottom left"')
     expect(markup).toContain('aria-label="Resize QR from bottom right"')
+  })
+
+  it("renders the add qr toolbar action when a handler is supplied", () => {
+    const scene = upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD)
+
+    const markup = renderToStaticMarkup(
+      <DashboardComposeSurface
+        errorMessage={null}
+        isEditMode={true}
+        onAddQrCode={vi.fn()}
+        onEditModeChange={vi.fn()}
+        onReset={vi.fn()}
+        onQrSizeChange={vi.fn()}
+        onSceneChange={vi.fn()}
+        onSelectedNodeChange={vi.fn()}
+        qrSize={QR_PAYLOAD.naturalWidth}
+        scene={scene}
+        selectedNodeId={null}
+      />,
+    )
+
+    expect(markup).toContain('aria-label="Add QR code"')
+  })
+
+  it("visually elevates the selected qr without changing its stored z-index", () => {
+    const scene = addDashboardComposeImageNode(
+      upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD),
+      {
+        id: "image-node",
+        imageUrl: "/landscape.png",
+        name: "Landscape",
+        naturalHeight: 600,
+        naturalWidth: 1200,
+      },
+    )
+
+    const markup = renderToStaticMarkup(
+      <DashboardComposeSurface
+        errorMessage={null}
+        isEditMode={true}
+        onEditModeChange={vi.fn()}
+        onReset={vi.fn()}
+        onQrSizeChange={vi.fn()}
+        onSceneChange={vi.fn()}
+        onSelectedNodeChange={vi.fn()}
+        qrSize={QR_PAYLOAD.naturalWidth}
+        scene={scene}
+        selectedNodeId={DASHBOARD_QR_NODE_ID}
+      />,
+    )
+
+    expect(markup).toContain(`data-node-id="${DASHBOARD_QR_NODE_ID}"`)
+    expect(markup).toContain('data-z-index="1"')
+    expect(markup).toContain("drop-shadow-[0_22px_34px_rgba(15,23,42,0.28)]")
+    expect(markup).toContain("z-index:10000")
+  })
+
+  it("shows selected qr elevation and transform controls in document mode", () => {
+    const scene = addDashboardComposeImageNode(
+      upsertDashboardQrNode(createDashboardDocumentComposeScene(), QR_PAYLOAD),
+      {
+        id: "image-node",
+        imageUrl: "/landscape.png",
+        name: "Landscape",
+        naturalHeight: 600,
+        naturalWidth: 1200,
+      },
+    )
+
+    const markup = renderToStaticMarkup(
+      <DashboardComposeSurface
+        errorMessage={null}
+        isEditMode={false}
+        onEditModeChange={vi.fn()}
+        onReset={vi.fn()}
+        onQrSizeChange={vi.fn()}
+        onSceneChange={vi.fn()}
+        onSelectedNodeChange={vi.fn()}
+        qrSize={QR_PAYLOAD.naturalWidth}
+        scene={scene}
+        selectedNodeId={DASHBOARD_QR_NODE_ID}
+        surfaceAppearance="neutral"
+        surfaceMode="document"
+      />,
+    )
+
+    const imageNodeIndex = markup.indexOf('data-node-id="image-node"')
+    const qrNodeIndex = markup.indexOf(`data-node-id="${DASHBOARD_QR_NODE_ID}"`)
+
+    expect(imageNodeIndex).toBeGreaterThan(-1)
+    expect(qrNodeIndex).toBeGreaterThan(imageNodeIndex)
+    expect(markup).toContain('data-selected="true"')
+    expect(markup).toContain("drop-shadow-[0_22px_34px_rgba(15,23,42,0.28)]")
+    expect(markup).toContain("z-index:10000")
+    expect(markup).toContain('aria-label="Rotate QR"')
+    expect(markup).toContain('aria-label="Resize QR from top left"')
+    expect(markup).not.toContain("border border-[#111111]")
   })
 
   it("renders the selected qr size label below the composer preview in edit mode", () => {
@@ -161,12 +294,12 @@ describe("DashboardComposeSurface", () => {
     )
 
     expect(markup).toContain(
-      'bottom-[-2.75rem] left-1/2 -translate-x-1/2 rounded-full border border-slate-300/90 bg-white/92',
+      'bottom-[-2.75rem] left-1/2 -translate-x-1/2 rounded-[4px] border border-black/24 bg-white/92',
     )
     expect(markup).toContain("320 × 320")
     expect(markup).not.toContain(`${fittedSize} × ${fittedSize}`)
     expect(markup).not.toContain(
-      'top-[-2.75rem] -translate-x-1/2 rounded-full border border-slate-300/90 bg-white/92',
+      'top-[-2.75rem] -translate-x-1/2 rounded-[4px] border border-black/24 bg-white/92',
     )
   })
 
@@ -281,7 +414,7 @@ describe("DashboardComposeSurface", () => {
         onSelectedNodeChange={vi.fn()}
         qrSize={QR_PAYLOAD.naturalWidth}
         scene={scene}
-        selectedNodeId={DASHBOARD_QR_NODE_ID}
+        selectedNodeId={null}
       />,
     )
 
@@ -294,6 +427,33 @@ describe("DashboardComposeSurface", () => {
     expect(markup).toContain('data-z-index="1"')
     expect(markup).toContain('data-node-id="image-node"')
     expect(markup).toContain('data-z-index="2"')
+  })
+
+  it("renders a white document page with guides when the drafting surface opts into document mode", () => {
+    const scene = upsertDashboardQrNode(createDashboardDocumentComposeScene(), QR_PAYLOAD)
+
+    const markup = renderToStaticMarkup(
+      <DashboardComposeSurface
+        errorMessage={null}
+        isEditMode={true}
+        onEditModeChange={vi.fn()}
+        onReset={vi.fn()}
+        onQrSizeChange={vi.fn()}
+        onSceneChange={vi.fn()}
+        onSelectedNodeChange={vi.fn()}
+        qrSize={QR_PAYLOAD.naturalWidth}
+        scene={scene}
+        selectedNodeId={DASHBOARD_QR_NODE_ID}
+        surfaceAppearance="neutral"
+        surfaceMode="document"
+      />,
+    )
+
+    expect(markup).toContain("Document mode")
+    expect(markup).toContain('aria-label="Toggle document mode"')
+    expect(markup).toContain('data-compose-mode="document"')
+    expect(markup).toContain('data-slot="dashboard-compose-document-guides"')
+    expect(markup).toContain("background:#ffffff")
   })
 
   it("hides invisible image nodes from the compose stage", () => {

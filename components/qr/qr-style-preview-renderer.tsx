@@ -1,12 +1,23 @@
-import type { CornerSquareType } from "qr-code-styling"
+import type { CornerDotType, CornerSquareType } from "qr-code-styling"
 
 import {
   DOT_STYLE_PREVIEW_ROWS,
-  getDotStylePreviewNeighbor,
   isDotStylePreviewDark,
 } from "@/components/qr/qr-style-preview"
 
 export type StylePreviewKind = "corner-dot" | "corner-square" | "dots"
+
+const PREVIEW_ICON_CLASS_NAME = "size-[5.5rem] text-foreground/80"
+const CORNER_DOT_PREVIEW_ROWS = Object.freeze(["111", "111", "111"])
+const CORNER_SQUARE_PREVIEW_ROWS = Object.freeze([
+  "1111111",
+  "1000001",
+  "1000001",
+  "1000001",
+  "1000001",
+  "1000001",
+  "1111111",
+])
 
 export function StylePreview({
   previewKind,
@@ -15,38 +26,32 @@ export function StylePreview({
   previewKind: StylePreviewKind
   value: string
 }) {
+  if (previewKind === "corner-dot") {
+    return <CornerDotStylePreview value={value as CornerDotType} />
+  }
+
   if (previewKind === "corner-square") {
     return <CornerSquareStylePreview value={value as CornerSquareType} />
   }
 
-  if (previewKind !== "dots") {
-    return <StyleIconPreview previewKind={previewKind} value={value} />
-  }
-
-  const modulePitch = 5.25
-  const moduleSize = 4.85
-  const start = 5.7
+  const modulePitch = 4
+  const moduleSize = 4
+  const start = 6
 
   return (
     <svg
       aria-hidden="true"
-      className="size-16 text-foreground/80"
+      className={PREVIEW_ICON_CLASS_NAME}
       fill="none"
       data-preview-kind={previewKind}
       data-preview-style={value}
+      data-preview-fragment-size={DOT_STYLE_PREVIEW_ROWS.length}
+      data-preview-module-pitch={modulePitch}
+      data-preview-module-size={moduleSize}
       data-slot="style-preview-fragment"
       viewBox="0 0 48 48"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect
-        fill="currentColor"
-        height={40}
-        opacity={0.08}
-        rx={12}
-        width={40}
-        x={4}
-        y={4}
-      />
       {DOT_STYLE_PREVIEW_ROWS.flatMap((row, rowIndex) =>
         [...row].map((_, columnIndex) => {
           if (!isDotStylePreviewDark(rowIndex, columnIndex)) {
@@ -54,9 +59,10 @@ export function StylePreview({
           }
 
           return (
-            <DotPreviewShape
+            <MatrixPreviewShape
               key={`${rowIndex}-${columnIndex}`}
               columnIndex={columnIndex}
+              isDark={isDotStylePreviewDark}
               rowIndex={rowIndex}
               size={moduleSize}
               value={value}
@@ -70,232 +76,180 @@ export function StylePreview({
   )
 }
 
+function CornerDotStylePreview({
+  value,
+}: {
+  value: CornerDotType
+}) {
+  const filledSize = 15
+  const filledStart = (48 - filledSize) / 2
+  const usesFilledShape =
+    value === "dot" || value === "square" || value === "extra-rounded"
+
+  return (
+    <svg
+      aria-hidden="true"
+      className={PREVIEW_ICON_CLASS_NAME}
+      data-preview-kind="corner-dot"
+      data-preview-style={value}
+      data-corner-dot-renderer={usesFilledShape ? "filled" : "grid"}
+      data-slot="style-preview-corner-dot"
+      fill="none"
+      viewBox="0 0 48 48"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {usesFilledShape ? (
+        <PreviewShape
+          size={filledSize}
+          slotName="style-preview-corner-dot-shape"
+          value={value}
+          x={filledStart}
+          y={filledStart}
+        />
+      ) : (
+        renderPreviewMatrix({
+          rows: CORNER_DOT_PREVIEW_ROWS,
+          size: 5,
+          startX: 16.5,
+          startY: 16.5,
+          value,
+        })
+      )}
+    </svg>
+  )
+}
+
 function CornerSquareStylePreview({
   value,
 }: {
   value: CornerSquareType
 }) {
-  const maskId = `corner-square-preview-mask-${value}`
+  const usesRingRenderer =
+    value === "dot" || value === "square" || value === "extra-rounded"
 
   return (
     <svg
       aria-hidden="true"
-      className="size-16 text-foreground/80"
+      className={PREVIEW_ICON_CLASS_NAME}
       data-preview-kind="corner-square"
       data-preview-style={value}
+      data-corner-square-renderer={usesRingRenderer ? "ring" : "grid"}
       data-slot="style-preview-corner-square"
       fill="none"
       viewBox="0 0 48 48"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect
-        fill="currentColor"
-        height={40}
-        opacity={0.08}
-        rx={12}
-        width={40}
-        x={4}
-        y={4}
-      />
-      <defs>
-        <mask id={maskId}>
-          <rect fill="white" height={48} width={48} />
-          <CornerSquareCutout value={value} />
-        </mask>
-      </defs>
-      <g
-        data-corner-frame-variant={value}
-        data-slot="style-preview-corner-square-frame"
-        fill="currentColor"
-        mask={`url(#${maskId})`}
-      >
-        <CornerSquareFrame value={value} />
-      </g>
+      {usesRingRenderer ? (
+        <CornerSquareRing value={value} x={13.5} y={13.5} size={21} />
+      ) : (
+        <g data-slot="style-preview-corner-square-grid">
+          {renderPreviewMatrix({
+            rows: CORNER_SQUARE_PREVIEW_ROWS,
+            size: 3,
+            startX: 13.5,
+            startY: 13.5,
+            value,
+          })}
+        </g>
+      )}
     </svg>
   )
 }
 
-function CornerSquareFrame({
+function CornerSquareRing({
   value,
+  x,
+  y,
+  size,
 }: {
   value: CornerSquareType
+  x: number
+  y: number
+  size: number
 }) {
+  const unit = size / 7
+
   switch (value) {
     case "dot":
       return (
-        <circle
-          cx={24}
-          cy={24}
-          data-slot="style-preview-native-module"
-          r={14}
-        />
-      )
-    case "dots":
-      return (
-        <>
-          {[
-            [16, 12],
-            [24, 10.5],
-            [32, 12],
-            [36, 16],
-            [37.5, 24],
-            [36, 32],
-            [32, 36],
-            [24, 37.5],
-            [16, 36],
-            [12, 32],
-            [10.5, 24],
-            [12, 16],
-          ].map(([cx, cy], index) => (
-            <circle
-              key={`${value}-${index}`}
-              cx={cx}
-              cy={cy}
-              data-slot="style-preview-native-module"
-              r={3}
-            />
-          ))}
-        </>
-      )
-    case "classy":
-      return (
         <path
-          data-slot="style-preview-native-module"
-          d="M 12 10 H 31 Q 38 10 38 17 V 30 Q 38 38 30 38 H 17 Q 10 38 10 31 V 10 Z"
-          fillRule="nonzero"
-        />
-      )
-    case "classy-rounded":
-      return (
-        <path
-          data-slot="style-preview-native-module"
-          d="M 15 10.5 H 30 Q 37.5 10.5 37.5 18 V 30 Q 37.5 37.5 30 37.5 H 18 Q 10.5 37.5 10.5 30 V 15 Q 10.5 10.5 15 10.5 Z"
-          fillRule="nonzero"
-        />
-      )
-    case "rounded":
-      return (
-        <rect
-          data-slot="style-preview-native-module"
-          height={28}
-          rx={7}
-          width={28}
-          x={10}
-          y={10}
+          clipRule="evenodd"
+          d={`M ${x + size / 2} ${y}a ${size / 2} ${size / 2} 0 1 0 0.1 0zm 0 ${unit}a ${size / 2 - unit} ${size / 2 - unit} 0 1 1 -0.1 0Z`}
+          data-corner-frame-variant={value}
+          data-slot="style-preview-corner-square-frame"
+          fill="currentColor"
+          fillRule="evenodd"
         />
       )
     case "extra-rounded":
       return (
-        <rect
-          data-slot="style-preview-native-module"
-          height={28}
-          rx={10}
-          width={28}
-          x={10}
-          y={10}
+        <path
+          clipRule="evenodd"
+          d={[
+            `M ${x} ${y + 2.5 * unit}v ${2 * unit}a ${2.5 * unit} ${2.5 * unit}, 0, 0, 0, ${2.5 * unit} ${2.5 * unit}h ${2 * unit}a ${2.5 * unit} ${2.5 * unit}, 0, 0, 0, ${2.5 * unit} ${-2.5 * unit}v ${-2 * unit}a ${2.5 * unit} ${2.5 * unit}, 0, 0, 0, ${-2.5 * unit} ${-2.5 * unit}h ${-2 * unit}a ${2.5 * unit} ${2.5 * unit}, 0, 0, 0, ${-2.5 * unit} ${2.5 * unit}`,
+            `M ${x + 2.5 * unit} ${y + unit}h ${2 * unit}a ${1.5 * unit} ${1.5 * unit}, 0, 0, 1, ${1.5 * unit} ${1.5 * unit}v ${2 * unit}a ${1.5 * unit} ${1.5 * unit}, 0, 0, 1, ${-1.5 * unit} ${1.5 * unit}h ${-2 * unit}a ${1.5 * unit} ${1.5 * unit}, 0, 0, 1, ${-1.5 * unit} ${-1.5 * unit}v ${-2 * unit}a ${1.5 * unit} ${1.5 * unit}, 0, 0, 1, ${1.5 * unit} ${-1.5 * unit}`,
+          ].join("")}
+          data-corner-frame-variant={value}
+          data-slot="style-preview-corner-square-frame"
+          fill="currentColor"
+          fillRule="evenodd"
         />
       )
     case "square":
     default:
       return (
-        <rect
-          data-slot="style-preview-native-module"
-          height={28}
-          rx={2.5}
-          width={28}
-          x={10}
-          y={10}
+        <path
+          clipRule="evenodd"
+          d={`M ${x} ${y}v ${size}h ${size}v ${-size}zM ${x + unit} ${y + unit}h ${size - 2 * unit}v ${size - 2 * unit}h ${2 * unit - size}z`}
+          data-corner-frame-variant={value}
+          data-slot="style-preview-corner-square-frame"
+          fill="currentColor"
+          fillRule="evenodd"
         />
       )
   }
 }
 
-function CornerSquareCutout({
+function renderPreviewMatrix({
+  rows,
+  size,
+  startX,
+  startY,
   value,
 }: {
-  value: CornerSquareType
+  rows: ReadonlyArray<string>
+  size: number
+  startX: number
+  startY: number
+  value: string
 }) {
-  switch (value) {
-    case "dot":
+  return rows.flatMap((row, rowIndex) =>
+    [...row].map((cell, columnIndex) => {
+      if (cell !== "1") {
+        return null
+      }
+
       return (
-        <circle
-          cx={24}
-          cy={24}
-          data-slot="style-preview-corner-square-cutout"
-          fill="black"
-          r={6.75}
+        <MatrixPreviewShape
+          key={`${value}-${rowIndex}-${columnIndex}`}
+          columnIndex={columnIndex}
+          isDark={(targetRow, targetColumn) =>
+            rows[targetRow]?.[targetColumn] === "1"
+          }
+          rowIndex={rowIndex}
+          size={size}
+          value={value}
+          x={startX + columnIndex * size}
+          y={startY + rowIndex * size}
         />
       )
-    case "dots":
-      return (
-        <rect
-          data-slot="style-preview-corner-square-cutout"
-          fill="black"
-          height={12}
-          rx={3}
-          width={12}
-          x={18}
-          y={18}
-        />
-      )
-    case "classy":
-      return (
-        <path
-          data-slot="style-preview-corner-square-cutout"
-          d="M 19 17.5 H 27 Q 31 17.5 31 21.5 V 26 Q 31 30.5 26.5 30.5 H 21.5 Q 17 30.5 17 26 V 17.5 Z"
-          fill="black"
-        />
-      )
-    case "classy-rounded":
-      return (
-        <path
-          data-slot="style-preview-corner-square-cutout"
-          d="M 20 18 H 26 Q 30 18 30 22 V 26 Q 30 30 26 30 H 22 Q 18 30 18 26 V 20 Q 18 18 20 18 Z"
-          fill="black"
-        />
-      )
-    case "rounded":
-      return (
-        <rect
-          data-slot="style-preview-corner-square-cutout"
-          fill="black"
-          height={12}
-          rx={3.5}
-          width={12}
-          x={18}
-          y={18}
-        />
-      )
-    case "extra-rounded":
-      return (
-        <rect
-          data-slot="style-preview-corner-square-cutout"
-          fill="black"
-          height={12}
-          rx={5}
-          width={12}
-          x={18}
-          y={18}
-        />
-      )
-    case "square":
-    default:
-      return (
-        <rect
-          data-slot="style-preview-corner-square-cutout"
-          fill="black"
-          height={12}
-          rx={1.5}
-          width={12}
-          x={18}
-          y={18}
-        />
-      )
-  }
+    }),
+  )
 }
 
-function DotPreviewShape({
+function MatrixPreviewShape({
   columnIndex,
+  isDark,
   rowIndex,
   size,
   value,
@@ -303,6 +257,7 @@ function DotPreviewShape({
   y,
 }: {
   columnIndex: number
+  isDark: (rowIndex: number, columnIndex: number) => boolean
   rowIndex: number
   size: number
   value: string
@@ -322,7 +277,7 @@ function DotPreviewShape({
   }
 
   const getNeighbor = (offsetX: number, offsetY: number) =>
-    getDotStylePreviewNeighbor(rowIndex, columnIndex, offsetX, offsetY)
+    isDark(rowIndex + offsetY, columnIndex + offsetX)
 
   switch (value) {
     case "dots":
@@ -339,31 +294,6 @@ function DotPreviewShape({
     default:
       return renderPreviewDotShape("square", { size, x, y })
   }
-}
-
-function StyleIconPreview({
-  previewKind,
-  value,
-}: {
-  previewKind: Exclude<StylePreviewKind, "dots">
-  value: string
-}) {
-  return (
-    <svg
-      aria-hidden="true"
-      className="size-16 text-foreground/80"
-      data-preview-kind={previewKind}
-      data-slot="style-preview-icon"
-      data-preview-style={value}
-      fill="none"
-      viewBox="0 0 48 48"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <PreviewShape size={14} value={value} x={7} y={7} />
-      <PreviewShape size={14} value={value} x={27} y={7} />
-      <PreviewShape size={14} value={value} x={17} y={27} />
-    </svg>
-  )
 }
 
 function PreviewShape({

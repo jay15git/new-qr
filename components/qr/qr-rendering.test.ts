@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest"
 
-import { buildQrExtension, getQrExtensionKey } from "./qr-rendering"
+import {
+  buildQrExtension,
+  createAlignedCornerGradientExtension,
+  getQrExtensionKey,
+} from "./qr-rendering"
 import { createDefaultQrStudioState } from "./qr-studio-state"
 
 type StubElement = {
@@ -100,6 +104,56 @@ function createStubElement(tagName: string): StubElement {
   return element
 }
 
+function appendGradientRectPair({
+  defs,
+  fillRectX,
+  fillRectY,
+  gradientId,
+  svg,
+  tagName = "linearGradient",
+}: {
+  defs: StubElement
+  fillRectX: number
+  fillRectY: number
+  gradientId: string
+  svg: StubElement
+  tagName?: "linearGradient" | "radialGradient"
+}) {
+  const gradient = createStubElement(tagName)
+  gradient.setAttribute("gradientUnits", "userSpaceOnUse")
+  gradient.setAttribute("id", gradientId)
+  gradient.setAttribute("x1", "999")
+  gradient.setAttribute("y1", "999")
+  gradient.setAttribute("x2", "-999")
+  gradient.setAttribute("y2", "-999")
+  defs.appendChild(gradient)
+
+  const fillRect = createStubElement("rect")
+  fillRect.setAttribute("fill", `url('#${gradientId}')`)
+  fillRect.setAttribute("height", "21")
+  fillRect.setAttribute("width", "21")
+  fillRect.setAttribute("x", String(fillRectX))
+  fillRect.setAttribute("y", String(fillRectY))
+  svg.appendChild(fillRect)
+
+  return { fillRect, gradient }
+}
+
+function getGradientRelativeCoordinates(
+  gradient: StubElement,
+  fillRect: StubElement,
+) {
+  const rectX = Number.parseFloat(fillRect.getAttribute("x") ?? "0")
+  const rectY = Number.parseFloat(fillRect.getAttribute("y") ?? "0")
+
+  return {
+    x1: Number.parseFloat(gradient.getAttribute("x1") ?? "0") - rectX,
+    x2: Number.parseFloat(gradient.getAttribute("x2") ?? "0") - rectX,
+    y1: Number.parseFloat(gradient.getAttribute("y1") ?? "0") - rectY,
+    y2: Number.parseFloat(gradient.getAttribute("y2") ?? "0") - rectY,
+  }
+}
+
 describe("qr rendering helpers", () => {
   it("keeps logo-only changes on the upstream image path instead of the extension pipeline", () => {
     const defaultState = createDefaultQrStudioState()
@@ -122,6 +176,21 @@ describe("qr rendering helpers", () => {
     }
 
     expect(getQrExtensionKey(stateWithBackgroundImage)).not.toBe(
+      getQrExtensionKey(defaultState),
+    )
+  })
+
+  it("changes the extension key when a linear corner gradient changes", () => {
+    const defaultState = createDefaultQrStudioState()
+    const stateWithCornerGradient = createDefaultQrStudioState()
+    stateWithCornerGradient.cornersSquareGradient = {
+      ...stateWithCornerGradient.cornersSquareGradient,
+      enabled: true,
+      rotation: Math.PI / 3,
+      type: "linear",
+    }
+
+    expect(getQrExtensionKey(stateWithCornerGradient)).not.toBe(
       getQrExtensionKey(defaultState),
     )
   })
@@ -157,5 +226,134 @@ describe("qr rendering helpers", () => {
       "blob:https://new-qr-studio.local/background.png",
     )
     expect(svg.children[2]?.getAttribute("data-qr-layer")).toBe("background-image")
+  })
+
+  it("normalizes all corner-frame linear gradients to the same relative direction", () => {
+    const state = createDefaultQrStudioState()
+    state.cornersSquareGradient = {
+      ...state.cornersSquareGradient,
+      enabled: true,
+      rotation: Math.PI / 4,
+      type: "linear",
+    }
+
+    const extension = createAlignedCornerGradientExtension(state)
+    expect(extension).toBeTypeOf("function")
+
+    if (!extension) {
+      return
+    }
+
+    const svg = createStubElement("svg")
+    const defs = createStubElement("defs")
+    svg.appendChild(defs)
+    const topLeft = appendGradientRectPair({
+      defs,
+      fillRectX: 24,
+      fillRectY: 24,
+      gradientId: "corners-square-color-0-0-1",
+      svg,
+    })
+    const topRight = appendGradientRectPair({
+      defs,
+      fillRectX: 180,
+      fillRectY: 24,
+      gradientId: "corners-square-color-1-0-1",
+      svg,
+    })
+    const bottomLeft = appendGradientRectPair({
+      defs,
+      fillRectX: 24,
+      fillRectY: 180,
+      gradientId: "corners-square-color-0-1-1",
+      svg,
+    })
+
+    extension(svg as unknown as SVGElement, {
+      height: 240,
+      width: 240,
+    })
+
+    const topLeftCoordinates = getGradientRelativeCoordinates(
+      topLeft.gradient,
+      topLeft.fillRect,
+    )
+
+    expect(
+      getGradientRelativeCoordinates(topRight.gradient, topRight.fillRect),
+    ).toEqual(topLeftCoordinates)
+    expect(
+      getGradientRelativeCoordinates(bottomLeft.gradient, bottomLeft.fillRect),
+    ).toEqual(topLeftCoordinates)
+  })
+
+  it("normalizes all corner-dot linear gradients to the same relative direction", () => {
+    const state = createDefaultQrStudioState()
+    state.cornersDotGradient = {
+      ...state.cornersDotGradient,
+      enabled: true,
+      rotation: Math.PI / 2,
+      type: "linear",
+    }
+
+    const extension = createAlignedCornerGradientExtension(state)
+    expect(extension).toBeTypeOf("function")
+
+    if (!extension) {
+      return
+    }
+
+    const svg = createStubElement("svg")
+    const defs = createStubElement("defs")
+    svg.appendChild(defs)
+    const topLeft = appendGradientRectPair({
+      defs,
+      fillRectX: 40,
+      fillRectY: 40,
+      gradientId: "corners-dot-color-0-0-1",
+      svg,
+    })
+    const topRight = appendGradientRectPair({
+      defs,
+      fillRectX: 196,
+      fillRectY: 40,
+      gradientId: "corners-dot-color-1-0-1",
+      svg,
+    })
+    const bottomLeft = appendGradientRectPair({
+      defs,
+      fillRectX: 40,
+      fillRectY: 196,
+      gradientId: "corners-dot-color-0-1-1",
+      svg,
+    })
+
+    extension(svg as unknown as SVGElement, {
+      height: 280,
+      width: 280,
+    })
+
+    const topLeftCoordinates = getGradientRelativeCoordinates(
+      topLeft.gradient,
+      topLeft.fillRect,
+    )
+
+    expect(
+      getGradientRelativeCoordinates(topRight.gradient, topRight.fillRect),
+    ).toEqual(topLeftCoordinates)
+    expect(
+      getGradientRelativeCoordinates(bottomLeft.gradient, bottomLeft.fillRect),
+    ).toEqual(topLeftCoordinates)
+  })
+
+  it("does not create an alignment extension for radial corner gradients", () => {
+    const state = createDefaultQrStudioState()
+    state.cornersSquareGradient = {
+      ...state.cornersSquareGradient,
+      enabled: true,
+      type: "radial",
+    }
+
+    expect(createAlignedCornerGradientExtension(state)).toBeNull()
   })
 })

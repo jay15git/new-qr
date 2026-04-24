@@ -122,12 +122,16 @@ export function QrPreviewCard({
       </CardContent>
 
       <CardFooter className="flex flex-col gap-4 border-t border-border/70 pt-6">
+        <p className="w-full text-sm text-muted-foreground">
+          Export format is chosen per button. The preview renderer badge above does
+          not change the downloaded file type.
+        </p>
         <div className="flex w-full flex-wrap gap-2">
           {DOWNLOAD_EXTENSIONS.map((extension) => (
             <Button
               key={extension}
               disabled={!canDownload}
-              variant={extension === state.type ? "default" : "outline"}
+              variant="outline"
               onClick={() => {
                 void onDownload(extension)
               }}

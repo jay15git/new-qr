@@ -2,12 +2,19 @@ import { describe, expect, it } from "vitest"
 
 import {
   addDashboardComposeImageNode,
+  applyDashboardDocumentPreset,
+  centerDashboardComposeNode,
   createDashboardComposeScene,
+  createDashboardDocumentComposeScene,
   DASHBOARD_COMPOSE_CANVAS_SIZE,
   DASHBOARD_COMPOSE_CANVAS_HEIGHT,
+  DASHBOARD_DOCUMENT_DEFAULT_MARGIN,
   DASHBOARD_IMAGE_STAGE_FIT_RATIO,
   DASHBOARD_QR_NODE_ID,
   DASHBOARD_QR_STAGE_FIT_RATIO,
+  fitDashboardQrNodeToDocument,
+  getDashboardQrNodes,
+  isDashboardQrNodeId,
   removeDashboardComposeNode,
   reorderDashboardComposeNodes,
   resetDashboardComposeCamera,
@@ -50,7 +57,23 @@ describe("dashboard compose scene helpers", () => {
       panY: 0,
       zoom: 1,
     })
+    expect(scene.document).toEqual({
+      backgroundColor: "#ffffff",
+      margin: DASHBOARD_DOCUMENT_DEFAULT_MARGIN,
+      presetId: "letter",
+      showGuides: true,
+    })
     expect(scene.nodes).toEqual([])
+  })
+
+  it("creates a portrait document scene for the drafting workspace", () => {
+    const scene = createDashboardDocumentComposeScene()
+
+    expect(scene.canvasSize).toEqual({
+      width: 816,
+      height: 1056,
+    })
+    expect(scene.document.presetId).toBe("letter")
   })
 
   it("creates a centered svg-backed qr node at the dashboard fit size", () => {
@@ -273,6 +296,50 @@ describe("dashboard compose scene helpers", () => {
     })
   })
 
+  it("applies document presets while preserving the normalized document metadata", () => {
+    const scene = applyDashboardDocumentPreset(createDashboardDocumentComposeScene(), "square")
+
+    expect(scene.canvasSize).toEqual({
+      width: 1080,
+      height: 1080,
+    })
+    expect(scene.document).toMatchObject({
+      backgroundColor: "#ffffff",
+      presetId: "square",
+      showGuides: true,
+    })
+  })
+
+  it("centers and fits the qr node to the document margin-safe area", () => {
+    const seededScene = upsertDashboardQrNode(createDashboardDocumentComposeScene(), QR_PAYLOAD)
+    const offsetScene = updateDashboardComposeNode(seededScene, DASHBOARD_QR_NODE_ID, {
+      x: 12,
+      y: 18,
+    })
+
+    const centeredScene = centerDashboardComposeNode(offsetScene)
+    const centeredNode = centeredScene.nodes[0]
+    const centeredWidth = centeredNode.naturalWidth * centeredNode.scale
+    const centeredHeight = centeredNode.naturalHeight * centeredNode.scale
+
+    expect(centeredNode.x).toBeCloseTo((centeredScene.canvasSize.width - centeredWidth) / 2)
+    expect(centeredNode.y).toBeCloseTo((centeredScene.canvasSize.height - centeredHeight) / 2)
+
+    const fittedScene = fitDashboardQrNodeToDocument(seededScene)
+    const fittedNode = fittedScene.nodes[0]
+    const fittedSize = fittedNode.naturalWidth * fittedNode.scale
+
+    expect(fittedSize).toBeCloseTo(
+      Math.min(
+        fittedScene.canvasSize.width - fittedScene.document.margin * 2,
+        fittedScene.canvasSize.height - fittedScene.document.margin * 2,
+      ),
+      0,
+    )
+    expect(fittedNode.x).toBeCloseTo((fittedScene.canvasSize.width - fittedSize) / 2)
+    expect(fittedNode.y).toBeCloseTo((fittedScene.canvasSize.height - fittedSize) / 2)
+  })
+
   it("removes only the targeted image node and never removes the QR node", () => {
     const seededScene = createLayeredScene()
 
@@ -306,6 +373,94 @@ describe("dashboard compose scene helpers", () => {
     expect(
       regeneratedScene.nodes.find((node) => node.id === DASHBOARD_QR_NODE_ID)?.kind,
     ).toBe("svg")
+  })
+
+  it("supports independent qr nodes without rewriting the default qr", () => {
+    const initialScene = upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD)
+    const secondPayload = {
+      ...QR_PAYLOAD,
+      markup:
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320"><circle cx="160" cy="160" r="120" fill="#111" /></svg>',
+      name: "QR Code 2",
+    }
+    const nextScene = upsertDashboardQrNode(
+      initialScene,
+      secondPayload,
+      "dashboard-qr-node-copy",
+    )
+
+    expect(isDashboardQrNodeId("dashboard-qr-node-copy")).toBe(true)
+    expect(getDashboardQrNodes(nextScene)).toHaveLength(2)
+    expect(nextScene.nodes.find((node) => node.id === DASHBOARD_QR_NODE_ID)).toMatchObject({
+      id: DASHBOARD_QR_NODE_ID,
+      name: "QR Code",
+      zIndex: 1,
+    })
+    expect(nextScene.nodes.find((node) => node.id === "dashboard-qr-node-copy")).toMatchObject({
+      id: "dashboard-qr-node-copy",
+      name: "QR Code 2",
+      zIndex: 2,
+    })
+  })
+
+  it("targets fit and reset operations to the requested qr node", () => {
+    const twoQrScene = upsertDashboardQrNode(
+      upsertDashboardQrNode(createDashboardDocumentComposeScene(), QR_PAYLOAD),
+      {
+        ...QR_PAYLOAD,
+        name: "QR Code 2",
+      },
+      "dashboard-qr-node-copy",
+    )
+    const transformedScene = {
+      ...twoQrScene,
+      nodes: twoQrScene.nodes.map((node) =>
+        node.id === "dashboard-qr-node-copy"
+          ? {
+              ...node,
+              rotation: 18,
+              scale: 0.5,
+              x: 12,
+              y: 18,
+            }
+          : node,
+      ),
+    }
+
+    const fittedScene = fitDashboardQrNodeToDocument(
+      transformedScene,
+      "dashboard-qr-node-copy",
+    )
+    const defaultQr = fittedScene.nodes.find((node) => node.id === DASHBOARD_QR_NODE_ID)
+    const fittedQr = fittedScene.nodes.find((node) => node.id === "dashboard-qr-node-copy")
+
+    expect(defaultQr).toEqual(transformedScene.nodes.find((node) => node.id === DASHBOARD_QR_NODE_ID))
+    expect(fittedQr?.x).not.toBe(12)
+
+    const resetScene = resetDashboardQrNodeTransform(fittedScene, "dashboard-qr-node-copy")
+    const resetQr = resetScene.nodes.find((node) => node.id === "dashboard-qr-node-copy")
+
+    expect(resetQr?.rotation).toBe(0)
+    expect(resetScene.nodes.find((node) => node.id === DASHBOARD_QR_NODE_ID)).toEqual(defaultQr)
+  })
+
+  it("allows deleting extra qr nodes but preserves the last remaining qr", () => {
+    const twoQrScene = upsertDashboardQrNode(
+      upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD),
+      {
+        ...QR_PAYLOAD,
+        name: "QR Code 2",
+      },
+      "dashboard-qr-node-copy",
+    )
+
+    const removedDefaultScene = removeDashboardComposeNode(twoQrScene, DASHBOARD_QR_NODE_ID)
+
+    expect(getDashboardQrNodes(removedDefaultScene)).toHaveLength(1)
+    expect(removedDefaultScene.nodes.some((node) => node.id === DASHBOARD_QR_NODE_ID)).toBe(false)
+    expect(
+      removeDashboardComposeNode(removedDefaultScene, "dashboard-qr-node-copy"),
+    ).toBe(removedDefaultScene)
   })
 
   it("rewrites z-index values from a top-first layer order while preserving node metadata", () => {

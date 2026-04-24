@@ -103,19 +103,19 @@ describe("QrStudio", () => {
     expect(markup).not.toContain('data-slot="dashboard-settings-stage" class="relative flex min-h-0 flex-1 flex-col overflow-hidden"')
   })
 
-  it("replaces the editor rail with layers and background tabs when edit mode starts enabled", () => {
+  it("replaces the editor rail with page, position, and assets tabs when edit mode starts enabled", () => {
     const markup = renderToStaticMarkup(
       <QrStudio
         initialDashboardEditMode
-        initialDashboardEditSection="background"
+        initialDashboardEditSection="page"
         variant="dashboard"
       />,
     )
 
     expect(markup).toContain('data-slot="dashboard-edit-rail"')
-    expect(markup).toContain("Layers")
-    expect(markup).toContain("Inspector")
-    expect(markup).toContain("Background")
+    expect(markup).toContain("Page")
+    expect(markup).toContain("Position")
+    expect(markup).toContain("Assets")
     expect(markup).toContain('data-testid="dashboard-edit-controls"')
     expect(markup).not.toContain('data-testid="section-rail"')
     expect(markup).not.toContain('data-testid="control-sections"')

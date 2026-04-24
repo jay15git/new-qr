@@ -131,7 +131,88 @@ describe("DashboardComposeSurface interactions", () => {
     expect(getCommittedScene(onSceneChange).nodes[0]?.naturalWidth).toBeCloseTo(400)
   })
 
-  it("renders rotation live but waits until pointer release to commit the scene", () => {
+  it("does not expose qr rotation handles in the compose surface", () => {
+    const scene = createDashboardScene()
+    const onSceneChange = vi.fn()
+    const surface = renderSurface({
+      onSceneChange,
+      scene,
+      selectedNodeId: DASHBOARD_QR_NODE_ID,
+    })
+
+    expect(surface.container.querySelector('[aria-label="Rotate QR"]')).toBeNull()
+    expect(onSceneChange).not.toHaveBeenCalled()
+  })
+
+  it("allows document-mode qr movement without enabling the separate edit toggle", () => {
+    const scene = createDashboardScene()
+    const node = scene.nodes[0]
+    const onSceneChange = vi.fn()
+    const onSelectedNodeChange = vi.fn()
+    const surface = renderSurface({
+      isEditMode: false,
+      onSceneChange,
+      onSelectedNodeChange,
+      scene,
+      selectedNodeId: null,
+      surfaceMode: "document",
+    })
+
+    dispatchPointer(surface.getNode(DASHBOARD_QR_NODE_ID), "pointerdown", {
+      clientX: 120,
+      clientY: 120,
+    })
+    dispatchPointer(window, "pointermove", {
+      clientX: 180,
+      clientY: 180,
+    })
+    flushAnimationFrames()
+    dispatchPointer(window, "pointerup", {
+      clientX: 180,
+      clientY: 180,
+    })
+
+    expect(onSelectedNodeChange).toHaveBeenCalledWith(DASHBOARD_QR_NODE_ID)
+    expect(onSceneChange).toHaveBeenCalledTimes(1)
+    expect(getCommittedScene(onSceneChange).nodes[0]?.x).toBe(node.x + 60)
+    expect(getCommittedScene(onSceneChange).nodes[0]?.y).toBe(node.y + 60)
+  })
+
+  it("allows direct qr movement without enabling edit mode when opted in", () => {
+    const scene = createDashboardScene()
+    const node = scene.nodes[0]
+    const onSceneChange = vi.fn()
+    const onSelectedNodeChange = vi.fn()
+    const surface = renderSurface({
+      allowDirectNodeTransforms: true,
+      isEditMode: false,
+      onSceneChange,
+      onSelectedNodeChange,
+      scene,
+      selectedNodeId: null,
+    })
+
+    dispatchPointer(surface.getNode(DASHBOARD_QR_NODE_ID), "pointerdown", {
+      clientX: 120,
+      clientY: 120,
+    })
+    dispatchPointer(window, "pointermove", {
+      clientX: 180,
+      clientY: 180,
+    })
+    flushAnimationFrames()
+    dispatchPointer(window, "pointerup", {
+      clientX: 180,
+      clientY: 180,
+    })
+
+    expect(onSelectedNodeChange).toHaveBeenCalledWith(DASHBOARD_QR_NODE_ID)
+    expect(onSceneChange).toHaveBeenCalledTimes(1)
+    expect(getCommittedScene(onSceneChange).nodes[0]?.x).toBe(node.x + 60)
+    expect(getCommittedScene(onSceneChange).nodes[0]?.y).toBe(node.y + 60)
+  })
+
+  it("allows direct qr rotation without enabling edit mode when opted in", () => {
     const scene = createDashboardScene()
     const node = scene.nodes[0]
     const width = node.naturalWidth * node.scale
@@ -140,31 +221,29 @@ describe("DashboardComposeSurface interactions", () => {
     const centerY = node.y + height * 0.5
     const onSceneChange = vi.fn()
     const surface = renderSurface({
+      allowDirectNodeTransforms: true,
+      isEditMode: false,
       onSceneChange,
       scene,
       selectedNodeId: DASHBOARD_QR_NODE_ID,
     })
 
     dispatchPointer(getRequiredElement(surface.container, '[aria-label="Rotate QR"]'), "pointerdown", {
-      clientX: centerX + width,
-      clientY: centerY,
+      clientX: centerX,
+      clientY: centerY - 160,
     })
     dispatchPointer(window, "pointermove", {
-      clientX: centerX,
-      clientY: centerY + height,
+      clientX: centerX + 160,
+      clientY: centerY,
     })
     flushAnimationFrames()
-
-    expect(onSceneChange).not.toHaveBeenCalled()
-    expect(surface.getNode(DASHBOARD_QR_NODE_ID).style.transform).toContain("rotate(90deg)")
-
     dispatchPointer(window, "pointerup", {
-      clientX: centerX,
-      clientY: centerY + height,
+      clientX: centerX + 160,
+      clientY: centerY,
     })
 
     expect(onSceneChange).toHaveBeenCalledTimes(1)
-    expect(getCommittedScene(onSceneChange).nodes[0]?.rotation).toBe(90)
+    expect(getCommittedScene(onSceneChange).nodes[0]?.rotation).toBeCloseTo(90)
   })
 
   it("resyncs the draft canvas from incoming scene props when no interaction is active", () => {

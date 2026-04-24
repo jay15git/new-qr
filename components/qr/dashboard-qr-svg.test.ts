@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
 
+const applyExtensionSpy = vi.fn()
+
 vi.mock("qr-code-styling", () => ({
   default: class MockQRCodeStyling {
     private options: { height?: number; width?: number }
@@ -8,7 +10,9 @@ vi.mock("qr-code-styling", () => ({
       this.options = options
     }
 
-    applyExtension() {}
+    applyExtension() {
+      applyExtensionSpy()
+    }
 
     async getRawData() {
       return Buffer.from(
@@ -51,6 +55,7 @@ describe("dashboard qr svg helpers", () => {
   })
 
   it("uses the canonical qr size when building the dashboard payload", async () => {
+    applyExtensionSpy.mockClear()
     const state = setSquareQrSize(createDefaultQrStudioState(), 512)
 
     const payload = await buildDashboardQrNodePayload(state)
@@ -58,5 +63,23 @@ describe("dashboard qr svg helpers", () => {
     expect(payload.naturalWidth).toBe(512)
     expect(payload.naturalHeight).toBe(512)
     expect(payload.markup).toContain("<svg")
+    expect(applyExtensionSpy).not.toHaveBeenCalled()
+  })
+
+  it("applies the shared svg extension path when corner gradient alignment is needed", async () => {
+    applyExtensionSpy.mockClear()
+    const state = createDefaultQrStudioState()
+    state.cornersDotGradient = {
+      ...state.cornersDotGradient,
+      enabled: true,
+      rotation: Math.PI / 3,
+      type: "linear",
+    }
+
+    const payload = await buildDashboardQrNodePayload(state)
+
+    expect(payload.naturalWidth).toBe(state.width)
+    expect(payload.naturalHeight).toBe(state.height)
+    expect(applyExtensionSpy).toHaveBeenCalledTimes(1)
   })
 })

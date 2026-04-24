@@ -4,7 +4,6 @@ import { type ReactNode } from "react"
 import type {
   CornerDotType,
   CornerSquareType,
-  DrawType,
   ErrorCorrectionLevel,
   TypeNumber,
 } from "qr-code-styling"
@@ -53,7 +52,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { QR_SIZE_MAX, QR_SIZE_MIN } from "@/components/qr/qr-studio-state"
 
-type DraftingBinaryColorMode = "solid" | "gradient"
+export type DraftingBinaryColorMode = "solid" | "gradient"
+export type DraftingBackgroundColorMode = DraftingBinaryColorMode | "transparent"
 type DraftingAssetSourceMode = "upload" | "url"
 type DraftingBrandIconCategoryFilter = BrandIconCategory | "all"
 
@@ -70,41 +70,12 @@ const DRAFTING_BRAND_ICON_CATEGORY_OPTIONS: Array<{
   { label: "Web", value: "web" },
 ]
 
-const DRAFTING_RENDER_TYPE_OPTIONS: Array<{
-  description: string
-  summary: string
-  value: DrawType
-}> = [
-  {
-    description: "Crisp vector export",
-    summary: "Best for print, scaling, and editor-friendly assets.",
-    value: "svg",
-  },
-  {
-    description: "Pixel canvas output",
-    summary: "Useful when your downstream flow expects a raster-backed render.",
-    value: "canvas",
-  },
-]
-
 export function DraftingContentTab({
   contentValue,
-  margin,
-  renderType,
-  size,
   onContentValueChange,
-  onMarginChange,
-  onRenderTypeChange,
-  onSizeChange,
 }: {
   contentValue: string
-  margin: number
-  renderType: DrawType
-  size: number
   onContentValueChange: (value: string) => void
-  onMarginChange: (value: number) => void
-  onRenderTypeChange: (value: DrawType) => void
-  onSizeChange: (value: number) => void
 }) {
   return (
     <div data-slot="drafting-content-tab" className="min-w-0 space-y-4">
@@ -138,98 +109,6 @@ export function DraftingContentTab({
         </p>
       </div>
 
-      <section data-slot="drafting-render-type-section" className="space-y-3">
-        <div className="space-y-1">
-          <h3 className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#111111]">
-            Render type
-          </h3>
-          <p className="text-[0.72rem] leading-5 text-[#00000066]">
-            Choose the output engine before exporting or embedding the QR.
-          </p>
-        </div>
-
-        <div
-          data-slot="drafting-render-type-grid"
-          role="radiogroup"
-          aria-label="Render type"
-          className="grid grid-cols-2 gap-3"
-        >
-          {DRAFTING_RENDER_TYPE_OPTIONS.map((option) => {
-            const isSelected = option.value === renderType
-
-            return (
-              <OptionCard
-                key={option.value}
-                checked={isSelected}
-                className={cn(
-                  "w-full gap-2",
-                  "[&_[data-slot=option-card]]:h-full [&_[data-slot=option-card]]:min-h-[128px] [&_[data-slot=option-card]]:w-full",
-                  "[&_[data-slot=option-card-motif]]:size-full",
-                  "[&_[data-slot=option-card-label]]:sr-only",
-                )}
-                label={option.value === "svg" ? "SVG" : "Canvas"}
-                motifClassName="size-full px-3 py-3"
-                name="drafting-render-type"
-                onSelect={() => onRenderTypeChange(option.value)}
-                value={option.value}
-              >
-                <span className="flex size-full flex-col items-start justify-between gap-3 text-left">
-                  <span
-                    className={cn(
-                      "text-[1.2rem] font-semibold uppercase leading-none tracking-[0.12em]",
-                      isSelected ? "text-[#111111]" : "text-[#00000073]",
-                    )}
-                  >
-                    {option.value}
-                  </span>
-                  <span className="space-y-1">
-                    <span
-                      className={cn(
-                        "block text-[0.68rem] font-semibold uppercase tracking-[0.14em]",
-                        isSelected ? "text-[#111111]" : "text-[#0000008A]",
-                      )}
-                    >
-                      {option.description}
-                    </span>
-                    <span
-                      className={cn(
-                        "block text-[0.72rem] leading-5",
-                        isSelected ? "text-[#111111]" : "text-[#00000066]",
-                      )}
-                    >
-                      {option.summary}
-                    </span>
-                  </span>
-                </span>
-              </OptionCard>
-            )
-          })}
-        </div>
-      </section>
-
-      <DraftingSliderField
-        dataSlot="drafting-content-margin-slider"
-        formatValue={(value) => `${Math.round(value)} px`}
-        id="drafting-qr-margin"
-        label="Outer margin"
-        max={80}
-        min={0}
-        step={1}
-        value={margin}
-        onChange={onMarginChange}
-      />
-
-      <DraftingSliderField
-        dataSlot="drafting-content-size-slider"
-        formatValue={(value) => `${Math.round(value)} px`}
-        id="drafting-qr-size"
-        label="Size"
-        max={QR_SIZE_MAX}
-        min={QR_SIZE_MIN}
-        step={1}
-        value={size}
-        onChange={onSizeChange}
-      />
     </div>
   )
 }
@@ -251,6 +130,48 @@ export function DraftingStyleTab({
       value={value}
       onValueChange={onValueChange}
     />
+  )
+}
+
+export function DraftingSizeTab({
+  margin,
+  size,
+  onMarginChange,
+  onSizeChange,
+}: {
+  margin: number
+  size: number
+  onMarginChange: (value: number) => void
+  onSizeChange: (value: number) => void
+}) {
+  return (
+    <div data-slot="drafting-style-size-tab" className="min-w-0 space-y-3">
+      <DraftingSliderField
+        dataSlot="drafting-style-margin-slider"
+        description="Controls the quiet zone around the QR so scanners have room to detect the code."
+        formatValue={(value) => `${Math.round(value)} px`}
+        id="drafting-qr-margin"
+        label="Outer margin"
+        max={80}
+        min={0}
+        step={1}
+        value={margin}
+        onChange={onMarginChange}
+      />
+
+      <DraftingSliderField
+        dataSlot="drafting-style-size-slider"
+        description="Scales the QR canvas before export while keeping the code square."
+        formatValue={(value) => `${Math.round(value)} px`}
+        id="drafting-qr-size"
+        label="Size"
+        max={QR_SIZE_MAX}
+        min={QR_SIZE_MIN}
+        step={1}
+        value={size}
+        onChange={onSizeChange}
+      />
+    </div>
   )
 }
 
@@ -512,6 +433,49 @@ export function DraftingBackgroundColorTab({
         onGradientChange,
         onModeChange,
         onSolidColorChange,
+        solidColor,
+      })}
+      mode={mode}
+      openItemIds={openItemIds}
+      onModeChange={onModeChange}
+      onOpenItemIdsChange={onOpenItemIdsChange}
+    />
+  )
+}
+
+export function DraftingEditBackgroundColorTab({
+  gradient,
+  mode,
+  openItemIds,
+  solidColor,
+  onGradientChange,
+  onModeChange,
+  onOpenItemIdsChange,
+  onSolidColorChange,
+  onTransparentSelect,
+}: {
+  gradient: StudioGradient
+  mode: DraftingBackgroundColorMode
+  onGradientChange: (gradient: StudioGradient) => void
+  onModeChange: (mode: DraftingBackgroundColorMode) => void
+  onOpenItemIdsChange: (itemIds: string[]) => void
+  onSolidColorChange: (value: string) => void
+  onTransparentSelect: () => void
+  openItemIds: string[]
+  solidColor: string
+}) {
+  return (
+    <DraftingColorAccordion
+      dataSlot="drafting-background-color-accordion"
+      items={buildDraftingBackgroundColorItems({
+        gradient,
+        gradientIdPrefix: "drafting-background-gradient",
+        gradientTitle: "Background gradient",
+        includeTransparent: true,
+        onGradientChange,
+        onModeChange,
+        onSolidColorChange,
+        onTransparentSelect,
         solidColor,
       })}
       mode={mode}
@@ -989,6 +953,56 @@ function buildDraftingSolidGradientItems({
   ]
 }
 
+function buildDraftingBackgroundColorItems({
+  gradient,
+  gradientIdPrefix,
+  gradientTitle,
+  includeTransparent,
+  onGradientChange,
+  onModeChange,
+  onSolidColorChange,
+  onTransparentSelect,
+  solidColor,
+}: {
+  gradient: StudioGradient
+  gradientIdPrefix: string
+  gradientTitle: string
+  includeTransparent: boolean
+  onGradientChange: (gradient: StudioGradient) => void
+  onModeChange: (mode: DraftingBackgroundColorMode) => void
+  onSolidColorChange: (value: string) => void
+  onTransparentSelect?: () => void
+  solidColor: string
+}) {
+  const items: Array<{
+    id: DraftingBackgroundColorMode
+    title: string
+    content: ReactNode
+    onSelect?: () => void
+  }> = buildDraftingSolidGradientItems({
+    gradient,
+    gradientIdPrefix,
+    gradientTitle,
+    onGradientChange,
+    onModeChange,
+    onSolidColorChange,
+    solidColor,
+  })
+
+  if (!includeTransparent) {
+    return items
+  }
+
+  items.push({
+    id: "transparent",
+    title: "Transparent",
+    content: null,
+    onSelect: onTransparentSelect,
+  })
+
+  return items
+}
+
 function buildDraftingAssetSourceItems({
   onModeChange,
   onRemoteUrlChange,
@@ -1059,6 +1073,7 @@ function DraftingColorAccordion<TMode extends string>({
     id: TMode
     title: string
     content: ReactNode
+    onSelect?: () => void
   }>
   mode: TMode
   onModeChange: (mode: TMode) => void
@@ -1100,7 +1115,10 @@ function DraftingColorAccordion<TMode extends string>({
                   "px-4 py-3 no-underline hover:no-underline focus-visible:ring-0",
                   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-black/55",
                 )}
-                onClick={() => onModeChange(item.id)}
+                onClick={() => {
+                  onModeChange(item.id)
+                  item.onSelect?.()
+                }}
               >
                 <span className="flex min-w-0 items-center gap-3">
                   <span
@@ -1275,7 +1293,9 @@ function DraftingOptionCardGrid<TValue extends string>({
             onSelect={() => onValueChange(option.value)}
             value={option.value}
           >
-            <StylePreview previewKind={previewKind} value={option.value} />
+            <span className="flex items-center justify-center [&_svg]:size-[6.5rem]">
+              <StylePreview previewKind={previewKind} value={option.value} />
+            </span>
           </OptionCard>
         ))}
       </div>

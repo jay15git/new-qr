@@ -17,53 +17,34 @@ const QR_PAYLOAD = {
 }
 
 describe("DashboardEditControls", () => {
-  it("renders the draggable layers list in top-first stack order without inline inspector controls", () => {
+  it("renders the page controls with document presets and margin settings", () => {
     const scene = createLayeredScene()
 
     const markup = renderToStaticMarkup(
       <DashboardEditControls
-        activeSection="layers"
+        activeSection="page"
         onComposeImageUploadError={vi.fn()}
         onComposeImageUploadSuccess={vi.fn()}
         onSceneChange={vi.fn()}
         onSelectedNodeChange={vi.fn()}
         scene={scene}
-        selectedNodeId="image-node"
+        selectedNodeId={DASHBOARD_QR_NODE_ID}
       />,
     )
 
-    const imageIndex = markup.indexOf('data-node-id="image-node"')
-    const qrIndex = markup.indexOf(`data-node-id="${DASHBOARD_QR_NODE_ID}"`)
-
-    expect(markup).toContain('data-slot="dashboard-edit-layers"')
-    expect(markup).toContain('data-slot="dashboard-compose-image-upload"')
-    expect(markup).toContain('data-slot="draggable-list"')
-    expect(markup).toContain('data-slot="draggable-list-handle"')
-    expect(markup).toContain("Add image")
-    expect(markup).toContain("Layers")
-    expect(markup).toContain("Composition stack")
-    expect(markup).toContain("QR Code")
-    expect(markup).toContain("Landscape")
-    expect(imageIndex).toBeGreaterThan(-1)
-    expect(qrIndex).toBeGreaterThan(imageIndex)
-    expect(qrIndex).toBeGreaterThan(-1)
-    expect(markup).toContain("Hide")
-    expect(markup).toContain("Lock")
-    expect(markup).toContain("Delete")
-    expect(markup).not.toContain("Delete layer")
-    expect(markup).not.toContain("Blend mode")
-    expect(markup).not.toContain("Scale")
-    expect(markup).not.toContain("Layer name")
-    expect(markup).not.toContain("Move up")
-    expect(markup).not.toContain("Move down")
+    expect(markup).toContain('data-slot="dashboard-edit-page"')
+    expect(markup).toContain("Letter portrait")
+    expect(markup).toContain("A4 portrait")
+    expect(markup).toContain("Safe margin")
+    expect(markup).toContain("Guides on")
   })
 
-  it("shows a disabled reorder affordance when only one layer exists", () => {
+  it("renders the qr placement controls in the position tab", () => {
     const scene = upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD)
 
     const markup = renderToStaticMarkup(
       <DashboardEditControls
-        activeSection="layers"
+        activeSection="position"
         onComposeImageUploadError={vi.fn()}
         onComposeImageUploadSuccess={vi.fn()}
         onSceneChange={vi.fn()}
@@ -73,18 +54,19 @@ describe("DashboardEditControls", () => {
       />,
     )
 
-    expect(markup).toContain('data-slot="draggable-list-handle"')
-    expect(markup).toContain('data-disabled="true"')
-    expect(markup).toContain("Hide")
-    expect(markup).toContain("Lock")
+    expect(markup).toContain('data-slot="dashboard-edit-position"')
+    expect(markup).toContain("Center QR")
+    expect(markup).toContain("Fit to page")
+    expect(markup).toContain("Align on page")
+    expect(markup).toContain("QR size")
   })
 
-  it("renders the selected layer controls in the inspector tab", () => {
+  it("renders the uploaded asset controls in the assets tab", () => {
     const scene = createLayeredScene()
 
     const markup = renderToStaticMarkup(
       <DashboardEditControls
-        activeSection="inspector"
+        activeSection="assets"
         onComposeImageUploadError={vi.fn()}
         onComposeImageUploadSuccess={vi.fn()}
         onSceneChange={vi.fn()}
@@ -94,20 +76,19 @@ describe("DashboardEditControls", () => {
       />,
     )
 
-    expect(markup).toContain('data-slot="dashboard-edit-inspector"')
-    expect(markup).toContain('data-slot="dashboard-layer-inspector"')
-    expect(markup).toContain("Inspector")
+    expect(markup).toContain('data-slot="dashboard-edit-assets"')
+    expect(markup).toContain('data-slot="dashboard-compose-image-upload"')
+    expect(markup).toContain("Add image")
+    expect(markup).toContain("1 assets")
     expect(markup).toContain("Landscape")
-    expect(markup).toContain("Blend mode")
-    expect(markup).toContain("Scale")
-    expect(markup).toContain("Delete layer")
-    expect(markup).not.toContain("Composition stack")
+    expect(markup).toContain("Delete")
+    expect(markup).not.toContain("Blend mode")
   })
 
-  it("shows an empty state when the inspector has no selected layer", () => {
+  it("shows an empty state when the assets tab has no uploaded images", () => {
     const markup = renderToStaticMarkup(
       <DashboardEditControls
-        activeSection="inspector"
+        activeSection="assets"
         onComposeImageUploadError={vi.fn()}
         onComposeImageUploadSuccess={vi.fn()}
         onSceneChange={vi.fn()}
@@ -117,15 +98,15 @@ describe("DashboardEditControls", () => {
       />,
     )
 
-    expect(markup).toContain('data-slot="dashboard-edit-inspector"')
+    expect(markup).toContain('data-slot="dashboard-edit-assets"')
     expect(markup).toContain(
-      "Select a layer in Layers to edit its name, transform, opacity, and blend mode.",
+      "No extra assets yet. The QR remains the only exported object on the page.",
     )
-    expect(markup).not.toContain('data-slot="dashboard-layer-inspector"')
+    expect(markup).not.toContain("Landscape")
   })
 
-  it("renders solid, gradient, and transparent canvas background options", () => {
-    const scene = upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD)
+  it("maps the legacy background section to the new page controls", () => {
+    const scene = createLayeredScene()
 
     const markup = renderToStaticMarkup(
       <DashboardEditControls
@@ -139,11 +120,96 @@ describe("DashboardEditControls", () => {
       />,
     )
 
-    expect(markup).toContain('data-slot="dashboard-edit-background"')
-    expect(markup).toContain("Solid")
-    expect(markup).toContain("Gradient")
-    expect(markup).toContain("Transparent")
-    expect(markup).toMatch(/data-item-id="transparent"[^>]*data-state="open"/)
+    expect(markup).toContain('data-slot="dashboard-edit-page"')
+    expect(markup).toContain("Letter portrait")
+  })
+
+  it("uses the drafting page layout for the /new page panel", () => {
+    const scene = upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD)
+
+    const markup = renderToStaticMarkup(
+      <DashboardEditControls
+        activeSection="page"
+        appearance="drafting"
+        onComposeImageUploadError={vi.fn()}
+        onComposeImageUploadSuccess={vi.fn()}
+        onSceneChange={vi.fn()}
+        onSelectedNodeChange={vi.fn()}
+        scene={scene}
+        selectedNodeId={scene.nodes[0]?.id ?? null}
+      />,
+    )
+
+    expect(markup).toContain('data-slot="dashboard-edit-page"')
+    expect(markup).toContain("Page")
+    expect(markup).toContain("Safe margin")
+    expect(markup).toContain("Guides on")
+  })
+
+  it("uses the streamlined drafting layout for the /new assets panel", () => {
+    const scene = createLayeredScene()
+
+    const markup = renderToStaticMarkup(
+      <DashboardEditControls
+        activeSection="assets"
+        appearance="drafting"
+        onComposeImageUploadError={vi.fn()}
+        onComposeImageUploadSuccess={vi.fn()}
+        onSceneChange={vi.fn()}
+        onSelectedNodeChange={vi.fn()}
+        scene={scene}
+        selectedNodeId="image-node"
+      />,
+    )
+
+    expect(markup).toContain('data-slot="dashboard-edit-assets"')
+    expect(markup).toContain('data-slot="dashboard-compose-image-upload"')
+    expect(markup).toContain('data-slot="drafting-layer-upload-button"')
+    expect(markup).toContain("Add image")
+    expect(markup).toContain("Choose file")
+    expect(markup).toContain("Assets")
+    expect(markup).toContain("1 assets")
+    expect(markup).not.toContain("Composition stack")
+  })
+
+  it("renders all qr and image nodes in the drafting layers panel", () => {
+    const scene = addDashboardComposeImageNode(
+      upsertDashboardQrNode(
+        upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD),
+        {
+          ...QR_PAYLOAD,
+          name: "QR Code 2",
+        },
+        "dashboard-qr-node-copy",
+      ),
+      {
+        id: "image-node",
+        imageUrl: "/landscape.png",
+        name: "Landscape",
+        naturalHeight: 600,
+        naturalWidth: 1200,
+      },
+    )
+
+    const markup = renderToStaticMarkup(
+      <DashboardEditControls
+        activeSection="layers"
+        appearance="drafting"
+        onComposeImageUploadError={vi.fn()}
+        onComposeImageUploadSuccess={vi.fn()}
+        onSceneChange={vi.fn()}
+        onSelectedNodeChange={vi.fn()}
+        scene={scene}
+        selectedNodeId="dashboard-qr-node-copy"
+      />,
+    )
+
+    expect(markup).toContain('data-slot="dashboard-edit-layers"')
+    expect(markup).toContain("3 total")
+    expect(markup).toContain("QR Code")
+    expect(markup).toContain("QR Code 2")
+    expect(markup).toContain("Landscape")
+    expect(markup).toContain("Selected")
   })
 })
 

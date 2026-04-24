@@ -2,9 +2,11 @@ import type { StudioGradient } from "@/components/qr/qr-studio-state"
 
 export const DASHBOARD_COMPOSE_CANVAS_SIZE = 960
 export const DASHBOARD_COMPOSE_CANVAS_HEIGHT = 640
+export const DASHBOARD_DOCUMENT_DEFAULT_MARGIN = 72
 export const DASHBOARD_QR_STAGE_FIT_RATIO = 0.74
 export const DASHBOARD_IMAGE_STAGE_FIT_RATIO = 0.48
 export const DASHBOARD_QR_NODE_ID = "dashboard-qr-node"
+export const DASHBOARD_QR_NODE_ID_PREFIX = `${DASHBOARD_QR_NODE_ID}-`
 const MIN_DASHBOARD_ZOOM = 0.2
 const MAX_DASHBOARD_ZOOM = 4
 
@@ -14,6 +16,22 @@ export type DashboardComposeBackground = {
   mode: DashboardComposeBackgroundMode
   color: string
   gradient: StudioGradient
+}
+
+export type DashboardDocumentPresetId = "letter" | "a4" | "square" | "social-post"
+
+export type DashboardDocumentPreset = {
+  id: DashboardDocumentPresetId
+  title: string
+  width: number
+  height: number
+}
+
+export type DashboardComposeDocument = {
+  backgroundColor: string
+  margin: number
+  presetId: DashboardDocumentPresetId
+  showGuides: boolean
 }
 
 export type DashboardComposeCamera = {
@@ -57,11 +75,13 @@ export type DashboardComposeScene = {
     height: number
   }
   camera: DashboardComposeCamera
+  document: DashboardComposeDocument
   nodes: DashboardComposeNode[]
 }
 
 export type DashboardQrNodePayload = {
   markup: string
+  name?: string
   naturalWidth: number
   naturalHeight: number
 }
@@ -86,6 +106,42 @@ const DEFAULT_BACKGROUND: DashboardComposeBackground = {
   gradient: createDefaultDashboardComposeBackgroundGradient(),
 }
 
+export const DASHBOARD_DOCUMENT_PRESETS: DashboardDocumentPreset[] = [
+  {
+    id: "letter",
+    title: "Letter portrait",
+    width: 816,
+    height: 1056,
+  },
+  {
+    id: "a4",
+    title: "A4 portrait",
+    width: 794,
+    height: 1123,
+  },
+  {
+    id: "square",
+    title: "Square",
+    width: 1080,
+    height: 1080,
+  },
+  {
+    id: "social-post",
+    title: "Social post",
+    width: 1080,
+    height: 1350,
+  },
+] as const
+
+export const DEFAULT_DASHBOARD_DOCUMENT_PRESET_ID: DashboardDocumentPresetId = "letter"
+
+const DEFAULT_DOCUMENT: DashboardComposeDocument = {
+  backgroundColor: "#ffffff",
+  margin: DASHBOARD_DOCUMENT_DEFAULT_MARGIN,
+  presetId: DEFAULT_DASHBOARD_DOCUMENT_PRESET_ID,
+  showGuides: true,
+}
+
 export function createDashboardComposeScene(): DashboardComposeScene {
   return {
     background: normalizeDashboardComposeBackground(DEFAULT_BACKGROUND),
@@ -94,8 +150,32 @@ export function createDashboardComposeScene(): DashboardComposeScene {
       height: DASHBOARD_COMPOSE_CANVAS_HEIGHT,
     },
     camera: { ...DEFAULT_CAMERA },
+    document: normalizeDashboardComposeDocument(DEFAULT_DOCUMENT),
     nodes: [],
   }
+}
+
+export function createDashboardDocumentComposeScene(): DashboardComposeScene {
+  const preset = getDashboardDocumentPreset(DEFAULT_DASHBOARD_DOCUMENT_PRESET_ID)
+
+  return {
+    ...createDashboardComposeScene(),
+    canvasSize: {
+      width: preset.width,
+      height: preset.height,
+    },
+    document: normalizeDashboardComposeDocument({
+      ...DEFAULT_DOCUMENT,
+      presetId: preset.id,
+    }),
+  }
+}
+
+export function getDashboardDocumentPreset(presetId: DashboardDocumentPresetId) {
+  return (
+    DASHBOARD_DOCUMENT_PRESETS.find((preset) => preset.id === presetId) ??
+    DASHBOARD_DOCUMENT_PRESETS[0]
+  )
 }
 
 export function clampDashboardZoom(zoom: number) {
@@ -147,6 +227,93 @@ export function updateDashboardComposeBackground(
       ...patch,
     }),
   }
+}
+
+export function updateDashboardComposeDocument(
+  scene: DashboardComposeScene,
+  patch: Partial<DashboardComposeDocument>,
+) {
+  return {
+    ...scene,
+    document: normalizeDashboardComposeDocument({
+      ...scene.document,
+      ...patch,
+    }),
+  }
+}
+
+export function applyDashboardDocumentPreset(
+  scene: DashboardComposeScene,
+  presetId: DashboardDocumentPresetId,
+) {
+  const preset = getDashboardDocumentPreset(presetId)
+  const previousWidth = scene.canvasSize.width
+  const previousHeight = scene.canvasSize.height
+  const nextCanvasSize = {
+    width: preset.width,
+    height: preset.height,
+  }
+  const widthRatio = previousWidth > 0 ? preset.width / previousWidth : 1
+  const heightRatio = previousHeight > 0 ? preset.height / previousHeight : 1
+
+  return {
+    ...scene,
+    canvasSize: nextCanvasSize,
+    document: normalizeDashboardComposeDocument({
+      ...scene.document,
+      presetId,
+    }),
+    nodes: scene.nodes.map((node) =>
+      normalizeDashboardComposeNode({
+        ...node,
+        x: node.x * widthRatio,
+        y: node.y * heightRatio,
+      }),
+    ),
+  }
+}
+
+export function centerDashboardComposeNode(
+  scene: DashboardComposeScene,
+  nodeId = DASHBOARD_QR_NODE_ID,
+) {
+  const node = getDashboardComposeNode(scene, nodeId)
+
+  if (!node) {
+    return scene
+  }
+
+  const width = node.naturalWidth * node.scale
+  const height = node.naturalHeight * node.scale
+
+  return updateDashboardComposeNode(scene, node.id, {
+    x: (scene.canvasSize.width - width) * 0.5,
+    y: (scene.canvasSize.height - height) * 0.5,
+  })
+}
+
+export function fitDashboardQrNodeToDocument(
+  scene: DashboardComposeScene,
+  nodeId = DASHBOARD_QR_NODE_ID,
+) {
+  const node = getDashboardComposeNode(scene, nodeId)
+
+  if (!node || node.kind !== "svg") {
+    return scene
+  }
+
+  const availableWidth = Math.max(1, scene.canvasSize.width - scene.document.margin * 2)
+  const availableHeight = Math.max(1, scene.canvasSize.height - scene.document.margin * 2)
+  const fitSize = Math.min(availableWidth, availableHeight)
+  const nextSize = Math.max(1, Math.round(fitSize / node.scale))
+  const renderedSize = nextSize * node.scale
+
+  return updateDashboardComposeNode(scene, node.id, {
+    naturalHeight: nextSize,
+    naturalWidth: nextSize,
+    x: (scene.canvasSize.width - renderedSize) * 0.5,
+    y: (scene.canvasSize.height - renderedSize) * 0.5,
+  })
 }
 
 export function updateDashboardComposeNode(
@@ -225,7 +392,7 @@ export function removeDashboardComposeNode(
   scene: DashboardComposeScene,
   nodeId: string,
 ) {
-  if (nodeId === DASHBOARD_QR_NODE_ID) {
+  if (isDashboardQrNodeId(nodeId) && getDashboardQrNodes(scene).length <= 1) {
     return scene
   }
 
@@ -289,17 +456,32 @@ export function getDashboardComposeNode(
   return scene.nodes.find((node) => node.id === nodeId)
 }
 
+export function isDashboardQrNodeId(nodeId: string | null | undefined) {
+  return (
+    nodeId === DASHBOARD_QR_NODE_ID ||
+    Boolean(nodeId?.startsWith(DASHBOARD_QR_NODE_ID_PREFIX))
+  )
+}
+
+export function getDashboardQrNodes(scene: DashboardComposeScene) {
+  return scene.nodes.filter(
+    (node): node is DashboardComposeSvgNode =>
+      node.kind === "svg" && isDashboardQrNodeId(node.id),
+  )
+}
+
 export function upsertDashboardQrNode(
   scene: DashboardComposeScene,
   payload: DashboardQrNodePayload,
+  nodeId = DASHBOARD_QR_NODE_ID,
 ) {
-  const existingNode = getDashboardComposeNode(scene)
-  const otherNodes = scene.nodes.filter((node) => node.id !== DASHBOARD_QR_NODE_ID)
+  const existingNode = getDashboardComposeNode(scene, nodeId)
+  const otherNodes = scene.nodes.filter((node) => node.id !== nodeId)
 
   if (!existingNode || existingNode.kind !== "svg" || !hasFiniteTransform(existingNode)) {
     return {
       ...scene,
-      nodes: [...otherNodes, createDashboardQrNode(scene, payload)],
+      nodes: [...otherNodes, createDashboardQrNode(scene, payload, nodeId)],
     }
   }
 
@@ -316,6 +498,7 @@ export function upsertDashboardQrNode(
       ...otherNodes,
       normalizeDashboardComposeNode({
         ...existingNode,
+        name: payload.name ?? existingNode.name,
         originalSvgMarkup: payload.markup,
         naturalWidth: payload.naturalWidth,
         naturalHeight: payload.naturalHeight,
@@ -333,8 +516,11 @@ export function resetDashboardComposeCamera(scene: DashboardComposeScene) {
   }
 }
 
-export function resetDashboardQrNodeTransform(scene: DashboardComposeScene) {
-  const node = getDashboardComposeNode(scene)
+export function resetDashboardQrNodeTransform(
+  scene: DashboardComposeScene,
+  nodeId = DASHBOARD_QR_NODE_ID,
+) {
+  const node = getDashboardComposeNode(scene, nodeId)
 
   if (!node || node.kind !== "svg") {
     return scene
@@ -343,13 +529,14 @@ export function resetDashboardQrNodeTransform(scene: DashboardComposeScene) {
   return {
     ...scene,
     nodes: [
-      ...scene.nodes.filter((existingNode) => existingNode.id !== DASHBOARD_QR_NODE_ID),
+      ...scene.nodes.filter((existingNode) => existingNode.id !== node.id),
       normalizeDashboardComposeNode({
         ...createDashboardQrNode(scene, {
           markup: node.originalSvgMarkup,
+          name: node.name,
           naturalHeight: node.naturalHeight,
           naturalWidth: node.naturalWidth,
-        }),
+        }, node.id),
         zIndex: node.zIndex,
       }),
     ],
@@ -359,6 +546,7 @@ export function resetDashboardQrNodeTransform(scene: DashboardComposeScene) {
 function createDashboardQrNode(
   scene: DashboardComposeScene,
   payload: DashboardQrNodePayload,
+  nodeId = DASHBOARD_QR_NODE_ID,
 ): DashboardComposeSvgNode {
   const fitScale = Math.min(
     (scene.canvasSize.width * DASHBOARD_QR_STAGE_FIT_RATIO) / payload.naturalWidth,
@@ -369,9 +557,9 @@ function createDashboardQrNode(
   const height = payload.naturalHeight * scale
 
   return normalizeDashboardComposeNode({
-    id: DASHBOARD_QR_NODE_ID,
+    id: nodeId,
     kind: "svg",
-    name: "QR Code",
+    name: payload.name ?? "QR Code",
     originalSvgMarkup: payload.markup,
     naturalWidth: payload.naturalWidth,
     naturalHeight: payload.naturalHeight,
@@ -442,6 +630,21 @@ function normalizeDashboardComposeBackground(
       enabled: background.mode === "gradient",
     },
     mode: background.mode ?? "transparent",
+  }
+}
+
+function normalizeDashboardComposeDocument(
+  document: DashboardComposeDocument,
+): DashboardComposeDocument {
+  const preset = getDashboardDocumentPreset(
+    document.presetId ?? DEFAULT_DASHBOARD_DOCUMENT_PRESET_ID,
+  )
+
+  return {
+    backgroundColor: document.backgroundColor || DEFAULT_DOCUMENT.backgroundColor,
+    margin: clamp(document.margin, 0, Math.min(preset.width, preset.height) * 0.45),
+    presetId: preset.id,
+    showGuides: document.showGuides ?? DEFAULT_DOCUMENT.showGuides,
   }
 }
 

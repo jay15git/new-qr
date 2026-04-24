@@ -26,6 +26,9 @@ describe("QrPreviewCard", () => {
     expect(markup).toContain("qr-code-styling")
     expect(markup).toContain("new-qr")
     expect(markup).toContain("SVG")
+    expect(markup).toContain(
+      "Export format is chosen per button. The preview renderer badge above does not change the downloaded file type.",
+    )
   })
 
   it("renders the direct qr mount stage in the settings card", () => {
