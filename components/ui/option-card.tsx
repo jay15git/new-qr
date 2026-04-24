@@ -34,7 +34,7 @@ export function OptionCard({
       data-slot="option-card-root"
       data-state={checked ? "checked" : "unchecked"}
       className={cn(
-        "group flex cursor-pointer flex-col items-center gap-3 text-center",
+        "group relative flex cursor-pointer flex-col items-center gap-3 text-center",
         isCompact ? "w-[76px] gap-2.5" : "w-[108px]",
         className,
       )}
@@ -42,7 +42,7 @@ export function OptionCard({
       <input
         aria-label={label}
         checked={checked}
-        className="peer sr-only"
+        className="peer absolute inset-0 z-10 cursor-pointer opacity-0"
         data-slot="option-card-input"
         name={name}
         onChange={onSelect}

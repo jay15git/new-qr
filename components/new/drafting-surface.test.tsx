@@ -1169,6 +1169,17 @@ describe("DraftingSurface", () => {
     expect(
       brandTab.querySelectorAll('[data-slot="drafting-brand-icon-option"]').length,
     ).toBeGreaterThan(0)
+
+    const brandInput = getRequiredElement(
+      brandTab,
+      'input[data-slot="option-card-input"][aria-label="Instagram"]',
+    )
+    const brandInputRoot = brandInput.closest('[data-slot="option-card-root"]')
+
+    expect(brandInput.className).toContain("absolute")
+    expect(brandInput.className).toContain("inset-0")
+    expect(brandInput.className).not.toContain("sr-only")
+    expect(brandInputRoot?.className).toContain("relative")
   })
 
   it("selects a drafting brand icon and marks preset mode active", () => {
