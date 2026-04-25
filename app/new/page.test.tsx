@@ -19,6 +19,7 @@ describe("new page", () => {
 
     expect(isValidElement(page)).toBe(true)
     expect(page.type).toBe("main")
+    expect(page.props.className).toContain("bg-white")
 
     const surface = page.props.children
 

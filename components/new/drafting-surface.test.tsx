@@ -170,6 +170,9 @@ describe("DraftingSurface", () => {
     const headerContent = getRequiredElement(header, "div")
 
     expect(surface.container.querySelector('[data-slot="drafting-surface"]')).not.toBeNull()
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').className,
+    ).toContain("bg-white")
     expect(header).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="drafting-nav"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="drafting-scroll-area"]')).not.toBeNull()

@@ -1460,7 +1460,7 @@ export function DraftingSurface() {
       data-qr-size={selectedQrSize}
       data-qr-type-number={selectedTypeNumber}
       data-slot="drafting-surface"
-      className="relative grid h-[calc(100dvh-3rem)] w-full grid-rows-[var(--new-header-height)_minmax(0,1fr)] overflow-visible border border-dashed border-black/18 bg-[#f4f6f8] shadow-[0_18px_48px_rgba(15,23,42,0.06)] sm:h-[calc(100dvh-4rem)] [--new-header-height:3.875rem] [--new-left-rail-width:clamp(6.25rem,10vw,7.5rem)] [--new-middle-rail-width:clamp(15rem,24vw,18.5rem)]"
+      className="relative grid h-[calc(100dvh-3rem)] w-full grid-rows-[var(--new-header-height)_minmax(0,1fr)] overflow-visible border border-dashed border-black/18 bg-white shadow-[0_18px_48px_rgba(15,23,42,0.06)] sm:h-[calc(100dvh-4rem)] [--new-header-height:3.875rem] [--new-left-rail-width:clamp(6.25rem,10vw,7.5rem)] [--new-middle-rail-width:clamp(15rem,24vw,18.5rem)]"
       data-compose-edit-mode={isComposeEditMode ? "true" : "false"}
       data-compose-selected-node-id={selectedComposeNodeId ?? ""}
     >
@@ -1502,8 +1502,8 @@ export function DraftingSurface() {
                   data-slot="drafting-download-trigger"
                   disabled={!canDownload}
                   type="button"
-                  variant="outline"
-                  className="rounded-[10px] border-black/8 bg-white/70 px-3.5 text-[#111111] shadow-[0_10px_30px_rgba(15,23,42,0.08)] backdrop-blur-sm hover:border-black/14 hover:bg-white/85"
+                  variant="ghost"
+                  className="h-8 rounded-[6px] border-0 bg-black/[0.03] px-3.5 text-black/45 shadow-[0_0_18px_rgba(0,0,0,0.08),0_2px_6px_rgba(0,0,0,0.03)] transition-[background-color,box-shadow,transform,color] duration-150 ease-out hover:-translate-y-px hover:bg-black/[0.06] hover:text-black/72 hover:shadow-[0_0_24px_rgba(0,0,0,0.10),0_4px_10px_rgba(0,0,0,0.06)] active:translate-y-0 active:bg-black/[0.07] active:shadow-[0_0_14px_rgba(0,0,0,0.07),0_2px_6px_rgba(0,0,0,0.04)]"
                 >
                   <DownloadIcon data-icon="inline-start" />
                   Download

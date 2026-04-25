@@ -325,6 +325,8 @@
 }
 
 [data-slot="drafting-surface"] {
+  --drafting-dash-size: 15px;
+  --drafting-dash-cycle: 30px;
   border-color: transparent;
   isolation: isolate;
 }
@@ -336,10 +338,26 @@
   z-index: 30;
   pointer-events: none;
   background-image:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.12) 0 18px, transparent 18px 30px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.12) 0 18px, transparent 18px 30px),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.12) 0 18px, transparent 18px 30px),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.12) 0 18px, transparent 18px 30px);
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.12) 0 var(--drafting-dash-size),
+      transparent var(--drafting-dash-size) var(--drafting-dash-cycle)
+    ),
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.12) 0 var(--drafting-dash-size),
+      transparent var(--drafting-dash-size) var(--drafting-dash-cycle)
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.12) 0 var(--drafting-dash-size),
+      transparent var(--drafting-dash-size) var(--drafting-dash-cycle)
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.12) 0 var(--drafting-dash-size),
+      transparent var(--drafting-dash-size) var(--drafting-dash-cycle)
+    );
   background-position:
     top left,
     bottom left,
@@ -351,10 +369,10 @@
     repeat-y,
     repeat-y;
   background-size:
-    30px 1px,
-    30px 1px,
-    1px 30px,
-    1px 30px;
+    var(--drafting-dash-cycle) 1px,
+    var(--drafting-dash-cycle) 1px,
+    1px var(--drafting-dash-cycle),
+    1px var(--drafting-dash-cycle);
 }
 
 [data-slot="drafting-divider-horizontal"] {
@@ -374,11 +392,11 @@
   transform: translateY(-0.5px);
   background-image: repeating-linear-gradient(
     90deg,
-    rgba(0, 0, 0, 0.12) 0 18px,
-    transparent 18px 30px
+    rgba(0, 0, 0, 0.12) 0 var(--drafting-dash-size),
+    transparent var(--drafting-dash-size) var(--drafting-dash-cycle)
   );
   background-repeat: repeat-x;
-  background-size: 30px 1px;
+  background-size: var(--drafting-dash-cycle) 1px;
 }
 
 [data-slot="drafting-divider-vertical"]::before {
@@ -390,9 +408,9 @@
   transform: translateX(-0.5px);
   background-image: repeating-linear-gradient(
     180deg,
-    rgba(0, 0, 0, 0.12) 0 18px,
-    transparent 18px 30px
+    rgba(0, 0, 0, 0.12) 0 var(--drafting-dash-size),
+    transparent var(--drafting-dash-size) var(--drafting-dash-cycle)
   );
   background-repeat: repeat-y;
-  background-size: 1px 30px;
+  background-size: 1px var(--drafting-dash-cycle);
 }
