@@ -1071,14 +1071,9 @@ export function QrControlSections({
                 onChange={(event) =>
                   setState((current) => ({ ...current, data: event.target.value }))
                 }
-                className="min-h-28"
+                className="min-h-28 !border-transparent shadow-none focus-visible:!border-transparent aria-invalid:!border-destructive"
                 placeholder="https://example.com/invite"
               />
-              {!isDashboardMode ? (
-                <FieldDescription>
-                  The value you enter here is encoded directly into the QR code.
-                </FieldDescription>
-              ) : null}
               {contentError ? <FieldError>{contentError}</FieldError> : null}
             </Field>
 

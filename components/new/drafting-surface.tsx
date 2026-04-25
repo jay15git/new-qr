@@ -89,14 +89,10 @@ import {
 import { DownloadIcon, LinkIcon, PieChart, Settings, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { ModeToggle } from "@/components/mode-toggle"
 import { OptionCard } from "@/components/ui/option-card"
 import {
@@ -192,7 +188,7 @@ const DRAFTING_PANEL_TAB_TRIGGER_CLASS_NAME =
 const DEFAULT_DRAFTING_STUDIO_STATE = createDefaultQrStudioState()
 const IGNORE_DRAFTING_UPLOAD_ERROR: (message: string) => void = () => undefined
 const DEFAULT_DOWNLOAD_NAME = "new-qr-studio"
-const DRAFTING_DOWNLOAD_EXTENSIONS = ["png", "svg", "webp", "jpeg"] as const satisfies ReadonlyArray<
+const DRAFTING_DOWNLOAD_EXTENSIONS = ["svg", "png", "webp", "jpeg"] as const satisfies ReadonlyArray<
   FileExtension
 >
 const DRAFTING_RASTER_EXPORT_PRESETS = [
@@ -1495,8 +1491,8 @@ export function DraftingSurface() {
         <div className="flex h-full items-center justify-end">
           <div data-slot="drafting-header-actions" className="flex h-full items-center gap-2.5">
             <ModeToggle className="border-black/8 bg-white/70 text-black shadow-[0_10px_30px_rgba(15,23,42,0.08)] backdrop-blur-sm" />
-            <Dialog>
-              <DialogTrigger asChild>
+            <Popover>
+              <PopoverTrigger asChild>
                 <Button
                   aria-label="Open download options"
                   data-slot="drafting-download-trigger"
@@ -1508,37 +1504,30 @@ export function DraftingSurface() {
                   <DownloadIcon data-icon="inline-start" />
                   Download
                 </Button>
-              </DialogTrigger>
-              <DialogContent
-                data-slot="drafting-download-dialog"
-                className="flex max-h-[calc(100dvh-2rem)] max-w-3xl flex-col overflow-hidden rounded-[16px] border border-black/10 bg-[#FFFFFFF2] p-0 text-[#111111] shadow-[0_30px_80px_rgba(15,23,42,0.18),0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-xl"
+              </PopoverTrigger>
+              <PopoverContent
+                align="end"
+                data-slot="drafting-download-popover"
+                sideOffset={10}
+                className="flex max-h-[calc(100dvh-5rem)] w-[min(27rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-[12px] border border-black/10 bg-[#FFFFFFF2] p-0 text-[#111111] shadow-[0_24px_64px_rgba(15,23,42,0.18),0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-xl"
               >
                 <div className="flex min-h-0 flex-1 flex-col">
-                  <DialogHeader className="border-b border-black/8 px-5 pb-4 pt-5 text-left">
-                    <DialogTitle className="text-xl font-semibold tracking-[-0.01em] text-[#111111]">
-                      Download QR
-                    </DialogTitle>
-                    <DialogDescription className="text-sm leading-6 text-[#00000073]">
-                      Choose the file type and output size for this QR export.
-                    </DialogDescription>
-                  </DialogHeader>
-
                   <div
                     data-slot="drafting-download-dialog-body"
-                    className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4"
+                    className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-2.5"
                   >
                     <div
                       data-slot="drafting-download-target-section"
-                      className="flex flex-col gap-2 rounded-[12px] border border-black/8 bg-black/[0.02] p-3"
+                      className="flex flex-col gap-2.5"
                     >
-                      <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#111111]">
+                      <p className="text-[0.74rem] font-bold uppercase tracking-[0.08em] text-[#111111]">
                         Target
                       </p>
                       <div
                         data-slot="drafting-download-target-list"
                         role="radiogroup"
                         aria-label="Download target"
-                        className="grid grid-cols-2 gap-2 sm:grid-cols-3"
+                        className="grid grid-cols-2 gap-1 sm:grid-cols-3"
                       >
                         {draftingDownloadTargetOptions.map((target) => {
                           const isSelected = target.id === selectedDownloadTarget
@@ -1549,19 +1538,19 @@ export function DraftingSurface() {
                               checked={isSelected}
                               className={cn(
                                 "w-full gap-0",
-                                "[&_[data-slot=option-card]]:h-full [&_[data-slot=option-card]]:min-h-[64px] [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:rounded-[10px]",
+                                "[&_[data-slot=option-card]]:h-full [&_[data-slot=option-card]]:min-h-[36px] [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:rounded-[7px]",
                                 "[&_[data-slot=option-card-motif]]:size-full",
                                 "[&_[data-slot=option-card-label]]:sr-only",
                               )}
                               label={`Download ${target.label}`}
-                              motifClassName="size-full px-3 py-2"
+                              motifClassName="size-full px-1.5 py-1"
                               name="drafting-download-target"
                               onSelect={() => setSelectedDownloadTarget(target.id)}
                               value={target.id}
                             >
                               <span
                                 className={cn(
-                                  "flex min-w-0 items-center justify-center text-center text-[0.8rem] font-semibold leading-tight",
+                                  "flex min-w-0 items-center justify-center text-center text-[0.7rem] font-semibold leading-tight",
                                   isSelected ? "text-[#111111]" : "text-[#00000073]",
                                 )}
                               >
@@ -1575,16 +1564,16 @@ export function DraftingSurface() {
 
                     <div
                       data-slot="drafting-download-format-section"
-                      className="flex flex-col gap-2 rounded-[12px] border border-black/8 bg-black/[0.02] p-3"
+                      className="flex flex-col gap-2.5"
                     >
-                      <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#111111]">
+                      <p className="text-[0.74rem] font-bold uppercase tracking-[0.08em] text-[#111111]">
                         Format
                       </p>
                       <div
                         data-slot="drafting-download-format-grid"
                         role="radiogroup"
                         aria-label="Download format"
-                        className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+                        className="grid grid-cols-4 gap-1"
                       >
                         {DRAFTING_DOWNLOAD_EXTENSIONS.map((extension) => {
                           const isSelected = extension === selectedDownloadExtension
@@ -1595,12 +1584,12 @@ export function DraftingSurface() {
                               checked={isSelected}
                               className={cn(
                                 "w-full gap-0",
-                                "[&_[data-slot=option-card]]:h-full [&_[data-slot=option-card]]:min-h-[64px] [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:rounded-[10px]",
+                                "[&_[data-slot=option-card]]:h-full [&_[data-slot=option-card]]:min-h-[36px] [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:rounded-[7px]",
                                 "[&_[data-slot=option-card-motif]]:size-full",
                                 "[&_[data-slot=option-card-label]]:sr-only",
                               )}
                               label={`Export ${extension.toUpperCase()}`}
-                              motifClassName="size-full px-3 py-2.5"
+                              motifClassName="size-full px-1.5 py-1"
                               name="drafting-download-format"
                               onSelect={() => setSelectedDownloadExtension(extension)}
                               value={extension}
@@ -1608,7 +1597,7 @@ export function DraftingSurface() {
                               <span className="flex size-full items-center justify-center text-center">
                                 <span
                                   className={cn(
-                                    "text-[0.8rem] font-semibold uppercase leading-none tracking-[0.16em]",
+                                    "text-[0.68rem] font-semibold uppercase leading-none tracking-[0.1em]",
                                     isSelected ? "text-[#111111]" : "text-[#00000073]",
                                   )}
                                 >
@@ -1624,28 +1613,33 @@ export function DraftingSurface() {
                     {isDraftingRasterExport ? (
                       <div
                         data-slot="drafting-raster-preset-section"
-                        className="flex flex-col gap-3 rounded-[12px] border border-black/8 bg-black/[0.02] p-3"
+                        className="flex flex-col gap-2.5"
                       >
-                        <div className="flex items-center justify-between gap-3">
-                          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#111111]">
-                            Quality preset
-                          </p>
-                          <div
-                            data-slot="drafting-raster-quality-value"
-                            className="rounded-full border border-black/8 bg-white px-2.5 py-1 text-xs font-medium text-[#111111]"
-                          >
-                            {selectedRasterExportPreset.sizePx} px
-                          </div>
-                        </div>
+                        <p className="text-[0.74rem] font-bold uppercase tracking-[0.08em] text-[#111111]">
+                          Quality preset
+                        </p>
 
                         <div
                           data-slot="drafting-raster-preset-grid"
                           role="radiogroup"
                           aria-label="Raster quality preset"
-                          className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3"
+                          className="grid grid-cols-1 gap-1 sm:grid-cols-2"
                         >
                           {DRAFTING_RASTER_EXPORT_PRESETS.map((preset) => {
                             const isSelected = preset.id === selectedRasterExportPresetId
+                            const selectedPresetExportSizeLabel =
+                              isSelected &&
+                              effectiveDraftingExportSizePreview.status === "pending"
+                                ? "Calculating size"
+                                : isSelected &&
+                                    effectiveDraftingExportSizePreview.status === "ready"
+                                  ? formatDashboardExportFileSize(
+                                      effectiveDraftingExportSizePreview.blobSizeBytes,
+                                    )
+                                  : isSelected &&
+                                      effectiveDraftingExportSizePreview.status === "error"
+                                    ? "Size unavailable"
+                                    : null
 
                             return (
                               <OptionCard
@@ -1653,29 +1647,56 @@ export function DraftingSurface() {
                                 checked={isSelected}
                                 className={cn(
                                   "w-full items-stretch gap-0 text-left",
-                                  "[&_[data-slot=option-card]]:h-full [&_[data-slot=option-card]]:min-h-[104px] [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:justify-start [&_[data-slot=option-card]]:rounded-[10px]",
+                                  "[&_[data-slot=option-card]]:h-full [&_[data-slot=option-card]]:min-h-[58px] [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:justify-start [&_[data-slot=option-card]]:rounded-[7px]",
                                   "[&_[data-slot=option-card-motif]]:size-full [&_[data-slot=option-card-motif]]:justify-start",
                                   "[&_[data-slot=option-card-label]]:sr-only",
                                 )}
                                 label={`Use ${preset.label} export preset`}
-                                motifClassName="size-full px-3.5 py-3"
+                                motifClassName="size-full px-2 py-1.5"
                                 name="drafting-raster-quality-preset"
                                 onSelect={() => setSelectedRasterExportPresetId(preset.id)}
                                 value={preset.id}
                               >
-                                <span className="flex min-w-0 flex-col gap-1 text-left">
-                                  <span
-                                    className={cn(
-                                      "text-[0.82rem] font-semibold leading-tight",
-                                      isSelected ? "text-[#111111]" : "text-[#000000A6]",
-                                    )}
-                                  >
-                                    {preset.label}
+                                <span className="flex min-w-0 flex-col gap-0.5 text-left">
+                                  <span className="flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0.5">
+                                    <span
+                                      className={cn(
+                                        "text-[0.74rem] font-semibold leading-tight",
+                                        isSelected ? "text-[#111111]" : "text-[#000000A6]",
+                                      )}
+                                    >
+                                      {preset.label}
+                                    </span>
+                                    <span
+                                      aria-hidden="true"
+                                      className="text-[0.68rem] leading-4 text-[#00000052]"
+                                    >
+                                      •
+                                    </span>
+                                    <span
+                                      data-slot="drafting-raster-quality-value"
+                                      className="text-[0.68rem] font-semibold leading-4 text-[#111111]"
+                                    >
+                                      {preset.sizePx} × {preset.sizePx}
+                                    </span>
+                                    {selectedPresetExportSizeLabel ? (
+                                      <>
+                                        <span
+                                          aria-hidden="true"
+                                          className="text-[0.68rem] leading-4 text-[#00000052]"
+                                        >
+                                          •
+                                        </span>
+                                        <span
+                                          data-slot="drafting-raster-calculated-size"
+                                          className="text-[0.68rem] font-semibold leading-4 text-[#111111]"
+                                        >
+                                          {selectedPresetExportSizeLabel}
+                                        </span>
+                                      </>
+                                    ) : null}
                                   </span>
-                                  <span className="text-sm font-semibold leading-none text-[#111111]">
-                                    {preset.sizePx} × {preset.sizePx}
-                                  </span>
-                                  <span className="text-[0.72rem] leading-5 text-[#00000073]">
+                                  <span className="text-[0.68rem] leading-4 text-[#00000073]">
                                     {preset.primaryUse}
                                   </span>
                                 </span>
@@ -1684,45 +1705,16 @@ export function DraftingSurface() {
                           })}
                         </div>
 
-                        <div
-                          data-slot="drafting-export-size-preview"
-                          className="rounded-[10px] border border-black/8 bg-white/70 px-3 py-2 text-sm text-[#00000073]"
-                        >
-                          {effectiveDraftingExportSizePreview.status === "pending" ? (
-                            <p>Calculating size…</p>
-                          ) : effectiveDraftingExportSizePreview.status === "ready" ? (
-                            <p>
-                              {formatDashboardExportFileSize(
-                                effectiveDraftingExportSizePreview.blobSizeBytes,
-                              )}{" "}
-                              <span className="text-[#00000052]">
-                                {effectiveDraftingExportSizePreview.width} ×{" "}
-                                {effectiveDraftingExportSizePreview.height}
-                              </span>
-                            </p>
-                          ) : effectiveDraftingExportSizePreview.status === "error" ? (
-                            <p>
-                              Size preview unavailable. Output will target{" "}
-                              {selectedRasterExportPreset.sizePx} ×{" "}
-                              {selectedRasterExportPreset.sizePx}.
-                            </p>
-                          ) : (
-                            <p>
-                              Each QR exports at {selectedRasterExportPreset.sizePx} ×{" "}
-                              {selectedRasterExportPreset.sizePx}.
-                            </p>
-                          )}
-                        </div>
                       </div>
                     ) : null}
                   </div>
 
-                  <DialogFooter className="shrink-0 border-t border-black/8 bg-[#FFFFFFF2] p-4">
+                  <div className="shrink-0 border-t border-black/8 bg-[#FFFFFFF2] p-3">
                     <Button
                       data-slot="drafting-download-submit"
                       disabled={!canDownload}
                       type="button"
-                      className="h-10 w-full rounded-[10px] bg-[#111111] text-white shadow-[0_14px_32px_rgba(17,17,17,0.18)] transition-[background-color,box-shadow,transform] hover:-translate-y-px hover:bg-[#1d1d1d] hover:shadow-[0_18px_36px_rgba(17,17,17,0.22)] active:translate-y-0 sm:w-auto"
+                      className="h-9 w-full rounded-[8px] bg-[#111111] text-white shadow-[0_14px_32px_rgba(17,17,17,0.18)] transition-[background-color,box-shadow,transform] hover:-translate-y-px hover:bg-[#1d1d1d] hover:shadow-[0_18px_36px_rgba(17,17,17,0.22)] active:translate-y-0"
                       onClick={() => {
                         void handleDownload()
                       }}
@@ -1730,10 +1722,10 @@ export function DraftingSurface() {
                       <DownloadIcon data-icon="inline-start" />
                       Download {selectedDownloadExtension.toUpperCase()}
                     </Button>
-                  </DialogFooter>
+                  </div>
                 </div>
-              </DialogContent>
-            </Dialog>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </header>

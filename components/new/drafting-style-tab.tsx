@@ -101,14 +101,11 @@ export function DraftingContentTab({
         <Textarea
           id="drafting-qr-data"
           aria-label="Text or URL"
-          className="mt-3 min-h-28 border-[#00000012] bg-white/90 px-3.5 py-3 text-sm text-[#111111] shadow-none placeholder:text-[#00000052] focus-visible:border-black/35 focus-visible:ring-0"
+          className="mt-3 min-h-28 border-0 bg-white/70 px-3.5 py-3 text-sm text-[#111111] shadow-none placeholder:text-[#00000052] focus-visible:border-0 focus-visible:ring-0"
           placeholder="https://example.com/invite"
           value={contentValue}
           onChange={(event) => onContentValueChange(event.target.value)}
         />
-        <p className="mt-2 text-[0.72rem] leading-5 text-[#00000066]">
-          The value you enter here is encoded directly into the QR code.
-        </p>
       </div>
 
     </div>

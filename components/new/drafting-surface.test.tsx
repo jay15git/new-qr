@@ -43,24 +43,14 @@ vi.mock("@/components/qr/dashboard-raster-export", () => ({
   ) => measureDashboardRasterExportSpy(...args),
 }))
 
-vi.mock("@/components/ui/dialog", () => ({
-  Dialog: ({ children }: { children: ReactNode }) => <div data-slot="dialog">{children}</div>,
-  DialogContent: ({ children, ...props }: { children: ReactNode }) => (
+vi.mock("@/components/ui/popover", () => ({
+  Popover: ({ children }: { children: ReactNode }) => (
+    <div data-slot="popover">{children}</div>
+  ),
+  PopoverContent: ({ children, ...props }: { children: ReactNode }) => (
     <div {...props}>{children}</div>
   ),
-  DialogDescription: ({ children, ...props }: { children: ReactNode }) => (
-    <p {...props}>{children}</p>
-  ),
-  DialogFooter: ({ children, ...props }: { children: ReactNode }) => (
-    <div {...props}>{children}</div>
-  ),
-  DialogHeader: ({ children, ...props }: { children: ReactNode }) => (
-    <div {...props}>{children}</div>
-  ),
-  DialogTitle: ({ children, ...props }: { children: ReactNode }) => (
-    <h2 {...props}>{children}</h2>
-  ),
-  DialogTrigger: ({ children }: { children: ReactNode }) => children,
+  PopoverTrigger: ({ children }: { children: ReactNode }) => children,
 }))
 
 vi.mock("@/components/unlumen-ui/slider", () => ({
@@ -267,7 +257,6 @@ describe("DraftingSurface", () => {
     expect(pngExportInput.checked).toBe(true)
     expect(jpegExportInput.checked).toBe(false)
     expect(webpExportInput.checked).toBe(false)
-    expect(surface.container.textContent).toContain("Download QR")
     expect(surface.container.textContent).toContain("Download PNG")
     expect(surface.container.textContent).toContain("Web & Social")
     expect(surface.container.textContent).toContain("1024 × 1024")
@@ -291,7 +280,7 @@ describe("DraftingSurface", () => {
       expect(surface.container.textContent).toContain("Quality preset")
       expect(surface.container.textContent).toContain("Web & Social")
       expect(surface.container.textContent).toContain("1024 × 1024")
-      expect(surface.container.textContent).toContain("Calculating size…")
+      expect(surface.container.textContent).toContain("Calculating size")
 
       await act(async () => {
         vi.advanceTimersByTime(250)
@@ -309,7 +298,9 @@ describe("DraftingSurface", () => {
         }),
       )
       expect(surface.container.textContent).toContain("182000 B")
-      expect(surface.container.textContent).toContain("1280 × 1280")
+      expect(
+        surface.container.querySelector('[data-slot="drafting-export-size-preview"]'),
+      ).toBeNull()
     },
     15000,
   )
@@ -615,7 +606,10 @@ describe("DraftingSurface", () => {
       }),
     )
     expect(surface.container.textContent).toContain("182000 B")
-    expect(surface.container.textContent).toContain("1280 × 1280")
+    expect(
+      surface.container.querySelector('[data-slot="drafting-raster-calculated-size"]')
+        ?.textContent,
+    ).toContain("182000 B")
 
     await act(async () => {
       activateElement(getButtonByExactText(surface.container, "Download PNG"))
