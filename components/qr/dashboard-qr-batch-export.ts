@@ -3,6 +3,7 @@ import type { FileExtension } from "qr-code-styling"
 
 import type { DashboardComposeSvgNode } from "@/components/qr/dashboard-compose-scene"
 import {
+  clampDashboardRasterTargetSize,
   getDashboardRasterExportScale,
   getLossyRasterEncoderQuality,
   type DashboardRasterExtension,
@@ -20,6 +21,7 @@ type DashboardQrNodeExportOptions = {
   name: string
   node: DashboardQrFileExportNode
   qualityPercent: number
+  targetSizePx?: number
 }
 
 type DashboardQrBatchZipExportOptions = {
@@ -27,6 +29,7 @@ type DashboardQrBatchZipExportOptions = {
   name: string
   nodes: DashboardQrFileExportNode[]
   qualityPercent: number
+  targetSizePx?: number
 }
 
 export async function downloadDashboardQrNodeExport({
@@ -34,11 +37,13 @@ export async function downloadDashboardQrNodeExport({
   name,
   node,
   qualityPercent,
+  targetSizePx,
 }: DashboardQrNodeExportOptions) {
   const result = await renderDashboardQrNodeExport({
     extension,
     node,
     qualityPercent,
+    targetSizePx,
   })
 
   downloadBlob(result.blob, `${sanitizeDownloadFileName(name)}.${extension}`)
@@ -49,6 +54,7 @@ export async function downloadDashboardQrBatchZipExport({
   name,
   nodes,
   qualityPercent,
+  targetSizePx,
 }: DashboardQrBatchZipExportOptions) {
   const files = await Promise.all(
     nodes.map(async (node) => {
@@ -56,6 +62,7 @@ export async function downloadDashboardQrBatchZipExport({
         extension,
         node,
         qualityPercent,
+        targetSizePx,
       })
 
       return {
@@ -92,6 +99,7 @@ async function renderDashboardQrNodeExport({
   extension,
   node,
   qualityPercent,
+  targetSizePx,
 }: Omit<DashboardQrNodeExportOptions, "name">) {
   if (extension === "svg") {
     return {
@@ -102,7 +110,11 @@ async function renderDashboardQrNodeExport({
     }
   }
 
-  const dimensions = getDashboardQrNodeRasterDimensions(node, qualityPercent)
+  const dimensions = getDashboardQrNodeRasterDimensions(
+    node,
+    qualityPercent,
+    targetSizePx,
+  )
   const svgBlob = new Blob([node.originalSvgMarkup], {
     type: "image/svg+xml;charset=utf-8",
   })
@@ -134,7 +146,17 @@ async function renderDashboardQrNodeExport({
 function getDashboardQrNodeRasterDimensions(
   node: DashboardQrFileExportNode,
   qualityPercent: number,
+  targetSizePx?: number,
 ) {
+  if (targetSizePx !== undefined) {
+    const targetSize = clampDashboardRasterTargetSize(targetSizePx)
+
+    return {
+      height: targetSize,
+      width: targetSize,
+    }
+  }
+
   const requestedScale = getDashboardRasterExportScale(qualityPercent)
   const effectiveScale = Math.max(
     1,

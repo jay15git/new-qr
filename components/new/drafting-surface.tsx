@@ -53,20 +53,10 @@ import {
   applyLogoPresetSelection,
 } from "@/components/qr/qr-control-sections"
 import {
-  DEFAULT_DASHBOARD_EDIT_SECTION,
-  type DashboardEditSectionId,
-} from "@/components/qr/dashboard-edit-sections"
-import { DashboardEditControls } from "@/components/qr/dashboard-edit-controls"
-import { DashboardEditRail } from "@/components/qr/dashboard-edit-rail"
-import {
   DEFAULT_QR_EDITOR_SECTION,
   type QrEditorSectionId,
 } from "@/components/qr/qr-sections"
 import { buildDashboardQrNodePayload } from "@/components/qr/dashboard-qr-svg"
-import {
-  downloadDashboardDocumentExport,
-  measureDashboardDocumentExport,
-} from "@/components/qr/dashboard-document-export"
 import {
   downloadDashboardQrBatchZipExport,
   downloadDashboardQrNodeExport,
@@ -79,7 +69,6 @@ import {
 } from "@/components/qr/dashboard-raster-export"
 import { DashboardComposeSurface } from "@/components/qr/dashboard-compose-surface"
 import {
-  addDashboardComposeImageNode,
   createDashboardComposeScene,
   type DashboardComposeScene,
   DASHBOARD_QR_NODE_ID,
@@ -97,22 +86,25 @@ import {
   type StudioDotType,
   type StudioGradient,
 } from "@/components/qr/qr-studio-state"
-import { ChevronDownIcon, DownloadIcon, LinkIcon, PieChart, Settings, Sparkles } from "lucide-react"
+import { DownloadIcon, LinkIcon, PieChart, Settings, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { ModeToggle } from "@/components/mode-toggle"
 import { OptionCard } from "@/components/ui/option-card"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 import {
   ScrollArea,
   ScrollAreaScrollbar,
   ScrollAreaThumb,
   ScrollAreaViewport,
 } from "@/components/ui/scroll-area"
-import { Slider as UnlumenSlider } from "@/components/unlumen-ui/slider"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 
@@ -149,7 +141,6 @@ type DraftingTool = {
   renderIcon: () => ReactNode
 }
 
-type ComposeImageUrlRegistry = Record<string, string>
 type DraftingQrStateByNodeId = Record<string, QrStudioState>
 
 const DRAFTING_PANEL_TABS: Record<DraftingToolId, DraftingPanelTab[]> = {
@@ -201,9 +192,49 @@ const DRAFTING_PANEL_TAB_TRIGGER_CLASS_NAME =
 const DEFAULT_DRAFTING_STUDIO_STATE = createDefaultQrStudioState()
 const IGNORE_DRAFTING_UPLOAD_ERROR: (message: string) => void = () => undefined
 const DEFAULT_DOWNLOAD_NAME = "new-qr-studio"
-const DRAFTING_DOWNLOAD_EXTENSIONS = ["svg", "png", "jpeg", "webp"] as const satisfies ReadonlyArray<
+const DRAFTING_DOWNLOAD_EXTENSIONS = ["png", "svg", "webp", "jpeg"] as const satisfies ReadonlyArray<
   FileExtension
 >
+const DRAFTING_RASTER_EXPORT_PRESETS = [
+  {
+    id: "quick-share",
+    label: "Quick Share",
+    primaryUse: "chat, email, docs, previews",
+    sizePx: 512,
+  },
+  {
+    id: "web-social",
+    label: "Web & Social",
+    primaryUse: "websites, social posts, menus",
+    sizePx: 1024,
+  },
+  {
+    id: "small-print",
+    label: "Small Print",
+    primaryUse: "stickers, cards, table tents",
+    sizePx: 1600,
+  },
+  {
+    id: "flyer-poster",
+    label: "Flyer / Poster",
+    primaryUse: "flyers, posters, nearby signage",
+    sizePx: 2400,
+  },
+  {
+    id: "large-format",
+    label: "Large Format",
+    primaryUse: "banners, wall signs, storefronts",
+    sizePx: 3200,
+  },
+  {
+    id: "max-quality",
+    label: "Max Quality",
+    primaryUse: "designer handoff, archive, safest PNG",
+    sizePx: 4096,
+  },
+] as const
+type DraftingRasterExportPresetId = (typeof DRAFTING_RASTER_EXPORT_PRESETS)[number]["id"]
+const DEFAULT_DRAFTING_RASTER_EXPORT_PRESET_ID: DraftingRasterExportPresetId = "web-social"
 
 function cloneDraftingQrState(state: QrStudioState): QrStudioState {
   return structuredClone(state)
@@ -289,8 +320,6 @@ function PlusMarker({ className }: { className: string }) {
 }
 
 export function DraftingSurface() {
-  const lastNonEditToolRef = useRef<DraftingToolId>(DEFAULT_QR_EDITOR_SECTION)
-  const composeImageUrlsRef = useRef<ComposeImageUrlRegistry>({})
   const [activeTool, setActiveTool] = useState<DraftingToolId>(
     DEFAULT_QR_EDITOR_SECTION,
   )
@@ -429,9 +458,7 @@ export function DraftingSurface() {
       DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.errorCorrectionLevel,
     )
   const [draftingScene, setDraftingScene] = useState(() => createDashboardComposeScene())
-  const [isComposeEditMode, setIsComposeEditMode] = useState(false)
-  const [activeComposeEditSection, setActiveComposeEditSection] =
-    useState<DashboardEditSectionId>(DEFAULT_DASHBOARD_EDIT_SECTION)
+  const isComposeEditMode = false
   const [selectedComposeNodeId, setSelectedComposeNodeId] = useState<string | null>(null)
   const [activeQrNodeId, setActiveQrNodeId] = useState(DASHBOARD_QR_NODE_ID)
   const [qrStateByNodeId, setQrStateByNodeId] = useState<DraftingQrStateByNodeId>(() => ({
@@ -439,9 +466,11 @@ export function DraftingSurface() {
   }))
   const [composeErrorMessage, setComposeErrorMessage] = useState<string | null>(null)
   const [selectedDownloadExtension, setSelectedDownloadExtension] =
-    useState<DraftingDownloadExtension>("svg")
+    useState<DraftingDownloadExtension>("png")
   const [selectedDownloadTarget, setSelectedDownloadTarget] =
-    useState<DraftingDownloadTarget>(getDraftingQrNodeDownloadTarget(DASHBOARD_QR_NODE_ID))
+    useState<DraftingDownloadTarget>("current")
+  const [selectedRasterExportPresetId, setSelectedRasterExportPresetId] =
+    useState<DraftingRasterExportPresetId>(DEFAULT_DRAFTING_RASTER_EXPORT_PRESET_ID)
   const [draftingExportSizePreview, setDraftingExportSizePreview] =
     useState<DraftingExportSizePreview>({
       status: "idle",
@@ -606,22 +635,27 @@ export function DraftingSurface() {
     )
   const canDownload = Boolean(draftingStudioState.data.trim())
   const isDraftingRasterExport = isRasterExportExtension(selectedDownloadExtension)
+  const selectedRasterExportPreset =
+    DRAFTING_RASTER_EXPORT_PRESETS.find(
+      (preset) => preset.id === selectedRasterExportPresetId,
+    ) ?? DRAFTING_RASTER_EXPORT_PRESETS[1]
+  const selectedRasterExportTargetSizePx = isDraftingRasterExport
+    ? selectedRasterExportPreset.sizePx
+    : undefined
   const draftingQrNodes = useMemo(() => getDashboardQrNodes(draftingScene), [draftingScene])
   const activeQrDownloadTarget = getDraftingQrNodeDownloadTarget(activeQrNodeId)
   const shouldMeasureActiveQrExport =
-    !isComposeEditMode && selectedDownloadTarget === activeQrDownloadTarget
+    !isComposeEditMode &&
+    (selectedDownloadTarget === "current" ||
+      selectedDownloadTarget === activeQrDownloadTarget)
   const shouldMeasureFullPageExport =
     isComposeEditMode && selectedDownloadTarget === "current"
   const draftingDownloadTargetOptions = useMemo(
     () => [
-      ...(isComposeEditMode
-        ? [
-            {
-              id: "current" as const,
-              label: "Full page",
-            },
-          ]
-        : []),
+      {
+        id: "current" as const,
+        label: isComposeEditMode ? "Full page" : "Current QR",
+      },
       ...(draftingQrNodes.length > 0 || !isComposeEditMode
         ? [
             {
@@ -859,22 +893,19 @@ export function DraftingSurface() {
   function resetDraftingWorkspace() {
     const nextState = createDefaultQrStudioState()
 
-    lastNonEditToolRef.current = DEFAULT_QR_EDITOR_SECTION
-    cleanupComposeImageUrls(composeImageUrlsRef)
     setActiveTool(DEFAULT_QR_EDITOR_SECTION)
     applyDraftingQrStateToControls(nextState)
     setBrandIconQuery("")
     setBrandIconCategory("all")
-    setIsComposeEditMode(false)
-    setActiveComposeEditSection(DEFAULT_DASHBOARD_EDIT_SECTION)
     setSelectedComposeNodeId(null)
     setActiveQrNodeId(DASHBOARD_QR_NODE_ID)
     setQrStateByNodeId({
       [DASHBOARD_QR_NODE_ID]: cloneDraftingQrState(nextState),
     })
     setComposeErrorMessage(null)
-    setSelectedDownloadExtension("svg")
-    setSelectedDownloadTarget(getDraftingQrNodeDownloadTarget(DASHBOARD_QR_NODE_ID))
+    setSelectedDownloadExtension("png")
+    setSelectedDownloadTarget("current")
+    setSelectedRasterExportPresetId(DEFAULT_DRAFTING_RASTER_EXPORT_PRESET_ID)
     setDraftingExportSizePreview({
       status: "idle",
     })
@@ -888,13 +919,8 @@ export function DraftingSurface() {
         window.clearTimeout(draftingExportPreviewTimeoutRef.current)
       }
 
-      cleanupComposeImageUrls(composeImageUrlsRef)
     }
   }, [])
-
-  useEffect(() => {
-    cleanupRemovedComposeImageUrls(composeImageUrlsRef, draftingScene)
-  }, [draftingScene])
 
   useEffect(() => {
     const requestId = ++dashboardPayloadRequestRef.current
@@ -954,17 +980,12 @@ export function DraftingSurface() {
     })
 
     draftingExportPreviewTimeoutRef.current = window.setTimeout(() => {
-      void (isComposeEditMode
-        ? measureDashboardDocumentExport({
-            extension: selectedDownloadExtension,
-            qualityPercent: draftingStudioState.rasterExportQualityPercent,
-            scene: draftingScene,
-          })
-        : measureDashboardRasterExport({
-            extension: selectedDownloadExtension,
-            qualityPercent: draftingStudioState.rasterExportQualityPercent,
-            state: draftingStudioState,
-          }))
+      void measureDashboardRasterExport({
+        extension: selectedDownloadExtension,
+        qualityPercent: draftingStudioState.rasterExportQualityPercent,
+        state: draftingStudioState,
+        targetSizePx: selectedRasterExportTargetSizePx,
+      })
         .then((result) => {
           if (draftingExportPreviewRequestRef.current !== requestId) {
             return
@@ -999,33 +1020,10 @@ export function DraftingSurface() {
     isDraftingRasterExport,
     selectedDownloadExtension,
     selectedDownloadTarget,
+    selectedRasterExportTargetSizePx,
     shouldMeasureActiveQrExport,
     shouldMeasureFullPageExport,
   ])
-
-  async function handleComposeImageUploadSuccess(file: File) {
-    try {
-      const dataUrl = await readFileAsDataUrl(file)
-      const naturalSize = await loadComposeImageDimensions(dataUrl)
-      const nodeId = `dashboard-image-node-${crypto.randomUUID()}`
-      const nextImageUrl = dataUrl
-
-      composeImageUrlsRef.current[nodeId] = nextImageUrl
-      setDraftingScene((current) =>
-        addDashboardComposeImageNode(current, {
-          id: nodeId,
-          imageUrl: nextImageUrl,
-          name: getComposeImageLayerName(file.name),
-          naturalHeight: naturalSize.height,
-          naturalWidth: naturalSize.width,
-        }),
-      )
-      handleComposeNodeSelection(nodeId)
-      setComposeErrorMessage(null)
-    } catch {
-      setComposeErrorMessage("The image layer could not be added. Try another image.")
-    }
-  }
 
   async function handleAddQrCode() {
     const sourceQrNodeId =
@@ -1076,8 +1074,6 @@ export function DraftingSurface() {
       setActiveQrNodeId(nextNodeId)
       applyDraftingQrStateToControls(sourceState)
       setSelectedComposeNodeId(nextNodeId)
-      setIsComposeEditMode(true)
-      setActiveComposeEditSection("layers")
       setComposeErrorMessage(null)
     } catch {
       setComposeErrorMessage("The QR layer could not be added. Try again.")
@@ -1112,10 +1108,14 @@ export function DraftingSurface() {
           name: DEFAULT_DOWNLOAD_NAME,
           nodes: qrNodes,
           qualityPercent: draftingStudioState.rasterExportQualityPercent,
+          targetSizePx: selectedRasterExportTargetSizePx,
         })
-      } else if (selectedDownloadTarget.startsWith("qr:")) {
+      } else if (selectedDownloadTarget === "current" || selectedDownloadTarget.startsWith("qr:")) {
         const nextScene = await buildDraftingSceneWithFreshActiveQrNode()
-        const nodeId = selectedDownloadTarget.slice("qr:".length)
+        const nodeId =
+          selectedDownloadTarget === "current"
+            ? activeQrNodeId
+            : selectedDownloadTarget.slice("qr:".length)
         const qrNode = getDashboardQrNodes(nextScene).find((node) => node.id === nodeId)
 
         if (!qrNode) {
@@ -1127,13 +1127,7 @@ export function DraftingSurface() {
           name: qrNode.name,
           node: qrNode,
           qualityPercent: draftingStudioState.rasterExportQualityPercent,
-        })
-      } else if (isComposeEditMode) {
-        await downloadDashboardDocumentExport({
-          extension: selectedDownloadExtension,
-          name: DEFAULT_DOWNLOAD_NAME,
-          qualityPercent: draftingStudioState.rasterExportQualityPercent,
-          scene: draftingScene,
+          targetSizePx: selectedRasterExportTargetSizePx,
         })
       } else if (isRasterExportExtension(selectedDownloadExtension)) {
         await downloadDashboardRasterExport({
@@ -1141,6 +1135,7 @@ export function DraftingSurface() {
           name: DEFAULT_DOWNLOAD_NAME,
           qualityPercent: draftingStudioState.rasterExportQualityPercent,
           state: draftingStudioState,
+          targetSizePx: selectedRasterExportTargetSizePx,
         })
       } else {
         await downloadDraftingSvgExport({
@@ -1466,7 +1461,6 @@ export function DraftingSurface() {
       data-qr-type-number={selectedTypeNumber}
       data-slot="drafting-surface"
       className="relative grid h-[calc(100dvh-3rem)] w-full grid-rows-[var(--new-header-height)_minmax(0,1fr)] overflow-visible border border-dashed border-black/18 bg-[#f4f6f8] shadow-[0_18px_48px_rgba(15,23,42,0.06)] sm:h-[calc(100dvh-4rem)] [--new-header-height:3.875rem] [--new-left-rail-width:clamp(6.25rem,10vw,7.5rem)] [--new-middle-rail-width:clamp(15rem,24vw,18.5rem)]"
-      data-compose-edit-section={activeComposeEditSection}
       data-compose-edit-mode={isComposeEditMode ? "true" : "false"}
       data-compose-selected-node-id={selectedComposeNodeId ?? ""}
     >
@@ -1501,8 +1495,8 @@ export function DraftingSurface() {
         <div className="flex h-full items-center justify-end">
           <div data-slot="drafting-header-actions" className="flex h-full items-center gap-2.5">
             <ModeToggle className="border-black/8 bg-white/70 text-black shadow-[0_10px_30px_rgba(15,23,42,0.08)] backdrop-blur-sm" />
-            <Popover>
-              <PopoverTrigger asChild>
+            <Dialog>
+              <DialogTrigger asChild>
                 <Button
                   aria-label="Open download options"
                   data-slot="drafting-download-trigger"
@@ -1513,184 +1507,233 @@ export function DraftingSurface() {
                 >
                   <DownloadIcon data-icon="inline-start" />
                   Download
-                  <ChevronDownIcon data-icon="inline-end" />
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                align="end"
-                className="w-[19rem] rounded-[14px] border border-black/10 bg-[#FFFFFFF2] p-0 text-[#111111] shadow-[0_24px_60px_rgba(15,23,42,0.16),0_4px_14px_rgba(15,23,42,0.06)] backdrop-blur-xl"
+              </DialogTrigger>
+              <DialogContent
+                data-slot="drafting-download-dialog"
+                className="flex max-h-[calc(100dvh-2rem)] max-w-3xl flex-col overflow-hidden rounded-[16px] border border-black/10 bg-[#FFFFFFF2] p-0 text-[#111111] shadow-[0_30px_80px_rgba(15,23,42,0.18),0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-xl"
               >
-                <div data-slot="drafting-download-popover" className="space-y-3 p-3">
-                  <div
-                    data-slot="drafting-download-target-section"
-                    className="space-y-2 rounded-[12px] border border-black/8 bg-black/[0.02] p-3"
-                  >
-                    <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#111111]">
-                      Target
-                    </p>
-                    <div
-                      data-slot="drafting-download-target-list"
-                      role="radiogroup"
-                      aria-label="Download target"
-                      className="grid grid-cols-2 gap-2"
-                    >
-                      {draftingDownloadTargetOptions.map((target) => {
-                        const isSelected = target.id === selectedDownloadTarget
+                <div className="flex min-h-0 flex-1 flex-col">
+                  <DialogHeader className="border-b border-black/8 px-5 pb-4 pt-5 text-left">
+                    <DialogTitle className="text-xl font-semibold tracking-[-0.01em] text-[#111111]">
+                      Download QR
+                    </DialogTitle>
+                    <DialogDescription className="text-sm leading-6 text-[#00000073]">
+                      Choose the file type and output size for this QR export.
+                    </DialogDescription>
+                  </DialogHeader>
 
-                        return (
-                          <OptionCard
-                            key={target.id}
-                            checked={isSelected}
-                            className={cn(
-                              "w-full gap-0",
-                              "[&_[data-slot=option-card]]:h-full [&_[data-slot=option-card]]:min-h-[68px] [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:rounded-[10px]",
-                              "[&_[data-slot=option-card-motif]]:size-full",
-                              "[&_[data-slot=option-card-label]]:sr-only",
-                            )}
-                            label={`Download ${target.label}`}
-                            motifClassName="size-full px-3 py-2"
-                            name="drafting-download-target"
-                            onSelect={() => setSelectedDownloadTarget(target.id)}
-                            value={target.id}
-                          >
-                            <span
+                  <div
+                    data-slot="drafting-download-dialog-body"
+                    className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4"
+                  >
+                    <div
+                      data-slot="drafting-download-target-section"
+                      className="flex flex-col gap-2 rounded-[12px] border border-black/8 bg-black/[0.02] p-3"
+                    >
+                      <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#111111]">
+                        Target
+                      </p>
+                      <div
+                        data-slot="drafting-download-target-list"
+                        role="radiogroup"
+                        aria-label="Download target"
+                        className="grid grid-cols-2 gap-2 sm:grid-cols-3"
+                      >
+                        {draftingDownloadTargetOptions.map((target) => {
+                          const isSelected = target.id === selectedDownloadTarget
+
+                          return (
+                            <OptionCard
+                              key={target.id}
+                              checked={isSelected}
                               className={cn(
-                                "flex min-w-0 items-center justify-center text-center text-[0.8rem] font-semibold leading-tight",
-                                isSelected ? "text-[#111111]" : "text-[#00000073]",
+                                "w-full gap-0",
+                                "[&_[data-slot=option-card]]:h-full [&_[data-slot=option-card]]:min-h-[64px] [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:rounded-[10px]",
+                                "[&_[data-slot=option-card-motif]]:size-full",
+                                "[&_[data-slot=option-card-label]]:sr-only",
                               )}
+                              label={`Download ${target.label}`}
+                              motifClassName="size-full px-3 py-2"
+                              name="drafting-download-target"
+                              onSelect={() => setSelectedDownloadTarget(target.id)}
+                              value={target.id}
                             >
-                              {target.label}
-                            </span>
-                          </OptionCard>
-                        )
-                      })}
+                              <span
+                                className={cn(
+                                  "flex min-w-0 items-center justify-center text-center text-[0.8rem] font-semibold leading-tight",
+                                  isSelected ? "text-[#111111]" : "text-[#00000073]",
+                                )}
+                              >
+                                {target.label}
+                              </span>
+                            </OptionCard>
+                          )
+                        })}
+                      </div>
                     </div>
-                  </div>
 
-                  <div
-                    data-slot="drafting-download-format-grid"
-                    role="radiogroup"
-                    aria-label="Download format"
-                    className="grid grid-cols-2 gap-2"
-                  >
-                    {DRAFTING_DOWNLOAD_EXTENSIONS.map((extension) => {
-                      const isSelected = extension === selectedDownloadExtension
-
-                      return (
-                        <OptionCard
-                          key={extension}
-                          checked={isSelected}
-                          className={cn(
-                            "w-full gap-0",
-                            "[&_[data-slot=option-card]]:h-full [&_[data-slot=option-card]]:min-h-[68px] [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:rounded-[10px]",
-                            "[&_[data-slot=option-card-motif]]:size-full",
-                            "[&_[data-slot=option-card-label]]:sr-only",
-                          )}
-                          label={`Export ${extension.toUpperCase()}`}
-                          motifClassName="size-full px-3 py-2.5"
-                          name="drafting-download-format"
-                          onSelect={() => setSelectedDownloadExtension(extension)}
-                          value={extension}
-                        >
-                          <span className="flex size-full items-center justify-center text-center">
-                            <span
-                              className={cn(
-                                "text-[0.8rem] font-semibold uppercase leading-none tracking-[0.16em]",
-                                isSelected ? "text-[#111111]" : "text-[#00000073]",
-                              )}
-                            >
-                              {extension}
-                            </span>
-                          </span>
-                        </OptionCard>
-                      )
-                    })}
-                  </div>
-
-                  {isDraftingRasterExport ? (
                     <div
-                      data-slot="drafting-raster-quality-controls"
-                      className="space-y-3 rounded-[12px] border border-black/8 bg-black/[0.02] p-3"
+                      data-slot="drafting-download-format-section"
+                      className="flex flex-col gap-2 rounded-[12px] border border-black/8 bg-black/[0.02] p-3"
                     >
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#111111]">
-                          Quality
-                        </p>
+                      <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#111111]">
+                        Format
+                      </p>
+                      <div
+                        data-slot="drafting-download-format-grid"
+                        role="radiogroup"
+                        aria-label="Download format"
+                        className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+                      >
+                        {DRAFTING_DOWNLOAD_EXTENSIONS.map((extension) => {
+                          const isSelected = extension === selectedDownloadExtension
+
+                          return (
+                            <OptionCard
+                              key={extension}
+                              checked={isSelected}
+                              className={cn(
+                                "w-full gap-0",
+                                "[&_[data-slot=option-card]]:h-full [&_[data-slot=option-card]]:min-h-[64px] [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:rounded-[10px]",
+                                "[&_[data-slot=option-card-motif]]:size-full",
+                                "[&_[data-slot=option-card-label]]:sr-only",
+                              )}
+                              label={`Export ${extension.toUpperCase()}`}
+                              motifClassName="size-full px-3 py-2.5"
+                              name="drafting-download-format"
+                              onSelect={() => setSelectedDownloadExtension(extension)}
+                              value={extension}
+                            >
+                              <span className="flex size-full items-center justify-center text-center">
+                                <span
+                                  className={cn(
+                                    "text-[0.8rem] font-semibold uppercase leading-none tracking-[0.16em]",
+                                    isSelected ? "text-[#111111]" : "text-[#00000073]",
+                                  )}
+                                >
+                                  {extension}
+                                </span>
+                              </span>
+                            </OptionCard>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    {isDraftingRasterExport ? (
+                      <div
+                        data-slot="drafting-raster-preset-section"
+                        className="flex flex-col gap-3 rounded-[12px] border border-black/8 bg-black/[0.02] p-3"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#111111]">
+                            Quality preset
+                          </p>
+                          <div
+                            data-slot="drafting-raster-quality-value"
+                            className="rounded-full border border-black/8 bg-white px-2.5 py-1 text-xs font-medium text-[#111111]"
+                          >
+                            {selectedRasterExportPreset.sizePx} px
+                          </div>
+                        </div>
+
                         <div
-                          data-slot="drafting-raster-quality-value"
-                          className="rounded-full border border-black/8 bg-white px-2.5 py-1 text-xs font-medium text-[#111111]"
+                          data-slot="drafting-raster-preset-grid"
+                          role="radiogroup"
+                          aria-label="Raster quality preset"
+                          className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3"
                         >
-                          {selectedRasterExportQualityPercent}%
+                          {DRAFTING_RASTER_EXPORT_PRESETS.map((preset) => {
+                            const isSelected = preset.id === selectedRasterExportPresetId
+
+                            return (
+                              <OptionCard
+                                key={preset.id}
+                                checked={isSelected}
+                                className={cn(
+                                  "w-full items-stretch gap-0 text-left",
+                                  "[&_[data-slot=option-card]]:h-full [&_[data-slot=option-card]]:min-h-[104px] [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:justify-start [&_[data-slot=option-card]]:rounded-[10px]",
+                                  "[&_[data-slot=option-card-motif]]:size-full [&_[data-slot=option-card-motif]]:justify-start",
+                                  "[&_[data-slot=option-card-label]]:sr-only",
+                                )}
+                                label={`Use ${preset.label} export preset`}
+                                motifClassName="size-full px-3.5 py-3"
+                                name="drafting-raster-quality-preset"
+                                onSelect={() => setSelectedRasterExportPresetId(preset.id)}
+                                value={preset.id}
+                              >
+                                <span className="flex min-w-0 flex-col gap-1 text-left">
+                                  <span
+                                    className={cn(
+                                      "text-[0.82rem] font-semibold leading-tight",
+                                      isSelected ? "text-[#111111]" : "text-[#000000A6]",
+                                    )}
+                                  >
+                                    {preset.label}
+                                  </span>
+                                  <span className="text-sm font-semibold leading-none text-[#111111]">
+                                    {preset.sizePx} × {preset.sizePx}
+                                  </span>
+                                  <span className="text-[0.72rem] leading-5 text-[#00000073]">
+                                    {preset.primaryUse}
+                                  </span>
+                                </span>
+                              </OptionCard>
+                            )
+                          })}
+                        </div>
+
+                        <div
+                          data-slot="drafting-export-size-preview"
+                          className="rounded-[10px] border border-black/8 bg-white/70 px-3 py-2 text-sm text-[#00000073]"
+                        >
+                          {effectiveDraftingExportSizePreview.status === "pending" ? (
+                            <p>Calculating size…</p>
+                          ) : effectiveDraftingExportSizePreview.status === "ready" ? (
+                            <p>
+                              {formatDashboardExportFileSize(
+                                effectiveDraftingExportSizePreview.blobSizeBytes,
+                              )}{" "}
+                              <span className="text-[#00000052]">
+                                {effectiveDraftingExportSizePreview.width} ×{" "}
+                                {effectiveDraftingExportSizePreview.height}
+                              </span>
+                            </p>
+                          ) : effectiveDraftingExportSizePreview.status === "error" ? (
+                            <p>
+                              Size preview unavailable. Output will target{" "}
+                              {selectedRasterExportPreset.sizePx} ×{" "}
+                              {selectedRasterExportPreset.sizePx}.
+                            </p>
+                          ) : (
+                            <p>
+                              Each QR exports at {selectedRasterExportPreset.sizePx} ×{" "}
+                              {selectedRasterExportPreset.sizePx}.
+                            </p>
+                          )}
                         </div>
                       </div>
+                    ) : null}
+                  </div>
 
-                      <div className="px-1">
-                        <UnlumenSlider
-                          aria-label="Raster quality"
-                          className="w-full"
-                          data-slot="drafting-raster-quality-slider"
-                          disabled={!canDownload}
-                          formatValue={(value) => `${Math.round(value)}%`}
-                          label="Quality"
-                          max={100}
-                          min={25}
-                          showValue={false}
-                          step={1}
-                          thumbDataSlot="drafting-raster-quality-slider-thumb"
-                          trackClassName="bg-black/[0.08]"
-                          trackDataSlot="drafting-raster-quality-slider-track"
-                          trackStyle={{ backgroundColor: "rgba(0,0,0,0.08)" }}
-                          value={selectedRasterExportQualityPercent}
-                          onChange={(nextValue) =>
-                            setSelectedRasterExportQualityPercent(
-                              Array.isArray(nextValue)
-                                ? (nextValue[0] ?? selectedRasterExportQualityPercent)
-                                : nextValue,
-                            )
-                          }
-                        />
-                      </div>
-
-                      <div
-                        data-slot="drafting-export-size-preview"
-                        className="px-1 text-sm text-[#00000073]"
-                      >
-                        {effectiveDraftingExportSizePreview.status === "pending" ? (
-                          <p>Calculating size…</p>
-                        ) : effectiveDraftingExportSizePreview.status === "ready" ? (
-                          <p>
-                            {formatDashboardExportFileSize(
-                              effectiveDraftingExportSizePreview.blobSizeBytes,
-                            )}{" "}
-                            <span className="text-[#00000052]">
-                              {effectiveDraftingExportSizePreview.width} ×{" "}
-                              {effectiveDraftingExportSizePreview.height}
-                            </span>
-                          </p>
-                        ) : effectiveDraftingExportSizePreview.status === "error" ? (
-                          <p>Size preview unavailable.</p>
-                        ) : (
-                          <p>Adjust quality to preview the export size.</p>
-                        )}
-                      </div>
-                    </div>
-                  ) : null}
-
-                  <Button
-                    data-slot="drafting-download-submit"
-                    disabled={!canDownload}
-                    type="button"
-                    className="h-9 w-full rounded-[10px] bg-[#111111] text-white shadow-[0_14px_32px_rgba(17,17,17,0.18)] transition-[background-color,box-shadow,transform] hover:-translate-y-px hover:bg-[#1d1d1d] hover:shadow-[0_18px_36px_rgba(17,17,17,0.22)] active:translate-y-0"
-                    onClick={() => {
-                      void handleDownload()
-                    }}
-                  >
-                    <DownloadIcon data-icon="inline-start" />
-                    Download {selectedDownloadExtension.toUpperCase()}
-                  </Button>
+                  <DialogFooter className="shrink-0 border-t border-black/8 bg-[#FFFFFFF2] p-4">
+                    <Button
+                      data-slot="drafting-download-submit"
+                      disabled={!canDownload}
+                      type="button"
+                      className="h-10 w-full rounded-[10px] bg-[#111111] text-white shadow-[0_14px_32px_rgba(17,17,17,0.18)] transition-[background-color,box-shadow,transform] hover:-translate-y-px hover:bg-[#1d1d1d] hover:shadow-[0_18px_36px_rgba(17,17,17,0.22)] active:translate-y-0 sm:w-auto"
+                      onClick={() => {
+                        void handleDownload()
+                      }}
+                    >
+                      <DownloadIcon data-icon="inline-start" />
+                      Download {selectedDownloadExtension.toUpperCase()}
+                    </Button>
+                  </DialogFooter>
                 </div>
-              </PopoverContent>
-            </Popover>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </header>
@@ -1701,194 +1744,133 @@ export function DraftingSurface() {
           data-slot="drafting-nav"
           className="min-h-0"
         >
-          {isComposeEditMode ? (
-            <ScrollArea
-              data-slot="drafting-edit-nav-scroll-area"
-              className="h-full min-h-0"
+          <ScrollArea
+            data-slot="drafting-nav-scroll-area"
+            className="h-full min-h-0"
+          >
+            <ScrollAreaViewport
+              data-slot="drafting-nav-scroll"
+              className="h-full w-full overflow-x-hidden scroll-fade-effect-y"
             >
-              <ScrollAreaViewport
-                data-slot="drafting-edit-nav-scroll"
-                className="h-full w-full overflow-x-hidden scroll-fade-effect-y"
+              <div
+                data-slot="drafting-nav-scroll-content"
+                className="flex min-h-full flex-col items-center gap-4 py-4"
               >
-                <DashboardEditRail
-                  activeSection={activeComposeEditSection}
-                  appearance="drafting"
-                  className="min-h-full py-4"
-                  onSectionChange={setActiveComposeEditSection}
-                />
-              </ScrollAreaViewport>
-              <ScrollAreaScrollbar
-                data-slot="drafting-edit-nav-scrollbar"
-                forceMount
-                className="w-2 border-none p-[1px]"
-              >
-                <ScrollAreaThumb className="bg-black/16 hover:bg-black/24" />
-              </ScrollAreaScrollbar>
-            </ScrollArea>
-          ) : (
-            <ScrollArea
-              data-slot="drafting-nav-scroll-area"
-              className="h-full min-h-0"
-            >
-              <ScrollAreaViewport
-                data-slot="drafting-nav-scroll"
-                className="h-full w-full overflow-x-hidden scroll-fade-effect-y"
-              >
-                <div
-                  data-slot="drafting-nav-scroll-content"
-                  className="flex min-h-full flex-col items-center gap-4 py-4"
-                >
-                  {DRAFTING_TOOLS.map((tool) => {
-                    const isActive = tool.id === activeTool
+                {DRAFTING_TOOLS.map((tool) => {
+                  const isActive = tool.id === activeTool
 
-                    return (
-                      <Button
-                        key={tool.id}
-                        aria-label={`Open ${tool.title}`}
-                        aria-pressed={isActive}
-                        data-drafting-tool-button="true"
+                  return (
+                    <Button
+                      key={tool.id}
+                      aria-label={`Open ${tool.title}`}
+                      aria-pressed={isActive}
+                      data-drafting-tool-button="true"
+                      className={cn(
+                        "group flex h-auto w-20 flex-col items-center gap-3 rounded-none border-0 bg-transparent px-2 py-2.5 text-center text-black/45 shadow-none transition-[color,transform] duration-150 ease-out hover:bg-transparent hover:text-black/72 active:bg-transparent",
+                        isActive && "text-black",
+                      )}
+                      size="default"
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setActiveTool(tool.id)}
+                    >
+                      <span
+                        data-slot="drafting-tool-button-icon"
                         className={cn(
-                          "group flex h-auto w-20 flex-col items-center gap-3 rounded-none border-0 bg-transparent px-2 py-2.5 text-center text-black/45 shadow-none transition-[color,transform] duration-150 ease-out hover:bg-transparent hover:text-black/72 active:bg-transparent",
-                          isActive && "text-black",
+                          "flex size-10 items-center justify-center rounded-[6px] bg-black/[0.03] text-current shadow-[0_0_18px_rgba(0,0,0,0.08),0_2px_6px_rgba(0,0,0,0.03)] transition-[background-color,box-shadow,transform,color] duration-150 ease-out group-hover:-translate-y-px group-hover:bg-black/[0.06] group-hover:shadow-[0_0_24px_rgba(0,0,0,0.10),0_4px_10px_rgba(0,0,0,0.06)] group-active:translate-y-0 group-active:bg-black/[0.07] group-active:shadow-[0_0_14px_rgba(0,0,0,0.07),0_2px_6px_rgba(0,0,0,0.04)]",
+                          isActive &&
+                            "bg-[#111111] text-white shadow-[0_0_24px_rgba(0,0,0,0.18),0_4px_10px_rgba(0,0,0,0.10)] group-hover:bg-[#111111] group-hover:text-white group-hover:shadow-[0_0_28px_rgba(0,0,0,0.22),0_4px_12px_rgba(0,0,0,0.14)] group-active:translate-y-0 group-active:bg-[#111111] group-active:text-white group-active:shadow-[0_0_24px_rgba(0,0,0,0.18),0_4px_10px_rgba(0,0,0,0.10)]",
                         )}
-                        size="default"
-                        type="button"
-                        variant="ghost"
-                        onClick={() => setActiveTool(tool.id)}
                       >
-                        <span
-                          data-slot="drafting-tool-button-icon"
-                          className={cn(
-                            "flex size-10 items-center justify-center rounded-[6px] bg-black/[0.03] text-current shadow-[0_0_18px_rgba(0,0,0,0.08),0_2px_6px_rgba(0,0,0,0.03)] transition-[background-color,box-shadow,transform,color] duration-150 ease-out group-hover:-translate-y-px group-hover:bg-black/[0.06] group-hover:shadow-[0_0_24px_rgba(0,0,0,0.10),0_4px_10px_rgba(0,0,0,0.06)] group-active:translate-y-0 group-active:bg-black/[0.07] group-active:shadow-[0_0_14px_rgba(0,0,0,0.07),0_2px_6px_rgba(0,0,0,0.04)]",
-                            isActive &&
-                              "bg-[#111111] text-white shadow-[0_0_24px_rgba(0,0,0,0.18),0_4px_10px_rgba(0,0,0,0.10)] group-hover:bg-[#111111] group-hover:text-white group-hover:shadow-[0_0_28px_rgba(0,0,0,0.22),0_4px_12px_rgba(0,0,0,0.14)] group-active:translate-y-0 group-active:bg-[#111111] group-active:text-white group-active:shadow-[0_0_24px_rgba(0,0,0,0.18),0_4px_10px_rgba(0,0,0,0.10)]",
-                          )}
-                        >
-                          {tool.renderIcon()}
-                        </span>
-                        <span
-                          data-slot="drafting-tool-button-label"
-                          className={cn(
-                            "text-[0.58rem] font-medium uppercase leading-[1.15] tracking-[0.16em] text-black/45 transition-colors duration-150 group-hover:text-black/72",
-                            isActive && "font-semibold text-current",
-                          )}
-                        >
-                          {tool.title}
-                        </span>
-                      </Button>
-                    )
-                  })}
-                </div>
-              </ScrollAreaViewport>
-              <ScrollAreaScrollbar
-                data-slot="drafting-nav-scrollbar"
-                forceMount
-                className="w-2 border-none p-[1px]"
-              >
-                <ScrollAreaThumb className="bg-black/16 hover:bg-black/24" />
-              </ScrollAreaScrollbar>
-            </ScrollArea>
-          )}
+                        {tool.renderIcon()}
+                      </span>
+                      <span
+                        data-slot="drafting-tool-button-label"
+                        className={cn(
+                          "text-[0.58rem] font-medium uppercase leading-[1.15] tracking-[0.16em] text-black/45 transition-colors duration-150 group-hover:text-black/72",
+                          isActive && "font-semibold text-current",
+                        )}
+                      >
+                        {tool.title}
+                      </span>
+                    </Button>
+                  )
+                })}
+              </div>
+            </ScrollAreaViewport>
+            <ScrollAreaScrollbar
+              data-slot="drafting-nav-scrollbar"
+              forceMount
+              className="w-2 border-none p-[1px]"
+            >
+              <ScrollAreaThumb className="bg-black/16 hover:bg-black/24" />
+            </ScrollAreaScrollbar>
+          </ScrollArea>
         </nav>
         <aside
           aria-label="Middle scroll frame"
           data-slot="drafting-scroll-area"
           className="min-h-0"
         >
-          {isComposeEditMode ? (
-            <ScrollArea
-              data-slot="drafting-edit-panel-scroll-area"
-              className="h-full min-h-0"
+          <Tabs
+            className="h-full min-h-0 gap-0"
+            value={activePanelTab}
+            onValueChange={(value) =>
+              setActivePanelTabs((current) => ({ ...current, [activeTool]: value }))
+            }
+          >
+            <div
+              data-slot="drafting-tabs-sticky"
+              className="sticky top-0 z-10 px-4 py-4"
             >
-              <ScrollAreaViewport
-                aria-label={`${activeComposeEditSection} panel`}
-                data-slot="drafting-edit-panel-scroll"
-                className="h-full w-full overflow-x-hidden scroll-fade-effect-y"
+              <TabsList
+                aria-label={`${activeToolConfig.title} settings groups`}
+                className={DRAFTING_PANEL_TAB_TRAY_CLASS_NAME}
               >
-                <div className="px-4 py-4">
-                  <DashboardEditControls
-                    activeSection={activeComposeEditSection}
-                    appearance="drafting"
-                    onComposeImageUploadError={setComposeErrorMessage}
-                    onComposeImageUploadSuccess={(file) => {
-                      void handleComposeImageUploadSuccess(file)
-                    }}
-                    onSceneChange={setDraftingScene}
-                    onSelectedNodeChange={handleComposeNodeSelection}
-                    scene={draftingScene}
-                    selectedNodeId={selectedComposeNodeId}
-                  />
-                </div>
-              </ScrollAreaViewport>
-              <ScrollAreaScrollbar
-                data-slot="drafting-edit-panel-scrollbar"
-                forceMount
-                className="w-2 border-none p-[1px]"
-              >
-                <ScrollAreaThumb className="bg-black/16 hover:bg-black/24" />
-              </ScrollAreaScrollbar>
-            </ScrollArea>
-          ) : (
-            <Tabs
-              className="h-full min-h-0 gap-0"
-              value={activePanelTab}
-              onValueChange={(value) =>
-                setActivePanelTabs((current) => ({ ...current, [activeTool]: value }))
-              }
-            >
-              <div
-                data-slot="drafting-tabs-sticky"
-                className="sticky top-0 z-10 px-4 py-4"
-              >
-                <TabsList
-                  aria-label={`${activeToolConfig.title} settings groups`}
-                  className={DRAFTING_PANEL_TAB_TRAY_CLASS_NAME}
-                >
-                  {activeToolTabs.map((tab) => (
-                    <TabsTrigger
-                      key={tab.id}
-                      value={tab.id}
-                      className={DRAFTING_PANEL_TAB_TRIGGER_CLASS_NAME}
-                    >
-                      {tab.label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </div>
-
-              <div data-slot="drafting-tab-panels" className="min-h-0 flex-1">
                 {activeToolTabs.map((tab) => (
-                  <TabsContent
+                  <TabsTrigger
                     key={tab.id}
                     value={tab.id}
-                    className="mt-0 h-full min-h-0 data-[state=inactive]:hidden"
+                    className={DRAFTING_PANEL_TAB_TRIGGER_CLASS_NAME}
                   >
-                    <ScrollArea
-                      data-slot="drafting-tab-panel-scroll-area"
-                      className="h-full min-h-0"
-                    >
-                      <ScrollAreaViewport
-                        aria-label={`${activeToolConfig.title} ${tab.label} panel`}
-                        data-active-tab={tab.id}
-                        data-active-tool={activeTool}
-                        data-slot="drafting-tab-panel-scroll"
-                        className="h-full w-full overflow-x-hidden scroll-fade-effect-y"
-                      >
-                        <div className="px-4 pb-4">{renderPanelContent(activeTool, tab.id)}</div>
-                      </ScrollAreaViewport>
-                      <ScrollAreaScrollbar
-                        data-slot="drafting-tab-panel-scrollbar"
-                        forceMount
-                        className="w-2 border-none p-[1px]"
-                      >
-                        <ScrollAreaThumb className="bg-black/16 hover:bg-black/24" />
-                      </ScrollAreaScrollbar>
-                    </ScrollArea>
-                  </TabsContent>
+                    {tab.label}
+                  </TabsTrigger>
                 ))}
-              </div>
-            </Tabs>
-          )}
+              </TabsList>
+            </div>
+
+            <div data-slot="drafting-tab-panels" className="min-h-0 flex-1">
+              {activeToolTabs.map((tab) => (
+                <TabsContent
+                  key={tab.id}
+                  value={tab.id}
+                  className="mt-0 h-full min-h-0 data-[state=inactive]:hidden"
+                >
+                  <ScrollArea
+                    data-slot="drafting-tab-panel-scroll-area"
+                    className="h-full min-h-0"
+                  >
+                    <ScrollAreaViewport
+                      aria-label={`${activeToolConfig.title} ${tab.label} panel`}
+                      data-active-tab={tab.id}
+                      data-active-tool={activeTool}
+                      data-slot="drafting-tab-panel-scroll"
+                      className="h-full w-full overflow-x-hidden scroll-fade-effect-y"
+                    >
+                      <div className="px-4 pb-4">{renderPanelContent(activeTool, tab.id)}</div>
+                    </ScrollAreaViewport>
+                    <ScrollAreaScrollbar
+                      data-slot="drafting-tab-panel-scrollbar"
+                      forceMount
+                      className="w-2 border-none p-[1px]"
+                    >
+                      <ScrollAreaThumb className="bg-black/16 hover:bg-black/24" />
+                    </ScrollAreaScrollbar>
+                  </ScrollArea>
+                </TabsContent>
+              ))}
+            </div>
+          </Tabs>
         </aside>
         <section
           aria-label="Workspace frame"
@@ -1902,22 +1884,9 @@ export function DraftingSurface() {
             <DashboardComposeSurface
               allowDirectNodeTransforms
               errorMessage={composeErrorMessage}
-              isEditMode={isComposeEditMode}
-              onEditModeChange={(checked) => {
-                setIsComposeEditMode(checked)
-
-                if (checked) {
-                  lastNonEditToolRef.current = activeTool
-                  setActiveComposeEditSection(DEFAULT_DASHBOARD_EDIT_SECTION)
-                  setSelectedDownloadTarget("current")
-                  handleComposeNodeSelection(activeQrNodeId)
-                  return
-                }
-
-                setActiveTool(lastNonEditToolRef.current)
-                setSelectedComposeNodeId(null)
-                setSelectedDownloadTarget(getDraftingQrNodeDownloadTarget(activeQrNodeId))
-              }}
+              isEditMode={false}
+              showEditModeToggle={false}
+              onEditModeChange={() => {}}
               onAddQrCode={() => {
                 void handleAddQrCode()
               }}
@@ -1937,71 +1906,12 @@ export function DraftingSurface() {
   )
 }
 
-function cleanupRemovedComposeImageUrls(
-  composeImageUrlsRef: React.MutableRefObject<ComposeImageUrlRegistry>,
-  scene: DashboardComposeScene,
-) {
-  const activeImageNodeIds = new Set(
-    scene.nodes.filter((node) => node.kind === "image").map((node) => node.id),
-  )
-
-  for (const [nodeId, imageUrl] of Object.entries(composeImageUrlsRef.current)) {
-    if (activeImageNodeIds.has(nodeId)) {
-      continue
-    }
-
-    URL.revokeObjectURL(imageUrl)
-    delete composeImageUrlsRef.current[nodeId]
-  }
-}
-
-function cleanupComposeImageUrls(
-  composeImageUrlsRef: React.MutableRefObject<ComposeImageUrlRegistry>,
-) {
-  for (const imageUrl of Object.values(composeImageUrlsRef.current)) {
-    URL.revokeObjectURL(imageUrl)
-  }
-
-  composeImageUrlsRef.current = {}
-}
-
-function getComposeImageLayerName(fileName: string) {
-  const normalizedName = fileName.replace(/\.[^./\\]+$/, "").trim()
-
-  return normalizedName || "Image"
-}
-
 function getNextDraftingQrLayerName(scene: DashboardComposeScene) {
   return `QR Code ${getDashboardQrNodes(scene).length + 1}`
 }
 
 function getDraftingQrNodeDownloadTarget(nodeId: string): DraftingDownloadTarget {
   return `qr:${nodeId}`
-}
-
-async function loadComposeImageDimensions(imageUrl: string) {
-  return await new Promise<{ width: number; height: number }>((resolve, reject) => {
-    const image = new Image()
-
-    image.onload = () => {
-      resolve({
-        width: image.naturalWidth,
-        height: image.naturalHeight,
-      })
-    }
-    image.onerror = () => reject(new Error("Failed to load image dimensions."))
-    image.src = imageUrl
-  })
-}
-
-async function readFileAsDataUrl(file: File) {
-  return await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader()
-
-    reader.onerror = () => reject(new Error("Failed to read file."))
-    reader.onload = () => resolve(String(reader.result))
-    reader.readAsDataURL(file)
-  })
 }
 
 async function downloadDraftingSvgExport({

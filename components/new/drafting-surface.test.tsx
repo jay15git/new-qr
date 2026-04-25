@@ -5,18 +5,8 @@ import { createRoot } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const buildDashboardQrNodePayloadSpy = vi.fn(() => new Promise(() => undefined))
-const downloadDashboardDocumentExportSpy = vi.fn(() => Promise.resolve())
 const downloadDashboardQrBatchZipExportSpy = vi.fn(() => Promise.resolve())
 const downloadDashboardQrNodeExportSpy = vi.fn(() => Promise.resolve())
-const measureDashboardDocumentExportSpy = vi.fn(() =>
-  Promise.resolve({
-    blobSizeBytes: 246000,
-    extension: "png" as const,
-    height: 1584,
-    qualityPercent: 100,
-    width: 1224,
-  }),
-)
 const downloadDashboardRasterExportSpy = vi.fn(() => Promise.resolve())
 const measureDashboardRasterExportSpy = vi.fn(() =>
   Promise.resolve({
@@ -31,15 +21,6 @@ const measureDashboardRasterExportSpy = vi.fn(() =>
 vi.mock("@/components/qr/dashboard-qr-svg", () => ({
   buildDashboardQrNodePayload: (...args: Parameters<typeof buildDashboardQrNodePayloadSpy>) =>
     buildDashboardQrNodePayloadSpy(...args),
-}))
-
-vi.mock("@/components/qr/dashboard-document-export", () => ({
-  downloadDashboardDocumentExport: (
-    ...args: Parameters<typeof downloadDashboardDocumentExportSpy>
-  ) => downloadDashboardDocumentExportSpy(...args),
-  measureDashboardDocumentExport: (
-    ...args: Parameters<typeof measureDashboardDocumentExportSpy>
-  ) => measureDashboardDocumentExportSpy(...args),
 }))
 
 vi.mock("@/components/qr/dashboard-qr-batch-export", () => ({
@@ -62,10 +43,24 @@ vi.mock("@/components/qr/dashboard-raster-export", () => ({
   ) => measureDashboardRasterExportSpy(...args),
 }))
 
-vi.mock("@/components/ui/popover", () => ({
-  Popover: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  PopoverContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  PopoverTrigger: ({ children }: { children: ReactNode }) => children,
+vi.mock("@/components/ui/dialog", () => ({
+  Dialog: ({ children }: { children: ReactNode }) => <div data-slot="dialog">{children}</div>,
+  DialogContent: ({ children, ...props }: { children: ReactNode }) => (
+    <div {...props}>{children}</div>
+  ),
+  DialogDescription: ({ children, ...props }: { children: ReactNode }) => (
+    <p {...props}>{children}</p>
+  ),
+  DialogFooter: ({ children, ...props }: { children: ReactNode }) => (
+    <div {...props}>{children}</div>
+  ),
+  DialogHeader: ({ children, ...props }: { children: ReactNode }) => (
+    <div {...props}>{children}</div>
+  ),
+  DialogTitle: ({ children, ...props }: { children: ReactNode }) => (
+    <h2 {...props}>{children}</h2>
+  ),
+  DialogTrigger: ({ children }: { children: ReactNode }) => children,
 }))
 
 vi.mock("@/components/unlumen-ui/slider", () => ({
@@ -135,19 +130,8 @@ beforeEach(() => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true)
   buildDashboardQrNodePayloadSpy.mockClear()
   buildDashboardQrNodePayloadSpy.mockImplementation(() => new Promise(() => undefined))
-  downloadDashboardDocumentExportSpy.mockClear()
   downloadDashboardQrBatchZipExportSpy.mockClear()
   downloadDashboardQrNodeExportSpy.mockClear()
-  measureDashboardDocumentExportSpy.mockClear()
-  measureDashboardDocumentExportSpy.mockImplementation(() =>
-    Promise.resolve({
-      blobSizeBytes: 246000,
-      extension: "png",
-      height: 1584,
-      qualityPercent: 100,
-      width: 1224,
-    }),
-  )
   downloadDashboardRasterExportSpy.mockClear()
   measureDashboardRasterExportSpy.mockClear()
   measureDashboardRasterExportSpy.mockImplementation(() =>
@@ -208,7 +192,8 @@ describe("DraftingSurface", () => {
         .querySelector('[data-slot="dashboard-compose-toolbar"]')
         ?.getAttribute("data-toolbar-appearance"),
     ).toBe("neutral")
-    expect(surface.container.textContent).toContain("Edit mode")
+    expect(surface.container.textContent).not.toContain("Edit mode")
+    expect(surface.container.querySelector('button[aria-label="Toggle edit mode"]')).toBeNull()
     expect(
       surface.container
         .querySelector('[data-slot="dashboard-compose-canvas"]')
@@ -275,12 +260,15 @@ describe("DraftingSurface", () => {
       getRequiredElement(surface.container, '[data-slot="drafting-download-format-grid"]')
         .querySelectorAll('[data-slot="option-card"]').length,
     ).toBe(4)
-    expect(svgExportInput.checked).toBe(true)
-    expect(pngExportInput.checked).toBe(false)
+    expect(svgExportInput.checked).toBe(false)
+    expect(pngExportInput.checked).toBe(true)
     expect(jpegExportInput.checked).toBe(false)
     expect(webpExportInput.checked).toBe(false)
-    expect(surface.container.textContent).toContain("Download SVG")
-    expect(surface.container.textContent).not.toContain("Current QR")
+    expect(surface.container.textContent).toContain("Download QR")
+    expect(surface.container.textContent).toContain("Download PNG")
+    expect(surface.container.textContent).toContain("Web & Social")
+    expect(surface.container.textContent).toContain("1024 × 1024")
+    expect(surface.container.textContent).toContain("Current QR")
     expect(surface.container.textContent).not.toContain("Vector master")
     expect(surface.container.textContent).not.toContain("Raster export")
     },
@@ -288,21 +276,18 @@ describe("DraftingSurface", () => {
   )
 
   it(
-    "shows raster quality controls and measures the export size after selecting the png option card",
+    "shows raster quality presets and measures the default web and social export size",
     async () => {
       vi.useFakeTimers()
       const surface = renderSurface()
-      const pngExportInput = getRequiredElement(
-        surface.container,
-        'input[type="radio"][aria-label="Export PNG"]',
-      ) as HTMLInputElement
 
       await act(async () => {
-        activateElement(pngExportInput)
+        await flushPromises()
       })
 
-      expect(surface.container.textContent).toContain("Quality")
-      expect(surface.container.textContent).not.toContain("Quality: 100%")
+      expect(surface.container.textContent).toContain("Quality preset")
+      expect(surface.container.textContent).toContain("Web & Social")
+      expect(surface.container.textContent).toContain("1024 × 1024")
       expect(surface.container.textContent).toContain("Calculating size…")
 
       await act(async () => {
@@ -314,6 +299,7 @@ describe("DraftingSurface", () => {
         expect.objectContaining({
           extension: "png",
           qualityPercent: 100,
+          targetSizePx: 1024,
           state: expect.objectContaining({
             rasterExportQualityPercent: 100,
           }),
@@ -325,30 +311,51 @@ describe("DraftingSurface", () => {
     15000,
   )
 
-  it("downloads the selected png export from the header control with the current quality", async () => {
+  it("passes each raster quality preset target size into export preview", async () => {
+    vi.useFakeTimers()
+    const surface = renderSurface()
+    const presetExpectations = [
+      ["Use Quick Share export preset", 512],
+      ["Use Web & Social export preset", 1024],
+      ["Use Small Print export preset", 1600],
+      ["Use Flyer / Poster export preset", 2400],
+      ["Use Large Format export preset", 3200],
+      ["Use Max Quality export preset", 4096],
+    ] as const
+
+    for (const [label, targetSizePx] of presetExpectations) {
+      await act(async () => {
+        activateElement(
+          getRadioInputByAriaLabel(
+            surface.container,
+            label,
+          ),
+        )
+      })
+      await act(async () => {
+        vi.advanceTimersByTime(250)
+        await flushPromises()
+      })
+
+      expect(measureDashboardRasterExportSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          targetSizePx,
+        }),
+      )
+    }
+  })
+
+  it("downloads the selected png export from the header control with the selected preset", async () => {
     vi.useFakeTimers()
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface()
-    const pngExportInput = getRequiredElement(
+    const maxQualityInput = getRequiredElement(
       surface.container,
-      'input[type="radio"][aria-label="Export PNG"]',
+      'input[type="radio"][aria-label="Use Max Quality export preset"]',
     ) as HTMLInputElement
 
     await act(async () => {
-      activateElement(pngExportInput)
-    })
-    await act(async () => {
-      vi.advanceTimersByTime(250)
-      await flushPromises()
-    })
-
-    const slider = getRequiredElement(
-      surface.container,
-      'input[type="range"][aria-label="Raster quality"]',
-    ) as HTMLInputElement
-
-    await act(async () => {
-      setRangeValue(slider, "88")
+      activateElement(maxQualityInput)
     })
     await act(async () => {
       vi.advanceTimersByTime(250)
@@ -365,7 +372,8 @@ describe("DraftingSurface", () => {
         extension: "png",
         name: "QR Code",
         node: expect.objectContaining({ name: "QR Code" }),
-        qualityPercent: 88,
+        qualityPercent: 100,
+        targetSizePx: 4096,
       }),
     )
     expect(downloadDashboardRasterExportSpy).not.toHaveBeenCalled()
@@ -408,6 +416,7 @@ describe("DraftingSurface", () => {
       expect.objectContaining({
         extension: "jpeg",
         name: "QR Code",
+        targetSizePx: 1024,
       }),
     )
     expect(downloadDashboardQrNodeExportSpy).toHaveBeenNthCalledWith(
@@ -415,6 +424,7 @@ describe("DraftingSurface", () => {
       expect.objectContaining({
         extension: "webp",
         name: "QR Code",
+        targetSizePx: 1024,
       }),
     )
     expect(downloadDashboardRasterExportSpy).not.toHaveBeenCalled()
@@ -436,6 +446,9 @@ describe("DraftingSurface", () => {
     })
 
     expect(
+      getRequiredElement(surface.container, 'input[aria-label="Download Current QR"]'),
+    ).not.toBeNull()
+    expect(
       getRequiredElement(surface.container, 'input[aria-label="Download All QR codes"]'),
     ).not.toBeNull()
     expect(
@@ -450,7 +463,7 @@ describe("DraftingSurface", () => {
         '[data-slot="drafting-download-target-list"]',
       ).className,
     ).toContain("grid-cols-2")
-    expect(surface.container.textContent).not.toContain("Current QR")
+    expect(surface.container.textContent).toContain("Current QR")
   })
 
   it("downloads all qr layers as a zip using the selected format", async () => {
@@ -491,10 +504,10 @@ describe("DraftingSurface", () => {
           expect.objectContaining({ name: "QR Code" }),
           expect.objectContaining({ name: "QR Code 2" }),
         ]),
+        targetSizePx: 1024,
       }),
     )
     expect(downloadDashboardQrNodeExportSpy).not.toHaveBeenCalled()
-    expect(downloadDashboardDocumentExportSpy).not.toHaveBeenCalled()
   })
 
   it("downloads an individual selected qr layer directly", async () => {
@@ -516,6 +529,7 @@ describe("DraftingSurface", () => {
       activateElement(
         getRequiredElement(surface.container, 'input[aria-label="Download QR Code 2"]'),
       )
+      activateElement(getRequiredElement(surface.container, 'input[aria-label="Export SVG"]'))
       await flushPromises()
     })
 
@@ -532,7 +546,6 @@ describe("DraftingSurface", () => {
       }),
     )
     expect(downloadDashboardQrBatchZipExportSpy).not.toHaveBeenCalled()
-    expect(downloadDashboardDocumentExportSpy).not.toHaveBeenCalled()
   })
 
   it("downloads the default named qr layer as svg from the header control", async () => {
@@ -545,6 +558,13 @@ describe("DraftingSurface", () => {
 
     const surface = renderSurface()
     const callsBeforeDownload = buildDashboardQrNodePayloadSpy.mock.calls.length
+
+    await act(async () => {
+      activateElement(getRequiredElement(surface.container, 'input[aria-label="Export SVG"]'))
+      await flushPromises()
+    })
+
+    expect(surface.container.querySelector('[data-slot="drafting-raster-preset-section"]')).toBeNull()
 
     await act(async () => {
       activateElement(getButtonByExactText(surface.container, "Download SVG"))
@@ -562,15 +582,12 @@ describe("DraftingSurface", () => {
     expect(downloadDashboardRasterExportSpy).not.toHaveBeenCalled()
   })
 
-  it("switches to composed export behavior while edit mode is enabled", async () => {
+  it("keeps png export on the qr layer path without an edit mode toggle", async () => {
     vi.useFakeTimers()
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface()
 
-    await act(async () => {
-      activateElement(
-        getRequiredElement(surface.container, 'button[aria-label="Toggle edit mode"]'),
-      )
-    })
+    expect(surface.container.querySelector('button[aria-label="Toggle edit mode"]')).toBeNull()
 
     const pngExportInput = getRequiredElement(
       surface.container,
@@ -585,29 +602,28 @@ describe("DraftingSurface", () => {
       await flushPromises()
     })
 
-    expect(measureDashboardDocumentExportSpy).toHaveBeenCalledWith(
+    expect(measureDashboardRasterExportSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         extension: "png",
-        scene: expect.objectContaining({
-          canvasSize: expect.objectContaining({
-            height: 640,
-            width: 960,
-          }),
+        targetSizePx: 1024,
+        state: expect.objectContaining({
+          data: "https://new-qr-studio.local/launch",
         }),
       }),
     )
-    expect(surface.container.textContent).toContain("246000 B")
-    expect(surface.container.textContent).toContain("1224 × 1584")
+    expect(surface.container.textContent).toContain("182000 B")
+    expect(surface.container.textContent).toContain("1280 × 1280")
 
     await act(async () => {
       activateElement(getButtonByExactText(surface.container, "Download PNG"))
       await flushPromises()
     })
 
-    expect(downloadDashboardDocumentExportSpy).toHaveBeenCalledWith(
+    expect(downloadDashboardQrNodeExportSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         extension: "png",
-        name: "new-qr-studio",
+        name: "QR Code",
+        targetSizePx: 1024,
       }),
     )
     expect(downloadDashboardRasterExportSpy).not.toHaveBeenCalled()
@@ -1610,102 +1626,31 @@ describe("DraftingSurface", () => {
     ).toBe("H")
   })
 
-  it("swaps the /new rail and middle panel to dashboard edit sections when edit mode is enabled", () => {
-    const surface = renderSurface()
-    const editModeSwitch = getRequiredElement(
-      surface.container,
-      'button[aria-label="Toggle edit mode"]',
-    )
-
-    act(() => {
-      activateElement(editModeSwitch)
-    })
-
-    const editNavScrollArea = getRequiredElement(
-      surface.container,
-      '[data-slot="drafting-edit-nav-scroll-area"]',
-    )
-    const editNavScroll = getRequiredElement(
-      surface.container,
-      '[data-slot="drafting-edit-nav-scroll"]',
-    )
-    const editPanelScroll = getRequiredElement(
-      surface.container,
-      '[data-slot="drafting-edit-panel-scroll"]',
-    )
-    const editRail = getRequiredElement(
-      surface.container,
-      '[data-slot="dashboard-edit-rail"]',
-    )
-
-    expect(editRail).not.toBeNull()
-    expect(editRail.className).toContain("py-4")
-    expect(editNavScrollArea.className).toContain("overflow-hidden")
-    expect(editNavScroll.className).toContain("scroll-fade-effect-y")
-    expect(editNavScroll.getAttribute("data-radix-scroll-area-viewport")).toBe("")
-    expect(editPanelScroll.className).toContain("scroll-fade-effect-y")
-    expect(editPanelScroll.getAttribute("data-radix-scroll-area-viewport")).toBe("")
-    expect(surface.container.querySelector('[data-slot="dashboard-edit-page"]')).not.toBeNull()
-    expect(surface.container.textContent).toContain("Page")
-    expect(surface.container.textContent).toContain("Position")
-    expect(surface.container.textContent).toContain("Assets")
-    expect(surface.container.textContent).toContain("Layers")
-    expect(
-      surface.container.querySelector('[data-slot="dashboard-edit-rail"] button[aria-label="Open Layers"]'),
-    ).not.toBeNull()
-    expect(surface.container.querySelector('[data-slot="tabs-list"]')).toBeNull()
-    expect(surface.container.querySelector('[data-drafting-tool-button="true"]')).toBeNull()
-    expect(
-      surface.container.querySelectorAll(
-        '[data-slot="dashboard-edit-rail"] [data-slot="drafting-tool-button-icon"]',
-      ),
-    ).toHaveLength(4)
-  })
-
-  it("opens the page section from the /new edit rail", () => {
+  it("does not expose the dashboard edit mode toggle or edit rail on /new", () => {
     const surface = renderSurface()
 
-    act(() => {
-      activateElement(
-        getRequiredElement(surface.container, 'button[aria-label="Toggle edit mode"]'),
-      )
-    })
-
-    const pageTab = getRequiredElement(
-      surface.container,
-      'button[aria-label="Open Page"]',
-    )
-
-    act(() => {
-      activateElement(pageTab)
-    })
-
-    expect(
-      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
-        "data-compose-edit-section",
-      ),
-    ).toBe("page")
-    expect(surface.container.querySelector('[data-slot="dashboard-edit-page"]')).not.toBeNull()
-    expect(surface.container.textContent).toContain("Letter portrait")
-    expect(surface.container.textContent).toContain("A4 portrait")
-    expect(surface.container.textContent).toContain("Safe margin")
+    expect(surface.container.querySelector('button[aria-label="Toggle edit mode"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="dashboard-compose-edit-mode"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="dashboard-edit-rail"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="drafting-edit-nav-scroll-area"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="drafting-edit-panel-scroll"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="dashboard-edit-page"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="tabs-list"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-drafting-tool-button="true"]')).not.toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open Page"]')).toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open Position"]')).toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open Assets"]')).toBeNull()
   })
 
   it("does not render a document guide overlay in the default compose surface", () => {
     const surface = renderSurface()
-
-    act(() => {
-      activateElement(
-        getRequiredElement(surface.container, 'button[aria-label="Toggle edit mode"]'),
-      )
-    })
 
     expect(
       surface.container.querySelector('[data-slot="dashboard-compose-document-guides"]'),
     ).toBeNull()
   })
 
-  it("restores the previous /new tool after edit mode is turned off", () => {
+  it("keeps the normal /new tool rail active because edit mode is unavailable", () => {
     const surface = renderSurface()
     const layersButton = getRequiredElement(surface.container, 'button[aria-label="Open Layers"]')
 
@@ -1713,24 +1658,7 @@ describe("DraftingSurface", () => {
       activateElement(layersButton)
     })
 
-    act(() => {
-      activateElement(
-        getRequiredElement(surface.container, 'button[aria-label="Toggle edit mode"]'),
-      )
-    })
-
-    expect(
-      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
-        "data-compose-selected-node-id",
-      ),
-    ).toBe(DASHBOARD_QR_NODE_ID)
-
-    act(() => {
-      activateElement(
-        getRequiredElement(surface.container, 'button[aria-label="Toggle edit mode"]'),
-      )
-    })
-
+    expect(surface.container.querySelector('button[aria-label="Toggle edit mode"]')).toBeNull()
     expect(surface.container.querySelector('[data-slot="dashboard-edit-rail"]')).toBeNull()
     expect(getTabLabels(surface.container)).toEqual(["Layers"])
     expect(getRequiredElement(surface.container, 'button[aria-label="Open Layers"]').getAttribute("aria-pressed")).toBe("true")
@@ -1763,10 +1691,23 @@ describe("DraftingSurface", () => {
     expect(surface.container.querySelectorAll('[data-slot="dashboard-compose-node"]')).toHaveLength(2)
     expect(
       getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
+        "data-compose-edit-mode",
+      ),
+    ).toBe("false")
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
         "data-compose-edit-section",
       ),
-    ).toBe("layers")
-    expect(surface.container.querySelectorAll('[data-slot="dashboard-layer-row"]')).toHaveLength(2)
+    ).toBeNull()
+    expect(surface.container.querySelector('[data-slot="dashboard-edit-rail"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="dashboard-layer-row"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="drafting-layer-row"]')).toBeNull()
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Layers"]'))
+    })
+
+    expect(surface.container.querySelectorAll('[data-slot="drafting-layer-row"]')).toHaveLength(2)
     expect(surface.container.textContent).toContain("QR Code 2")
     expect(buildDashboardQrNodePayloadSpy).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -1848,6 +1789,16 @@ function getRequiredElement(parent: ParentNode, selector: string) {
   return element as HTMLElement
 }
 
+function getRadioInputByAriaLabel(parent: ParentNode, label: string) {
+  const element = Array.from(parent.querySelectorAll('input[type="radio"]')).find(
+    (input) => input.getAttribute("aria-label") === label,
+  )
+
+  expect(element).not.toBeNull()
+
+  return element as HTMLInputElement
+}
+
 function activateElement(element: HTMLElement) {
   element.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, button: 0 }))
   element.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, button: 0 }))
@@ -1855,17 +1806,6 @@ function activateElement(element: HTMLElement) {
 }
 
 function changeInputValue(element: HTMLInputElement, value: string) {
-  const valueSetter = Object.getOwnPropertyDescriptor(
-    window.HTMLInputElement.prototype,
-    "value",
-  )?.set
-
-  valueSetter?.call(element, value)
-  element.dispatchEvent(new Event("input", { bubbles: true }))
-  element.dispatchEvent(new Event("change", { bubbles: true }))
-}
-
-function setRangeValue(element: HTMLInputElement, value: string) {
   const valueSetter = Object.getOwnPropertyDescriptor(
     window.HTMLInputElement.prototype,
     "value",

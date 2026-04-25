@@ -24,6 +24,7 @@ type DashboardRasterExportOptions = {
   name: string
   qualityPercent: number
   state: QrStudioState
+  targetSizePx?: number
 }
 
 export type DashboardRasterExportMeasurement = {
@@ -59,10 +60,30 @@ export function getDashboardRasterExportScale(qualityPercent: number) {
   return 1
 }
 
+export function clampDashboardRasterTargetSize(value: number) {
+  if (!Number.isFinite(value)) {
+    return DASHBOARD_RASTER_EXPORT_MAX_DIMENSION
+  }
+
+  return Math.max(1, Math.min(DASHBOARD_RASTER_EXPORT_MAX_DIMENSION, Math.round(value)))
+}
+
 export function getDashboardRasterExportDimensions(
   state: QrStudioState,
   qualityPercent: number,
+  targetSizePx?: number,
 ) {
+  if (targetSizePx !== undefined) {
+    const targetSize = clampDashboardRasterTargetSize(targetSizePx)
+
+    return {
+      height: targetSize,
+      requestedScale: targetSize / Math.max(1, clampQrSize(state.height)),
+      scale: targetSize / Math.max(1, clampQrSize(state.width)),
+      width: targetSize,
+    }
+  }
+
   const requestedScale = getDashboardRasterExportScale(qualityPercent)
   const baseWidth = clampQrSize(state.width)
   const baseHeight = clampQrSize(state.height)
@@ -92,11 +113,13 @@ export async function downloadDashboardRasterExport({
   name,
   qualityPercent,
   state,
+  targetSizePx,
 }: DashboardRasterExportOptions) {
   const result = await renderDashboardRasterExport({
     extension,
     qualityPercent,
     state,
+    targetSizePx,
   })
 
   downloadBlob(result.blob, `${name}.${extension}`)
@@ -106,11 +129,13 @@ export async function measureDashboardRasterExport({
   extension,
   qualityPercent,
   state,
+  targetSizePx,
 }: Omit<DashboardRasterExportOptions, "name">) {
   const result = await renderDashboardRasterExport({
     extension,
     qualityPercent,
     state,
+    targetSizePx,
   })
 
   return {
@@ -143,8 +168,13 @@ async function renderDashboardRasterExport({
   extension,
   qualityPercent,
   state,
+  targetSizePx,
 }: Omit<DashboardRasterExportOptions, "name">) {
-  const dimensions = getDashboardRasterExportDimensions(state, qualityPercent)
+  const dimensions = getDashboardRasterExportDimensions(
+    state,
+    qualityPercent,
+    targetSizePx,
+  )
   const exportState = {
     ...createDashboardSurfaceQrState(state),
     height: dimensions.height,

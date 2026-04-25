@@ -57,6 +57,7 @@ type DashboardComposeSurfaceProps = {
   scene: DashboardComposeScene
   selectedNodeId: string | null
   allowDirectNodeTransforms?: boolean
+  showEditModeToggle?: boolean
   surfaceAppearance?: "dashboard" | "neutral"
   surfaceMode?: "compose" | "document"
 }
@@ -122,6 +123,7 @@ export function DashboardComposeSurface({
   scene,
   selectedNodeId,
   allowDirectNodeTransforms = false,
+  showEditModeToggle = true,
   surfaceAppearance = "dashboard",
   surfaceMode = "compose",
 }: DashboardComposeSurfaceProps) {
@@ -472,26 +474,28 @@ export function DashboardComposeSurface({
                 : "gap-2 rounded-[1.75rem] border border-slate-300/80 bg-white/84 px-2 py-2 text-foreground/70 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)]",
             )}
           >
-            <div
-              data-slot="dashboard-compose-edit-mode"
-              className={cn(
-                "inline-flex items-center gap-2",
-                isNeutralSurface
-                  ? "rounded-[8px] px-2 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-[#111111]"
-                  : "rounded-full border border-slate-300/80 bg-white/84 px-3 py-1.5 text-sm font-medium text-foreground/70 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)]",
-              )}
-            >
-              <span>{isDocumentSurface ? "Document mode" : "Edit mode"}</span>
-              <Switch
-                aria-label={isDocumentSurface ? "Toggle document mode" : "Toggle edit mode"}
-                checked={isEditMode}
+            {showEditModeToggle ? (
+              <div
+                data-slot="dashboard-compose-edit-mode"
                 className={cn(
-                  isNeutralSurface &&
-                    "h-[20px] w-[36px] shrink-0 border border-[#00000014] bg-black/[0.10] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18)] transition-[background-color,border-color,box-shadow] duration-150 hover:border-[#00000024] hover:bg-black/[0.14] data-[state=checked]:border-[#111111] data-[state=checked]:bg-[#111111] focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-0",
+                  "inline-flex items-center gap-2",
+                  isNeutralSurface
+                    ? "rounded-[8px] px-2 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-[#111111]"
+                    : "rounded-full border border-slate-300/80 bg-white/84 px-3 py-1.5 text-sm font-medium text-foreground/70 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)]",
                 )}
-                onCheckedChange={handleEditModeChange}
-              />
-            </div>
+              >
+                <span>{isDocumentSurface ? "Document mode" : "Edit mode"}</span>
+                <Switch
+                  aria-label={isDocumentSurface ? "Toggle document mode" : "Toggle edit mode"}
+                  checked={isEditMode}
+                  className={cn(
+                    isNeutralSurface &&
+                      "h-[20px] w-[36px] shrink-0 border border-[#00000014] bg-black/[0.10] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18)] transition-[background-color,border-color,box-shadow] duration-150 hover:border-[#00000024] hover:bg-black/[0.14] data-[state=checked]:border-[#111111] data-[state=checked]:bg-[#111111] focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-0",
+                  )}
+                  onCheckedChange={handleEditModeChange}
+                />
+              </div>
+            ) : null}
 
             <div
               className={cn(

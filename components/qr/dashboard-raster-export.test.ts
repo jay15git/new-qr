@@ -141,6 +141,32 @@ describe("dashboard raster export helper", () => {
     expect(anchorClickSpy).toHaveBeenCalledTimes(1)
   })
 
+  it("uses fixed target sizing when requested", async () => {
+    const state = setSquareQrSize(createDefaultQrStudioState(), 320)
+
+    await downloadDashboardRasterExport({
+      extension: "png",
+      name: "poster",
+      qualityPercent: 100,
+      state,
+      targetSizePx: 1024,
+    })
+
+    expect(qrCodeConstructorSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        height: 1024,
+        type: "svg",
+        width: 1024,
+      }),
+    )
+    expect(getDashboardRasterExportDimensions(state, 100, 9000)).toEqual({
+      height: 4096,
+      requestedScale: 4096 / 320,
+      scale: 4096 / 320,
+      width: 4096,
+    })
+  })
+
   it("passes lossy encoder quality for jpeg and webp exports", async () => {
     const state = setSquareQrSize(createDefaultQrStudioState(), 320)
 
