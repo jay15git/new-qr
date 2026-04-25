@@ -791,7 +791,7 @@ describe("DraftingSurface", () => {
     expect(sizeTab.textContent).toContain("Size")
   })
 
-  it("selects solid by default and keeps newly selected color modes expanded", () => {
+  it("expands style color modes without selecting them from the accordion header", () => {
     const surface = renderSurface()
     const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Style"]')
 
@@ -829,7 +829,7 @@ describe("DraftingSurface", () => {
       activateElement(gradientTrigger)
     })
 
-    expect(gradientItem.getAttribute("data-selected")).toBe("true")
+    expect(gradientItem.getAttribute("data-selected")).toBe("false")
     expect(gradientItem.getAttribute("data-state")).toBe("open")
     expect(solidItem.getAttribute("data-state")).toBe("open")
 
@@ -837,9 +837,15 @@ describe("DraftingSurface", () => {
       activateElement(paletteTrigger)
     })
 
-    expect(paletteItem.getAttribute("data-selected")).toBe("true")
+    expect(paletteItem.getAttribute("data-selected")).toBe("false")
     expect(paletteItem.getAttribute("data-state")).toBe("open")
     expect(gradientItem.getAttribute("data-state")).toBe("open")
+
+    act(() => {
+      activateElement(getButtonByExactText(surface.container, "Use palette"))
+    })
+
+    expect(paletteItem.getAttribute("data-selected")).toBe("true")
   })
 
   it("renders a drafting color accordion for the corner frame color tab with solid and gradient", () => {
@@ -869,7 +875,7 @@ describe("DraftingSurface", () => {
     expect(accordion.textContent).toContain("Gradient")
   })
 
-  it("selects and expands the corner frame gradient color mode", () => {
+  it("expands the corner frame gradient color mode without selecting it from the accordion header", () => {
     const surface = renderSurface()
     const cornerFrameButton = getRequiredElement(
       surface.container,
@@ -904,7 +910,7 @@ describe("DraftingSurface", () => {
       activateElement(getAccordionTriggerByText(accordion, "Gradient"))
     })
 
-    expect(gradientItem.getAttribute("data-selected")).toBe("true")
+    expect(gradientItem.getAttribute("data-selected")).toBe("false")
     expect(gradientItem.getAttribute("data-state")).toBe("open")
     expect(solidItem.getAttribute("data-state")).toBe("open")
   })
@@ -1011,7 +1017,7 @@ describe("DraftingSurface", () => {
     expect(accordion.textContent).toContain("Gradient")
   })
 
-  it("selects and expands the corner dot gradient color mode", () => {
+  it("expands the corner dot gradient color mode without selecting it from the accordion header", () => {
     const surface = renderSurface()
     const cornerDotButton = getRequiredElement(
       surface.container,
@@ -1046,7 +1052,7 @@ describe("DraftingSurface", () => {
       activateElement(getAccordionTriggerByText(accordion, "Gradient"))
     })
 
-    expect(gradientItem.getAttribute("data-selected")).toBe("true")
+    expect(gradientItem.getAttribute("data-selected")).toBe("false")
     expect(gradientItem.getAttribute("data-state")).toBe("open")
     expect(solidItem.getAttribute("data-state")).toBe("open")
   })
@@ -1072,7 +1078,7 @@ describe("DraftingSurface", () => {
     expect(accordion.textContent).toContain("Gradient")
   })
 
-  it("selects and expands the background gradient color mode", () => {
+  it("expands the background gradient color mode without selecting it from the accordion header", () => {
     const surface = renderSurface()
     const backgroundButton = getRequiredElement(
       surface.container,
@@ -1103,7 +1109,7 @@ describe("DraftingSurface", () => {
       activateElement(getAccordionTriggerByText(accordion, "Gradient"))
     })
 
-    expect(gradientItem.getAttribute("data-selected")).toBe("true")
+    expect(gradientItem.getAttribute("data-selected")).toBe("false")
     expect(gradientItem.getAttribute("data-state")).toBe("open")
     expect(solidItem.getAttribute("data-state")).toBe("open")
   })
@@ -1130,7 +1136,7 @@ describe("DraftingSurface", () => {
     expect(accordion.textContent).toContain("Gradient")
   })
 
-  it("selects and expands the logo gradient color mode", () => {
+  it("expands the logo gradient color mode without selecting it from the accordion header", () => {
     const surface = renderSurface()
     const logoButton = getRequiredElement(surface.container, 'button[aria-label="Open Logo"]')
 
@@ -1162,7 +1168,7 @@ describe("DraftingSurface", () => {
       activateElement(getAccordionTriggerByText(accordion, "Gradient"))
     })
 
-    expect(gradientItem.getAttribute("data-selected")).toBe("true")
+    expect(gradientItem.getAttribute("data-selected")).toBe("false")
     expect(gradientItem.getAttribute("data-state")).toBe("open")
     expect(solidItem.getAttribute("data-state")).toBe("open")
   })
@@ -1181,7 +1187,27 @@ describe("DraftingSurface", () => {
     )
 
     expect(brandTab.querySelector('[data-slot="drafting-brand-icon-picker"]')).not.toBeNull()
-    expect(brandTab.querySelector('[aria-label="Search brand icons"]')).not.toBeNull()
+    const searchInput = getRequiredElement(
+      brandTab,
+      'input[aria-label="Search brand icons"]',
+    ) as HTMLInputElement
+    const searchIcon = getRequiredElement(
+      brandTab,
+      '[data-slot="drafting-brand-icon-search-icon"]',
+    )
+    const categoryPicker = getRequiredElement(
+      brandTab,
+      '[data-slot="drafting-brand-icon-category-picker"]',
+    )
+
+    expect(searchInput.placeholder).toBe("Search Icons")
+    expect(searchIcon.getAttribute("aria-hidden")).toBe("true")
+    expect(
+      Boolean(
+        searchInput.compareDocumentPosition(categoryPicker) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ),
+    ).toBe(true)
     expect(
       brandTab.querySelectorAll('[data-slot="drafting-brand-icon-option"]').length,
     ).toBeGreaterThan(0)
@@ -1349,7 +1375,7 @@ describe("DraftingSurface", () => {
     ).not.toBeNull()
   })
 
-  it("selects and expands the logo remote url source mode", () => {
+  it("expands the logo remote url source mode without selecting it from the accordion header", () => {
     const surface = renderSurface()
     const logoButton = getRequiredElement(surface.container, 'button[aria-label="Open Logo"]')
 
@@ -1381,12 +1407,12 @@ describe("DraftingSurface", () => {
       activateElement(getAccordionTriggerByText(accordion, "Remote URL"))
     })
 
-    expect(urlItem.getAttribute("data-selected")).toBe("true")
+    expect(urlItem.getAttribute("data-selected")).toBe("false")
     expect(urlItem.getAttribute("data-state")).toBe("open")
     expect(uploadItem.getAttribute("data-state")).toBe("open")
   })
 
-  it("clears the drafting preset selection when switching the logo source to remote url", () => {
+  it("clears the drafting preset selection when entering a remote logo url", () => {
     const surface = renderSurface()
     const logoButton = getRequiredElement(surface.container, 'button[aria-label="Open Logo"]')
 
@@ -1416,6 +1442,15 @@ describe("DraftingSurface", () => {
       activateElement(remoteUrlTrigger)
     })
 
+    const remoteUrlInput = getRequiredElement(
+      surface.container,
+      'input[aria-label="Remote logo URL"]',
+    ) as HTMLInputElement
+
+    act(() => {
+      changeInputValue(remoteUrlInput, "https://example.com/logo.png")
+    })
+
     const surfaceRoot = getRequiredElement(surface.container, '[data-slot="drafting-surface"]')
 
     expect(surfaceRoot.getAttribute("data-logo-source-mode")).toBe("url")
@@ -1423,7 +1458,7 @@ describe("DraftingSurface", () => {
     expect(surfaceRoot.getAttribute("data-logo-preset-value")).toBe("")
   })
 
-  it("clears the drafting preset selection when switching the logo source to upload", () => {
+  it("clears the drafting preset selection when uploading a logo file", () => {
     const surface = renderSurface()
     const logoButton = getRequiredElement(surface.container, 'button[aria-label="Open Logo"]')
 
@@ -1444,14 +1479,24 @@ describe("DraftingSurface", () => {
       activateElement(getTabTriggerByText(surface.container, "Upload"))
     })
 
-    const uploadTrigger = getAccordionTriggerByText(
-      getRequiredElement(surface.container, '[data-slot="drafting-logo-upload-accordion"]'),
-      "Upload file",
-    )
+    const fileInput = getRequiredElement(
+      surface.container,
+      'input[aria-label="File input"]',
+    ) as HTMLInputElement
+    const logoFile = new File(["logo"], "logo.png", { type: "image/png" })
+
+    vi.useFakeTimers()
 
     act(() => {
-      activateElement(uploadTrigger)
+      setInputFiles(fileInput, [logoFile])
+      fileInput.dispatchEvent(new Event("change", { bubbles: true }))
     })
+
+    act(() => {
+      vi.runAllTimers()
+    })
+
+    vi.useRealTimers()
 
     const surfaceRoot = getRequiredElement(surface.container, '[data-slot="drafting-surface"]')
 
@@ -1745,18 +1790,26 @@ describe("DraftingSurface", () => {
     expect(stickyTabs.className).toContain("sticky")
     expect(navFrame.className).not.toContain("overflow-y-auto")
     expect(navFrame.className).not.toContain("py-4")
+    expect(navScrollArea.getAttribute("data-scrollbar-visibility")).toBe("while-scrolling")
     expect(navScrollArea.className).toContain("overflow-hidden")
     expect(navScroll.className).toContain("overflow-x-hidden")
     expect(navScroll.className).toContain("scroll-fade-effect-y")
     expect(navScroll.getAttribute("data-radix-scroll-area-viewport")).toBe("")
+    expect(
+      surface.container.querySelector('[data-slot="drafting-nav-scrollbar"]'),
+    ).toBeNull()
     expect(navScrollContent.className).toContain("py-4")
     expect(scrollFrame.className).not.toContain("overflow-y-auto")
     expect(panelScrollArea.getAttribute("data-slot")).toBe("drafting-tab-panel-scroll-area")
+    expect(panelScrollArea.getAttribute("data-scrollbar-visibility")).toBe("while-scrolling")
     expect(panelScrollArea.className).toContain("overflow-hidden")
     expect(panelScroll.className).toContain("overflow-x-hidden")
     expect(panelScroll.className).toContain("scroll-fade-effect-y")
     expect(panelScroll.className).not.toContain("overflow-y-auto")
     expect(panelScroll.getAttribute("data-radix-scroll-area-viewport")).toBe("")
+    expect(
+      surface.container.querySelector('[data-slot="drafting-tab-panel-scrollbar"]'),
+    ).toBeNull()
     expect(panelScroll.getAttribute("data-active-tool")).toBe("content")
     expect(panelScroll.getAttribute("data-active-tab")).toBe("content")
   })
@@ -1814,6 +1867,13 @@ function changeInputValue(element: HTMLInputElement, value: string) {
   valueSetter?.call(element, value)
   element.dispatchEvent(new Event("input", { bubbles: true }))
   element.dispatchEvent(new Event("change", { bubbles: true }))
+}
+
+function setInputFiles(element: HTMLInputElement, files: File[]) {
+  Object.defineProperty(element, "files", {
+    configurable: true,
+    value: files,
+  })
 }
 
 function getTabLabels(parent: ParentNode) {

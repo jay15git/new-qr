@@ -1,6 +1,8 @@
 "use client"
 
 import { type ReactNode } from "react"
+import { Search01Icon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import type {
   CornerDotType,
   CornerSquareType,
@@ -320,7 +322,6 @@ export function DraftingDotsColorTab({
       items={items}
       mode={mode}
       openItemIds={openItemIds}
-      onModeChange={onModeChange}
       onOpenItemIdsChange={onOpenItemIdsChange}
     />
   )
@@ -359,7 +360,6 @@ export function DraftingCornerSquareColorTab({
       })}
       mode={mode}
       openItemIds={openItemIds}
-      onModeChange={onModeChange}
       onOpenItemIdsChange={onOpenItemIdsChange}
     />
   )
@@ -398,7 +398,6 @@ export function DraftingCornerDotColorTab({
       })}
       mode={mode}
       openItemIds={openItemIds}
-      onModeChange={onModeChange}
       onOpenItemIdsChange={onOpenItemIdsChange}
     />
   )
@@ -437,7 +436,6 @@ export function DraftingBackgroundColorTab({
       })}
       mode={mode}
       openItemIds={openItemIds}
-      onModeChange={onModeChange}
       onOpenItemIdsChange={onOpenItemIdsChange}
     />
   )
@@ -480,7 +478,6 @@ export function DraftingEditBackgroundColorTab({
       })}
       mode={mode}
       openItemIds={openItemIds}
-      onModeChange={onModeChange}
       onOpenItemIdsChange={onOpenItemIdsChange}
     />
   )
@@ -520,7 +517,6 @@ export function DraftingLogoColorTab({
       })}
       mode={mode}
       openItemIds={openItemIds}
-      onModeChange={onModeChange}
       onOpenItemIdsChange={onOpenItemIdsChange}
     />
   )
@@ -549,6 +545,29 @@ export function DraftingBrandIconTab({
         data-slot="drafting-brand-icon-picker"
         className="min-w-0 space-y-4"
       >
+        <div className="relative space-y-2">
+          <span
+            aria-hidden="true"
+            data-slot="drafting-brand-icon-search-icon"
+            className="pointer-events-none absolute left-3 top-1/2 flex size-4 -translate-y-1/2 items-center justify-center text-[#00000052]"
+          >
+            <HugeiconsIcon
+              icon={Search01Icon}
+              size={16}
+              color="currentColor"
+              strokeWidth={1.8}
+            />
+          </span>
+          <Input
+            id="drafting-brand-icon-search"
+            aria-label="Search brand icons"
+            className="h-10 border-[#00000017] bg-[#FFFFFFE6] pl-9 pr-3 text-sm text-[#111111] shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.03)] placeholder:text-[#00000052] focus-visible:border-black/35 focus-visible:ring-0"
+            placeholder="Search Icons"
+            value={brandIconQuery}
+            onChange={(event) => onBrandIconQueryChange(event.target.value)}
+          />
+        </div>
+
         <div
           className="grid grid-cols-2 gap-2 sm:grid-cols-3"
           data-slot="drafting-brand-icon-category-picker"
@@ -586,17 +605,6 @@ export function DraftingBrandIconTab({
               </OptionCard>
             )
           })}
-        </div>
-
-        <div className="space-y-2">
-          <Input
-            id="drafting-brand-icon-search"
-            aria-label="Search brand icons"
-            className="h-10 border-[#00000017] bg-[#FFFFFFE6] px-3 text-sm text-[#111111] shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.03)] placeholder:text-[#00000052] focus-visible:border-black/35 focus-visible:ring-0"
-            placeholder="Search brand icons"
-            value={brandIconQuery}
-            onChange={(event) => onBrandIconQueryChange(event.target.value)}
-          />
         </div>
 
         <div
@@ -676,7 +684,6 @@ export function DraftingBackgroundUploadTab({
       })}
       mode={mode}
       openItemIds={openItemIds}
-      onModeChange={onModeChange}
       onOpenItemIdsChange={onOpenItemIdsChange}
     />
   )
@@ -715,7 +722,6 @@ export function DraftingLogoUploadTab({
       })}
       mode={mode}
       openItemIds={openItemIds}
-      onModeChange={onModeChange}
       onOpenItemIdsChange={onOpenItemIdsChange}
     />
   )
@@ -978,7 +984,6 @@ function buildDraftingBackgroundColorItems({
     id: DraftingBackgroundColorMode
     title: string
     content: ReactNode
-    onSelect?: () => void
   }> = buildDraftingSolidGradientItems({
     gradient,
     gradientIdPrefix,
@@ -996,8 +1001,18 @@ function buildDraftingBackgroundColorItems({
   items.push({
     id: "transparent",
     title: "Transparent",
-    content: null,
-    onSelect: onTransparentSelect,
+    content: (
+      <div className="min-w-0 px-4 pb-4">
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full rounded-[8px] border-[#00000017] bg-[#FFFFFFE6] text-[#111111] shadow-[0_0_10px_0_rgba(0,0,0,0.06),0_2px_4px_0_rgba(0,0,0,0.04)] hover:border-[#0000002A] hover:bg-[#FFFFFFF2]"
+          onClick={onTransparentSelect}
+        >
+          Use transparent background
+        </Button>
+      </div>
+    ),
   })
 
   return items
@@ -1065,7 +1080,6 @@ function DraftingColorAccordion<TMode extends string>({
   items,
   mode,
   openItemIds,
-  onModeChange,
   onOpenItemIdsChange,
 }: {
   dataSlot: string
@@ -1073,10 +1087,8 @@ function DraftingColorAccordion<TMode extends string>({
     id: TMode
     title: string
     content: ReactNode
-    onSelect?: () => void
   }>
   mode: TMode
-  onModeChange: (mode: TMode) => void
   onOpenItemIdsChange: (itemIds: string[]) => void
   openItemIds: string[]
 }) {
@@ -1105,7 +1117,7 @@ function DraftingColorAccordion<TMode extends string>({
                 "active:translate-y-0 active:border-[#00000034] active:shadow-[0_0_8px_0_rgba(0,0,0,0.08),0_1px_3px_0_rgba(0,0,0,0.08)]",
                 "data-[state=open]:bg-[#FFFFFFF2]",
                 isSelected &&
-                  "border-[#111111] bg-[#FFFFFF] shadow-[0_0_22px_2px_rgba(0,0,0,0.14),0_5px_10px_1px_rgba(0,0,0,0.08)]",
+                  "bg-[#FFFFFF] shadow-[0_0_22px_2px_rgba(0,0,0,0.14),0_5px_10px_1px_rgba(0,0,0,0.08)]",
               )}
             >
               <AccordionTrigger
@@ -1115,10 +1127,6 @@ function DraftingColorAccordion<TMode extends string>({
                   "px-4 py-3 no-underline hover:no-underline focus-visible:ring-0",
                   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-black/55",
                 )}
-                onClick={() => {
-                  onModeChange(item.id)
-                  item.onSelect?.()
-                }}
               >
                 <span className="flex min-w-0 items-center gap-3">
                   <span

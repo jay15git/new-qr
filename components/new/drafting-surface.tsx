@@ -1745,7 +1745,10 @@ export function DraftingSurface() {
           className="min-h-0"
         >
           <ScrollArea
+            data-scrollbar-visibility="while-scrolling"
             data-slot="drafting-nav-scroll-area"
+            scrollHideDelay={500}
+            type="scroll"
             className="h-full min-h-0"
           >
             <ScrollAreaViewport
@@ -1800,7 +1803,6 @@ export function DraftingSurface() {
             </ScrollAreaViewport>
             <ScrollAreaScrollbar
               data-slot="drafting-nav-scrollbar"
-              forceMount
               className="w-2 border-none p-[1px]"
             >
               <ScrollAreaThumb className="bg-black/16 hover:bg-black/24" />
@@ -1847,7 +1849,10 @@ export function DraftingSurface() {
                   className="mt-0 h-full min-h-0 data-[state=inactive]:hidden"
                 >
                   <ScrollArea
+                    data-scrollbar-visibility="while-scrolling"
                     data-slot="drafting-tab-panel-scroll-area"
+                    scrollHideDelay={500}
+                    type="scroll"
                     className="h-full min-h-0"
                   >
                     <ScrollAreaViewport
@@ -1861,7 +1866,6 @@ export function DraftingSurface() {
                     </ScrollAreaViewport>
                     <ScrollAreaScrollbar
                       data-slot="drafting-tab-panel-scrollbar"
-                      forceMount
                       className="w-2 border-none p-[1px]"
                     >
                       <ScrollAreaThumb className="bg-black/16 hover:bg-black/24" />

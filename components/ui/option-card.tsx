@@ -53,7 +53,7 @@ export function OptionCard({
         data-slot="option-card"
         data-state={checked ? "checked" : "unchecked"}
         className={cn(
-          "flex items-center justify-center border bg-white transition-[border-color,box-shadow,transform] duration-150 ease-out group-active:translate-y-px peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-black/55",
+          "flex items-center justify-center border border-dashed bg-white transition-[border-color,box-shadow,transform] duration-150 ease-out group-active:translate-y-px peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-black/55",
           isCompact ? "size-[76px]" : "size-[108px]",
           checked
             ? "border-2 border-black shadow-[0_0_22px_2px_rgba(0,0,0,0.14),0_5px_10px_1px_rgba(0,0,0,0.1)] group-hover:shadow-[0_0_28px_3px_rgba(0,0,0,0.18),0_6px_14px_1px_rgba(0,0,0,0.12)]"
