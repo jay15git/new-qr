@@ -19,6 +19,8 @@ describe("Unlumen slider", () => {
     expect(markup).toContain("rounded-[4px]")
     expect(markup).toContain("rounded-[2px]")
     expect(markup).toContain("border-black/10")
+    expect(markup).toContain("dark:bg-card")
+    expect(markup).toContain("dark:border-border")
     expect(markup).toContain("Logo size:")
   })
 })

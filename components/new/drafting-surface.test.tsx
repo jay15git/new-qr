@@ -163,6 +163,12 @@ describe("DraftingSurface", () => {
     expect(
       getRequiredElement(surface.container, '[data-slot="drafting-surface"]').className,
     ).toContain("bg-white")
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').className,
+    ).toContain("dark:bg-[#050505]")
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').className,
+    ).toContain("dark:border-white/15")
     expect(header).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="drafting-nav"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="drafting-scroll-area"]')).not.toBeNull()
@@ -202,6 +208,9 @@ describe("DraftingSurface", () => {
     ).toContain("text-black")
     expect(
       surface.container.querySelector('[data-slot="drafting-plus-marker"]')?.getAttribute("class"),
+    ).toContain("dark:text-foreground")
+    expect(
+      surface.container.querySelector('[data-slot="drafting-plus-marker"]')?.getAttribute("class"),
     ).not.toContain("text-black/")
     expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(8)
     expect(surface.container.querySelector('[data-slot="tabs"]')).not.toBeNull()
@@ -218,8 +227,13 @@ describe("DraftingSurface", () => {
     expect(headerContent.className).toContain("justify-end")
     expect(header.innerHTML).toContain('data-slot="mode-toggle"')
     expect(header.innerHTML).toContain('data-slot="drafting-download-trigger"')
+    expect(header.innerHTML).toContain("dark:bg-card")
+    expect(header.innerHTML).toContain("dark:bg-muted")
     expect(surface.container.textContent).toContain("Appearance")
     expect(surface.container.innerHTML).toContain('aria-label="Toggle dark mode"')
+    expect(surface.container.innerHTML).not.toMatch(
+      /dark:[^"]*shadow-\[[^\]]*rgba\(255,255,255/,
+    )
   })
 
   it(
@@ -728,6 +742,14 @@ describe("DraftingSurface", () => {
 
     expect(styleGrid.getAttribute("role")).toBe("radiogroup")
     expect(styleGrid.querySelectorAll('[data-slot="option-card"]').length).toBe(8)
+    expect(
+      squareInput.parentElement
+        ?.querySelector('[data-slot="option-card"]')
+        ?.getAttribute("class"),
+    ).toContain("dark:border-foreground/10")
+    expect(styleGrid.innerHTML).not.toMatch(
+      /dark:[^"]*shadow-\[[^\]]*rgba\(255,255,255/,
+    )
     expect(roundedInput.checked).toBe(true)
     expect(squareInput.checked).toBe(false)
 

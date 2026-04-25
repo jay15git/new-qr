@@ -45,14 +45,14 @@ export function DraftingLayersTab({
     <section data-slot="drafting-layers-tab" className="space-y-3">
       <div className="flex items-center justify-between gap-3 px-1">
         <div className="min-w-0">
-          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-[#111111]">
+          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-[#111111] dark:text-foreground">
             Layers
           </p>
-          <p className="mt-1 text-[0.72rem] leading-5 text-[#00000066]">
+          <p className="mt-1 text-[0.72rem] leading-5 text-[#00000066] dark:text-muted-foreground">
             Reorder and manage the current canvas stack.
           </p>
         </div>
-        <span className="shrink-0 text-[0.72rem] text-[#00000066]">
+        <span className="shrink-0 text-[0.72rem] text-[#00000066] dark:text-muted-foreground">
           {layerNodes.length} total
         </span>
       </div>
@@ -60,7 +60,7 @@ export function DraftingLayersTab({
       {layerNodes.length === 0 ? (
         <div
           data-slot="drafting-layers-empty-state"
-          className="rounded-[8px] border border-[#00000017] bg-[#FFFFFFCC] px-4 py-3 text-[0.72rem] leading-5 text-[#00000066] shadow-[0_0_10px_0_rgba(0,0,0,0.05),0_2px_4px_0_rgba(0,0,0,0.03)]"
+          className="rounded-[8px] border border-[#00000017] bg-[#FFFFFFCC] px-4 py-3 text-[0.72rem] leading-5 text-[#00000066] shadow-[0_0_10px_0_rgba(0,0,0,0.05),0_2px_4px_0_rgba(0,0,0,0.03)] dark:border-border dark:bg-card/80 dark:text-muted-foreground dark:shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.28)]"
         >
           The layer stack will appear here once the canvas has content.
         </div>
@@ -93,16 +93,16 @@ export function DraftingLayersTab({
                   data-node-id={node.id}
                   data-selected={isSelected ? "true" : "false"}
                   className={cn(
-                    "min-w-0 overflow-hidden rounded-[8px] border px-3 py-3 shadow-[0_0_10px_0_rgba(0,0,0,0.05),0_2px_4px_0_rgba(0,0,0,0.03)] transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
-                    "border-[#00000017] bg-[#FFFFFFCC] hover:-translate-y-px hover:border-[#00000026] hover:bg-[#FFFFFFF2] hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.07),0_4px_10px_0_rgba(0,0,0,0.04)]",
+                    "min-w-0 overflow-hidden rounded-[8px] border px-3 py-3 shadow-[0_0_10px_0_rgba(0,0,0,0.05),0_2px_4px_0_rgba(0,0,0,0.03)] transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out dark:shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.28)]",
+                    "border-[#00000017] bg-[#FFFFFFCC] hover:-translate-y-px hover:border-[#00000026] hover:bg-[#FFFFFFF2] hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.07),0_4px_10px_0_rgba(0,0,0,0.04)] dark:border-border dark:bg-card/80 dark:hover:border-border/80 dark:hover:bg-card dark:hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.06),0_4px_10px_0_rgba(0,0,0,0.34)]",
                     isSelected &&
-                      "border-[#111111] bg-[#FFFFFF] shadow-[0_0_22px_2px_rgba(0,0,0,0.14),0_5px_10px_1px_rgba(0,0,0,0.08)]",
+                      "border-[#111111] bg-[#FFFFFF] shadow-[0_0_22px_2px_rgba(0,0,0,0.14),0_5px_10px_1px_rgba(0,0,0,0.08)] dark:border-ring/70 dark:bg-accent/70 dark:shadow-[0_0_22px_2px_rgba(0,0,0,0.08),0_5px_10px_1px_rgba(0,0,0,0.34)]",
                   )}
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <div className="shrink-0">
                       <DraggableListHandle
-                        className="rounded-[6px] border-transparent bg-[#00000008] text-[#00000052] hover:bg-[#FFFFFFF2] hover:text-[#111111]"
+                        className="rounded-[6px] border-transparent bg-[#00000008] text-[#00000052] hover:bg-[#FFFFFFF2] hover:text-[#111111] dark:bg-muted/40 dark:text-muted-foreground dark:hover:bg-muted/70 dark:hover:text-foreground"
                         label={`Reorder ${node.name}`}
                       />
                     </div>
@@ -112,10 +112,10 @@ export function DraftingLayersTab({
                       onClick={() => onSelectedNodeChange(node.id)}
                       type="button"
                     >
-                      <p className="truncate text-[0.82rem] font-semibold text-[#111111]">
+                      <p className="truncate text-[0.82rem] font-semibold text-[#111111] dark:text-foreground">
                         {node.name}
                       </p>
-                      <p className="mt-1 truncate text-[0.68rem] uppercase tracking-[0.12em] text-[#00000066]">
+                      <p className="mt-1 truncate text-[0.68rem] uppercase tracking-[0.12em] text-[#00000066] dark:text-muted-foreground">
                         {getLayerRowMeta(node, index, layerNodes.length, isSelected)}
                       </p>
                     </button>
@@ -199,7 +199,7 @@ function IconActionButton({
     <Button
       aria-label={ariaLabel}
       className={cn(
-        "rounded-[6px] border border-transparent bg-[#00000008] text-[#00000073] shadow-none transition-[color,box-shadow,background-color,transform] duration-150 ease-out hover:-translate-y-px hover:bg-[#FFFFFFF2] hover:text-[#262626] hover:shadow-[0_0_20px_2px_rgba(0,0,0,0.06),0_4px_10px_0_rgba(0,0,0,0.03)] active:translate-y-0 active:bg-[#FFFFFFF2]",
+        "rounded-[6px] border border-transparent bg-[#00000008] text-[#00000073] shadow-none transition-[color,box-shadow,background-color,transform] duration-150 ease-out hover:-translate-y-px hover:bg-[#FFFFFFF2] hover:text-[#262626] hover:shadow-[0_0_20px_2px_rgba(0,0,0,0.06),0_4px_10px_0_rgba(0,0,0,0.03)] active:translate-y-0 active:bg-[#FFFFFFF2] dark:bg-muted/40 dark:text-muted-foreground dark:hover:bg-muted/70 dark:hover:text-foreground dark:hover:shadow-[0_0_20px_2px_rgba(0,0,0,0.05),0_4px_10px_0_rgba(0,0,0,0.28)] dark:active:bg-muted",
         className,
       )}
       onClick={onClick}

@@ -180,10 +180,10 @@ const DEFAULT_DRAFTING_PANEL_TABS: Record<DraftingToolId, string> = {
 }
 
 const DRAFTING_PANEL_TAB_TRAY_CLASS_NAME =
-  "grid h-auto w-full auto-cols-fr grid-flow-col items-stretch gap-2 rounded-[4px] bg-[#00000008] p-1 shadow-none"
+  "grid h-auto w-full auto-cols-fr grid-flow-col items-stretch gap-2 rounded-[4px] bg-[#00000008] p-1 shadow-none dark:bg-muted/40"
 
 const DRAFTING_PANEL_TAB_TRIGGER_CLASS_NAME =
-  "min-w-0 rounded-[4px] border border-transparent bg-transparent px-3 py-2 text-[0.72rem] font-medium tracking-[0.04em] text-[#00000073] shadow-none transition-[color,box-shadow,background-color,transform] duration-150 ease-out hover:-translate-y-px hover:bg-[#FFFFFFF2] hover:text-[#000000A6] hover:shadow-[0_0_24px_3px_rgba(0,0,0,0.08),0_4px_10px_1px_rgba(0,0,0,0.025)] active:translate-y-0 active:bg-[#FFFFFFF2] active:font-medium active:text-[#262626] active:shadow-[0_0_14px_1px_rgba(0,0,0,0.07)] data-[state=active]:bg-[#FFFFFF] data-[state=active]:font-semibold data-[state=active]:text-[#262626] data-[state=active]:shadow-[0_0_24px_3px_rgba(0,0,0,0.08),0_4px_10px_1px_rgba(0,0,0,0.025)] data-[state=active]:hover:-translate-y-px data-[state=active]:hover:bg-[#FFFFFF] data-[state=active]:hover:text-[#262626] data-[state=active]:hover:shadow-[0_0_28px_4px_rgba(0,0,0,0.10),0_4px_10px_1px_rgba(0,0,0,0.03)] data-[state=active]:active:translate-y-0"
+  "min-w-0 rounded-[4px] border border-transparent bg-transparent px-3 py-2 text-[0.72rem] font-medium tracking-[0.04em] text-[#00000073] shadow-none transition-[color,box-shadow,background-color,transform] duration-150 ease-out hover:-translate-y-px hover:bg-[#FFFFFFF2] hover:text-[#000000A6] hover:shadow-[0_0_24px_3px_rgba(0,0,0,0.08),0_4px_10px_1px_rgba(0,0,0,0.025)] active:translate-y-0 active:bg-[#FFFFFFF2] active:font-medium active:text-[#262626] active:shadow-[0_0_14px_1px_rgba(0,0,0,0.07)] data-[state=active]:bg-[#FFFFFF] data-[state=active]:font-semibold data-[state=active]:text-[#262626] data-[state=active]:shadow-[0_0_24px_3px_rgba(0,0,0,0.08),0_4px_10px_1px_rgba(0,0,0,0.025)] data-[state=active]:hover:-translate-y-px data-[state=active]:hover:bg-[#FFFFFF] data-[state=active]:hover:text-[#262626] data-[state=active]:hover:shadow-[0_0_28px_4px_rgba(0,0,0,0.10),0_4px_10px_1px_rgba(0,0,0,0.03)] data-[state=active]:active:translate-y-0 dark:text-muted-foreground dark:hover:bg-muted/70 dark:hover:text-foreground dark:hover:shadow-[0_0_24px_3px_rgba(0,0,0,0.05),0_4px_10px_1px_rgba(0,0,0,0.28)] dark:active:bg-muted dark:active:text-foreground dark:data-[state=active]:bg-card dark:data-[state=active]:text-foreground dark:data-[state=active]:shadow-[0_0_24px_3px_rgba(0,0,0,0.06),0_4px_10px_1px_rgba(0,0,0,0.32)] dark:data-[state=active]:hover:bg-card dark:data-[state=active]:hover:text-foreground"
 
 const DEFAULT_DRAFTING_STUDIO_STATE = createDefaultQrStudioState()
 const IGNORE_DRAFTING_UPLOAD_ERROR: (message: string) => void = () => undefined
@@ -306,7 +306,7 @@ function PlusMarker({ className }: { className: string }) {
     <svg
       aria-hidden="true"
       data-slot="drafting-plus-marker"
-      className={cn("pointer-events-none absolute size-4 text-black", className)}
+      className={cn("pointer-events-none absolute size-4 text-black dark:text-foreground/70", className)}
       fill="none"
       viewBox="0 0 24 24"
     >
@@ -1456,7 +1456,7 @@ export function DraftingSurface() {
       data-qr-size={selectedQrSize}
       data-qr-type-number={selectedTypeNumber}
       data-slot="drafting-surface"
-      className="relative grid h-[calc(100dvh-3rem)] w-full grid-rows-[var(--new-header-height)_minmax(0,1fr)] overflow-visible border border-dashed border-black/18 bg-white shadow-[0_18px_48px_rgba(15,23,42,0.06)] sm:h-[calc(100dvh-4rem)] [--new-header-height:3.875rem] [--new-left-rail-width:clamp(6.25rem,10vw,7.5rem)] [--new-middle-rail-width:clamp(15rem,24vw,18.5rem)]"
+      className="relative grid h-[calc(100dvh-3rem)] w-full grid-rows-[var(--new-header-height)_minmax(0,1fr)] overflow-visible border border-dashed border-black/18 bg-white shadow-[0_18px_48px_rgba(15,23,42,0.06)] dark:border-white/15 dark:bg-[#050505] dark:shadow-[0_18px_48px_rgba(0,0,0,0.28)] sm:h-[calc(100dvh-4rem)] [--new-header-height:3.875rem] [--new-left-rail-width:clamp(6.25rem,10vw,7.5rem)] [--new-middle-rail-width:clamp(15rem,24vw,18.5rem)]"
       data-compose-edit-mode={isComposeEditMode ? "true" : "false"}
       data-compose-selected-node-id={selectedComposeNodeId ?? ""}
     >
@@ -1490,7 +1490,7 @@ export function DraftingSurface() {
       >
         <div className="flex h-full items-center justify-end">
           <div data-slot="drafting-header-actions" className="flex h-full items-center gap-2.5">
-            <ModeToggle className="border-black/8 bg-white/70 text-black shadow-[0_10px_30px_rgba(15,23,42,0.08)] backdrop-blur-sm" />
+            <ModeToggle className="border-black/8 bg-white/70 text-black shadow-[0_10px_30px_rgba(15,23,42,0.08)] backdrop-blur-sm dark:border-border dark:bg-card/70 dark:text-foreground dark:shadow-[0_10px_30px_rgba(0,0,0,0.32)]" />
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -1499,7 +1499,7 @@ export function DraftingSurface() {
                   disabled={!canDownload}
                   type="button"
                   variant="ghost"
-                  className="h-8 rounded-[6px] border-0 bg-black/[0.03] px-3.5 text-black/45 shadow-[0_0_18px_rgba(0,0,0,0.08),0_2px_6px_rgba(0,0,0,0.03)] transition-[background-color,box-shadow,transform,color] duration-150 ease-out hover:-translate-y-px hover:bg-black/[0.06] hover:text-black/72 hover:shadow-[0_0_24px_rgba(0,0,0,0.10),0_4px_10px_rgba(0,0,0,0.06)] active:translate-y-0 active:bg-black/[0.07] active:shadow-[0_0_14px_rgba(0,0,0,0.07),0_2px_6px_rgba(0,0,0,0.04)]"
+                  className="h-8 rounded-[6px] border-0 bg-black/[0.03] px-3.5 text-black/45 shadow-[0_0_18px_rgba(0,0,0,0.08),0_2px_6px_rgba(0,0,0,0.03)] transition-[background-color,box-shadow,transform,color] duration-150 ease-out hover:-translate-y-px hover:bg-black/[0.06] hover:text-black/72 hover:shadow-[0_0_24px_rgba(0,0,0,0.10),0_4px_10px_rgba(0,0,0,0.06)] active:translate-y-0 active:bg-black/[0.07] active:shadow-[0_0_14px_rgba(0,0,0,0.07),0_2px_6px_rgba(0,0,0,0.04)] dark:bg-muted/40 dark:text-muted-foreground dark:hover:bg-muted/70 dark:hover:text-foreground dark:hover:shadow-[0_0_24px_rgba(0,0,0,0.05),0_4px_10px_rgba(0,0,0,0.28)] dark:active:bg-muted"
                 >
                   <DownloadIcon data-icon="inline-start" />
                   Download
@@ -1509,7 +1509,7 @@ export function DraftingSurface() {
                 align="end"
                 data-slot="drafting-download-popover"
                 sideOffset={10}
-                className="flex max-h-[calc(100dvh-5rem)] w-[min(27rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-[12px] border border-black/10 bg-[#FFFFFFF2] p-0 text-[#111111] shadow-[0_24px_64px_rgba(15,23,42,0.18),0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-xl"
+                className="flex max-h-[calc(100dvh-5rem)] w-[min(27rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-[12px] border border-black/10 bg-[#FFFFFFF2] p-0 text-[#111111] shadow-[0_24px_64px_rgba(15,23,42,0.18),0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-border dark:bg-popover/95 dark:text-popover-foreground dark:shadow-[0_24px_64px_rgba(0,0,0,0.46),0_8px_20px_rgba(0,0,0,0.32)]"
               >
                 <div className="flex min-h-0 flex-1 flex-col">
                   <div
@@ -1520,7 +1520,7 @@ export function DraftingSurface() {
                       data-slot="drafting-download-target-section"
                       className="flex flex-col gap-2.5"
                     >
-                      <p className="text-[0.74rem] font-bold uppercase tracking-[0.08em] text-[#111111]">
+                      <p className="text-[0.74rem] font-bold uppercase tracking-[0.08em] text-[#111111] dark:text-foreground">
                         Target
                       </p>
                       <div
@@ -1534,6 +1534,7 @@ export function DraftingSurface() {
 
                           return (
                             <OptionCard
+                              darkShadowTone="ink"
                               key={target.id}
                               checked={isSelected}
                               className={cn(
@@ -1551,7 +1552,9 @@ export function DraftingSurface() {
                               <span
                                 className={cn(
                                   "flex min-w-0 items-center justify-center text-center text-[0.7rem] font-semibold leading-tight",
-                                  isSelected ? "text-[#111111]" : "text-[#00000073]",
+                                  isSelected
+                                    ? "text-[#111111] dark:text-foreground"
+                                    : "text-[#00000073] dark:text-muted-foreground",
                                 )}
                               >
                                 {target.label}
@@ -1566,7 +1569,7 @@ export function DraftingSurface() {
                       data-slot="drafting-download-format-section"
                       className="flex flex-col gap-2.5"
                     >
-                      <p className="text-[0.74rem] font-bold uppercase tracking-[0.08em] text-[#111111]">
+                      <p className="text-[0.74rem] font-bold uppercase tracking-[0.08em] text-[#111111] dark:text-foreground">
                         Format
                       </p>
                       <div
@@ -1580,6 +1583,7 @@ export function DraftingSurface() {
 
                           return (
                             <OptionCard
+                              darkShadowTone="ink"
                               key={extension}
                               checked={isSelected}
                               className={cn(
@@ -1598,7 +1602,9 @@ export function DraftingSurface() {
                                 <span
                                   className={cn(
                                     "text-[0.68rem] font-semibold uppercase leading-none tracking-[0.1em]",
-                                    isSelected ? "text-[#111111]" : "text-[#00000073]",
+                                    isSelected
+                                      ? "text-[#111111] dark:text-foreground"
+                                      : "text-[#00000073] dark:text-muted-foreground",
                                   )}
                                 >
                                   {extension}
@@ -1615,7 +1621,7 @@ export function DraftingSurface() {
                         data-slot="drafting-raster-preset-section"
                         className="flex flex-col gap-2.5"
                       >
-                        <p className="text-[0.74rem] font-bold uppercase tracking-[0.08em] text-[#111111]">
+                        <p className="text-[0.74rem] font-bold uppercase tracking-[0.08em] text-[#111111] dark:text-foreground">
                           Quality preset
                         </p>
 
@@ -1643,6 +1649,7 @@ export function DraftingSurface() {
 
                             return (
                               <OptionCard
+                                darkShadowTone="ink"
                                 key={preset.id}
                                 checked={isSelected}
                                 className={cn(
@@ -1662,20 +1669,22 @@ export function DraftingSurface() {
                                     <span
                                       className={cn(
                                         "text-[0.74rem] font-semibold leading-tight",
-                                        isSelected ? "text-[#111111]" : "text-[#000000A6]",
+                                        isSelected
+                                          ? "text-[#111111] dark:text-foreground"
+                                          : "text-[#000000A6] dark:text-foreground/80",
                                       )}
                                     >
                                       {preset.label}
                                     </span>
                                     <span
                                       aria-hidden="true"
-                                      className="text-[0.68rem] leading-4 text-[#00000052]"
+                                      className="text-[0.68rem] leading-4 text-[#00000052] dark:text-muted-foreground/70"
                                     >
                                       •
                                     </span>
                                     <span
                                       data-slot="drafting-raster-quality-value"
-                                      className="text-[0.68rem] font-semibold leading-4 text-[#111111]"
+                                      className="text-[0.68rem] font-semibold leading-4 text-[#111111] dark:text-foreground"
                                     >
                                       {preset.sizePx} × {preset.sizePx}
                                     </span>
@@ -1683,20 +1692,20 @@ export function DraftingSurface() {
                                       <>
                                         <span
                                           aria-hidden="true"
-                                          className="text-[0.68rem] leading-4 text-[#00000052]"
+                                          className="text-[0.68rem] leading-4 text-[#00000052] dark:text-muted-foreground/70"
                                         >
                                           •
                                         </span>
                                         <span
                                           data-slot="drafting-raster-calculated-size"
-                                          className="text-[0.68rem] font-semibold leading-4 text-[#111111]"
+                                          className="text-[0.68rem] font-semibold leading-4 text-[#111111] dark:text-foreground"
                                         >
                                           {selectedPresetExportSizeLabel}
                                         </span>
                                       </>
                                     ) : null}
                                   </span>
-                                  <span className="text-[0.68rem] leading-4 text-[#00000073]">
+                                  <span className="text-[0.68rem] leading-4 text-[#00000073] dark:text-muted-foreground">
                                     {preset.primaryUse}
                                   </span>
                                 </span>
@@ -1709,12 +1718,12 @@ export function DraftingSurface() {
                     ) : null}
                   </div>
 
-                  <div className="shrink-0 border-t border-black/8 bg-[#FFFFFFF2] p-3">
+                  <div className="shrink-0 border-t border-black/8 bg-[#FFFFFFF2] p-3 dark:border-border dark:bg-popover/95">
                     <Button
                       data-slot="drafting-download-submit"
                       disabled={!canDownload}
                       type="button"
-                      className="h-9 w-full rounded-[8px] bg-[#111111] text-white shadow-[0_14px_32px_rgba(17,17,17,0.18)] transition-[background-color,box-shadow,transform] hover:-translate-y-px hover:bg-[#1d1d1d] hover:shadow-[0_18px_36px_rgba(17,17,17,0.22)] active:translate-y-0"
+                      className="h-9 w-full rounded-[8px] bg-[#111111] text-white shadow-[0_14px_32px_rgba(17,17,17,0.18)] transition-[background-color,box-shadow,transform] hover:-translate-y-px hover:bg-[#1d1d1d] hover:shadow-[0_18px_36px_rgba(17,17,17,0.22)] active:translate-y-0 dark:bg-foreground dark:text-background dark:shadow-[0_14px_32px_rgba(0,0,0,0.34)] dark:hover:bg-foreground/90"
                       onClick={() => {
                         void handleDownload()
                       }}
@@ -1761,8 +1770,8 @@ export function DraftingSurface() {
                       aria-pressed={isActive}
                       data-drafting-tool-button="true"
                       className={cn(
-                        "group flex h-auto w-20 flex-col items-center gap-3 rounded-none border-0 bg-transparent px-2 py-2.5 text-center text-black/45 shadow-none transition-[color,transform] duration-150 ease-out hover:bg-transparent hover:text-black/72 active:bg-transparent",
-                        isActive && "text-black",
+                        "group flex h-auto w-20 flex-col items-center gap-3 rounded-none border-0 bg-transparent px-2 py-2.5 text-center text-black/45 shadow-none transition-[color,transform] duration-150 ease-out hover:bg-transparent hover:text-black/72 active:bg-transparent dark:text-muted-foreground dark:hover:text-foreground",
+                        isActive && "text-black dark:text-foreground",
                       )}
                       size="default"
                       type="button"
@@ -1772,9 +1781,9 @@ export function DraftingSurface() {
                       <span
                         data-slot="drafting-tool-button-icon"
                         className={cn(
-                          "flex size-10 items-center justify-center rounded-[6px] bg-black/[0.03] text-current shadow-[0_0_18px_rgba(0,0,0,0.08),0_2px_6px_rgba(0,0,0,0.03)] transition-[background-color,box-shadow,transform,color] duration-150 ease-out group-hover:-translate-y-px group-hover:bg-black/[0.06] group-hover:shadow-[0_0_24px_rgba(0,0,0,0.10),0_4px_10px_rgba(0,0,0,0.06)] group-active:translate-y-0 group-active:bg-black/[0.07] group-active:shadow-[0_0_14px_rgba(0,0,0,0.07),0_2px_6px_rgba(0,0,0,0.04)]",
+                          "flex size-10 items-center justify-center rounded-[6px] bg-black/[0.03] text-current shadow-[0_0_18px_rgba(0,0,0,0.08),0_2px_6px_rgba(0,0,0,0.03)] transition-[background-color,box-shadow,transform,color] duration-150 ease-out group-hover:-translate-y-px group-hover:bg-black/[0.06] group-hover:shadow-[0_0_24px_rgba(0,0,0,0.10),0_4px_10px_rgba(0,0,0,0.06)] group-active:translate-y-0 group-active:bg-black/[0.07] group-active:shadow-[0_0_14px_rgba(0,0,0,0.07),0_2px_6px_rgba(0,0,0,0.04)] dark:bg-muted/40 dark:group-hover:bg-muted/70 dark:group-hover:shadow-[0_0_24px_rgba(0,0,0,0.05),0_4px_10px_rgba(0,0,0,0.28)] dark:group-active:bg-muted",
                           isActive &&
-                            "bg-[#111111] text-white shadow-[0_0_24px_rgba(0,0,0,0.18),0_4px_10px_rgba(0,0,0,0.10)] group-hover:bg-[#111111] group-hover:text-white group-hover:shadow-[0_0_28px_rgba(0,0,0,0.22),0_4px_12px_rgba(0,0,0,0.14)] group-active:translate-y-0 group-active:bg-[#111111] group-active:text-white group-active:shadow-[0_0_24px_rgba(0,0,0,0.18),0_4px_10px_rgba(0,0,0,0.10)]",
+                            "bg-[#111111] text-white shadow-[0_0_24px_rgba(0,0,0,0.18),0_4px_10px_rgba(0,0,0,0.10)] group-hover:bg-[#111111] group-hover:text-white group-hover:shadow-[0_0_28px_rgba(0,0,0,0.22),0_4px_12px_rgba(0,0,0,0.14)] group-active:translate-y-0 group-active:bg-[#111111] group-active:text-white group-active:shadow-[0_0_24px_rgba(0,0,0,0.18),0_4px_10px_rgba(0,0,0,0.10)] dark:bg-foreground dark:text-background dark:shadow-[0_0_24px_rgba(0,0,0,0.08),0_4px_10px_rgba(0,0,0,0.36)] dark:group-hover:bg-foreground dark:group-hover:text-background dark:group-hover:shadow-[0_0_28px_rgba(0,0,0,0.10),0_4px_12px_rgba(0,0,0,0.4)] dark:group-active:bg-foreground",
                         )}
                       >
                         {tool.renderIcon()}
@@ -1782,7 +1791,7 @@ export function DraftingSurface() {
                       <span
                         data-slot="drafting-tool-button-label"
                         className={cn(
-                          "text-[0.58rem] font-medium uppercase leading-[1.15] tracking-[0.16em] text-black/45 transition-colors duration-150 group-hover:text-black/72",
+                          "text-[0.58rem] font-medium uppercase leading-[1.15] tracking-[0.16em] text-black/45 transition-colors duration-150 group-hover:text-black/72 dark:text-muted-foreground dark:group-hover:text-foreground",
                           isActive && "font-semibold text-current",
                         )}
                       >
@@ -1797,7 +1806,7 @@ export function DraftingSurface() {
               data-slot="drafting-nav-scrollbar"
               className="w-2 border-none p-[1px]"
             >
-              <ScrollAreaThumb className="bg-black/16 hover:bg-black/24" />
+              <ScrollAreaThumb className="bg-black/16 hover:bg-black/24 dark:bg-muted-foreground/20 dark:hover:bg-muted-foreground/30" />
             </ScrollAreaScrollbar>
           </ScrollArea>
         </nav>
@@ -1860,7 +1869,7 @@ export function DraftingSurface() {
                       data-slot="drafting-tab-panel-scrollbar"
                       className="w-2 border-none p-[1px]"
                     >
-                      <ScrollAreaThumb className="bg-black/16 hover:bg-black/24" />
+                      <ScrollAreaThumb className="bg-black/16 hover:bg-black/24 dark:bg-muted-foreground/20 dark:hover:bg-muted-foreground/30" />
                     </ScrollAreaScrollbar>
                   </ScrollArea>
                 </TabsContent>

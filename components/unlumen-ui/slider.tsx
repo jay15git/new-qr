@@ -605,7 +605,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
             renderThumb(index, thumbState)
           ) : (
             <motion.span
-              className="flex items-center justify-center rounded-[4px] border border-black/10 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.06)]"
+              className="flex items-center justify-center rounded-[4px] border border-black/10 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.06)] dark:border-border dark:bg-card dark:shadow-[0_1px_4px_rgba(0,0,0,0.35),0_0_0_1px_rgba(255,255,255,0.08)]"
               initial={false}
               animate={{
                 width: THUMB_SIZE,
@@ -614,7 +614,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
               transition={springs.fast}
             >
               <span
-                className="rounded-[2px] border border-black/10"
+                className="rounded-[2px] border border-black/10 dark:border-border"
                 style={{
                   width: thumbState.isActive ? 10 : 8,
                   height: thumbState.isActive ? 10 : 8,

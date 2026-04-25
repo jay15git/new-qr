@@ -470,7 +470,7 @@ export function DashboardComposeSurface({
             className={cn(
               "pointer-events-auto inline-flex max-w-full flex-wrap items-center justify-center backdrop-blur",
               isNeutralSurface
-                ? "gap-1.5 rounded-[10px] border border-[#00000017] bg-[#FFFFFFCC] px-2.5 py-1 text-[#00000073] shadow-[0_0_10px_0_rgba(0,0,0,0.05),0_2px_4px_0_rgba(0,0,0,0.03)]"
+                ? "gap-1.5 rounded-[10px] border border-[#00000017] bg-[#FFFFFFCC] px-2.5 py-1 text-[#00000073] shadow-[0_0_10px_0_rgba(0,0,0,0.05),0_2px_4px_0_rgba(0,0,0,0.03)] dark:border-border dark:bg-card/80 dark:text-muted-foreground dark:shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.28)]"
                 : "gap-2 rounded-[1.75rem] border border-slate-300/80 bg-white/84 px-2 py-2 text-foreground/70 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)]",
             )}
           >
@@ -480,7 +480,7 @@ export function DashboardComposeSurface({
                 className={cn(
                   "inline-flex items-center gap-2",
                   isNeutralSurface
-                    ? "rounded-[8px] px-2 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-[#111111]"
+                    ? "rounded-[8px] px-2 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-[#111111] dark:text-foreground"
                     : "rounded-full border border-slate-300/80 bg-white/84 px-3 py-1.5 text-sm font-medium text-foreground/70 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)]",
                 )}
               >
@@ -490,7 +490,7 @@ export function DashboardComposeSurface({
                   checked={isEditMode}
                   className={cn(
                     isNeutralSurface &&
-                      "h-[20px] w-[36px] shrink-0 border border-[#00000014] bg-black/[0.10] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18)] transition-[background-color,border-color,box-shadow] duration-150 hover:border-[#00000024] hover:bg-black/[0.14] data-[state=checked]:border-[#111111] data-[state=checked]:bg-[#111111] focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-0",
+                      "h-[20px] w-[36px] shrink-0 border border-[#00000014] bg-black/[0.10] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18)] transition-[background-color,border-color,box-shadow] duration-150 hover:border-[#00000024] hover:bg-black/[0.14] data-[state=checked]:border-[#111111] data-[state=checked]:bg-[#111111] focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-0 dark:border-border dark:bg-muted dark:hover:border-border/80 dark:hover:bg-muted/80 dark:data-[state=checked]:border-foreground dark:data-[state=checked]:bg-foreground dark:focus-visible:ring-ring/50",
                   )}
                   onCheckedChange={handleEditModeChange}
                 />
@@ -501,7 +501,7 @@ export function DashboardComposeSurface({
               className={cn(
                 "inline-flex items-center gap-1",
                 isNeutralSurface
-                  ? "rounded-[8px] px-1 py-0.5 text-[#00000073]"
+                  ? "rounded-[8px] px-1 py-0.5 text-[#00000073] dark:text-muted-foreground"
                   : "rounded-full border border-slate-300/80 bg-white/84 p-1 text-foreground/70 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)]",
               )}
             >
@@ -523,7 +523,7 @@ export function DashboardComposeSurface({
                 className={cn(
                   "min-w-12 px-1 text-center font-semibold",
                   isNeutralSurface
-                    ? "text-[0.68rem] uppercase tracking-[0.08em] text-[#111111]"
+                    ? "text-[0.68rem] uppercase tracking-[0.08em] text-[#111111] dark:text-foreground"
                     : "text-[0.72rem] text-foreground/65",
                 )}
               >
@@ -605,7 +605,7 @@ export function DashboardComposeSurface({
               variant="ghost"
               className={cn(
                 isNeutralSurface
-                  ? "rounded-[8px] border-0 bg-transparent px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-[#111111] shadow-none transition-[background-color,transform,color] duration-150 ease-out hover:-translate-y-px hover:bg-black/[0.04] hover:text-black active:translate-y-0 active:bg-black/[0.06]"
+                  ? "rounded-[8px] border-0 bg-transparent px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-[#111111] shadow-none transition-[background-color,transform,color] duration-150 ease-out hover:-translate-y-px hover:bg-black/[0.04] hover:text-black active:translate-y-0 active:bg-black/[0.06] dark:text-foreground dark:hover:bg-muted/60 dark:hover:text-foreground dark:active:bg-muted"
                   : "rounded-full border border-slate-300/80 bg-white/88 text-foreground/68 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)] hover:bg-white",
               )}
               onClick={onReset}
@@ -765,21 +765,21 @@ export function DashboardComposeSurface({
                             <>
                               <div
                                 className={cn(
-                                  "pointer-events-none absolute inset-[-10px] rounded-[4px] border border-black shadow-[0_0_0_1px_rgba(255,255,255,0.72)]",
+                                  "pointer-events-none absolute inset-[-10px] rounded-[4px] border border-black shadow-[0_0_0_1px_rgba(255,255,255,0.72)] dark:border-foreground dark:shadow-[0_0_0_1px_rgba(0,0,0,0.72)]",
                                 )}
                               />
                               {isQrNode ? (
-                                <div className="pointer-events-none absolute bottom-[-2.75rem] left-1/2 -translate-x-1/2 rounded-[4px] border border-black/24 bg-white/92 px-3 py-1 text-[0.72rem] font-semibold text-black/72 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)]">
+                                <div className="pointer-events-none absolute bottom-[-2.75rem] left-1/2 -translate-x-1/2 rounded-[4px] border border-black/24 bg-white/92 px-3 py-1 text-[0.72rem] font-semibold text-black/72 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)] dark:border-border dark:bg-popover/92 dark:text-popover-foreground/80 dark:shadow-[0_12px_24px_-20px_rgba(0,0,0,0.9)]">
                                   {Math.round(node.naturalWidth)} × {Math.round(node.naturalHeight)}
                                 </div>
                               ) : null}
                               {showRotationHandle && isRotating ? (
-                                <div className="pointer-events-none absolute left-1/2 top-[-4.7rem] -translate-x-1/2 rounded-[4px] border border-black/24 bg-white/92 px-2 py-1 text-[0.72rem] font-semibold text-black/72 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)]">
+                                <div className="pointer-events-none absolute left-1/2 top-[-4.7rem] -translate-x-1/2 rounded-[4px] border border-black/24 bg-white/92 px-2 py-1 text-[0.72rem] font-semibold text-black/72 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)] dark:border-border dark:bg-popover/92 dark:text-popover-foreground/80 dark:shadow-[0_12px_24px_-20px_rgba(0,0,0,0.9)]">
                                   {Math.round(node.rotation)}°
                                 </div>
                               ) : null}
                               {showRotationHandle ? (
-                                <div className="pointer-events-none absolute left-1/2 top-[-2.05rem] h-7 w-px -translate-x-1/2 bg-black/72" />
+                                <div className="pointer-events-none absolute left-1/2 top-[-2.05rem] h-7 w-px -translate-x-1/2 bg-black/72 dark:bg-foreground/70" />
                               ) : null}
                               {canTransformNodes && !node.isLocked ? (
                                 <>
@@ -911,7 +911,7 @@ function IconButton({
       className={cn(
         "p-0",
         appearance === "neutral"
-          ? "h-9 w-9 rounded-[8px] border-0 bg-black/[0.03] text-[#111111] shadow-[0_0_18px_rgba(0,0,0,0.08),0_2px_6px_rgba(0,0,0,0.03)] transition-[background-color,box-shadow,transform,color] duration-150 ease-out hover:-translate-y-px hover:bg-black/[0.06] hover:shadow-[0_0_24px_rgba(0,0,0,0.10),0_4px_10px_rgba(0,0,0,0.06)] active:translate-y-0 active:bg-black/[0.07] active:shadow-[0_0_14px_rgba(0,0,0,0.07),0_2px_6px_rgba(0,0,0,0.04)]"
+          ? "h-9 w-9 rounded-[8px] border-0 bg-black/[0.03] text-[#111111] shadow-[0_0_18px_rgba(0,0,0,0.08),0_2px_6px_rgba(0,0,0,0.03)] transition-[background-color,box-shadow,transform,color] duration-150 ease-out hover:-translate-y-px hover:bg-black/[0.06] hover:shadow-[0_0_24px_rgba(0,0,0,0.10),0_4px_10px_rgba(0,0,0,0.06)] active:translate-y-0 active:bg-black/[0.07] active:shadow-[0_0_14px_rgba(0,0,0,0.07),0_2px_6px_rgba(0,0,0,0.04)] dark:bg-muted/40 dark:text-foreground dark:hover:bg-muted/70 dark:hover:shadow-[0_0_24px_rgba(0,0,0,0.05),0_4px_10px_rgba(0,0,0,0.28)] dark:active:bg-muted"
           : "h-8 w-8 rounded-full border border-slate-300/80 bg-white/92 text-foreground/72 shadow-none hover:bg-white",
       )}
       onClick={onClick}
@@ -941,7 +941,7 @@ function DocumentGuideOverlay({
       className="pointer-events-none absolute inset-0"
     >
       <div
-        className="absolute border border-dashed border-black/18"
+        className="absolute border border-dashed border-black/18 dark:border-foreground/14"
         style={{
           bottom: insetY,
           left: insetX,
@@ -967,7 +967,7 @@ function HandleButton({
   return (
     <button
       aria-label={ariaLabel}
-      className={`absolute flex h-6 w-6 items-center justify-center rounded-[4px] border border-black bg-white text-black shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)] ${className}`}
+      className={`absolute flex h-6 w-6 items-center justify-center rounded-[4px] border border-black bg-white text-black shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)] dark:border-foreground dark:bg-card dark:text-foreground dark:shadow-[0_12px_24px_-20px_rgba(0,0,0,0.9)] ${className}`}
       onPointerDown={onPointerDown}
       type="button"
     >

@@ -327,8 +327,124 @@
 [data-slot="drafting-surface"] {
   --drafting-dash-size: 15px;
   --drafting-dash-cycle: 30px;
+  --drafting-dash-color: rgba(0, 0, 0, 0.12);
   border-color: transparent;
   isolation: isolate;
+}
+
+.dark [data-slot="drafting-surface"] {
+  --drafting-dash-color: rgba(255, 255, 255, 0.14);
+}
+
+.dark [data-slot="new-page"] {
+  min-height: 100dvh;
+  --background: oklch(0.065 0.003 252);
+  --card: oklch(0.15 0.006 252);
+  --popover: oklch(0.13 0.006 252);
+  --muted: oklch(0.19 0.006 252);
+  --input: oklch(0.18 0.006 252 / 0.95);
+  --border: oklch(0.34 0.006 252 / 0.72);
+  --drafting-dark-depth-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.07),
+    0 0 18px 2px rgba(150, 150, 150, 0.12),
+    0 7px 16px -3px rgba(0, 0, 0, 0.76),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  --drafting-dark-depth-shadow-hover:
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 0 24px 3px rgba(170, 170, 170, 0.16),
+    0 9px 20px -3px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --drafting-dark-depth-shadow-active:
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 12px 1px rgba(135, 135, 135, 0.1),
+    0 4px 12px -4px rgba(0, 0, 0, 0.84),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --drafting-dark-depth-shadow-selected:
+    0 0 0 1px rgba(255, 255, 255, 0.13),
+    0 0 28px 4px rgba(185, 185, 185, 0.18),
+    0 10px 24px -4px rgba(0, 0, 0, 0.82),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(circle at 50% 42%, rgba(68, 68, 68, 0.48), rgba(16, 16, 16, 0.62) 43%, rgba(2, 2, 2, 0.98) 78%),
+    #050505;
+}
+
+.dark [data-slot="new-page"] [data-slot="drafting-surface"] {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(48, 48, 48, 0.26), rgba(8, 8, 8, 0.5) 45%, rgba(5, 5, 5, 0.96) 78%),
+    #050505;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 0 42px 8px rgba(118, 118, 118, 0.12),
+    0 24px 60px rgba(0, 0, 0, 0.72);
+}
+
+.dark [data-slot="new-page"] :is(
+  [data-slot="mode-toggle"],
+  [data-slot="button"]:not([data-drafting-tool-button="true"]),
+  [data-slot="drafting-tool-button-icon"],
+  [data-slot="tabs-list"],
+  [data-slot="tabs-trigger"][data-state="active"],
+  [data-slot="option-card"],
+  [data-slot="card"],
+  [data-slot="input"],
+  [data-slot="textarea"],
+  [data-slot="select-trigger"],
+  [data-slot="popover-content"],
+  [data-slot="drafting-download-popover"],
+  [data-slot="drafting-content-textarea-field"],
+  [data-slot="drafting-layers-empty-state"],
+  [data-slot="drafting-layer-row"],
+  [data-slot="drafting-color-trigger"],
+  [data-slot="drafting-download-submit"]
+) {
+  box-shadow: var(--drafting-dark-depth-shadow) !important;
+}
+
+.dark [data-slot="new-page"] :is(
+  [data-slot="mode-toggle"],
+  [data-slot="button"]:not([data-drafting-tool-button="true"]),
+  [data-slot="drafting-tool-button-icon"],
+  [data-slot="tabs-list"],
+  [data-slot="tabs-trigger"][data-state="active"],
+  [data-slot="option-card"],
+  [data-slot="card"],
+  [data-slot="input"],
+  [data-slot="textarea"],
+  [data-slot="select-trigger"],
+  [data-slot="popover-content"],
+  [data-slot="drafting-download-popover"],
+  [data-slot="drafting-content-textarea-field"],
+  [data-slot="drafting-layers-empty-state"],
+  [data-slot="drafting-layer-row"],
+  [data-slot="drafting-color-trigger"],
+  [data-slot="drafting-download-submit"]
+):hover {
+  box-shadow: var(--drafting-dark-depth-shadow-hover) !important;
+}
+
+.dark [data-slot="new-page"] :is(
+  [data-slot="button"]:not([data-drafting-tool-button="true"]),
+  [data-slot="drafting-tool-button-icon"],
+  [data-slot="tabs-trigger"],
+  [data-slot="option-card"],
+  [data-slot="drafting-layer-row"],
+  [data-slot="drafting-color-trigger"],
+  [data-slot="drafting-download-submit"]
+):active {
+  box-shadow: var(--drafting-dark-depth-shadow-active) !important;
+}
+
+.dark [data-slot="new-page"] :is(
+  [data-state="checked"][data-slot="option-card"],
+  [data-state="active"][data-slot="tabs-trigger"],
+  [data-state="open"][data-slot="drafting-color-trigger"]
+) {
+  box-shadow: var(--drafting-dark-depth-shadow-selected) !important;
+}
+
+.dark [data-slot="new-page"] [data-drafting-tool-button="true"][aria-pressed="true"] [data-slot="drafting-tool-button-icon"] {
+  box-shadow: var(--drafting-dark-depth-shadow-selected) !important;
 }
 
 [data-slot="drafting-surface"]::before {
@@ -340,22 +456,22 @@
   background-image:
     linear-gradient(
       90deg,
-      rgba(0, 0, 0, 0.12) 0 var(--drafting-dash-size),
+      var(--drafting-dash-color) 0 var(--drafting-dash-size),
       transparent var(--drafting-dash-size) var(--drafting-dash-cycle)
     ),
     linear-gradient(
       90deg,
-      rgba(0, 0, 0, 0.12) 0 var(--drafting-dash-size),
+      var(--drafting-dash-color) 0 var(--drafting-dash-size),
       transparent var(--drafting-dash-size) var(--drafting-dash-cycle)
     ),
     linear-gradient(
       180deg,
-      rgba(0, 0, 0, 0.12) 0 var(--drafting-dash-size),
+      var(--drafting-dash-color) 0 var(--drafting-dash-size),
       transparent var(--drafting-dash-size) var(--drafting-dash-cycle)
     ),
     linear-gradient(
       180deg,
-      rgba(0, 0, 0, 0.12) 0 var(--drafting-dash-size),
+      var(--drafting-dash-color) 0 var(--drafting-dash-size),
       transparent var(--drafting-dash-size) var(--drafting-dash-cycle)
     );
   background-position:
@@ -392,7 +508,7 @@
   transform: translateY(-0.5px);
   background-image: repeating-linear-gradient(
     90deg,
-    rgba(0, 0, 0, 0.12) 0 var(--drafting-dash-size),
+    var(--drafting-dash-color) 0 var(--drafting-dash-size),
     transparent var(--drafting-dash-size) var(--drafting-dash-cycle)
   );
   background-repeat: repeat-x;
@@ -408,7 +524,7 @@
   transform: translateX(-0.5px);
   background-image: repeating-linear-gradient(
     180deg,
-    rgba(0, 0, 0, 0.12) 0 var(--drafting-dash-size),
+    var(--drafting-dash-color) 0 var(--drafting-dash-size),
     transparent var(--drafting-dash-size) var(--drafting-dash-cycle)
   );
   background-repeat: repeat-y;

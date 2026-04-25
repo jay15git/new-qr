@@ -40,6 +40,7 @@ export function ModeToggle({ className }: ModeToggleProps) {
       <Switch
         aria-label="Toggle dark mode"
         checked={isDark}
+        className="dark:data-checked:bg-foreground dark:[&_[data-slot=switch-thumb]]:data-checked:bg-background"
         disabled={!mounted}
         onCheckedChange={(checked) => {
           setTheme(checked ? "dark" : "light")

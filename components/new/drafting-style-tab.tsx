@@ -84,24 +84,24 @@ export function DraftingContentTab({
       <div
         data-slot="drafting-content-textarea-field"
         className={cn(
-          "min-w-0 rounded-[8px] border border-[#00000017] bg-[#FFFFFFCC] px-4 py-3",
-          "shadow-[0_0_10px_0_rgba(0,0,0,0.05),0_2px_4px_0_rgba(0,0,0,0.03)]",
+          "min-w-0 rounded-[8px] border border-[#00000017] bg-[#FFFFFFCC] px-4 py-3 dark:border-border dark:bg-card/80",
+          "shadow-[0_0_10px_0_rgba(0,0,0,0.05),0_2px_4px_0_rgba(0,0,0,0.03)] dark:shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.28)]",
           "transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
-          "hover:-translate-y-px hover:border-[#00000026] hover:bg-[#FFFFFFF2] hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.07),0_4px_10px_0_rgba(0,0,0,0.04)]",
-          "active:translate-y-0 active:border-[#00000030] active:shadow-[0_0_8px_0_rgba(0,0,0,0.07),0_1px_3px_0_rgba(0,0,0,0.06)]",
-          "focus-within:border-[#11111166] focus-within:bg-white focus-within:shadow-[0_0_18px_1px_rgba(0,0,0,0.09),0_4px_10px_0_rgba(0,0,0,0.05)]",
+          "hover:-translate-y-px hover:border-[#00000026] hover:bg-[#FFFFFFF2] hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.07),0_4px_10px_0_rgba(0,0,0,0.04)] dark:hover:border-border/80 dark:hover:bg-card dark:hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.06),0_4px_10px_0_rgba(0,0,0,0.34)]",
+          "active:translate-y-0 active:border-[#00000030] active:shadow-[0_0_8px_0_rgba(0,0,0,0.07),0_1px_3px_0_rgba(0,0,0,0.06)] dark:active:border-border dark:active:shadow-[0_0_8px_0_rgba(0,0,0,0.05),0_1px_3px_0_rgba(0,0,0,0.34)]",
+          "focus-within:border-[#11111166] focus-within:bg-white focus-within:shadow-[0_0_18px_1px_rgba(0,0,0,0.09),0_4px_10px_0_rgba(0,0,0,0.05)] dark:focus-within:border-ring dark:focus-within:bg-card dark:focus-within:shadow-[0_0_18px_1px_rgba(0,0,0,0.07),0_4px_10px_0_rgba(0,0,0,0.34)]",
         )}
       >
         <label
           htmlFor="drafting-qr-data"
-          className="block text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-[#111111]"
+          className="block text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-[#111111] dark:text-foreground"
         >
           Text or URL
         </label>
         <Textarea
           id="drafting-qr-data"
           aria-label="Text or URL"
-          className="mt-3 min-h-28 border-0 bg-white/70 px-3.5 py-3 text-sm text-[#111111] shadow-none placeholder:text-[#00000052] focus-visible:border-0 focus-visible:ring-0"
+          className="mt-3 min-h-28 border-0 bg-white/70 px-3.5 py-3 text-sm text-[#111111] shadow-none placeholder:text-[#00000052] focus-visible:border-0 focus-visible:ring-0 dark:bg-input/30 dark:text-foreground dark:placeholder:text-muted-foreground"
           placeholder="https://example.com/invite"
           value={contentValue}
           onChange={(event) => onContentValueChange(event.target.value)}
@@ -302,7 +302,7 @@ export function DraftingDotsColorTab({
             <Button
               type="button"
               variant="outline"
-              className="w-full rounded-[8px] border-[#00000017] bg-[#FFFFFFE6] text-[#111111] shadow-[0_0_10px_0_rgba(0,0,0,0.06),0_2px_4px_0_rgba(0,0,0,0.04)] hover:border-[#0000002A] hover:bg-[#FFFFFFF2]"
+              className="w-full rounded-[8px] border-[#00000017] bg-[#FFFFFFE6] text-[#111111] shadow-[0_0_10px_0_rgba(0,0,0,0.06),0_2px_4px_0_rgba(0,0,0,0.04)] hover:border-[#0000002A] hover:bg-[#FFFFFFF2] dark:border-border dark:bg-card dark:text-foreground dark:shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.28)] dark:hover:border-border/80 dark:hover:bg-muted/50"
               onClick={() => onModeChange("palette")}
             >
               Use palette
@@ -546,7 +546,7 @@ export function DraftingBrandIconTab({
           <span
             aria-hidden="true"
             data-slot="drafting-brand-icon-search-icon"
-            className="pointer-events-none absolute left-3 top-1/2 flex size-4 -translate-y-1/2 items-center justify-center text-[#00000052]"
+            className="pointer-events-none absolute left-3 top-1/2 flex size-4 -translate-y-1/2 items-center justify-center text-[#00000052] dark:text-muted-foreground"
           >
             <HugeiconsIcon
               icon={Search01Icon}
@@ -558,7 +558,7 @@ export function DraftingBrandIconTab({
           <Input
             id="drafting-brand-icon-search"
             aria-label="Search brand icons"
-            className="h-10 border-[#00000017] bg-[#FFFFFFE6] pl-9 pr-3 text-sm text-[#111111] shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.03)] placeholder:text-[#00000052] focus-visible:border-black/35 focus-visible:ring-0"
+            className="h-10 border-[#00000017] bg-[#FFFFFFE6] pl-9 pr-3 text-sm text-[#111111] shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.03)] placeholder:text-[#00000052] focus-visible:border-black/35 focus-visible:ring-0 dark:border-border dark:bg-input/30 dark:text-foreground dark:placeholder:text-muted-foreground dark:focus-visible:border-ring"
             placeholder="Search Icons"
             value={brandIconQuery}
             onChange={(event) => onBrandIconQueryChange(event.target.value)}
@@ -575,6 +575,7 @@ export function DraftingBrandIconTab({
 
             return (
               <OptionCard
+                darkShadowTone="ink"
                 key={option.value}
                 checked={isSelected}
                 className={cn(
@@ -594,7 +595,9 @@ export function DraftingBrandIconTab({
                   aria-hidden="true"
                   className={cn(
                     "flex size-full items-center justify-center text-[0.68rem] font-medium uppercase tracking-[0.12em]",
-                    isSelected ? "text-[#111111]" : "text-[#00000066]",
+                    isSelected
+                      ? "text-[#111111] dark:text-foreground"
+                      : "text-[#00000066] dark:text-muted-foreground",
                   )}
                 >
                   {option.label}
@@ -614,12 +617,13 @@ export function DraftingBrandIconTab({
 
             return (
               <OptionCard
+                darkShadowTone="ink"
                 key={brandIcon.id}
                 checked={isSelected}
                 className={cn(
                   "w-[56px]",
                   "[&_[data-slot=option-card]]:h-[56px] [&_[data-slot=option-card]]:w-[56px]",
-                  "[&_[data-slot=option-card-motif]]:text-[#111111]",
+                  "[&_[data-slot=option-card-motif]]:text-[#111111] dark:[&_[data-slot=option-card-motif]]:text-foreground",
                 )}
                 label={brandIcon.label}
                 labelClassName="text-[0.5rem] uppercase tracking-[0.08em] leading-[1.05] min-h-[1.2rem]"
@@ -635,7 +639,7 @@ export function DraftingBrandIconTab({
                   data-slot="drafting-brand-icon-option"
                   className="flex size-full items-center justify-center"
                 >
-                  <span className="text-[#111111]">
+                  <span className="text-[#111111] dark:text-foreground">
                     <Icon className="size-[18px]" />
                   </span>
                 </span>
@@ -823,10 +827,10 @@ export function DraftingEncodingTab({
 
       <section data-slot="drafting-error-correction-section" className="space-y-3">
         <div className="space-y-1">
-          <h3 className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#111111]">
+          <h3 className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#111111] dark:text-foreground">
             Error correction
           </h3>
-          <p className="text-[0.72rem] leading-5 text-[#00000066]">
+          <p className="text-[0.72rem] leading-5 text-[#00000066] dark:text-muted-foreground">
             Higher recovery makes styled codes more tolerant to logos, crops, and wear.
           </p>
         </div>
@@ -842,6 +846,7 @@ export function DraftingEncodingTab({
 
             return (
               <OptionCard
+                darkShadowTone="ink"
                 key={option.value}
                 checked={isSelected}
                 className={cn(
@@ -860,7 +865,9 @@ export function DraftingEncodingTab({
                   <span
                     className={cn(
                       "text-[1.375rem] font-semibold leading-none tracking-[0.08em]",
-                      isSelected ? "text-[#111111]" : "text-[#00000073]",
+                      isSelected
+                        ? "text-[#111111] dark:text-foreground"
+                        : "text-[#00000073] dark:text-muted-foreground",
                     )}
                   >
                     {option.label}
@@ -869,7 +876,9 @@ export function DraftingEncodingTab({
                     <span
                       className={cn(
                         "block text-[0.68rem] font-semibold uppercase tracking-[0.14em]",
-                        isSelected ? "text-[#111111]" : "text-[#0000008A]",
+                        isSelected
+                          ? "text-[#111111] dark:text-foreground"
+                          : "text-[#0000008A] dark:text-foreground/80",
                       )}
                     >
                       {option.title}
@@ -877,7 +886,9 @@ export function DraftingEncodingTab({
                     <span
                       className={cn(
                         "block text-[0.72rem] leading-5",
-                        isSelected ? "text-[#111111]" : "text-[#00000066]",
+                        isSelected
+                          ? "text-[#111111] dark:text-foreground"
+                          : "text-[#00000066] dark:text-muted-foreground",
                       )}
                     >
                       {option.summary}
@@ -1003,7 +1014,7 @@ function buildDraftingBackgroundColorItems({
         <Button
           type="button"
           variant="outline"
-          className="w-full rounded-[8px] border-[#00000017] bg-[#FFFFFFE6] text-[#111111] shadow-[0_0_10px_0_rgba(0,0,0,0.06),0_2px_4px_0_rgba(0,0,0,0.04)] hover:border-[#0000002A] hover:bg-[#FFFFFFF2]"
+          className="w-full rounded-[8px] border-[#00000017] bg-[#FFFFFFE6] text-[#111111] shadow-[0_0_10px_0_rgba(0,0,0,0.06),0_2px_4px_0_rgba(0,0,0,0.04)] hover:border-[#0000002A] hover:bg-[#FFFFFFF2] dark:border-border dark:bg-card dark:text-foreground dark:shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.28)] dark:hover:border-border/80 dark:hover:bg-muted/50"
           onClick={onTransparentSelect}
         >
           Use transparent background
@@ -1058,7 +1069,7 @@ function buildDraftingAssetSourceItems({
         <div className="min-w-0 px-4 pb-4">
           <Input
             aria-label={remoteUrlAriaLabel}
-            className="h-10 rounded-[8px] border-[#00000017] bg-[#FFFFFFE6] px-3 text-sm text-[#111111] shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.03)] placeholder:text-[#00000052] focus-visible:border-black/35 focus-visible:ring-0"
+            className="h-10 rounded-[8px] border-[#00000017] bg-[#FFFFFFE6] px-3 text-sm text-[#111111] shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.03)] placeholder:text-[#00000052] focus-visible:border-black/35 focus-visible:ring-0 dark:border-border dark:bg-input/30 dark:text-foreground dark:placeholder:text-muted-foreground dark:focus-visible:border-ring"
             placeholder={remoteUrlPlaceholder}
             value={remoteUrl}
             onChange={(event) => {
@@ -1109,12 +1120,12 @@ function DraftingColorAccordion<TMode extends string>({
               value={item.id}
               className={cn(
                 "mb-3 min-w-0 w-full overflow-hidden rounded-[8px] border last:mb-0 last:border-b",
-                "border-[#00000017] bg-[#FFFFFFCC] shadow-[0_0_10px_0_rgba(0,0,0,0.06),0_2px_4px_0_rgba(0,0,0,0.04)] transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
-                "hover:-translate-y-px hover:border-[#0000002A] hover:bg-[#FFFFFFF2] hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.08),0_4px_10px_0_rgba(0,0,0,0.05)]",
-                "active:translate-y-0 active:border-[#00000034] active:shadow-[0_0_8px_0_rgba(0,0,0,0.08),0_1px_3px_0_rgba(0,0,0,0.08)]",
-                "data-[state=open]:bg-[#FFFFFFF2]",
+                "border-[#00000017] bg-[#FFFFFFCC] shadow-[0_0_10px_0_rgba(0,0,0,0.06),0_2px_4px_0_rgba(0,0,0,0.04)] transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out dark:border-border dark:bg-card/80 dark:shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.28)]",
+                "hover:-translate-y-px hover:border-[#0000002A] hover:bg-[#FFFFFFF2] hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.08),0_4px_10px_0_rgba(0,0,0,0.05)] dark:hover:border-border/80 dark:hover:bg-card dark:hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.06),0_4px_10px_0_rgba(0,0,0,0.34)]",
+                "active:translate-y-0 active:border-[#00000034] active:shadow-[0_0_8px_0_rgba(0,0,0,0.08),0_1px_3px_0_rgba(0,0,0,0.08)] dark:active:border-border dark:active:shadow-[0_0_8px_0_rgba(0,0,0,0.05),0_1px_3px_0_rgba(0,0,0,0.34)]",
+                "data-[state=open]:bg-[#FFFFFFF2] dark:data-[state=open]:bg-card",
                 isSelected &&
-                  "bg-[#FFFFFF] shadow-[0_0_22px_2px_rgba(0,0,0,0.14),0_5px_10px_1px_rgba(0,0,0,0.08)]",
+                  "bg-[#FFFFFF] shadow-[0_0_22px_2px_rgba(0,0,0,0.14),0_5px_10px_1px_rgba(0,0,0,0.08)] dark:bg-accent/70 dark:shadow-[0_0_22px_2px_rgba(0,0,0,0.08),0_5px_10px_1px_rgba(0,0,0,0.34)]",
               )}
             >
               <AccordionTrigger
@@ -1122,14 +1133,14 @@ function DraftingColorAccordion<TMode extends string>({
                 data-slot="drafting-color-trigger"
                 className={cn(
                   "px-4 py-3 no-underline hover:no-underline focus-visible:ring-0",
-                  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-black/55",
+                  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-black/55 dark:focus-visible:outline-ring",
                 )}
               >
                 <span className="flex min-w-0 items-center gap-3">
                   <span
                     className={cn(
-                      "text-[0.72rem] font-medium tracking-[0.12em] uppercase text-[#00000073] transition-colors",
-                      isSelected && "font-semibold text-[#111111]",
+                      "text-[0.72rem] font-medium tracking-[0.12em] uppercase text-[#00000073] transition-colors dark:text-muted-foreground",
+                      isSelected && "font-semibold text-[#111111] dark:text-foreground",
                     )}
                   >
                     {item.title}
@@ -1179,12 +1190,12 @@ function DraftingSliderField({
     <div
       data-slot={`${dataSlot}-field`}
       className={cn(
-        "min-w-0 rounded-[8px] border border-[#00000017] bg-[#FFFFFFCC] px-4 py-3",
-        "shadow-[0_0_10px_0_rgba(0,0,0,0.05),0_2px_4px_0_rgba(0,0,0,0.03)]",
+        "min-w-0 rounded-[8px] border border-[#00000017] bg-[#FFFFFFCC] px-4 py-3 dark:border-border dark:bg-card/80",
+        "shadow-[0_0_10px_0_rgba(0,0,0,0.05),0_2px_4px_0_rgba(0,0,0,0.03)] dark:shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.28)]",
         "transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
-        "hover:-translate-y-px hover:border-[#00000026] hover:bg-[#FFFFFFF2] hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.07),0_4px_10px_0_rgba(0,0,0,0.04)]",
-        "active:translate-y-0 active:border-[#00000030] active:shadow-[0_0_8px_0_rgba(0,0,0,0.07),0_1px_3px_0_rgba(0,0,0,0.06)]",
-        "focus-within:border-[#11111166] focus-within:bg-white focus-within:shadow-[0_0_18px_1px_rgba(0,0,0,0.09),0_4px_10px_0_rgba(0,0,0,0.05)]",
+        "hover:-translate-y-px hover:border-[#00000026] hover:bg-[#FFFFFFF2] hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.07),0_4px_10px_0_rgba(0,0,0,0.04)] dark:hover:border-border/80 dark:hover:bg-card dark:hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.06),0_4px_10px_0_rgba(0,0,0,0.34)]",
+        "active:translate-y-0 active:border-[#00000030] active:shadow-[0_0_8px_0_rgba(0,0,0,0.07),0_1px_3px_0_rgba(0,0,0,0.06)] dark:active:border-border dark:active:shadow-[0_0_8px_0_rgba(0,0,0,0.05),0_1px_3px_0_rgba(0,0,0,0.34)]",
+        "focus-within:border-[#11111166] focus-within:bg-white focus-within:shadow-[0_0_18px_1px_rgba(0,0,0,0.09),0_4px_10px_0_rgba(0,0,0,0.05)] dark:focus-within:border-ring dark:focus-within:bg-card dark:focus-within:shadow-[0_0_18px_1px_rgba(0,0,0,0.07),0_4px_10px_0_rgba(0,0,0,0.34)]",
       )}
     >
       <UnlumenSlider
@@ -1199,14 +1210,13 @@ function DraftingSliderField({
         showValue
         step={step}
         thumbDataSlot={`${dataSlot}-thumb`}
-        trackClassName="bg-black/[0.08]"
+        trackClassName="bg-black/[0.08] dark:bg-muted"
         trackDataSlot={`${dataSlot}-track`}
-        trackStyle={{ backgroundColor: "rgba(0,0,0,0.08)" }}
         value={value}
         onChange={(nextValue) => onChange(Array.isArray(nextValue) ? nextValue[0] ?? value : nextValue)}
       />
       {description ? (
-        <p className="mt-2 text-[0.72rem] leading-5 text-[#00000066]">{description}</p>
+        <p className="mt-2 text-[0.72rem] leading-5 text-[#00000066] dark:text-muted-foreground">{description}</p>
       ) : null}
     </div>
   )
@@ -1233,28 +1243,28 @@ function DraftingToggleField({
       htmlFor={id}
       className={cn(
         "flex min-w-0 cursor-pointer items-start justify-between gap-4 rounded-[8px] border px-4 py-3",
-        "border-[#00000017] bg-[#FFFFFFCC] shadow-[0_0_10px_0_rgba(0,0,0,0.05),0_2px_4px_0_rgba(0,0,0,0.03)]",
+        "border-[#00000017] bg-[#FFFFFFCC] shadow-[0_0_10px_0_rgba(0,0,0,0.05),0_2px_4px_0_rgba(0,0,0,0.03)] dark:border-border dark:bg-card/80 dark:shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.28)]",
         "transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
-        "hover:-translate-y-px hover:border-[#00000026] hover:bg-[#FFFFFFF2] hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.07),0_4px_10px_0_rgba(0,0,0,0.04)]",
-        "active:translate-y-0 active:border-[#00000030] active:shadow-[0_0_8px_0_rgba(0,0,0,0.07),0_1px_3px_0_rgba(0,0,0,0.06)]",
-        "focus-within:border-[#11111166] focus-within:bg-white focus-within:shadow-[0_0_18px_1px_rgba(0,0,0,0.09),0_4px_10px_0_rgba(0,0,0,0.05)]",
-        checked && "border-[#11111133] bg-white",
+        "hover:-translate-y-px hover:border-[#00000026] hover:bg-[#FFFFFFF2] hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.07),0_4px_10px_0_rgba(0,0,0,0.04)] dark:hover:border-border/80 dark:hover:bg-card dark:hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.06),0_4px_10px_0_rgba(0,0,0,0.34)]",
+        "active:translate-y-0 active:border-[#00000030] active:shadow-[0_0_8px_0_rgba(0,0,0,0.07),0_1px_3px_0_rgba(0,0,0,0.06)] dark:active:border-border dark:active:shadow-[0_0_8px_0_rgba(0,0,0,0.05),0_1px_3px_0_rgba(0,0,0,0.34)]",
+        "focus-within:border-[#11111166] focus-within:bg-white focus-within:shadow-[0_0_18px_1px_rgba(0,0,0,0.09),0_4px_10px_0_rgba(0,0,0,0.05)] dark:focus-within:border-ring dark:focus-within:bg-card dark:focus-within:shadow-[0_0_18px_1px_rgba(0,0,0,0.07),0_4px_10px_0_rgba(0,0,0,0.34)]",
+        checked && "border-[#11111133] bg-white dark:border-ring/60 dark:bg-accent/70",
       )}
     >
       <span className="min-w-0 space-y-1">
-        <span className="block text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-[#111111]">
+        <span className="block text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-[#111111] dark:text-foreground">
           {label}
         </span>
-        <span className="block text-[0.72rem] leading-5 text-[#00000066]">{description}</span>
+        <span className="block text-[0.72rem] leading-5 text-[#00000066] dark:text-muted-foreground">{description}</span>
       </span>
       <Switch
         checked={checked}
         className={cn(
-          "mt-0.5 h-[20px] w-[36px] shrink-0 border border-[#00000014] bg-black/[0.10]",
+          "mt-0.5 h-[20px] w-[36px] shrink-0 border border-[#00000014] bg-black/[0.10] dark:border-border dark:bg-muted",
           "shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18)] transition-[background-color,border-color,box-shadow] duration-150",
-          "hover:border-[#00000024] hover:bg-black/[0.14]",
-          "data-[state=checked]:border-[#111111] data-[state=checked]:bg-[#111111]",
-          "focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-0",
+          "hover:border-[#00000024] hover:bg-black/[0.14] dark:hover:border-border/80 dark:hover:bg-muted/80",
+          "data-[state=checked]:border-[#111111] data-[state=checked]:bg-[#111111] dark:data-[state=checked]:border-foreground dark:data-[state=checked]:bg-foreground",
+          "focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-0 dark:focus-visible:ring-ring/50",
         )}
         data-slot={`${dataSlot}-switch`}
         id={id}
@@ -1291,6 +1301,7 @@ function DraftingOptionCardGrid<TValue extends string>({
       >
         {options.map((option) => (
           <OptionCard
+            darkShadowTone="ink"
             key={option.value}
             checked={option.value === value}
             label={option.label}

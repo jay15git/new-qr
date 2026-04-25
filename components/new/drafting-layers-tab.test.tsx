@@ -70,6 +70,9 @@ describe("DraftingLayersTab", () => {
     expect(view.container.querySelector('button[aria-label="Lock QR Code"]')).not.toBeNull()
     expect(view.container.querySelector('button[aria-label="Delete Landscape"]')).not.toBeNull()
     expect(view.container.querySelector('button[aria-label="Delete QR Code"]')).toBeNull()
+    expect(view.container.innerHTML).not.toMatch(
+      /dark:[^"]*shadow-\[[^\]]*rgba\(255,255,255/,
+    )
   })
 
   it("wires reorder interactions through the compose scene helpers", () => {

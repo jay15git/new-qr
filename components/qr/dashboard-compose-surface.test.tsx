@@ -453,6 +453,7 @@ describe("DashboardComposeSurface", () => {
     expect(markup).toContain('aria-label="Toggle document mode"')
     expect(markup).toContain('data-compose-mode="document"')
     expect(markup).toContain('data-slot="dashboard-compose-document-guides"')
+    expect(markup).toContain("dark:border-foreground/14")
     expect(markup).toContain("background:#ffffff")
   })
 
