@@ -84,12 +84,12 @@ export function DraftingContentTab({
       <div
         data-slot="drafting-content-textarea-field"
         className={cn(
-          "min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 dark:border-border dark:bg-card/80",
-          "shadow-[var(--drafting-shadow-rest)] dark:shadow-[var(--drafting-shadow-rest)]",
+          "min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3",
+          "shadow-[var(--drafting-shadow-rest)]",
           "transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
-          "hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)] dark:hover:border-border/80 dark:hover:bg-card dark:hover:shadow-[var(--drafting-shadow-hover)]",
-          "active:translate-y-0 active:border-[var(--drafting-line-hover)] active:shadow-[var(--drafting-shadow-active)] dark:active:border-border dark:active:shadow-[var(--drafting-shadow-active)]",
-          "focus-within:border-[var(--drafting-line-strong)] focus-within:bg-[var(--drafting-panel-bg-active)] focus-within:shadow-[var(--drafting-shadow-rest)] dark:focus-within:border-ring dark:focus-within:bg-card dark:focus-within:shadow-[var(--drafting-shadow-rest)]",
+          "hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)]",
+          "active:translate-y-0 active:border-[var(--drafting-line-hover)] active:shadow-[var(--drafting-shadow-active)]",
+          "focus-within:border-[var(--drafting-line-strong)] focus-within:bg-[var(--drafting-panel-bg-active)] focus-within:shadow-[var(--drafting-shadow-rest)]",
         )}
       >
         <label
@@ -101,7 +101,7 @@ export function DraftingContentTab({
         <Textarea
           id="drafting-qr-data"
           aria-label="Text or URL"
-          className="mt-3 min-h-28 min-w-0 max-w-full resize-none overflow-x-hidden border-0 bg-white/70 px-3.5 py-3 text-sm text-[var(--drafting-ink)] shadow-none placeholder:text-[var(--drafting-ink-subtle)] [overflow-wrap:anywhere] focus-visible:border-0 focus-visible:ring-0 dark:bg-input/30 dark:text-foreground dark:placeholder:text-muted-foreground"
+          className="mt-3 min-h-28 min-w-0 max-w-full resize-none overflow-x-hidden border-0 bg-[var(--drafting-panel-bg-hover)] px-3.5 py-3 text-sm text-[var(--drafting-ink)] shadow-none placeholder:text-[var(--drafting-ink-subtle)] [overflow-wrap:anywhere] focus-visible:border-0 focus-visible:ring-0"
           placeholder="https://example.com/invite"
           value={contentValue}
           onChange={(event) => onContentValueChange(event.target.value)}
@@ -302,7 +302,7 @@ export function DraftingDotsColorTab({
             <Button
               type="button"
               variant="outline"
-              className="w-full rounded-[8px] border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] dark:border-border dark:bg-card dark:text-foreground dark:shadow-[var(--drafting-shadow-rest)] dark:hover:border-border/80 dark:hover:bg-muted/50"
+              className="w-full rounded-[8px] border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)]"
               onClick={() => onModeChange("palette")}
             >
               Use palette
@@ -558,7 +558,7 @@ export function DraftingBrandIconTab({
           <Input
             id="drafting-brand-icon-search"
             aria-label="Search brand icons"
-            className="h-10 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] pl-9 pr-3 text-sm text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] placeholder:text-[var(--drafting-ink-subtle)] focus-visible:border-black/35 focus-visible:ring-0 dark:border-border dark:bg-input/30 dark:text-foreground dark:placeholder:text-muted-foreground dark:focus-visible:border-ring"
+            className="h-10 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] pl-9 pr-3 text-sm text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] placeholder:text-[var(--drafting-ink-subtle)] focus-visible:border-[var(--drafting-line-strong)] focus-visible:ring-0"
             placeholder="Search Icons"
             value={brandIconQuery}
             onChange={(event) => onBrandIconQueryChange(event.target.value)}
@@ -575,6 +575,7 @@ export function DraftingBrandIconTab({
 
             return (
               <OptionCard
+                appearance="drafting"
                 darkShadowTone="ink"
                 key={option.value}
                 checked={isSelected}
@@ -617,13 +618,14 @@ export function DraftingBrandIconTab({
 
             return (
               <OptionCard
+                appearance="drafting"
                 darkShadowTone="ink"
                 key={brandIcon.id}
                 checked={isSelected}
                 className={cn(
                   "w-[56px]",
                   "[&_[data-slot=option-card]]:h-[56px] [&_[data-slot=option-card]]:w-[56px]",
-                  "[&_[data-slot=option-card-motif]]:text-[var(--drafting-ink)] dark:[&_[data-slot=option-card-motif]]:text-foreground",
+                  "[&_[data-slot=option-card-motif]]:text-[var(--drafting-ink)]",
                 )}
                 label={brandIcon.label}
                 labelClassName="text-[0.5rem] uppercase tracking-[0.08em] leading-[1.05] min-h-[1.2rem]"
@@ -846,6 +848,7 @@ export function DraftingEncodingTab({
 
             return (
               <OptionCard
+                appearance="drafting"
                 darkShadowTone="ink"
                 key={option.value}
                 checked={isSelected}
@@ -1014,7 +1017,7 @@ function buildDraftingBackgroundColorItems({
         <Button
           type="button"
           variant="outline"
-          className="w-full rounded-[8px] border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] dark:border-border dark:bg-card dark:text-foreground dark:shadow-[var(--drafting-shadow-rest)] dark:hover:border-border/80 dark:hover:bg-muted/50"
+          className="w-full rounded-[8px] border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)]"
           onClick={onTransparentSelect}
         >
           Use transparent background
@@ -1069,7 +1072,7 @@ function buildDraftingAssetSourceItems({
         <div className="min-w-0 px-4 pb-4">
           <Input
             aria-label={remoteUrlAriaLabel}
-            className="h-10 rounded-[8px] border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-3 text-sm text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] placeholder:text-[var(--drafting-ink-subtle)] focus-visible:border-black/35 focus-visible:ring-0 dark:border-border dark:bg-input/30 dark:text-foreground dark:placeholder:text-muted-foreground dark:focus-visible:border-ring"
+            className="h-10 rounded-[8px] border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-3 text-sm text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] placeholder:text-[var(--drafting-ink-subtle)] focus-visible:border-[var(--drafting-line-strong)] focus-visible:ring-0"
             placeholder={remoteUrlPlaceholder}
             value={remoteUrl}
             onChange={(event) => {
@@ -1120,12 +1123,12 @@ function DraftingColorAccordion<TMode extends string>({
               value={item.id}
               className={cn(
                 "mb-3 min-w-0 w-full overflow-hidden rounded-[8px] border last:mb-0 last:border-b",
-                "border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] shadow-[var(--drafting-shadow-rest)] transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out dark:border-border dark:bg-card/80 dark:shadow-[var(--drafting-shadow-rest)]",
-                "hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)] dark:hover:border-border/80 dark:hover:bg-card dark:hover:shadow-[var(--drafting-shadow-hover)]",
-                "active:translate-y-0 active:border-[var(--drafting-line-hover)] active:shadow-[var(--drafting-shadow-active)] dark:active:border-border dark:active:shadow-[var(--drafting-shadow-active)]",
-                "data-[state=open]:bg-[var(--drafting-panel-bg-hover)] dark:data-[state=open]:bg-card",
+                "border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] shadow-[var(--drafting-shadow-rest)] transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
+                "hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)]",
+                "active:translate-y-0 active:border-[var(--drafting-line-hover)] active:shadow-[var(--drafting-shadow-active)]",
+                "data-[state=open]:bg-[var(--drafting-panel-bg-hover)]",
                 isSelected &&
-                  "bg-[var(--drafting-panel-bg-active)] shadow-[var(--drafting-shadow-rest)] dark:bg-accent/70 dark:shadow-[var(--drafting-shadow-rest)]",
+                  "bg-[var(--drafting-panel-bg-active)] shadow-[var(--drafting-shadow-rest)]",
               )}
             >
               <AccordionTrigger
@@ -1133,13 +1136,13 @@ function DraftingColorAccordion<TMode extends string>({
                 data-slot="drafting-color-trigger"
                 className={cn(
                   "px-4 py-3 no-underline hover:no-underline focus-visible:ring-0",
-                  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-black/55 dark:focus-visible:outline-ring",
+                  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-[var(--drafting-line-strong)]",
                 )}
               >
                 <span className="flex min-w-0 items-center gap-3">
                   <span
                     className={cn(
-                      "text-[0.72rem] font-medium tracking-[0.12em] uppercase text-[var(--drafting-ink-muted)] transition-colors dark:text-muted-foreground",
+                      "text-[0.72rem] font-medium tracking-[0.12em] uppercase text-[var(--drafting-ink-muted)] transition-colors",
                       isSelected && "font-semibold text-[var(--drafting-ink)]",
                     )}
                   >
@@ -1190,12 +1193,12 @@ function DraftingSliderField({
     <div
       data-slot={`${dataSlot}-field`}
       className={cn(
-        "min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 dark:border-border dark:bg-card/80",
-        "shadow-[var(--drafting-shadow-rest)] dark:shadow-[var(--drafting-shadow-rest)]",
+        "min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3",
+        "shadow-[var(--drafting-shadow-rest)]",
         "transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
-        "hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)] dark:hover:border-border/80 dark:hover:bg-card dark:hover:shadow-[var(--drafting-shadow-hover)]",
-        "active:translate-y-0 active:border-[var(--drafting-line-hover)] active:shadow-[var(--drafting-shadow-active)] dark:active:border-border dark:active:shadow-[var(--drafting-shadow-active)]",
-        "focus-within:border-[var(--drafting-line-strong)] focus-within:bg-[var(--drafting-panel-bg-active)] focus-within:shadow-[var(--drafting-shadow-rest)] dark:focus-within:border-ring dark:focus-within:bg-card dark:focus-within:shadow-[var(--drafting-shadow-rest)]",
+        "hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)]",
+        "active:translate-y-0 active:border-[var(--drafting-line-hover)] active:shadow-[var(--drafting-shadow-active)]",
+        "focus-within:border-[var(--drafting-line-strong)] focus-within:bg-[var(--drafting-panel-bg-active)] focus-within:shadow-[var(--drafting-shadow-rest)]",
       )}
     >
       <UnlumenSlider
@@ -1210,7 +1213,7 @@ function DraftingSliderField({
         showValue
         step={step}
         thumbDataSlot={`${dataSlot}-thumb`}
-        trackClassName="bg-black/[0.08] dark:bg-muted"
+        trackClassName="bg-[var(--drafting-control-bg)]"
         trackDataSlot={`${dataSlot}-track`}
         value={value}
         onChange={(nextValue) => onChange(Array.isArray(nextValue) ? nextValue[0] ?? value : nextValue)}
@@ -1243,11 +1246,11 @@ function DraftingToggleField({
       htmlFor={id}
       className={cn(
         "flex min-w-0 cursor-pointer items-start justify-between gap-4 rounded-[8px] border px-4 py-3",
-        "border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] shadow-[var(--drafting-shadow-rest)] dark:border-border dark:bg-card/80 dark:shadow-[var(--drafting-shadow-rest)]",
+        "border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] shadow-[var(--drafting-shadow-rest)]",
         "transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
-        "hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)] dark:hover:border-border/80 dark:hover:bg-card dark:hover:shadow-[var(--drafting-shadow-hover)]",
-        "active:translate-y-0 active:border-[var(--drafting-line-hover)] active:shadow-[var(--drafting-shadow-active)] dark:active:border-border dark:active:shadow-[var(--drafting-shadow-active)]",
-        "focus-within:border-[var(--drafting-line-strong)] focus-within:bg-[var(--drafting-panel-bg-active)] focus-within:shadow-[var(--drafting-shadow-rest)] dark:focus-within:border-ring dark:focus-within:bg-card dark:focus-within:shadow-[var(--drafting-shadow-rest)]",
+        "hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)]",
+        "active:translate-y-0 active:border-[var(--drafting-line-hover)] active:shadow-[var(--drafting-shadow-active)]",
+        "focus-within:border-[var(--drafting-line-strong)] focus-within:bg-[var(--drafting-panel-bg-active)] focus-within:shadow-[var(--drafting-shadow-rest)]",
         checked && "border-[var(--drafting-line-strong)] bg-[var(--drafting-panel-bg-active)]",
       )}
     >
@@ -1260,11 +1263,11 @@ function DraftingToggleField({
       <Switch
         checked={checked}
         className={cn(
-          "mt-0.5 h-[20px] w-[36px] shrink-0 border border-[var(--drafting-line)] bg-black/[0.10] dark:border-border dark:bg-muted",
+          "mt-0.5 h-[20px] w-[36px] shrink-0 border border-[var(--drafting-line)] bg-[var(--drafting-control-bg)]",
           "shadow-[var(--drafting-shadow-rest)] transition-[background-color,border-color,box-shadow] duration-150",
-          "hover:border-[var(--drafting-line-hover)] hover:bg-black/[0.14] dark:hover:border-border/80 dark:hover:bg-muted/80",
-          "data-[state=checked]:border-[var(--drafting-ink)] data-[state=checked]:bg-[var(--drafting-ink)] dark:data-[state=checked]:border-foreground dark:data-[state=checked]:bg-foreground",
-          "focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-0 dark:focus-visible:ring-ring/50",
+          "hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-control-bg-hover)]",
+          "data-[state=checked]:border-[var(--drafting-ink)] data-[state=checked]:bg-[var(--drafting-ink)]",
+          "focus-visible:ring-2 focus-visible:ring-[var(--drafting-line-hover)] focus-visible:ring-offset-0",
         )}
         data-slot={`${dataSlot}-switch`}
         id={id}
@@ -1301,6 +1304,7 @@ function DraftingOptionCardGrid<TValue extends string>({
       >
         {options.map((option) => (
           <OptionCard
+            appearance="drafting"
             darkShadowTone="ink"
             key={option.value}
             checked={option.value === value}

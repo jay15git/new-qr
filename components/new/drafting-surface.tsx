@@ -180,10 +180,10 @@ const DEFAULT_DRAFTING_PANEL_TABS: Record<DraftingToolId, string> = {
 }
 
 const DRAFTING_PANEL_TAB_TRAY_CLASS_NAME =
-  "grid h-auto w-full min-w-0 max-w-full auto-cols-fr grid-flow-col items-stretch gap-1 overflow-hidden rounded-[4px] bg-[var(--drafting-control-bg)] p-1 shadow-none sm:gap-2"
+  "grid h-auto w-full min-w-0 max-w-full auto-cols-fr grid-flow-col items-stretch gap-1 overflow-hidden rounded-[4px] bg-[var(--drafting-control-bg)] p-1 shadow-none dark:bg-[var(--drafting-panel-tab-tray-bg)] sm:gap-2"
 
 const DRAFTING_PANEL_TAB_TRIGGER_CLASS_NAME =
-  "min-w-0 rounded-[4px] border border-transparent bg-transparent px-2 py-2 text-[0.68rem] font-medium tracking-[0.04em] text-[var(--drafting-ink-muted)] shadow-none transition-[color,box-shadow,background-color,transform] duration-150 ease-out hover:-translate-y-px hover:bg-[var(--drafting-panel-bg-hover)] hover:text-[var(--drafting-ink-strong-muted)] hover:shadow-[var(--drafting-shadow-hover)] active:translate-y-0 active:bg-[var(--drafting-panel-bg-hover)] active:font-medium active:text-[var(--drafting-ink)] active:shadow-[var(--drafting-shadow-active)] data-[state=active]:bg-[var(--drafting-panel-bg-active)] data-[state=active]:font-semibold data-[state=active]:text-[var(--drafting-ink)] data-[state=active]:shadow-[var(--drafting-shadow-active)] data-[state=active]:hover:-translate-y-px data-[state=active]:hover:bg-[var(--drafting-panel-bg-active)] data-[state=active]:hover:text-[var(--drafting-ink)] data-[state=active]:hover:shadow-[var(--drafting-shadow-hover)] data-[state=active]:active:translate-y-0 dark:text-muted-foreground dark:hover:bg-muted/70 dark:hover:text-foreground dark:hover:shadow-[var(--drafting-shadow-hover)] dark:active:bg-muted dark:active:text-foreground dark:data-[state=active]:bg-card dark:data-[state=active]:text-foreground dark:data-[state=active]:shadow-[var(--drafting-shadow-active)] dark:data-[state=active]:hover:bg-card dark:data-[state=active]:hover:text-foreground sm:px-3 sm:text-[0.72rem]"
+  "min-w-0 rounded-[4px] border border-transparent bg-transparent px-2 py-2 text-[0.68rem] font-medium tracking-[0.04em] text-[var(--drafting-ink-muted)] shadow-none transition-[color,box-shadow,background-color,transform] duration-150 ease-out hover:-translate-y-px hover:bg-[var(--drafting-panel-bg-hover)] hover:text-[var(--drafting-ink-strong-muted)] hover:shadow-[var(--drafting-shadow-hover)] active:translate-y-0 active:bg-[var(--drafting-panel-bg-hover)] active:font-medium active:text-[var(--drafting-ink)] active:shadow-[var(--drafting-shadow-active)] data-[state=active]:bg-[var(--drafting-panel-bg-active)] data-[state=active]:font-semibold data-[state=active]:text-[var(--drafting-ink)] data-[state=active]:shadow-[var(--drafting-shadow-active)] data-[state=active]:hover:-translate-y-px data-[state=active]:hover:bg-[var(--drafting-panel-bg-active)] data-[state=active]:hover:text-[var(--drafting-ink)] data-[state=active]:hover:shadow-[var(--drafting-shadow-hover)] data-[state=active]:active:translate-y-0 dark:bg-[var(--drafting-panel-tab-bg)] dark:text-[var(--drafting-panel-tab-label)] dark:hover:bg-[var(--drafting-panel-tab-bg-hover)] dark:hover:text-[var(--drafting-panel-tab-label-hover)] dark:hover:shadow-[var(--drafting-panel-tab-shadow-hover)] dark:active:bg-[var(--drafting-panel-tab-bg-active)] dark:active:text-[var(--drafting-panel-tab-label-selected)] dark:active:shadow-[var(--drafting-panel-tab-shadow-active)] dark:data-[state=active]:bg-[var(--drafting-panel-tab-bg-selected)] dark:data-[state=active]:text-[var(--drafting-panel-tab-label-selected)] dark:data-[state=active]:shadow-[var(--drafting-panel-tab-shadow-selected)] dark:data-[state=active]:hover:bg-[var(--drafting-panel-tab-bg-selected)] dark:data-[state=active]:hover:text-[var(--drafting-panel-tab-label-selected)] dark:data-[state=active]:hover:shadow-[var(--drafting-panel-tab-shadow-selected-hover)] sm:px-3 sm:text-[0.72rem]"
 
 const DEFAULT_DRAFTING_STUDIO_STATE = createDefaultQrStudioState()
 const IGNORE_DRAFTING_UPLOAD_ERROR: (message: string) => void = () => undefined
@@ -306,7 +306,7 @@ function PlusMarker({ className }: { className: string }) {
     <svg
       aria-hidden="true"
       data-slot="drafting-plus-marker"
-      className={cn("pointer-events-none absolute size-4 text-black dark:text-foreground/70", className)}
+      className={cn("pointer-events-none absolute size-4 text-[var(--drafting-ink-muted)]", className)}
       fill="none"
       viewBox="0 0 24 24"
     >
@@ -1509,7 +1509,7 @@ export function DraftingSurface() {
                 align="end"
                 data-slot="drafting-download-popover"
                 sideOffset={10}
-                className="flex max-h-[calc(100dvh-5rem)] w-[min(27rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-[12px] border border-black/10 bg-[var(--drafting-panel-bg-hover)] p-0 text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] backdrop-blur-xl dark:border-border dark:bg-popover/95 dark:text-popover-foreground dark:shadow-[var(--drafting-shadow-rest)]"
+                className="flex max-h-[calc(100dvh-5rem)] w-[min(27rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-[12px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] p-0 text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] backdrop-blur-xl"
               >
                 <div className="flex min-h-0 flex-1 flex-col">
                   <div
@@ -1534,6 +1534,7 @@ export function DraftingSurface() {
 
                           return (
                             <OptionCard
+                              appearance="drafting"
                               darkShadowTone="ink"
                               key={target.id}
                               checked={isSelected}
@@ -1583,6 +1584,7 @@ export function DraftingSurface() {
 
                           return (
                             <OptionCard
+                              appearance="drafting"
                               darkShadowTone="ink"
                               key={extension}
                               checked={isSelected}
@@ -1649,6 +1651,7 @@ export function DraftingSurface() {
 
                             return (
                               <OptionCard
+                                appearance="drafting"
                                 darkShadowTone="ink"
                                 key={preset.id}
                                 checked={isSelected}
@@ -1718,7 +1721,7 @@ export function DraftingSurface() {
                     ) : null}
                   </div>
 
-                  <div className="shrink-0 border-t border-black/8 bg-[var(--drafting-panel-bg-hover)] p-3 dark:border-border dark:bg-popover/95">
+                  <div className="shrink-0 border-t border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] p-3">
                     <Button
                       data-slot="drafting-download-submit"
                       disabled={!canDownload}
@@ -1770,9 +1773,9 @@ export function DraftingSurface() {
                       aria-pressed={isActive}
                       data-drafting-tool-button="true"
                       className={cn(
-                        "group flex h-7 w-auto min-w-fit flex-row items-center justify-center rounded-[5px] border-0 bg-[var(--drafting-control-bg)] px-2.5 py-0 text-center text-[var(--drafting-ink-muted)] shadow-[var(--drafting-shadow-rest)] transition-[background-color,box-shadow,color,transform] duration-150 ease-out hover:-translate-y-px hover:bg-[var(--drafting-control-bg-hover)] hover:text-[var(--drafting-ink-strong-muted)] hover:shadow-[var(--drafting-shadow-hover)] active:translate-y-0 active:bg-[var(--drafting-control-bg-active)] active:shadow-[var(--drafting-shadow-active)] lg:h-auto lg:w-20 lg:min-w-0 lg:flex-col lg:justify-center lg:gap-3 lg:rounded-none lg:bg-transparent lg:px-2 lg:py-2.5 lg:text-center lg:shadow-none lg:hover:bg-transparent lg:hover:shadow-none lg:active:bg-transparent",
+                        "group flex h-7 w-auto min-w-fit flex-row items-center justify-center rounded-[5px] border-0 bg-[var(--drafting-control-bg)] px-2.5 py-0 text-center text-[var(--drafting-ink-muted)] shadow-[var(--drafting-shadow-rest)] transition-[background-color,box-shadow,color,transform] duration-150 ease-out hover:-translate-y-px hover:bg-[var(--drafting-control-bg-hover)] hover:text-[var(--drafting-ink-strong-muted)] hover:shadow-[var(--drafting-shadow-hover)] active:translate-y-0 active:bg-[var(--drafting-control-bg-active)] active:shadow-[var(--drafting-shadow-active)] dark:bg-[var(--drafting-button-bg)] dark:text-[var(--drafting-button-label)] dark:shadow-[var(--drafting-button-shadow-rest)] dark:hover:bg-[var(--drafting-button-bg-hover)] dark:hover:text-[var(--drafting-button-label-hover)] dark:hover:shadow-[var(--drafting-button-shadow-hover)] dark:active:bg-[var(--drafting-button-bg-active)] dark:active:shadow-[var(--drafting-button-shadow-active)] lg:h-auto lg:w-20 lg:min-w-0 lg:flex-col lg:justify-center lg:gap-3 lg:rounded-none lg:bg-transparent lg:px-2 lg:py-2.5 lg:text-center lg:shadow-none lg:hover:bg-transparent lg:hover:shadow-none lg:active:bg-transparent dark:lg:bg-transparent dark:lg:hover:bg-transparent dark:lg:hover:shadow-none dark:lg:active:bg-transparent",
                         isActive &&
-                          "bg-[var(--drafting-ink)] text-[var(--drafting-ink-inverse)] shadow-[var(--drafting-shadow-rest)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-ink-inverse)] hover:shadow-[var(--drafting-shadow-hover)] active:bg-[var(--drafting-ink)] active:text-[var(--drafting-ink-inverse)] lg:bg-transparent lg:text-[var(--drafting-ink)] lg:shadow-none lg:hover:bg-transparent lg:hover:text-[var(--drafting-ink)] lg:hover:shadow-none",
+                          "bg-[var(--drafting-ink)] text-[var(--drafting-ink-inverse)] shadow-[var(--drafting-shadow-rest)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-ink-inverse)] hover:shadow-[var(--drafting-shadow-hover)] active:bg-[var(--drafting-ink)] active:text-[var(--drafting-ink-inverse)] dark:bg-[var(--drafting-button-bg-selected)] dark:text-[var(--drafting-button-icon-selected)] dark:shadow-[var(--drafting-button-shadow-selected)] dark:hover:bg-[var(--drafting-button-bg-selected)] dark:hover:text-[var(--drafting-button-icon-selected)] dark:hover:shadow-[var(--drafting-button-shadow-selected-hover)] dark:active:bg-[var(--drafting-button-bg-selected)] dark:active:text-[var(--drafting-button-icon-selected)] lg:bg-transparent lg:text-[var(--drafting-ink)] lg:shadow-none lg:hover:bg-transparent lg:hover:text-[var(--drafting-ink)] lg:hover:shadow-none dark:lg:bg-transparent dark:lg:text-[var(--drafting-button-label-selected)] dark:lg:hover:bg-transparent dark:lg:hover:text-[var(--drafting-button-label-selected)] dark:lg:hover:shadow-none",
                       )}
                       size="default"
                       type="button"
@@ -1782,9 +1785,9 @@ export function DraftingSurface() {
                       <span
                         data-slot="drafting-tool-button-icon"
                         className={cn(
-                          "hidden size-7 shrink-0 items-center justify-center rounded-[4px] bg-transparent text-current shadow-none transition-[background-color,box-shadow,transform,color] duration-150 ease-out lg:flex lg:size-10 lg:rounded-[6px] lg:bg-[var(--drafting-control-bg)] lg:shadow-[var(--drafting-shadow-rest)] lg:group-hover:-translate-y-px lg:group-hover:bg-[var(--drafting-control-bg-hover)] lg:group-hover:shadow-[var(--drafting-shadow-hover)] lg:group-active:translate-y-0 lg:group-active:bg-[var(--drafting-control-bg-active)] lg:group-active:shadow-[var(--drafting-shadow-active)]",
+                          "hidden size-7 shrink-0 items-center justify-center rounded-[4px] bg-transparent text-current shadow-none transition-[background-color,box-shadow,transform,color] duration-150 ease-out dark:text-[var(--drafting-button-icon)] lg:flex lg:size-10 lg:rounded-[6px] lg:bg-[var(--drafting-control-bg)] lg:shadow-[var(--drafting-shadow-rest)] lg:group-hover:-translate-y-px lg:group-hover:bg-[var(--drafting-control-bg-hover)] lg:group-hover:shadow-[var(--drafting-shadow-hover)] lg:group-active:translate-y-0 lg:group-active:bg-[var(--drafting-control-bg-active)] lg:group-active:shadow-[var(--drafting-shadow-active)] dark:lg:bg-[var(--drafting-button-bg)] dark:lg:shadow-[var(--drafting-button-shadow-rest)] dark:lg:group-hover:bg-[var(--drafting-button-bg-hover)] dark:lg:group-hover:shadow-[var(--drafting-button-shadow-hover)] dark:lg:group-active:bg-[var(--drafting-button-bg-active)] dark:lg:group-active:shadow-[var(--drafting-button-shadow-active)]",
                           isActive &&
-                            "lg:bg-[var(--drafting-ink)] lg:text-[var(--drafting-ink-inverse)] lg:shadow-[var(--drafting-shadow-rest)] lg:group-hover:bg-[var(--drafting-ink)] lg:group-hover:text-[var(--drafting-ink-inverse)] lg:group-hover:shadow-[var(--drafting-shadow-hover)] lg:group-active:translate-y-0 lg:group-active:bg-[var(--drafting-ink)] lg:group-active:text-[var(--drafting-ink-inverse)] lg:group-active:shadow-[var(--drafting-shadow-active)]",
+                            "lg:bg-[var(--drafting-ink)] lg:text-[var(--drafting-ink-inverse)] lg:shadow-[var(--drafting-shadow-rest)] lg:group-hover:bg-[var(--drafting-ink)] lg:group-hover:text-[var(--drafting-ink-inverse)] lg:group-hover:shadow-[var(--drafting-shadow-hover)] lg:group-active:translate-y-0 lg:group-active:bg-[var(--drafting-ink)] lg:group-active:text-[var(--drafting-ink-inverse)] lg:group-active:shadow-[var(--drafting-shadow-active)] dark:lg:bg-[var(--drafting-button-bg-selected)] dark:lg:text-[var(--drafting-button-icon-selected)] dark:lg:shadow-[var(--drafting-button-shadow-selected)] dark:lg:group-hover:bg-[var(--drafting-button-bg-selected)] dark:lg:group-hover:text-[var(--drafting-button-icon-selected)] dark:lg:group-hover:shadow-[var(--drafting-button-shadow-selected-hover)] dark:lg:group-active:bg-[var(--drafting-button-bg-selected)] dark:lg:group-active:text-[var(--drafting-button-icon-selected)] dark:lg:group-active:shadow-[var(--drafting-button-shadow-active)]",
                         )}
                       >
                         {tool.renderIcon()}
@@ -1792,8 +1795,8 @@ export function DraftingSurface() {
                       <span
                         data-slot="drafting-tool-button-label"
                         className={cn(
-                          "text-[0.62rem] font-medium uppercase leading-none tracking-[0.12em] text-[var(--drafting-ink-muted)] transition-colors duration-150 group-hover:text-[var(--drafting-ink-strong-muted)] lg:text-[0.58rem] lg:leading-[1.15] lg:tracking-[0.16em]",
-                          isActive && "font-semibold text-current",
+                          "text-[0.62rem] font-medium uppercase leading-none tracking-[0.12em] text-[var(--drafting-ink-muted)] transition-colors duration-150 group-hover:text-[var(--drafting-ink-strong-muted)] dark:text-[var(--drafting-button-label)] dark:group-hover:text-[var(--drafting-button-label-hover)] lg:text-[0.58rem] lg:leading-[1.15] lg:tracking-[0.16em]",
+                          isActive && "font-semibold text-current dark:text-[var(--drafting-button-label-selected)]",
                         )}
                       >
                         {tool.title}
@@ -1808,7 +1811,7 @@ export function DraftingSurface() {
               data-slot="drafting-nav-scrollbar"
               className="h-2 border-none p-[1px] lg:hidden"
             >
-              <ScrollAreaThumb className="bg-black/16 hover:bg-black/24 dark:bg-muted-foreground/20 dark:hover:bg-muted-foreground/30" />
+              <ScrollAreaThumb className="bg-[var(--drafting-line-hover)] hover:bg-[var(--drafting-line-strong)]" />
             </ScrollAreaScrollbar>
           </ScrollArea>
         </nav>
@@ -1873,7 +1876,7 @@ export function DraftingSurface() {
                       data-slot="drafting-tab-panel-scrollbar"
                       className="w-2 border-none p-[1px]"
                     >
-                      <ScrollAreaThumb className="bg-black/16 hover:bg-black/24 dark:bg-muted-foreground/20 dark:hover:bg-muted-foreground/30" />
+                      <ScrollAreaThumb className="bg-[var(--drafting-line-hover)] hover:bg-[var(--drafting-line-strong)]" />
                     </ScrollAreaScrollbar>
                   </ScrollArea>
                 </TabsContent>

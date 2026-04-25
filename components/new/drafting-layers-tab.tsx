@@ -60,7 +60,7 @@ export function DraftingLayersTab({
       {layerNodes.length === 0 ? (
         <div
           data-slot="drafting-layers-empty-state"
-          className="rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 text-[0.72rem] leading-5 text-[var(--drafting-ink-muted)] shadow-[var(--drafting-shadow-rest)] dark:border-border dark:bg-card/80 dark:text-muted-foreground dark:shadow-[var(--drafting-shadow-rest)]"
+          className="rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 text-[0.72rem] leading-5 text-[var(--drafting-ink-muted)] shadow-[var(--drafting-shadow-rest)]"
         >
           The layer stack will appear here once the canvas has content.
         </div>
@@ -93,10 +93,10 @@ export function DraftingLayersTab({
                   data-node-id={node.id}
                   data-selected={isSelected ? "true" : "false"}
                   className={cn(
-                    "min-w-0 overflow-hidden rounded-[8px] border px-3 py-3 shadow-[var(--drafting-shadow-rest)] transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out dark:shadow-[var(--drafting-shadow-rest)]",
-                    "border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)] dark:border-border dark:bg-card/80 dark:hover:border-border/80 dark:hover:bg-card dark:hover:shadow-[var(--drafting-shadow-hover)]",
+                    "min-w-0 overflow-hidden rounded-[8px] border px-3 py-3 shadow-[var(--drafting-shadow-rest)] transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
+                    "border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)]",
                     isSelected &&
-                      "border-[var(--drafting-ink)] bg-[var(--drafting-panel-bg-active)] shadow-[var(--drafting-shadow-rest)] dark:border-ring/70 dark:bg-accent/70 dark:shadow-[var(--drafting-shadow-rest)]",
+                      "border-[var(--drafting-ink)] bg-[var(--drafting-panel-bg-active)] shadow-[var(--drafting-shadow-rest)]",
                   )}
                 >
                   <div className="flex min-w-0 items-center gap-3">

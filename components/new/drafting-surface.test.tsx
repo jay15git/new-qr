@@ -214,10 +214,7 @@ describe("DraftingSurface", () => {
     ).toContain("lg:block")
     expect(
       surface.container.querySelector('[data-slot="drafting-plus-marker"]')?.getAttribute("class"),
-    ).toContain("text-black")
-    expect(
-      surface.container.querySelector('[data-slot="drafting-plus-marker"]')?.getAttribute("class"),
-    ).toContain("dark:text-foreground")
+    ).toContain("text-[var(--drafting-ink-muted)]")
     expect(
       surface.container.querySelector('[data-slot="drafting-plus-marker"]')?.getAttribute("class"),
     ).not.toContain("text-black/")
@@ -755,7 +752,12 @@ describe("DraftingSurface", () => {
       squareInput.parentElement
         ?.querySelector('[data-slot="option-card"]')
         ?.getAttribute("class"),
-    ).toContain("dark:border-foreground/10")
+    ).toContain("border-[var(--drafting-option-card-border)]")
+    expect(
+      squareInput.parentElement
+        ?.querySelector('[data-slot="option-card"]')
+        ?.getAttribute("class"),
+    ).toContain("shadow-[var(--drafting-option-card-shadow-rest)]")
     expect(styleGrid.innerHTML).not.toMatch(
       /dark:[^"]*shadow-\[[^\]]*rgba\(255,255,255/,
     )
