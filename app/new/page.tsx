@@ -11,7 +11,7 @@ export default function NewPage() {
   return (
     <main
       data-slot="new-page"
-      className="bg-white px-6 pb-6 pt-6 dark:bg-[#050505] dark:text-foreground sm:px-8 sm:pb-8 sm:pt-8"
+      className="bg-[var(--drafting-page-bg)] p-0 text-[var(--drafting-ink)] sm:px-8 sm:pb-8 sm:pt-8"
     >
       <DraftingSurface />
     </main>

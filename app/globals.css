@@ -324,26 +324,81 @@
   animation-fill-mode: both;
 }
 
+[data-slot="new-page"] {
+  min-height: 100dvh;
+  --drafting-ink-rgb: 17 17 17;
+  --drafting-paper-rgb: 255 255 255;
+  --drafting-page-bg: oklch(0.985 0 0);
+  --drafting-surface-bg: oklch(1 0 0);
+  --drafting-canvas-bg: oklch(0.93 0 0);
+  --drafting-canvas-check-rgb: 255 255 255;
+  --drafting-panel-bg: rgb(var(--drafting-paper-rgb) / 0.8);
+  --drafting-panel-bg-hover: rgb(var(--drafting-paper-rgb) / 0.95);
+  --drafting-panel-bg-active: oklch(1 0 0);
+  --drafting-ink: oklch(0.18 0 0);
+  --drafting-ink-muted: rgb(var(--drafting-ink-rgb) / 0.45);
+  --drafting-ink-strong-muted: rgb(var(--drafting-ink-rgb) / 0.65);
+  --drafting-ink-subtle: rgb(var(--drafting-ink-rgb) / 0.32);
+  --drafting-ink-inverse: oklch(1 0 0);
+  --drafting-line: rgb(var(--drafting-ink-rgb) / 0.09);
+  --drafting-line-hover: rgb(var(--drafting-ink-rgb) / 0.16);
+  --drafting-line-strong: rgb(var(--drafting-ink-rgb) / 0.4);
+  --drafting-dash-color: rgb(var(--drafting-ink-rgb) / 0.12);
+  --drafting-control-bg: rgb(var(--drafting-ink-rgb) / 0.03);
+  --drafting-control-bg-hover: rgb(var(--drafting-ink-rgb) / 0.06);
+  --drafting-control-bg-active: rgb(var(--drafting-ink-rgb) / 0.08);
+  --drafting-shadow-rest: 0 0 10px 0 rgb(var(--drafting-ink-rgb) / 0.05), 0 2px 4px 0 rgb(var(--drafting-ink-rgb) / 0.03);
+  --drafting-shadow-hover: 0 0 18px 1px rgb(var(--drafting-ink-rgb) / 0.07), 0 4px 10px 0 rgb(var(--drafting-ink-rgb) / 0.04);
+  --drafting-shadow-active: 0 0 8px 0 rgb(var(--drafting-ink-rgb) / 0.07), 0 1px 3px 0 rgb(var(--drafting-ink-rgb) / 0.06);
+  --drafting-shadow-selected: 0 0 22px 2px rgb(var(--drafting-ink-rgb) / 0.14), 0 5px 10px 1px rgb(var(--drafting-ink-rgb) / 0.08);
+  --drafting-shadow-raised: 0 24px 64px rgb(var(--drafting-ink-rgb) / 0.18), 0 8px 20px rgb(var(--drafting-ink-rgb) / 0.08);
+  --drafting-shadow-shell: 0 18px 48px rgb(var(--drafting-ink-rgb) / 0.06);
+}
+
+.dark [data-slot="new-page"] {
+  --drafting-ink-rgb: 245 245 245;
+  --drafting-paper-rgb: 8 8 8;
+  --drafting-page-bg: oklch(0.08 0 0);
+  --drafting-surface-bg: oklch(0.04 0 0);
+  --drafting-canvas-bg: oklch(0.11 0 0);
+  --drafting-canvas-check-rgb: 255 255 255;
+  --drafting-panel-bg: rgb(var(--drafting-paper-rgb) / 0.86);
+  --drafting-panel-bg-hover: rgb(var(--drafting-paper-rgb) / 0.95);
+  --drafting-panel-bg-active: oklch(0.12 0 0);
+  --drafting-ink: oklch(0.94 0 0);
+  --drafting-ink-muted: rgb(var(--drafting-ink-rgb) / 0.56);
+  --drafting-ink-strong-muted: rgb(var(--drafting-ink-rgb) / 0.78);
+  --drafting-ink-subtle: rgb(var(--drafting-ink-rgb) / 0.38);
+  --drafting-ink-inverse: oklch(0.08 0 0);
+  --drafting-line: rgb(var(--drafting-ink-rgb) / 0.12);
+  --drafting-line-hover: rgb(var(--drafting-ink-rgb) / 0.2);
+  --drafting-line-strong: rgb(var(--drafting-ink-rgb) / 0.48);
+  --drafting-dash-color: rgb(var(--drafting-ink-rgb) / 0.14);
+  --drafting-control-bg: rgb(var(--drafting-ink-rgb) / 0.08);
+  --drafting-control-bg-hover: rgb(var(--drafting-ink-rgb) / 0.12);
+  --drafting-control-bg-active: rgb(var(--drafting-ink-rgb) / 0.16);
+  --drafting-shadow-rest: 0 0 10px 0 rgb(0 0 0 / 0.04), 0 2px 4px 0 rgb(0 0 0 / 0.28);
+  --drafting-shadow-hover: 0 0 18px 1px rgb(0 0 0 / 0.06), 0 4px 10px 0 rgb(0 0 0 / 0.34);
+  --drafting-shadow-active: 0 0 8px 0 rgb(0 0 0 / 0.05), 0 1px 3px 0 rgb(0 0 0 / 0.34);
+  --drafting-shadow-selected: 0 0 22px 2px rgb(0 0 0 / 0.08), 0 5px 10px 1px rgb(0 0 0 / 0.34);
+  --drafting-shadow-raised: 0 24px 64px rgb(0 0 0 / 0.46), 0 8px 20px rgb(0 0 0 / 0.32);
+  --drafting-shadow-shell: 0 18px 48px rgb(0 0 0 / 0.28);
+}
+
 [data-slot="drafting-surface"] {
   --drafting-dash-size: 15px;
   --drafting-dash-cycle: 30px;
-  --drafting-dash-color: rgba(0, 0, 0, 0.12);
   border-color: transparent;
   isolation: isolate;
 }
 
-.dark [data-slot="drafting-surface"] {
-  --drafting-dash-color: rgba(255, 255, 255, 0.14);
-}
-
 .dark [data-slot="new-page"] {
-  min-height: 100dvh;
-  --background: oklch(0.065 0.003 252);
-  --card: oklch(0.15 0.006 252);
-  --popover: oklch(0.13 0.006 252);
-  --muted: oklch(0.19 0.006 252);
-  --input: oklch(0.18 0.006 252 / 0.95);
-  --border: oklch(0.34 0.006 252 / 0.72);
+  --background: oklch(0.065 0 0);
+  --card: oklch(0.15 0 0);
+  --popover: oklch(0.13 0 0);
+  --muted: oklch(0.19 0 0);
+  --input: oklch(0.18 0 0 / 0.95);
+  --border: oklch(0.34 0 0 / 0.72);
   --drafting-dark-depth-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.07),
     0 0 18px 2px rgba(150, 150, 150, 0.12),
@@ -529,4 +584,39 @@
   );
   background-repeat: repeat-y;
   background-size: 1px var(--drafting-dash-cycle);
+}
+
+@media (max-width: 63.999rem) {
+  [data-slot="drafting-surface"]::before,
+  [data-slot="drafting-divider-horizontal"]::before,
+  [data-slot="drafting-divider-vertical"]::before {
+    display: none;
+  }
+
+  [data-slot="drafting-nav"]::before,
+  [data-slot="drafting-nav"]::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    height: 1px;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      90deg,
+      var(--drafting-dash-color) 0 var(--drafting-dash-size),
+      transparent var(--drafting-dash-size) var(--drafting-dash-cycle)
+    );
+    background-position: top left;
+    background-repeat: repeat-x;
+    background-size: var(--drafting-dash-cycle) 1px;
+  }
+
+  [data-slot="drafting-nav"]::before {
+    top: 0;
+  }
+
+  [data-slot="drafting-nav"]::after {
+    bottom: 0;
+  }
 }
