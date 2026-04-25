@@ -122,9 +122,9 @@ describe("DashboardComposeSurface", () => {
     expect(dashboardMarkup).toContain("background-color:#e8edf4")
     expect(dashboardMarkup).toContain('data-toolbar-appearance="dashboard"')
     expect(neutralMarkup).toContain('data-surface-appearance="neutral"')
-    expect(neutralMarkup).toContain("background-color:#ececec")
+    expect(neutralMarkup).toContain("background-color:var(--drafting-canvas-bg)")
     expect(neutralMarkup).toContain('data-toolbar-appearance="neutral"')
-    expect(neutralMarkup).toContain("border-[#00000017]")
+    expect(neutralMarkup).toContain("border-[var(--drafting-line)]")
     expect(neutralMarkup).not.toContain("background-color:#e8edf4")
   })
 
@@ -267,7 +267,7 @@ describe("DashboardComposeSurface", () => {
     expect(imageNodeIndex).toBeGreaterThan(-1)
     expect(qrNodeIndex).toBeGreaterThan(imageNodeIndex)
     expect(markup).toContain('data-selected="true"')
-    expect(markup).toContain("drop-shadow-[0_22px_34px_rgba(15,23,42,0.28)]")
+    expect(markup).toContain("drop-shadow-[0_22px_34px_rgb(var(--drafting-ink-rgb)/0.28)]")
     expect(markup).toContain("z-index:10000")
     expect(markup).toContain('aria-label="Rotate QR"')
     expect(markup).toContain('aria-label="Resize QR from top left"')
@@ -293,9 +293,9 @@ describe("DashboardComposeSurface", () => {
       />,
     )
 
-    expect(markup).toContain(
-      'bottom-[-2.75rem] left-1/2 -translate-x-1/2 rounded-[4px] border border-black/24 bg-white/92',
-    )
+    expect(markup).toContain("bottom-[-2.75rem] left-1/2 -translate-x-1/2")
+    expect(markup).toContain("rounded-[4px] px-3 py-1")
+    expect(markup).toContain("border border-black/24 bg-white/92")
     expect(markup).toContain("320 × 320")
     expect(markup).not.toContain(`${fittedSize} × ${fittedSize}`)
     expect(markup).not.toContain(

@@ -84,24 +84,24 @@ export function DraftingContentTab({
       <div
         data-slot="drafting-content-textarea-field"
         className={cn(
-          "min-w-0 rounded-[8px] border border-[#00000017] bg-[#FFFFFFCC] px-4 py-3 dark:border-border dark:bg-card/80",
-          "shadow-[0_0_10px_0_rgba(0,0,0,0.05),0_2px_4px_0_rgba(0,0,0,0.03)] dark:shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.28)]",
+          "min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 dark:border-border dark:bg-card/80",
+          "shadow-[var(--drafting-shadow-rest)] dark:shadow-[var(--drafting-shadow-rest)]",
           "transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
-          "hover:-translate-y-px hover:border-[#00000026] hover:bg-[#FFFFFFF2] hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.07),0_4px_10px_0_rgba(0,0,0,0.04)] dark:hover:border-border/80 dark:hover:bg-card dark:hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.06),0_4px_10px_0_rgba(0,0,0,0.34)]",
-          "active:translate-y-0 active:border-[#00000030] active:shadow-[0_0_8px_0_rgba(0,0,0,0.07),0_1px_3px_0_rgba(0,0,0,0.06)] dark:active:border-border dark:active:shadow-[0_0_8px_0_rgba(0,0,0,0.05),0_1px_3px_0_rgba(0,0,0,0.34)]",
-          "focus-within:border-[#11111166] focus-within:bg-white focus-within:shadow-[0_0_18px_1px_rgba(0,0,0,0.09),0_4px_10px_0_rgba(0,0,0,0.05)] dark:focus-within:border-ring dark:focus-within:bg-card dark:focus-within:shadow-[0_0_18px_1px_rgba(0,0,0,0.07),0_4px_10px_0_rgba(0,0,0,0.34)]",
+          "hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)] dark:hover:border-border/80 dark:hover:bg-card dark:hover:shadow-[var(--drafting-shadow-hover)]",
+          "active:translate-y-0 active:border-[var(--drafting-line-hover)] active:shadow-[var(--drafting-shadow-active)] dark:active:border-border dark:active:shadow-[var(--drafting-shadow-active)]",
+          "focus-within:border-[var(--drafting-line-strong)] focus-within:bg-[var(--drafting-panel-bg-active)] focus-within:shadow-[var(--drafting-shadow-rest)] dark:focus-within:border-ring dark:focus-within:bg-card dark:focus-within:shadow-[var(--drafting-shadow-rest)]",
         )}
       >
         <label
           htmlFor="drafting-qr-data"
-          className="block text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-[#111111] dark:text-foreground"
+          className="block text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-[var(--drafting-ink)]"
         >
           Text or URL
         </label>
         <Textarea
           id="drafting-qr-data"
           aria-label="Text or URL"
-          className="mt-3 min-h-28 border-0 bg-white/70 px-3.5 py-3 text-sm text-[#111111] shadow-none placeholder:text-[#00000052] focus-visible:border-0 focus-visible:ring-0 dark:bg-input/30 dark:text-foreground dark:placeholder:text-muted-foreground"
+          className="mt-3 min-h-28 min-w-0 max-w-full resize-none overflow-x-hidden border-0 bg-white/70 px-3.5 py-3 text-sm text-[var(--drafting-ink)] shadow-none placeholder:text-[var(--drafting-ink-subtle)] [overflow-wrap:anywhere] focus-visible:border-0 focus-visible:ring-0 dark:bg-input/30 dark:text-foreground dark:placeholder:text-muted-foreground"
           placeholder="https://example.com/invite"
           value={contentValue}
           onChange={(event) => onContentValueChange(event.target.value)}
@@ -294,7 +294,7 @@ export function DraftingDotsColorTab({
                 <span
                   key={color}
                   aria-hidden="true"
-                  className="size-7 shrink-0 rounded-full border border-black/10 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.45)]"
+                  className="size-7 shrink-0 rounded-full border border-black/10 shadow-[var(--drafting-shadow-rest)]"
                   style={{ backgroundColor: color }}
                 />
               ))}
@@ -302,7 +302,7 @@ export function DraftingDotsColorTab({
             <Button
               type="button"
               variant="outline"
-              className="w-full rounded-[8px] border-[#00000017] bg-[#FFFFFFE6] text-[#111111] shadow-[0_0_10px_0_rgba(0,0,0,0.06),0_2px_4px_0_rgba(0,0,0,0.04)] hover:border-[#0000002A] hover:bg-[#FFFFFFF2] dark:border-border dark:bg-card dark:text-foreground dark:shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.28)] dark:hover:border-border/80 dark:hover:bg-muted/50"
+              className="w-full rounded-[8px] border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] dark:border-border dark:bg-card dark:text-foreground dark:shadow-[var(--drafting-shadow-rest)] dark:hover:border-border/80 dark:hover:bg-muted/50"
               onClick={() => onModeChange("palette")}
             >
               Use palette
@@ -546,7 +546,7 @@ export function DraftingBrandIconTab({
           <span
             aria-hidden="true"
             data-slot="drafting-brand-icon-search-icon"
-            className="pointer-events-none absolute left-3 top-1/2 flex size-4 -translate-y-1/2 items-center justify-center text-[#00000052] dark:text-muted-foreground"
+            className="pointer-events-none absolute left-3 top-1/2 flex size-4 -translate-y-1/2 items-center justify-center text-[var(--drafting-ink-subtle)]"
           >
             <HugeiconsIcon
               icon={Search01Icon}
@@ -558,7 +558,7 @@ export function DraftingBrandIconTab({
           <Input
             id="drafting-brand-icon-search"
             aria-label="Search brand icons"
-            className="h-10 border-[#00000017] bg-[#FFFFFFE6] pl-9 pr-3 text-sm text-[#111111] shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.03)] placeholder:text-[#00000052] focus-visible:border-black/35 focus-visible:ring-0 dark:border-border dark:bg-input/30 dark:text-foreground dark:placeholder:text-muted-foreground dark:focus-visible:border-ring"
+            className="h-10 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] pl-9 pr-3 text-sm text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] placeholder:text-[var(--drafting-ink-subtle)] focus-visible:border-black/35 focus-visible:ring-0 dark:border-border dark:bg-input/30 dark:text-foreground dark:placeholder:text-muted-foreground dark:focus-visible:border-ring"
             placeholder="Search Icons"
             value={brandIconQuery}
             onChange={(event) => onBrandIconQueryChange(event.target.value)}
@@ -566,7 +566,7 @@ export function DraftingBrandIconTab({
         </div>
 
         <div
-          className="grid grid-cols-2 gap-2 sm:grid-cols-3"
+          className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-3"
           data-slot="drafting-brand-icon-category-picker"
           role="radiogroup"
         >
@@ -596,8 +596,8 @@ export function DraftingBrandIconTab({
                   className={cn(
                     "flex size-full items-center justify-center text-[0.68rem] font-medium uppercase tracking-[0.12em]",
                     isSelected
-                      ? "text-[#111111] dark:text-foreground"
-                      : "text-[#00000066] dark:text-muted-foreground",
+                      ? "text-[var(--drafting-ink)]"
+                      : "text-[var(--drafting-ink-muted)]",
                   )}
                 >
                   {option.label}
@@ -609,7 +609,7 @@ export function DraftingBrandIconTab({
 
         <div
           data-slot="drafting-brand-icon-grid"
-          className="-mx-2 grid grid-cols-4 justify-items-center gap-x-2 gap-y-4 px-1"
+          className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(56px,1fr))] justify-items-center gap-x-2 gap-y-4"
         >
           {brandIcons.map((brandIcon) => {
             const Icon = brandIcon.icon
@@ -623,7 +623,7 @@ export function DraftingBrandIconTab({
                 className={cn(
                   "w-[56px]",
                   "[&_[data-slot=option-card]]:h-[56px] [&_[data-slot=option-card]]:w-[56px]",
-                  "[&_[data-slot=option-card-motif]]:text-[#111111] dark:[&_[data-slot=option-card-motif]]:text-foreground",
+                  "[&_[data-slot=option-card-motif]]:text-[var(--drafting-ink)] dark:[&_[data-slot=option-card-motif]]:text-foreground",
                 )}
                 label={brandIcon.label}
                 labelClassName="text-[0.5rem] uppercase tracking-[0.08em] leading-[1.05] min-h-[1.2rem]"
@@ -639,7 +639,7 @@ export function DraftingBrandIconTab({
                   data-slot="drafting-brand-icon-option"
                   className="flex size-full items-center justify-center"
                 >
-                  <span className="text-[#111111] dark:text-foreground">
+                  <span className="text-[var(--drafting-ink)]">
                     <Icon className="size-[18px]" />
                   </span>
                 </span>
@@ -827,10 +827,10 @@ export function DraftingEncodingTab({
 
       <section data-slot="drafting-error-correction-section" className="space-y-3">
         <div className="space-y-1">
-          <h3 className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#111111] dark:text-foreground">
+          <h3 className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[var(--drafting-ink)]">
             Error correction
           </h3>
-          <p className="text-[0.72rem] leading-5 text-[#00000066] dark:text-muted-foreground">
+          <p className="text-[0.72rem] leading-5 text-[var(--drafting-ink-muted)]">
             Higher recovery makes styled codes more tolerant to logos, crops, and wear.
           </p>
         </div>
@@ -839,7 +839,7 @@ export function DraftingEncodingTab({
           data-slot="drafting-error-correction-grid"
           role="radiogroup"
           aria-label="Error correction levels"
-          className="grid grid-cols-2 gap-3"
+          className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2"
         >
           {ERROR_CORRECTION_LEVEL_OPTIONS.map((option) => {
             const isSelected = option.value === errorCorrectionLevel
@@ -866,8 +866,8 @@ export function DraftingEncodingTab({
                     className={cn(
                       "text-[1.375rem] font-semibold leading-none tracking-[0.08em]",
                       isSelected
-                        ? "text-[#111111] dark:text-foreground"
-                        : "text-[#00000073] dark:text-muted-foreground",
+                        ? "text-[var(--drafting-ink)]"
+                        : "text-[var(--drafting-ink-muted)]",
                     )}
                   >
                     {option.label}
@@ -877,8 +877,8 @@ export function DraftingEncodingTab({
                       className={cn(
                         "block text-[0.68rem] font-semibold uppercase tracking-[0.14em]",
                         isSelected
-                          ? "text-[#111111] dark:text-foreground"
-                          : "text-[#0000008A] dark:text-foreground/80",
+                          ? "text-[var(--drafting-ink)]"
+                          : "text-[var(--drafting-ink-strong-muted)]",
                       )}
                     >
                       {option.title}
@@ -887,8 +887,8 @@ export function DraftingEncodingTab({
                       className={cn(
                         "block text-[0.72rem] leading-5",
                         isSelected
-                          ? "text-[#111111] dark:text-foreground"
-                          : "text-[#00000066] dark:text-muted-foreground",
+                          ? "text-[var(--drafting-ink)]"
+                          : "text-[var(--drafting-ink-muted)]",
                       )}
                     >
                       {option.summary}
@@ -1014,7 +1014,7 @@ function buildDraftingBackgroundColorItems({
         <Button
           type="button"
           variant="outline"
-          className="w-full rounded-[8px] border-[#00000017] bg-[#FFFFFFE6] text-[#111111] shadow-[0_0_10px_0_rgba(0,0,0,0.06),0_2px_4px_0_rgba(0,0,0,0.04)] hover:border-[#0000002A] hover:bg-[#FFFFFFF2] dark:border-border dark:bg-card dark:text-foreground dark:shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.28)] dark:hover:border-border/80 dark:hover:bg-muted/50"
+          className="w-full rounded-[8px] border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] dark:border-border dark:bg-card dark:text-foreground dark:shadow-[var(--drafting-shadow-rest)] dark:hover:border-border/80 dark:hover:bg-muted/50"
           onClick={onTransparentSelect}
         >
           Use transparent background
@@ -1069,7 +1069,7 @@ function buildDraftingAssetSourceItems({
         <div className="min-w-0 px-4 pb-4">
           <Input
             aria-label={remoteUrlAriaLabel}
-            className="h-10 rounded-[8px] border-[#00000017] bg-[#FFFFFFE6] px-3 text-sm text-[#111111] shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.03)] placeholder:text-[#00000052] focus-visible:border-black/35 focus-visible:ring-0 dark:border-border dark:bg-input/30 dark:text-foreground dark:placeholder:text-muted-foreground dark:focus-visible:border-ring"
+            className="h-10 rounded-[8px] border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-3 text-sm text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] placeholder:text-[var(--drafting-ink-subtle)] focus-visible:border-black/35 focus-visible:ring-0 dark:border-border dark:bg-input/30 dark:text-foreground dark:placeholder:text-muted-foreground dark:focus-visible:border-ring"
             placeholder={remoteUrlPlaceholder}
             value={remoteUrl}
             onChange={(event) => {
@@ -1120,12 +1120,12 @@ function DraftingColorAccordion<TMode extends string>({
               value={item.id}
               className={cn(
                 "mb-3 min-w-0 w-full overflow-hidden rounded-[8px] border last:mb-0 last:border-b",
-                "border-[#00000017] bg-[#FFFFFFCC] shadow-[0_0_10px_0_rgba(0,0,0,0.06),0_2px_4px_0_rgba(0,0,0,0.04)] transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out dark:border-border dark:bg-card/80 dark:shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.28)]",
-                "hover:-translate-y-px hover:border-[#0000002A] hover:bg-[#FFFFFFF2] hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.08),0_4px_10px_0_rgba(0,0,0,0.05)] dark:hover:border-border/80 dark:hover:bg-card dark:hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.06),0_4px_10px_0_rgba(0,0,0,0.34)]",
-                "active:translate-y-0 active:border-[#00000034] active:shadow-[0_0_8px_0_rgba(0,0,0,0.08),0_1px_3px_0_rgba(0,0,0,0.08)] dark:active:border-border dark:active:shadow-[0_0_8px_0_rgba(0,0,0,0.05),0_1px_3px_0_rgba(0,0,0,0.34)]",
-                "data-[state=open]:bg-[#FFFFFFF2] dark:data-[state=open]:bg-card",
+                "border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] shadow-[var(--drafting-shadow-rest)] transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out dark:border-border dark:bg-card/80 dark:shadow-[var(--drafting-shadow-rest)]",
+                "hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)] dark:hover:border-border/80 dark:hover:bg-card dark:hover:shadow-[var(--drafting-shadow-hover)]",
+                "active:translate-y-0 active:border-[var(--drafting-line-hover)] active:shadow-[var(--drafting-shadow-active)] dark:active:border-border dark:active:shadow-[var(--drafting-shadow-active)]",
+                "data-[state=open]:bg-[var(--drafting-panel-bg-hover)] dark:data-[state=open]:bg-card",
                 isSelected &&
-                  "bg-[#FFFFFF] shadow-[0_0_22px_2px_rgba(0,0,0,0.14),0_5px_10px_1px_rgba(0,0,0,0.08)] dark:bg-accent/70 dark:shadow-[0_0_22px_2px_rgba(0,0,0,0.08),0_5px_10px_1px_rgba(0,0,0,0.34)]",
+                  "bg-[var(--drafting-panel-bg-active)] shadow-[var(--drafting-shadow-rest)] dark:bg-accent/70 dark:shadow-[var(--drafting-shadow-rest)]",
               )}
             >
               <AccordionTrigger
@@ -1139,8 +1139,8 @@ function DraftingColorAccordion<TMode extends string>({
                 <span className="flex min-w-0 items-center gap-3">
                   <span
                     className={cn(
-                      "text-[0.72rem] font-medium tracking-[0.12em] uppercase text-[#00000073] transition-colors dark:text-muted-foreground",
-                      isSelected && "font-semibold text-[#111111] dark:text-foreground",
+                      "text-[0.72rem] font-medium tracking-[0.12em] uppercase text-[var(--drafting-ink-muted)] transition-colors dark:text-muted-foreground",
+                      isSelected && "font-semibold text-[var(--drafting-ink)]",
                     )}
                   >
                     {item.title}
@@ -1190,12 +1190,12 @@ function DraftingSliderField({
     <div
       data-slot={`${dataSlot}-field`}
       className={cn(
-        "min-w-0 rounded-[8px] border border-[#00000017] bg-[#FFFFFFCC] px-4 py-3 dark:border-border dark:bg-card/80",
-        "shadow-[0_0_10px_0_rgba(0,0,0,0.05),0_2px_4px_0_rgba(0,0,0,0.03)] dark:shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.28)]",
+        "min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 dark:border-border dark:bg-card/80",
+        "shadow-[var(--drafting-shadow-rest)] dark:shadow-[var(--drafting-shadow-rest)]",
         "transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
-        "hover:-translate-y-px hover:border-[#00000026] hover:bg-[#FFFFFFF2] hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.07),0_4px_10px_0_rgba(0,0,0,0.04)] dark:hover:border-border/80 dark:hover:bg-card dark:hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.06),0_4px_10px_0_rgba(0,0,0,0.34)]",
-        "active:translate-y-0 active:border-[#00000030] active:shadow-[0_0_8px_0_rgba(0,0,0,0.07),0_1px_3px_0_rgba(0,0,0,0.06)] dark:active:border-border dark:active:shadow-[0_0_8px_0_rgba(0,0,0,0.05),0_1px_3px_0_rgba(0,0,0,0.34)]",
-        "focus-within:border-[#11111166] focus-within:bg-white focus-within:shadow-[0_0_18px_1px_rgba(0,0,0,0.09),0_4px_10px_0_rgba(0,0,0,0.05)] dark:focus-within:border-ring dark:focus-within:bg-card dark:focus-within:shadow-[0_0_18px_1px_rgba(0,0,0,0.07),0_4px_10px_0_rgba(0,0,0,0.34)]",
+        "hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)] dark:hover:border-border/80 dark:hover:bg-card dark:hover:shadow-[var(--drafting-shadow-hover)]",
+        "active:translate-y-0 active:border-[var(--drafting-line-hover)] active:shadow-[var(--drafting-shadow-active)] dark:active:border-border dark:active:shadow-[var(--drafting-shadow-active)]",
+        "focus-within:border-[var(--drafting-line-strong)] focus-within:bg-[var(--drafting-panel-bg-active)] focus-within:shadow-[var(--drafting-shadow-rest)] dark:focus-within:border-ring dark:focus-within:bg-card dark:focus-within:shadow-[var(--drafting-shadow-rest)]",
       )}
     >
       <UnlumenSlider
@@ -1216,7 +1216,7 @@ function DraftingSliderField({
         onChange={(nextValue) => onChange(Array.isArray(nextValue) ? nextValue[0] ?? value : nextValue)}
       />
       {description ? (
-        <p className="mt-2 text-[0.72rem] leading-5 text-[#00000066] dark:text-muted-foreground">{description}</p>
+        <p className="mt-2 text-[0.72rem] leading-5 text-[var(--drafting-ink-muted)]">{description}</p>
       ) : null}
     </div>
   )
@@ -1243,27 +1243,27 @@ function DraftingToggleField({
       htmlFor={id}
       className={cn(
         "flex min-w-0 cursor-pointer items-start justify-between gap-4 rounded-[8px] border px-4 py-3",
-        "border-[#00000017] bg-[#FFFFFFCC] shadow-[0_0_10px_0_rgba(0,0,0,0.05),0_2px_4px_0_rgba(0,0,0,0.03)] dark:border-border dark:bg-card/80 dark:shadow-[0_0_10px_0_rgba(0,0,0,0.04),0_2px_4px_0_rgba(0,0,0,0.28)]",
+        "border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] shadow-[var(--drafting-shadow-rest)] dark:border-border dark:bg-card/80 dark:shadow-[var(--drafting-shadow-rest)]",
         "transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
-        "hover:-translate-y-px hover:border-[#00000026] hover:bg-[#FFFFFFF2] hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.07),0_4px_10px_0_rgba(0,0,0,0.04)] dark:hover:border-border/80 dark:hover:bg-card dark:hover:shadow-[0_0_18px_1px_rgba(0,0,0,0.06),0_4px_10px_0_rgba(0,0,0,0.34)]",
-        "active:translate-y-0 active:border-[#00000030] active:shadow-[0_0_8px_0_rgba(0,0,0,0.07),0_1px_3px_0_rgba(0,0,0,0.06)] dark:active:border-border dark:active:shadow-[0_0_8px_0_rgba(0,0,0,0.05),0_1px_3px_0_rgba(0,0,0,0.34)]",
-        "focus-within:border-[#11111166] focus-within:bg-white focus-within:shadow-[0_0_18px_1px_rgba(0,0,0,0.09),0_4px_10px_0_rgba(0,0,0,0.05)] dark:focus-within:border-ring dark:focus-within:bg-card dark:focus-within:shadow-[0_0_18px_1px_rgba(0,0,0,0.07),0_4px_10px_0_rgba(0,0,0,0.34)]",
-        checked && "border-[#11111133] bg-white dark:border-ring/60 dark:bg-accent/70",
+        "hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)] dark:hover:border-border/80 dark:hover:bg-card dark:hover:shadow-[var(--drafting-shadow-hover)]",
+        "active:translate-y-0 active:border-[var(--drafting-line-hover)] active:shadow-[var(--drafting-shadow-active)] dark:active:border-border dark:active:shadow-[var(--drafting-shadow-active)]",
+        "focus-within:border-[var(--drafting-line-strong)] focus-within:bg-[var(--drafting-panel-bg-active)] focus-within:shadow-[var(--drafting-shadow-rest)] dark:focus-within:border-ring dark:focus-within:bg-card dark:focus-within:shadow-[var(--drafting-shadow-rest)]",
+        checked && "border-[var(--drafting-line-strong)] bg-[var(--drafting-panel-bg-active)]",
       )}
     >
       <span className="min-w-0 space-y-1">
-        <span className="block text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-[#111111] dark:text-foreground">
+        <span className="block text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-[var(--drafting-ink)]">
           {label}
         </span>
-        <span className="block text-[0.72rem] leading-5 text-[#00000066] dark:text-muted-foreground">{description}</span>
+        <span className="block text-[0.72rem] leading-5 text-[var(--drafting-ink-muted)]">{description}</span>
       </span>
       <Switch
         checked={checked}
         className={cn(
-          "mt-0.5 h-[20px] w-[36px] shrink-0 border border-[#00000014] bg-black/[0.10] dark:border-border dark:bg-muted",
-          "shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18)] transition-[background-color,border-color,box-shadow] duration-150",
-          "hover:border-[#00000024] hover:bg-black/[0.14] dark:hover:border-border/80 dark:hover:bg-muted/80",
-          "data-[state=checked]:border-[#111111] data-[state=checked]:bg-[#111111] dark:data-[state=checked]:border-foreground dark:data-[state=checked]:bg-foreground",
+          "mt-0.5 h-[20px] w-[36px] shrink-0 border border-[var(--drafting-line)] bg-black/[0.10] dark:border-border dark:bg-muted",
+          "shadow-[var(--drafting-shadow-rest)] transition-[background-color,border-color,box-shadow] duration-150",
+          "hover:border-[var(--drafting-line-hover)] hover:bg-black/[0.14] dark:hover:border-border/80 dark:hover:bg-muted/80",
+          "data-[state=checked]:border-[var(--drafting-ink)] data-[state=checked]:bg-[var(--drafting-ink)] dark:data-[state=checked]:border-foreground dark:data-[state=checked]:bg-foreground",
           "focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-0 dark:focus-visible:ring-ring/50",
         )}
         data-slot={`${dataSlot}-switch`}
@@ -1292,10 +1292,10 @@ function DraftingOptionCardGrid<TValue extends string>({
   value: TValue
 }) {
   return (
-    <div className="space-y-4" data-slot="drafting-style-tab">
+    <div className="min-w-0 space-y-4" data-slot="drafting-style-tab">
       <div
         aria-label={ariaLabel}
-        className="-mx-3 grid grid-cols-2 justify-items-center gap-x-3 gap-y-5 px-1"
+        className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(108px,1fr))] justify-items-center gap-x-3 gap-y-5"
         data-slot={dataSlot}
         role="radiogroup"
       >

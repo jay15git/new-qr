@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 
 type ModeToggleProps = {
+  appearance?: "default" | "drafting"
   className?: string
 }
 
@@ -15,11 +16,26 @@ function subscribe() {
   return () => {}
 }
 
-export function ModeToggle({ className }: ModeToggleProps) {
+export function ModeToggle({ appearance = "default", className }: ModeToggleProps) {
   const { setTheme, theme } = useTheme()
   const mounted = useSyncExternalStore(subscribe, () => true, () => false)
 
   const isDark = mounted ? theme === "dark" : false
+  const isDrafting = appearance === "drafting"
+  const lightIconClassName = isDrafting
+    ? isDark
+      ? "text-[var(--drafting-ink-subtle)]"
+      : "text-[var(--drafting-ink)]"
+    : isDark
+      ? "text-foreground/35"
+      : "text-amber-500"
+  const darkIconClassName = isDrafting
+    ? isDark
+      ? "text-[var(--drafting-ink)]"
+      : "text-[var(--drafting-ink-subtle)]"
+    : isDark
+      ? "text-sky-300"
+      : "text-foreground/35"
 
   return (
     <div
@@ -32,10 +48,7 @@ export function ModeToggle({ className }: ModeToggleProps) {
       <span className="text-sm font-medium text-foreground/70">Appearance</span>
       <SunIcon
         data-slot="mode-toggle-light-icon"
-        className={cn(
-          "size-4 transition-colors",
-          isDark ? "text-foreground/35" : "text-amber-500",
-        )}
+        className={cn("size-4 transition-colors", lightIconClassName)}
       />
       <Switch
         aria-label="Toggle dark mode"
@@ -48,10 +61,7 @@ export function ModeToggle({ className }: ModeToggleProps) {
       />
       <MoonIcon
         data-slot="mode-toggle-dark-icon"
-        className={cn(
-          "size-4 transition-colors",
-          isDark ? "text-sky-300" : "text-foreground/35",
-        )}
+        className={cn("size-4 transition-colors", darkIconClassName)}
       />
     </div>
   )

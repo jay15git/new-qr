@@ -162,13 +162,10 @@ describe("DraftingSurface", () => {
     expect(surface.container.querySelector('[data-slot="drafting-surface"]')).not.toBeNull()
     expect(
       getRequiredElement(surface.container, '[data-slot="drafting-surface"]').className,
-    ).toContain("bg-white")
+    ).toContain("bg-[var(--drafting-surface-bg)]")
     expect(
       getRequiredElement(surface.container, '[data-slot="drafting-surface"]').className,
-    ).toContain("dark:bg-[#050505]")
-    expect(
-      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').className,
-    ).toContain("dark:border-white/15")
+    ).toContain("lg:border-[var(--drafting-line-hover)]")
     expect(header).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="drafting-nav"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="drafting-scroll-area"]')).not.toBeNull()
@@ -178,7 +175,13 @@ describe("DraftingSurface", () => {
     ).not.toBeNull()
     expect(
       surface.container.querySelector('[data-slot="drafting-workspace-inset"]')?.className,
-    ).toContain("p-4")
+    ).toContain("p-0")
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').className,
+    ).toContain("h-dvh")
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').className,
+    ).toContain("[--new-mobile-rail-height:3.25rem]")
     expect(surface.container.querySelector('[data-slot="dashboard-compose-surface"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="dashboard-compose-canvas"]')).not.toBeNull()
     expect(
@@ -205,6 +208,12 @@ describe("DraftingSurface", () => {
     expect(surface.container.querySelectorAll('[data-slot="drafting-plus-marker"]')).toHaveLength(10)
     expect(
       surface.container.querySelector('[data-slot="drafting-plus-marker"]')?.getAttribute("class"),
+    ).toContain("hidden")
+    expect(
+      surface.container.querySelector('[data-slot="drafting-plus-marker"]')?.getAttribute("class"),
+    ).toContain("lg:block")
+    expect(
+      surface.container.querySelector('[data-slot="drafting-plus-marker"]')?.getAttribute("class"),
     ).toContain("text-black")
     expect(
       surface.container.querySelector('[data-slot="drafting-plus-marker"]')?.getAttribute("class"),
@@ -227,8 +236,8 @@ describe("DraftingSurface", () => {
     expect(headerContent.className).toContain("justify-end")
     expect(header.innerHTML).toContain('data-slot="mode-toggle"')
     expect(header.innerHTML).toContain('data-slot="drafting-download-trigger"')
-    expect(header.innerHTML).toContain("dark:bg-card")
-    expect(header.innerHTML).toContain("dark:bg-muted")
+    expect(header.innerHTML).toContain("bg-[var(--drafting-panel-bg)]")
+    expect(header.innerHTML).toContain("bg-[var(--drafting-control-bg)]")
     expect(surface.container.textContent).toContain("Appearance")
     expect(surface.container.innerHTML).toContain('aria-label="Toggle dark mode"')
     expect(surface.container.innerHTML).not.toMatch(
@@ -1807,17 +1816,40 @@ describe("DraftingSurface", () => {
     )
 
     expect(stickyTabs.className).toContain("sticky")
+    expect(navFrame.className).toContain("isolate")
+    expect(navFrame.className).toContain("order-2")
+    expect(navFrame.className).toContain("border-y")
+    expect(navFrame.className).toContain("border-transparent")
     expect(navFrame.className).not.toContain("overflow-y-auto")
     expect(navFrame.className).not.toContain("py-4")
     expect(navScrollArea.getAttribute("data-scrollbar-visibility")).toBe("while-scrolling")
     expect(navScrollArea.className).toContain("overflow-hidden")
-    expect(navScroll.className).toContain("overflow-x-hidden")
+    expect(navScrollArea.className).toContain("h-[var(--new-mobile-rail-height)]")
+    expect(navScroll.className).toContain("overflow-x-auto")
+    expect(navScroll.className).toContain("lg:overflow-x-hidden")
+    expect(navScroll.className).toContain("scroll-fade-effect-x")
     expect(navScroll.className).toContain("scroll-fade-effect-y")
     expect(navScroll.getAttribute("data-radix-scroll-area-viewport")).toBe("")
     expect(
       surface.container.querySelector('[data-slot="drafting-nav-scrollbar"]'),
     ).toBeNull()
-    expect(navScrollContent.className).toContain("py-4")
+    expect(navScrollContent.className).toContain("flex-row")
+    expect(navScrollContent.className).toContain("lg:flex-col")
+    expect(navScrollContent.className).toContain("py-2")
+    expect(navScrollContent.className).toContain("lg:py-4")
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-tool-button-icon"]').className,
+    ).toContain("hidden")
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-tool-button-icon"]').className,
+    ).toContain("lg:flex")
+    expect(
+      getRequiredElement(surface.container, '[data-drafting-tool-button="true"]').className,
+    ).toContain("h-7")
+    expect(
+      getRequiredElement(surface.container, '[data-drafting-tool-button="true"]').className,
+    ).toContain("min-w-fit")
+    expect(scrollFrame.className).toContain("order-3")
     expect(scrollFrame.className).not.toContain("overflow-y-auto")
     expect(panelScrollArea.getAttribute("data-slot")).toBe("drafting-tab-panel-scroll-area")
     expect(panelScrollArea.getAttribute("data-scrollbar-visibility")).toBe("while-scrolling")
