@@ -60,10 +60,13 @@ interface SliderProps
 }
 
 const THUMB_SIZE = 18;
-const THUMB_SIZE_REST = 14;
 const TRACK_HEIGHT = 10;
 const ACTIVE_TRACK_HEIGHT = 12;
 const DOT_SIZE = 4;
+const NEUTRAL_TRACK_COLOR =
+  "color-mix(in srgb, var(--foreground) 12%, var(--background))";
+const NEUTRAL_DOT_COLOR =
+  "color-mix(in srgb, var(--foreground) 28%, var(--background))";
 
 function valueToPixel(
   v: number,
@@ -239,7 +242,7 @@ function TooltipValue({
       transition={springs.fast}
     >
       <span
-        className="text-[12px] text-foreground tabular-nums whitespace-nowrap bg-accent px-2 py-1 rounded-md"
+        className="text-[12px] text-foreground tabular-nums whitespace-nowrap bg-neutral-100 px-2 py-1 rounded-md dark:bg-neutral-800"
         style={{ fontVariationSettings: fontWeights.medium }}
       >
         {formatValue(value)}
@@ -743,7 +746,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
                   style={{ top: -20 }}
                 >
                   <span
-                    className="text-[12px] text-foreground tabular-nums whitespace-nowrap bg-accent px-2 py-1 rounded-md"
+                    className="text-[12px] text-foreground tabular-nums whitespace-nowrap bg-neutral-100 px-2 py-1 rounded-md dark:bg-neutral-800"
                     style={{ fontVariationSettings: fontWeights.medium }}
                   >
                     {formatValue(hoverPreview.snappedValue)}
@@ -767,7 +770,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
                     : 8 + (THUMB_SIZE - TRACK_HEIGHT) / 2,
               }}
               transition={springs.fast}
-              style={{ backgroundColor: "var(--accent)", ...trackStyle }}
+              style={{ backgroundColor: NEUTRAL_TRACK_COLOR, ...trackStyle }}
             >
               <motion.div
                 className={cn("absolute h-full rounded-[4px]", rangeClassName)}
@@ -851,7 +854,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
                     style={{
                       backgroundColor: onFilled
                         ? "color-mix(in srgb, var(--background) 20%, var(--foreground))"
-                        : "color-mix(in srgb, var(--muted-foreground) 40%, var(--accent))",
+                        : NEUTRAL_DOT_COLOR,
                     }}
                   />
                 </div>
