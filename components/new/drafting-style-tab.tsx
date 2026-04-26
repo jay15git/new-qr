@@ -41,18 +41,37 @@ import type {
   StudioGradient,
 } from "@/components/qr/qr-studio-state"
 import {
+  STATIC_QR_CONTENT_META,
+  type StaticQrContentValue,
+  type StaticQrContentValues,
+  type StaticQrValidationResult,
+} from "@/components/qr/qr-static-content"
+import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { OptionCard } from "@/components/ui/option-card"
+import {
+  QR_CATEGORIES,
+  QR_INPUT_OPTIONS,
+  type QrInputType,
+} from "@/components/ui/qr-input-config"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { QR_SIZE_MAX, QR_SIZE_MIN } from "@/components/qr/qr-studio-state"
+import { ChevronDown } from "lucide-react"
 
 export type DraftingBinaryColorMode = "solid" | "gradient"
 export type DraftingBackgroundColorMode = DraftingBinaryColorMode | "transparent"
@@ -73,43 +92,700 @@ const DRAFTING_BRAND_ICON_CATEGORY_OPTIONS: Array<{
 ]
 
 export function DraftingContentTab({
-  contentValue,
+  contentType,
+  contentValues,
+  encodedValue,
+  onContentTypeChange,
   onContentValueChange,
+  validation,
 }: {
-  contentValue: string
-  onContentValueChange: (value: string) => void
+  contentType: QrInputType
+  contentValues: StaticQrContentValues
+  encodedValue: string
+  onContentTypeChange: (value: QrInputType) => void
+  onContentValueChange: (field: string, value: StaticQrContentValue) => void
+  validation: StaticQrValidationResult
 }) {
+  const meta = STATIC_QR_CONTENT_META[contentType]
+
   return (
     <div data-slot="drafting-content-tab" className="min-w-0 space-y-4">
       <div
-        data-slot="drafting-content-textarea-field"
+        data-slot="drafting-content-type-selector"
+        className="grid min-w-0 grid-cols-3 gap-2"
+      >
+        {QR_CATEGORIES.map((category) => (
+          <DraftingContentTypeDropdown
+            key={category.key}
+            activeContentType={contentType}
+            category={category}
+            onContentTypeChange={onContentTypeChange}
+          />
+        ))}
+      </div>
+
+      <section
+        data-slot="drafting-content-fields"
         className={cn(
           "min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3",
           "shadow-[var(--drafting-shadow-rest)]",
           "transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
-          "hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)]",
-          "active:translate-y-0 active:border-[var(--drafting-line-hover)] active:shadow-[var(--drafting-shadow-active)]",
-          "focus-within:border-[var(--drafting-line-strong)] focus-within:bg-[var(--drafting-panel-bg-active)] focus-within:shadow-[var(--drafting-shadow-rest)]",
+          "focus-within:border-[var(--drafting-line-strong)] focus-within:bg-[var(--drafting-panel-bg-active)]",
         )}
       >
-        <label
-          htmlFor="drafting-qr-data"
-          className="drafting-type-control-label block font-semibold text-[var(--drafting-ink)]"
-        >
-          Text or URL
-        </label>
-        <Textarea
-          id="drafting-qr-data"
-          aria-label="Text or URL"
-          className="drafting-type-input mt-3 min-h-28 min-w-0 max-w-full resize-none overflow-x-hidden border-0 bg-[var(--drafting-panel-bg-hover)] px-3.5 py-3 text-[var(--drafting-ink)] shadow-none placeholder:text-[var(--drafting-ink-subtle)] [overflow-wrap:anywhere] focus-visible:border-0 focus-visible:ring-0"
-          placeholder="https://example.com/invite"
-          value={contentValue}
-          onChange={(event) => onContentValueChange(event.target.value)}
-        />
-      </div>
+        <div className="min-w-0">
+          <h3 className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+            {meta.title}
+          </h3>
+          <p className="drafting-type-caption mt-1 text-[var(--drafting-ink-muted)]">
+            {meta.description}
+          </p>
+        </div>
+
+        <div className="mt-4 min-w-0 space-y-3">
+          <DraftingStaticQrFields
+            contentType={contentType}
+            contentValues={contentValues}
+            onContentValueChange={onContentValueChange}
+            validation={validation}
+          />
+        </div>
+      </section>
+
+      <details
+        data-slot="drafting-content-encoded-preview"
+        className="min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)]"
+      >
+        <summary className="drafting-type-control-label cursor-pointer font-semibold">
+          Encoded value
+        </summary>
+        <pre className="drafting-type-caption mt-3 max-h-44 min-w-0 overflow-auto whitespace-pre-wrap break-words rounded-[4px] bg-[var(--drafting-panel-bg-hover)] p-3 text-[var(--drafting-ink-muted)]">
+          {encodedValue}
+        </pre>
+      </details>
 
     </div>
   )
+}
+
+function DraftingContentTypeDropdown({
+  activeContentType,
+  category,
+  onContentTypeChange,
+}: {
+  activeContentType: QrInputType
+  category: (typeof QR_CATEGORIES)[number]
+  onContentTypeChange: (value: QrInputType) => void
+}) {
+  const isSelectedCategory = category.items.some((item) => item.value === activeContentType)
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          aria-label={`Open ${category.label} content types`}
+          type="button"
+          variant="outline"
+          className={cn(
+            "group h-12 w-full min-w-0 flex-row justify-between gap-2 rounded-[6px] border border-dashed px-3 py-2 text-left",
+            "border-[var(--drafting-option-card-border)] bg-[var(--drafting-option-card-bg)] text-[var(--drafting-option-card-label)] shadow-[var(--drafting-option-card-shadow-rest)]",
+            "transition-[border-color,box-shadow,transform,background-color,color] duration-150 ease-out",
+            "hover:-translate-y-px hover:border-[var(--drafting-option-card-border-hover)] hover:bg-[var(--drafting-option-card-bg-hover)] hover:text-[var(--drafting-option-card-label-selected)] hover:shadow-[var(--drafting-option-card-shadow-hover)]",
+            "active:translate-y-px active:border-[var(--drafting-option-card-border-active)] active:bg-[var(--drafting-option-card-bg-active)] active:shadow-[var(--drafting-option-card-shadow-active)]",
+            "data-[state=open]:border-[var(--drafting-option-card-border-selected)] data-[state=open]:bg-[var(--drafting-option-card-bg-selected)] data-[state=open]:text-[var(--drafting-option-card-label-selected)] data-[state=open]:shadow-[var(--drafting-option-card-shadow-selected)]",
+            "dark:border-[var(--drafting-option-card-border)] dark:bg-[var(--drafting-option-card-bg)] dark:text-[var(--drafting-option-card-label)] dark:shadow-[var(--drafting-option-card-shadow-rest)]",
+            "dark:hover:border-[var(--drafting-option-card-border-hover)] dark:hover:bg-[var(--drafting-option-card-bg-hover)] dark:hover:shadow-[var(--drafting-option-card-shadow-hover)]",
+            "dark:active:border-[var(--drafting-option-card-border-active)] dark:active:bg-[var(--drafting-option-card-bg-active)] dark:active:shadow-[var(--drafting-option-card-shadow-active)]",
+            "dark:data-[state=open]:border-[var(--drafting-option-card-border-selected)] dark:data-[state=open]:bg-[var(--drafting-option-card-bg-selected)] dark:data-[state=open]:text-[var(--drafting-option-card-label-selected)] dark:data-[state=open]:shadow-[var(--drafting-option-card-shadow-selected)]",
+            isSelectedCategory &&
+              "border-2 border-[var(--drafting-option-card-border-selected)] bg-[var(--drafting-option-card-bg-selected)] text-[var(--drafting-option-card-label-selected)] shadow-[var(--drafting-option-card-shadow-selected)] hover:bg-[var(--drafting-option-card-bg-selected)] hover:text-[var(--drafting-option-card-label-selected)] hover:shadow-[var(--drafting-option-card-shadow-selected-hover)] dark:border-[var(--drafting-option-card-border-selected)] dark:bg-[var(--drafting-option-card-bg-selected)] dark:text-[var(--drafting-option-card-label-selected)] dark:shadow-[var(--drafting-option-card-shadow-selected)]",
+          )}
+        >
+          <span className="drafting-type-caption min-w-0 truncate font-medium">
+            {category.label}
+          </span>
+          <ChevronDown
+            aria-hidden="true"
+            className="size-3.5 shrink-0 opacity-65 transition-transform duration-150 ease-out group-data-[state=open]:rotate-180"
+          />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="start"
+        className="w-64 rounded-[6px] border border-dashed border-[var(--drafting-option-card-border-selected)] bg-white p-1.5 text-[var(--drafting-option-card-label-selected)] shadow-[var(--drafting-option-card-shadow-selected)] dark:border-[var(--drafting-option-card-border-selected)] dark:bg-[var(--drafting-dark-shell-bg)] dark:text-[var(--drafting-option-card-label-selected)] dark:shadow-[var(--drafting-option-card-shadow-selected)]"
+      >
+        <DropdownMenuGroup className="grid gap-1">
+          {category.items.map((item) => {
+            const ItemIcon = item.icon
+            const isSelected = activeContentType === item.value
+
+            return (
+              <DropdownMenuItem
+                key={item.value}
+                data-content-type={item.value}
+                onSelect={() => onContentTypeChange(item.value)}
+                className={cn(
+                  "min-h-9 rounded-[4px] border border-dashed border-transparent px-2.5 py-2 text-[var(--drafting-ink-muted)]",
+                  "focus:border-[var(--drafting-line-hover)] focus:bg-[var(--drafting-panel-bg-hover)] focus:text-[var(--drafting-ink)]",
+                  isSelected &&
+                    "border-[var(--drafting-ink)] bg-[var(--drafting-ink)] text-[var(--drafting-surface-bg)] focus:bg-[var(--drafting-ink)] focus:text-[var(--drafting-surface-bg)]",
+                )}
+              >
+                <ItemIcon className="size-3.5" aria-hidden="true" />
+                <span className="drafting-type-caption font-semibold">{item.label}</span>
+              </DropdownMenuItem>
+            )
+          })}
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+function DraftingStaticQrFields({
+  contentType,
+  contentValues,
+  onContentValueChange,
+  validation,
+}: {
+  contentType: QrInputType
+  contentValues: StaticQrContentValues
+  onContentValueChange: (field: string, value: StaticQrContentValue) => void
+  validation: StaticQrValidationResult
+}) {
+  if (contentType === "auto") {
+    return (
+      <DraftingContentTextarea
+        ariaLabel="Auto content"
+        field="text"
+        label="Text, URL, or QR payload"
+        placeholder="https://example.com/invite"
+        value={stringContentValue(contentValues.text)}
+        onChange={onContentValueChange}
+      />
+    )
+  }
+
+  if (contentType === "text") {
+    return (
+      <DraftingContentTextarea
+        ariaLabel="Text content"
+        field="text"
+        label="Text"
+        placeholder="Plain text to encode"
+        value={stringContentValue(contentValues.text)}
+        onChange={onContentValueChange}
+      />
+    )
+  }
+
+  if (isUrlContentType(contentType)) {
+    return (
+      <DraftingContentInput
+        ariaLabel={`${QR_INPUT_OPTIONS[contentType].label} URL`}
+        error={validation.fieldErrors.url}
+        field="url"
+        label="URL"
+        placeholder="https://example.com"
+        value={stringContentValue(contentValues.url)}
+        onChange={onContentValueChange}
+      />
+    )
+  }
+
+  if (contentType === "phone") {
+    return (
+      <DraftingContentInput
+        ariaLabel="Phone number"
+        error={validation.fieldErrors.phone}
+        field="phone"
+        label="Phone number"
+        placeholder="+1 555 010 2000"
+        value={stringContentValue(contentValues.phone)}
+        onChange={onContentValueChange}
+      />
+    )
+  }
+
+  if (contentType === "email") {
+    return (
+      <>
+        <DraftingContentInput
+          ariaLabel="Email address"
+          error={validation.fieldErrors.email}
+          field="email"
+          label="Email address"
+          placeholder="hello@example.com"
+          value={stringContentValue(contentValues.email)}
+          onChange={onContentValueChange}
+        />
+        <DraftingContentInput
+          ariaLabel="Email subject"
+          field="subject"
+          label="Subject"
+          placeholder="Launch"
+          value={stringContentValue(contentValues.subject)}
+          onChange={onContentValueChange}
+        />
+        <DraftingContentTextarea
+          ariaLabel="Email body"
+          field="body"
+          label="Body"
+          placeholder="Message body"
+          value={stringContentValue(contentValues.body)}
+          onChange={onContentValueChange}
+        />
+      </>
+    )
+  }
+
+  if (contentType === "sms") {
+    return (
+      <>
+        <DraftingContentInput
+          ariaLabel="SMS phone number"
+          error={validation.fieldErrors.phone}
+          field="phone"
+          label="Phone number"
+          placeholder="+1 555 010 2000"
+          value={stringContentValue(contentValues.phone)}
+          onChange={onContentValueChange}
+        />
+        <DraftingContentTextarea
+          ariaLabel="SMS message"
+          field="message"
+          label="Message"
+          placeholder="Message text"
+          value={stringContentValue(contentValues.message)}
+          onChange={onContentValueChange}
+        />
+      </>
+    )
+  }
+
+  if (contentType === "wifi") {
+    return (
+      <>
+        <DraftingContentInput
+          ariaLabel="Network name"
+          error={validation.fieldErrors.ssid}
+          field="ssid"
+          label="Network name"
+          placeholder="Cafe Guest"
+          value={stringContentValue(contentValues.ssid)}
+          onChange={onContentValueChange}
+        />
+        <div className="grid min-w-0 grid-cols-3 gap-2">
+          {["WPA", "WEP", "nopass"].map((security) => (
+            <label
+              key={security}
+              className={cn(
+                "flex min-h-9 cursor-pointer items-center justify-center rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-2 text-center",
+                "drafting-type-caption font-semibold text-[var(--drafting-ink-muted)]",
+                stringContentValue(contentValues.security) === security &&
+                  "border-[var(--drafting-ink)] bg-[var(--drafting-ink)] text-[var(--drafting-surface-bg)]",
+              )}
+            >
+              <input
+                aria-label={`Wi-Fi security ${security}`}
+                checked={stringContentValue(contentValues.security) === security}
+                className="sr-only"
+                name="drafting-wifi-security"
+                type="radio"
+                onChange={() => onContentValueChange("security", security)}
+              />
+              {security === "nopass" ? "None" : security}
+            </label>
+          ))}
+        </div>
+        <DraftingContentInput
+          ariaLabel="Wi-Fi password"
+          field="password"
+          label="Password"
+          placeholder="Network password"
+          value={stringContentValue(contentValues.password)}
+          onChange={onContentValueChange}
+        />
+        <label className="flex min-w-0 items-center justify-between gap-3 rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3 py-2">
+          <span className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+            Hidden network
+          </span>
+          <input
+            aria-label="Hidden network"
+            checked={Boolean(contentValues.hidden)}
+            className="size-4 accent-[var(--drafting-ink)]"
+            type="checkbox"
+            onChange={(event) => onContentValueChange("hidden", event.currentTarget.checked)}
+          />
+        </label>
+      </>
+    )
+  }
+
+  if (contentType === "vcard") {
+    return (
+      <>
+        <div className="grid min-w-0 gap-3 sm:grid-cols-2">
+          <DraftingContentInput
+            ariaLabel="First name"
+            error={validation.fieldErrors.firstName}
+            field="firstName"
+            label="First name"
+            placeholder="Jay"
+            value={stringContentValue(contentValues.firstName)}
+            onChange={onContentValueChange}
+          />
+          <DraftingContentInput
+            ariaLabel="Last name"
+            field="lastName"
+            label="Last name"
+            placeholder="Shah"
+            value={stringContentValue(contentValues.lastName)}
+            onChange={onContentValueChange}
+          />
+        </div>
+        <DraftingContentInput
+          ariaLabel="Contact phone number"
+          field="phone"
+          label="Phone"
+          placeholder="+91 98765 43210"
+          value={stringContentValue(contentValues.phone)}
+          onChange={onContentValueChange}
+        />
+        <DraftingContentInput
+          ariaLabel="Contact email"
+          field="email"
+          label="Email"
+          placeholder="jay@example.com"
+          value={stringContentValue(contentValues.email)}
+          onChange={onContentValueChange}
+        />
+        <DraftingContentInput
+          ariaLabel="Company"
+          field="company"
+          label="Company"
+          placeholder="New QR"
+          value={stringContentValue(contentValues.company)}
+          onChange={onContentValueChange}
+        />
+        <DraftingContentInput
+          ariaLabel="Contact website"
+          field="url"
+          label="Website"
+          placeholder="https://example.com"
+          value={stringContentValue(contentValues.url)}
+          onChange={onContentValueChange}
+        />
+      </>
+    )
+  }
+
+  if (contentType === "whatsapp" || contentType === "whatsapp-chat") {
+    return (
+      <>
+        <DraftingContentInput
+          ariaLabel="WhatsApp phone number"
+          error={validation.fieldErrors.phone}
+          field="phone"
+          label="Phone number"
+          placeholder="+91 98765 43210"
+          value={stringContentValue(contentValues.phone)}
+          onChange={onContentValueChange}
+        />
+        <DraftingContentTextarea
+          ariaLabel="WhatsApp message"
+          field="message"
+          label="Message"
+          placeholder="I would like to book"
+          value={stringContentValue(contentValues.message)}
+          onChange={onContentValueChange}
+        />
+      </>
+    )
+  }
+
+  if (isUsernameContentType(contentType)) {
+    return (
+      <DraftingContentInput
+        ariaLabel={`${QR_INPUT_OPTIONS[contentType].label} username`}
+        error={validation.fieldErrors.username}
+        field="username"
+        label="Username"
+        placeholder="@newqr"
+        value={stringContentValue(contentValues.username)}
+        onChange={onContentValueChange}
+      />
+    )
+  }
+
+  if (contentType === "map-location") {
+    return (
+      <>
+        <DraftingContentInput
+          ariaLabel="Place search"
+          error={validation.fieldErrors.query}
+          field="query"
+          label="Place or label"
+          placeholder="Mumbai"
+          value={stringContentValue(contentValues.query)}
+          onChange={onContentValueChange}
+        />
+        <div className="grid min-w-0 gap-3 sm:grid-cols-2">
+          <DraftingContentInput
+            ariaLabel="Latitude"
+            error={validation.fieldErrors.latitude}
+            field="latitude"
+            label="Latitude"
+            placeholder="19.0760"
+            value={stringContentValue(contentValues.latitude)}
+            onChange={onContentValueChange}
+          />
+          <DraftingContentInput
+            ariaLabel="Longitude"
+            error={validation.fieldErrors.longitude}
+            field="longitude"
+            label="Longitude"
+            placeholder="72.8777"
+            value={stringContentValue(contentValues.longitude)}
+            onChange={onContentValueChange}
+          />
+        </div>
+      </>
+    )
+  }
+
+  if (contentType === "event") {
+    const eventMode = stringContentValue(contentValues.eventMode) || "url"
+
+    return (
+      <>
+        <div className="grid min-w-0 grid-cols-2 gap-2">
+          {[
+            ["url", "Event URL"],
+            ["calendar", "Calendar"],
+          ].map(([value, label]) => (
+            <label
+              key={value}
+              className={cn(
+                "flex min-h-9 cursor-pointer items-center justify-center rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-2 text-center",
+                "drafting-type-caption font-semibold text-[var(--drafting-ink-muted)]",
+                eventMode === value &&
+                  "border-[var(--drafting-ink)] bg-[var(--drafting-ink)] text-[var(--drafting-surface-bg)]",
+              )}
+            >
+              <input
+                aria-label={`Use ${label}`}
+                checked={eventMode === value}
+                className="sr-only"
+                name="drafting-event-mode"
+                type="radio"
+                onChange={() => onContentValueChange("eventMode", value)}
+              />
+              {label}
+            </label>
+          ))}
+        </div>
+        {eventMode === "calendar" ? (
+          <>
+            <DraftingContentInput
+              ariaLabel="Event title"
+              error={validation.fieldErrors.title}
+              field="title"
+              label="Title"
+              placeholder="Launch Briefing"
+              value={stringContentValue(contentValues.title)}
+              onChange={onContentValueChange}
+            />
+            <DraftingContentInput
+              ariaLabel="Event start"
+              error={validation.fieldErrors.start}
+              field="start"
+              label="Start"
+              placeholder="2026-06-01T09:00"
+              value={stringContentValue(contentValues.start)}
+              onChange={onContentValueChange}
+            />
+            <DraftingContentInput
+              ariaLabel="Event end"
+              field="end"
+              label="End"
+              placeholder="2026-06-01T10:30"
+              value={stringContentValue(contentValues.end)}
+              onChange={onContentValueChange}
+            />
+            <DraftingContentInput
+              ariaLabel="Event location"
+              field="location"
+              label="Location"
+              placeholder="Studio 2"
+              value={stringContentValue(contentValues.location)}
+              onChange={onContentValueChange}
+            />
+          </>
+        ) : (
+          <DraftingContentInput
+            ariaLabel="Event URL"
+            error={validation.fieldErrors.url}
+            field="url"
+            label="URL"
+            placeholder="https://example.com/rsvp"
+            value={stringContentValue(contentValues.url)}
+            onChange={onContentValueChange}
+          />
+        )}
+      </>
+    )
+  }
+
+  if (contentType === "coupon") {
+    return (
+      <>
+        <DraftingContentInput
+          ariaLabel="Coupon code"
+          error={validation.fieldErrors.code}
+          field="code"
+          label="Code"
+          placeholder="SAVE20"
+          value={stringContentValue(contentValues.code)}
+          onChange={onContentValueChange}
+        />
+        <DraftingContentTextarea
+          ariaLabel="Coupon description"
+          field="description"
+          label="Description"
+          placeholder="20% off"
+          value={stringContentValue(contentValues.description)}
+          onChange={onContentValueChange}
+        />
+        <DraftingContentInput
+          ariaLabel="Coupon URL"
+          field="url"
+          label="URL"
+          placeholder="https://example.com/save"
+          value={stringContentValue(contentValues.url)}
+          onChange={onContentValueChange}
+        />
+      </>
+    )
+  }
+
+  return null
+}
+
+function DraftingContentInput({
+  ariaLabel,
+  error,
+  field,
+  label,
+  onChange,
+  placeholder,
+  value,
+}: {
+  ariaLabel: string
+  error?: string
+  field: string
+  label: string
+  onChange: (field: string, value: string) => void
+  placeholder: string
+  value: string
+}) {
+  return (
+    <label className="block min-w-0">
+      <span className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+        {label}
+      </span>
+      <Input
+        aria-invalid={error ? true : undefined}
+        aria-label={ariaLabel}
+        className="drafting-type-input mt-2 min-w-0 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] text-[var(--drafting-ink)] shadow-none placeholder:text-[var(--drafting-ink-subtle)] focus-visible:ring-0"
+        placeholder={placeholder}
+        value={value}
+        onChange={(event) => onChange(field, event.currentTarget.value)}
+      />
+      {error ? (
+        <span className="drafting-type-caption mt-1 block text-[var(--destructive)]">
+          {error}
+        </span>
+      ) : null}
+    </label>
+  )
+}
+
+function DraftingContentTextarea({
+  ariaLabel,
+  error,
+  field,
+  label,
+  onChange,
+  placeholder,
+  value,
+}: {
+  ariaLabel: string
+  error?: string
+  field: string
+  label: string
+  onChange: (field: string, value: string) => void
+  placeholder: string
+  value: string
+}) {
+  return (
+    <label className="block min-w-0">
+      <span className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+        {label}
+      </span>
+      <Textarea
+        aria-invalid={error ? true : undefined}
+        aria-label={ariaLabel}
+        className="drafting-type-input mt-2 min-h-24 min-w-0 max-w-full resize-none overflow-x-hidden border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3.5 py-3 text-[var(--drafting-ink)] shadow-none placeholder:text-[var(--drafting-ink-subtle)] [overflow-wrap:anywhere] focus-visible:ring-0"
+        placeholder={placeholder}
+        value={value}
+        onChange={(event) => onChange(field, event.currentTarget.value)}
+      />
+      {error ? (
+        <span className="drafting-type-caption mt-1 block text-[var(--destructive)]">
+          {error}
+        </span>
+      ) : null}
+    </label>
+  )
+}
+
+function isUrlContentType(type: QrInputType) {
+  return [
+    "link",
+    "website",
+    "facebook",
+    "youtube",
+    "linkedin",
+    "discord",
+    "google-review",
+    "booking-link",
+    "payment-link",
+    "menu",
+    "app-download",
+    "pdf",
+    "image",
+    "video",
+    "document",
+    "form",
+  ].includes(type)
+}
+
+function isUsernameContentType(type: QrInputType) {
+  return [
+    "instagram",
+    "x",
+    "tiktok",
+    "telegram",
+    "snapchat",
+    "threads",
+    "pinterest",
+    "telegram-username",
+  ].includes(type)
+}
+
+function stringContentValue(value: StaticQrContentValue | undefined) {
+  return typeof value === "string" ? value : ""
 }
 
 export function DraftingStyleTab({

@@ -236,9 +236,15 @@ describe("DraftingSurface", () => {
     expect(headerContent.className).toContain("justify-end")
     expect(header.innerHTML).toContain('data-slot="mode-toggle"')
     expect(header.innerHTML).toContain('data-slot="drafting-download-trigger"')
-    expect(header.innerHTML).toContain("bg-[var(--drafting-panel-bg)]")
+    expect(getRequiredElement(header, '[data-slot="mode-toggle"]').className).not.toContain(
+      "bg-[var(--drafting-panel-bg)]",
+    )
+    expect(getRequiredElement(header, '[data-slot="mode-toggle"]').className).not.toContain(
+      "shadow-[var(--drafting-shadow-rest)]",
+    )
     expect(header.innerHTML).toContain("bg-[var(--drafting-control-bg)]")
-    expect(surface.container.textContent).toContain("Appearance")
+    expect(surface.container.textContent).not.toContain("Appearance")
+    expect(surface.container.innerHTML).toContain('data-slot="mode-toggle-thumb-icon"')
     expect(surface.container.innerHTML).toContain('aria-label="Toggle dark mode"')
     expect(surface.container.innerHTML).not.toMatch(
       /dark:[^"]*shadow-\[[^\]]*rgba\(255,255,255/,
@@ -704,28 +710,146 @@ describe("DraftingSurface", () => {
     expect(surface.container.querySelector('[data-slot="drafting-layers-tab"]')).not.toBeNull()
   })
 
-  it("ports the content controls into the default /new panel without render type cards", () => {
+  it("ports static content controls into the default /new panel without render type cards", () => {
     const surface = renderSurface()
     const contentTab = getRequiredElement(
       surface.container,
       '[data-slot="drafting-content-tab"]',
     )
-    const contentField = getRequiredElement(
-      surface.container,
-      '[data-slot="drafting-content-textarea-field"]',
-    )
-    const qrData = getRequiredElement(
-      surface.container,
-      'textarea[aria-label="Text or URL"]',
-    ) as HTMLTextAreaElement
+    const qrData = getRequiredElement(surface.container, 'textarea[aria-label="Auto content"]') as HTMLTextAreaElement
 
     expect(contentTab).not.toBeNull()
-    expect(contentField.textContent).toContain("Text or URL")
+    expect(surface.container.querySelector('[data-slot="drafting-content-type-selector"]')).not.toBeNull()
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-content-type-selector"]')
+        .className,
+    ).toContain("grid-cols-3")
+    expect(
+      getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
+        .className,
+    ).toContain("h-12")
+    expect(
+      getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
+        .className,
+    ).toContain("flex-row")
+    expect(
+      getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
+        .querySelector("svg"),
+    ).not.toBeNull()
+    expect(
+      getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
+        .className,
+    ).toContain("bg-[var(--drafting-option-card-bg-selected)]")
+    expect(
+      getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
+        .className,
+    ).not.toContain("bg-[var(--drafting-ink)]")
+    expect(surface.container.textContent).toContain("Popular")
+    expect(surface.container.textContent).not.toContain("Wi-Fi")
+    expect(surface.container.textContent).not.toContain("Discord")
+    expect(surface.container.textContent).toContain("Encoded value")
     expect(qrData.value).toBe("https://new-qr-studio.local/launch")
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
+        "data-qr-content-type",
+      ),
+    ).toBe("auto")
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
+        "data-qr-content-value",
+      ),
+    ).toBe("https://new-qr-studio.local/launch")
     expect(surface.container.querySelector('[data-slot="drafting-render-type-grid"]')).toBeNull()
     expect(surface.container.textContent).not.toContain("Render type")
     expect(surface.container.querySelector('[data-slot="drafting-style-margin-slider"]')).toBeNull()
     expect(surface.container.querySelector('[data-slot="drafting-style-size-slider"]')).toBeNull()
+  })
+
+  it("builds Wi-Fi payloads from the content type selector and preserves per-type drafts", () => {
+    const surface = renderSurface()
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]'))
+    })
+    expect(
+      getRequiredElement(document.body, '[data-slot="dropdown-menu-content"]').className,
+    ).toContain("bg-white")
+    act(() => {
+      activateElement(getRequiredElement(document.body, '[data-slot="dropdown-menu-item"][data-content-type="wifi"]'))
+    })
+
+    const ssidInput = getRequiredElement(surface.container, 'input[aria-label="Network name"]') as HTMLInputElement
+    const passwordInput = getRequiredElement(surface.container, 'input[aria-label="Wi-Fi password"]') as HTMLInputElement
+    const hiddenInput = getRequiredElement(surface.container, 'input[aria-label="Hidden network"]') as HTMLInputElement
+
+    act(() => {
+      changeInputValue(ssidInput, "Cafe;Guest")
+      changeInputValue(passwordInput, "pa:ss")
+      activateElement(hiddenInput)
+    })
+
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
+        "data-qr-content-value",
+      ),
+    ).toBe(String.raw`WIFI:T:WPA;S:Cafe\;Guest;P:pa\:ss;H:true;;`)
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Contact content types"]'))
+    })
+    act(() => {
+      activateElement(getRequiredElement(document.body, '[data-slot="dropdown-menu-item"][data-content-type="sms"]'))
+    })
+    act(() => {
+      changeInputValue(
+        getRequiredElement(surface.container, 'input[aria-label="SMS phone number"]') as HTMLInputElement,
+        "+1 555 010 2000",
+      )
+      changeInputValue(
+        getRequiredElement(surface.container, 'textarea[aria-label="SMS message"]') as HTMLTextAreaElement,
+        "Bring menus",
+      )
+    })
+
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
+        "data-qr-content-value",
+      ),
+    ).toBe("sms:+15550102000?body=Bring%20menus")
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]'))
+    })
+    act(() => {
+      activateElement(getRequiredElement(document.body, '[data-slot="dropdown-menu-item"][data-content-type="wifi"]'))
+    })
+
+    expect(
+      (getRequiredElement(surface.container, 'input[aria-label="Network name"]') as HTMLInputElement)
+        .value,
+    ).toBe("Cafe;Guest")
+  })
+
+  it("shows validation for missing required static content fields", () => {
+    const surface = renderSurface()
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]'))
+    })
+    act(() => {
+      activateElement(getRequiredElement(document.body, '[data-slot="dropdown-menu-item"][data-content-type="wifi"]'))
+    })
+
+    expect(surface.container.textContent).toContain("Enter a network name.")
+
+    act(() => {
+      changeInputValue(
+        getRequiredElement(surface.container, 'input[aria-label="Network name"]') as HTMLInputElement,
+        "Studio",
+      )
+    })
+
+    expect(surface.container.textContent).not.toContain("Enter a network name.")
   })
 
   it("renders a selectable option-card grid for the style tab", () => {
@@ -1940,14 +2064,34 @@ function getRadioInputByAriaLabel(parent: ParentNode, label: string) {
 }
 
 function activateElement(element: HTMLElement) {
+  const PointerEventConstructor = window.PointerEvent ?? window.MouseEvent
+
+  element.dispatchEvent(
+    new PointerEventConstructor("pointerdown", {
+      bubbles: true,
+      button: 0,
+      ctrlKey: false,
+    }),
+  )
+  element.dispatchEvent(
+    new PointerEventConstructor("pointerup", {
+      bubbles: true,
+      button: 0,
+      ctrlKey: false,
+    }),
+  )
   element.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, button: 0 }))
   element.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, button: 0 }))
   element.dispatchEvent(new MouseEvent("click", { bubbles: true, button: 0 }))
 }
 
-function changeInputValue(element: HTMLInputElement, value: string) {
+function changeInputValue(element: HTMLInputElement | HTMLTextAreaElement, value: string) {
+  const prototype =
+    element instanceof window.HTMLTextAreaElement
+      ? window.HTMLTextAreaElement.prototype
+      : window.HTMLInputElement.prototype
   const valueSetter = Object.getOwnPropertyDescriptor(
-    window.HTMLInputElement.prototype,
+    prototype,
     "value",
   )?.set
 

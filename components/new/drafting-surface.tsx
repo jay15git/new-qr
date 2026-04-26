@@ -86,6 +86,13 @@ import {
   type StudioDotType,
   type StudioGradient,
 } from "@/components/qr/qr-studio-state"
+import {
+  buildStaticQrPayload,
+  getDefaultStaticQrValues,
+  validateStaticQrContent,
+  type StaticQrContentValue,
+  type StaticQrContentValues,
+} from "@/components/qr/qr-static-content"
 import { DownloadIcon, LinkIcon, PieChart, Settings, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -102,6 +109,10 @@ import {
   ScrollAreaViewport,
 } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  DEFAULT_QR_INPUT_TYPE,
+  type QrInputType,
+} from "@/components/ui/qr-input-config"
 import { cn } from "@/lib/utils"
 
 const OUTER_MARKERS = [
@@ -138,6 +149,7 @@ type DraftingTool = {
 }
 
 type DraftingQrStateByNodeId = Record<string, QrStudioState>
+type DraftingContentValuesByType = Partial<Record<QrInputType, StaticQrContentValues>>
 
 const DRAFTING_PANEL_TABS: Record<DraftingToolId, DraftingPanelTab[]> = {
   content: [{ id: "content", label: "Content" }],
@@ -323,9 +335,16 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const [activeTool, setActiveTool] = useState<DraftingToolId>(
     DEFAULT_QR_EDITOR_SECTION,
   )
-  const [selectedContentValue, setSelectedContentValue] = useState(
-    DEFAULT_DRAFTING_STUDIO_STATE.data,
+  const [selectedContentType, setSelectedContentType] = useState<QrInputType>(
+    DEFAULT_QR_INPUT_TYPE,
   )
+  const [contentValuesByType, setContentValuesByType] =
+    useState<DraftingContentValuesByType>(() => ({
+      [DEFAULT_QR_INPUT_TYPE]: {
+        ...getDefaultStaticQrValues(DEFAULT_QR_INPUT_TYPE),
+        text: DEFAULT_DRAFTING_STUDIO_STATE.data,
+      },
+    }))
   const [selectedQrMargin, setSelectedQrMargin] = useState(
     DEFAULT_DRAFTING_STUDIO_STATE.margin,
   )
@@ -486,6 +505,16 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const activeToolTabs = DRAFTING_PANEL_TABS[activeTool]
   const activePanelTab = activePanelTabs[activeTool]
   const filteredBrandIcons = filterBrandIcons(brandIconQuery, brandIconCategory)
+  const selectedContentValues =
+    contentValuesByType[selectedContentType] ?? getDefaultStaticQrValues(selectedContentType)
+  const selectedContentValue = useMemo(
+    () => buildStaticQrPayload(selectedContentType, selectedContentValues),
+    [selectedContentType, selectedContentValues],
+  )
+  const selectedContentValidation = useMemo(
+    () => validateStaticQrContent(selectedContentType, selectedContentValues),
+    [selectedContentType, selectedContentValues],
+  )
   const draftingStudioState = useMemo<QrStudioState>(
     () => ({
       ...DEFAULT_DRAFTING_STUDIO_STATE,
@@ -633,7 +662,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     setOpenLogoUploadItems((current) =>
       current.includes(itemId) ? current : [...current, itemId],
     )
-  const canDownload = Boolean(draftingStudioState.data.trim())
+  const canDownload = selectedContentValidation.isValid && Boolean(draftingStudioState.data.trim())
   const isDraftingRasterExport = isRasterExportExtension(selectedDownloadExtension)
   const selectedRasterExportPreset =
     DRAFTING_RASTER_EXPORT_PRESETS.find(
@@ -812,8 +841,42 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     syncDraftingLogoAsset(nextState)
   }
 
+  function handleDraftingContentTypeChange(type: QrInputType) {
+    setSelectedContentType(type)
+    setContentValuesByType((current) => {
+      if (current[type]) {
+        return current
+      }
+
+      return {
+        ...current,
+        [type]: getDefaultStaticQrValues(type),
+      }
+    })
+  }
+
+  function handleDraftingContentValueChange(
+    field: string,
+    value: StaticQrContentValue,
+  ) {
+    setContentValuesByType((current) => ({
+      ...current,
+      [selectedContentType]: {
+        ...(current[selectedContentType] ?? getDefaultStaticQrValues(selectedContentType)),
+        [field]: value,
+      },
+    }))
+  }
+
   function applyDraftingQrStateToControls(nextState: QrStudioState) {
-    setSelectedContentValue(nextState.data)
+    setSelectedContentType(DEFAULT_QR_INPUT_TYPE)
+    setContentValuesByType((current) => ({
+      ...current,
+      [DEFAULT_QR_INPUT_TYPE]: {
+        ...getDefaultStaticQrValues(DEFAULT_QR_INPUT_TYPE),
+        text: nextState.data,
+      },
+    }))
     setSelectedQrMargin(nextState.margin)
     setSelectedRasterExportQualityPercent(nextState.rasterExportQualityPercent)
     setSelectedQrSize(nextState.width)
@@ -1158,8 +1221,12 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     if (toolId === "content" && tabId === "content") {
       return (
         <DraftingContentTab
-          contentValue={selectedContentValue}
-          onContentValueChange={setSelectedContentValue}
+          contentType={selectedContentType}
+          contentValues={selectedContentValues}
+          encodedValue={selectedContentValue}
+          validation={selectedContentValidation}
+          onContentTypeChange={handleDraftingContentTypeChange}
+          onContentValueChange={handleDraftingContentValueChange}
         />
       )
     }
@@ -1454,6 +1521,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       data-logo-preset-id={selectedLogoPresetId ?? ""}
       data-logo-preset-value={selectedLogoPresetValue ?? ""}
       data-logo-source-mode={selectedLogoSourceMode}
+      data-qr-content-type={selectedContentType}
       data-qr-content-value={selectedContentValue}
       data-qr-error-correction-level={selectedErrorCorrectionLevel}
       data-qr-margin={selectedQrMargin}
@@ -1494,7 +1562,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       >
         <div className="flex h-full min-w-0 items-center justify-end">
           <div data-slot="drafting-header-actions" className="flex h-full min-w-0 max-w-full items-center gap-1.5 sm:gap-2.5">
-            <ModeToggle appearance="drafting" className="shrink-0 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-2 text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] backdrop-blur-sm [&>span:first-child]:hidden sm:px-3 sm:[&>span:first-child]:inline" />
+            <ModeToggle appearance="drafting" className="shrink-0 text-[var(--drafting-ink)]" />
             <Popover>
               <PopoverTrigger asChild>
                 <Button
