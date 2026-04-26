@@ -179,13 +179,27 @@ describe("DraftingSurface", () => {
     ).not.toBeNull()
     expect(
       surface.container.querySelector('[data-slot="drafting-workspace-inset"]')?.className,
-    ).toContain("p-0")
+    ).toContain("pb-3")
+    expect(
+      surface.container.querySelector('[data-slot="drafting-workspace-inset"]')?.className,
+    ).toContain("pt-0")
     expect(
       getRequiredElement(surface.container, '[data-slot="drafting-surface"]').className,
     ).toContain("h-dvh")
     expect(
       getRequiredElement(surface.container, '[data-slot="drafting-surface"]').className,
-    ).toContain("[--new-mobile-rail-height:3.25rem]")
+    ).toContain("[--new-mobile-rail-height:5.75rem]")
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-content-grid"]').className,
+    ).toContain("grid-rows-[minmax(0,1fr)_var(--new-mobile-rail-height)]")
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-content-grid"]').className,
+    ).toContain(
+      "lg:grid-cols-[var(--new-left-rail-width)_var(--new-middle-rail-width)_minmax(0,1fr)]",
+    )
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-content-grid"]').className,
+    ).toContain("lg:grid-rows-1")
     expect(surface.container.querySelector('[data-slot="dashboard-compose-surface"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="dashboard-compose-canvas"]')).not.toBeNull()
     expect(
@@ -2008,7 +2022,9 @@ describe("DraftingSurface", () => {
     expect(stickyTabs.className).toContain("sticky")
     expect(navFrame.className).toContain("isolate")
     expect(navFrame.className).toContain("order-2")
-    expect(navFrame.className).toContain("border-y")
+    expect(navFrame.className).toContain("border-t")
+    expect(navFrame.className).toContain("lg:border-t-0")
+    expect(navFrame.className).not.toContain("border-y")
     expect(navFrame.className).toContain("border-transparent")
     expect(navFrame.className).not.toContain("overflow-y-auto")
     expect(navFrame.className).not.toContain("py-4")
@@ -2033,17 +2049,28 @@ describe("DraftingSurface", () => {
     expect(navScrollContent.className).toContain("lg:py-4")
     expect(
       getRequiredElement(surface.container, '[data-slot="drafting-tool-button-icon"]').className,
-    ).toContain("hidden")
+    ).toContain("flex")
     expect(
       getRequiredElement(surface.container, '[data-slot="drafting-tool-button-icon"]').className,
-    ).toContain("lg:flex")
+    ).not.toContain("hidden")
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-tool-button-icon"]').className,
+    ).toContain("lg:size-10")
     expect(
       getRequiredElement(surface.container, '[data-drafting-tool-button="true"]').className,
-    ).toContain("h-7")
+    ).toContain("h-16")
     expect(
       getRequiredElement(surface.container, '[data-drafting-tool-button="true"]').className,
-    ).toContain("min-w-fit")
-    expect(scrollFrame.className).toContain("order-3")
+    ).toContain("w-20")
+    expect(
+      getRequiredElement(surface.container, '[data-drafting-tool-button="true"]').className,
+    ).toContain("min-w-20")
+    expect(
+      getRequiredElement(surface.container, '[data-drafting-tool-button="true"]').className,
+    ).toContain("flex-col")
+    expect(scrollFrame.className).toContain("hidden")
+    expect(scrollFrame.className).toContain("lg:block")
+    expect(scrollFrame.className).not.toContain("order-3")
     expect(scrollFrame.className).not.toContain("overflow-y-auto")
     expect(panelScrollArea.getAttribute("data-slot")).toBe("drafting-tab-panel-scroll-area")
     expect(panelScrollArea.getAttribute("data-scrollbar-visibility")).toBe("while-scrolling")
@@ -2057,6 +2084,11 @@ describe("DraftingSurface", () => {
     ).toBeNull()
     expect(panelScroll.getAttribute("data-active-tool")).toBe("content")
     expect(panelScroll.getAttribute("data-active-tab")).toBe("content")
+
+    const globalsSource = readFileSync("app/globals.css", "utf8")
+
+    expect(globalsSource).toContain('[data-slot="drafting-nav"]::before')
+    expect(globalsSource).not.toContain('[data-slot="drafting-nav"]::after')
   })
 })
 

@@ -865,8 +865,7 @@
     display: none;
   }
 
-  [data-slot="drafting-nav"]::before,
-  [data-slot="drafting-nav"]::after {
+  [data-slot="drafting-nav"]::before {
     content: "";
     position: absolute;
     left: 0;
@@ -886,9 +885,5 @@
 
   [data-slot="drafting-nav"]::before {
     top: 0;
-  }
-
-  [data-slot="drafting-nav"]::after {
-    bottom: 0;
   }
 }
