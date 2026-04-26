@@ -8,7 +8,7 @@
       "y": -1423,
       "name": "Component Library",
       "width": 3016,
-      "height": 6120,
+      "height": 8020,
       "fill": "#FAFAFA",
       "layout": "vertical",
       "gap": 24,
@@ -4103,6 +4103,1890 @@
                       "fontFamily": "Manrope",
                       "fontSize": 11,
                       "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "ddDropdownLibrary",
+          "name": "Dropdown Components & Tokens",
+          "width": "fill_container",
+          "height": 1850,
+          "fill": "#FAFAFA",
+          "cornerRadius": 8,
+          "stroke": {
+            "align": "inside",
+            "thickness": 1,
+            "fill": "#0000001F"
+          },
+          "layout": "vertical",
+          "gap": 20,
+          "padding": 24,
+          "children": [
+            {
+              "type": "text",
+              "id": "ddDropdownLibraryTitle",
+              "name": "dropdownLibraryTitle",
+              "fill": "$text-primary",
+              "content": "Dropdown Components",
+              "fontFamily": "Bricolage Grotesque",
+              "fontSize": 24,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "ddDropdownLibraryDesc",
+              "name": "dropdownLibraryDesc",
+              "fill": "$text-muted",
+              "content": "Light and dark dropdown component anatomy for the /new shell. States document trigger, menu, item, focus, selection, disabled, and shadow tokens.",
+              "fontFamily": "Manrope",
+              "fontSize": 11,
+              "fontWeight": "500",
+              "textGrowth": "fixed-width",
+              "width": 840,
+              "lineHeight": 1.45
+            },
+            {
+              "type": "frame",
+              "id": "ddDropdownReusableRow",
+              "name": "Dropdown Reusable Components Row",
+              "width": "fill_container",
+              "height": 420,
+              "layout": "horizontal",
+              "gap": 32,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ddLightDropdownComponents",
+                  "name": "Light Dropdown Components",
+                  "width": 680,
+                  "height": "fill_container",
+                  "layout": "vertical",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ddLightDropdownComponentsLabel",
+                      "name": "lightDropdownComponentsLabel",
+                      "fill": "$text-muted",
+                      "content": "Light",
+                      "fontFamily": "Manrope",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ddLightDropdownTrigger",
+                      "name": "Wireframe / Dropdown Trigger",
+                      "reusable": true,
+                      "width": 260,
+                      "height": 40,
+                      "fill": "$page-bg",
+                      "cornerRadius": 6,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "$panel-border"
+                      },
+                      "layout": "horizontal",
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "effect": [
+                        {
+                          "type": "shadow",
+                          "shadowType": "outer",
+                          "color": "#00000008",
+                          "blur": 18,
+                          "spread": 2
+                        },
+                        {
+                          "type": "shadow",
+                          "shadowType": "outer",
+                          "color": "#00000006",
+                          "blur": 4,
+                          "offset": {
+                            "x": 0,
+                            "y": 2
+                          }
+                        }
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ddLightTriggerLabel",
+                          "name": "triggerLabel",
+                          "fill": "$text-primary",
+                          "content": "Export format",
+                          "fontFamily": "Manrope",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "ddLightTriggerChevron",
+                          "name": "triggerChevron",
+                          "iconFontFamily": "lucide",
+                          "iconFontName": "chevron-down",
+                          "width": 16,
+                          "height": 16,
+                          "fill": "$text-muted"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ddLightDropdownItem",
+                      "name": "Wireframe / Dropdown Item",
+                      "reusable": true,
+                      "width": 260,
+                      "height": 36,
+                      "fill": "#00000000",
+                      "cornerRadius": 4,
+                      "layout": "horizontal",
+                      "gap": 8,
+                      "padding": [
+                        0,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "ddLightItemCheck",
+                          "name": "itemCheck",
+                          "iconFontFamily": "lucide",
+                          "iconFontName": "check",
+                          "width": 14,
+                          "height": 14,
+                          "fill": "$text-primary",
+                          "opacity": 0
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "ddLightItemIcon",
+                          "name": "itemIcon",
+                          "iconFontFamily": "lucide",
+                          "iconFontName": "file-code",
+                          "width": 16,
+                          "height": 16,
+                          "fill": "$text-primary"
+                        },
+                        {
+                          "type": "text",
+                          "id": "ddLightItemLabel",
+                          "name": "itemLabel",
+                          "fill": "$text-primary",
+                          "content": "SVG",
+                          "fontFamily": "Manrope",
+                          "fontSize": 12,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ddLightDropdownMenu",
+                      "name": "Wireframe / Dropdown Menu",
+                      "reusable": true,
+                      "width": 280,
+                      "height": 230,
+                      "fill": "$page-bg",
+                      "cornerRadius": 8,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "$panel-border"
+                      },
+                      "layout": "vertical",
+                      "gap": 4,
+                      "padding": 8,
+                      "effect": [
+                        {
+                          "type": "shadow",
+                          "shadowType": "outer",
+                          "color": "#0000002E",
+                          "blur": 64,
+                          "offset": {
+                            "x": 0,
+                            "y": 24
+                          }
+                        },
+                        {
+                          "type": "shadow",
+                          "shadowType": "outer",
+                          "color": "#00000014",
+                          "blur": 20,
+                          "offset": {
+                            "x": 0,
+                            "y": 8
+                          }
+                        }
+                      ],
+                      "children": [
+                        {
+                          "type": "ref",
+                          "id": "ddLightDropdownMenuSvg",
+                          "name": "menuItemSvg",
+                          "ref": "ddLightDropdownItem",
+                          "width": "fill_container",
+                          "descendants": {
+                            "ddLightItemLabel": {
+                              "content": "SVG"
+                            },
+                            "ddLightItemIcon": {
+                              "iconFontName": "file-code",
+                              "fill": "$text-primary"
+                            }
+                          }
+                        },
+                        {
+                          "type": "ref",
+                          "id": "ddLightDropdownMenuPng",
+                          "name": "menuItemHover",
+                          "ref": "ddLightDropdownItem",
+                          "width": "fill_container",
+                          "fill": "#00000003",
+                          "descendants": {
+                            "ddLightItemLabel": {
+                              "content": "PNG"
+                            },
+                            "ddLightItemIcon": {
+                              "iconFontName": "image",
+                              "fill": "$text-primary"
+                            }
+                          }
+                        },
+                        {
+                          "type": "ref",
+                          "id": "ddLightDropdownMenuPdf",
+                          "name": "menuItemSelected",
+                          "ref": "ddLightDropdownItem",
+                          "width": "fill_container",
+                          "fill": "#00000006",
+                          "descendants": {
+                            "ddLightItemCheck": {
+                              "opacity": 1,
+                              "fill": "$text-primary"
+                            },
+                            "ddLightItemLabel": {
+                              "content": "PDF",
+                              "fill": "$text-primary",
+                              "fontWeight": "600"
+                            },
+                            "ddLightItemIcon": {
+                              "iconFontName": "file-text",
+                              "fill": "$text-primary"
+                            }
+                          }
+                        },
+                        {
+                          "type": "ref",
+                          "id": "ddLightDropdownMenuEps",
+                          "name": "menuItemDisabled",
+                          "ref": "ddLightDropdownItem",
+                          "width": "fill_container",
+                          "opacity": 0.45,
+                          "descendants": {
+                            "ddLightItemLabel": {
+                              "content": "EPS"
+                            },
+                            "ddLightItemIcon": {
+                              "iconFontName": "file",
+                              "fill": "$text-primary"
+                            }
+                          }
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddLightDropdownMenuDivider",
+                          "name": "menuDivider",
+                          "width": "fill_container",
+                          "height": 1,
+                          "fill": "$panel-border"
+                        },
+                        {
+                          "type": "ref",
+                          "id": "ddLightDropdownMenuCopy",
+                          "name": "menuItemCopy",
+                          "ref": "ddLightDropdownItem",
+                          "width": "fill_container",
+                          "descendants": {
+                            "ddLightItemLabel": {
+                              "content": "Copy link"
+                            },
+                            "ddLightItemIcon": {
+                              "iconFontName": "link",
+                              "fill": "$text-primary"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ddDarkDropdownComponents",
+                  "name": "Dark Dropdown Components",
+                  "width": 680,
+                  "height": "fill_container",
+                  "fill": "#101216",
+                  "cornerRadius": 8,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#ffffff22"
+                  },
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": 20,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ddDarkDropdownComponentsLabel",
+                      "name": "darkDropdownComponentsLabel",
+                      "fill": "$dark-text-muted",
+                      "content": "Dark",
+                      "fontFamily": "Manrope",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ddDarkDropdownTrigger",
+                      "name": "Dark / Dropdown Trigger",
+                      "reusable": true,
+                      "width": 260,
+                      "height": 40,
+                      "fill": "$dark-surface-muted",
+                      "cornerRadius": 6,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "$dark-border"
+                      },
+                      "layout": "horizontal",
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "effect": [
+                        {
+                          "type": "shadow",
+                          "shadowType": "outer",
+                          "color": "$dark-shadow-rest-a-color",
+                          "blur": "$dark-shadow-rest-a-blur",
+                          "spread": "$dark-shadow-rest-a-spread"
+                        },
+                        {
+                          "type": "shadow",
+                          "shadowType": "outer",
+                          "color": "$dark-shadow-rest-b-color",
+                          "blur": "$dark-shadow-rest-b-blur",
+                          "offset": {
+                            "x": 0,
+                            "y": "$dark-shadow-rest-b-y"
+                          },
+                          "spread": "$dark-shadow-rest-b-spread"
+                        }
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ddDarkTriggerLabel",
+                          "name": "darkTriggerLabel",
+                          "fill": "$dark-text-primary",
+                          "content": "Export format",
+                          "fontFamily": "Manrope",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "ddDarkTriggerChevron",
+                          "name": "darkTriggerChevron",
+                          "iconFontFamily": "lucide",
+                          "iconFontName": "chevron-down",
+                          "width": 16,
+                          "height": 16,
+                          "fill": "$dark-text-muted"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ddDarkDropdownItem",
+                      "name": "Dark / Dropdown Item",
+                      "reusable": true,
+                      "width": 260,
+                      "height": 36,
+                      "fill": "#ffffff00",
+                      "cornerRadius": 4,
+                      "layout": "horizontal",
+                      "gap": 8,
+                      "padding": [
+                        0,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "ddDarkItemCheck",
+                          "name": "darkItemCheck",
+                          "iconFontFamily": "lucide",
+                          "iconFontName": "check",
+                          "width": 14,
+                          "height": 14,
+                          "fill": "$dark-text-primary",
+                          "opacity": 0
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "ddDarkItemIcon",
+                          "name": "darkItemIcon",
+                          "iconFontFamily": "lucide",
+                          "iconFontName": "file-code",
+                          "width": 16,
+                          "height": 16,
+                          "fill": "$dark-text-primary"
+                        },
+                        {
+                          "type": "text",
+                          "id": "ddDarkItemLabel",
+                          "name": "darkItemLabel",
+                          "fill": "$dark-text-primary",
+                          "content": "SVG",
+                          "fontFamily": "Manrope",
+                          "fontSize": 12,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ddDarkDropdownMenu",
+                      "name": "Dark / Dropdown Menu",
+                      "reusable": true,
+                      "width": 280,
+                      "height": 230,
+                      "fill": "$dark-surface-raised",
+                      "cornerRadius": 8,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "$dark-border"
+                      },
+                      "layout": "vertical",
+                      "gap": 4,
+                      "padding": 8,
+                      "effect": [
+                        {
+                          "type": "shadow",
+                          "shadowType": "outer",
+                          "color": "#00000075",
+                          "blur": 64,
+                          "offset": {
+                            "x": 0,
+                            "y": 24
+                          }
+                        },
+                        {
+                          "type": "shadow",
+                          "shadowType": "outer",
+                          "color": "#00000052",
+                          "blur": 20,
+                          "offset": {
+                            "x": 0,
+                            "y": 8
+                          }
+                        }
+                      ],
+                      "children": [
+                        {
+                          "type": "ref",
+                          "id": "ddDarkDropdownMenuSvg",
+                          "name": "menuItemSvg",
+                          "ref": "ddDarkDropdownItem",
+                          "width": "fill_container",
+                          "descendants": {
+                            "ddDarkItemLabel": {
+                              "content": "SVG"
+                            },
+                            "ddDarkItemIcon": {
+                              "iconFontName": "file-code",
+                              "fill": "$dark-text-primary"
+                            }
+                          }
+                        },
+                        {
+                          "type": "ref",
+                          "id": "ddDarkDropdownMenuPng",
+                          "name": "menuItemHover",
+                          "ref": "ddDarkDropdownItem",
+                          "width": "fill_container",
+                          "fill": "$dark-surface-subtle",
+                          "descendants": {
+                            "ddDarkItemLabel": {
+                              "content": "PNG",
+                              "fill": "$dark-text-secondary"
+                            },
+                            "ddDarkItemIcon": {
+                              "iconFontName": "image",
+                              "fill": "$dark-text-primary"
+                            }
+                          }
+                        },
+                        {
+                          "type": "ref",
+                          "id": "ddDarkDropdownMenuPdf",
+                          "name": "menuItemSelected",
+                          "ref": "ddDarkDropdownItem",
+                          "width": "fill_container",
+                          "fill": "$dark-button-fill-pressed",
+                          "descendants": {
+                            "ddDarkItemCheck": {
+                              "opacity": 1,
+                              "fill": "$dark-text-primary"
+                            },
+                            "ddDarkItemLabel": {
+                              "content": "PDF",
+                              "fill": "$dark-text-primary",
+                              "fontWeight": "600"
+                            },
+                            "ddDarkItemIcon": {
+                              "iconFontName": "file-text",
+                              "fill": "$dark-text-primary"
+                            }
+                          }
+                        },
+                        {
+                          "type": "ref",
+                          "id": "ddDarkDropdownMenuEps",
+                          "name": "menuItemDisabled",
+                          "ref": "ddDarkDropdownItem",
+                          "width": "fill_container",
+                          "opacity": 0.45,
+                          "descendants": {
+                            "ddDarkItemLabel": {
+                              "content": "EPS"
+                            },
+                            "ddDarkItemIcon": {
+                              "iconFontName": "file",
+                              "fill": "$dark-text-primary"
+                            }
+                          }
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddDarkDropdownMenuDivider",
+                          "name": "darkMenuDivider",
+                          "width": "fill_container",
+                          "height": 1,
+                          "fill": "$dark-border"
+                        },
+                        {
+                          "type": "ref",
+                          "id": "ddDarkDropdownMenuCopy",
+                          "name": "menuItemCopy",
+                          "ref": "ddDarkDropdownItem",
+                          "width": "fill_container",
+                          "descendants": {
+                            "ddDarkItemLabel": {
+                              "content": "Copy link"
+                            },
+                            "ddDarkItemIcon": {
+                              "iconFontName": "link",
+                              "fill": "$dark-text-primary"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ddDropdownStateSpecimens",
+              "name": "Dropdown State Specimens",
+              "width": "fill_container",
+              "height": 640,
+              "layout": "horizontal",
+              "gap": 32,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ddLightDropdownStates",
+                  "name": "Light Dropdown States",
+                  "width": 1180,
+                  "height": "fill_container",
+                  "layout": "vertical",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ddLightStatesTitle",
+                      "name": "lightStatesTitle",
+                      "fill": "$text-primary",
+                      "content": "Light Dropdown States",
+                      "fontFamily": "Bricolage Grotesque",
+                      "fontSize": 20,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ddLightTriggerStateCaption",
+                      "name": "lightTriggerStateCaption",
+                      "fill": "$text-muted",
+                      "content": "Trigger",
+                      "fontFamily": "Manrope",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ddLightTriggerStateRow",
+                      "name": "Light Trigger State Row",
+                      "width": "fill_container",
+                      "height": 72,
+                      "layout": "horizontal",
+                      "gap": 18,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "ddLtDefaultCol",
+                          "name": "Trigger / Default",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddLtDefaultColLabel",
+                              "name": "stateLabel",
+                              "fill": "$text-muted",
+                              "content": "Default",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddLtDefaultRef",
+                              "name": "stateDefault",
+                              "ref": "ddLightDropdownTrigger",
+                              "width": "fill_container"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddLtHoverCol",
+                          "name": "Trigger / Hover",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddLtHoverColLabel",
+                              "name": "stateLabel",
+                              "fill": "$text-muted",
+                              "content": "Hover",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddLtHoverRef",
+                              "name": "stateHover",
+                              "ref": "ddLightDropdownTrigger",
+                              "width": "fill_container",
+                              "fill": "#00000003",
+                              "effect": [
+                                {
+                                  "type": "shadow",
+                                  "shadowType": "outer",
+                                  "color": "#00000010",
+                                  "blur": 24,
+                                  "spread": 3
+                                },
+                                {
+                                  "type": "shadow",
+                                  "shadowType": "outer",
+                                  "color": "#00000008",
+                                  "blur": 10,
+                                  "offset": {
+                                    "x": 0,
+                                    "y": 4
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddLtPressedCol",
+                          "name": "Trigger / Pressed",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddLtPressedColLabel",
+                              "name": "stateLabel",
+                              "fill": "$text-muted",
+                              "content": "Pressed",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddLtPressedRef",
+                              "name": "statePressed",
+                              "ref": "ddLightDropdownTrigger",
+                              "width": "fill_container",
+                              "fill": "#00000006",
+                              "effect": [
+                                {
+                                  "type": "shadow",
+                                  "shadowType": "outer",
+                                  "color": "#0000000C",
+                                  "blur": 14,
+                                  "spread": 1
+                                },
+                                {
+                                  "type": "shadow",
+                                  "shadowType": "outer",
+                                  "color": "#00000008",
+                                  "blur": 6,
+                                  "offset": {
+                                    "x": 0,
+                                    "y": 2
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddLtFocusCol",
+                          "name": "Trigger / Focused",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddLtFocusColLabel",
+                              "name": "stateLabel",
+                              "fill": "$text-muted",
+                              "content": "Focused",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddLtFocusRef",
+                              "name": "stateFocused",
+                              "ref": "ddLightDropdownTrigger",
+                              "width": "fill_container",
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 2,
+                                "fill": "$nav-selected-bg"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddLtOpenCol",
+                          "name": "Trigger / Open",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddLtOpenColLabel",
+                              "name": "stateLabel",
+                              "fill": "$text-muted",
+                              "content": "Open",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddLtOpenRef",
+                              "name": "stateOpen",
+                              "ref": "ddLightDropdownTrigger",
+                              "width": "fill_container",
+                              "fill": "$page-bg",
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "$nav-selected-bg"
+                              },
+                              "descendants": {
+                                "ddLightTriggerChevron": {
+                                  "rotation": 180
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddLtDisabledCol",
+                          "name": "Trigger / Disabled",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddLtDisabledColLabel",
+                              "name": "stateLabel",
+                              "fill": "$text-muted",
+                              "content": "Disabled",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddLtDisabledRef",
+                              "name": "stateDisabled",
+                              "ref": "ddLightDropdownTrigger",
+                              "width": "fill_container",
+                              "opacity": 0.38,
+                              "effect": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "ddLightItemStateCaption",
+                      "name": "lightItemStateCaption",
+                      "fill": "$text-muted",
+                      "content": "Menu item",
+                      "fontFamily": "Manrope",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ddLightItemStateRow",
+                      "name": "Light Item State Row",
+                      "width": "fill_container",
+                      "height": 68,
+                      "layout": "horizontal",
+                      "gap": 18,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "ddLiDefaultCol",
+                          "name": "Item / Default",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddLiDefaultColLabel",
+                              "name": "stateLabel",
+                              "fill": "$text-muted",
+                              "content": "Default",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddLiDefaultRef",
+                              "name": "itemDefault",
+                              "ref": "ddLightDropdownItem",
+                              "width": "fill_container",
+                              "descendants": {
+                                "ddLightItemIcon": {
+                                  "iconFontName": "file-code",
+                                  "fill": "$text-primary"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddLiHoverCol",
+                          "name": "Item / Hover",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddLiHoverColLabel",
+                              "name": "stateLabel",
+                              "fill": "$text-muted",
+                              "content": "Hover",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddLiHoverRef",
+                              "name": "itemHover",
+                              "ref": "ddLightDropdownItem",
+                              "width": "fill_container",
+                              "fill": "#00000003",
+                              "descendants": {
+                                "ddLightItemLabel": {
+                                  "content": "PNG"
+                                },
+                                "ddLightItemIcon": {
+                                  "iconFontName": "image",
+                                  "fill": "$text-primary"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddLiPressedCol",
+                          "name": "Item / Pressed",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddLiPressedColLabel",
+                              "name": "stateLabel",
+                              "fill": "$text-muted",
+                              "content": "Pressed",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddLiPressedRef",
+                              "name": "itemPressed",
+                              "ref": "ddLightDropdownItem",
+                              "width": "fill_container",
+                              "fill": "#00000006",
+                              "descendants": {
+                                "ddLightItemLabel": {
+                                  "content": "PDF"
+                                },
+                                "ddLightItemIcon": {
+                                  "iconFontName": "file-text",
+                                  "fill": "$text-primary"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddLiSelectedCol",
+                          "name": "Item / Selected",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddLiSelectedColLabel",
+                              "name": "stateLabel",
+                              "fill": "$text-muted",
+                              "content": "Selected",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddLiSelectedRef",
+                              "name": "itemSelected",
+                              "ref": "ddLightDropdownItem",
+                              "width": "fill_container",
+                              "fill": "#00000006",
+                              "descendants": {
+                                "ddLightItemCheck": {
+                                  "opacity": 1,
+                                  "fill": "$text-primary"
+                                },
+                                "ddLightItemLabel": {
+                                  "content": "PDF",
+                                  "fill": "$text-primary",
+                                  "fontWeight": "600"
+                                },
+                                "ddLightItemIcon": {
+                                  "iconFontName": "file-text",
+                                  "fill": "$text-primary"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddLiDisabledCol",
+                          "name": "Item / Disabled",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddLiDisabledColLabel",
+                              "name": "stateLabel",
+                              "fill": "$text-muted",
+                              "content": "Disabled",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddLiDisabledRef",
+                              "name": "itemDisabled",
+                              "ref": "ddLightDropdownItem",
+                              "width": "fill_container",
+                              "opacity": 0.38,
+                              "descendants": {
+                                "ddLightItemLabel": {
+                                  "content": "EPS"
+                                },
+                                "ddLightItemIcon": {
+                                  "iconFontName": "file",
+                                  "fill": "$text-primary"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "ddLightMenuStateCaption",
+                      "name": "lightMenuStateCaption",
+                      "fill": "$text-muted",
+                      "content": "Menu surface",
+                      "fontFamily": "Manrope",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ddLightMenuSurfaceRow",
+                      "name": "Light Menu Surface Row",
+                      "width": "fill_container",
+                      "height": 280,
+                      "layout": "horizontal",
+                      "gap": 24,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "ddLmRestCol",
+                          "name": "Menu / Rest",
+                          "width": 300,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddLmRestLabel",
+                              "name": "stateLabel",
+                              "fill": "$text-muted",
+                              "content": "Rest surface",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddLmRestRef",
+                              "name": "menuRest",
+                              "ref": "ddLightDropdownMenu",
+                              "width": 280,
+                              "effect": [
+                                {
+                                  "type": "shadow",
+                                  "shadowType": "outer",
+                                  "color": "#00000008",
+                                  "blur": 18,
+                                  "spread": 2
+                                },
+                                {
+                                  "type": "shadow",
+                                  "shadowType": "outer",
+                                  "color": "#00000006",
+                                  "blur": 4,
+                                  "offset": {
+                                    "x": 0,
+                                    "y": 2
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddLmOpenCol",
+                          "name": "Menu / Open",
+                          "width": 300,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddLmOpenLabel",
+                              "name": "stateLabel",
+                              "fill": "$text-muted",
+                              "content": "Open surface",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddLmOpenRef",
+                              "name": "menuOpen",
+                              "ref": "ddLightDropdownMenu",
+                              "width": 280
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ddDarkDropdownStates",
+                  "name": "Dark Dropdown States",
+                  "width": 1180,
+                  "height": "fill_container",
+                  "fill": "#101216",
+                  "cornerRadius": 8,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#ffffff22"
+                  },
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": 20,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ddDarkStatesTitle",
+                      "name": "darkStatesTitle",
+                      "fill": "$dark-text-primary",
+                      "content": "Dark Dropdown States",
+                      "fontFamily": "Bricolage Grotesque",
+                      "fontSize": 20,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ddDarkTriggerStateCaption",
+                      "name": "darkTriggerStateCaption",
+                      "fill": "$dark-text-muted",
+                      "content": "Trigger",
+                      "fontFamily": "Manrope",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ddDarkTriggerStateRow",
+                      "name": "Dark Trigger State Row",
+                      "width": "fill_container",
+                      "height": 72,
+                      "layout": "horizontal",
+                      "gap": 18,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "ddDtDefaultCol",
+                          "name": "Dark Trigger / Default",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddDtDefaultColLabel",
+                              "name": "stateLabel",
+                              "fill": "$dark-text-muted",
+                              "content": "Default",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddDtDefaultRef",
+                              "name": "stateDefault",
+                              "ref": "ddDarkDropdownTrigger",
+                              "width": "fill_container"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddDtHoverCol",
+                          "name": "Dark Trigger / Hover",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddDtHoverColLabel",
+                              "name": "stateLabel",
+                              "fill": "$dark-text-muted",
+                              "content": "Hover",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddDtHoverRef",
+                              "name": "stateHover",
+                              "ref": "ddDarkDropdownTrigger",
+                              "width": "fill_container",
+                              "fill": "$dark-surface-subtle",
+                              "effect": [
+                                {
+                                  "type": "shadow",
+                                  "shadowType": "outer",
+                                  "color": "$dark-shadow-hover-a-color",
+                                  "blur": "$dark-shadow-hover-a-blur",
+                                  "spread": "$dark-shadow-hover-a-spread"
+                                },
+                                {
+                                  "type": "shadow",
+                                  "shadowType": "outer",
+                                  "color": "$dark-shadow-hover-b-color",
+                                  "blur": "$dark-shadow-hover-b-blur",
+                                  "offset": {
+                                    "x": 0,
+                                    "y": "$dark-shadow-hover-b-y"
+                                  },
+                                  "spread": "$dark-shadow-hover-b-spread"
+                                }
+                              ],
+                              "descendants": {
+                                "ddDarkTriggerLabel": {
+                                  "fill": "$dark-text-secondary"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddDtPressedCol",
+                          "name": "Dark Trigger / Pressed",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddDtPressedColLabel",
+                              "name": "stateLabel",
+                              "fill": "$dark-text-muted",
+                              "content": "Pressed",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddDtPressedRef",
+                              "name": "statePressed",
+                              "ref": "ddDarkDropdownTrigger",
+                              "width": "fill_container",
+                              "fill": "$dark-button-fill-pressed",
+                              "effect": [
+                                {
+                                  "type": "shadow",
+                                  "shadowType": "outer",
+                                  "color": "$dark-shadow-pressed-a-color",
+                                  "blur": "$dark-shadow-pressed-a-blur",
+                                  "spread": "$dark-shadow-pressed-a-spread"
+                                },
+                                {
+                                  "type": "shadow",
+                                  "shadowType": "outer",
+                                  "color": "$dark-shadow-pressed-b-color",
+                                  "blur": "$dark-shadow-pressed-b-blur",
+                                  "offset": {
+                                    "x": 0,
+                                    "y": "$dark-shadow-pressed-b-y"
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddDtFocusCol",
+                          "name": "Dark Trigger / Focused",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddDtFocusColLabel",
+                              "name": "stateLabel",
+                              "fill": "$dark-text-muted",
+                              "content": "Focused",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddDtFocusRef",
+                              "name": "stateFocused",
+                              "ref": "ddDarkDropdownTrigger",
+                              "width": "fill_container",
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 2,
+                                "fill": "$dark-border-strong"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddDtOpenCol",
+                          "name": "Dark Trigger / Open",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddDtOpenColLabel",
+                              "name": "stateLabel",
+                              "fill": "$dark-text-muted",
+                              "content": "Open",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddDtOpenRef",
+                              "name": "stateOpen",
+                              "ref": "ddDarkDropdownTrigger",
+                              "width": "fill_container",
+                              "fill": "$dark-surface-raised",
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "$dark-border-strong"
+                              },
+                              "descendants": {
+                                "ddDarkTriggerChevron": {
+                                  "rotation": 180
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddDtDisabledCol",
+                          "name": "Dark Trigger / Disabled",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddDtDisabledColLabel",
+                              "name": "stateLabel",
+                              "fill": "$dark-text-muted",
+                              "content": "Disabled",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddDtDisabledRef",
+                              "name": "stateDisabled",
+                              "ref": "ddDarkDropdownTrigger",
+                              "width": "fill_container",
+                              "opacity": 0.38,
+                              "effect": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "ddDarkItemStateCaption",
+                      "name": "darkItemStateCaption",
+                      "fill": "$dark-text-muted",
+                      "content": "Menu item",
+                      "fontFamily": "Manrope",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ddDarkItemStateRow",
+                      "name": "Dark Item State Row",
+                      "width": "fill_container",
+                      "height": 68,
+                      "layout": "horizontal",
+                      "gap": 18,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "ddDiDefaultCol",
+                          "name": "Dark Item / Default",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddDiDefaultColLabel",
+                              "name": "stateLabel",
+                              "fill": "$dark-text-muted",
+                              "content": "Default",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddDiDefaultRef",
+                              "name": "itemDefault",
+                              "ref": "ddDarkDropdownItem",
+                              "width": "fill_container",
+                              "descendants": {
+                                "ddDarkItemIcon": {
+                                  "iconFontName": "file-code",
+                                  "fill": "$dark-text-primary"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddDiHoverCol",
+                          "name": "Dark Item / Hover",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddDiHoverColLabel",
+                              "name": "stateLabel",
+                              "fill": "$dark-text-muted",
+                              "content": "Hover",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddDiHoverRef",
+                              "name": "itemHover",
+                              "ref": "ddDarkDropdownItem",
+                              "width": "fill_container",
+                              "fill": "$dark-surface-subtle",
+                              "descendants": {
+                                "ddDarkItemLabel": {
+                                  "content": "PNG",
+                                  "fill": "$dark-text-secondary"
+                                },
+                                "ddDarkItemIcon": {
+                                  "iconFontName": "image",
+                                  "fill": "$dark-text-primary"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddDiPressedCol",
+                          "name": "Dark Item / Pressed",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddDiPressedColLabel",
+                              "name": "stateLabel",
+                              "fill": "$dark-text-muted",
+                              "content": "Pressed",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddDiPressedRef",
+                              "name": "itemPressed",
+                              "ref": "ddDarkDropdownItem",
+                              "width": "fill_container",
+                              "fill": "$dark-button-fill-pressed",
+                              "descendants": {
+                                "ddDarkItemLabel": {
+                                  "content": "PDF"
+                                },
+                                "ddDarkItemIcon": {
+                                  "iconFontName": "file-text",
+                                  "fill": "$dark-text-primary"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddDiSelectedCol",
+                          "name": "Dark Item / Selected",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddDiSelectedColLabel",
+                              "name": "stateLabel",
+                              "fill": "$dark-text-muted",
+                              "content": "Selected",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddDiSelectedRef",
+                              "name": "itemSelected",
+                              "ref": "ddDarkDropdownItem",
+                              "width": "fill_container",
+                              "fill": "$dark-button-fill-pressed",
+                              "descendants": {
+                                "ddDarkItemCheck": {
+                                  "opacity": 1,
+                                  "fill": "$dark-text-primary"
+                                },
+                                "ddDarkItemLabel": {
+                                  "content": "PDF",
+                                  "fill": "$dark-text-primary",
+                                  "fontWeight": "600"
+                                },
+                                "ddDarkItemIcon": {
+                                  "iconFontName": "file-text",
+                                  "fill": "$dark-text-primary"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddDiDisabledCol",
+                          "name": "Dark Item / Disabled",
+                          "width": 174,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddDiDisabledColLabel",
+                              "name": "stateLabel",
+                              "fill": "$dark-text-muted",
+                              "content": "Disabled",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddDiDisabledRef",
+                              "name": "itemDisabled",
+                              "ref": "ddDarkDropdownItem",
+                              "width": "fill_container",
+                              "opacity": 0.38,
+                              "descendants": {
+                                "ddDarkItemLabel": {
+                                  "content": "EPS"
+                                },
+                                "ddDarkItemIcon": {
+                                  "iconFontName": "file",
+                                  "fill": "$dark-text-primary"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "ddDarkMenuStateCaption",
+                      "name": "darkMenuStateCaption",
+                      "fill": "$dark-text-muted",
+                      "content": "Menu surface",
+                      "fontFamily": "Manrope",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ddDarkMenuSurfaceRow",
+                      "name": "Dark Menu Surface Row",
+                      "width": "fill_container",
+                      "height": 280,
+                      "layout": "horizontal",
+                      "gap": 24,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "ddDmRestCol",
+                          "name": "Dark Menu / Rest",
+                          "width": 300,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddDmRestLabel",
+                              "name": "stateLabel",
+                              "fill": "$dark-text-muted",
+                              "content": "Rest surface",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddDmRestRef",
+                              "name": "menuRest",
+                              "ref": "ddDarkDropdownMenu",
+                              "width": 280,
+                              "effect": [
+                                {
+                                  "type": "shadow",
+                                  "shadowType": "outer",
+                                  "color": "$dark-shadow-rest-a-color",
+                                  "blur": "$dark-shadow-rest-a-blur",
+                                  "spread": "$dark-shadow-rest-a-spread"
+                                },
+                                {
+                                  "type": "shadow",
+                                  "shadowType": "outer",
+                                  "color": "$dark-shadow-rest-b-color",
+                                  "blur": "$dark-shadow-rest-b-blur",
+                                  "offset": {
+                                    "x": 0,
+                                    "y": "$dark-shadow-rest-b-y"
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ddDmOpenCol",
+                          "name": "Dark Menu / Open",
+                          "width": 300,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddDmOpenLabel",
+                              "name": "stateLabel",
+                              "fill": "$dark-text-muted",
+                              "content": "Open surface",
+                              "fontFamily": "Manrope",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "ref",
+                              "id": "ddDmOpenRef",
+                              "name": "menuOpen",
+                              "ref": "ddDarkDropdownMenu",
+                              "width": 280
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ddDropdownTokenNotes",
+              "name": "Dropdown Token Notes",
+              "width": "fill_container",
+              "height": 640,
+              "layout": "horizontal",
+              "gap": 28,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ddLightDropdownTokens",
+                  "name": "Light Dropdown Tokens",
+                  "width": 640,
+                  "height": 600,
+                  "layout": "vertical",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ddLightDropdownTokTitle",
+                      "name": "lightDropdownTokTitle",
+                      "fill": "$text-primary",
+                      "content": "Light Dropdown Tokens",
+                      "fontFamily": "Bricolage Grotesque",
+                      "fontSize": 20,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ddLightDropdownTokBody",
+                      "name": "lightDropdownTokBody",
+                      "fill": "$text-muted",
+                      "content": "Dropdown/Trigger/Size  260 x 40\nDropdown/Trigger/Radius  6\nDropdown/Trigger/Padding  0 12\nDropdown/Item/Size  260 x 36\nDropdown/Item/Anatomy  Check 14px + Icon 16px + Label\nDropdown/Item/Radius  4\nDropdown/Item/Padding  0 10\nDropdown/Menu/Size  280 x 230\nDropdown/Menu/Radius  8\nDropdown/Menu/Padding  8\nDropdown/Surface/Default  $page-bg #FFFFFF\nDropdown/Surface/Hover  #00000003\nDropdown/Surface/Pressed  #00000006\nDropdown/Surface/Open  #FFFFFF\nDropdown/Border/Default  $panel-border #0000001F @ 1px\nDropdown/Border/Focus  $nav-selected-bg #000000 @ 2px\nDropdown/Text/Default  $text-primary #262626\nDropdown/Text/Muted Disabled  $text-muted #000000B3 @ 38% opacity\nDropdown/Icon/Default  $text-primary #262626\nDropdown/Check/Selected  $text-primary #262626 @ 14px\nDropdown/Selected/Fill  #00000006\nDropdown/Selected/Foreground  $text-primary #262626\nDropdown/OptionIcons  SVG file-code; PNG image; PDF file-text; EPS file; Copy link link\nDropdown/Trigger/Shadow/Rest  0/0 18 blur + 2 spread #00000008; 0/2 4 blur #00000006\nDropdown/Trigger/Shadow/Hover  0/0 24 blur + 3 spread #00000010; 0/4 10 blur #00000008\nDropdown/Trigger/Shadow/Pressed  0/0 14 blur + 1 spread #0000000C; 0/2 6 blur #00000008\nDropdown/Menu/Shadow/Open  0/24 64 blur #0000002E; 0/8 20 blur #00000014",
+                      "fontFamily": "Manrope",
+                      "fontSize": 11,
+                      "fontWeight": "500",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "lineHeight": 1.55
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ddDarkDropdownTokens",
+                  "name": "Dark Dropdown Tokens",
+                  "width": 640,
+                  "height": 600,
+                  "fill": "#101216",
+                  "cornerRadius": 8,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#ffffff22"
+                  },
+                  "layout": "vertical",
+                  "gap": 10,
+                  "padding": 20,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ddDarkDropdownTokTitle",
+                      "name": "darkDropdownTokTitle",
+                      "fill": "$dark-text-primary",
+                      "content": "Dark Dropdown Tokens",
+                      "fontFamily": "Bricolage Grotesque",
+                      "fontSize": 20,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ddDarkDropdownTokBody",
+                      "name": "darkDropdownTokBody",
+                      "fill": "$dark-text-secondary",
+                      "content": "DarkDropdown/Trigger/Size  260 x 40\nDarkDropdown/Trigger/Radius  6\nDarkDropdown/Trigger/Padding  0 12\nDarkDropdown/Item/Size  260 x 36\nDarkDropdown/Item/Anatomy  Check 14px + Icon 16px + Label\nDarkDropdown/Item/Radius  4\nDarkDropdown/Item/Padding  0 10\nDarkDropdown/Menu/Size  280 x 230\nDarkDropdown/Menu/Radius  8\nDarkDropdown/Menu/Padding  8\nDarkDropdown/Surface/Default  $dark-surface-muted #FFFFFF08\nDarkDropdown/Surface/Hover  $dark-surface-subtle #FFFFFF0D\nDarkDropdown/Surface/Pressed  $dark-button-fill-pressed #FFFFFF14\nDarkDropdown/Surface/Open  $dark-surface-raised #252A33\nDarkDropdown/Border/Default  $dark-border #FFFFFF22 @ 1px\nDarkDropdown/Border/Focus  $dark-border-strong #FFFFFF59 @ 2px\nDarkDropdown/Text/Default  $dark-text-primary #F6F8FB\nDarkDropdown/Text/Muted Disabled  $dark-text-muted #A8B0BD @ 38% opacity\nDarkDropdown/Icon/Default  $dark-text-primary #F6F8FB\nDarkDropdown/Check/Selected  $dark-text-primary #F6F8FB @ 14px\nDarkDropdown/Selected/Fill  $dark-button-fill-pressed #FFFFFF14\nDarkDropdown/Selected/Foreground  $dark-text-primary #F6F8FB\nDarkDropdown/OptionIcons  SVG file-code; PNG image; PDF file-text; EPS file; Copy link link\nDarkDropdown/Trigger/Shadow/Rest  0/0 18 blur + 2 spread #00000010; 0/3 8 blur + 1 spread #00000009\nDarkDropdown/Trigger/Shadow/Hover  0/0 24 blur + 3 spread #00000016; 0/4 10 blur + 1 spread #0000000E\nDarkDropdown/Trigger/Shadow/Pressed  0/0 14 blur + 1 spread #00000012; 0/2 6 blur #0000000C\nDarkDropdown/Menu/Shadow/Open  0/24 64 blur #00000075; 0/8 20 blur #00000052",
+                      "fontFamily": "Manrope",
+                      "fontSize": 11,
+                      "fontWeight": "500",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "lineHeight": 1.55
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ddDropdownAnatomyNotes",
+                  "name": "Dropdown Anatomy Notes",
+                  "width": 640,
+                  "height": 600,
+                  "layout": "vertical",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ddDropdownAnatomyTitle",
+                      "name": "dropdownAnatomyTitle",
+                      "fill": "$text-primary",
+                      "content": "Dropdown Anatomy",
+                      "fontFamily": "Bricolage Grotesque",
+                      "fontSize": 20,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ddDropdownAnatomyBody",
+                      "name": "dropdownAnatomyBody",
+                      "fill": "$text-muted",
+                      "content": "Composition\nTrigger uses label + lucide chevron-down.\nMenu uses vertical list with 4px item gap and 8px internal padding.\nItem uses Check/Icon/Label: optional lucide check at 14px, option icon at 16px, and text label at 12px Manrope.\n\nOption icons\nSVG uses file-code.\nPNG uses image.\nPDF uses file-text.\nEPS uses file.\nCopy link uses link.\n\nState behavior\nHover changes surface only.\nPressed deepens surface and lowers shadow.\nFocused uses 2px token focus border.\nOpen keeps trigger active, rotates chevron 180 degrees, and exposes menu shadow.\nSelected item uses a visible leading checkmark plus subtle selected fill, not inverted foreground.\nDisabled uses 38% opacity and removes emphasis shadow.\n\nReusable components\nWireframe / Dropdown Trigger\nWireframe / Dropdown Menu\nWireframe / Dropdown Item\nDark / Dropdown Trigger\nDark / Dropdown Menu\nDark / Dropdown Item",
+                      "fontFamily": "Manrope",
+                      "fontSize": 11,
+                      "fontWeight": "500",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "lineHeight": 1.55
                     }
                   ]
                 }

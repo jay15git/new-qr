@@ -71,7 +71,7 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { QR_SIZE_MAX, QR_SIZE_MIN } from "@/components/qr/qr-studio-state"
-import { ChevronDown } from "lucide-react"
+import { CheckIcon, ChevronDown } from "lucide-react"
 
 export type DraftingBinaryColorMode = "solid" | "gradient"
 export type DraftingBackgroundColorMode = DraftingBinaryColorMode | "transparent"
@@ -182,23 +182,19 @@ function DraftingContentTypeDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
+        <button
           aria-label={`Open ${category.label} content types`}
+          data-drafting-dropdown-trigger="true"
           type="button"
-          variant="outline"
           className={cn(
-            "group h-12 w-full min-w-0 flex-row justify-between gap-2 rounded-[6px] border border-dashed px-3 py-2 text-left",
-            "border-[var(--drafting-option-card-border)] bg-[var(--drafting-option-card-bg)] text-[var(--drafting-option-card-label)] shadow-[var(--drafting-option-card-shadow-rest)]",
+            "group flex h-10 w-full min-w-0 cursor-default select-none items-center justify-between gap-2 rounded-[6px] border px-3 py-0 text-left outline-none",
+            "border-[var(--drafting-dropdown-border)] bg-[var(--drafting-dropdown-trigger-surface)] text-[var(--drafting-dropdown-text)] shadow-[var(--drafting-dropdown-trigger-shadow-rest)]",
             "transition-[border-color,box-shadow,transform,background-color,color] duration-150 ease-out",
-            "hover:-translate-y-px hover:border-[var(--drafting-option-card-border-hover)] hover:bg-[var(--drafting-option-card-bg-hover)] hover:text-[var(--drafting-option-card-label-selected)] hover:shadow-[var(--drafting-option-card-shadow-hover)]",
-            "active:translate-y-px active:border-[var(--drafting-option-card-border-active)] active:bg-[var(--drafting-option-card-bg-active)] active:shadow-[var(--drafting-option-card-shadow-active)]",
-            "data-[state=open]:border-[var(--drafting-option-card-border-selected)] data-[state=open]:bg-[var(--drafting-option-card-bg-selected)] data-[state=open]:text-[var(--drafting-option-card-label-selected)] data-[state=open]:shadow-[var(--drafting-option-card-shadow-selected)]",
-            "dark:border-[var(--drafting-option-card-border)] dark:bg-[var(--drafting-option-card-bg)] dark:text-[var(--drafting-option-card-label)] dark:shadow-[var(--drafting-option-card-shadow-rest)]",
-            "dark:hover:border-[var(--drafting-option-card-border-hover)] dark:hover:bg-[var(--drafting-option-card-bg-hover)] dark:hover:shadow-[var(--drafting-option-card-shadow-hover)]",
-            "dark:active:border-[var(--drafting-option-card-border-active)] dark:active:bg-[var(--drafting-option-card-bg-active)] dark:active:shadow-[var(--drafting-option-card-shadow-active)]",
-            "dark:data-[state=open]:border-[var(--drafting-option-card-border-selected)] dark:data-[state=open]:bg-[var(--drafting-option-card-bg-selected)] dark:data-[state=open]:text-[var(--drafting-option-card-label-selected)] dark:data-[state=open]:shadow-[var(--drafting-option-card-shadow-selected)]",
-            isSelectedCategory &&
-              "border-2 border-[var(--drafting-option-card-border-selected)] bg-[var(--drafting-option-card-bg-selected)] text-[var(--drafting-option-card-label-selected)] shadow-[var(--drafting-option-card-shadow-selected)] hover:bg-[var(--drafting-option-card-bg-selected)] hover:text-[var(--drafting-option-card-label-selected)] hover:shadow-[var(--drafting-option-card-shadow-selected-hover)] dark:border-[var(--drafting-option-card-border-selected)] dark:bg-[var(--drafting-option-card-bg-selected)] dark:text-[var(--drafting-option-card-label-selected)] dark:shadow-[var(--drafting-option-card-shadow-selected)]",
+            "hover:-translate-y-px hover:bg-[var(--drafting-dropdown-trigger-surface-hover)] hover:shadow-[var(--drafting-dropdown-trigger-shadow-hover)]",
+            "active:translate-y-0 active:bg-[var(--drafting-dropdown-trigger-surface-pressed)] active:shadow-[var(--drafting-dropdown-trigger-shadow-pressed)]",
+            "focus-visible:border-2 focus-visible:border-[var(--drafting-dropdown-border-focus)] focus-visible:ring-0",
+            "data-[state=open]:border-[var(--drafting-dropdown-border-focus)] data-[state=open]:bg-[var(--drafting-dropdown-trigger-surface-open)] data-[state=open]:shadow-[var(--drafting-dropdown-trigger-shadow-hover)]",
+            isSelectedCategory && "font-semibold",
           )}
         >
           <span className="drafting-type-caption min-w-0 truncate font-medium">
@@ -206,13 +202,14 @@ function DraftingContentTypeDropdown({
           </span>
           <ChevronDown
             aria-hidden="true"
-            className="size-3.5 shrink-0 opacity-65 transition-transform duration-150 ease-out group-data-[state=open]:rotate-180"
+            className="size-4 shrink-0 text-[var(--drafting-dropdown-text-muted)] transition-transform duration-150 ease-out group-data-[state=open]:rotate-180"
           />
-        </Button>
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className="w-64 rounded-[6px] border border-dashed border-[var(--drafting-option-card-border-selected)] bg-white p-1.5 text-[var(--drafting-option-card-label-selected)] shadow-[var(--drafting-option-card-shadow-selected)] dark:border-[var(--drafting-option-card-border-selected)] dark:bg-[var(--drafting-dark-shell-bg)] dark:text-[var(--drafting-option-card-label-selected)] dark:shadow-[var(--drafting-option-card-shadow-selected)]"
+        data-drafting-dropdown-content="true"
+        className="w-[280px] max-w-[calc(100vw-2rem)] rounded-[8px] border border-[var(--drafting-dropdown-border)] bg-[var(--drafting-dropdown-menu-surface-open)] p-2 text-[var(--drafting-dropdown-text)] shadow-[var(--drafting-dropdown-menu-shadow-open)] ring-0"
       >
         <DropdownMenuGroup className="grid gap-1">
           {category.items.map((item) => {
@@ -225,14 +222,30 @@ function DraftingContentTypeDropdown({
                 data-content-type={item.value}
                 onSelect={() => onContentTypeChange(item.value)}
                 className={cn(
-                  "min-h-9 rounded-[4px] border border-dashed border-transparent px-2.5 py-2 text-[var(--drafting-ink-muted)]",
-                  "focus:border-[var(--drafting-line-hover)] focus:bg-[var(--drafting-panel-bg-hover)] focus:text-[var(--drafting-ink)]",
+                  "h-9 min-h-9 gap-2 rounded-[4px] border border-transparent bg-transparent px-2.5 py-0 text-[12px] font-medium text-[var(--drafting-dropdown-text)]",
+                  "focus:bg-[var(--drafting-dropdown-trigger-surface-hover)] focus:text-[var(--drafting-dropdown-text)] focus:**:text-[var(--drafting-dropdown-text)]",
                   isSelected &&
-                    "border-[var(--drafting-ink)] bg-[var(--drafting-ink)] text-[var(--drafting-surface-bg)] focus:bg-[var(--drafting-ink)] focus:text-[var(--drafting-surface-bg)]",
+                    "bg-[var(--drafting-dropdown-selected-fill)] font-semibold text-[var(--drafting-dropdown-text)] focus:bg-[var(--drafting-dropdown-selected-fill)] focus:text-[var(--drafting-dropdown-text)]",
                 )}
               >
-                <ItemIcon className="size-3.5" aria-hidden="true" />
-                <span className="drafting-type-caption font-semibold">{item.label}</span>
+                <span
+                  aria-hidden="true"
+                  className="flex size-3.5 shrink-0 items-center justify-center"
+                >
+                  <CheckIcon
+                    className={cn(
+                      "size-3.5 text-[var(--drafting-dropdown-text)] transition-opacity duration-100",
+                      isSelected ? "opacity-100" : "opacity-0",
+                    )}
+                  />
+                </span>
+                <ItemIcon
+                  aria-hidden="true"
+                  className="size-4 shrink-0 text-[var(--drafting-dropdown-text)]"
+                />
+                <span className="drafting-type-caption min-w-0 truncate font-medium">
+                  {item.label}
+                </span>
               </DropdownMenuItem>
             )
           })}

@@ -404,6 +404,37 @@
   --drafting-option-card-shadow-active: 0 0 8px 0 rgb(0 0 0 / 0.08), 0 1px 3px 0 rgb(0 0 0 / 0.08);
   --drafting-option-card-shadow-selected: 0 0 22px 2px rgb(0 0 0 / 0.14), 0 5px 10px 1px rgb(0 0 0 / 0.1);
   --drafting-option-card-shadow-selected-hover: 0 0 28px 3px rgb(0 0 0 / 0.18), 0 6px 14px 1px rgb(0 0 0 / 0.12);
+  --drafting-dropdown-trigger-surface: #ffffff;
+  --drafting-dropdown-trigger-surface-hover: #00000003;
+  --drafting-dropdown-trigger-surface-pressed: #00000006;
+  --drafting-dropdown-trigger-surface-open: #ffffff;
+  --drafting-dropdown-menu-surface-open: #ffffff;
+  --drafting-dropdown-border: #0000001f;
+  --drafting-dropdown-border-focus: #000000;
+  --drafting-dropdown-text: #262626;
+  --drafting-dropdown-text-muted: #000000b3;
+  --drafting-dropdown-selected-fill: #00000006;
+  --drafting-dropdown-trigger-shadow-rest: 0 0 18px 2px #00000008, 0 2px 4px #00000006;
+  --drafting-dropdown-trigger-shadow-hover: 0 0 24px 3px #00000010, 0 4px 10px #00000008;
+  --drafting-dropdown-trigger-shadow-pressed: 0 0 14px 1px #0000000c, 0 2px 6px #00000008;
+  --drafting-dropdown-menu-shadow-open: 0 24px 64px #0000002e, 0 8px 20px #00000014;
+}
+
+[data-drafting-dropdown-content="true"] {
+  --drafting-dropdown-trigger-surface: #ffffff;
+  --drafting-dropdown-trigger-surface-hover: #00000003;
+  --drafting-dropdown-trigger-surface-pressed: #00000006;
+  --drafting-dropdown-trigger-surface-open: #ffffff;
+  --drafting-dropdown-menu-surface-open: #ffffff;
+  --drafting-dropdown-border: #0000001f;
+  --drafting-dropdown-border-focus: #000000;
+  --drafting-dropdown-text: #262626;
+  --drafting-dropdown-text-muted: #000000b3;
+  --drafting-dropdown-selected-fill: #00000006;
+  --drafting-dropdown-trigger-shadow-rest: 0 0 18px 2px #00000008, 0 2px 4px #00000006;
+  --drafting-dropdown-trigger-shadow-hover: 0 0 24px 3px #00000010, 0 4px 10px #00000008;
+  --drafting-dropdown-trigger-shadow-pressed: 0 0 14px 1px #0000000c, 0 2px 6px #00000008;
+  --drafting-dropdown-menu-shadow-open: 0 24px 64px #0000002e, 0 8px 20px #00000014;
 }
 
 .dark [data-slot="new-page"] {
@@ -468,6 +499,20 @@
   --drafting-dark-option-shadow-selected-hover: 0 0 28px 3px #0000001a, 0 6px 14px 1px #00000010;
   --drafting-dark-shadow-raised: 0 24px 64px #00000075, 0 8px 20px #00000052;
   --drafting-dark-shadow-shell: none;
+  --drafting-dropdown-trigger-surface: #ffffff08;
+  --drafting-dropdown-trigger-surface-hover: #ffffff0d;
+  --drafting-dropdown-trigger-surface-pressed: #ffffff14;
+  --drafting-dropdown-trigger-surface-open: #252a33;
+  --drafting-dropdown-menu-surface-open: #252a33;
+  --drafting-dropdown-border: #ffffff22;
+  --drafting-dropdown-border-focus: #ffffff59;
+  --drafting-dropdown-text: #f6f8fb;
+  --drafting-dropdown-text-muted: #a8b0bd;
+  --drafting-dropdown-selected-fill: #ffffff14;
+  --drafting-dropdown-trigger-shadow-rest: 0 0 18px 2px #00000010, 0 3px 8px 1px #00000009;
+  --drafting-dropdown-trigger-shadow-hover: 0 0 24px 3px #00000016, 0 4px 10px 1px #0000000e;
+  --drafting-dropdown-trigger-shadow-pressed: 0 0 14px 1px #00000012, 0 2px 6px #0000000c;
+  --drafting-dropdown-menu-shadow-open: 0 24px 64px #00000075, 0 8px 20px #00000052;
   --drafting-ink-rgb: 246 248 251;
   --drafting-paper-rgb: 16 18 22;
   --drafting-page-bg: var(--drafting-dark-page-bg);
@@ -547,6 +592,23 @@
   --drafting-option-card-shadow-active: var(--drafting-dark-option-shadow-active);
   --drafting-option-card-shadow-selected: var(--drafting-dark-option-shadow-selected);
   --drafting-option-card-shadow-selected-hover: var(--drafting-dark-option-shadow-selected-hover);
+}
+
+.dark [data-drafting-dropdown-content="true"] {
+  --drafting-dropdown-trigger-surface: #ffffff08;
+  --drafting-dropdown-trigger-surface-hover: #ffffff0d;
+  --drafting-dropdown-trigger-surface-pressed: #ffffff14;
+  --drafting-dropdown-trigger-surface-open: #252a33;
+  --drafting-dropdown-menu-surface-open: #252a33;
+  --drafting-dropdown-border: #ffffff22;
+  --drafting-dropdown-border-focus: #ffffff59;
+  --drafting-dropdown-text: #f6f8fb;
+  --drafting-dropdown-text-muted: #a8b0bd;
+  --drafting-dropdown-selected-fill: #ffffff14;
+  --drafting-dropdown-trigger-shadow-rest: 0 0 18px 2px #00000010, 0 3px 8px 1px #00000009;
+  --drafting-dropdown-trigger-shadow-hover: 0 0 24px 3px #00000016, 0 4px 10px 1px #0000000e;
+  --drafting-dropdown-trigger-shadow-pressed: 0 0 14px 1px #00000012, 0 2px 6px #0000000c;
+  --drafting-dropdown-menu-shadow-open: 0 24px 64px #00000075, 0 8px 20px #00000052;
 }
 
 [data-slot="drafting-surface"] {
@@ -659,7 +721,7 @@
 
 .dark [data-slot="new-page"] :is(
   [data-slot="mode-toggle"],
-  [data-slot="button"]:not([data-drafting-tool-button="true"]),
+  [data-slot="button"]:not([data-drafting-tool-button="true"]):not([data-drafting-dropdown-trigger="true"]),
   [data-slot="card"],
   [data-slot="input"],
   [data-slot="textarea"],
@@ -677,7 +739,7 @@
 
 .dark [data-slot="new-page"] :is(
   [data-slot="mode-toggle"],
-  [data-slot="button"]:not([data-drafting-tool-button="true"]),
+  [data-slot="button"]:not([data-drafting-tool-button="true"]):not([data-drafting-dropdown-trigger="true"]),
   [data-slot="card"],
   [data-slot="input"],
   [data-slot="textarea"],

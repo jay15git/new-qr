@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { readFileSync } from "node:fs"
 import { act, type ReactNode } from "react"
 import { createRoot } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
@@ -727,11 +728,19 @@ describe("DraftingSurface", () => {
     expect(
       getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
         .className,
-    ).toContain("h-12")
+    ).toContain("h-10")
+    expect(
+      getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
+        .getAttribute("data-drafting-dropdown-trigger"),
+    ).toBe("true")
+    expect(
+      getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
+        .getAttribute("data-slot"),
+    ).toBe("dropdown-menu-trigger")
     expect(
       getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
         .className,
-    ).toContain("flex-row")
+    ).toContain("border-[var(--drafting-dropdown-border)]")
     expect(
       getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
         .querySelector("svg"),
@@ -739,7 +748,7 @@ describe("DraftingSurface", () => {
     expect(
       getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
         .className,
-    ).toContain("bg-[var(--drafting-option-card-bg-selected)]")
+    ).toContain("bg-[var(--drafting-dropdown-trigger-surface)]")
     expect(
       getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
         .className,
@@ -771,11 +780,36 @@ describe("DraftingSurface", () => {
     act(() => {
       activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]'))
     })
+    const menuContent = getRequiredElement(document.body, '[data-slot="dropdown-menu-content"]')
+    const globalsSource = readFileSync("app/globals.css", "utf8")
+    expect(globalsSource).toContain('[data-drafting-dropdown-content="true"]')
+    expect(globalsSource).toContain('.dark [data-drafting-dropdown-content="true"]')
+    expect(globalsSource).toContain("--drafting-dropdown-menu-surface-open: #252a33;")
+    expect(menuContent.getAttribute("data-drafting-dropdown-content")).toBe("true")
     expect(
-      getRequiredElement(document.body, '[data-slot="dropdown-menu-content"]').className,
-    ).toContain("bg-white")
+      menuContent.className,
+    ).toContain("bg-[var(--drafting-dropdown-menu-surface-open)]")
+    expect(menuContent.className).toContain("w-[280px]")
+    expect(menuContent.className).toContain("shadow-[var(--drafting-dropdown-menu-shadow-open)]")
+    const selectedAutoItem = getRequiredElement(
+      document.body,
+      '[data-slot="dropdown-menu-item"][data-content-type="auto"]',
+    )
+    expect(selectedAutoItem.className).toContain("bg-[var(--drafting-dropdown-selected-fill)]")
+    expect(selectedAutoItem.className).not.toContain("bg-[var(--drafting-ink)]")
+    expect(selectedAutoItem.className).not.toContain("border-dashed")
+    expect(selectedAutoItem.className).not.toContain("focus:bg-accent")
+    expect(selectedAutoItem.querySelector("svg")?.getAttribute("class")).toContain("opacity-100")
+    const wifiItem = getRequiredElement(
+      document.body,
+      '[data-slot="dropdown-menu-item"][data-content-type="wifi"]',
+    )
+    expect(wifiItem.className).toContain("bg-transparent")
+    expect(wifiItem.className).not.toContain("bg-[var(--drafting-ink)]")
+    expect(wifiItem.querySelectorAll("svg")).toHaveLength(2)
+    expect(wifiItem.querySelector("svg")?.getAttribute("class")).toContain("opacity-0")
     act(() => {
-      activateElement(getRequiredElement(document.body, '[data-slot="dropdown-menu-item"][data-content-type="wifi"]'))
+      activateElement(wifiItem)
     })
 
     const ssidInput = getRequiredElement(surface.container, 'input[aria-label="Network name"]') as HTMLInputElement
