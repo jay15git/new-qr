@@ -33,6 +33,7 @@ const fontWeights = {
 
 type SliderValue = number | [number, number];
 type ValuePosition = "left" | "right" | "top" | "bottom" | "tooltip";
+type SliderAppearance = "default" | "drafting";
 
 interface SliderProps
   extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
@@ -44,6 +45,7 @@ interface SliderProps
   showSteps?: boolean;
   showValue?: boolean;
   valuePosition?: ValuePosition;
+  appearance?: SliderAppearance;
   formatValue?: (v: number) => string;
   label?: string;
   disabled?: boolean;
@@ -109,6 +111,7 @@ interface ValueDisplayProps {
   label?: string;
   isRange: boolean;
   isInteracting: boolean;
+  appearance: SliderAppearance;
 }
 
 function ValueDisplay({
@@ -124,7 +127,9 @@ function ValueDisplay({
   label,
   isRange,
   isInteracting,
+  appearance,
 }: ValueDisplayProps) {
+  const isDrafting = appearance === "drafting";
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -161,7 +166,17 @@ function ValueDisplay({
             {formatValue(max)}
           </span>
           <span className="col-start-1 row-start-1 flex items-center gap-1">
-            {label && <span className="text-muted-foreground">{label}:</span>}
+            {label && (
+              <span
+                className={
+                  isDrafting
+                    ? "text-[var(--drafting-ink-muted)]"
+                    : "text-muted-foreground"
+                }
+              >
+                {label}:
+              </span>
+            )}
             <input
               ref={inputRef}
               type="number"
@@ -176,7 +191,12 @@ function ValueDisplay({
                 if (e.key === "Escape") onCancelEdit();
               }}
               aria-label={`Edit slider value${isRange ? (index === 0 ? " (start)" : " (end)") : ""}`}
-              className="w-[5ch] bg-transparent text-foreground outline-none border-b border-border text-center rounded-none"
+              className={cn(
+                "w-[5ch] rounded-none border-b bg-transparent text-center outline-none",
+                isDrafting
+                  ? "border-[var(--drafting-line)] text-[var(--drafting-ink)]"
+                  : "border-border text-foreground",
+              )}
               style={{ fontVariationSettings: fontWeights.medium }}
             />
           </span>
@@ -199,7 +219,12 @@ function ValueDisplay({
 
   return (
     <span
-      className="text-[13px] text-muted-foreground transition-[font-variation-settings] duration-100 tabular-nums"
+      className={cn(
+        "text-[13px] transition-[font-variation-settings] duration-100 tabular-nums",
+        isDrafting
+          ? "text-[var(--drafting-ink-muted)]"
+          : "text-muted-foreground",
+      )}
       style={{
         fontVariationSettings: isInteracting
           ? fontWeights.medium
@@ -207,12 +232,29 @@ function ValueDisplay({
       }}
     >
       {label && editingIndex === null && (
-        <span className="text-muted-foreground">{label}: </span>
+        <span
+          className={
+            isDrafting
+              ? "text-[var(--drafting-ink-muted)]"
+              : "text-muted-foreground"
+          }
+        >
+          {label}:{" "}
+        </span>
       )}
       {isRange ? (
         <>
           {renderValue(0)}
-          <span className="mx-1 text-muted-foreground/50">—</span>
+          <span
+            className={cn(
+              "mx-1",
+              isDrafting
+                ? "text-[var(--drafting-ink-subtle)]"
+                : "text-muted-foreground/50",
+            )}
+          >
+            —
+          </span>
           {renderValue(1)}
         </>
       ) : (
@@ -226,11 +268,14 @@ function TooltipValue({
   value,
   formatValue,
   motionX,
+  appearance,
 }: {
   value: number;
   formatValue: (v: number) => string;
   motionX: MotionValue<number>;
+  appearance: SliderAppearance;
 }) {
+  const isDrafting = appearance === "drafting";
   const tooltipX = useTransform(motionX, (x) => x + THUMB_SIZE / 2);
   return (
     <motion.div
@@ -242,7 +287,12 @@ function TooltipValue({
       transition={springs.fast}
     >
       <span
-        className="text-[12px] text-foreground tabular-nums whitespace-nowrap bg-neutral-100 px-2 py-1 rounded-md dark:bg-neutral-800"
+        className={cn(
+          "whitespace-nowrap rounded-md px-2 py-1 text-[12px] tabular-nums",
+          isDrafting
+            ? "border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-active)] text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)]"
+            : "bg-neutral-100 text-foreground dark:bg-neutral-800",
+        )}
         style={{ fontVariationSettings: fontWeights.medium }}
       >
         {formatValue(value)}
@@ -262,6 +312,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
       showSteps = false,
       showValue = true,
       valuePosition = "bottom",
+      appearance = "default",
       formatValue = String,
       label,
       disabled = false,
@@ -278,6 +329,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
     ref,
   ) => {
     const isRange = Array.isArray(value);
+    const isDrafting = appearance === "drafting";
     const values = toRadixValue(value);
 
     const trackRef = useRef<HTMLDivElement>(null);
@@ -575,6 +627,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
         label={label}
         isRange={isRange}
         isInteracting={isInteracting}
+        appearance={appearance}
       />
     );
 
@@ -608,7 +661,12 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
             renderThumb(index, thumbState)
           ) : (
             <motion.span
-              className="flex items-center justify-center rounded-[4px] border border-black/10 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.06)] dark:border-border dark:bg-card dark:shadow-[0_1px_4px_rgba(0,0,0,0.35),0_0_0_1px_rgba(255,255,255,0.08)]"
+              className={cn(
+                "flex items-center justify-center rounded-[4px] border",
+                isDrafting
+                  ? "border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-active)] shadow-[var(--drafting-shadow-rest)]"
+                  : "border-black/10 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.06)] dark:border-border dark:bg-card dark:shadow-[0_1px_4px_rgba(0,0,0,0.35),0_0_0_1px_rgba(255,255,255,0.08)]",
+              )}
               initial={false}
               animate={{
                 width: THUMB_SIZE,
@@ -617,12 +675,19 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
               transition={springs.fast}
             >
               <span
-                className="rounded-[2px] border border-black/10 dark:border-border"
+                className={cn(
+                  "rounded-[2px] border",
+                  isDrafting
+                    ? "border-[var(--drafting-line-hover)]"
+                    : "border-black/10 dark:border-border",
+                )}
                 style={{
                   width: thumbState.isActive ? 10 : 8,
                   height: thumbState.isActive ? 10 : 8,
                   backgroundColor:
-                    "color-mix(in srgb, var(--foreground) 84%, white)",
+                    isDrafting
+                      ? "color-mix(in srgb, var(--drafting-ink) 84%, var(--drafting-surface-bg))"
+                      : "color-mix(in srgb, var(--foreground) 84%, white)",
                 }}
               />
             </motion.span>
@@ -678,6 +743,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
                   value={values[0]}
                   formatValue={formatValue}
                   motionX={motionX0}
+                  appearance={appearance}
                 />
               )}
               {isInteracting && isRange && values[1] !== undefined && (
@@ -686,6 +752,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
                   value={values[1]}
                   formatValue={formatValue}
                   motionX={motionX1}
+                  appearance={appearance}
                 />
               )}
             </AnimatePresence>
@@ -746,7 +813,12 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
                   style={{ top: -20 }}
                 >
                   <span
-                    className="text-[12px] text-foreground tabular-nums whitespace-nowrap bg-neutral-100 px-2 py-1 rounded-md dark:bg-neutral-800"
+                    className={cn(
+                      "whitespace-nowrap rounded-md px-2 py-1 text-[12px] tabular-nums",
+                      isDrafting
+                        ? "border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-active)] text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)]"
+                        : "bg-neutral-100 text-foreground dark:bg-neutral-800",
+                    )}
                     style={{ fontVariationSettings: fontWeights.medium }}
                   >
                     {formatValue(hoverPreview.snappedValue)}
@@ -759,6 +831,8 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
               data-slot={trackDataSlot}
               className={cn(
                 "absolute left-0 right-0 rounded-[4px]",
+                isDrafting &&
+                  "border border-[var(--drafting-line)] bg-[var(--drafting-control-bg)]",
                 trackClassName,
               )}
               initial={false}
@@ -770,14 +844,21 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
                     : 8 + (THUMB_SIZE - TRACK_HEIGHT) / 2,
               }}
               transition={springs.fast}
-              style={{ backgroundColor: NEUTRAL_TRACK_COLOR, ...trackStyle }}
+              style={{
+                backgroundColor: isDrafting ? undefined : NEUTRAL_TRACK_COLOR,
+                ...trackStyle,
+              }}
             >
               <motion.div
-                className={cn("absolute h-full rounded-[4px]", rangeClassName)}
+                className={cn(
+                  "absolute h-full rounded-[4px]",
+                  isDrafting && "bg-[var(--drafting-ink)]",
+                  rangeClassName,
+                )}
                 style={{
                   left: fillLeft,
                   width: fillWidth,
-                  backgroundColor: "var(--foreground)",
+                  backgroundColor: isDrafting ? undefined : "var(--foreground)",
                   ...rangeStyle,
                 }}
               />
@@ -805,7 +886,9 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
                 }}
                 style={{
                   backgroundColor:
-                    "color-mix(in srgb, var(--foreground) 20%, transparent)",
+                    isDrafting
+                      ? "color-mix(in srgb, var(--drafting-ink) 20%, transparent)"
+                      : "color-mix(in srgb, var(--foreground) 20%, transparent)",
                 }}
               />
 
@@ -823,7 +906,9 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
                 }}
                 style={{
                   backgroundColor:
-                    "color-mix(in srgb, var(--background) 25%, transparent)",
+                    isDrafting
+                      ? "color-mix(in srgb, var(--drafting-surface-bg) 25%, transparent)"
+                      : "color-mix(in srgb, var(--background) 25%, transparent)",
                 }}
               />
             </motion.div>
@@ -853,8 +938,12 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
                     transition={springs.moderate}
                     style={{
                       backgroundColor: onFilled
-                        ? "color-mix(in srgb, var(--background) 20%, var(--foreground))"
-                        : NEUTRAL_DOT_COLOR,
+                        ? isDrafting
+                          ? "color-mix(in srgb, var(--drafting-surface-bg) 20%, var(--drafting-ink))"
+                          : "color-mix(in srgb, var(--background) 20%, var(--foreground))"
+                        : isDrafting
+                          ? "color-mix(in srgb, var(--drafting-ink-muted) 28%, var(--drafting-control-bg))"
+                          : NEUTRAL_DOT_COLOR,
                     }}
                   />
                 </div>
@@ -876,4 +965,4 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
 Slider.displayName = "Slider";
 
 export { Slider };
-export type { SliderProps, SliderValue, ValuePosition };
+export type { SliderAppearance, SliderProps, SliderValue, ValuePosition };
