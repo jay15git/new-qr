@@ -45,7 +45,14 @@ export function ModeToggle({ appearance = "default", className }: ModeToggleProp
         className,
       )}
     >
-      <span className="text-sm font-medium text-foreground/70">Appearance</span>
+      <span
+        className={cn(
+          "font-medium text-foreground/70",
+          isDrafting ? "drafting-type-body" : "text-sm",
+        )}
+      >
+        Appearance
+      </span>
       <SunIcon
         data-slot="mode-toggle-light-icon"
         className={cn("size-4 transition-colors", lightIconClassName)}

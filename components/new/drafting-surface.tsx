@@ -183,7 +183,7 @@ const DRAFTING_PANEL_TAB_TRAY_CLASS_NAME =
   "grid h-auto w-full min-w-0 max-w-full auto-cols-fr grid-flow-col items-stretch gap-1 overflow-hidden rounded-[4px] bg-[var(--drafting-control-bg)] p-1 shadow-none dark:bg-[var(--drafting-panel-tab-tray-bg)] sm:gap-2"
 
 const DRAFTING_PANEL_TAB_TRIGGER_CLASS_NAME =
-  "min-w-0 rounded-[4px] border border-transparent bg-transparent px-2 py-2 text-[0.68rem] font-medium tracking-[0.04em] text-[var(--drafting-ink-muted)] shadow-none transition-[color,box-shadow,background-color,transform] duration-150 ease-out hover:-translate-y-px hover:bg-[var(--drafting-panel-bg-hover)] hover:text-[var(--drafting-ink-strong-muted)] hover:shadow-[var(--drafting-shadow-hover)] active:translate-y-0 active:bg-[var(--drafting-panel-bg-hover)] active:font-medium active:text-[var(--drafting-ink)] active:shadow-[var(--drafting-shadow-active)] data-[state=active]:bg-[var(--drafting-panel-bg-active)] data-[state=active]:font-semibold data-[state=active]:text-[var(--drafting-ink)] data-[state=active]:shadow-[var(--drafting-shadow-active)] data-[state=active]:hover:-translate-y-px data-[state=active]:hover:bg-[var(--drafting-panel-bg-active)] data-[state=active]:hover:text-[var(--drafting-ink)] data-[state=active]:hover:shadow-[var(--drafting-shadow-hover)] data-[state=active]:active:translate-y-0 dark:bg-[var(--drafting-panel-tab-bg)] dark:text-[var(--drafting-panel-tab-label)] dark:hover:bg-[var(--drafting-panel-tab-bg-hover)] dark:hover:text-[var(--drafting-panel-tab-label-hover)] dark:hover:shadow-[var(--drafting-panel-tab-shadow-hover)] dark:active:bg-[var(--drafting-panel-tab-bg-active)] dark:active:text-[var(--drafting-panel-tab-label-selected)] dark:active:shadow-[var(--drafting-panel-tab-shadow-active)] dark:data-[state=active]:bg-[var(--drafting-panel-tab-bg-selected)] dark:data-[state=active]:text-[var(--drafting-panel-tab-label-selected)] dark:data-[state=active]:shadow-[var(--drafting-panel-tab-shadow-selected)] dark:data-[state=active]:hover:bg-[var(--drafting-panel-tab-bg-selected)] dark:data-[state=active]:hover:text-[var(--drafting-panel-tab-label-selected)] dark:data-[state=active]:hover:shadow-[var(--drafting-panel-tab-shadow-selected-hover)] sm:px-3 sm:text-[0.72rem]"
+  "drafting-type-panel-tab min-w-0 rounded-[4px] border border-transparent bg-transparent px-2 py-2 font-medium text-[var(--drafting-ink-muted)] shadow-none transition-[color,box-shadow,background-color,transform] duration-150 ease-out hover:-translate-y-px hover:bg-[var(--drafting-panel-bg-hover)] hover:text-[var(--drafting-ink-strong-muted)] hover:shadow-[var(--drafting-shadow-hover)] active:translate-y-0 active:bg-[var(--drafting-panel-bg-hover)] active:font-medium active:text-[var(--drafting-ink)] active:shadow-[var(--drafting-shadow-active)] data-[state=active]:bg-[var(--drafting-panel-bg-active)] data-[state=active]:font-semibold data-[state=active]:text-[var(--drafting-ink)] data-[state=active]:shadow-[var(--drafting-shadow-active)] data-[state=active]:hover:-translate-y-px data-[state=active]:hover:bg-[var(--drafting-panel-bg-active)] data-[state=active]:hover:text-[var(--drafting-ink)] data-[state=active]:hover:shadow-[var(--drafting-shadow-hover)] data-[state=active]:active:translate-y-0 dark:bg-[var(--drafting-panel-tab-bg)] dark:text-[var(--drafting-panel-tab-label)] dark:hover:bg-[var(--drafting-panel-tab-bg-hover)] dark:hover:text-[var(--drafting-panel-tab-label-hover)] dark:hover:shadow-[var(--drafting-panel-tab-shadow-hover)] dark:active:bg-[var(--drafting-panel-tab-bg-active)] dark:active:text-[var(--drafting-panel-tab-label-selected)] dark:active:shadow-[var(--drafting-panel-tab-shadow-active)] dark:data-[state=active]:bg-[var(--drafting-panel-tab-bg-selected)] dark:data-[state=active]:text-[var(--drafting-panel-tab-label-selected)] dark:data-[state=active]:shadow-[var(--drafting-panel-tab-shadow-selected)] dark:data-[state=active]:hover:bg-[var(--drafting-panel-tab-bg-selected)] dark:data-[state=active]:hover:text-[var(--drafting-panel-tab-label-selected)] dark:data-[state=active]:hover:shadow-[var(--drafting-panel-tab-shadow-selected-hover)] sm:px-3"
 
 const DEFAULT_DRAFTING_STUDIO_STATE = createDefaultQrStudioState()
 const IGNORE_DRAFTING_UPLOAD_ERROR: (message: string) => void = () => undefined
@@ -194,37 +194,37 @@ const DRAFTING_DOWNLOAD_EXTENSIONS = ["svg", "png", "webp", "jpeg"] as const sat
 const DRAFTING_RASTER_EXPORT_PRESETS = [
   {
     id: "quick-share",
-    label: "Quick Share",
+    label: "Quick share",
     primaryUse: "chat, email, docs, previews",
     sizePx: 512,
   },
   {
     id: "web-social",
-    label: "Web & Social",
+    label: "Web & social",
     primaryUse: "websites, social posts, menus",
     sizePx: 1024,
   },
   {
     id: "small-print",
-    label: "Small Print",
+    label: "Small print",
     primaryUse: "stickers, cards, table tents",
     sizePx: 1600,
   },
   {
     id: "flyer-poster",
-    label: "Flyer / Poster",
+    label: "Flyer / poster",
     primaryUse: "flyers, posters, nearby signage",
     sizePx: 2400,
   },
   {
     id: "large-format",
-    label: "Large Format",
+    label: "Large format",
     primaryUse: "banners, wall signs, storefronts",
     sizePx: 3200,
   },
   {
     id: "max-quality",
-    label: "Max Quality",
+    label: "Max quality",
     primaryUse: "designer handoff, archive, safest PNG",
     sizePx: 4096,
   },
@@ -249,14 +249,14 @@ const DRAFTING_TOOLS: DraftingTool[] = [
   },
   {
     id: "corner-square",
-    title: "Corner Frame",
+    title: "Corner frame",
     renderIcon: () => (
       <HugeiconsIcon icon={SquareIcon} size={16} color="currentColor" strokeWidth={1.8} />
     ),
   },
   {
     id: "corner-dot",
-    title: "Corner Dot",
+    title: "Corner dot",
     renderIcon: () => <PieChart className="size-4 shrink-0" />,
   },
   {
@@ -315,7 +315,11 @@ function PlusMarker({ className }: { className: string }) {
   )
 }
 
-export function DraftingSurface() {
+type DraftingSurfaceProps = {
+  fontClassName?: string
+}
+
+export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const [activeTool, setActiveTool] = useState<DraftingToolId>(
     DEFAULT_QR_EDITOR_SECTION,
   )
@@ -1456,7 +1460,7 @@ export function DraftingSurface() {
       data-qr-size={selectedQrSize}
       data-qr-type-number={selectedTypeNumber}
       data-slot="drafting-surface"
-      className="relative grid h-dvh w-full grid-rows-[var(--new-header-height)_minmax(0,1fr)] overflow-visible bg-[var(--drafting-surface-bg)] sm:h-[calc(100dvh-4rem)] lg:border lg:border-dashed lg:border-[var(--drafting-line-hover)] lg:shadow-[var(--drafting-shadow-shell)] [--new-header-height:3.875rem] [--new-left-rail-width:clamp(6.25rem,10vw,7.5rem)] [--new-middle-rail-width:clamp(15rem,24vw,18.5rem)] [--new-mobile-rail-height:3.25rem]"
+      className="relative grid h-dvh w-full grid-rows-[var(--new-header-height)_minmax(0,1fr)] overflow-visible bg-[var(--drafting-surface-bg)] sm:h-[calc(100dvh-4rem)] lg:shadow-[var(--drafting-shadow-shell)] [--new-header-height:3.875rem] [--new-left-rail-width:clamp(6.25rem,10vw,7.5rem)] [--new-middle-rail-width:clamp(15rem,24vw,18.5rem)] [--new-mobile-rail-height:3.25rem]"
       data-compose-edit-mode={isComposeEditMode ? "true" : "false"}
       data-compose-selected-node-id={selectedComposeNodeId ?? ""}
     >
@@ -1509,7 +1513,10 @@ export function DraftingSurface() {
                 align="end"
                 data-slot="drafting-download-popover"
                 sideOffset={10}
-                className="flex max-h-[calc(100dvh-5rem)] w-[min(27rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-[12px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] p-0 text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] backdrop-blur-xl"
+                className={cn(
+                  fontClassName,
+                  "flex max-h-[calc(100dvh-5rem)] w-[min(27rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-[12px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] p-0 text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] backdrop-blur-xl",
+                )}
               >
                 <div className="flex min-h-0 flex-1 flex-col">
                   <div
@@ -1520,7 +1527,7 @@ export function DraftingSurface() {
                       data-slot="drafting-download-target-section"
                       className="flex flex-col gap-2.5"
                     >
-                      <p className="text-[0.74rem] font-bold uppercase tracking-[0.08em] text-[var(--drafting-ink)]">
+                      <p className="drafting-type-section-title font-bold text-[var(--drafting-ink)]">
                         Target
                       </p>
                       <div
@@ -1552,7 +1559,7 @@ export function DraftingSurface() {
                             >
                               <span
                                 className={cn(
-                                  "flex min-w-0 items-center justify-center text-center text-[0.7rem] font-semibold leading-tight",
+                                  "drafting-type-meta flex min-w-0 items-center justify-center text-center font-semibold",
                                   isSelected
                                     ? "text-[var(--drafting-ink)]"
                                     : "text-[var(--drafting-ink-muted)]",
@@ -1570,7 +1577,7 @@ export function DraftingSurface() {
                       data-slot="drafting-download-format-section"
                       className="flex flex-col gap-2.5"
                     >
-                      <p className="text-[0.74rem] font-bold uppercase tracking-[0.08em] text-[var(--drafting-ink)]">
+                      <p className="drafting-type-section-title font-bold text-[var(--drafting-ink)]">
                         Format
                       </p>
                       <div
@@ -1603,13 +1610,13 @@ export function DraftingSurface() {
                               <span className="flex size-full items-center justify-center text-center">
                                 <span
                                   className={cn(
-                                    "text-[0.68rem] font-semibold uppercase leading-none tracking-[0.1em]",
+                                    "drafting-type-meta font-semibold",
                                     isSelected
                                       ? "text-[var(--drafting-ink)]"
                                       : "text-[var(--drafting-ink-muted)]",
                                   )}
                                 >
-                                  {extension}
+                                  {extension.toUpperCase()}
                                 </span>
                               </span>
                             </OptionCard>
@@ -1623,7 +1630,7 @@ export function DraftingSurface() {
                         data-slot="drafting-raster-preset-section"
                         className="flex flex-col gap-2.5"
                       >
-                        <p className="text-[0.74rem] font-bold uppercase tracking-[0.08em] text-[var(--drafting-ink)]">
+                        <p className="drafting-type-section-title font-bold text-[var(--drafting-ink)]">
                           Quality preset
                         </p>
 
@@ -1671,7 +1678,7 @@ export function DraftingSurface() {
                                   <span className="flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0.5">
                                     <span
                                       className={cn(
-                                        "text-[0.74rem] font-semibold leading-tight",
+                                        "drafting-type-meta font-semibold",
                                         isSelected
                                           ? "text-[var(--drafting-ink)]"
                                           : "text-[var(--drafting-ink-strong-muted)]",
@@ -1681,13 +1688,13 @@ export function DraftingSurface() {
                                     </span>
                                     <span
                                       aria-hidden="true"
-                                      className="text-[0.68rem] leading-4 text-[var(--drafting-ink-subtle)]"
+                                      className="drafting-type-caption text-[var(--drafting-ink-subtle)]"
                                     >
                                       •
                                     </span>
                                     <span
                                       data-slot="drafting-raster-quality-value"
-                                      className="text-[0.68rem] font-semibold leading-4 text-[var(--drafting-ink)]"
+                                      className="drafting-type-data font-semibold text-[var(--drafting-ink)]"
                                     >
                                       {preset.sizePx} × {preset.sizePx}
                                     </span>
@@ -1695,20 +1702,20 @@ export function DraftingSurface() {
                                       <>
                                         <span
                                           aria-hidden="true"
-                                          className="text-[0.68rem] leading-4 text-[var(--drafting-ink-subtle)]"
+                                          className="drafting-type-caption text-[var(--drafting-ink-subtle)]"
                                         >
                                           •
                                         </span>
                                         <span
                                           data-slot="drafting-raster-calculated-size"
-                                          className="text-[0.68rem] font-semibold leading-4 text-[var(--drafting-ink)]"
+                                          className="drafting-type-data font-semibold text-[var(--drafting-ink)]"
                                         >
                                           {selectedPresetExportSizeLabel}
                                         </span>
                                       </>
                                     ) : null}
                                   </span>
-                                  <span className="text-[0.68rem] leading-4 text-[var(--drafting-ink-muted)]">
+                                  <span className="drafting-type-caption text-[var(--drafting-ink-muted)]">
                                     {preset.primaryUse}
                                   </span>
                                 </span>
@@ -1757,7 +1764,7 @@ export function DraftingSurface() {
           >
             <ScrollAreaViewport
               data-slot="drafting-nav-scroll"
-              className="h-full w-full overflow-x-auto overflow-y-hidden scroll-fade-effect-x lg:overflow-x-hidden lg:scroll-fade-effect-y"
+              className="h-full w-full overflow-x-auto overflow-y-hidden scroll-fade-effect-x lg:overflow-x-hidden lg:overflow-y-auto lg:scroll-fade-effect-y"
             >
               <div
                 data-slot="drafting-nav-scroll-content"
@@ -1795,7 +1802,7 @@ export function DraftingSurface() {
                       <span
                         data-slot="drafting-tool-button-label"
                         className={cn(
-                          "text-[0.62rem] font-medium uppercase leading-none tracking-[0.12em] text-[var(--drafting-ink-muted)] transition-colors duration-150 group-hover:text-[var(--drafting-ink-strong-muted)] dark:text-[var(--drafting-button-label)] dark:group-hover:text-[var(--drafting-button-label-hover)] lg:text-[0.58rem] lg:leading-[1.15] lg:tracking-[0.16em]",
+                          "drafting-type-nav-label font-medium text-[var(--drafting-ink-muted)] transition-colors duration-150 group-hover:text-[var(--drafting-ink-strong-muted)] dark:text-[var(--drafting-button-label)] dark:group-hover:text-[var(--drafting-button-label-hover)]",
                           isActive && "font-semibold text-current dark:text-[var(--drafting-button-label-selected)]",
                         )}
                       >
@@ -1808,8 +1815,14 @@ export function DraftingSurface() {
             </ScrollAreaViewport>
             <ScrollAreaScrollbar
               orientation="horizontal"
-              data-slot="drafting-nav-scrollbar"
+              data-slot="drafting-nav-scrollbar-horizontal"
               className="h-2 border-none p-[1px] lg:hidden"
+            >
+              <ScrollAreaThumb className="bg-[var(--drafting-line-hover)] hover:bg-[var(--drafting-line-strong)]" />
+            </ScrollAreaScrollbar>
+            <ScrollAreaScrollbar
+              data-slot="drafting-nav-scrollbar-vertical"
+              className="hidden w-2 border-none p-[1px] lg:flex"
             >
               <ScrollAreaThumb className="bg-[var(--drafting-line-hover)] hover:bg-[var(--drafting-line-strong)]" />
             </ScrollAreaScrollbar>

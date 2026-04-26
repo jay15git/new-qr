@@ -156,7 +156,7 @@ export function DashboardComposeSurface({
       ? {
           backgroundColor: "var(--drafting-canvas-bg)",
           backgroundImage:
-            "linear-gradient(45deg, rgb(var(--drafting-canvas-check-rgb) / 0.72) 25%, transparent 25%), linear-gradient(-45deg, rgb(var(--drafting-canvas-check-rgb) / 0.72) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgb(var(--drafting-canvas-check-rgb) / 0.72) 75%), linear-gradient(-45deg, transparent 75%, rgb(var(--drafting-canvas-check-rgb) / 0.72) 75%)",
+            "linear-gradient(45deg, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 25%, transparent 25%), linear-gradient(-45deg, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 75%), linear-gradient(-45deg, transparent 75%, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 75%)",
           backgroundPosition: "0 0, 0 18px, 18px -18px, -18px 0",
           backgroundSize: "36px 36px",
         }
@@ -485,7 +485,7 @@ export function DashboardComposeSurface({
                 className={cn(
                   "inline-flex items-center gap-2",
                   isNeutralSurface
-                    ? "rounded-[8px] px-2 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-[var(--drafting-ink)]"
+                    ? "drafting-type-control-label rounded-[8px] px-2 py-1 font-semibold text-[var(--drafting-ink)]"
                     : "rounded-full border border-slate-300/80 bg-white/84 px-3 py-1.5 text-sm font-medium text-foreground/70 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)]",
                 )}
               >
@@ -528,7 +528,7 @@ export function DashboardComposeSurface({
                 className={cn(
                   "min-w-12 px-1 text-center font-semibold",
                   isNeutralSurface
-                    ? "text-[0.68rem] uppercase tracking-[0.08em] text-[var(--drafting-ink)]"
+                    ? "drafting-type-data text-[var(--drafting-ink)]"
                     : "text-[0.72rem] text-foreground/65",
                 )}
               >
@@ -610,7 +610,7 @@ export function DashboardComposeSurface({
               variant="ghost"
               className={cn(
                 isNeutralSurface
-                  ? "rounded-[8px] border-0 bg-transparent px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-[var(--drafting-ink)] shadow-none transition-[background-color,transform,color] duration-150 ease-out hover:-translate-y-px hover:bg-[var(--drafting-control-bg-hover)] hover:text-[var(--drafting-ink)] active:translate-y-0 active:bg-[var(--drafting-control-bg-active)]"
+                  ? "drafting-type-control-label rounded-[8px] border-0 bg-transparent px-3 py-1 font-semibold text-[var(--drafting-ink)] shadow-none transition-[background-color,transform,color] duration-150 ease-out hover:-translate-y-px hover:bg-[var(--drafting-control-bg-hover)] hover:text-[var(--drafting-ink)] active:translate-y-0 active:bg-[var(--drafting-control-bg-active)]"
                   : "rounded-full border border-slate-300/80 bg-white/88 text-foreground/68 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.9)] hover:bg-white",
               )}
               onClick={onReset}

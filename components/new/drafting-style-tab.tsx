@@ -94,14 +94,14 @@ export function DraftingContentTab({
       >
         <label
           htmlFor="drafting-qr-data"
-          className="block text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-[var(--drafting-ink)]"
+          className="drafting-type-control-label block font-semibold text-[var(--drafting-ink)]"
         >
           Text or URL
         </label>
         <Textarea
           id="drafting-qr-data"
           aria-label="Text or URL"
-          className="mt-3 min-h-28 min-w-0 max-w-full resize-none overflow-x-hidden border-0 bg-[var(--drafting-panel-bg-hover)] px-3.5 py-3 text-sm text-[var(--drafting-ink)] shadow-none placeholder:text-[var(--drafting-ink-subtle)] [overflow-wrap:anywhere] focus-visible:border-0 focus-visible:ring-0"
+          className="drafting-type-input mt-3 min-h-28 min-w-0 max-w-full resize-none overflow-x-hidden border-0 bg-[var(--drafting-panel-bg-hover)] px-3.5 py-3 text-[var(--drafting-ink)] shadow-none placeholder:text-[var(--drafting-ink-subtle)] [overflow-wrap:anywhere] focus-visible:border-0 focus-visible:ring-0"
           placeholder="https://example.com/invite"
           value={contentValue}
           onChange={(event) => onContentValueChange(event.target.value)}
@@ -558,8 +558,8 @@ export function DraftingBrandIconTab({
           <Input
             id="drafting-brand-icon-search"
             aria-label="Search brand icons"
-            className="h-10 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] pl-9 pr-3 text-sm text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] placeholder:text-[var(--drafting-ink-subtle)] focus-visible:border-[var(--drafting-line-strong)] focus-visible:ring-0"
-            placeholder="Search Icons"
+            className="drafting-type-input h-10 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] pl-9 pr-3 text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] placeholder:text-[var(--drafting-ink-subtle)] focus-visible:border-[var(--drafting-line-strong)] focus-visible:ring-0"
+            placeholder="Search icons"
             value={brandIconQuery}
             onChange={(event) => onBrandIconQueryChange(event.target.value)}
           />
@@ -595,7 +595,7 @@ export function DraftingBrandIconTab({
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "flex size-full items-center justify-center text-[0.68rem] font-medium uppercase tracking-[0.12em]",
+                    "drafting-type-meta flex size-full items-center justify-center font-medium",
                     isSelected
                       ? "text-[var(--drafting-ink)]"
                       : "text-[var(--drafting-ink-muted)]",
@@ -628,7 +628,7 @@ export function DraftingBrandIconTab({
                   "[&_[data-slot=option-card-motif]]:text-[var(--drafting-ink)]",
                 )}
                 label={brandIcon.label}
-                labelClassName="text-[0.5rem] uppercase tracking-[0.08em] leading-[1.05] min-h-[1.2rem]"
+                labelClassName="drafting-type-caption min-h-[1.2rem]"
                 motifClassName="size-full px-1.5 py-1.5"
                 name="drafting-brand-icon"
                 onSelect={() => onSelect(brandIcon)}
@@ -829,10 +829,10 @@ export function DraftingEncodingTab({
 
       <section data-slot="drafting-error-correction-section" className="space-y-3">
         <div className="space-y-1">
-          <h3 className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[var(--drafting-ink)]">
+          <h3 className="drafting-type-section-title font-semibold text-[var(--drafting-ink)]">
             Error correction
           </h3>
-          <p className="text-[0.72rem] leading-5 text-[var(--drafting-ink-muted)]">
+          <p className="drafting-type-body text-[var(--drafting-ink-muted)]">
             Higher recovery makes styled codes more tolerant to logos, crops, and wear.
           </p>
         </div>
@@ -867,7 +867,7 @@ export function DraftingEncodingTab({
                 <span className="flex size-full flex-col items-start justify-between gap-2 text-left">
                   <span
                     className={cn(
-                      "text-[1.375rem] font-semibold leading-none tracking-[0.08em]",
+                      "drafting-type-display-data font-semibold",
                       isSelected
                         ? "text-[var(--drafting-ink)]"
                         : "text-[var(--drafting-ink-muted)]",
@@ -878,7 +878,7 @@ export function DraftingEncodingTab({
                   <span className="space-y-1">
                     <span
                       className={cn(
-                        "block text-[0.68rem] font-semibold uppercase tracking-[0.14em]",
+                        "drafting-type-meta block font-semibold",
                         isSelected
                           ? "text-[var(--drafting-ink)]"
                           : "text-[var(--drafting-ink-strong-muted)]",
@@ -888,7 +888,7 @@ export function DraftingEncodingTab({
                     </span>
                     <span
                       className={cn(
-                        "block text-[0.72rem] leading-5",
+                        "drafting-type-body block",
                         isSelected
                           ? "text-[var(--drafting-ink)]"
                           : "text-[var(--drafting-ink-muted)]",
@@ -1072,7 +1072,7 @@ function buildDraftingAssetSourceItems({
         <div className="min-w-0 px-4 pb-4">
           <Input
             aria-label={remoteUrlAriaLabel}
-            className="h-10 rounded-[8px] border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-3 text-sm text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] placeholder:text-[var(--drafting-ink-subtle)] focus-visible:border-[var(--drafting-line-strong)] focus-visible:ring-0"
+            className="drafting-type-input h-10 rounded-[8px] border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-3 text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] placeholder:text-[var(--drafting-ink-subtle)] focus-visible:border-[var(--drafting-line-strong)] focus-visible:ring-0"
             placeholder={remoteUrlPlaceholder}
             value={remoteUrl}
             onChange={(event) => {
@@ -1142,7 +1142,7 @@ function DraftingColorAccordion<TMode extends string>({
                 <span className="flex min-w-0 items-center gap-3">
                   <span
                     className={cn(
-                      "text-[0.72rem] font-medium tracking-[0.12em] uppercase text-[var(--drafting-ink-muted)] transition-colors",
+                      "drafting-type-control-label font-medium text-[var(--drafting-ink-muted)] transition-colors",
                       isSelected && "font-semibold text-[var(--drafting-ink)]",
                     )}
                   >
@@ -1219,7 +1219,7 @@ function DraftingSliderField({
         onChange={(nextValue) => onChange(Array.isArray(nextValue) ? nextValue[0] ?? value : nextValue)}
       />
       {description ? (
-        <p className="mt-2 text-[0.72rem] leading-5 text-[var(--drafting-ink-muted)]">{description}</p>
+        <p className="drafting-type-body mt-2 text-[var(--drafting-ink-muted)]">{description}</p>
       ) : null}
     </div>
   )
@@ -1255,10 +1255,10 @@ function DraftingToggleField({
       )}
     >
       <span className="min-w-0 space-y-1">
-        <span className="block text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-[var(--drafting-ink)]">
+        <span className="drafting-type-control-label block font-semibold text-[var(--drafting-ink)]">
           {label}
         </span>
-        <span className="block text-[0.72rem] leading-5 text-[var(--drafting-ink-muted)]">{description}</span>
+        <span className="drafting-type-body block text-[var(--drafting-ink-muted)]">{description}</span>
       </span>
       <Switch
         checked={checked}
@@ -1308,6 +1308,7 @@ function DraftingOptionCardGrid<TValue extends string>({
             darkShadowTone="ink"
             key={option.value}
             checked={option.value === value}
+            labelClassName="drafting-type-option-label"
             label={option.label}
             name={name}
             onSelect={() => onValueChange(option.value)}

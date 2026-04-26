@@ -332,6 +332,7 @@
   --drafting-surface-bg: oklch(1 0 0);
   --drafting-canvas-bg: oklch(0.93 0 0);
   --drafting-canvas-check-rgb: 255 255 255;
+  --drafting-canvas-check-opacity: 0.72;
   --drafting-panel-bg: rgb(var(--drafting-paper-rgb) / 0.8);
   --drafting-panel-bg-hover: rgb(var(--drafting-paper-rgb) / 0.95);
   --drafting-panel-bg-active: oklch(1 0 0);
@@ -410,7 +411,7 @@
   --drafting-dark-shell-bg: #101216;
   --drafting-dark-surface-muted: #ffffff08;
   --drafting-dark-surface-subtle: #ffffff0d;
-  --drafting-dark-surface-raised: #252a33;
+  --drafting-dark-surface-raised: #171a20;
   --drafting-dark-surface-selected: #f6f8fb;
   --drafting-dark-border: #ffffff22;
   --drafting-dark-border-strong: #ffffff59;
@@ -446,13 +447,13 @@
   --drafting-dark-option-fill-default: #101216;
   --drafting-dark-option-fill-hover: #ffffff0d;
   --drafting-dark-option-fill-pressed: #ffffff14;
-  --drafting-dark-option-fill-selected: #f6f8fb;
+  --drafting-dark-option-fill-selected: #ffffff14;
   --drafting-dark-option-border-default: #ffffff20;
   --drafting-dark-option-border-hover: #ffffff2b;
   --drafting-dark-option-border-pressed: #ffffff34;
   --drafting-dark-option-border-selected: #f6f8fb;
   --drafting-dark-option-motif-default: #b8c0cc;
-  --drafting-dark-option-motif-selected: #101216;
+  --drafting-dark-option-motif-selected: #dfe5ee;
   --drafting-dark-option-label-default: #a8b0bd;
   --drafting-dark-option-label-selected: #f6f8fb;
   --drafting-dark-shadow-rest: 0 0 18px 2px #00000010, 0 3px 8px 1px #00000009;
@@ -466,13 +467,14 @@
   --drafting-dark-option-shadow-selected: 0 0 22px 2px #00000016, 0 5px 10px 1px #0000000e;
   --drafting-dark-option-shadow-selected-hover: 0 0 28px 3px #0000001a, 0 6px 14px 1px #00000010;
   --drafting-dark-shadow-raised: 0 24px 64px #00000075, 0 8px 20px #00000052;
-  --drafting-dark-shadow-shell: 0 0 0 1px var(--drafting-dark-border);
+  --drafting-dark-shadow-shell: none;
   --drafting-ink-rgb: 246 248 251;
   --drafting-paper-rgb: 16 18 22;
   --drafting-page-bg: var(--drafting-dark-page-bg);
   --drafting-surface-bg: var(--drafting-dark-shell-bg);
   --drafting-canvas-bg: var(--drafting-dark-surface-raised);
-  --drafting-canvas-check-rgb: 255 255 255;
+  --drafting-canvas-check-rgb: 246 248 251;
+  --drafting-canvas-check-opacity: 0.028;
   --drafting-panel-bg: var(--drafting-dark-surface-muted);
   --drafting-panel-bg-hover: var(--drafting-dark-surface-subtle);
   --drafting-panel-bg-active: var(--drafting-dark-shell-bg);
@@ -552,6 +554,92 @@
   --drafting-dash-cycle: 30px;
   border-color: transparent;
   isolation: isolate;
+}
+
+:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) {
+  --drafting-type-panel-tab: 0.875rem;
+  --drafting-type-section-title: 0.875rem;
+  --drafting-type-control-label: 0.875rem;
+  --drafting-type-body: 0.9375rem;
+  --drafting-type-input: 1rem;
+  --drafting-type-nav-label: 0.75rem;
+  --drafting-type-meta: 0.875rem;
+  --drafting-type-caption: 0.75rem;
+  --drafting-type-display-data: 1.5rem;
+  font-kerning: normal;
+  font-optical-sizing: auto;
+}
+
+:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-panel-tab {
+  font-size: var(--drafting-type-panel-tab);
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-section-title {
+  font-size: var(--drafting-type-section-title);
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+}
+
+:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-control-label {
+  font-size: var(--drafting-type-control-label);
+  line-height: 1.2;
+  letter-spacing: 0.005em;
+}
+
+:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-body {
+  max-width: 65ch;
+  font-size: var(--drafting-type-body);
+  line-height: 1.55;
+  letter-spacing: 0;
+  text-wrap: pretty;
+}
+
+:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-input {
+  font-size: var(--drafting-type-input);
+  line-height: 1.45;
+  letter-spacing: 0;
+}
+
+:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-nav-label {
+  font-size: var(--drafting-type-nav-label);
+  line-height: 1.05;
+  letter-spacing: 0.015em;
+}
+
+:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-meta {
+  font-size: var(--drafting-type-meta);
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
+:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-caption {
+  font-size: var(--drafting-type-caption);
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-data {
+  font-size: var(--drafting-type-meta);
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-display-data {
+  font-size: var(--drafting-type-display-data);
+  line-height: 1;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 64rem) {
+  :is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-nav-label {
+    font-size: var(--drafting-type-nav-label);
+    line-height: 1.18;
+    letter-spacing: 0.015em;
+  }
 }
 
 .dark [data-slot="new-page"] {

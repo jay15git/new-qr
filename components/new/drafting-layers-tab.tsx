@@ -45,14 +45,14 @@ export function DraftingLayersTab({
     <section data-slot="drafting-layers-tab" className="space-y-3">
       <div className="flex items-center justify-between gap-3 px-1">
         <div className="min-w-0">
-          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-[var(--drafting-ink)]">
+          <p className="drafting-type-section-title font-semibold text-[var(--drafting-ink)]">
             Layers
           </p>
-          <p className="mt-1 text-[0.72rem] leading-5 text-[var(--drafting-ink-muted)]">
+          <p className="drafting-type-body mt-1 text-[var(--drafting-ink-muted)]">
             Reorder and manage the current canvas stack.
           </p>
         </div>
-        <span className="shrink-0 text-[0.72rem] text-[var(--drafting-ink-muted)]">
+        <span className="drafting-type-data shrink-0 text-[var(--drafting-ink-muted)]">
           {layerNodes.length} total
         </span>
       </div>
@@ -60,7 +60,7 @@ export function DraftingLayersTab({
       {layerNodes.length === 0 ? (
         <div
           data-slot="drafting-layers-empty-state"
-          className="rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 text-[0.72rem] leading-5 text-[var(--drafting-ink-muted)] shadow-[var(--drafting-shadow-rest)]"
+          className="drafting-type-body rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 text-[var(--drafting-ink-muted)] shadow-[var(--drafting-shadow-rest)]"
         >
           The layer stack will appear here once the canvas has content.
         </div>
@@ -112,10 +112,10 @@ export function DraftingLayersTab({
                       onClick={() => onSelectedNodeChange(node.id)}
                       type="button"
                     >
-                      <p className="truncate text-[0.82rem] font-semibold text-[var(--drafting-ink)]">
+                      <p className="drafting-type-control-label truncate font-semibold text-[var(--drafting-ink)]">
                         {node.name}
                       </p>
-                      <p className="mt-1 truncate text-[0.68rem] uppercase tracking-[0.12em] text-[var(--drafting-ink-muted)]">
+                      <p className="drafting-type-meta mt-1 truncate text-[var(--drafting-ink-muted)]">
                         {getLayerRowMeta(node, index, layerNodes.length, isSelected)}
                       </p>
                     </button>

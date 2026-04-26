@@ -43,7 +43,7 @@ describe("theme contract", () => {
       "--drafting-dark-shell-bg: #101216;",
       "--drafting-dark-surface-muted: #ffffff08;",
       "--drafting-dark-surface-subtle: #ffffff0d;",
-      "--drafting-dark-surface-raised: #252a33;",
+      "--drafting-dark-surface-raised: #171a20;",
       "--drafting-dark-surface-selected: #f6f8fb;",
       "--drafting-dark-border: #ffffff22;",
       "--drafting-dark-border-strong: #ffffff59;",
@@ -60,11 +60,12 @@ describe("theme contract", () => {
       "--drafting-dark-panel-tray-fill: #ffffff0d;",
       "--drafting-dark-panel-surface-selected: #101216;",
       "--drafting-dark-option-fill-default: #101216;",
-      "--drafting-dark-option-fill-selected: #f6f8fb;",
+      "--drafting-dark-option-fill-selected: #ffffff14;",
       "--drafting-dark-option-border-default: #ffffff20;",
-      "--drafting-dark-option-motif-selected: #101216;",
+      "--drafting-dark-option-motif-selected: #dfe5ee;",
       "--drafting-dark-shadow-rest: 0 0 18px 2px #00000010, 0 3px 8px 1px #00000009;",
       "--drafting-dark-shadow-active: 0 0 14px 1px #00000012, 0 2px 6px 0 #0000000c;",
+      "--drafting-dark-shadow-shell: none;",
       "--drafting-dark-option-shadow-rest: 0 0 10px 0 #00000010, 0 2px 4px 0 #00000009;",
     ]
 
@@ -73,6 +74,9 @@ describe("theme contract", () => {
     }
 
     expect(globalsSource).toContain("--drafting-page-bg: var(--drafting-dark-page-bg);")
+    expect(globalsSource).toContain("--drafting-canvas-bg: var(--drafting-dark-surface-raised);")
+    expect(globalsSource).toContain("--drafting-canvas-check-rgb: 246 248 251;")
+    expect(globalsSource).toContain("--drafting-canvas-check-opacity: 0.028;")
     expect(globalsSource).toContain("--drafting-control-bg: var(--drafting-dark-button-fill-default);")
     expect(globalsSource).toContain("--drafting-ink: var(--drafting-dark-text-primary);")
     expect(globalsSource).toContain("--drafting-line: var(--drafting-dark-border);")
@@ -94,6 +98,7 @@ describe("theme contract", () => {
     const requiredLightMappings = [
       "--drafting-button-shadow-rest: var(--drafting-shadow-rest);",
       "--drafting-button-shadow-hover: var(--drafting-shadow-hover);",
+      "--drafting-canvas-check-opacity: 0.72;",
       "--drafting-panel-tab-tray-bg: var(--drafting-control-bg);",
       "--drafting-panel-tab-shadow-hover: var(--drafting-shadow-hover);",
       "--drafting-panel-tab-shadow-selected: var(--drafting-shadow-active);",
@@ -104,6 +109,46 @@ describe("theme contract", () => {
 
     for (const token of requiredLightMappings) {
       expect(globalsSource).toContain(token)
+    }
+  })
+
+  it("defines the new drafting typography scale as route-scoped tokens", () => {
+    const globalsSource = readFileSync(resolve(process.cwd(), "app/globals.css"), "utf8")
+    const requiredTypographyTokens = [
+      "--drafting-type-panel-tab: 0.875rem;",
+      "--drafting-type-section-title: 0.875rem;",
+      "--drafting-type-control-label: 0.875rem;",
+      "--drafting-type-body: 0.9375rem;",
+      "--drafting-type-input: 1rem;",
+      "--drafting-type-nav-label: 0.75rem;",
+      "--drafting-type-meta: 0.875rem;",
+      "--drafting-type-caption: 0.75rem;",
+      "--drafting-type-display-data: 1.5rem;",
+      ':is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-body',
+      ':is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-nav-label',
+    ]
+
+    for (const token of requiredTypographyTokens) {
+      expect(globalsSource).toContain(token)
+    }
+
+    expect(globalsSource).toContain("font-kerning: normal;")
+    expect(globalsSource).toContain("font-variant-numeric: tabular-nums;")
+    expect(globalsSource).not.toContain("font-size: 0.625rem;")
+  })
+
+  it("keeps new drafting labels out of forced uppercase styling", () => {
+    const checkedFiles = [
+      "components/new/drafting-surface.tsx",
+      "components/new/drafting-style-tab.tsx",
+      "components/new/drafting-layers-tab.tsx",
+      "components/qr/dashboard-compose-surface.tsx",
+    ]
+
+    for (const file of checkedFiles) {
+      const source = readFileSync(resolve(process.cwd(), file), "utf8")
+
+      expect(source, `${file} should use normal label casing`).not.toMatch(/\buppercase\b/)
     }
   })
 })

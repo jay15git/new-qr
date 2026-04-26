@@ -165,7 +165,7 @@ describe("DraftingSurface", () => {
     ).toContain("bg-[var(--drafting-surface-bg)]")
     expect(
       getRequiredElement(surface.container, '[data-slot="drafting-surface"]').className,
-    ).toContain("lg:border-[var(--drafting-line-hover)]")
+    ).not.toContain("lg:border-[var(--drafting-line-hover)]")
     expect(header).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="drafting-nav"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="drafting-scroll-area"]')).not.toBeNull()
@@ -224,8 +224,8 @@ describe("DraftingSurface", () => {
     expect(getTabLabels(surface.container)).toEqual(["Content"])
     expect(surface.container.textContent).toContain("Content")
     expect(surface.container.textContent).toContain("Style")
-    expect(surface.container.textContent).toContain("Corner Frame")
-    expect(surface.container.textContent).toContain("Corner Dot")
+    expect(surface.container.textContent).toContain("Corner frame")
+    expect(surface.container.textContent).toContain("Corner dot")
     expect(surface.container.textContent).toContain("Background")
     expect(surface.container.textContent).toContain("Logo")
     expect(surface.container.textContent).toContain("Encoding")
@@ -278,7 +278,7 @@ describe("DraftingSurface", () => {
     expect(jpegExportInput.checked).toBe(false)
     expect(webpExportInput.checked).toBe(false)
     expect(surface.container.textContent).toContain("Download PNG")
-    expect(surface.container.textContent).toContain("Web & Social")
+    expect(surface.container.textContent).toContain("Web & social")
     expect(surface.container.textContent).toContain("1024 × 1024")
     expect(surface.container.textContent).toContain("Current QR")
     expect(surface.container.textContent).not.toContain("Vector master")
@@ -298,7 +298,7 @@ describe("DraftingSurface", () => {
       })
 
       expect(surface.container.textContent).toContain("Quality preset")
-      expect(surface.container.textContent).toContain("Web & Social")
+      expect(surface.container.textContent).toContain("Web & social")
       expect(surface.container.textContent).toContain("1024 × 1024")
       expect(surface.container.textContent).toContain("Calculating size")
 
@@ -329,12 +329,12 @@ describe("DraftingSurface", () => {
     vi.useFakeTimers()
     const surface = renderSurface()
     const presetExpectations = [
-      ["Use Quick Share export preset", 512],
-      ["Use Web & Social export preset", 1024],
-      ["Use Small Print export preset", 1600],
-      ["Use Flyer / Poster export preset", 2400],
-      ["Use Large Format export preset", 3200],
-      ["Use Max Quality export preset", 4096],
+      ["Use Quick share export preset", 512],
+      ["Use Web & social export preset", 1024],
+      ["Use Small print export preset", 1600],
+      ["Use Flyer / poster export preset", 2400],
+      ["Use Large format export preset", 3200],
+      ["Use Max quality export preset", 4096],
     ] as const
 
     for (const [label, targetSizePx] of presetExpectations) {
@@ -365,7 +365,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const maxQualityInput = getRequiredElement(
       surface.container,
-      'input[type="radio"][aria-label="Use Max Quality export preset"]',
+      'input[type="radio"][aria-label="Use Max quality export preset"]',
     ) as HTMLInputElement
 
     await act(async () => {
@@ -653,7 +653,7 @@ describe("DraftingSurface", () => {
     const logoButton = getRequiredElement(surface.container, 'button[aria-label="Open Logo"]')
     const cornerSquareButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Corner Frame"]',
+      'button[aria-label="Open Corner frame"]',
     )
 
     expect(contentButton.getAttribute("aria-pressed")).toBe("true")
@@ -882,7 +882,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const cornerFrameButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Corner Frame"]',
+      'button[aria-label="Open Corner frame"]',
     )
 
     act(() => {
@@ -909,7 +909,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const cornerFrameButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Corner Frame"]',
+      'button[aria-label="Open Corner frame"]',
     )
 
     act(() => {
@@ -949,7 +949,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const cornerFrameButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Corner Frame"]',
+      'button[aria-label="Open Corner frame"]',
     )
 
     act(() => {
@@ -989,7 +989,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const cornerDotButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Corner Dot"]',
+      'button[aria-label="Open Corner dot"]',
     )
 
     act(() => {
@@ -1026,7 +1026,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const cornerDotButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Corner Dot"]',
+      'button[aria-label="Open Corner dot"]',
     )
 
     act(() => {
@@ -1051,7 +1051,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const cornerDotButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Corner Dot"]',
+      'button[aria-label="Open Corner dot"]',
     )
 
     act(() => {
@@ -1230,7 +1230,7 @@ describe("DraftingSurface", () => {
       '[data-slot="drafting-brand-icon-category-picker"]',
     )
 
-    expect(searchInput.placeholder).toBe("Search Icons")
+    expect(searchInput.placeholder).toBe("Search icons")
     expect(searchIcon.getAttribute("aria-hidden")).toBe("true")
     expect(
       Boolean(
@@ -1829,11 +1829,15 @@ describe("DraftingSurface", () => {
     expect(navScrollArea.className).toContain("h-[var(--new-mobile-rail-height)]")
     expect(navScroll.className).toContain("overflow-x-auto")
     expect(navScroll.className).toContain("lg:overflow-x-hidden")
+    expect(navScroll.className).toContain("lg:overflow-y-auto")
     expect(navScroll.className).toContain("scroll-fade-effect-x")
     expect(navScroll.className).toContain("scroll-fade-effect-y")
     expect(navScroll.getAttribute("data-radix-scroll-area-viewport")).toBe("")
     expect(
-      surface.container.querySelector('[data-slot="drafting-nav-scrollbar"]'),
+      surface.container.querySelector('[data-slot="drafting-nav-scrollbar-horizontal"]'),
+    ).toBeNull()
+    expect(
+      surface.container.querySelector('[data-slot="drafting-nav-scrollbar-vertical"]'),
     ).toBeNull()
     expect(navScrollContent.className).toContain("flex-row")
     expect(navScrollContent.className).toContain("lg:flex-col")

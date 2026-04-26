@@ -123,6 +123,7 @@ describe("DashboardComposeSurface", () => {
     expect(dashboardMarkup).toContain('data-toolbar-appearance="dashboard"')
     expect(neutralMarkup).toContain('data-surface-appearance="neutral"')
     expect(neutralMarkup).toContain("background-color:var(--drafting-canvas-bg)")
+    expect(neutralMarkup).toContain("var(--drafting-canvas-check-opacity)")
     expect(neutralMarkup).toContain('data-toolbar-appearance="neutral"')
     expect(neutralMarkup).toContain("border-[var(--drafting-line)]")
     expect(neutralMarkup).not.toContain("background-color:#e8edf4")
