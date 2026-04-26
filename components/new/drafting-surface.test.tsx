@@ -58,6 +58,7 @@ vi.mock("@/components/unlumen-ui/slider", () => ({
     "aria-label": ariaLabel,
     formatValue,
     label,
+    appearance,
     disabled,
     max,
     min,
@@ -65,9 +66,11 @@ vi.mock("@/components/unlumen-ui/slider", () => ({
     showValue = true,
     step,
     value,
-    ...rest
+    "data-slot": dataSlot,
   }: {
     "aria-label"?: string
+    "data-slot"?: string
+    appearance?: string
     formatValue?: (value: number) => string
     label?: string
     disabled?: boolean
@@ -78,7 +81,7 @@ vi.mock("@/components/unlumen-ui/slider", () => ({
     step?: number
     value?: number | number[]
   }) => (
-    <div {...rest}>
+    <div data-slot={dataSlot} data-appearance={appearance}>
       {label && showValue ? (
         <span>
           {label}
@@ -796,6 +799,20 @@ describe("DraftingSurface", () => {
     expect(surface.container.textContent).toContain("Solid")
     expect(surface.container.textContent).toContain("Gradient")
     expect(surface.container.textContent).toContain("Palette")
+    expect(accordion.innerHTML).toContain("text-[var(--drafting-ink-muted)]")
+    expect(
+      getRequiredElement(
+        accordion,
+        '[data-slot="drafting-color-trigger"]',
+      ).className,
+    ).toContain("[&_[data-slot=accordion-chevron]]:text-[var(--drafting-ink-muted)]")
+    const triggerMarkup = Array.from(
+      accordion.querySelectorAll('[data-slot="drafting-color-trigger"]'),
+    )
+      .map((trigger) => trigger.outerHTML)
+      .join("")
+    expect(triggerMarkup).not.toContain("text-muted-foreground")
+    expect(triggerMarkup).not.toContain("#111111")
   })
 
   it("renders a drafting size tab for style with the qr margin and size sliders", () => {
@@ -819,6 +836,12 @@ describe("DraftingSurface", () => {
     expect(sizeTab.querySelector('[data-slot="drafting-style-size-slider"]')).not.toBeNull()
     expect(sizeTab.textContent).toContain("Outer margin")
     expect(sizeTab.textContent).toContain("Size")
+    expect(
+      sizeTab.querySelector('[data-slot="drafting-style-margin-slider"]')?.getAttribute("data-appearance"),
+    ).toBe("drafting")
+    expect(
+      sizeTab.querySelector('[data-slot="drafting-style-size-slider"]')?.getAttribute("data-appearance"),
+    ).toBe("drafting")
   })
 
   it("expands style color modes without selecting them from the accordion header", () => {
@@ -862,6 +885,13 @@ describe("DraftingSurface", () => {
     expect(gradientItem.getAttribute("data-selected")).toBe("false")
     expect(gradientItem.getAttribute("data-state")).toBe("open")
     expect(solidItem.getAttribute("data-state")).toBe("open")
+    const gradientTypeGrid = getRequiredElement(
+      gradientItem,
+      '[data-slot="gradient-type-option-grid"]',
+    )
+    const gradientTypeIcons = Array.from(gradientTypeGrid.querySelectorAll("svg"))
+    expect(gradientTypeIcons.length).toBeGreaterThan(0)
+    expect(gradientTypeIcons.every((icon) => icon.getAttribute("color") === "currentColor")).toBe(true)
 
     act(() => {
       activateElement(paletteTrigger)

@@ -1137,6 +1137,8 @@ function DraftingColorAccordion<TMode extends string>({
                 className={cn(
                   "px-4 py-3 no-underline hover:no-underline focus-visible:ring-0",
                   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-[var(--drafting-line-strong)]",
+                  "text-[var(--drafting-ink-muted)] hover:text-[var(--drafting-ink-strong-muted)] data-[state=open]:text-[var(--drafting-ink)]",
+                  "[&_[data-slot=accordion-chevron]]:text-[var(--drafting-ink-muted)] hover:[&_[data-slot=accordion-chevron]]:text-[var(--drafting-ink-strong-muted)] data-[state=open]:[&_[data-slot=accordion-chevron]]:text-[var(--drafting-ink)]",
                 )}
               >
                 <span className="flex min-w-0 items-center gap-3">
@@ -1202,6 +1204,7 @@ function DraftingSliderField({
       )}
     >
       <UnlumenSlider
+        appearance="drafting"
         className="w-full"
         data-slot={dataSlot}
         formatValue={formatValue}

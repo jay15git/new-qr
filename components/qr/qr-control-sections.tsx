@@ -1974,6 +1974,7 @@ export function GradientEditor({
         >
           {isDraftingLayout ? (
             <GradientTypeOptionCardPicker
+              appearance="drafting"
               id={`${idPrefix}-type`}
               label="Gradient type"
               onValueChange={(value) =>
@@ -2034,6 +2035,7 @@ export function GradientEditor({
                   />
                 </div>
                 <GradientOffsetRangeField
+                  appearance="drafting"
                   className="max-w-full"
                   hideHeader
                   id={`${idPrefix}-offset-range`}
@@ -2489,6 +2491,7 @@ function NumberField({
 }
 
 function GradientOffsetRangeField({
+  appearance = "default",
   className,
   endColor,
   endLabel = "End",
@@ -2505,6 +2508,7 @@ function GradientOffsetRangeField({
   step,
   valueFormatter,
 }: {
+  appearance?: "default" | "drafting"
   className?: string
   endColor: string
   endLabel?: string
@@ -2523,6 +2527,7 @@ function GradientOffsetRangeField({
 }) {
   const displayValues = normalizeGradientOffsetRange([startValue, endValue])
   const trackGradient = buildAdaptiveTrackGradient(startColor, endColor)
+  const isDrafting = appearance === "drafting"
 
   return (
     <Field data-slot="gradient-offset-range-slider" className={className}>
@@ -2531,10 +2536,12 @@ function GradientOffsetRangeField({
           <FieldLabel>{label}</FieldLabel>
           <div className="flex flex-wrap items-center gap-2">
             <GradientValueChip
+              appearance={appearance}
               label={startLabel}
               value={valueFormatter(displayValues[0])}
             />
             <GradientValueChip
+              appearance={appearance}
               label={endLabel}
               value={valueFormatter(displayValues[1])}
             />
@@ -2544,6 +2551,7 @@ function GradientOffsetRangeField({
         <FieldLabel className="sr-only">{label}</FieldLabel>
       )}
       <UnlumenSlider
+        appearance={appearance}
         className="w-full"
         data-slot="gradient-offset-slider"
         formatValue={valueFormatter}
@@ -2567,6 +2575,7 @@ function GradientOffsetRangeField({
         rangeStyle={{ backgroundColor: "transparent" }}
         renderThumb={(index, state) => (
           <GradientSliderThumb
+            appearance={appearance}
             accentColor={index === 0 ? startColor : endColor}
             isActive={state.isActive}
           />
@@ -2575,6 +2584,7 @@ function GradientOffsetRangeField({
         step={step}
         thumbDataSlot="gradient-offset-thumb"
         trackDataSlot="gradient-offset-track"
+        trackClassName={isDrafting ? "border-[var(--drafting-line)]" : undefined}
         trackStyle={{ background: trackGradient }}
         value={displayValues}
       />
@@ -2583,21 +2593,31 @@ function GradientOffsetRangeField({
 }
 
 function GradientSliderThumb({
+  appearance = "default",
   accentColor,
   isActive = false,
 }: {
+  appearance?: "default" | "drafting"
   accentColor: string
   isActive?: boolean
 }) {
+  const isDrafting = appearance === "drafting"
+
   return (
     <span
       className={cn(
-        "flex size-[18px] items-center justify-center rounded-[4px] border border-black/10 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.06)] transition-transform",
+        "flex size-[18px] items-center justify-center rounded-[4px] border transition-transform",
+        isDrafting
+          ? "border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-active)] shadow-[var(--drafting-shadow-rest)]"
+          : "border-black/10 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.06)]",
         isActive && "scale-105",
       )}
     >
       <span
-        className="size-2.5 rounded-[2px] border border-black/10"
+        className={cn(
+          "size-2.5 rounded-[2px] border",
+          isDrafting ? "border-[var(--drafting-line-hover)]" : "border-black/10",
+        )}
         style={{ backgroundColor: accentColor }}
       />
     </span>
@@ -2605,15 +2625,33 @@ function GradientSliderThumb({
 }
 
 function GradientValueChip({
+  appearance = "default",
   label,
   value,
 }: {
+  appearance?: "default" | "drafting"
   label: string
   value: string
 }) {
+  const isDrafting = appearance === "drafting"
+
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-muted/30 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
-      <span className="font-medium text-foreground">{label}</span>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-mono text-[11px]",
+        isDrafting
+          ? "border-[var(--drafting-line)] bg-[var(--drafting-control-bg)] text-[var(--drafting-ink-muted)]"
+          : "border-border/60 bg-muted/30 text-muted-foreground",
+      )}
+    >
+      <span
+        className={cn(
+          "font-medium",
+          isDrafting ? "text-[var(--drafting-ink)]" : "text-foreground",
+        )}
+      >
+        {label}
+      </span>
       <span>{value}</span>
     </span>
   )
@@ -2674,11 +2712,13 @@ function KnobSliderField({
 }
 
 function GradientTypeOptionCardPicker({
+  appearance = "default",
   id,
   label,
   onValueChange,
   value,
 }: {
+  appearance?: "default" | "drafting"
   id: string
   label: string
   onValueChange: (value: string) => void
@@ -2700,6 +2740,8 @@ function GradientTypeOptionCardPicker({
       >
         {GRADIENT_TYPES.map((option) => (
           <OptionCard
+            appearance={appearance}
+            darkShadowTone={appearance === "drafting" ? "ink" : "default"}
             key={option.value}
             checked={option.value === value}
             label={option.label}
@@ -2721,7 +2763,7 @@ function GradientTypePreview({ type }: { type: GradientType }) {
     <div className="flex size-full items-center justify-center">
       <HugeiconsIcon
         aria-hidden="true"
-        color="#111111"
+        color="currentColor"
         icon={type === "radial" ? RadiusIcon : StraightEdgeIcon}
         size={24}
         strokeWidth={1.9}

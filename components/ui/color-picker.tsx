@@ -41,6 +41,9 @@ type ColorPickerProps = {
 
 type ColorType = "hex" | "hsl" | "rgb"
 
+const DRAFTING_COLOR_PICKER_CONTROL_CLASS_NAME =
+  "rounded-none border-[var(--drafting-line)] bg-[var(--drafting-control-bg)] text-[var(--drafting-ink)] shadow-none hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-control-bg-hover)] hover:text-[var(--drafting-ink)] focus-visible:border-[var(--drafting-line-strong)] focus-visible:ring-0"
+
 export default function ColorPicker({
   className,
   chrome = "default",
@@ -78,11 +81,17 @@ export default function ColorPicker({
   }
 
   const saturationPointer = ({ color, left, top }: PickerPointerProps) => (
-    <ColorPickerPointer color={color} left={left} top={top} />
+    <ColorPickerPointer chrome={chrome} color={color} left={left} top={top} />
   )
 
   const huePointer = ({ left, top }: PickerPointerProps) => (
-    <ColorPickerPointer color={huePointerColor} left={left} top={top} variant="bar" />
+    <ColorPickerPointer
+      chrome={chrome}
+      color={huePointerColor}
+      left={left}
+      top={top}
+      variant="bar"
+    />
   )
 
   return (
@@ -116,6 +125,12 @@ export default function ColorPicker({
         style={
           {
             "--alpha-pointer-background-color": "hsl(var(--foreground))",
+            ...(isDrafting
+              ? {
+                  "--alpha-pointer-background-color": "var(--drafting-ink)",
+                  "--alpha-pointer-box-shadow": "var(--drafting-shadow-rest)",
+                }
+              : null),
             borderRadius: isDrafting ? "0" : "0.5rem",
             height: "0.875rem",
             width: "100%",
@@ -137,8 +152,7 @@ export default function ColorPicker({
                 "shrink-0 justify-between uppercase",
                 chrome === "embedded" &&
                   "border-white/8 bg-white/[0.03] hover:bg-white/[0.05]",
-                chrome === "drafting" &&
-                  "rounded-none border-transparent bg-black/[0.04] text-[#111111] shadow-none hover:bg-black/[0.06] focus-visible:border-black/15 focus-visible:ring-0",
+                chrome === "drafting" && DRAFTING_COLOR_PICKER_CONTROL_CLASS_NAME,
               )}
               variant={isDrafting ? "ghost" : "outline"}
             >
@@ -178,8 +192,7 @@ export default function ColorPicker({
             <Input
               className={cn(
                 "flex",
-                isDrafting &&
-                  "rounded-none border-transparent bg-black/[0.04] text-[#111111] shadow-none focus-visible:border-black/15 focus-visible:ring-0",
+                isDrafting && DRAFTING_COLOR_PICKER_CONTROL_CLASS_NAME,
               )}
               value={hsvaToHex(hsva)}
               onChange={(event) => {
@@ -230,6 +243,7 @@ export default function ColorPicker({
 }
 
 type PickerPointerProps = {
+  chrome?: "default" | "embedded" | "drafting"
   color?: string
   left?: React.CSSProperties["left"]
   top?: React.CSSProperties["top"]
@@ -237,12 +251,14 @@ type PickerPointerProps = {
 }
 
 function ColorPickerPointer({
+  chrome = "default",
   color,
   left,
   top,
   variant = "surface",
 }: PickerPointerProps) {
   const isBarPointer = variant === "bar"
+  const isDrafting = chrome === "drafting"
 
   return (
     <div
@@ -253,11 +269,19 @@ function ColorPickerPointer({
       }}
     >
       <span
-        className="pointer-events-none flex size-[18px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[4px] border border-black/10 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.06)]"
+        className={cn(
+          "pointer-events-none flex size-[18px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[4px] border",
+          isDrafting
+            ? "border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-active)] shadow-[var(--drafting-shadow-rest)]"
+            : "border-black/10 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.06)]",
+        )}
       >
         <span
-          className="size-2.5 rounded-[2px] border border-black/10"
-          style={{ backgroundColor: color ?? "#111111" }}
+          className={cn(
+            "size-2.5 rounded-[2px] border",
+            isDrafting ? "border-[var(--drafting-line-hover)]" : "border-black/10",
+          )}
+          style={{ backgroundColor: color ?? (isDrafting ? "var(--drafting-ink)" : "#111111") }}
         />
       </span>
     </div>
@@ -289,8 +313,7 @@ function HslColorInput({
           <Input
             className={cn(
               "shadow-none [direction:inherit]",
-              chrome === "drafting" &&
-                "border-transparent bg-black/[0.04] text-[#111111] focus-visible:border-black/15 focus-visible:ring-0",
+              chrome === "drafting" && DRAFTING_COLOR_PICKER_CONTROL_CLASS_NAME,
               chrome === "drafting" && index === 0 && "rounded-none",
               chrome === "drafting" &&
                 index > 0 &&
@@ -337,8 +360,7 @@ function RgbColorInput({
           <Input
             className={cn(
               "shadow-none [direction:inherit]",
-              chrome === "drafting" &&
-                "border-transparent bg-black/[0.04] text-[#111111] focus-visible:border-black/15 focus-visible:ring-0",
+              chrome === "drafting" && DRAFTING_COLOR_PICKER_CONTROL_CLASS_NAME,
               chrome === "drafting" && index === 0 && "rounded-none",
               chrome === "drafting" &&
                 index > 0 &&

@@ -13,4 +13,18 @@ describe("ColorPicker", () => {
     expect(markup).toContain("rounded-[4px]")
     expect(markup).toContain("rounded-[2px]")
   })
+
+  it("uses drafting tokens for drafting chrome controls", () => {
+    const markup = renderToStaticMarkup(
+      <ColorPicker chrome="drafting" onColorChange={vi.fn()} value="#111827" />,
+    )
+
+    expect(markup).toContain("text-[var(--drafting-ink)]")
+    expect(markup).toContain("bg-[var(--drafting-control-bg)]")
+    expect(markup).toContain("focus-visible:border-[var(--drafting-line-strong)]")
+    expect(markup).toContain("border-[var(--drafting-line)]")
+    expect(markup).not.toContain("text-[#111111]")
+    expect(markup).not.toContain("bg-black/[0.04]")
+    expect(markup).not.toContain("focus-visible:border-black/15")
+  })
 })
