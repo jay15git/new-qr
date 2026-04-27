@@ -37,6 +37,23 @@ export function ModeToggle({ appearance = "default", className }: ModeToggleProp
       ? "text-sky-300"
       : "text-foreground/35"
 
+  if (isDrafting) {
+    return (
+      <Switch
+        aria-label="Toggle dark mode"
+        checked={isDark}
+        className={cn(
+          "dark:data-checked:bg-foreground dark:[&_[data-slot=switch-thumb]]:data-checked:bg-background",
+          className,
+        )}
+        disabled={!mounted}
+        onCheckedChange={(checked) => {
+          setTheme(checked ? "dark" : "light")
+        }}
+      />
+    )
+  }
+
   return (
     <div
       data-slot="mode-toggle"
