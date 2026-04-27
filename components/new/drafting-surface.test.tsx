@@ -257,7 +257,7 @@ describe("DraftingSurface", () => {
     expect(getRequiredElement(header, '[data-slot="mode-toggle"]').className).not.toContain(
       "shadow-[var(--drafting-shadow-rest)]",
     )
-    expect(header.innerHTML).toContain("bg-[var(--drafting-control-bg)]")
+    expect(header.innerHTML).toContain("bg-[#00000003]")
     expect(surface.container.textContent).not.toContain("Appearance")
     expect(surface.container.innerHTML).toContain('data-slot="mode-toggle-thumb-icon"')
     expect(surface.container.innerHTML).toContain('aria-label="Toggle dark mode"')

@@ -57,7 +57,7 @@ import {
 } from "@/components/qr/dashboard-raster-export"
 import { QrPreviewCard } from "@/components/qr/qr-preview-card"
 import { buildQrExtension, getQrExtensionKey } from "@/components/qr/qr-rendering"
-import { Button } from "@/components/ui/button"
+import { SecondaryButton } from "@/components/ui/secondary-button"
 import { Input } from "@/components/ui/input"
 import {
   Popover,
@@ -617,15 +617,11 @@ export function QrStudio({
                     <ModeToggle />
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button
-                          disabled={!canDownload}
-                          variant="secondary"
-                          className="rounded-full border border-white/10 bg-white/[0.08] px-4 text-foreground shadow-none hover:bg-white/[0.12]"
-                        >
+                        <SecondaryButton disabled={!canDownload}>
                           <DownloadIcon data-icon="inline-start" />
                           Download
                           <ChevronDownIcon data-icon="inline-end" />
-                        </Button>
+                        </SecondaryButton>
                       </PopoverTrigger>
                       <PopoverContent
                         align="end"
@@ -648,7 +644,7 @@ export function QrStudio({
                               className="grid grid-cols-2 gap-2"
                             >
                               {DOWNLOAD_EXTENSIONS.map((extension) => (
-                                <Button
+                                <SecondaryButton
                                   key={extension}
                                   aria-checked={
                                     extension === selectedDashboardExportExtension
@@ -657,22 +653,16 @@ export function QrStudio({
                                   disabled={!canDownload}
                                   role="radio"
                                   type="button"
-                                  variant={
+                                  selected={
                                     extension === selectedDashboardExportExtension
-                                      ? "secondary"
-                                      : "ghost"
                                   }
-                                  className={
-                                    extension === selectedDashboardExportExtension
-                                      ? "justify-center rounded-xl border border-white/10 bg-white/[0.08] text-foreground shadow-none hover:bg-white/[0.12]"
-                                      : "justify-center rounded-xl border border-transparent text-foreground/70 shadow-none hover:border-white/8 hover:bg-white/[0.04] hover:text-foreground"
-                                  }
+                                  className="justify-center"
                                   onClick={() => {
                                     setSelectedDashboardExportExtension(extension)
                                   }}
                                 >
                                   {extension.toUpperCase()}
-                                </Button>
+                                </SecondaryButton>
                               ))}
                             </div>
                           </div>
@@ -751,19 +741,18 @@ export function QrStudio({
                           ) : null}
 
                           <div className="border-t border-white/8 pt-3">
-                            <Button
+                            <SecondaryButton
                               data-slot="dashboard-export-submit"
                               disabled={!canDownload}
                               type="button"
-                              variant="secondary"
-                              className="w-full rounded-xl border border-white/10 bg-white/[0.08] text-foreground shadow-none hover:bg-white/[0.12]"
+                              className="w-full"
                               onClick={() => {
                                 void handleDownload(selectedDashboardExportExtension)
                               }}
                             >
                               <DownloadIcon data-icon="inline-start" />
                               Download {selectedDashboardExportExtension.toUpperCase()}
-                            </Button>
+                            </SecondaryButton>
                           </div>
                         </div>
                       </PopoverContent>

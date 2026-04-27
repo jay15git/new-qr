@@ -2,6 +2,7 @@ import { DownloadIcon, RefreshCcwIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { SecondaryButton } from "@/components/ui/secondary-button"
 import {
   Card,
   CardContent,
@@ -128,17 +129,16 @@ export function QrPreviewCard({
         </p>
         <div className="flex w-full flex-wrap gap-2">
           {DOWNLOAD_EXTENSIONS.map((extension) => (
-            <Button
+            <SecondaryButton
               key={extension}
               disabled={!canDownload}
-              variant="outline"
               onClick={() => {
                 void onDownload(extension)
               }}
             >
               <DownloadIcon data-icon="inline-start" />
               {extension.toUpperCase()}
-            </Button>
+            </SecondaryButton>
           ))}
         </div>
         <Separator />

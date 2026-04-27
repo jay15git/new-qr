@@ -95,6 +95,7 @@ import {
 } from "@/components/qr/qr-static-content"
 import { DownloadIcon, LinkIcon, PieChart, Settings, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { SecondaryButton } from "@/components/ui/secondary-button"
 import {
   Popover,
   PopoverContent,
@@ -1565,17 +1566,15 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
             <ModeToggle appearance="drafting" className="shrink-0 text-[var(--drafting-ink)]" />
             <Popover>
               <PopoverTrigger asChild>
-                <Button
+                <SecondaryButton
                   aria-label="Open download options"
                   data-slot="drafting-download-trigger"
                   disabled={!canDownload}
-                  type="button"
-                  variant="ghost"
-                  className="h-8 shrink-0 rounded-[6px] border-0 bg-[var(--drafting-control-bg)] px-2 text-[var(--drafting-ink-muted)] shadow-[var(--drafting-shadow-rest)] transition-[background-color,box-shadow,transform,color] duration-150 ease-out hover:-translate-y-px hover:bg-[var(--drafting-control-bg-hover)] hover:text-[var(--drafting-ink-strong-muted)] hover:shadow-[var(--drafting-shadow-hover)] active:translate-y-0 active:bg-[var(--drafting-control-bg-active)] active:shadow-[var(--drafting-shadow-active)] sm:px-3.5"
+                  className="h-8 shrink-0 px-2 sm:px-3.5"
                 >
                   <DownloadIcon data-icon="inline-start" />
                   <span className="hidden sm:inline">Download</span>
-                </Button>
+                </SecondaryButton>
               </PopoverTrigger>
               <PopoverContent
                 align="end"
@@ -1797,18 +1796,18 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
                   </div>
 
                   <div className="shrink-0 border-t border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] p-3">
-                    <Button
+                    <SecondaryButton
                       data-slot="drafting-download-submit"
                       disabled={!canDownload}
                       type="button"
-                      className="h-9 w-full rounded-[8px] bg-[var(--drafting-ink)] text-[var(--drafting-ink-inverse)] shadow-[var(--drafting-shadow-rest)] transition-[background-color,box-shadow,transform] hover:-translate-y-px hover:bg-[var(--drafting-ink)] hover:shadow-[var(--drafting-shadow-hover)] active:translate-y-0"
+                      className="h-9 w-full"
                       onClick={() => {
                         void handleDownload()
                       }}
                     >
                       <DownloadIcon data-icon="inline-start" />
                       Download {selectedDownloadExtension.toUpperCase()}
-                    </Button>
+                    </SecondaryButton>
                   </div>
                 </div>
               </PopoverContent>
