@@ -1811,13 +1811,14 @@ function DraftingColorAccordion<TMode extends string>({
               data-selected={isSelected ? "true" : "false"}
               value={item.id}
               className={cn(
-                "mb-3 min-w-0 w-full overflow-hidden rounded-[8px] border last:mb-0 last:border-b",
-                "border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] shadow-[var(--drafting-shadow-rest)] transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
-                "hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)]",
-                "active:translate-y-0 active:border-[var(--drafting-line-hover)] active:shadow-[var(--drafting-shadow-active)]",
+                "mb-3 min-w-0 w-full overflow-hidden rounded-[8px] last:mb-0 last:border-b",
+                "bg-[var(--drafting-panel-bg)] shadow-[var(--drafting-shadow-rest)] transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
+                "hover:-translate-y-px hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)]",
+                "active:translate-y-0 active:bg-[var(--drafting-panel-bg-active)] active:shadow-[var(--drafting-shadow-active)]",
                 "data-[state=open]:bg-[var(--drafting-panel-bg-hover)]",
-                isSelected &&
-                  "bg-[var(--drafting-panel-bg-active)] shadow-[var(--drafting-shadow-rest)]",
+                isSelected
+                  ? "border-2 border-dashed border-[var(--drafting-line-strong)] hover:border-[var(--drafting-line-strong)] active:border-[var(--drafting-line-strong)] last:border-b-2 bg-[var(--drafting-panel-bg-active)]"
+                  : "border border-dashed border-[var(--drafting-line)] hover:border-[var(--drafting-line-hover)] active:border-[var(--drafting-line-hover)]",
               )}
             >
               <AccordionTrigger
