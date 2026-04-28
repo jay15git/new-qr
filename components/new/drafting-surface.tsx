@@ -26,6 +26,7 @@ import {
   DraftingLogoColorTab,
   DraftingLogoSizeTab,
   DraftingLogoUploadTab,
+  DraftingQrTypeDropdown,
   DraftingSizeTab,
   DraftingStyleTab,
 } from "@/components/new/drafting-style-tab"
@@ -1226,7 +1227,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
           contentValues={selectedContentValues}
           encodedValue={selectedContentValue}
           validation={selectedContentValidation}
-          onContentTypeChange={handleDraftingContentTypeChange}
           onContentValueChange={handleDraftingContentValueChange}
         />
       )
@@ -1914,20 +1914,29 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
               data-slot="drafting-tabs-sticky"
               className="sticky top-0 z-10 min-w-0 px-3 py-3 sm:px-4 sm:py-4"
             >
-              <TabsList
-                aria-label={`${activeToolConfig.title} settings groups`}
-                className={DRAFTING_PANEL_TAB_TRAY_CLASS_NAME}
-              >
-                {activeToolTabs.map((tab) => (
-                  <TabsTrigger
-                    key={tab.id}
-                    value={tab.id}
-                    className={DRAFTING_PANEL_TAB_TRIGGER_CLASS_NAME}
-                  >
-                    {tab.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
+              {activeTool === "content" ? (
+                <div className={DRAFTING_PANEL_TAB_TRAY_CLASS_NAME}>
+                  <DraftingQrTypeDropdown
+                    activeContentType={selectedContentType}
+                    onContentTypeChange={handleDraftingContentTypeChange}
+                  />
+                </div>
+              ) : (
+                <TabsList
+                  aria-label={`${activeToolConfig.title} settings groups`}
+                  className={DRAFTING_PANEL_TAB_TRAY_CLASS_NAME}
+                >
+                  {activeToolTabs.map((tab) => (
+                    <TabsTrigger
+                      key={tab.id}
+                      value={tab.id}
+                      className={DRAFTING_PANEL_TAB_TRIGGER_CLASS_NAME}
+                    >
+                      {tab.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              )}
             </div>
 
             <div data-slot="drafting-tab-panels" className="min-h-0 min-w-0 flex-1 overflow-hidden">

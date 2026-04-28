@@ -238,8 +238,10 @@ describe("DraftingSurface", () => {
     ).not.toContain("text-black/")
     expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(8)
     expect(surface.container.querySelector('[data-slot="tabs"]')).not.toBeNull()
-    expect(surface.container.querySelector('[data-slot="tabs-list"]')).not.toBeNull()
-    expect(getTabLabels(surface.container)).toEqual(["Content"])
+    expect(
+      surface.container.querySelector('button[aria-label="Open QR type options"]'),
+    ).not.toBeNull()
+    expect(surface.container.textContent).toContain("QR Type:")
     expect(surface.container.textContent).toContain("Content")
     expect(surface.container.textContent).toContain("Style")
     expect(surface.container.textContent).toContain("Corner frame")
@@ -682,7 +684,9 @@ describe("DraftingSurface", () => {
     expect(contentButton.getAttribute("aria-pressed")).toBe("true")
     expect(styleButton.getAttribute("aria-pressed")).toBe("false")
     expect(cornerSquareButton.getAttribute("aria-pressed")).toBe("false")
-    expect(getTabLabels(surface.container)).toEqual(["Content"])
+    expect(
+      surface.container.querySelector('button[aria-label="Open QR type options"]'),
+    ).not.toBeNull()
 
     act(() => {
       styleButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -733,40 +737,35 @@ describe("DraftingSurface", () => {
     const qrData = getRequiredElement(surface.container, 'textarea[aria-label="Auto content"]') as HTMLTextAreaElement
 
     expect(contentTab).not.toBeNull()
-    expect(surface.container.querySelector('[data-slot="drafting-content-type-selector"]')).not.toBeNull()
     expect(
-      getRequiredElement(surface.container, '[data-slot="drafting-content-type-selector"]')
-        .className,
-    ).toContain("grid-cols-3")
-    expect(
-      getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
+      getRequiredElement(surface.container, 'button[aria-label="Open QR type options"]')
         .className,
     ).toContain("h-10")
     expect(
-      getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
+      getRequiredElement(surface.container, 'button[aria-label="Open QR type options"]')
         .getAttribute("data-drafting-dropdown-trigger"),
     ).toBe("true")
     expect(
-      getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
+      getRequiredElement(surface.container, 'button[aria-label="Open QR type options"]')
         .getAttribute("data-slot"),
     ).toBe("dropdown-menu-trigger")
     expect(
-      getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
+      getRequiredElement(surface.container, 'button[aria-label="Open QR type options"]')
         .className,
     ).toContain("border-[var(--drafting-dropdown-border)]")
     expect(
-      getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
+      getRequiredElement(surface.container, 'button[aria-label="Open QR type options"]')
         .querySelector("svg"),
     ).not.toBeNull()
     expect(
-      getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
+      getRequiredElement(surface.container, 'button[aria-label="Open QR type options"]')
         .className,
     ).toContain("bg-[var(--drafting-dropdown-trigger-surface)]")
     expect(
-      getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]')
+      getRequiredElement(surface.container, 'button[aria-label="Open QR type options"]')
         .className,
     ).not.toContain("bg-[var(--drafting-ink)]")
-    expect(surface.container.textContent).toContain("Popular")
+    expect(surface.container.textContent).toContain("QR Type:")
     expect(surface.container.textContent).not.toContain("Wi-Fi")
     expect(surface.container.textContent).not.toContain("Discord")
     expect(surface.container.textContent).toContain("Encoded value")
@@ -791,7 +790,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open QR type options"]'))
     })
     const menuContent = getRequiredElement(document.body, '[data-slot="dropdown-menu-content"]')
     const globalsSource = readFileSync("app/globals.css", "utf8")
@@ -804,6 +803,11 @@ describe("DraftingSurface", () => {
     ).toContain("bg-[var(--drafting-dropdown-menu-surface-open)]")
     expect(menuContent.className).toContain("w-[280px]")
     expect(menuContent.className).toContain("shadow-[var(--drafting-dropdown-menu-shadow-open)]")
+
+    act(() => {
+      activateElement(getRequiredElement(document.body, '[data-slot="dropdown-menu-sub-trigger"][data-category="popular"]'))
+    })
+
     const selectedAutoItem = getRequiredElement(
       document.body,
       '[data-slot="dropdown-menu-item"][data-content-type="auto"]',
@@ -842,7 +846,10 @@ describe("DraftingSurface", () => {
     ).toBe(String.raw`WIFI:T:WPA;S:Cafe\;Guest;P:pa\:ss;H:true;;`)
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Contact content types"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open QR type options"]'))
+    })
+    act(() => {
+      activateElement(getRequiredElement(document.body, '[data-slot="dropdown-menu-sub-trigger"][data-category="contact"]'))
     })
     act(() => {
       activateElement(getRequiredElement(document.body, '[data-slot="dropdown-menu-item"][data-content-type="sms"]'))
@@ -865,7 +872,10 @@ describe("DraftingSurface", () => {
     ).toBe("sms:+15550102000?body=Bring%20menus")
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open QR type options"]'))
+    })
+    act(() => {
+      activateElement(getRequiredElement(document.body, '[data-slot="dropdown-menu-sub-trigger"][data-category="popular"]'))
     })
     act(() => {
       activateElement(getRequiredElement(document.body, '[data-slot="dropdown-menu-item"][data-content-type="wifi"]'))
@@ -881,7 +891,10 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Popular content types"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open QR type options"]'))
+    })
+    act(() => {
+      activateElement(getRequiredElement(document.body, '[data-slot="dropdown-menu-sub-trigger"][data-category="popular"]'))
     })
     act(() => {
       activateElement(getRequiredElement(document.body, '[data-slot="dropdown-menu-item"][data-content-type="wifi"]'))
@@ -1915,7 +1928,9 @@ describe("DraftingSurface", () => {
     expect(surface.container.querySelector('[data-slot="drafting-edit-nav-scroll-area"]')).toBeNull()
     expect(surface.container.querySelector('[data-slot="drafting-edit-panel-scroll"]')).toBeNull()
     expect(surface.container.querySelector('[data-slot="dashboard-edit-page"]')).toBeNull()
-    expect(surface.container.querySelector('[data-slot="tabs-list"]')).not.toBeNull()
+    expect(
+      surface.container.querySelector('button[aria-label="Open QR type options"]'),
+    ).not.toBeNull()
     expect(surface.container.querySelector('[data-drafting-tool-button="true"]')).not.toBeNull()
     expect(surface.container.querySelector('button[aria-label="Open Page"]')).toBeNull()
     expect(surface.container.querySelector('button[aria-label="Open Position"]')).toBeNull()

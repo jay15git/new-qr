@@ -57,6 +57,9 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
@@ -94,14 +97,12 @@ export function DraftingContentTab({
   contentType,
   contentValues,
   encodedValue,
-  onContentTypeChange,
   onContentValueChange,
   validation,
 }: {
   contentType: QrInputType
   contentValues: StaticQrContentValues
   encodedValue: string
-  onContentTypeChange: (value: QrInputType) => void
   onContentValueChange: (field: string, value: StaticQrContentValue) => void
   validation: StaticQrValidationResult
 }) {
@@ -131,20 +132,6 @@ export function DraftingContentTab({
 
   return (
     <div data-slot="drafting-content-tab" className="min-w-0 space-y-4">
-      <div
-        data-slot="drafting-content-type-selector"
-        className="grid min-w-0 grid-cols-3 gap-2"
-      >
-        {QR_CATEGORIES.map((category) => (
-          <DraftingContentTypeDropdown
-            key={category.key}
-            activeContentType={contentType}
-            category={category}
-            onContentTypeChange={onContentTypeChange}
-          />
-        ))}
-      </div>
-
       <DraftingAccordion
         dataSlot="drafting-content-fields"
         items={contentFieldItems}
@@ -167,22 +154,22 @@ export function DraftingContentTab({
   )
 }
 
-function DraftingContentTypeDropdown({
+export function DraftingQrTypeDropdown({
   activeContentType,
-  category,
   onContentTypeChange,
 }: {
   activeContentType: QrInputType
-  category: (typeof QR_CATEGORIES)[number]
   onContentTypeChange: (value: QrInputType) => void
 }) {
-  const isSelectedCategory = category.items.some((item) => item.value === activeContentType)
+  const activeItem = QR_CATEGORIES.flatMap((c) => c.items).find(
+    (item) => item.value === activeContentType,
+  )
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          aria-label={`Open ${category.label} content types`}
+          aria-label="Open QR type options"
           data-drafting-dropdown-trigger="true"
           type="button"
           className={cn(
@@ -193,11 +180,15 @@ function DraftingContentTypeDropdown({
             "active:translate-y-0 active:bg-[var(--drafting-dropdown-trigger-surface-pressed)] active:shadow-[var(--drafting-dropdown-trigger-shadow-pressed)]",
             "focus-visible:border-2 focus-visible:border-[var(--drafting-dropdown-border-focus)] focus-visible:ring-0",
             "data-[state=open]:border-[var(--drafting-dropdown-border-focus)] data-[state=open]:bg-[var(--drafting-dropdown-trigger-surface-open)] data-[state=open]:shadow-[var(--drafting-dropdown-trigger-shadow-hover)]",
-            isSelectedCategory && "font-semibold",
           )}
         >
-          <span className="drafting-type-caption min-w-0 truncate font-medium">
-            {category.label}
+          <span className="flex min-w-0 items-center gap-2">
+            <span className="drafting-type-panel-tab shrink-0 font-medium text-[var(--drafting-dropdown-text-muted)]">
+              QR Type:
+            </span>
+            <span className="drafting-type-panel-tab min-w-0 truncate font-semibold">
+              {activeItem?.label ?? "Choose a type"}
+            </span>
           </span>
           <ChevronDown
             aria-hidden="true"
@@ -210,42 +201,74 @@ function DraftingContentTypeDropdown({
         data-drafting-dropdown-content="true"
         className="w-[280px] max-w-[calc(100vw-2rem)] rounded-[8px] border border-[var(--drafting-dropdown-border)] bg-[var(--drafting-dropdown-menu-surface-open)] p-2 text-[var(--drafting-dropdown-text)] shadow-[var(--drafting-dropdown-menu-shadow-open)] ring-0"
       >
-        <DropdownMenuGroup className="grid gap-1">
-          {category.items.map((item) => {
-            const ItemIcon = item.icon
-            const isSelected = activeContentType === item.value
+        <DropdownMenuGroup className="grid gap-0.5">
+          {QR_CATEGORIES.map((category) => {
+            const CategoryIcon = category.icon
 
             return (
-              <DropdownMenuItem
-                key={item.value}
-                data-content-type={item.value}
-                onSelect={() => onContentTypeChange(item.value)}
-                className={cn(
-                  "h-9 min-h-9 gap-2 rounded-[4px] border border-transparent bg-transparent px-2.5 py-0 text-[12px] font-medium text-[var(--drafting-dropdown-text)]",
-                  "focus:bg-[var(--drafting-dropdown-trigger-surface-hover)] focus:text-[var(--drafting-dropdown-text)] focus:**:text-[var(--drafting-dropdown-text)]",
-                  isSelected &&
-                    "bg-[var(--drafting-dropdown-selected-fill)] font-semibold text-[var(--drafting-dropdown-text)] focus:bg-[var(--drafting-dropdown-selected-fill)] focus:text-[var(--drafting-dropdown-text)]",
-                )}
-              >
-                <span
-                  aria-hidden="true"
-                  className="flex size-3.5 shrink-0 items-center justify-center"
+              <DropdownMenuSub key={category.key}>
+                <DropdownMenuSubTrigger
+                  data-category={category.key}
+                  className={cn(
+                    "flex h-9 min-h-9 cursor-default items-center justify-between gap-2 rounded-[4px] border border-transparent bg-transparent px-2.5 py-0 text-[12px] font-medium text-[var(--drafting-dropdown-text)]",
+                    "focus:bg-[var(--drafting-dropdown-trigger-surface-hover)] focus:text-[var(--drafting-dropdown-text)]",
+                  )}
                 >
-                  <CheckIcon
-                    className={cn(
-                      "size-3.5 text-[var(--drafting-dropdown-text)] transition-opacity duration-100",
-                      isSelected ? "opacity-100" : "opacity-0",
-                    )}
-                  />
-                </span>
-                <ItemIcon
-                  aria-hidden="true"
-                  className="size-4 shrink-0 text-[var(--drafting-dropdown-text)]"
-                />
-                <span className="drafting-type-caption min-w-0 truncate font-medium">
-                  {item.label}
-                </span>
-              </DropdownMenuItem>
+                  <span className="flex items-center gap-2">
+                    <CategoryIcon
+                      aria-hidden="true"
+                      className="size-4 shrink-0 text-[var(--drafting-dropdown-text)]"
+                    />
+                    <span className="drafting-type-caption font-medium">
+                      {category.label}
+                    </span>
+                  </span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent
+                  sideOffset={4}
+                  className="w-[280px] max-w-[calc(100vw-2rem)] rounded-[8px] border border-[var(--drafting-dropdown-border)] bg-[var(--drafting-dropdown-menu-surface-open)] p-2 text-[var(--drafting-dropdown-text)] shadow-[var(--drafting-dropdown-menu-shadow-open)] ring-0"
+                >
+                  <DropdownMenuGroup className="grid gap-1">
+                    {category.items.map((item) => {
+                      const ItemIcon = item.icon
+                      const isSelected = activeContentType === item.value
+
+                      return (
+                        <DropdownMenuItem
+                          key={item.value}
+                          data-content-type={item.value}
+                          onSelect={() => onContentTypeChange(item.value)}
+                          className={cn(
+                            "h-9 min-h-9 gap-2 rounded-[4px] border border-transparent bg-transparent px-2.5 py-0 text-[12px] font-medium text-[var(--drafting-dropdown-text)]",
+                            "focus:bg-[var(--drafting-dropdown-trigger-surface-hover)] focus:text-[var(--drafting-dropdown-text)] focus:**:text-[var(--drafting-dropdown-text)]",
+                            isSelected &&
+                              "bg-[var(--drafting-dropdown-selected-fill)] font-semibold text-[var(--drafting-dropdown-text)] focus:bg-[var(--drafting-dropdown-selected-fill)] focus:text-[var(--drafting-dropdown-text)]",
+                          )}
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="flex size-3.5 shrink-0 items-center justify-center"
+                          >
+                            <CheckIcon
+                              className={cn(
+                                "size-3.5 text-[var(--drafting-dropdown-text)] transition-opacity duration-100",
+                                isSelected ? "opacity-100" : "opacity-0",
+                              )}
+                            />
+                          </span>
+                          <ItemIcon
+                            aria-hidden="true"
+                            className="size-4 shrink-0 text-[var(--drafting-dropdown-text)]"
+                          />
+                          <span className="drafting-type-caption min-w-0 truncate font-medium">
+                            {item.label}
+                          </span>
+                        </DropdownMenuItem>
+                      )
+                    })}
+                  </DropdownMenuGroup>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
             )
           })}
         </DropdownMenuGroup>
