@@ -1,6 +1,6 @@
 "use client"
 
-import { type ReactNode } from "react"
+import { type ReactNode, useEffect, useState } from "react"
 import { Search01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import type {
@@ -41,7 +41,6 @@ import type {
   StudioGradient,
 } from "@/components/qr/qr-studio-state"
 import {
-  STATIC_QR_CONTENT_META,
   type StaticQrContentValue,
   type StaticQrContentValues,
   type StaticQrValidationResult,
@@ -106,7 +105,29 @@ export function DraftingContentTab({
   onContentValueChange: (field: string, value: StaticQrContentValue) => void
   validation: StaticQrValidationResult
 }) {
-  const meta = STATIC_QR_CONTENT_META[contentType]
+  const contentFieldItems = buildDraftingContentFieldItems({
+    contentType,
+    contentValues,
+    onContentValueChange,
+    validation,
+  })
+
+  const [contentOpenItemIds, setContentOpenItemIds] = useState<string[]>(() =>
+    contentFieldItems.map((item) => item.id),
+  )
+
+  useEffect(() => {
+    setContentOpenItemIds(
+      buildDraftingContentFieldItems({
+        contentType,
+        contentValues,
+        onContentValueChange,
+        validation,
+      }).map((item) => item.id),
+    )
+    // Only reset accordion expansion when contentType changes, not on every keystroke.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contentType])
 
   return (
     <div data-slot="drafting-content-tab" className="min-w-0 space-y-4">
@@ -124,33 +145,12 @@ export function DraftingContentTab({
         ))}
       </div>
 
-      <section
-        data-slot="drafting-content-fields"
-        className={cn(
-          "min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3",
-          "shadow-[var(--drafting-shadow-rest)]",
-          "transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
-          "focus-within:border-[var(--drafting-line-strong)] focus-within:bg-[var(--drafting-panel-bg-active)]",
-        )}
-      >
-        <div className="min-w-0">
-          <h3 className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
-            {meta.title}
-          </h3>
-          <p className="drafting-type-caption mt-1 text-[var(--drafting-ink-muted)]">
-            {meta.description}
-          </p>
-        </div>
-
-        <div className="mt-4 min-w-0 space-y-3">
-          <DraftingStaticQrFields
-            contentType={contentType}
-            contentValues={contentValues}
-            onContentValueChange={onContentValueChange}
-            validation={validation}
-          />
-        </div>
-      </section>
+      <DraftingAccordion
+        dataSlot="drafting-content-fields"
+        items={contentFieldItems}
+        openItemIds={contentOpenItemIds}
+        onOpenItemIdsChange={setContentOpenItemIds}
+      />
 
       <details
         data-slot="drafting-content-encoded-preview"
@@ -163,7 +163,6 @@ export function DraftingContentTab({
           {encodedValue}
         </pre>
       </details>
-
     </div>
   )
 }
@@ -255,7 +254,7 @@ function DraftingContentTypeDropdown({
   )
 }
 
-function DraftingStaticQrFields({
+function buildDraftingContentFieldItems({
   contentType,
   contentValues,
   onContentValueChange,
@@ -265,502 +264,459 @@ function DraftingStaticQrFields({
   contentValues: StaticQrContentValues
   onContentValueChange: (field: string, value: StaticQrContentValue) => void
   validation: StaticQrValidationResult
-}) {
+}): Array<{ id: string; title: string; content: ReactNode; error?: string }> {
+  const inputClassName =
+    "drafting-type-input h-11 min-w-0 border-0 bg-[var(--drafting-panel-bg-hover)] px-3.5 py-2.5 text-[var(--drafting-ink)] shadow-none placeholder:text-[var(--drafting-ink-subtle)] focus-visible:ring-0 aria-invalid:ring-0"
+  const textareaClassName =
+    "drafting-type-input min-h-24 min-w-0 max-w-full resize-none overflow-x-hidden border-0 bg-[var(--drafting-panel-bg-hover)] px-3.5 py-3 text-[var(--drafting-ink)] shadow-none placeholder:text-[var(--drafting-ink-subtle)] [overflow-wrap:anywhere] focus-visible:ring-0 aria-invalid:ring-0"
+
+  const textItem = (
+    id: string,
+    title: string,
+    ariaLabel: string,
+    placeholder: string,
+    value: string,
+    error?: string,
+  ): { id: string; title: string; content: ReactNode; error?: string } => ({
+    id,
+    title,
+    error,
+    content: (
+      <div className="min-w-0 pb-4">
+        <Input
+          aria-invalid={error ? true : undefined}
+          aria-label={ariaLabel}
+          className={inputClassName}
+          placeholder={placeholder}
+          value={value}
+          onChange={(event) => onContentValueChange(id, event.currentTarget.value)}
+        />
+      </div>
+    ),
+  })
+
+  const textareaItem = (
+    id: string,
+    title: string,
+    ariaLabel: string,
+    placeholder: string,
+    value: string,
+    error?: string,
+  ): { id: string; title: string; content: ReactNode; error?: string } => ({
+    id,
+    title,
+    error,
+    content: (
+      <div className="min-w-0 pb-4">
+        <Textarea
+          aria-invalid={error ? true : undefined}
+          aria-label={ariaLabel}
+          className={textareaClassName}
+          placeholder={placeholder}
+          value={value}
+          onChange={(event) => onContentValueChange(id, event.currentTarget.value)}
+        />
+      </div>
+    ),
+  })
+
   if (contentType === "auto") {
-    return (
-      <DraftingContentTextarea
-        ariaLabel="Auto content"
-        field="text"
-        label="Text, URL, or QR payload"
-        placeholder="https://example.com/invite"
-        value={stringContentValue(contentValues.text)}
-        onChange={onContentValueChange}
-      />
-    )
+    return [
+      textareaItem(
+        "text",
+        "Text, URL, or QR payload",
+        "Auto content",
+        "https://example.com/invite",
+        stringContentValue(contentValues.text),
+      ),
+    ]
   }
 
   if (contentType === "text") {
-    return (
-      <DraftingContentTextarea
-        ariaLabel="Text content"
-        field="text"
-        label="Text"
-        placeholder="Plain text to encode"
-        value={stringContentValue(contentValues.text)}
-        onChange={onContentValueChange}
-      />
-    )
+    return [
+      textareaItem(
+        "text",
+        "Text",
+        "Text content",
+        "Plain text to encode",
+        stringContentValue(contentValues.text),
+      ),
+    ]
   }
 
   if (isUrlContentType(contentType)) {
-    return (
-      <DraftingContentInput
-        ariaLabel={`${QR_INPUT_OPTIONS[contentType].label} URL`}
-        error={validation.fieldErrors.url}
-        field="url"
-        label="URL"
-        placeholder="https://example.com"
-        value={stringContentValue(contentValues.url)}
-        onChange={onContentValueChange}
-      />
-    )
+    return [
+      textItem(
+        "url",
+        "URL",
+        `${QR_INPUT_OPTIONS[contentType].label} URL`,
+        "https://example.com",
+        stringContentValue(contentValues.url),
+        validation.fieldErrors.url,
+      ),
+    ]
   }
 
   if (contentType === "phone") {
-    return (
-      <DraftingContentInput
-        ariaLabel="Phone number"
-        error={validation.fieldErrors.phone}
-        field="phone"
-        label="Phone number"
-        placeholder="+1 555 010 2000"
-        value={stringContentValue(contentValues.phone)}
-        onChange={onContentValueChange}
-      />
-    )
+    return [
+      textItem(
+        "phone",
+        "Phone number",
+        "Phone number",
+        "+1 555 010 2000",
+        stringContentValue(contentValues.phone),
+        validation.fieldErrors.phone,
+      ),
+    ]
   }
 
   if (contentType === "email") {
-    return (
-      <>
-        <DraftingContentInput
-          ariaLabel="Email address"
-          error={validation.fieldErrors.email}
-          field="email"
-          label="Email address"
-          placeholder="hello@example.com"
-          value={stringContentValue(contentValues.email)}
-          onChange={onContentValueChange}
-        />
-        <DraftingContentInput
-          ariaLabel="Email subject"
-          field="subject"
-          label="Subject"
-          placeholder="Launch"
-          value={stringContentValue(contentValues.subject)}
-          onChange={onContentValueChange}
-        />
-        <DraftingContentTextarea
-          ariaLabel="Email body"
-          field="body"
-          label="Body"
-          placeholder="Message body"
-          value={stringContentValue(contentValues.body)}
-          onChange={onContentValueChange}
-        />
-      </>
-    )
+    return [
+      textItem(
+        "email",
+        "Email address",
+        "Email address",
+        "hello@example.com",
+        stringContentValue(contentValues.email),
+        validation.fieldErrors.email,
+      ),
+      textItem(
+        "subject",
+        "Subject",
+        "Email subject",
+        "Launch",
+        stringContentValue(contentValues.subject),
+      ),
+      textareaItem(
+        "body",
+        "Body",
+        "Email body",
+        "Message body",
+        stringContentValue(contentValues.body),
+      ),
+    ]
   }
 
   if (contentType === "sms") {
-    return (
-      <>
-        <DraftingContentInput
-          ariaLabel="SMS phone number"
-          error={validation.fieldErrors.phone}
-          field="phone"
-          label="Phone number"
-          placeholder="+1 555 010 2000"
-          value={stringContentValue(contentValues.phone)}
-          onChange={onContentValueChange}
-        />
-        <DraftingContentTextarea
-          ariaLabel="SMS message"
-          field="message"
-          label="Message"
-          placeholder="Message text"
-          value={stringContentValue(contentValues.message)}
-          onChange={onContentValueChange}
-        />
-      </>
-    )
+    return [
+      textItem(
+        "phone",
+        "Phone number",
+        "SMS phone number",
+        "+1 555 010 2000",
+        stringContentValue(contentValues.phone),
+        validation.fieldErrors.phone,
+      ),
+      textareaItem(
+        "message",
+        "Message",
+        "SMS message",
+        "Message text",
+        stringContentValue(contentValues.message),
+      ),
+    ]
   }
 
   if (contentType === "wifi") {
-    return (
-      <>
-        <DraftingContentInput
-          ariaLabel="Network name"
-          error={validation.fieldErrors.ssid}
-          field="ssid"
-          label="Network name"
-          placeholder="Cafe Guest"
-          value={stringContentValue(contentValues.ssid)}
-          onChange={onContentValueChange}
-        />
-        <div className="grid min-w-0 grid-cols-3 gap-2">
-          {["WPA", "WEP", "nopass"].map((security) => (
-            <label
-              key={security}
-              className={cn(
-                "flex min-h-9 cursor-pointer items-center justify-center rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-2 text-center",
-                "drafting-type-caption font-semibold text-[var(--drafting-ink-muted)]",
-                stringContentValue(contentValues.security) === security &&
-                  "border-[var(--drafting-ink)] bg-[var(--drafting-ink)] text-[var(--drafting-surface-bg)]",
-              )}
-            >
+    const security = stringContentValue(contentValues.security)
+    return [
+      textItem(
+        "ssid",
+        "Network name",
+        "Network name",
+        "Cafe Guest",
+        stringContentValue(contentValues.ssid),
+        validation.fieldErrors.ssid,
+      ),
+      {
+        id: "security",
+        title: "Security type",
+        content: (
+          <div className="min-w-0 px-4 pb-4">
+            <div className="grid min-w-0 grid-cols-3 gap-2">
+              {["WPA", "WEP", "nopass"].map((sec) => (
+                <label
+                  key={sec}
+                  className={cn(
+                    "flex min-h-9 cursor-pointer items-center justify-center rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-2 text-center",
+                    "drafting-type-caption font-semibold text-[var(--drafting-ink-muted)]",
+                    security === sec &&
+                      "border-[var(--drafting-ink)] bg-[var(--drafting-ink)] text-[var(--drafting-surface-bg)]",
+                  )}
+                >
+                  <input
+                    aria-label={`Wi-Fi security ${sec}`}
+                    checked={security === sec}
+                    className="sr-only"
+                    name="drafting-wifi-security"
+                    type="radio"
+                    onChange={() => onContentValueChange("security", sec)}
+                  />
+                  {sec === "nopass" ? "None" : sec}
+                </label>
+              ))}
+            </div>
+          </div>
+        ),
+      },
+      textItem(
+        "password",
+        "Password",
+        "Wi-Fi password",
+        "Network password",
+        stringContentValue(contentValues.password),
+      ),
+      {
+        id: "hidden",
+        title: "Hidden network",
+        content: (
+          <div className="min-w-0 px-4 pb-4">
+            <label className="flex min-w-0 items-center justify-between gap-3 rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3 py-2">
+              <span className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+                Hidden network
+              </span>
               <input
-                aria-label={`Wi-Fi security ${security}`}
-                checked={stringContentValue(contentValues.security) === security}
-                className="sr-only"
-                name="drafting-wifi-security"
-                type="radio"
-                onChange={() => onContentValueChange("security", security)}
+                aria-label="Hidden network"
+                checked={Boolean(contentValues.hidden)}
+                className="size-4 accent-[var(--drafting-ink)]"
+                type="checkbox"
+                onChange={(event) =>
+                  onContentValueChange("hidden", event.currentTarget.checked)
+                }
               />
-              {security === "nopass" ? "None" : security}
             </label>
-          ))}
-        </div>
-        <DraftingContentInput
-          ariaLabel="Wi-Fi password"
-          field="password"
-          label="Password"
-          placeholder="Network password"
-          value={stringContentValue(contentValues.password)}
-          onChange={onContentValueChange}
-        />
-        <label className="flex min-w-0 items-center justify-between gap-3 rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3 py-2">
-          <span className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
-            Hidden network
-          </span>
-          <input
-            aria-label="Hidden network"
-            checked={Boolean(contentValues.hidden)}
-            className="size-4 accent-[var(--drafting-ink)]"
-            type="checkbox"
-            onChange={(event) => onContentValueChange("hidden", event.currentTarget.checked)}
-          />
-        </label>
-      </>
-    )
+          </div>
+        ),
+      },
+    ]
   }
 
   if (contentType === "vcard") {
-    return (
-      <>
-        <div className="grid min-w-0 gap-3 sm:grid-cols-2">
-          <DraftingContentInput
-            ariaLabel="First name"
-            error={validation.fieldErrors.firstName}
-            field="firstName"
-            label="First name"
-            placeholder="Jay"
-            value={stringContentValue(contentValues.firstName)}
-            onChange={onContentValueChange}
-          />
-          <DraftingContentInput
-            ariaLabel="Last name"
-            field="lastName"
-            label="Last name"
-            placeholder="Shah"
-            value={stringContentValue(contentValues.lastName)}
-            onChange={onContentValueChange}
-          />
-        </div>
-        <DraftingContentInput
-          ariaLabel="Contact phone number"
-          field="phone"
-          label="Phone"
-          placeholder="+91 98765 43210"
-          value={stringContentValue(contentValues.phone)}
-          onChange={onContentValueChange}
-        />
-        <DraftingContentInput
-          ariaLabel="Contact email"
-          field="email"
-          label="Email"
-          placeholder="jay@example.com"
-          value={stringContentValue(contentValues.email)}
-          onChange={onContentValueChange}
-        />
-        <DraftingContentInput
-          ariaLabel="Company"
-          field="company"
-          label="Company"
-          placeholder="New QR"
-          value={stringContentValue(contentValues.company)}
-          onChange={onContentValueChange}
-        />
-        <DraftingContentInput
-          ariaLabel="Contact website"
-          field="url"
-          label="Website"
-          placeholder="https://example.com"
-          value={stringContentValue(contentValues.url)}
-          onChange={onContentValueChange}
-        />
-      </>
-    )
+    return [
+      textItem(
+        "firstName",
+        "First name",
+        "First name",
+        "Jay",
+        stringContentValue(contentValues.firstName),
+        validation.fieldErrors.firstName,
+      ),
+      textItem(
+        "lastName",
+        "Last name",
+        "Last name",
+        "Shah",
+        stringContentValue(contentValues.lastName),
+      ),
+      textItem(
+        "phone",
+        "Phone",
+        "Contact phone number",
+        "+91 98765 43210",
+        stringContentValue(contentValues.phone),
+      ),
+      textItem(
+        "email",
+        "Email",
+        "Contact email",
+        "jay@example.com",
+        stringContentValue(contentValues.email),
+      ),
+      textItem(
+        "company",
+        "Company",
+        "Company",
+        "New QR",
+        stringContentValue(contentValues.company),
+      ),
+      textItem(
+        "url",
+        "Website",
+        "Contact website",
+        "https://example.com",
+        stringContentValue(contentValues.url),
+      ),
+    ]
   }
 
   if (contentType === "whatsapp" || contentType === "whatsapp-chat") {
-    return (
-      <>
-        <DraftingContentInput
-          ariaLabel="WhatsApp phone number"
-          error={validation.fieldErrors.phone}
-          field="phone"
-          label="Phone number"
-          placeholder="+91 98765 43210"
-          value={stringContentValue(contentValues.phone)}
-          onChange={onContentValueChange}
-        />
-        <DraftingContentTextarea
-          ariaLabel="WhatsApp message"
-          field="message"
-          label="Message"
-          placeholder="I would like to book"
-          value={stringContentValue(contentValues.message)}
-          onChange={onContentValueChange}
-        />
-      </>
-    )
+    return [
+      textItem(
+        "phone",
+        "Phone number",
+        "WhatsApp phone number",
+        "+91 98765 43210",
+        stringContentValue(contentValues.phone),
+        validation.fieldErrors.phone,
+      ),
+      textareaItem(
+        "message",
+        "Message",
+        "WhatsApp message",
+        "I would like to book",
+        stringContentValue(contentValues.message),
+      ),
+    ]
   }
 
   if (isUsernameContentType(contentType)) {
-    return (
-      <DraftingContentInput
-        ariaLabel={`${QR_INPUT_OPTIONS[contentType].label} username`}
-        error={validation.fieldErrors.username}
-        field="username"
-        label="Username"
-        placeholder="@newqr"
-        value={stringContentValue(contentValues.username)}
-        onChange={onContentValueChange}
-      />
-    )
+    return [
+      textItem(
+        "username",
+        "Username",
+        `${QR_INPUT_OPTIONS[contentType].label} username`,
+        "@newqr",
+        stringContentValue(contentValues.username),
+        validation.fieldErrors.username,
+      ),
+    ]
   }
 
   if (contentType === "map-location") {
-    return (
-      <>
-        <DraftingContentInput
-          ariaLabel="Place search"
-          error={validation.fieldErrors.query}
-          field="query"
-          label="Place or label"
-          placeholder="Mumbai"
-          value={stringContentValue(contentValues.query)}
-          onChange={onContentValueChange}
-        />
-        <div className="grid min-w-0 gap-3 sm:grid-cols-2">
-          <DraftingContentInput
-            ariaLabel="Latitude"
-            error={validation.fieldErrors.latitude}
-            field="latitude"
-            label="Latitude"
-            placeholder="19.0760"
-            value={stringContentValue(contentValues.latitude)}
-            onChange={onContentValueChange}
-          />
-          <DraftingContentInput
-            ariaLabel="Longitude"
-            error={validation.fieldErrors.longitude}
-            field="longitude"
-            label="Longitude"
-            placeholder="72.8777"
-            value={stringContentValue(contentValues.longitude)}
-            onChange={onContentValueChange}
-          />
-        </div>
-      </>
-    )
+    return [
+      textItem(
+        "query",
+        "Place or label",
+        "Place search",
+        "Mumbai",
+        stringContentValue(contentValues.query),
+        validation.fieldErrors.query,
+      ),
+      textItem(
+        "latitude",
+        "Latitude",
+        "Latitude",
+        "19.0760",
+        stringContentValue(contentValues.latitude),
+        validation.fieldErrors.latitude,
+      ),
+      textItem(
+        "longitude",
+        "Longitude",
+        "Longitude",
+        "72.8777",
+        stringContentValue(contentValues.longitude),
+        validation.fieldErrors.longitude,
+      ),
+    ]
   }
 
   if (contentType === "event") {
     const eventMode = stringContentValue(contentValues.eventMode) || "url"
+    const items: Array<{ id: string; title: string; content: ReactNode }> = [
+      {
+        id: "eventMode",
+        title: "Event type",
+        content: (
+          <div className="min-w-0 px-4 pb-4">
+            <div className="grid min-w-0 grid-cols-2 gap-2">
+              {[
+                ["url", "Event URL"],
+                ["calendar", "Calendar"],
+              ].map(([value, label]) => (
+                <label
+                  key={value}
+                  className={cn(
+                    "flex min-h-9 cursor-pointer items-center justify-center rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-2 text-center",
+                    "drafting-type-caption font-semibold text-[var(--drafting-ink-muted)]",
+                    eventMode === value &&
+                      "border-[var(--drafting-ink)] bg-[var(--drafting-ink)] text-[var(--drafting-surface-bg)]",
+                  )}
+                >
+                  <input
+                    aria-label={`Use ${label}`}
+                    checked={eventMode === value}
+                    className="sr-only"
+                    name="drafting-event-mode"
+                    type="radio"
+                    onChange={() => onContentValueChange("eventMode", value)}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </div>
+        ),
+      },
+    ]
 
-    return (
-      <>
-        <div className="grid min-w-0 grid-cols-2 gap-2">
-          {[
-            ["url", "Event URL"],
-            ["calendar", "Calendar"],
-          ].map(([value, label]) => (
-            <label
-              key={value}
-              className={cn(
-                "flex min-h-9 cursor-pointer items-center justify-center rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-2 text-center",
-                "drafting-type-caption font-semibold text-[var(--drafting-ink-muted)]",
-                eventMode === value &&
-                  "border-[var(--drafting-ink)] bg-[var(--drafting-ink)] text-[var(--drafting-surface-bg)]",
-              )}
-            >
-              <input
-                aria-label={`Use ${label}`}
-                checked={eventMode === value}
-                className="sr-only"
-                name="drafting-event-mode"
-                type="radio"
-                onChange={() => onContentValueChange("eventMode", value)}
-              />
-              {label}
-            </label>
-          ))}
-        </div>
-        {eventMode === "calendar" ? (
-          <>
-            <DraftingContentInput
-              ariaLabel="Event title"
-              error={validation.fieldErrors.title}
-              field="title"
-              label="Title"
-              placeholder="Launch Briefing"
-              value={stringContentValue(contentValues.title)}
-              onChange={onContentValueChange}
-            />
-            <DraftingContentInput
-              ariaLabel="Event start"
-              error={validation.fieldErrors.start}
-              field="start"
-              label="Start"
-              placeholder="2026-06-01T09:00"
-              value={stringContentValue(contentValues.start)}
-              onChange={onContentValueChange}
-            />
-            <DraftingContentInput
-              ariaLabel="Event end"
-              field="end"
-              label="End"
-              placeholder="2026-06-01T10:30"
-              value={stringContentValue(contentValues.end)}
-              onChange={onContentValueChange}
-            />
-            <DraftingContentInput
-              ariaLabel="Event location"
-              field="location"
-              label="Location"
-              placeholder="Studio 2"
-              value={stringContentValue(contentValues.location)}
-              onChange={onContentValueChange}
-            />
-          </>
-        ) : (
-          <DraftingContentInput
-            ariaLabel="Event URL"
-            error={validation.fieldErrors.url}
-            field="url"
-            label="URL"
-            placeholder="https://example.com/rsvp"
-            value={stringContentValue(contentValues.url)}
-            onChange={onContentValueChange}
-          />
-        )}
-      </>
-    )
+    if (eventMode === "calendar") {
+      items.push(
+        textItem(
+          "title",
+          "Title",
+          "Event title",
+          "Launch Briefing",
+          stringContentValue(contentValues.title),
+          validation.fieldErrors.title,
+        ),
+        textItem(
+          "start",
+          "Start",
+          "Event start",
+          "2026-06-01T09:00",
+          stringContentValue(contentValues.start),
+          validation.fieldErrors.start,
+        ),
+        textItem(
+          "end",
+          "End",
+          "Event end",
+          "2026-06-01T10:30",
+          stringContentValue(contentValues.end),
+        ),
+        textItem(
+          "location",
+          "Location",
+          "Event location",
+          "Studio 2",
+          stringContentValue(contentValues.location),
+        ),
+      )
+    } else {
+      items.push(
+        textItem(
+          "url",
+          "URL",
+          "Event URL",
+          "https://example.com/rsvp",
+          stringContentValue(contentValues.url),
+          validation.fieldErrors.url,
+        ),
+      )
+    }
+
+    return items
   }
 
   if (contentType === "coupon") {
-    return (
-      <>
-        <DraftingContentInput
-          ariaLabel="Coupon code"
-          error={validation.fieldErrors.code}
-          field="code"
-          label="Code"
-          placeholder="SAVE20"
-          value={stringContentValue(contentValues.code)}
-          onChange={onContentValueChange}
-        />
-        <DraftingContentTextarea
-          ariaLabel="Coupon description"
-          field="description"
-          label="Description"
-          placeholder="20% off"
-          value={stringContentValue(contentValues.description)}
-          onChange={onContentValueChange}
-        />
-        <DraftingContentInput
-          ariaLabel="Coupon URL"
-          field="url"
-          label="URL"
-          placeholder="https://example.com/save"
-          value={stringContentValue(contentValues.url)}
-          onChange={onContentValueChange}
-        />
-      </>
-    )
+    return [
+      textItem(
+        "code",
+        "Code",
+        "Coupon code",
+        "SAVE20",
+        stringContentValue(contentValues.code),
+        validation.fieldErrors.code,
+      ),
+      textareaItem(
+        "description",
+        "Description",
+        "Coupon description",
+        "20% off",
+        stringContentValue(contentValues.description),
+      ),
+      textItem(
+        "url",
+        "URL",
+        "Coupon URL",
+        "https://example.com/save",
+        stringContentValue(contentValues.url),
+      ),
+    ]
   }
 
-  return null
-}
-
-function DraftingContentInput({
-  ariaLabel,
-  error,
-  field,
-  label,
-  onChange,
-  placeholder,
-  value,
-}: {
-  ariaLabel: string
-  error?: string
-  field: string
-  label: string
-  onChange: (field: string, value: string) => void
-  placeholder: string
-  value: string
-}) {
-  return (
-    <label className="block min-w-0">
-      <span className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
-        {label}
-      </span>
-      <Input
-        aria-invalid={error ? true : undefined}
-        aria-label={ariaLabel}
-        className="drafting-type-input mt-2 min-w-0 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] text-[var(--drafting-ink)] shadow-none placeholder:text-[var(--drafting-ink-subtle)] focus-visible:ring-0"
-        placeholder={placeholder}
-        value={value}
-        onChange={(event) => onChange(field, event.currentTarget.value)}
-      />
-      {error ? (
-        <span className="drafting-type-caption mt-1 block text-[var(--destructive)]">
-          {error}
-        </span>
-      ) : null}
-    </label>
-  )
-}
-
-function DraftingContentTextarea({
-  ariaLabel,
-  error,
-  field,
-  label,
-  onChange,
-  placeholder,
-  value,
-}: {
-  ariaLabel: string
-  error?: string
-  field: string
-  label: string
-  onChange: (field: string, value: string) => void
-  placeholder: string
-  value: string
-}) {
-  return (
-    <label className="block min-w-0">
-      <span className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
-        {label}
-      </span>
-      <Textarea
-        aria-invalid={error ? true : undefined}
-        aria-label={ariaLabel}
-        className="drafting-type-input mt-2 min-h-24 min-w-0 max-w-full resize-none overflow-x-hidden border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3.5 py-3 text-[var(--drafting-ink)] shadow-none placeholder:text-[var(--drafting-ink-subtle)] [overflow-wrap:anywhere] focus-visible:ring-0"
-        placeholder={placeholder}
-        value={value}
-        onChange={(event) => onChange(field, event.currentTarget.value)}
-      />
-      {error ? (
-        <span className="drafting-type-caption mt-1 block text-[var(--destructive)]">
-          {error}
-        </span>
-      ) : null}
-    </label>
-  )
+  return []
 }
 
 function isUrlContentType(type: QrInputType) {
@@ -1003,10 +959,10 @@ export function DraftingDotsColorTab({
   ]
 
   return (
-    <DraftingColorAccordion
+    <DraftingAccordion
       dataSlot="drafting-dots-color-accordion"
       items={items}
-      mode={mode}
+      selectedId={mode}
       openItemIds={openItemIds}
       onOpenItemIdsChange={onOpenItemIdsChange}
     />
@@ -1033,7 +989,7 @@ export function DraftingCornerSquareColorTab({
   solidColor: string
 }) {
   return (
-    <DraftingColorAccordion
+    <DraftingAccordion
       dataSlot="drafting-corner-square-color-accordion"
       items={buildDraftingSolidGradientItems({
         gradient,
@@ -1044,7 +1000,7 @@ export function DraftingCornerSquareColorTab({
         onSolidColorChange,
         solidColor,
       })}
-      mode={mode}
+      selectedId={mode}
       openItemIds={openItemIds}
       onOpenItemIdsChange={onOpenItemIdsChange}
     />
@@ -1071,7 +1027,7 @@ export function DraftingCornerDotColorTab({
   solidColor: string
 }) {
   return (
-    <DraftingColorAccordion
+    <DraftingAccordion
       dataSlot="drafting-corner-dot-color-accordion"
       items={buildDraftingSolidGradientItems({
         gradient,
@@ -1082,7 +1038,7 @@ export function DraftingCornerDotColorTab({
         onSolidColorChange,
         solidColor,
       })}
-      mode={mode}
+      selectedId={mode}
       openItemIds={openItemIds}
       onOpenItemIdsChange={onOpenItemIdsChange}
     />
@@ -1109,7 +1065,7 @@ export function DraftingBackgroundColorTab({
   solidColor: string
 }) {
   return (
-    <DraftingColorAccordion
+    <DraftingAccordion
       dataSlot="drafting-background-color-accordion"
       items={buildDraftingSolidGradientItems({
         gradient,
@@ -1120,7 +1076,7 @@ export function DraftingBackgroundColorTab({
         onSolidColorChange,
         solidColor,
       })}
-      mode={mode}
+      selectedId={mode}
       openItemIds={openItemIds}
       onOpenItemIdsChange={onOpenItemIdsChange}
     />
@@ -1149,7 +1105,7 @@ export function DraftingEditBackgroundColorTab({
   solidColor: string
 }) {
   return (
-    <DraftingColorAccordion
+    <DraftingAccordion
       dataSlot="drafting-background-color-accordion"
       items={buildDraftingBackgroundColorItems({
         gradient,
@@ -1162,7 +1118,7 @@ export function DraftingEditBackgroundColorTab({
         onTransparentSelect,
         solidColor,
       })}
-      mode={mode}
+      selectedId={mode}
       openItemIds={openItemIds}
       onOpenItemIdsChange={onOpenItemIdsChange}
     />
@@ -1189,7 +1145,7 @@ export function DraftingLogoColorTab({
   solidColor: string
 }) {
   return (
-    <DraftingColorAccordion
+    <DraftingAccordion
       dataSlot="drafting-logo-color-accordion"
       items={buildDraftingSolidGradientItems({
         gradient,
@@ -1201,7 +1157,7 @@ export function DraftingLogoColorTab({
         solidColor,
         solidLabel: "Logo icon color",
       })}
-      mode={mode}
+      selectedId={mode}
       openItemIds={openItemIds}
       onOpenItemIdsChange={onOpenItemIdsChange}
     />
@@ -1363,7 +1319,7 @@ export function DraftingBackgroundUploadTab({
   remoteUrl: string
 }) {
   return (
-    <DraftingColorAccordion
+    <DraftingAccordion
       dataSlot="drafting-background-upload-accordion"
       items={buildDraftingAssetSourceItems({
         onModeChange,
@@ -1374,7 +1330,7 @@ export function DraftingBackgroundUploadTab({
         remoteUrlAriaLabel: "Background image URL",
         remoteUrlPlaceholder: "https://example.com/background.png",
       })}
-      mode={mode}
+      selectedId={mode}
       openItemIds={openItemIds}
       onOpenItemIdsChange={onOpenItemIdsChange}
     />
@@ -1401,7 +1357,7 @@ export function DraftingLogoUploadTab({
   remoteUrl: string
 }) {
   return (
-    <DraftingColorAccordion
+    <DraftingAccordion
       dataSlot="drafting-logo-upload-accordion"
       items={buildDraftingAssetSourceItems({
         onModeChange,
@@ -1412,7 +1368,7 @@ export function DraftingLogoUploadTab({
         remoteUrlAriaLabel: "Remote logo URL",
         remoteUrlPlaceholder: "https://example.com/logo.png",
       })}
-      mode={mode}
+      selectedId={mode}
       openItemIds={openItemIds}
       onOpenItemIdsChange={onOpenItemIdsChange}
     />
@@ -1775,20 +1731,21 @@ function buildDraftingAssetSourceItems({
   ]
 }
 
-function DraftingColorAccordion<TMode extends string>({
+function DraftingAccordion({
   dataSlot,
   items,
-  mode,
+  selectedId,
   openItemIds,
   onOpenItemIdsChange,
 }: {
   dataSlot: string
   items: Array<{
-    id: TMode
+    id: string
     title: string
     content: ReactNode
+    error?: string
   }>
-  mode: TMode
+  selectedId?: string
   onOpenItemIdsChange: (itemIds: string[]) => void
   openItemIds: string[]
 }) {
@@ -1802,7 +1759,8 @@ function DraftingColorAccordion<TMode extends string>({
         onValueChange={onOpenItemIdsChange}
       >
         {items.map((item) => {
-          const isSelected = item.id === mode
+          const isSelected = selectedId !== undefined && item.id === selectedId
+          const hasError = Boolean(item.error)
 
           return (
             <AccordionItem
@@ -1840,6 +1798,11 @@ function DraftingColorAccordion<TMode extends string>({
                   >
                     {item.title}
                   </span>
+                  {hasError ? (
+                    <span className="shrink-0 self-center text-[6px] leading-none text-[var(--destructive)] opacity-60" aria-hidden="true">
+                      ●
+                    </span>
+                  ) : null}
                 </span>
               </AccordionTrigger>
               <AccordionContent

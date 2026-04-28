@@ -887,7 +887,11 @@ describe("DraftingSurface", () => {
       activateElement(getRequiredElement(document.body, '[data-slot="dropdown-menu-item"][data-content-type="wifi"]'))
     })
 
-    expect(surface.container.textContent).toContain("Enter a network name.")
+    const ssidTrigger = getRequiredElement(
+      surface.container,
+      '[data-item-id="ssid"] [data-slot="drafting-color-trigger"]',
+    )
+    expect(ssidTrigger.textContent).toContain("●")
 
     act(() => {
       changeInputValue(
@@ -896,7 +900,7 @@ describe("DraftingSurface", () => {
       )
     })
 
-    expect(surface.container.textContent).not.toContain("Enter a network name.")
+    expect(ssidTrigger.textContent).not.toContain("●")
   })
 
   it("renders a selectable option-card grid for the style tab", () => {
