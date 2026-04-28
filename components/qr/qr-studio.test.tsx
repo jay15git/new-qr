@@ -18,11 +18,7 @@ vi.mock("@/components/qr/qr-control-sections", () => ({
   QrControlSections: () => <div data-testid="control-sections" />,
 }))
 
-vi.mock("@/components/qr/dashboard-edit-controls", () => ({
-  DashboardEditControls: () => <div data-testid="dashboard-edit-controls" />,
-}))
 
-import { getNextDashboardSectionStateForEditMode } from "@/components/qr/dashboard-edit-sections"
 import {
   cleanupComposeImageUrls,
   cleanupRemovedComposeImageUrls,
@@ -59,9 +55,7 @@ describe("QrStudio", () => {
     expect(markup).toContain('data-slot="dashboard-preview-pane"')
     expect(markup).toContain('data-slot="dashboard-compose-surface"')
     expect(markup).toContain('data-slot="dashboard-compose-controls"')
-    expect(markup).toContain('data-slot="dashboard-compose-edit-mode"')
     expect(markup).toContain('data-slot="dashboard-compose-viewport"')
-    expect(markup).toContain('data-slot="dashboard-compose-reset"')
     expect(markup).toContain(
       'data-slot="dashboard-compose-controls" class="pointer-events-none absolute inset-x-5 bottom-4 z-20 flex justify-center px-2 sm:inset-x-6 lg:inset-x-8"',
     )
@@ -73,8 +67,6 @@ describe("QrStudio", () => {
     expect(markup).toContain("Export filename")
     expect(markup).toContain('data-slot="mode-toggle"')
     expect(markup).toContain("Appearance")
-    expect(markup).toContain("Edit mode")
-    expect(markup).toContain('aria-label="Toggle edit mode"')
     expect(markup).toContain("Download")
     expect(modeToggleIndex).toBeGreaterThan(-1)
     expect(downloadLabelIndex).toBeGreaterThan(modeToggleIndex)
@@ -101,37 +93,6 @@ describe("QrStudio", () => {
     expect(markup).not.toContain("dashboard-sidebar")
     expect(markup).not.toContain("sidebar-provider")
     expect(markup).not.toContain('data-slot="dashboard-settings-stage" class="relative flex min-h-0 flex-1 flex-col overflow-hidden"')
-  })
-
-  it("replaces the editor rail with page, position, and assets tabs when edit mode starts enabled", () => {
-    const markup = renderToStaticMarkup(
-      <QrStudio
-        initialDashboardEditMode
-        initialDashboardEditSection="page"
-        variant="dashboard"
-      />,
-    )
-
-    expect(markup).toContain('data-slot="dashboard-edit-rail"')
-    expect(markup).toContain("Page")
-    expect(markup).toContain("Position")
-    expect(markup).toContain("Assets")
-    expect(markup).toContain('data-testid="dashboard-edit-controls"')
-    expect(markup).not.toContain('data-testid="section-rail"')
-    expect(markup).not.toContain('data-testid="control-sections"')
-  })
-
-  it("restores the previous QR section when edit mode is turned off", () => {
-    expect(
-      getNextDashboardSectionStateForEditMode({
-        activeSection: "background",
-        lastEditorSection: "logo",
-        nextIsEditMode: false,
-      }),
-    ).toEqual({
-      activeSection: "logo",
-      lastEditorSection: "logo",
-    })
   })
 
   it("derives a clean default layer name from uploaded filenames", () => {

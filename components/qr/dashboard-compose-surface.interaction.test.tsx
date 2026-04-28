@@ -144,13 +144,12 @@ describe("DashboardComposeSurface interactions", () => {
     expect(onSceneChange).not.toHaveBeenCalled()
   })
 
-  it("allows document-mode qr movement without enabling the separate edit toggle", () => {
+  it("allows document-mode qr movement", () => {
     const scene = createDashboardScene()
     const node = scene.nodes[0]
     const onSceneChange = vi.fn()
     const onSelectedNodeChange = vi.fn()
     const surface = renderSurface({
-      isEditMode: false,
       onSceneChange,
       onSelectedNodeChange,
       scene,
@@ -178,14 +177,12 @@ describe("DashboardComposeSurface interactions", () => {
     expect(getCommittedScene(onSceneChange).nodes[0]?.y).toBe(node.y + 60)
   })
 
-  it("allows direct qr movement without enabling edit mode when opted in", () => {
+  it("allows direct qr movement by default", () => {
     const scene = createDashboardScene()
     const node = scene.nodes[0]
     const onSceneChange = vi.fn()
     const onSelectedNodeChange = vi.fn()
     const surface = renderSurface({
-      allowDirectNodeTransforms: true,
-      isEditMode: false,
       onSceneChange,
       onSelectedNodeChange,
       scene,
@@ -210,40 +207,6 @@ describe("DashboardComposeSurface interactions", () => {
     expect(onSceneChange).toHaveBeenCalledTimes(1)
     expect(getCommittedScene(onSceneChange).nodes[0]?.x).toBe(node.x + 60)
     expect(getCommittedScene(onSceneChange).nodes[0]?.y).toBe(node.y + 60)
-  })
-
-  it("allows direct qr rotation without enabling edit mode when opted in", () => {
-    const scene = createDashboardScene()
-    const node = scene.nodes[0]
-    const width = node.naturalWidth * node.scale
-    const height = node.naturalHeight * node.scale
-    const centerX = node.x + width * 0.5
-    const centerY = node.y + height * 0.5
-    const onSceneChange = vi.fn()
-    const surface = renderSurface({
-      allowDirectNodeTransforms: true,
-      isEditMode: false,
-      onSceneChange,
-      scene,
-      selectedNodeId: DASHBOARD_QR_NODE_ID,
-    })
-
-    dispatchPointer(getRequiredElement(surface.container, '[aria-label="Rotate QR"]'), "pointerdown", {
-      clientX: centerX,
-      clientY: centerY - 160,
-    })
-    dispatchPointer(window, "pointermove", {
-      clientX: centerX + 160,
-      clientY: centerY,
-    })
-    flushAnimationFrames()
-    dispatchPointer(window, "pointerup", {
-      clientX: centerX + 160,
-      clientY: centerY,
-    })
-
-    expect(onSceneChange).toHaveBeenCalledTimes(1)
-    expect(getCommittedScene(onSceneChange).nodes[0]?.rotation).toBeCloseTo(90)
   })
 
   it("resyncs the draft canvas from incoming scene props when no interaction is active", () => {
@@ -274,49 +237,6 @@ describe("DashboardComposeSurface interactions", () => {
       `translate(${nextScene.nodes[0]?.x}px, ${nextScene.nodes[0]?.y}px)`,
     )
   })
-
-  it("commits and clears interaction state when edit mode is turned off mid-drag", async () => {
-    const scene = createDashboardScene()
-    const node = scene.nodes[0]
-    const onSceneChange = vi.fn()
-    const surface = renderSurface({
-      onSceneChange,
-      scene,
-      selectedNodeId: DASHBOARD_QR_NODE_ID,
-    })
-
-    dispatchPointer(surface.getNode(DASHBOARD_QR_NODE_ID), "pointerdown", {
-      clientX: node.x + 24,
-      clientY: node.y + 24,
-    })
-    dispatchPointer(window, "pointermove", {
-      clientX: node.x + 60,
-      clientY: node.y + 48,
-    })
-    flushAnimationFrames()
-
-    surface.rerender({
-      isEditMode: false,
-      scene,
-      selectedNodeId: null,
-    })
-    await flushMicrotasks()
-
-    expect(onSceneChange).toHaveBeenCalledTimes(1)
-    expect(surface.container.querySelector('[aria-label="Rotate QR"]')).toBeNull()
-
-    const committedScene = getCommittedScene(onSceneChange)
-
-    surface.rerender({
-      isEditMode: true,
-      scene: committedScene,
-      selectedNodeId: DASHBOARD_QR_NODE_ID,
-    })
-
-    expect(surface.getNode(DASHBOARD_QR_NODE_ID).style.transform).toContain(
-      `translate(${committedScene.nodes[0]?.x}px, ${committedScene.nodes[0]?.y}px)`,
-    )
-  })
 })
 
 function createDashboardScene() {
@@ -331,12 +251,6 @@ function flushAnimationFrames() {
     for (const callback of callbacks) {
       callback(16)
     }
-  })
-}
-
-async function flushMicrotasks() {
-  await act(async () => {
-    await Promise.resolve()
   })
 }
 
@@ -384,8 +298,6 @@ function renderSurface(
 ) {
   let props: ComponentProps<typeof DashboardComposeSurface> = {
     errorMessage: null,
-    isEditMode: true,
-    onEditModeChange: vi.fn(),
     onReset: vi.fn(),
     onQrSizeChange: vi.fn(),
     onSceneChange: vi.fn(),

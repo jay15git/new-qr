@@ -222,7 +222,7 @@ describe("DraftingSurface", () => {
     expect(
       surface.container.querySelector('[data-slot="dashboard-compose-document-guides"]'),
     ).toBeNull()
-    expect(surface.container.textContent).toContain("Reset defaults")
+    expect(surface.container.querySelector('button[aria-label="Reset defaults"]')).not.toBeNull()
     expect(surface.container.querySelectorAll('[data-slot="drafting-plus-marker"]')).toHaveLength(10)
     expect(
       surface.container.querySelector('[data-slot="drafting-plus-marker"]')?.getAttribute("class"),
@@ -249,17 +249,16 @@ describe("DraftingSurface", () => {
     expect(surface.container.textContent).toContain("Encoding")
     expect(surface.container.textContent).toContain("Layers")
     expect(headerContent.className).toContain("justify-end")
-    expect(header.innerHTML).toContain('data-slot="mode-toggle"')
+    expect(header.innerHTML).toContain('data-slot="switch"')
     expect(header.innerHTML).toContain('data-slot="drafting-download-trigger"')
-    expect(getRequiredElement(header, '[data-slot="mode-toggle"]').className).not.toContain(
+    expect(getRequiredElement(header, '[data-slot="switch"]').className).not.toContain(
       "bg-[var(--drafting-panel-bg)]",
     )
-    expect(getRequiredElement(header, '[data-slot="mode-toggle"]').className).not.toContain(
+    expect(getRequiredElement(header, '[data-slot="switch"]').className).not.toContain(
       "shadow-[var(--drafting-shadow-rest)]",
     )
     expect(header.innerHTML).toContain("bg-[#00000003]")
     expect(surface.container.textContent).not.toContain("Appearance")
-    expect(surface.container.innerHTML).toContain('data-slot="mode-toggle-thumb-icon"')
     expect(surface.container.innerHTML).toContain('aria-label="Toggle dark mode"')
     expect(surface.container.innerHTML).not.toMatch(
       /dark:[^"]*shadow-\[[^\]]*rgba\(255,255,255/,
@@ -291,7 +290,7 @@ describe("DraftingSurface", () => {
       'input[type="radio"][aria-label="Export WEBP"]',
     ) as HTMLInputElement
 
-    expect(actions.firstElementChild?.getAttribute("data-slot")).toBe("mode-toggle")
+    expect(actions.firstElementChild?.getAttribute("data-slot")).toBe("switch")
     expect(actions.querySelector('[data-slot="drafting-download-trigger"]')).not.toBeNull()
     expect(
       getRequiredElement(surface.container, '[data-slot="drafting-download-format-grid"]')

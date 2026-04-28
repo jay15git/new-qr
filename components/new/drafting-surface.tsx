@@ -1582,7 +1582,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
                 sideOffset={10}
                 className={cn(
                   fontClassName,
-                  "flex max-h-[calc(100dvh-5rem)] w-[min(27rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-[12px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] p-0 text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] backdrop-blur-xl",
+                  "flex max-h-[calc(100dvh-5rem)] w-[min(27rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-[12px] border p-0",
                 )}
               >
                 <div className="flex min-h-0 flex-1 flex-col">
@@ -1977,11 +1977,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
             className="h-full min-h-0 px-0 pb-3 pt-0 sm:p-5 lg:p-6"
           >
             <DashboardComposeSurface
-              allowDirectNodeTransforms
               errorMessage={composeErrorMessage}
-              isEditMode={false}
-              showEditModeToggle={false}
-              onEditModeChange={() => {}}
               onAddQrCode={() => {
                 void handleAddQrCode()
               }}

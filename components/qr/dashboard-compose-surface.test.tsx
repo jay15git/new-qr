@@ -24,14 +24,12 @@ const QR_PAYLOAD = {
 }
 
 describe("DashboardComposeSurface", () => {
-  it("hides qr transform affordances while edit mode is off", () => {
+  it("exposes qr transform affordances by default", () => {
     const scene = upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD)
 
     const markup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={false}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -42,43 +40,13 @@ describe("DashboardComposeSurface", () => {
       />,
     )
 
-    expect(markup).toContain("Edit mode")
-    expect(markup).toContain('aria-label="Toggle edit mode"')
     expect(markup).not.toContain('aria-label="Rotate QR"')
-    expect(markup).not.toContain('aria-label="Resize QR from top left"')
-    expect(markup).not.toContain('aria-label="Resize QR from top right"')
-    expect(markup).not.toContain('aria-label="Resize QR from bottom left"')
-    expect(markup).not.toContain('aria-label="Resize QR from bottom right"')
-    expect(markup).not.toContain("320 × 320")
-  })
-
-  it("can expose direct qr transform affordances without edit mode", () => {
-    const scene = upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD)
-
-    const markup = renderToStaticMarkup(
-      <DashboardComposeSurface
-        allowDirectNodeTransforms
-        errorMessage={null}
-        isEditMode={false}
-        onEditModeChange={vi.fn()}
-        onReset={vi.fn()}
-        onQrSizeChange={vi.fn()}
-        onSceneChange={vi.fn()}
-        onSelectedNodeChange={vi.fn()}
-        qrSize={QR_PAYLOAD.naturalWidth}
-        scene={scene}
-        selectedNodeId={DASHBOARD_QR_NODE_ID}
-      />,
-    )
-
-    expect(markup).toContain('aria-label="Rotate QR"')
     expect(markup).toContain('aria-label="Resize QR from top left"')
     expect(markup).toContain('aria-label="Resize QR from top right"')
     expect(markup).toContain('aria-label="Resize QR from bottom left"')
     expect(markup).toContain('aria-label="Resize QR from bottom right"')
     expect(markup).toContain("320 × 320")
     expect(markup).toContain("rounded-[4px] border border-black")
-    expect(markup).toContain("bg-black/72")
     expect(markup).toContain("h-6 w-6 items-center justify-center rounded-[4px] border border-black")
     expect(markup).not.toContain("border-sky-600")
     expect(markup).not.toContain("text-sky-700")
@@ -90,8 +58,6 @@ describe("DashboardComposeSurface", () => {
     const dashboardMarkup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={false}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -105,8 +71,6 @@ describe("DashboardComposeSurface", () => {
     const neutralMarkup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={false}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -125,7 +89,6 @@ describe("DashboardComposeSurface", () => {
     expect(neutralMarkup).toContain("background-color:var(--drafting-canvas-bg)")
     expect(neutralMarkup).toContain("var(--drafting-canvas-check-opacity)")
     expect(neutralMarkup).toContain('data-toolbar-appearance="neutral"')
-    expect(neutralMarkup).toContain("border-[var(--drafting-line)]")
     expect(neutralMarkup).not.toContain("background-color:#e8edf4")
   })
 
@@ -136,8 +99,6 @@ describe("DashboardComposeSurface", () => {
     const markup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={true}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -153,40 +114,13 @@ describe("DashboardComposeSurface", () => {
     )
   })
 
-  it("renders interactive rotate and resize affordances when edit mode is on", () => {
-    const scene = upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD)
-
-    const markup = renderToStaticMarkup(
-      <DashboardComposeSurface
-        errorMessage={null}
-        isEditMode={true}
-        onEditModeChange={vi.fn()}
-        onReset={vi.fn()}
-        onQrSizeChange={vi.fn()}
-        onSceneChange={vi.fn()}
-        onSelectedNodeChange={vi.fn()}
-        qrSize={QR_PAYLOAD.naturalWidth}
-        scene={scene}
-        selectedNodeId={scene.nodes[0]?.id ?? null}
-      />,
-    )
-
-    expect(markup).not.toContain('aria-label="Rotate QR"')
-    expect(markup).toContain('aria-label="Resize QR from top left"')
-    expect(markup).toContain('aria-label="Resize QR from top right"')
-    expect(markup).toContain('aria-label="Resize QR from bottom left"')
-    expect(markup).toContain('aria-label="Resize QR from bottom right"')
-  })
-
   it("renders the add qr toolbar action when a handler is supplied", () => {
     const scene = upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD)
 
     const markup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={true}
         onAddQrCode={vi.fn()}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -215,8 +149,6 @@ describe("DashboardComposeSurface", () => {
     const markup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={true}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -248,8 +180,6 @@ describe("DashboardComposeSurface", () => {
     const markup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={false}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -275,15 +205,13 @@ describe("DashboardComposeSurface", () => {
     expect(markup).not.toContain("border border-[#111111]")
   })
 
-  it("renders the selected qr size label below the composer preview in edit mode", () => {
+  it("renders the selected qr size label below the composer preview", () => {
     const scene = upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD)
     const fittedSize = Math.round(QR_PAYLOAD.naturalWidth * DASHBOARD_QR_STAGE_FIT_RATIO * 2)
 
     const markup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={true}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -329,8 +257,6 @@ describe("DashboardComposeSurface", () => {
     const markup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={true}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -345,7 +271,7 @@ describe("DashboardComposeSurface", () => {
     expect(markup).not.toContain('data-selected="true"')
   })
 
-  it("renders locked nodes without transform handles while edit mode is on", () => {
+  it("renders locked nodes without transform handles", () => {
     const seededScene = upsertDashboardQrNode(createDashboardComposeScene(), QR_PAYLOAD)
     const scene = {
       ...seededScene,
@@ -360,8 +286,6 @@ describe("DashboardComposeSurface", () => {
     const markup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={true}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -383,8 +307,6 @@ describe("DashboardComposeSurface", () => {
     const markup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={true}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -407,8 +329,6 @@ describe("DashboardComposeSurface", () => {
     const markup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={true}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -436,8 +356,6 @@ describe("DashboardComposeSurface", () => {
     const markup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={true}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -450,8 +368,6 @@ describe("DashboardComposeSurface", () => {
       />,
     )
 
-    expect(markup).toContain("Document mode")
-    expect(markup).toContain('aria-label="Toggle document mode"')
     expect(markup).toContain('data-compose-mode="document"')
     expect(markup).toContain('data-slot="dashboard-compose-document-guides"')
     expect(markup).toContain("dark:border-foreground/14")
@@ -469,8 +385,6 @@ describe("DashboardComposeSurface", () => {
     const markup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={true}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -495,8 +409,6 @@ describe("DashboardComposeSurface", () => {
     const markup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={true}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -534,8 +446,6 @@ describe("DashboardComposeSurface", () => {
     const markup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={false}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -563,8 +473,6 @@ describe("DashboardComposeSurface", () => {
     const markup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={false}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -585,8 +493,6 @@ describe("DashboardComposeSurface", () => {
     const markup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={false}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -612,9 +518,7 @@ describe("DashboardComposeSurface", () => {
     const markup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={false}
         onApplyQualitySuggestionPath={vi.fn()}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
@@ -665,8 +569,6 @@ describe("DashboardComposeSurface", () => {
     const markup = renderToStaticMarkup(
       <DashboardComposeSurface
         errorMessage={null}
-        isEditMode={false}
-        onEditModeChange={vi.fn()}
         onReset={vi.fn()}
         onQrSizeChange={vi.fn()}
         onSceneChange={vi.fn()}
