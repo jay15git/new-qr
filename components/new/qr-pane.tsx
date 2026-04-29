@@ -51,10 +51,7 @@ export function QrPane({
       data-slot="qr-pane"
       data-selected={isSelected ? "true" : "false"}
       data-resize-active={isResizeActive ? "true" : "false"}
-      className={cn(
-        "relative flex h-full w-full flex-col items-center justify-center overflow-hidden",
-        isSelected && "ring-2 ring-inset ring-[var(--drafting-ink)]",
-      )}
+      className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden"
       onClick={(e) => {
         // Only select if clicking the pane background, not the QR itself
         if (e.target === e.currentTarget) {
@@ -65,11 +62,7 @@ export function QrPane({
       <div
         data-slot="dashboard-compose-canvas"
         data-compose-mode="compose"
-        className="relative flex items-center justify-center"
-        style={{
-          width: Math.min(state.width, 480),
-          height: Math.min(state.height, 480),
-        }}
+        className="relative flex h-full w-full items-center justify-center overflow-hidden"
       >
         {isLoading ? (
           <div className="text-sm font-medium text-[var(--drafting-ink-muted)]">

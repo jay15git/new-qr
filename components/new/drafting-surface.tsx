@@ -402,6 +402,8 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const [selectedBackgroundColor, setSelectedBackgroundColor] = useState(
     DEFAULT_DRAFTING_STUDIO_STATE.backgroundOptions.color,
   )
+  const [selectedBackgroundTransparent, setSelectedBackgroundTransparent] =
+    useState(true)
   const [selectedBackgroundGradient, setSelectedBackgroundGradient] =
     useState<StudioGradient>(
       structuredClone(DEFAULT_DRAFTING_STUDIO_STATE.backgroundGradient),
@@ -565,7 +567,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       },
       backgroundOptions: {
         color: selectedBackgroundColor,
-        transparent: false,
+        transparent: selectedBackgroundTransparent,
       },
       logoGradient: {
         ...structuredClone(selectedLogoGradient),
@@ -593,6 +595,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       selectedBackgroundColor,
       selectedBackgroundColorMode,
       selectedBackgroundGradient,
+      selectedBackgroundTransparent,
       selectedBackgroundRemoteUrl,
       selectedContentValue,
       selectedCornerDotColor,
@@ -991,6 +994,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       status: "idle",
     })
     setActivePanelTabs({ ...DEFAULT_DRAFTING_PANEL_TABS })
+    setSelectedBackgroundTransparent(true)
   }
 
   useEffect(() => {
@@ -1099,6 +1103,8 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   ])
 
   async function handleAddQrCode() {
+    if (qrNodeIds.length >= 10) return
+
     const sourceState = qrStateByNodeId[activeQrNodeId] ?? draftingStudioState
     const nextNodeId = `${DASHBOARD_QR_NODE_ID}-${crypto.randomUUID()}`
 
@@ -1112,7 +1118,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     setActiveQrNodeId(nextNodeId)
     applyDraftingQrStateToControls(sourceState)
     setResizeActivePaneId(null)
-
   }
 
   function handleRemoveQrCode(paneId: string) {
@@ -1345,16 +1350,19 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
             ensureBackgroundColorItemExpanded("gradient")
             setSelectedBackgroundColorMode("gradient")
             setSelectedBackgroundGradient({ ...value, enabled: true })
+            setSelectedBackgroundTransparent(false)
           }}
           onModeChange={(value) => {
             ensureBackgroundColorItemExpanded(value)
             setSelectedBackgroundColorMode(value)
+            setSelectedBackgroundTransparent(false)
           }}
           onOpenItemIdsChange={setOpenBackgroundColorItems}
           onSolidColorChange={(value) => {
             ensureBackgroundColorItemExpanded("solid")
             setSelectedBackgroundColorMode("solid")
             setSelectedBackgroundColor(value)
+            setSelectedBackgroundTransparent(false)
           }}
         />
       )
@@ -2015,6 +2023,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
           >
             <DraftingPaneWorkspace
               activePaneId={activeQrNodeId}
+              canAddQrCode={qrNodeIds.length < 10}
               onAddQrCode={() => {
                 void handleAddQrCode()
               }}

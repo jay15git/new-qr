@@ -1,8 +1,10 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useState, useSyncExternalStore } from "react"
 import {
   CopyPlusIcon,
+  Maximize2Icon,
+  Minimize2Icon,
   RefreshCcwIcon,
   Trash2Icon,
   ZoomInIcon,
@@ -10,13 +12,9 @@ import {
 } from "lucide-react"
 
 import { QrPane } from "@/components/new/qr-pane"
+import { getQrLayout } from "@/components/new/qr-layout-engine"
 import type { QrStudioState } from "@/components/qr/qr-studio-state"
 import { Button } from "@/components/ui/button"
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable"
 import {
   Tooltip,
   TooltipContent,
@@ -35,6 +33,7 @@ type DraftingPaneWorkspaceProps = {
   panes: DraftingPane[]
   activePaneId: string
   resizeActivePaneId: string | null
+  canAddQrCode?: boolean
   onAddQrCode?: () => void
   onRemoveQrCode?: (paneId: string) => void
   onReset: () => void
@@ -43,10 +42,23 @@ type DraftingPaneWorkspaceProps = {
   onPaneSizeChange: (paneId: string, size: number) => void
 }
 
+function getPortraitSnapshot() {
+  if (typeof window === "undefined" || !window.matchMedia) return false
+  return window.matchMedia("(orientation: portrait)").matches
+}
+
+function subscribePortrait(callback: () => void) {
+  if (typeof window === "undefined" || !window.matchMedia) return () => {}
+  const mql = window.matchMedia("(orientation: portrait)")
+  mql.addEventListener("change", callback)
+  return () => mql.removeEventListener("change", callback)
+}
+
 export function DraftingPaneWorkspace({
   panes,
   activePaneId,
   resizeActivePaneId,
+  canAddQrCode = true,
   onAddQrCode,
   onRemoveQrCode,
   onReset,
@@ -55,8 +67,12 @@ export function DraftingPaneWorkspace({
   onPaneSizeChange,
 }: DraftingPaneWorkspaceProps) {
   const [zoomLevels, setZoomLevels] = useState<Record<string, number>>({})
-
-  const defaultPanelSize = panes.length > 0 ? 100 / panes.length : 100
+  const [maximizedPaneId, setMaximizedPaneId] = useState<string | null>(null)
+  const isPortrait = useSyncExternalStore(
+    subscribePortrait,
+    getPortraitSnapshot,
+    () => false,
+  )
 
   const activeZoom = zoomLevels[activePaneId] ?? 1
 
@@ -76,7 +92,21 @@ export function DraftingPaneWorkspace({
 
   const zoomPercent = `${Math.round(activeZoom * 100)}%`
 
+  const isMaximized = maximizedPaneId !== null
+
+  const handleToggleMaximize = useCallback(() => {
+    setMaximizedPaneId((current) => (current === null ? activePaneId : null))
+  }, [activePaneId])
+
   const canRemove = panes.length > 1 && onRemoveQrCode
+
+  const visiblePanes = isMaximized
+    ? panes.filter((p) => p.id === activePaneId)
+    : panes
+
+  const layout = panes.length > 0
+    ? getQrLayout(isMaximized ? 1 : panes.length, isPortrait)
+    : null
 
   return (
     <TooltipProvider>
@@ -87,72 +117,66 @@ export function DraftingPaneWorkspace({
               No QR codes
             </div>
           ) : (
-            <ResizablePanelGroup
-              orientation="horizontal"
+            <div
               className="h-full w-full"
+              style={{
+                display: "grid",
+                gridTemplateColumns: layout ? `repeat(${layout.cols}, 1fr)` : undefined,
+                gridTemplateRows: layout ? `repeat(${layout.rows}, 1fr)` : undefined,
+                gap: "0.5rem",
+                ...(layout?.areas ? { gridTemplateAreas: layout.areas } : {}),
+              }}
             >
-              {panes.flatMap((pane, index) => {
+              {visiblePanes.map((pane, index) => {
                 const isSelected = pane.id === activePaneId
                 const isResizeActive = pane.id === resizeActivePaneId
                 const paneZoom = zoomLevels[pane.id] ?? 1
+                const areaName = layout?.areas
+                  ? String.fromCharCode(97 + index)
+                  : undefined
 
-                const panel = (
-                  <ResizablePanel
+                return (
+                  <div
                     key={pane.id}
-                    defaultSize={defaultPanelSize}
-                    minSize={15}
+                    data-slot="dashboard-compose-surface"
+                    data-surface-appearance="neutral"
+                    className={cn(
+                      "relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-[var(--drafting-canvas-bg)]",
+                      isSelected &&
+                        "ring-2 ring-inset ring-[var(--drafting-ink)]",
+                    )}
+                    style={{
+                      gridArea: areaName,
+                      backgroundImage:
+                        "linear-gradient(45deg, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 25%, transparent 25%), linear-gradient(-45deg, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 75%), linear-gradient(-45deg, transparent 75%, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 75%)",
+                      backgroundPosition: "0 0, 0 18px, 18px -18px, -18px 0",
+                      backgroundSize: "36px 36px",
+                    }}
+                    onClick={() => onPaneSelect(pane.id)}
                   >
                     <div
-                      data-slot="dashboard-compose-surface"
-                      data-surface-appearance="neutral"
-                      className={cn(
-                        "relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-[var(--drafting-canvas-bg)]",
-                        isSelected &&
-                          "ring-2 ring-inset ring-[var(--drafting-ink)]",
-                      )}
                       style={{
-                        backgroundImage:
-                          "linear-gradient(45deg, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 25%, transparent 25%), linear-gradient(-45deg, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 75%), linear-gradient(-45deg, transparent 75%, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 75%)",
-                        backgroundPosition: "0 0, 0 18px, 18px -18px, -18px 0",
-                        backgroundSize: "36px 36px",
+                        transform: `scale(${paneZoom})`,
+                        transformOrigin: "center center",
+                        transition: "transform 150ms ease-out",
                       }}
-                      onClick={() => onPaneSelect(pane.id)}
+                      className="flex h-full w-full items-center justify-center"
                     >
-                      <div
-                        style={{
-                          transform: `scale(${paneZoom})`,
-                          transformOrigin: "center center",
-                          transition: "transform 150ms ease-out",
-                        }}
-                        className="flex h-full w-full items-center justify-center"
-                      >
-                        <QrPane
-                          state={pane.state}
-                          isSelected={isSelected}
-                          isResizeActive={isResizeActive}
-                          onSelect={() => onPaneSelect(pane.id)}
-                          onQrClick={() => onPaneQrClick(pane.id)}
-                          onSizeChange={(size) =>
-                            onPaneSizeChange(pane.id, size)
-                          }
-                        />
-                      </div>
+                      <QrPane
+                        state={pane.state}
+                        isSelected={isSelected}
+                        isResizeActive={isResizeActive}
+                        onSelect={() => onPaneSelect(pane.id)}
+                        onQrClick={() => onPaneQrClick(pane.id)}
+                        onSizeChange={(size) =>
+                          onPaneSizeChange(pane.id, size)
+                        }
+                      />
                     </div>
-                  </ResizablePanel>
+                  </div>
                 )
-
-                const handle =
-                  index < panes.length - 1 ? (
-                    <ResizableHandle
-                      key={`handle-${index}`}
-                      withHandle
-                      className="z-10 w-1.5 cursor-ew-resize bg-[var(--drafting-line-strong)]/30 transition-colors duration-150 hover:bg-[var(--drafting-line-strong)]/60 active:bg-[var(--drafting-line-strong)]/80"
-                    />
-                  ) : null
-
-                return handle ? [panel, handle] : [panel]
               })}
-            </ResizablePanelGroup>
+            </div>
           )}
         </div>
 
@@ -161,7 +185,7 @@ export function DraftingPaneWorkspace({
             data-slot="dashboard-compose-toolbar"
             data-toolbar-appearance="neutral"
             className={cn(
-              "pointer-events-auto inline-flex max-w-full flex-wrap items-center justify-center gap-1 rounded-[10px] bg-[var(--drafting-panel-bg)]/60 px-2 py-1.5 backdrop-blur",
+              "pointer-events-auto inline-flex max-w-full flex-wrap items-center justify-center gap-1 rounded-[10px] bg-[var(--drafting-panel-bg-active)] px-2 py-1.5",
             )}
           >
             <Tooltip>
@@ -200,6 +224,33 @@ export function DraftingPaneWorkspace({
               <TooltipContent>Zoom in</TooltipContent>
             </Tooltip>
 
+            {panes.length > 1 && (
+              <>
+                <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label={isMaximized ? "Restore layout" : "Maximize pane"}
+                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                      onClick={handleToggleMaximize}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      {isMaximized ? (
+                        <Minimize2Icon />
+                      ) : (
+                        <Maximize2Icon />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {isMaximized ? "Restore layout" : "Maximize pane"}
+                  </TooltipContent>
+                </Tooltip>
+              </>
+            )}
+
             <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" />
 
             {onAddQrCode ? (
@@ -208,8 +259,9 @@ export function DraftingPaneWorkspace({
                   <TooltipTrigger asChild>
                     <Button
                       aria-label="Add QR code"
-                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] disabled:opacity-40"
                       onClick={onAddQrCode}
+                      disabled={!canAddQrCode}
                       size="icon"
                       type="button"
                       variant="ghost"
@@ -217,7 +269,9 @@ export function DraftingPaneWorkspace({
                       <CopyPlusIcon />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Add QR code</TooltipContent>
+                  <TooltipContent>
+                    {canAddQrCode ? "Add QR code" : "Maximum 10 QR codes reached"}
+                  </TooltipContent>
                 </Tooltip>
 
                 {canRemove ? (
