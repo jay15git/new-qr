@@ -33,8 +33,8 @@ This version has breaking changes. Read the relevant guide in `node_modules/next
 - **Use available MCP tools for every task** instead of falling back to raw bash commands. This includes:
   - `gitnexus_*` tools for codebase exploration and impact analysis
   - `context7_*` tools for library/framework documentation lookups
-  - `supabase_*` tools if database operations are needed
   - `pencil_*` tools if working with `.pen` design files in `designs/`
+- **Do not use these MCPs in this repo:** `paper`, `react-grab-mcp`, `supabase_*`
 - If a tool exists for the job, use it. Do not manually `cat`, `grep`, or `sed` when a structured tool is available.
 
 ## Testing Notes
