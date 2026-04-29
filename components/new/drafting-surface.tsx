@@ -34,6 +34,7 @@ import {
   DRAFTING_LAYERS_TAB_ICON,
   DraftingLayersTab,
 } from "@/components/new/drafting-layers-tab"
+import { DraftingPaneWorkspace } from "@/components/new/drafting-pane-workspace"
 import {
   filterBrandIcons,
   findBrandIconById,
@@ -68,16 +69,9 @@ import {
   isRasterExportExtension,
   measureDashboardRasterExport,
 } from "@/components/qr/dashboard-raster-export"
-import { DashboardComposeSurface } from "@/components/qr/dashboard-compose-surface"
 import {
-  createDashboardComposeScene,
-  type DashboardComposeScene,
   DASHBOARD_QR_NODE_ID,
-  getDashboardComposeNode,
-  getDashboardQrNodes,
   isDashboardQrNodeId,
-  upsertDashboardQrNode,
-  updateDashboardComposeNode,
 } from "@/components/qr/dashboard-compose-scene"
 import {
   createDefaultQrStudioState,
@@ -478,14 +472,11 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     useState<ErrorCorrectionLevel>(
       DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.errorCorrectionLevel,
     )
-  const [draftingScene, setDraftingScene] = useState(() => createDashboardComposeScene())
-  const isComposeEditMode = false
-  const [selectedComposeNodeId, setSelectedComposeNodeId] = useState<string | null>(null)
   const [activeQrNodeId, setActiveQrNodeId] = useState(DASHBOARD_QR_NODE_ID)
+  const [resizeActivePaneId, setResizeActivePaneId] = useState<string | null>(null)
   const [qrStateByNodeId, setQrStateByNodeId] = useState<DraftingQrStateByNodeId>(() => ({
     [DASHBOARD_QR_NODE_ID]: cloneDraftingQrState(DEFAULT_DRAFTING_STUDIO_STATE),
   }))
-  const [composeErrorMessage, setComposeErrorMessage] = useState<string | null>(null)
   const [selectedDownloadExtension, setSelectedDownloadExtension] =
     useState<DraftingDownloadExtension>("png")
   const [selectedDownloadTarget, setSelectedDownloadTarget] =
@@ -499,7 +490,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const [activePanelTabs, setActivePanelTabs] = useState<Record<DraftingToolId, string>>(
     DEFAULT_DRAFTING_PANEL_TABS,
   )
-  const dashboardPayloadRequestRef = useRef(0)
   const draftingExportPreviewRequestRef = useRef(0)
   const draftingExportPreviewTimeoutRef = useRef<number | null>(null)
   const activeToolConfig =
@@ -673,21 +663,20 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const selectedRasterExportTargetSizePx = isDraftingRasterExport
     ? selectedRasterExportPreset.sizePx
     : undefined
-  const draftingQrNodes = useMemo(() => getDashboardQrNodes(draftingScene), [draftingScene])
+
+  const qrNodeIds = useMemo(() => Object.keys(qrStateByNodeId), [qrStateByNodeId])
   const activeQrDownloadTarget = getDraftingQrNodeDownloadTarget(activeQrNodeId)
   const shouldMeasureActiveQrExport =
-    !isComposeEditMode &&
-    (selectedDownloadTarget === "current" ||
-      selectedDownloadTarget === activeQrDownloadTarget)
-  const shouldMeasureFullPageExport =
-    isComposeEditMode && selectedDownloadTarget === "current"
+    selectedDownloadTarget === "current" ||
+    selectedDownloadTarget === activeQrDownloadTarget
+
   const draftingDownloadTargetOptions = useMemo(
     () => [
       {
         id: "current" as const,
-        label: isComposeEditMode ? "Full page" : "Current QR",
+        label: "Current QR",
       },
-      ...(draftingQrNodes.length > 0 || !isComposeEditMode
+      ...(qrNodeIds.length > 0
         ? [
             {
               id: "all-qr" as const,
@@ -695,12 +684,12 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
             },
           ]
         : []),
-      ...draftingQrNodes.map((node) => ({
-        id: getDraftingQrNodeDownloadTarget(node.id),
-        label: node.name,
+      ...qrNodeIds.map((nodeId) => ({
+        id: getDraftingQrNodeDownloadTarget(nodeId),
+        label: getQrNodeName(qrStateByNodeId, nodeId),
       })),
     ],
-    [draftingQrNodes, isComposeEditMode],
+    [qrNodeIds, qrStateByNodeId],
   )
   const effectiveDraftingExportSizePreview: DraftingExportSizePreview =
     canDownload && isDraftingRasterExport
@@ -936,23 +925,50 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     setSelectedErrorCorrectionLevel(nextState.qrOptions.errorCorrectionLevel)
   }
 
-  function handleComposeNodeSelection(nodeId: string | null) {
-    if (nodeId && isDashboardQrNodeId(nodeId)) {
-      const nextQrState =
-        nodeId === activeQrNodeId
-          ? draftingStudioState
-          : (qrStateByNodeId[nodeId] ?? draftingStudioState)
-
-      setQrStateByNodeId((current) => ({
-        ...current,
-        [activeQrNodeId]: cloneDraftingQrState(draftingStudioState),
-        [nodeId]: cloneDraftingQrState(nextQrState),
-      }))
-      setActiveQrNodeId(nodeId)
-      applyDraftingQrStateToControls(nextQrState)
+  function handlePaneSelection(paneId: string) {
+    if (paneId === activeQrNodeId) {
+      return
     }
 
-    setSelectedComposeNodeId(nodeId)
+    // Save current controls state to the old active pane
+    setQrStateByNodeId((current) => ({
+      ...current,
+      [activeQrNodeId]: cloneDraftingQrState(draftingStudioState),
+    }))
+
+    // Load the new pane's state into controls
+    const nextState = qrStateByNodeId[paneId] ?? draftingStudioState
+    setActiveQrNodeId(paneId)
+    applyDraftingQrStateToControls(nextState)
+    setResizeActivePaneId(null)
+  }
+
+  function handlePaneQrClick(paneId: string) {
+    if (paneId !== activeQrNodeId) {
+      handlePaneSelection(paneId)
+      return
+    }
+    // Toggle resize mode for the active pane
+    setResizeActivePaneId((current) => (current === paneId ? null : paneId))
+  }
+
+  function handlePaneSizeChange(paneId: string, size: number) {
+    setQrStateByNodeId((current) => {
+      const state = current[paneId]
+      if (!state) return current
+      return {
+        ...current,
+        [paneId]: {
+          ...state,
+          width: size,
+          height: size,
+        },
+      }
+    })
+    // Also update the controls if this is the active pane
+    if (paneId === activeQrNodeId) {
+      setSelectedQrSize(size)
+    }
   }
 
   function resetDraftingWorkspace() {
@@ -962,19 +978,18 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     applyDraftingQrStateToControls(nextState)
     setBrandIconQuery("")
     setBrandIconCategory("all")
-    setSelectedComposeNodeId(null)
     setActiveQrNodeId(DASHBOARD_QR_NODE_ID)
+    setResizeActivePaneId(null)
     setQrStateByNodeId({
       [DASHBOARD_QR_NODE_ID]: cloneDraftingQrState(nextState),
     })
-    setComposeErrorMessage(null)
+
     setSelectedDownloadExtension("png")
     setSelectedDownloadTarget("current")
     setSelectedRasterExportPresetId(DEFAULT_DRAFTING_RASTER_EXPORT_PRESET_ID)
     setDraftingExportSizePreview({
       status: "idle",
     })
-    setDraftingScene(createDashboardComposeScene())
     setActivePanelTabs({ ...DEFAULT_DRAFTING_PANEL_TABS })
   }
 
@@ -983,33 +998,29 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       if (draftingExportPreviewTimeoutRef.current !== null) {
         window.clearTimeout(draftingExportPreviewTimeoutRef.current)
       }
-
     }
   }, [])
 
+  // Sync active pane state when controls change
   useEffect(() => {
-    const requestId = ++dashboardPayloadRequestRef.current
+    setQrStateByNodeId((current) => {
+      const prevState = current[activeQrNodeId]
+      if (!prevState) return current
 
-    void buildDashboardQrNodePayload(draftingStudioState)
-      .then((payload) => {
-        if (dashboardPayloadRequestRef.current !== requestId) {
-          return
-        }
+      // Only update if something actually changed
+      const nextState = cloneDraftingQrState(draftingStudioState)
+      if (JSON.stringify(prevState) === JSON.stringify(nextState)) {
+        return current
+      }
 
-        setDraftingScene((current) => upsertDashboardQrNode(current, payload, activeQrNodeId))
-        queueMicrotask(() => setComposeErrorMessage(null))
-      })
-      .catch(() => {
-        if (dashboardPayloadRequestRef.current !== requestId) {
-          return
-        }
+      return {
+        ...current,
+        [activeQrNodeId]: nextState,
+      }
+    })
+  }, [draftingStudioState, activeQrNodeId])
 
-        queueMicrotask(() => {
-          setComposeErrorMessage("The compose surface could not be updated.")
-        })
-      })
-  }, [activeQrNodeId, draftingStudioState])
-
+  // Export size preview
   useEffect(() => {
     if (draftingExportPreviewTimeoutRef.current !== null) {
       window.clearTimeout(draftingExportPreviewTimeoutRef.current)
@@ -1020,7 +1031,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     if (
       !canDownload ||
       !isDraftingRasterExport ||
-      (!shouldMeasureFullPageExport && !shouldMeasureActiveQrExport)
+      !shouldMeasureActiveQrExport
     ) {
       queueMicrotask(() => {
         if (draftingExportPreviewRequestRef.current !== requestId) {
@@ -1079,118 +1090,101 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     }
   }, [
     canDownload,
-    draftingScene,
     draftingStudioState,
-    isComposeEditMode,
     isDraftingRasterExport,
     selectedDownloadExtension,
     selectedDownloadTarget,
     selectedRasterExportTargetSizePx,
     shouldMeasureActiveQrExport,
-    shouldMeasureFullPageExport,
   ])
 
   async function handleAddQrCode() {
-    const sourceQrNodeId =
-      selectedComposeNodeId && isDashboardQrNodeId(selectedComposeNodeId)
-        ? selectedComposeNodeId
-        : activeQrNodeId
-    const sourceState =
-      sourceQrNodeId === activeQrNodeId
-        ? draftingStudioState
-        : (qrStateByNodeId[sourceQrNodeId] ?? draftingStudioState)
+    const sourceState = qrStateByNodeId[activeQrNodeId] ?? draftingStudioState
     const nextNodeId = `${DASHBOARD_QR_NODE_ID}-${crypto.randomUUID()}`
-    const nextName = getNextDraftingQrLayerName(draftingScene)
 
-    try {
-      const payload = await buildDashboardQrNodePayload(sourceState)
-
-      setQrStateByNodeId((current) => ({
-        ...current,
-        [activeQrNodeId]: cloneDraftingQrState(draftingStudioState),
-        [nextNodeId]: cloneDraftingQrState(sourceState),
-      }))
-      setDraftingScene((current) => {
-        const sourceNode = getDashboardComposeNode(current, sourceQrNodeId)
-        const createdScene = upsertDashboardQrNode(
-          current,
-          {
-            ...payload,
-            name: nextName,
-          },
-          nextNodeId,
-        )
-        const createdNode = getDashboardComposeNode(createdScene, nextNodeId)
-
-        if (!sourceNode || !createdNode) {
-          return createdScene
-        }
-
-        return updateDashboardComposeNode(createdScene, nextNodeId, {
-          name: nextName,
-          naturalHeight: payload.naturalHeight,
-          naturalWidth: payload.naturalWidth,
-          rotation: sourceNode.rotation,
-          scale: sourceNode.scale,
-          x: sourceNode.x + 36,
-          y: sourceNode.y + 36,
-        })
-      })
-      setActiveQrNodeId(nextNodeId)
-      applyDraftingQrStateToControls(sourceState)
-      setSelectedComposeNodeId(nextNodeId)
-      setComposeErrorMessage(null)
-    } catch {
-      setComposeErrorMessage("The QR layer could not be added. Try again.")
-    }
-  }
-
-  async function buildDraftingSceneWithFreshActiveQrNode() {
-    const payload = await buildDashboardQrNodePayload(draftingStudioState)
-    const nextScene = upsertDashboardQrNode(draftingScene, payload, activeQrNodeId)
-
-    setDraftingScene(nextScene)
+    // Save current controls to active pane first
     setQrStateByNodeId((current) => ({
       ...current,
       [activeQrNodeId]: cloneDraftingQrState(draftingStudioState),
+      [nextNodeId]: cloneDraftingQrState(sourceState),
     }))
 
-    return nextScene
+    setActiveQrNodeId(nextNodeId)
+    applyDraftingQrStateToControls(sourceState)
+    setResizeActivePaneId(null)
+
+  }
+
+  function handleRemoveQrCode(paneId: string) {
+    setQrStateByNodeId((current) => {
+      const next = { ...current }
+      delete next[paneId]
+      return next
+    })
+
+    if (activeQrNodeId === paneId) {
+      // Find fallback pane
+      const fallbackId = Object.keys(qrStateByNodeId).find(
+        (id) => id !== paneId,
+      ) ?? DASHBOARD_QR_NODE_ID
+      setActiveQrNodeId(fallbackId)
+      const fallbackState = qrStateByNodeId[fallbackId] ?? createDefaultQrStudioState()
+      applyDraftingQrStateToControls(fallbackState)
+    }
+
+    setResizeActivePaneId((current) => (current === paneId ? null : current))
   }
 
   async function handleDownload() {
     try {
       if (selectedDownloadTarget === "all-qr") {
-        const nextScene = await buildDraftingSceneWithFreshActiveQrNode()
-        const qrNodes = getDashboardQrNodes(nextScene)
+        const nodes = await Promise.all(
+          Object.entries(qrStateByNodeId).map(async ([nodeId, state]) => {
+            const payload = await buildDashboardQrNodePayload(state)
+            return {
+              id: nodeId,
+              name: getQrNodeName(qrStateByNodeId, nodeId),
+              naturalHeight: payload.naturalHeight,
+              naturalWidth: payload.naturalWidth,
+              originalSvgMarkup: payload.markup,
+            }
+          }),
+        )
 
-        if (qrNodes.length === 0) {
+        if (nodes.length === 0) {
           throw new Error("No QR codes are available for export.")
         }
 
         await downloadDashboardQrBatchZipExport({
           extension: selectedDownloadExtension,
           name: DEFAULT_DOWNLOAD_NAME,
-          nodes: qrNodes,
+          nodes,
           qualityPercent: draftingStudioState.rasterExportQualityPercent,
           targetSizePx: selectedRasterExportTargetSizePx,
         })
       } else if (selectedDownloadTarget === "current" || selectedDownloadTarget.startsWith("qr:")) {
-        const nextScene = await buildDraftingSceneWithFreshActiveQrNode()
         const nodeId =
           selectedDownloadTarget === "current"
             ? activeQrNodeId
             : selectedDownloadTarget.slice("qr:".length)
-        const qrNode = getDashboardQrNodes(nextScene).find((node) => node.id === nodeId)
+        const state = qrStateByNodeId[nodeId]
 
-        if (!qrNode) {
+        if (!state) {
           throw new Error("The selected QR code is unavailable for export.")
         }
 
+        const payload = await buildDashboardQrNodePayload(state)
+
         await downloadDashboardQrNodeExport({
           extension: selectedDownloadExtension,
-          name: qrNode.name,
-          node: qrNode,
+          name: getQrNodeName(qrStateByNodeId, nodeId),
+          node: {
+            id: nodeId,
+            name: getQrNodeName(qrStateByNodeId, nodeId),
+            naturalHeight: payload.naturalHeight,
+            naturalWidth: payload.naturalWidth,
+            originalSvgMarkup: payload.markup,
+          },
           qualityPercent: draftingStudioState.rasterExportQualityPercent,
           targetSizePx: selectedRasterExportTargetSizePx,
         })
@@ -1209,13 +1203,9 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
         })
       }
 
-      setComposeErrorMessage(null)
+  
     } catch {
-      setComposeErrorMessage(
-        isComposeEditMode
-          ? "The document could not be exported. Try another format."
-          : "The QR image could not be exported. Try another format.",
-      )
+      // Export failed silently
     }
   }
 
@@ -1504,16 +1494,54 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     if (toolId === "layers" && tabId === "layers") {
       return (
         <DraftingLayersTab
-          onSceneChange={setDraftingScene}
-          onSelectedNodeChange={handleComposeNodeSelection}
-          scene={draftingScene}
-          selectedNodeId={selectedComposeNodeId}
+          onReorder={(orderedIds) => {
+            setQrStateByNodeId((current) => {
+              const next: DraftingQrStateByNodeId = {}
+              for (const id of orderedIds) {
+                if (current[id]) {
+                  next[id] = current[id]
+                }
+              }
+              // Add any missing ids at the end
+              for (const id of Object.keys(current)) {
+                if (!next[id]) {
+                  next[id] = current[id]
+                }
+              }
+              return next
+            })
+          }}
+          onSelectedNodeChange={(nodeId) => {
+            if (nodeId && isDashboardQrNodeId(nodeId)) {
+              handlePaneSelection(nodeId)
+            }
+          }}
+          panes={qrNodeIds.map((id) => ({
+            id,
+            name: getQrNodeName(qrStateByNodeId, id),
+          }))}
+          selectedNodeId={activeQrNodeId}
+          onRemoveNode={(nodeId) => {
+            if (isDashboardQrNodeId(nodeId)) {
+              handleRemoveQrCode(nodeId)
+            }
+          }}
         />
       )
     }
 
     return null
   }
+
+  const panes = useMemo(
+    () =>
+      qrNodeIds.map((id) => ({
+        id,
+        name: getQrNodeName(qrStateByNodeId, id),
+        state: id === activeQrNodeId ? draftingStudioState : (qrStateByNodeId[id] ?? draftingStudioState),
+      })),
+    [qrNodeIds, qrStateByNodeId, activeQrNodeId, draftingStudioState],
+  )
 
   return (
     <section
@@ -1530,8 +1558,8 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       data-qr-type-number={selectedTypeNumber}
       data-slot="drafting-surface"
       className="relative grid h-dvh w-full grid-rows-[var(--new-header-height)_minmax(0,1fr)] overflow-visible bg-[var(--drafting-surface-bg)] sm:h-[calc(100dvh-4rem)] lg:shadow-[var(--drafting-shadow-shell)] [--new-header-height:3.875rem] [--new-left-rail-width:clamp(6.25rem,10vw,7.5rem)] [--new-middle-rail-width:clamp(15rem,24vw,18.5rem)] [--new-mobile-rail-height:5.75rem]"
-      data-compose-edit-mode={isComposeEditMode ? "true" : "false"}
-      data-compose-selected-node-id={selectedComposeNodeId ?? ""}
+      data-compose-edit-mode="false"
+      data-compose-selected-node-id={activeQrNodeId ?? ""}
     >
       {OUTER_MARKERS.map((marker) => (
         <PlusMarker key={marker} className={marker} />
@@ -1985,19 +2013,18 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
             data-slot="drafting-workspace-inset"
             className="h-full min-h-0 px-0 pb-3 pt-0 sm:p-5 lg:p-6"
           >
-            <DashboardComposeSurface
-              errorMessage={composeErrorMessage}
+            <DraftingPaneWorkspace
+              activePaneId={activeQrNodeId}
               onAddQrCode={() => {
                 void handleAddQrCode()
               }}
+              onPaneQrClick={handlePaneQrClick}
+              onPaneSelect={handlePaneSelection}
+              onPaneSizeChange={handlePaneSizeChange}
+              onRemoveQrCode={handleRemoveQrCode}
               onReset={resetDraftingWorkspace}
-              onQrSizeChange={setSelectedQrSize}
-              onSceneChange={setDraftingScene}
-              onSelectedNodeChange={handleComposeNodeSelection}
-              qrSize={selectedQrSize}
-              scene={draftingScene}
-              selectedNodeId={selectedComposeNodeId}
-              surfaceAppearance="neutral"
+              panes={panes}
+              resizeActivePaneId={resizeActivePaneId}
             />
           </div>
         </section>
@@ -2006,12 +2033,13 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   )
 }
 
-function getNextDraftingQrLayerName(scene: DashboardComposeScene) {
-  return `QR Code ${getDashboardQrNodes(scene).length + 1}`
-}
-
 function getDraftingQrNodeDownloadTarget(nodeId: string): DraftingDownloadTarget {
   return `qr:${nodeId}`
+}
+
+function getQrNodeName(qrStateByNodeId: DraftingQrStateByNodeId, nodeId: string): string {
+  const index = Object.keys(qrStateByNodeId).indexOf(nodeId)
+  return index === 0 ? "QR Code" : `QR Code ${index + 1}`
 }
 
 async function downloadDraftingSvgExport({

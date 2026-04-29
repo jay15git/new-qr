@@ -48,7 +48,9 @@ import {
 import { cn } from "@/lib/utils"
 
 type DashboardComposeSurfaceProps = {
+  interactive?: boolean
   errorMessage?: string | null
+  fixedCanvasSize?: boolean
   onApplyQualitySuggestionPath?: (path: QrQualitySuggestionPath) => void
   onAddQrCode?: () => void
   onReset: () => void
@@ -59,6 +61,7 @@ type DashboardComposeSurfaceProps = {
   qualityReport?: QrQualityReport | null
   scene: DashboardComposeScene
   selectedNodeId: string | null
+  showToolbar?: boolean
   surfaceAppearance?: "dashboard" | "neutral"
   surfaceMode?: "compose" | "document"
 }
@@ -111,7 +114,9 @@ type InteractionResult = {
 }
 
 export function DashboardComposeSurface({
+  interactive = true,
   errorMessage,
+  fixedCanvasSize = false,
   onApplyQualitySuggestionPath,
   onAddQrCode,
   onReset,
@@ -121,6 +126,7 @@ export function DashboardComposeSurface({
   qualityReport,
   scene,
   selectedNodeId,
+  showToolbar = true,
   surfaceAppearance = "dashboard",
   surfaceMode = "compose",
 }: DashboardComposeSurfaceProps) {
@@ -240,6 +246,27 @@ export function DashboardComposeSurface({
         return
       }
 
+      // Ignore tiny pan-canvas movements that are just clicks
+      if (interaction.kind === "pan-canvas") {
+        const dx = committedScene.camera.panX - interaction.startPanX
+        const dy = committedScene.camera.panY - interaction.startPanY
+        if (Math.hypot(dx, dy) < 3) {
+          return
+        }
+      }
+
+      // Ignore tiny drag-node movements that are just clicks
+      if (interaction.kind === "drag-node") {
+        const updatedNode = committedScene.nodes.find((n) => n.id === interaction.nodeId)
+        if (updatedNode) {
+          const dx = updatedNode.x - interaction.startX
+          const dy = updatedNode.y - interaction.startY
+          if (Math.hypot(dx, dy) < 3) {
+            return
+          }
+        }
+      }
+
       onSceneChangeRef.current(committedScene)
 
       if (
@@ -317,6 +344,10 @@ export function DashboardComposeSurface({
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
     event.preventDefault()
 
+    if (!interactive) {
+      return
+    }
+
     const anchor = getWorldPoint(event.nativeEvent, canvasRef.current, draftSceneRef.current)
 
     if (!anchor) {
@@ -345,6 +376,7 @@ export function DashboardComposeSurface({
     height: number,
   ) => {
     event.stopPropagation()
+    if (!interactive) return
     const baseScene = draftSceneRef.current
     const centerX = node.x + width * 0.5
     const centerY = node.y + height * 0.5
@@ -385,6 +417,10 @@ export function DashboardComposeSurface({
         className="absolute inset-0"
         style={canvasBackgroundStyle}
         onPointerDown={(event) => {
+          if (!interactive) {
+            return
+          }
+
           const baseScene = draftSceneRef.current
 
           onSelectedNodeChange(null)
@@ -427,221 +463,223 @@ export function DashboardComposeSurface({
           </div>
         ) : null}
 
-        <div
-          data-slot="dashboard-compose-controls"
-          className="pointer-events-none absolute inset-x-5 bottom-4 z-20 flex justify-center px-2 sm:inset-x-6 lg:inset-x-8"
-        >
+        {showToolbar ? (
           <div
-            data-slot="dashboard-compose-toolbar"
-            data-toolbar-appearance={surfaceAppearance}
-            className={cn(
-              "pointer-events-auto inline-flex max-w-full flex-wrap items-center justify-center gap-1 backdrop-blur",
-              isNeutralSurface
-                ? "rounded-[10px] bg-[var(--drafting-panel-bg)]/60 px-2 py-1.5"
-                : "rounded-[1.25rem] bg-white/50 px-2 py-1.5",
-            )}
+            data-slot="dashboard-compose-controls"
+            className="pointer-events-none absolute inset-x-5 bottom-4 z-20 flex justify-center px-2 sm:inset-x-6 lg:inset-x-8"
           >
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  aria-label="Zoom out preview"
-                  className={cn(
-                    "h-8 w-8 rounded-md border-0 bg-transparent p-0 shadow-none transition-colors duration-150",
-                    isNeutralSurface
-                      ? "text-[var(--drafting-ink-muted)] hover:bg-transparent hover:text-[var(--drafting-ink)]"
-                      : "text-muted-foreground hover:bg-transparent hover:text-foreground",
-                  )}
-                  onClick={() => {
-                    const currentScene = draftSceneRef.current
-                    const nextScene = updateDashboardComposeCamera(currentScene, {
-                      zoom: clampDashboardZoom(currentScene.camera.zoom - 0.1),
-                    })
-
-                    draftSceneRef.current = nextScene
-                    onSceneChangeRef.current(nextScene)
-                  }}
-                  size="icon"
-                  type="button"
-                  variant="ghost"
-                >
-                  <ZoomOutIcon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Zoom out</TooltipContent>
-            </Tooltip>
-
             <div
+              data-slot="dashboard-compose-toolbar"
+              data-toolbar-appearance={surfaceAppearance}
               className={cn(
-                "min-w-12 px-1 text-center font-semibold",
+                "pointer-events-auto inline-flex max-w-full flex-wrap items-center justify-center gap-1 backdrop-blur",
                 isNeutralSurface
-                  ? "drafting-type-data text-[var(--drafting-ink)]"
-                  : "text-[0.72rem] text-foreground/65",
+                  ? "rounded-[10px] bg-[var(--drafting-panel-bg)]/60 px-2 py-1.5"
+                  : "rounded-[1.25rem] bg-white/50 px-2 py-1.5",
               )}
             >
-              {zoomPercent}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    aria-label="Zoom out preview"
+                    className={cn(
+                      "h-8 w-8 rounded-md border-0 bg-transparent p-0 shadow-none transition-colors duration-150",
+                      isNeutralSurface
+                        ? "text-[var(--drafting-ink-muted)] hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                        : "text-muted-foreground hover:bg-transparent hover:text-foreground",
+                    )}
+                    onClick={() => {
+                      const currentScene = draftSceneRef.current
+                      const nextScene = updateDashboardComposeCamera(currentScene, {
+                        zoom: clampDashboardZoom(currentScene.camera.zoom - 0.1),
+                      })
+
+                      draftSceneRef.current = nextScene
+                      onSceneChangeRef.current(nextScene)
+                    }}
+                    size="icon"
+                    type="button"
+                    variant="ghost"
+                  >
+                    <ZoomOutIcon />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Zoom out</TooltipContent>
+              </Tooltip>
+
+              <div
+                className={cn(
+                  "min-w-12 px-1 text-center font-semibold",
+                  isNeutralSurface
+                    ? "drafting-type-data text-[var(--drafting-ink)]"
+                    : "text-[0.72rem] text-foreground/65",
+                )}
+              >
+                {zoomPercent}
+              </div>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    aria-label="Zoom in preview"
+                    className={cn(
+                      "h-8 w-8 rounded-md border-0 bg-transparent p-0 shadow-none transition-colors duration-150",
+                      isNeutralSurface
+                        ? "text-[var(--drafting-ink-muted)] hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                        : "text-muted-foreground hover:bg-transparent hover:text-foreground",
+                    )}
+                    onClick={() => {
+                      const currentScene = draftSceneRef.current
+                      const nextScene = updateDashboardComposeCamera(currentScene, {
+                        zoom: clampDashboardZoom(currentScene.camera.zoom + 0.1),
+                      })
+
+                      draftSceneRef.current = nextScene
+                      onSceneChangeRef.current(nextScene)
+                    }}
+                    size="icon"
+                    type="button"
+                    variant="ghost"
+                  >
+                    <ZoomInIcon />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Zoom in</TooltipContent>
+              </Tooltip>
+
+              <div
+                className={cn(
+                  "mx-1 h-4 w-px",
+                  isNeutralSurface
+                    ? "bg-[var(--drafting-line)]"
+                    : "bg-slate-300/80",
+                )}
+              />
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    aria-label="Reset preview position"
+                    className={cn(
+                      "h-8 w-8 rounded-md border-0 bg-transparent p-0 shadow-none transition-colors duration-150",
+                      isNeutralSurface
+                        ? "text-[var(--drafting-ink-muted)] hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                        : "text-muted-foreground hover:bg-transparent hover:text-foreground",
+                    )}
+                    onClick={() => {
+                      const nextScene = resetDashboardComposeCamera(draftSceneRef.current)
+
+                      draftSceneRef.current = nextScene
+                      onSceneChangeRef.current(nextScene)
+                    }}
+                    size="icon"
+                    type="button"
+                    variant="ghost"
+                  >
+                    <SearchIcon />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Reset view</TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    aria-label={isDocumentSurface ? "Fit QR to page" : "Reset QR transform"}
+                    className={cn(
+                      "h-8 w-8 rounded-md border-0 bg-transparent p-0 shadow-none transition-colors duration-150",
+                      isNeutralSurface
+                        ? "text-[var(--drafting-ink-muted)] hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                        : "text-muted-foreground hover:bg-transparent hover:text-foreground",
+                    )}
+                    onClick={() => {
+                      const nextScene = isDocumentSurface
+                        ? fitDashboardQrNodeToDocument(
+                            resetDashboardQrNodeTransform(draftSceneRef.current, targetQrNodeId),
+                            targetQrNodeId,
+                          )
+                        : resetDashboardQrNodeTransform(draftSceneRef.current, targetQrNodeId)
+
+                      draftSceneRef.current = nextScene
+                      onSceneChangeRef.current(nextScene)
+                    }}
+                    size="icon"
+                    type="button"
+                    variant="ghost"
+                  >
+                    <MaximizeIcon />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {isDocumentSurface ? "Fit to page" : "Reset transform"}
+                </TooltipContent>
+              </Tooltip>
+
+              {onAddQrCode ? (
+                <>
+                  <div
+                    className={cn(
+                      "mx-1 h-4 w-px",
+                      isNeutralSurface
+                        ? "bg-[var(--drafting-line)]"
+                        : "bg-slate-300/80",
+                    )}
+                  />
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        aria-label="Add QR code"
+                        className={cn(
+                          "h-8 w-8 rounded-md border-0 bg-transparent p-0 shadow-none transition-colors duration-150",
+                          isNeutralSurface
+                            ? "text-[var(--drafting-ink-muted)] hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                            : "text-muted-foreground hover:bg-transparent hover:text-foreground",
+                        )}
+                        onClick={onAddQrCode}
+                        size="icon"
+                        type="button"
+                        variant="ghost"
+                      >
+                        <CopyPlusIcon />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Add QR code</TooltipContent>
+                  </Tooltip>
+                </>
+              ) : null}
+
+              <div
+                className={cn(
+                  "mx-1 h-4 w-px",
+                  isNeutralSurface
+                    ? "bg-[var(--drafting-line)]"
+                    : "bg-slate-300/80",
+                )}
+              />
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    aria-label="Reset defaults"
+                    className={cn(
+                      "h-8 w-8 rounded-md border-0 bg-transparent p-0 shadow-none transition-colors duration-150",
+                      isNeutralSurface
+                        ? "text-[var(--drafting-ink-muted)] hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                        : "text-muted-foreground hover:bg-transparent hover:text-foreground",
+                    )}
+                    onClick={onReset}
+                    size="icon"
+                    type="button"
+                    variant="ghost"
+                  >
+                    <RefreshCcwIcon />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Reset defaults</TooltipContent>
+              </Tooltip>
             </div>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  aria-label="Zoom in preview"
-                  className={cn(
-                    "h-8 w-8 rounded-md border-0 bg-transparent p-0 shadow-none transition-colors duration-150",
-                    isNeutralSurface
-                      ? "text-[var(--drafting-ink-muted)] hover:bg-transparent hover:text-[var(--drafting-ink)]"
-                      : "text-muted-foreground hover:bg-transparent hover:text-foreground",
-                  )}
-                  onClick={() => {
-                    const currentScene = draftSceneRef.current
-                    const nextScene = updateDashboardComposeCamera(currentScene, {
-                      zoom: clampDashboardZoom(currentScene.camera.zoom + 0.1),
-                    })
-
-                    draftSceneRef.current = nextScene
-                    onSceneChangeRef.current(nextScene)
-                  }}
-                  size="icon"
-                  type="button"
-                  variant="ghost"
-                >
-                  <ZoomInIcon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Zoom in</TooltipContent>
-            </Tooltip>
-
-            <div
-              className={cn(
-                "mx-1 h-4 w-px",
-                isNeutralSurface
-                  ? "bg-[var(--drafting-line)]"
-                  : "bg-slate-300/80",
-              )}
-            />
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  aria-label="Reset preview position"
-                  className={cn(
-                    "h-8 w-8 rounded-md border-0 bg-transparent p-0 shadow-none transition-colors duration-150",
-                    isNeutralSurface
-                      ? "text-[var(--drafting-ink-muted)] hover:bg-transparent hover:text-[var(--drafting-ink)]"
-                      : "text-muted-foreground hover:bg-transparent hover:text-foreground",
-                  )}
-                  onClick={() => {
-                    const nextScene = resetDashboardComposeCamera(draftSceneRef.current)
-
-                    draftSceneRef.current = nextScene
-                    onSceneChangeRef.current(nextScene)
-                  }}
-                  size="icon"
-                  type="button"
-                  variant="ghost"
-                >
-                  <SearchIcon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Reset view</TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  aria-label={isDocumentSurface ? "Fit QR to page" : "Reset QR transform"}
-                  className={cn(
-                    "h-8 w-8 rounded-md border-0 bg-transparent p-0 shadow-none transition-colors duration-150",
-                    isNeutralSurface
-                      ? "text-[var(--drafting-ink-muted)] hover:bg-transparent hover:text-[var(--drafting-ink)]"
-                      : "text-muted-foreground hover:bg-transparent hover:text-foreground",
-                  )}
-                  onClick={() => {
-                    const nextScene = isDocumentSurface
-                      ? fitDashboardQrNodeToDocument(
-                          resetDashboardQrNodeTransform(draftSceneRef.current, targetQrNodeId),
-                          targetQrNodeId,
-                        )
-                      : resetDashboardQrNodeTransform(draftSceneRef.current, targetQrNodeId)
-
-                    draftSceneRef.current = nextScene
-                    onSceneChangeRef.current(nextScene)
-                  }}
-                  size="icon"
-                  type="button"
-                  variant="ghost"
-                >
-                  <MaximizeIcon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {isDocumentSurface ? "Fit to page" : "Reset transform"}
-              </TooltipContent>
-            </Tooltip>
-
-            {onAddQrCode ? (
-              <>
-                <div
-                  className={cn(
-                    "mx-1 h-4 w-px",
-                    isNeutralSurface
-                      ? "bg-[var(--drafting-line)]"
-                      : "bg-slate-300/80",
-                  )}
-                />
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      aria-label="Add QR code"
-                      className={cn(
-                        "h-8 w-8 rounded-md border-0 bg-transparent p-0 shadow-none transition-colors duration-150",
-                        isNeutralSurface
-                          ? "text-[var(--drafting-ink-muted)] hover:bg-transparent hover:text-[var(--drafting-ink)]"
-                          : "text-muted-foreground hover:bg-transparent hover:text-foreground",
-                      )}
-                      onClick={onAddQrCode}
-                      size="icon"
-                      type="button"
-                      variant="ghost"
-                    >
-                      <CopyPlusIcon />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Add QR code</TooltipContent>
-                </Tooltip>
-              </>
-            ) : null}
-
-            <div
-              className={cn(
-                "mx-1 h-4 w-px",
-                isNeutralSurface
-                  ? "bg-[var(--drafting-line)]"
-                  : "bg-slate-300/80",
-              )}
-            />
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  aria-label="Reset defaults"
-                  className={cn(
-                    "h-8 w-8 rounded-md border-0 bg-transparent p-0 shadow-none transition-colors duration-150",
-                    isNeutralSurface
-                      ? "text-[var(--drafting-ink-muted)] hover:bg-transparent hover:text-[var(--drafting-ink)]"
-                      : "text-muted-foreground hover:bg-transparent hover:text-foreground",
-                  )}
-                  onClick={onReset}
-                  size="icon"
-                  type="button"
-                  variant="ghost"
-                >
-                  <RefreshCcwIcon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Reset defaults</TooltipContent>
-            </Tooltip>
           </div>
-        </div>
+        ) : null}
 
         <div className="absolute inset-0 p-5 sm:p-6 lg:p-8">
           <div
@@ -649,10 +687,24 @@ export function DashboardComposeSurface({
             data-slot="dashboard-compose-canvas"
             data-compose-mode={surfaceMode}
             className={cn(
-              "absolute left-1/2 top-1/2 max-w-full -translate-x-1/2 -translate-y-1/2",
-              isDocumentSurface ? "h-full max-h-full w-auto" : "aspect-[3/2] w-[min(100%,960px)]",
+              "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+              isDocumentSurface
+                ? "h-full max-h-full w-auto"
+                : fixedCanvasSize
+                  ? "aspect-[3/2]"
+                  : "aspect-[3/2] max-w-full w-[min(100%,960px)]",
             )}
-            style={isDocumentSurface ? canvasFrameStyle : { background: "transparent" }}
+            style={
+              isDocumentSurface
+                ? canvasFrameStyle
+                : fixedCanvasSize
+                  ? {
+                      width: renderedScene.canvasSize.width,
+                      height: renderedScene.canvasSize.height,
+                      background: "transparent",
+                    }
+                  : { background: "transparent" }
+            }
           >
             <div
               data-slot="dashboard-compose-world"
@@ -731,7 +783,7 @@ export function DashboardComposeSurface({
                           event.stopPropagation()
                           onSelectedNodeChange(node.id)
 
-                          if (node.isLocked) {
+                          if (!interactive || node.isLocked) {
                             interactionRef.current = null
                             return
                           }

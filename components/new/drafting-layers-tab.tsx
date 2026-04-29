@@ -1,17 +1,11 @@
 "use client"
 
-import { useMemo, type Dispatch, type ReactNode, type SetStateAction } from "react"
-import { EyeIcon, EyeOffIcon, Layers3Icon, LockIcon, LockOpenIcon, Trash2Icon } from "lucide-react"
+import { useMemo, type ReactNode } from "react"
+import { Trash2Icon, Layers3Icon } from "lucide-react"
 
 import {
   DASHBOARD_QR_NODE_ID,
-  getDashboardQrNodes,
   isDashboardQrNodeId,
-  reorderDashboardComposeNodes,
-  removeDashboardComposeNode,
-  updateDashboardComposeNode,
-  type DashboardComposeNode,
-  type DashboardComposeScene,
 } from "@/components/qr/dashboard-compose-scene"
 import {
   DraggableList,
@@ -21,25 +15,29 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
+type DraftingLayerPane = {
+  id: string
+  name: string
+}
+
 type DraftingLayersTabProps = {
-  onSceneChange: Dispatch<SetStateAction<DashboardComposeScene>>
+  onReorder: (orderedIds: string[]) => void
+  onRemoveNode?: (nodeId: string) => void
   onSelectedNodeChange: (nodeId: string | null) => void
-  scene: DashboardComposeScene
+  panes: DraftingLayerPane[]
   selectedNodeId: string | null
 }
 
 export function DraftingLayersTab({
-  onSceneChange,
+  onReorder,
+  onRemoveNode,
   onSelectedNodeChange,
-  scene,
+  panes,
   selectedNodeId,
 }: DraftingLayersTabProps) {
-  const layerNodes = useMemo(
-    () => [...scene.nodes].sort((left, right) => right.zIndex - left.zIndex),
-    [scene.nodes],
-  )
+  const layerNodes = useMemo(() => [...panes], [panes])
   const isSingleLayer = layerNodes.length <= 1
-  const qrNodeCount = getDashboardQrNodes(scene).length
+  const qrNodeCount = layerNodes.filter((p) => isDashboardQrNodeId(p.id)).length
 
   return (
     <section data-slot="drafting-layers-tab" className="space-y-3">
@@ -49,7 +47,7 @@ export function DraftingLayersTab({
             Layers
           </p>
           <p className="drafting-type-body mt-1 text-[var(--drafting-ink-muted)]">
-            Reorder and manage the current canvas stack.
+            Reorder and manage the current QR stack.
           </p>
         </div>
         <span className="drafting-type-data shrink-0 text-[var(--drafting-ink-muted)]">
@@ -62,19 +60,14 @@ export function DraftingLayersTab({
           data-slot="drafting-layers-empty-state"
           className="drafting-type-body rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 text-[var(--drafting-ink-muted)] shadow-[var(--drafting-shadow-rest)]"
         >
-          The layer stack will appear here once the canvas has content.
+          The layer stack will appear here once there is content.
         </div>
       ) : (
         <DraggableList
           className="min-w-0 gap-2"
           items={layerNodes}
           onReorder={(nextNodes) =>
-            onSceneChange((current) =>
-              reorderDashboardComposeNodes(
-                current,
-                nextNodes.map((node) => node.id),
-              ),
-            )
+            onReorder(nextNodes.map((node) => node.id))
           }
         >
           {layerNodes.map((node, index) => {
@@ -121,52 +114,22 @@ export function DraftingLayersTab({
                     </button>
 
                     <div className="flex shrink-0 items-center gap-1">
-                      <IconActionButton
-                        ariaLabel={node.isVisible ? `Hide ${node.name}` : `Show ${node.name}`}
-                        onClick={() =>
-                          onSceneChange((current) =>
-                            updateDashboardComposeNode(current, node.id, {
-                              isVisible: !node.isVisible,
-                            }),
-                          )
-                        }
-                      >
-                        {node.isVisible ? (
-                          <EyeIcon className="size-3.5" />
-                        ) : (
-                          <EyeOffIcon className="size-3.5" />
-                        )}
-                      </IconActionButton>
-                      <IconActionButton
-                        ariaLabel={node.isLocked ? `Unlock ${node.name}` : `Lock ${node.name}`}
-                        onClick={() =>
-                          onSceneChange((current) =>
-                            updateDashboardComposeNode(current, node.id, {
-                              isLocked: !node.isLocked,
-                            }),
-                          )
-                        }
-                      >
-                        {node.isLocked ? (
-                          <LockOpenIcon className="size-3.5" />
-                        ) : (
-                          <LockIcon className="size-3.5" />
-                        )}
-                      </IconActionButton>
-                      {isRemovable ? (
+                      {isRemovable && onRemoveNode ? (
                         <IconActionButton
                           ariaLabel={`Delete ${node.name}`}
                           className="border-[var(--drafting-line-strong)] text-[var(--drafting-ink)] hover:bg-[var(--drafting-control-bg-active)] hover:text-[var(--drafting-ink)]"
-                        onClick={() => {
+                          onClick={() => {
                             const fallbackNodeId =
-                              scene.nodes.find(
+                              panes.find(
                                 (currentNode) =>
                                   currentNode.id !== node.id &&
                                   isDashboardQrNodeId(currentNode.id),
                               )?.id ?? DASHBOARD_QR_NODE_ID
 
-                            onSceneChange((current) => removeDashboardComposeNode(current, node.id))
-                            onSelectedNodeChange(selectedNodeId === node.id ? fallbackNodeId : selectedNodeId)
+                            onRemoveNode(node.id)
+                            if (selectedNodeId === node.id) {
+                              onSelectedNodeChange(fallbackNodeId)
+                            }
                           }}
                         >
                           <Trash2Icon className="size-3.5" />
@@ -213,23 +176,15 @@ function IconActionButton({
 }
 
 function getLayerRowMeta(
-  node: DashboardComposeNode,
+  node: DraftingLayerPane,
   index: number,
   totalLayers: number,
   isSelected: boolean,
 ) {
-  const labels = [getLayerOrderLabel(index, totalLayers), node.kind === "image" ? "Image" : "QR"]
+  const labels = [getLayerOrderLabel(index, totalLayers), "QR"]
 
   if (isSelected) {
     labels.push("Selected")
-  }
-
-  if (!node.isVisible) {
-    labels.push("Hidden")
-  }
-
-  if (node.isLocked) {
-    labels.push("Locked")
   }
 
   return labels.join(" · ")

@@ -5,13 +5,7 @@ import { createRoot } from "react-dom/client"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { DraftingLayersTab } from "@/components/new/drafting-layers-tab"
-import {
-  addDashboardComposeImageNode,
-  createDashboardDocumentComposeScene,
-  DASHBOARD_QR_NODE_ID,
-  upsertDashboardQrNode,
-  type DashboardComposeScene,
-} from "@/components/qr/dashboard-compose-scene"
+import { DASHBOARD_QR_NODE_ID } from "@/components/qr/dashboard-compose-scene"
 
 vi.mock("@/components/ui/draggable-list", () => ({
   DraggableList: ({
@@ -42,13 +36,6 @@ vi.mock("@/components/ui/draggable-list", () => ({
   DraggableListItem: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }))
 
-const QR_PAYLOAD = {
-  markup:
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320"><rect width="320" height="320" fill="#fff" /><path d="M20 20h40v40H20z" fill="#111" /></svg>',
-  naturalHeight: 320,
-  naturalWidth: 320,
-}
-
 const cleanupCallbacks: Array<() => void> = []
 
 afterEach(() => {
@@ -60,42 +47,52 @@ afterEach(() => {
 })
 
 describe("DraftingLayersTab", () => {
-  it("renders rows for the qr layer and uploaded image layers with icon controls", () => {
-    const view = renderHarness(createLayeredScene())
+  it("renders rows for qr layers with icon controls", () => {
+    const view = renderHarness([
+      { id: DASHBOARD_QR_NODE_ID, name: "QR Code" },
+      { id: "qr-2", name: "QR Code 2" },
+    ])
 
     expect(view.container.querySelectorAll('[data-slot="drafting-layer-row"]')).toHaveLength(2)
     expect(view.container.textContent).toContain("QR Code")
-    expect(view.container.textContent).toContain("Landscape")
-    expect(view.container.querySelector('button[aria-label="Hide QR Code"]')).not.toBeNull()
-    expect(view.container.querySelector('button[aria-label="Lock QR Code"]')).not.toBeNull()
-    expect(view.container.querySelector('button[aria-label="Delete Landscape"]')).not.toBeNull()
+    expect(view.container.textContent).toContain("QR Code 2")
     expect(view.container.querySelector('button[aria-label="Delete QR Code"]')).toBeNull()
+    expect(view.container.querySelector('button[aria-label="Delete QR Code 2"]')).not.toBeNull()
     expect(view.container.innerHTML).not.toMatch(
       /dark:[^"]*shadow-\[[^\]]*rgba\(255,255,255/,
     )
   })
 
-  it("wires reorder interactions through the compose scene helpers", () => {
-    const view = renderHarness(createLayeredScene())
+  it("wires reorder interactions", () => {
+    const view = renderHarness([
+      { id: "qr-2", name: "QR Code 2" },
+      { id: DASHBOARD_QR_NODE_ID, name: "QR Code" },
+    ])
 
-    expect(getLayerNames(view.container)).toEqual(["Landscape", "QR Code"])
+    expect(getLayerNames(view.container)).toEqual(["QR Code 2", "QR Code"])
 
     act(() => {
       activateElement(getRequiredElement(view.container, 'button[aria-label="Mock reorder layers"]'))
     })
 
-    expect(getLayerNames(view.container)).toEqual(["QR Code", "Landscape"])
+    expect(getLayerNames(view.container)).toEqual(["QR Code", "QR Code 2"])
   })
 
-  it("falls back to the qr layer when deleting the selected image layer", () => {
-    const view = renderHarness(createLayeredScene(), "image-node")
+  it("falls back to the qr layer when deleting the selected extra layer", () => {
+    const view = renderHarness(
+      [
+        { id: DASHBOARD_QR_NODE_ID, name: "QR Code" },
+        { id: "qr-2", name: "QR Code 2" },
+      ],
+      "qr-2",
+    )
 
     expect(getRequiredElement(view.container, "[data-selected-node-id]").getAttribute("data-selected-node-id")).toBe(
-      "image-node",
+      "qr-2",
     )
 
     act(() => {
-      activateElement(getRequiredElement(view.container, 'button[aria-label="Delete Landscape"]'))
+      activateElement(getRequiredElement(view.container, 'button[aria-label="Delete QR Code 2"]'))
     })
 
     expect(view.container.querySelectorAll('[data-slot="drafting-layer-row"]')).toHaveLength(1)
@@ -105,7 +102,13 @@ describe("DraftingLayersTab", () => {
   })
 
   it("allows deleting an extra qr layer while preserving another qr selection fallback", () => {
-    const view = renderHarness(createTwoQrScene(), "dashboard-qr-node-copy")
+    const view = renderHarness(
+      [
+        { id: DASHBOARD_QR_NODE_ID, name: "QR Code" },
+        { id: "qr-2", name: "QR Code 2" },
+      ],
+      "qr-2",
+    )
 
     expect(view.container.querySelectorAll('[data-slot="drafting-layer-row"]')).toHaveLength(2)
     expect(view.container.querySelector('button[aria-label="Delete QR Code 2"]')).not.toBeNull()
@@ -124,21 +127,27 @@ describe("DraftingLayersTab", () => {
 })
 
 function Harness({
-  initialScene,
+  initialPanes,
   initialSelectedNodeId,
 }: {
-  initialScene: DashboardComposeScene
+  initialPanes: Array<{ id: string; name: string }>
   initialSelectedNodeId: string | null
 }) {
-  const [scene, setScene] = useState(initialScene)
+  const [panes, setPanes] = useState(initialPanes)
   const [selectedNodeId, setSelectedNodeId] = useState(initialSelectedNodeId)
 
   return (
     <div data-selected-node-id={selectedNodeId ?? ""}>
       <DraftingLayersTab
-        onSceneChange={setScene}
+        onReorder={(orderedIds) => {
+          const paneMap = new Map(panes.map((p) => [p.id, p]))
+          setPanes(orderedIds.map((id) => paneMap.get(id)!).filter(Boolean))
+        }}
+        onRemoveNode={(nodeId) => {
+          setPanes((current) => current.filter((p) => p.id !== nodeId))
+        }}
         onSelectedNodeChange={setSelectedNodeId}
-        scene={scene}
+        panes={panes}
         selectedNodeId={selectedNodeId}
       />
     </div>
@@ -146,7 +155,7 @@ function Harness({
 }
 
 function renderHarness(
-  initialScene: DashboardComposeScene,
+  initialPanes: Array<{ id: string; name: string }>,
   initialSelectedNodeId: string | null = DASHBOARD_QR_NODE_ID,
 ) {
   const container = document.createElement("div")
@@ -155,7 +164,7 @@ function renderHarness(
   act(() => {
     root.render(
       <Harness
-        initialScene={initialScene}
+        initialPanes={initialPanes}
         initialSelectedNodeId={initialSelectedNodeId}
       />,
     )
@@ -170,30 +179,6 @@ function renderHarness(
   document.body.appendChild(container)
 
   return { container }
-}
-
-function createLayeredScene() {
-  return addDashboardComposeImageNode(
-    upsertDashboardQrNode(createDashboardDocumentComposeScene(), QR_PAYLOAD),
-    {
-      id: "image-node",
-      imageUrl: "/landscape.png",
-      name: "Landscape",
-      naturalHeight: 600,
-      naturalWidth: 1200,
-    },
-  )
-}
-
-function createTwoQrScene() {
-  return upsertDashboardQrNode(
-    upsertDashboardQrNode(createDashboardDocumentComposeScene(), QR_PAYLOAD),
-    {
-      ...QR_PAYLOAD,
-      name: "QR Code 2",
-    },
-    "dashboard-qr-node-copy",
-  )
 }
 
 function getLayerNames(parent: ParentNode) {
