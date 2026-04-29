@@ -72,7 +72,6 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { QR_SIZE_MAX, QR_SIZE_MIN } from "@/components/qr/qr-studio-state"
 import { CheckIcon, ChevronDown } from "lucide-react"
 
 export type DraftingBinaryColorMode = "solid" | "gradient"
@@ -802,14 +801,10 @@ export function DraftingStyleTab({
 
 export function DraftingSizeTab({
   margin,
-  size,
   onMarginChange,
-  onSizeChange,
 }: {
   margin: number
-  size: number
   onMarginChange: (value: number) => void
-  onSizeChange: (value: number) => void
 }) {
   return (
     <div data-slot="drafting-style-size-tab" className="min-w-0 space-y-3">
@@ -824,19 +819,6 @@ export function DraftingSizeTab({
         step={1}
         value={margin}
         onChange={onMarginChange}
-      />
-
-      <DraftingSliderField
-        dataSlot="drafting-style-size-slider"
-        description="Scales the QR canvas before export while keeping the code square."
-        formatValue={(value) => `${Math.round(value)} px`}
-        id="drafting-qr-size"
-        label="Size"
-        max={QR_SIZE_MAX}
-        min={QR_SIZE_MIN}
-        step={1}
-        value={size}
-        onChange={onSizeChange}
       />
     </div>
   )

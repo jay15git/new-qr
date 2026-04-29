@@ -1021,14 +1021,10 @@ describe("DraftingSurface", () => {
     )
 
     expect(sizeTab.querySelector('[data-slot="drafting-style-margin-slider"]')).not.toBeNull()
-    expect(sizeTab.querySelector('[data-slot="drafting-style-size-slider"]')).not.toBeNull()
+    expect(sizeTab.querySelector('[data-slot="drafting-style-size-slider"]')).toBeNull()
     expect(sizeTab.textContent).toContain("Outer margin")
-    expect(sizeTab.textContent).toContain("Size")
     expect(
       sizeTab.querySelector('[data-slot="drafting-style-margin-slider"]')?.getAttribute("data-appearance"),
-    ).toBe("drafting")
-    expect(
-      sizeTab.querySelector('[data-slot="drafting-style-size-slider"]')?.getAttribute("data-appearance"),
     ).toBe("drafting")
   })
 

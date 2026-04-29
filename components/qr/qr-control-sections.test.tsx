@@ -591,15 +591,13 @@ describe("QrControlSections", () => {
     )
   })
 
-  it("uses one square size slider instead of separate width and height controls", () => {
+  it("does not render the size slider below the content preview", () => {
     const markup = renderToStaticMarkup(
       <QrControlSections {...baseProps} activeSection="content" />,
     )
 
-    expect(markup).toContain('data-slot="qr-size-slider"')
-    expect(markup).toContain("Size")
-    expect(markup).not.toContain(">Width<")
-    expect(markup).not.toContain(">Height<")
+    expect(markup).not.toContain('data-slot="qr-size-slider"')
+    expect(markup).not.toContain("Size")
   })
 
   it("uses a slider for outer margin in the content section", () => {

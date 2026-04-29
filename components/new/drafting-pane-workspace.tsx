@@ -32,14 +32,12 @@ type DraftingPane = {
 type DraftingPaneWorkspaceProps = {
   panes: DraftingPane[]
   activePaneId: string
-  resizeActivePaneId: string | null
   canAddQrCode?: boolean
   onAddQrCode?: () => void
   onRemoveQrCode?: (paneId: string) => void
   onReset: () => void
   onPaneSelect: (paneId: string) => void
   onPaneQrClick: (paneId: string) => void
-  onPaneSizeChange: (paneId: string, size: number) => void
 }
 
 function getPortraitSnapshot() {
@@ -57,14 +55,12 @@ function subscribePortrait(callback: () => void) {
 export function DraftingPaneWorkspace({
   panes,
   activePaneId,
-  resizeActivePaneId,
   canAddQrCode = true,
   onAddQrCode,
   onRemoveQrCode,
   onReset,
   onPaneSelect,
   onPaneQrClick,
-  onPaneSizeChange,
 }: DraftingPaneWorkspaceProps) {
   const [zoomLevels, setZoomLevels] = useState<Record<string, number>>({})
   const [maximizedPaneId, setMaximizedPaneId] = useState<string | null>(null)
@@ -129,7 +125,6 @@ export function DraftingPaneWorkspace({
             >
               {visiblePanes.map((pane, index) => {
                 const isSelected = pane.id === activePaneId
-                const isResizeActive = pane.id === resizeActivePaneId
                 const paneZoom = zoomLevels[pane.id] ?? 1
                 const areaName = layout?.areas
                   ? String.fromCharCode(97 + index)
@@ -165,12 +160,8 @@ export function DraftingPaneWorkspace({
                       <QrPane
                         state={pane.state}
                         isSelected={isSelected}
-                        isResizeActive={isResizeActive}
                         onSelect={() => onPaneSelect(pane.id)}
                         onQrClick={() => onPaneQrClick(pane.id)}
-                        onSizeChange={(size) =>
-                          onPaneSizeChange(pane.id, size)
-                        }
                       />
                     </div>
                   </div>

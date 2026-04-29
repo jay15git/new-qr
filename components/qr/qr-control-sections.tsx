@@ -93,9 +93,6 @@ import {
 } from "@/components/qr/brand-icon-svg"
 import {
   hasBackgroundImage,
-  QR_SIZE_MAX,
-  QR_SIZE_MIN,
-  setSquareQrSize,
 } from "@/components/qr/qr-studio-state"
 
 type QrControlSectionsProps = {
@@ -215,7 +212,6 @@ export function QrControlSections({
   const [brandIconCategory, setBrandIconCategory] =
     useState<BrandIconCategoryFilter>("all")
   const contentError = state.data.trim() ? null : "Add text or a URL to encode"
-  const qrSize = state.width === state.height ? state.width : Math.max(state.width, state.height)
   const activeCustomDotShape = getActiveCustomDotShape(state.dotsOptions.type)
   const backgroundImageActive = hasBackgroundImage(state)
   const filteredBrandIcons = filterBrandIcons(brandIconQuery, brandIconCategory)
@@ -1131,24 +1127,6 @@ export function QrControlSections({
               />
             </Field>
 
-            <Field>
-              <UnlumenSlider
-                data-slot="qr-size-slider"
-                id="qr-size"
-                label="Size"
-                formatValue={(value) => `${Math.round(value)} px`}
-                max={QR_SIZE_MAX}
-                min={QR_SIZE_MIN}
-                onChange={(value) => {
-                  const nextSize = Array.isArray(value) ? value[0] : value
-
-                  setState((current) => setSquareQrSize(current, nextSize))
-                }}
-                showValue
-                step={1}
-                value={qrSize}
-              />
-            </Field>
           </FieldGroup>
           ),
         })

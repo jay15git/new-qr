@@ -475,7 +475,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.errorCorrectionLevel,
     )
   const [activeQrNodeId, setActiveQrNodeId] = useState(DASHBOARD_QR_NODE_ID)
-  const [resizeActivePaneId, setResizeActivePaneId] = useState<string | null>(null)
   const [qrStateByNodeId, setQrStateByNodeId] = useState<DraftingQrStateByNodeId>(() => ({
     [DASHBOARD_QR_NODE_ID]: cloneDraftingQrState(DEFAULT_DRAFTING_STUDIO_STATE),
   }))
@@ -943,34 +942,11 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     const nextState = qrStateByNodeId[paneId] ?? draftingStudioState
     setActiveQrNodeId(paneId)
     applyDraftingQrStateToControls(nextState)
-    setResizeActivePaneId(null)
   }
 
   function handlePaneQrClick(paneId: string) {
     if (paneId !== activeQrNodeId) {
       handlePaneSelection(paneId)
-      return
-    }
-    // Toggle resize mode for the active pane
-    setResizeActivePaneId((current) => (current === paneId ? null : paneId))
-  }
-
-  function handlePaneSizeChange(paneId: string, size: number) {
-    setQrStateByNodeId((current) => {
-      const state = current[paneId]
-      if (!state) return current
-      return {
-        ...current,
-        [paneId]: {
-          ...state,
-          width: size,
-          height: size,
-        },
-      }
-    })
-    // Also update the controls if this is the active pane
-    if (paneId === activeQrNodeId) {
-      setSelectedQrSize(size)
     }
   }
 
@@ -982,7 +958,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     setBrandIconQuery("")
     setBrandIconCategory("all")
     setActiveQrNodeId(DASHBOARD_QR_NODE_ID)
-    setResizeActivePaneId(null)
     setQrStateByNodeId({
       [DASHBOARD_QR_NODE_ID]: cloneDraftingQrState(nextState),
     })
@@ -1117,7 +1092,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
 
     setActiveQrNodeId(nextNodeId)
     applyDraftingQrStateToControls(sourceState)
-    setResizeActivePaneId(null)
   }
 
   function handleRemoveQrCode(paneId: string) {
@@ -1136,8 +1110,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       const fallbackState = qrStateByNodeId[fallbackId] ?? createDefaultQrStudioState()
       applyDraftingQrStateToControls(fallbackState)
     }
-
-    setResizeActivePaneId((current) => (current === paneId ? null : current))
   }
 
   async function handleDownload() {
@@ -1262,9 +1234,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       return (
         <DraftingSizeTab
           margin={selectedQrMargin}
-          size={selectedQrSize}
           onMarginChange={setSelectedQrMargin}
-          onSizeChange={setSelectedQrSize}
         />
       )
     }
@@ -2029,11 +1999,9 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
               }}
               onPaneQrClick={handlePaneQrClick}
               onPaneSelect={handlePaneSelection}
-              onPaneSizeChange={handlePaneSizeChange}
               onRemoveQrCode={handleRemoveQrCode}
               onReset={resetDraftingWorkspace}
               panes={panes}
-              resizeActivePaneId={resizeActivePaneId}
             />
           </div>
         </section>
