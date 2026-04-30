@@ -1,7 +1,16 @@
 // @vitest-environment jsdom
 
 import { readFileSync } from "node:fs"
-import { act, type ReactNode } from "react"
+import {
+  act,
+  cloneElement,
+  createContext,
+  isValidElement,
+  type ReactElement,
+  type ReactNode,
+  useContext,
+  useState,
+} from "react"
 import { createRoot } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -44,14 +53,59 @@ vi.mock("@/components/qr/dashboard-raster-export", () => ({
   ) => measureDashboardRasterExportSpy(...args),
 }))
 
+type PopoverContextValue = {
+  open: boolean
+  setOpen: (value: boolean) => void
+}
+
+const PopoverContext = createContext<PopoverContextValue | null>(null)
+
 vi.mock("@/components/ui/popover", () => ({
-  Popover: ({ children }: { children: ReactNode }) => (
-    <div data-slot="popover">{children}</div>
-  ),
-  PopoverContent: ({ children, ...props }: { children: ReactNode }) => (
-    <div {...props}>{children}</div>
-  ),
-  PopoverTrigger: ({ children }: { children: ReactNode }) => children,
+  Popover: ({
+    children,
+    open,
+    onOpenChange,
+  }: {
+    children: ReactNode
+    open?: boolean
+    onOpenChange?: (value: boolean) => void
+  }) => {
+    const [internalOpen, setInternalOpen] = useState(false)
+    const actualOpen = open ?? internalOpen
+    const setOpen = onOpenChange ?? setInternalOpen
+
+    return (
+      <PopoverContext.Provider value={{ open: actualOpen, setOpen }}>
+        <div data-slot="popover">{children}</div>
+      </PopoverContext.Provider>
+    )
+  },
+  PopoverContent: ({ children, ...props }: { children: ReactNode }) => {
+    const context = useContext(PopoverContext)
+
+    if (!context?.open) {
+      return null
+    }
+
+    return <div {...props}>{children}</div>
+  },
+  PopoverTrigger: ({ children }: { children: ReactNode }) => {
+    const context = useContext(PopoverContext)
+
+    if (!isValidElement(children)) {
+      return children
+    }
+
+    const element = children as ReactElement<{ onClick?: (event: unknown) => void }>
+    const originalOnClick = element.props.onClick
+
+    return cloneElement(element, {
+      onClick: (event: unknown) => {
+        originalOnClick?.(event)
+        context?.setOpen(!context.open)
+      },
+    })
+  },
 }))
 
 vi.mock("@/components/unlumen-ui/slider", () => ({
@@ -382,6 +436,55 @@ describe("DraftingSurface", () => {
         }),
       )
     }
+  })
+
+  it("keeps raster export preview idle while the download popover is closed", async () => {
+    vi.useFakeTimers()
+    const surface = renderSurface({ openDownloadPopover: false })
+
+    await act(async () => {
+      vi.advanceTimersByTime(500)
+      await flushPromises()
+    })
+
+    expect(measureDashboardRasterExportSpy).not.toHaveBeenCalled()
+
+    const autoContentInput = getRequiredElement(
+      surface.container,
+      'textarea[aria-label="Auto content"]',
+    ) as HTMLTextAreaElement
+
+    await act(async () => {
+      changeInputValue(autoContentInput, "https://example.com/updated")
+      vi.advanceTimersByTime(500)
+      await flushPromises()
+    })
+
+    expect(measureDashboardRasterExportSpy).not.toHaveBeenCalled()
+  })
+
+  it("regenerates the active qr markup once when content changes", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface()
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const callsBeforeEdit = buildDashboardQrNodePayloadSpy.mock.calls.length
+    const autoContentInput = getRequiredElement(
+      surface.container,
+      'textarea[aria-label="Auto content"]',
+    ) as HTMLTextAreaElement
+
+    await act(async () => {
+      changeInputValue(autoContentInput, "https://example.com/changed")
+      await flushPromises()
+      await flushPromises()
+    })
+
+    expect(buildDashboardQrNodePayloadSpy).toHaveBeenCalledTimes(callsBeforeEdit + 1)
   })
 
   it("downloads the selected png export from the header control with the selected preset", async () => {
@@ -2106,7 +2209,7 @@ describe("DraftingSurface", () => {
   })
 })
 
-function renderSurface() {
+function renderSurface({ openDownloadPopover = true }: { openDownloadPopover?: boolean } = {}) {
   const container = document.createElement("div")
   const root = createRoot(container)
 
@@ -2121,6 +2224,18 @@ function renderSurface() {
   })
 
   document.body.appendChild(container)
+
+  if (openDownloadPopover) {
+    const trigger = container.querySelector(
+      'button[aria-label="Open download options"]',
+    ) as HTMLButtonElement | null
+
+    if (trigger) {
+      act(() => {
+        activateElement(trigger)
+      })
+    }
+  }
 
   return { container }
 }

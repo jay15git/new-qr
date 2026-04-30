@@ -68,6 +68,7 @@ import {
   formatDashboardExportFileSize,
   isRasterExportExtension,
   measureDashboardRasterExport,
+  type DashboardRasterExtension,
 } from "@/components/qr/dashboard-raster-export"
 import {
   DASHBOARD_QR_NODE_ID,
@@ -482,6 +483,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     useState<DraftingDownloadExtension>("png")
   const [selectedDownloadTarget, setSelectedDownloadTarget] =
     useState<DraftingDownloadTarget>("current")
+  const [isDownloadPopoverOpen, setIsDownloadPopoverOpen] = useState(false)
   const [selectedRasterExportPresetId, setSelectedRasterExportPresetId] =
     useState<DraftingRasterExportPresetId>(DEFAULT_DRAFTING_RASTER_EXPORT_PRESET_ID)
   const [draftingExportSizePreview, setDraftingExportSizePreview] =
@@ -667,6 +669,15 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     : undefined
 
   const qrNodeIds = useMemo(() => Object.keys(qrStateByNodeId), [qrStateByNodeId])
+  const qrPaneNamesById = useMemo(() => {
+    const next = new Map<string, string>()
+
+    qrNodeIds.forEach((nodeId, index) => {
+      next.set(nodeId, index === 0 ? "QR Code" : `QR Code ${index + 1}`)
+    })
+
+    return next
+  }, [qrNodeIds])
   const activeQrDownloadTarget = getDraftingQrNodeDownloadTarget(activeQrNodeId)
   const shouldMeasureActiveQrExport =
     selectedDownloadTarget === "current" ||
@@ -678,7 +689,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
         id: "current" as const,
         label: "Current QR",
       },
-      ...(qrNodeIds.length > 0
+    ...(qrNodeIds.length > 0
         ? [
             {
               id: "all-qr" as const,
@@ -688,10 +699,10 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
         : []),
       ...qrNodeIds.map((nodeId) => ({
         id: getDraftingQrNodeDownloadTarget(nodeId),
-        label: getQrNodeName(qrStateByNodeId, nodeId),
+        label: qrPaneNamesById.get(nodeId) ?? "QR Code",
       })),
     ],
-    [qrNodeIds, qrStateByNodeId],
+    [qrNodeIds, qrPaneNamesById],
   )
   const effectiveDraftingExportSizePreview: DraftingExportSizePreview =
     canDownload && isDraftingRasterExport
@@ -699,6 +710,14 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       : {
           status: "idle",
         }
+  const activeDraftingExportPreviewEnabled =
+    isDownloadPopoverOpen && canDownload && isDraftingRasterExport && shouldMeasureActiveQrExport
+  const activeDraftingExportPreviewState = isDownloadPopoverOpen ? draftingStudioState : null
+  const activeDraftingExportPreviewExtension: DashboardRasterExtension | null =
+    isDownloadPopoverOpen ? (selectedDownloadExtension as DashboardRasterExtension) : null
+  const activeDraftingExportPreviewTargetSizePx = isDownloadPopoverOpen
+    ? selectedRasterExportTargetSizePx
+    : undefined
 
   function buildDraftingLogoStateSnapshot({
     logoColor = selectedLogoColor,
@@ -980,25 +999,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     }
   }, [])
 
-  // Sync active pane state when controls change
-  useEffect(() => {
-    setQrStateByNodeId((current) => {
-      const prevState = current[activeQrNodeId]
-      if (!prevState) return current
-
-      // Only update if something actually changed
-      const nextState = cloneDraftingQrState(draftingStudioState)
-      if (JSON.stringify(prevState) === JSON.stringify(nextState)) {
-        return current
-      }
-
-      return {
-        ...current,
-        [activeQrNodeId]: nextState,
-      }
-    })
-  }, [draftingStudioState, activeQrNodeId])
-
   // Export size preview
   useEffect(() => {
     if (draftingExportPreviewTimeoutRef.current !== null) {
@@ -1007,11 +1007,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
 
     const requestId = ++draftingExportPreviewRequestRef.current
 
-    if (
-      !canDownload ||
-      !isDraftingRasterExport ||
-      !shouldMeasureActiveQrExport
-    ) {
+    if (!activeDraftingExportPreviewEnabled) {
       queueMicrotask(() => {
         if (draftingExportPreviewRequestRef.current !== requestId) {
           return
@@ -1036,10 +1032,10 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
 
     draftingExportPreviewTimeoutRef.current = window.setTimeout(() => {
       void measureDashboardRasterExport({
-        extension: selectedDownloadExtension,
-        qualityPercent: draftingStudioState.rasterExportQualityPercent,
-        state: draftingStudioState,
-        targetSizePx: selectedRasterExportTargetSizePx,
+        extension: activeDraftingExportPreviewExtension!,
+        qualityPercent: activeDraftingExportPreviewState!.rasterExportQualityPercent,
+        state: activeDraftingExportPreviewState!,
+        targetSizePx: activeDraftingExportPreviewTargetSizePx,
       })
         .then((result) => {
           if (draftingExportPreviewRequestRef.current !== requestId) {
@@ -1068,19 +1064,16 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       }
     }
   }, [
-    canDownload,
-    draftingStudioState,
-    isDraftingRasterExport,
-    selectedDownloadExtension,
-    selectedDownloadTarget,
-    selectedRasterExportTargetSizePx,
-    shouldMeasureActiveQrExport,
+    activeDraftingExportPreviewEnabled,
+    activeDraftingExportPreviewExtension,
+    activeDraftingExportPreviewState,
+    activeDraftingExportPreviewTargetSizePx,
   ])
 
   async function handleAddQrCode() {
     if (qrNodeIds.length >= 10) return
 
-    const sourceState = qrStateByNodeId[activeQrNodeId] ?? draftingStudioState
+    const sourceState = draftingStudioState
     const nextNodeId = `${DASHBOARD_QR_NODE_ID}-${crypto.randomUUID()}`
 
     // Save current controls to active pane first
@@ -1117,10 +1110,11 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       if (selectedDownloadTarget === "all-qr") {
         const nodes = await Promise.all(
           Object.entries(qrStateByNodeId).map(async ([nodeId, state]) => {
-            const payload = await buildDashboardQrNodePayload(state)
+            const activeState = nodeId === activeQrNodeId ? draftingStudioState : state
+            const payload = await buildDashboardQrNodePayload(activeState)
             return {
               id: nodeId,
-              name: getQrNodeName(qrStateByNodeId, nodeId),
+              name: qrPaneNamesById.get(nodeId) ?? "QR Code",
               naturalHeight: payload.naturalHeight,
               naturalWidth: payload.naturalWidth,
               originalSvgMarkup: payload.markup,
@@ -1144,7 +1138,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
           selectedDownloadTarget === "current"
             ? activeQrNodeId
             : selectedDownloadTarget.slice("qr:".length)
-        const state = qrStateByNodeId[nodeId]
+        const state = nodeId === activeQrNodeId ? draftingStudioState : qrStateByNodeId[nodeId]
 
         if (!state) {
           throw new Error("The selected QR code is unavailable for export.")
@@ -1154,10 +1148,10 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
 
         await downloadDashboardQrNodeExport({
           extension: selectedDownloadExtension,
-          name: getQrNodeName(qrStateByNodeId, nodeId),
+          name: qrPaneNamesById.get(nodeId) ?? "QR Code",
           node: {
             id: nodeId,
-            name: getQrNodeName(qrStateByNodeId, nodeId),
+            name: qrPaneNamesById.get(nodeId) ?? "QR Code",
             naturalHeight: payload.naturalHeight,
             naturalWidth: payload.naturalWidth,
             originalSvgMarkup: payload.markup,
@@ -1473,9 +1467,16 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       return (
         <DraftingLayersTab
           onReorder={(orderedIds) => {
+            const activeState = cloneDraftingQrState(draftingStudioState)
+
             setQrStateByNodeId((current) => {
               const next: DraftingQrStateByNodeId = {}
               for (const id of orderedIds) {
+                if (id === activeQrNodeId) {
+                  next[id] = activeState
+                  continue
+                }
+
                 if (current[id]) {
                   next[id] = current[id]
                 }
@@ -1483,7 +1484,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
               // Add any missing ids at the end
               for (const id of Object.keys(current)) {
                 if (!next[id]) {
-                  next[id] = current[id]
+                  next[id] = id === activeQrNodeId ? activeState : current[id]
                 }
               }
               return next
@@ -1496,7 +1497,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
           }}
           panes={qrNodeIds.map((id) => ({
             id,
-            name: getQrNodeName(qrStateByNodeId, id),
+            name: qrPaneNamesById.get(id) ?? "QR Code",
           }))}
           selectedNodeId={activeQrNodeId}
           onRemoveNode={(nodeId) => {
@@ -1515,10 +1516,10 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     () =>
       qrNodeIds.map((id) => ({
         id,
-        name: getQrNodeName(qrStateByNodeId, id),
+        name: qrPaneNamesById.get(id) ?? "QR Code",
         state: id === activeQrNodeId ? draftingStudioState : (qrStateByNodeId[id] ?? draftingStudioState),
       })),
-    [qrNodeIds, qrStateByNodeId, activeQrNodeId, draftingStudioState],
+    [qrNodeIds, qrPaneNamesById, qrStateByNodeId, activeQrNodeId, draftingStudioState],
   )
 
   return (
@@ -1570,7 +1571,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
         <div className="flex h-full min-w-0 items-center justify-end">
           <div data-slot="drafting-header-actions" className="flex h-full min-w-0 max-w-full items-center gap-1.5 sm:gap-2.5">
             <ModeToggle appearance="drafting" className="shrink-0 text-[var(--drafting-ink)]" />
-            <Popover>
+            <Popover open={isDownloadPopoverOpen} onOpenChange={setIsDownloadPopoverOpen}>
               <PopoverTrigger asChild>
                 <SecondaryButton
                   aria-label="Open download options"
@@ -2012,11 +2013,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
 
 function getDraftingQrNodeDownloadTarget(nodeId: string): DraftingDownloadTarget {
   return `qr:${nodeId}`
-}
-
-function getQrNodeName(qrStateByNodeId: DraftingQrStateByNodeId, nodeId: string): string {
-  const index = Object.keys(qrStateByNodeId).indexOf(nodeId)
-  return index === 0 ? "QR Code" : `QR Code ${index + 1}`
 }
 
 async function downloadDraftingSvgExport({

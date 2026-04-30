@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState, useSyncExternalStore } from "react"
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react"
 import {
   CopyPlusIcon,
   Maximize2Icon,
@@ -50,6 +50,77 @@ function subscribePortrait(callback: () => void) {
   const mql = window.matchMedia("(orientation: portrait)")
   mql.addEventListener("change", callback)
   return () => mql.removeEventListener("change", callback)
+}
+
+function DraftingPaneSurface({
+  areaName,
+  isSelected,
+  onPaneQrClick,
+  onPaneSelect,
+  pane,
+  paneZoom,
+}: {
+  areaName?: string
+  isSelected: boolean
+  onPaneQrClick: (paneId: string) => void
+  onPaneSelect: (paneId: string) => void
+  pane: DraftingPane
+  paneZoom: number
+}) {
+  const onPaneSelectRef = useRef(onPaneSelect)
+  const onPaneQrClickRef = useRef(onPaneQrClick)
+
+  useEffect(() => {
+    onPaneSelectRef.current = onPaneSelect
+  }, [onPaneSelect])
+
+  useEffect(() => {
+    onPaneQrClickRef.current = onPaneQrClick
+  }, [onPaneQrClick])
+
+  const handleSelect = useCallback(() => {
+    onPaneSelectRef.current(pane.id)
+  }, [pane.id])
+
+  const handleQrClick = useCallback(() => {
+    onPaneQrClickRef.current(pane.id)
+  }, [pane.id])
+
+  return (
+    <div
+      key={pane.id}
+      data-slot="dashboard-compose-surface"
+      data-surface-appearance="neutral"
+      className={cn(
+        "relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-[var(--drafting-canvas-bg)]",
+        isSelected && "ring-2 ring-inset ring-[var(--drafting-ink)]",
+      )}
+      style={{
+        gridArea: areaName,
+        backgroundImage:
+          "linear-gradient(45deg, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 25%, transparent 25%), linear-gradient(-45deg, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 75%), linear-gradient(-45deg, transparent 75%, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 75%)",
+        backgroundPosition: "0 0, 0 18px, 18px -18px, -18px 0",
+        backgroundSize: "36px 36px",
+      }}
+      onClick={handleSelect}
+    >
+      <div
+        style={{
+          transform: `scale(${paneZoom})`,
+          transformOrigin: "center center",
+          transition: "transform 150ms ease-out",
+        }}
+        className="flex h-full w-full items-center justify-center"
+      >
+        <QrPane
+          state={pane.state}
+          isSelected={isSelected}
+          onQrClick={handleQrClick}
+          onSelect={handleSelect}
+        />
+      </div>
+    </div>
+  )
 }
 
 export function DraftingPaneWorkspace({
@@ -131,40 +202,15 @@ export function DraftingPaneWorkspace({
                   : undefined
 
                 return (
-                  <div
+                  <DraftingPaneSurface
+                    areaName={areaName}
+                    isSelected={isSelected}
                     key={pane.id}
-                    data-slot="dashboard-compose-surface"
-                    data-surface-appearance="neutral"
-                    className={cn(
-                      "relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-[var(--drafting-canvas-bg)]",
-                      isSelected &&
-                        "ring-2 ring-inset ring-[var(--drafting-ink)]",
-                    )}
-                    style={{
-                      gridArea: areaName,
-                      backgroundImage:
-                        "linear-gradient(45deg, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 25%, transparent 25%), linear-gradient(-45deg, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 75%), linear-gradient(-45deg, transparent 75%, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 75%)",
-                      backgroundPosition: "0 0, 0 18px, 18px -18px, -18px 0",
-                      backgroundSize: "36px 36px",
-                    }}
-                    onClick={() => onPaneSelect(pane.id)}
-                  >
-                    <div
-                      style={{
-                        transform: `scale(${paneZoom})`,
-                        transformOrigin: "center center",
-                        transition: "transform 150ms ease-out",
-                      }}
-                      className="flex h-full w-full items-center justify-center"
-                    >
-                      <QrPane
-                        state={pane.state}
-                        isSelected={isSelected}
-                        onSelect={() => onPaneSelect(pane.id)}
-                        onQrClick={() => onPaneQrClick(pane.id)}
-                      />
-                    </div>
-                  </div>
+                    onPaneQrClick={onPaneQrClick}
+                    onPaneSelect={onPaneSelect}
+                    pane={pane}
+                    paneZoom={paneZoom}
+                  />
                 )
               })}
             </div>

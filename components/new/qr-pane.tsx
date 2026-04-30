@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { memo, useEffect, useMemo, useRef, useState } from "react"
 
 import { buildDashboardQrNodePayload } from "@/components/qr/dashboard-qr-svg"
 import type { QrStudioState } from "@/components/qr/qr-studio-state"
@@ -12,7 +12,7 @@ type QrPaneProps = {
   onQrClick: () => void
 }
 
-export function QrPane({
+export const QrPane = memo(function QrPane({
   state,
   isSelected,
   onSelect,
@@ -21,13 +21,23 @@ export function QrPane({
   const [markup, setMarkup] = useState<string | null>(null)
   const [hasError, setHasError] = useState(false)
   const requestRef = useRef(0)
+  const markupCacheRef = useRef(new Map<string, string>())
+  const stateCacheKey = useMemo(() => JSON.stringify(state), [state])
 
   useEffect(() => {
     const requestId = ++requestRef.current
+    const cachedMarkup = markupCacheRef.current.get(stateCacheKey)
+
+    if (cachedMarkup) {
+      setMarkup(cachedMarkup)
+      setHasError(false)
+      return
+    }
 
     void buildDashboardQrNodePayload(state)
       .then((payload) => {
         if (requestRef.current !== requestId) return
+        markupCacheRef.current.set(stateCacheKey, payload.markup)
         setMarkup(payload.markup)
         setHasError(false)
       })
@@ -36,7 +46,7 @@ export function QrPane({
         setMarkup(null)
         setHasError(true)
       })
-  }, [state])
+  }, [state, stateCacheKey])
 
   const isLoading = markup === null && !hasError
 
@@ -81,4 +91,8 @@ export function QrPane({
       </div>
     </div>
   )
-}
+},
+(previousProps, nextProps) =>
+  previousProps.state === nextProps.state &&
+  previousProps.isSelected === nextProps.isSelected,
+)
