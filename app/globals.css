@@ -330,7 +330,9 @@
   --drafting-paper-rgb: 255 255 255;
   --drafting-page-bg: oklch(0.985 0 0);
   --drafting-surface-bg: oklch(1 0 0);
-  --drafting-canvas-bg: oklch(0.93 0 0);
+  --drafting-canvas-bg: oklch(1 0 0);
+  --drafting-canvas-dot-rgb: var(--drafting-ink-rgb);
+  --drafting-canvas-dot-opacity: 0.08;
   --drafting-canvas-check-rgb: 255 255 255;
   --drafting-canvas-check-opacity: 0.72;
   --drafting-panel-bg: rgb(var(--drafting-paper-rgb) / 0.8);
@@ -517,7 +519,9 @@
   --drafting-paper-rgb: 16 18 22;
   --drafting-page-bg: var(--drafting-dark-page-bg);
   --drafting-surface-bg: var(--drafting-dark-shell-bg);
-  --drafting-canvas-bg: var(--drafting-dark-surface-raised);
+  --drafting-canvas-bg: var(--drafting-dark-shell-bg);
+  --drafting-canvas-dot-rgb: var(--drafting-ink-rgb);
+  --drafting-canvas-dot-opacity: 0.035;
   --drafting-canvas-check-rgb: 246 248 251;
   --drafting-canvas-check-opacity: 0.028;
   --drafting-panel-bg: var(--drafting-dark-surface-muted);

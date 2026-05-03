@@ -163,7 +163,7 @@ vi.mock("@/components/unlumen-ui/slider", () => ({
 
 import { DraftingSurface } from "@/components/new/drafting-surface"
 import { DASHBOARD_QR_NODE_ID } from "@/components/qr/dashboard-compose-scene"
-import { createDefaultQrStudioState } from "@/components/qr/qr-studio-state"
+import { createDefaultQrStudioState, type QrStudioState } from "@/components/qr/qr-studio-state"
 
 const QR_PAYLOAD = {
   markup:
@@ -259,8 +259,13 @@ describe("DraftingSurface", () => {
     expect(
       surface.container
         .querySelector('[data-slot="dashboard-compose-surface"]')
-        ?.getAttribute("data-surface-appearance"),
-    ).toBe("neutral")
+        ?.className,
+    ).not.toContain("ring-2 ring-inset ring-[var(--drafting-ink)]")
+    expect(
+      surface.container
+        .querySelector('[data-slot="dashboard-compose-canvas"]')
+        ?.className,
+    ).not.toContain("shadow-[0_24px_48px_rgba(15,23,42,0.18)]")
     expect(
       surface.container
         .querySelector('[data-slot="dashboard-compose-toolbar"]')
@@ -2206,6 +2211,64 @@ describe("DraftingSurface", () => {
 
     expect(globalsSource).toContain('[data-slot="drafting-nav"]::before')
     expect(globalsSource).not.toContain('[data-slot="drafting-nav"]::after')
+  })
+
+  it("keeps the /new background preview solid on first render and after reset", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface({ openDownloadPopover: false })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const initialCall = buildDashboardQrNodePayloadSpy.mock.calls as unknown as Array<
+      [QrStudioState]
+    >
+    const initialState = initialCall[0]?.[0]
+
+    expect(initialState?.backgroundOptions.transparent).toBe(false)
+    expect(initialState?.width).toBe(240)
+    expect(initialState?.height).toBe(240)
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Reset defaults"]'))
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const resetCall = buildDashboardQrNodePayloadSpy.mock.calls as unknown as Array<
+      [QrStudioState]
+    >
+    const resetState = resetCall.at(-1)?.[0]
+
+    expect(
+      resetState?.backgroundOptions.transparent,
+    ).toBe(false)
+    expect(resetState?.width).toBe(240)
+    expect(resetState?.height).toBe(240)
+  })
+
+  it("renders a faint dotted texture behind the neutral pane workspace", () => {
+    const surface = renderSurface({ openDownloadPopover: false })
+    const composeSurface = getRequiredElement(
+      surface.container,
+      '[data-slot="dashboard-compose-surface"]',
+    )
+
+    expect(composeSurface.getAttribute("data-surface-appearance")).toBe("neutral")
+    expect(composeSurface.style.backgroundImage).toContain("radial-gradient(circle")
+    expect(composeSurface.style.backgroundImage).toContain(
+      "var(--drafting-canvas-dot-rgb)",
+    )
+    expect(composeSurface.style.backgroundImage).toContain(
+      "var(--drafting-canvas-dot-opacity)",
+    )
+    expect(composeSurface.style.backgroundImage).not.toContain("linear-gradient(45deg")
+    expect(composeSurface.style.backgroundSize).toBe("30px 30px")
   })
 })
 

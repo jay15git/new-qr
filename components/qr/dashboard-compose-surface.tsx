@@ -150,6 +150,7 @@ export function DashboardComposeSurface({
   const zoomPercent = `${Math.round(renderedScene.camera.zoom * 100)}%`
   const isNeutralSurface = surfaceAppearance === "neutral"
   const isDocumentSurface = surfaceMode === "document"
+  const isSelectedQrNode = Boolean(selectedNodeId && isDashboardQrNodeId(selectedNodeId))
   const canvasBackgroundStyle = getDashboardCanvasBackgroundStyle(renderedScene.background)
   const surfaceBaseStyle =
     isNeutralSurface
@@ -719,7 +720,11 @@ export function DashboardComposeSurface({
                 className={cn(
                   "absolute inset-0 overflow-visible",
                   isDocumentSurface &&
+                    !isSelectedQrNode &&
                     "overflow-hidden rounded-[2px] border border-black/10 bg-white shadow-[0_28px_80px_rgba(15,23,42,0.18),0_1px_0_rgba(255,255,255,0.65)_inset]",
+                  isDocumentSurface &&
+                    isSelectedQrNode &&
+                    "overflow-hidden rounded-[2px] bg-white shadow-[0_28px_80px_rgba(15,23,42,0.18),0_1px_0_rgba(255,255,255,0.65)_inset]",
                 )}
                 style={
                   isDocumentSurface
@@ -839,9 +844,14 @@ export function DashboardComposeSurface({
                             <>
                               <div
                                 className={cn(
-                                  isNeutralSurface
-                                    ? "pointer-events-none absolute inset-[-10px] rounded-[4px] border border-[var(--drafting-ink)] shadow-[0_0_0_1px_rgb(var(--drafting-paper-rgb)/0.72)]"
-                                    : "pointer-events-none absolute inset-[-10px] rounded-[4px] border border-black shadow-[0_0_0_1px_rgba(255,255,255,0.72)] dark:border-foreground dark:shadow-[0_0_0_1px_rgba(0,0,0,0.72)]",
+                                  "pointer-events-none absolute inset-[-10px] rounded-[4px]",
+                                  isQrNode
+                                    ? isNeutralSurface
+                                      ? "shadow-[0_24px_48px_rgb(var(--drafting-ink-rgb)/0.24)]"
+                                      : "shadow-[0_24px_48px_rgba(15,23,42,0.24)]"
+                                    : isNeutralSurface
+                                      ? "border border-[var(--drafting-ink)] shadow-[0_0_0_1px_rgb(var(--drafting-paper-rgb)/0.72)]"
+                                      : "border border-black shadow-[0_0_0_1px_rgba(255,255,255,0.72)] dark:border-foreground dark:shadow-[0_0_0_1px_rgba(0,0,0,0.72)]",
                                 )}
                               />
                               {isQrNode ? (

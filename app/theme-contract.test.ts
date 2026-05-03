@@ -74,7 +74,9 @@ describe("theme contract", () => {
     }
 
     expect(globalsSource).toContain("--drafting-page-bg: var(--drafting-dark-page-bg);")
-    expect(globalsSource).toContain("--drafting-canvas-bg: var(--drafting-dark-surface-raised);")
+    expect(globalsSource).toContain("--drafting-canvas-bg: var(--drafting-dark-shell-bg);")
+    expect(globalsSource).toContain("--drafting-canvas-dot-rgb: var(--drafting-ink-rgb);")
+    expect(globalsSource).toContain("--drafting-canvas-dot-opacity: 0.035;")
     expect(globalsSource).toContain("--drafting-canvas-check-rgb: 246 248 251;")
     expect(globalsSource).toContain("--drafting-canvas-check-opacity: 0.028;")
     expect(globalsSource).toContain("--drafting-control-bg: var(--drafting-dark-button-fill-default);")
@@ -98,6 +100,9 @@ describe("theme contract", () => {
     const requiredLightMappings = [
       "--drafting-button-shadow-rest: var(--drafting-shadow-rest);",
       "--drafting-button-shadow-hover: var(--drafting-shadow-hover);",
+      "--drafting-canvas-bg: oklch(1 0 0);",
+      "--drafting-canvas-dot-rgb: var(--drafting-ink-rgb);",
+      "--drafting-canvas-dot-opacity: 0.08;",
       "--drafting-canvas-check-opacity: 0.72;",
       "--drafting-panel-tab-tray-bg: var(--drafting-control-bg);",
       "--drafting-panel-tab-shadow-hover: var(--drafting-shadow-hover);",

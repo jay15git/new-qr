@@ -67,11 +67,11 @@ export function QrPreviewCard({
   )
 
   const previewStage = (
-    <div className={cn("rounded-[calc(var(--radius-xl)+4px)] border border-border/70 bg-muted/30 p-4")}>
+    <div className={cn("rounded-[calc(var(--radius-xl)+4px)] bg-muted/30 p-4")}>
       <div
         ref={previewRef}
         className={cn(
-          "flex aspect-square items-center justify-center rounded-[calc(var(--radius-xl)-2px)] bg-background p-4 shadow-inner [&_canvas]:h-full [&_canvas]:w-full [&_canvas]:max-w-full [&_svg]:h-full [&_svg]:w-full [&_svg]:max-w-full",
+          "flex aspect-square items-center justify-center rounded-[calc(var(--radius-xl)-2px)] bg-background p-4 shadow-[0_24px_60px_rgba(15,23,42,0.16)] [&_canvas]:h-full [&_canvas]:w-full [&_canvas]:max-w-full [&_svg]:h-full [&_svg]:w-full [&_svg]:max-w-full",
         )}
       />
     </div>

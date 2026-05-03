@@ -91,16 +91,13 @@ function DraftingPaneSurface({
       key={pane.id}
       data-slot="dashboard-compose-surface"
       data-surface-appearance="neutral"
-      className={cn(
-        "relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-[var(--drafting-canvas-bg)]",
-        isSelected && "ring-2 ring-inset ring-[var(--drafting-ink)]",
-      )}
+      className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-[var(--drafting-canvas-bg)]"
       style={{
         gridArea: areaName,
         backgroundImage:
-          "linear-gradient(45deg, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 25%, transparent 25%), linear-gradient(-45deg, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 75%), linear-gradient(-45deg, transparent 75%, rgb(var(--drafting-canvas-check-rgb) / var(--drafting-canvas-check-opacity)) 75%)",
-        backgroundPosition: "0 0, 0 18px, 18px -18px, -18px 0",
-        backgroundSize: "36px 36px",
+          "radial-gradient(circle, rgb(var(--drafting-canvas-dot-rgb) / var(--drafting-canvas-dot-opacity)) 2.4px, transparent 3px)",
+        backgroundPosition: "0 0",
+        backgroundSize: "30px 30px",
       }}
       onClick={handleSelect}
     >

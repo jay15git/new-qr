@@ -195,6 +195,7 @@ const DRAFTING_PANEL_TAB_TRIGGER_CLASS_NAME =
   "drafting-type-panel-tab min-w-0 rounded-[4px] border border-transparent bg-transparent px-2 py-2 font-medium text-[var(--drafting-ink-muted)] shadow-none transition-[color,box-shadow,background-color,transform] duration-150 ease-out hover:-translate-y-px hover:bg-[var(--drafting-panel-bg-hover)] hover:text-[var(--drafting-ink-strong-muted)] hover:shadow-[var(--drafting-shadow-hover)] active:translate-y-0 active:bg-[var(--drafting-panel-bg-hover)] active:font-medium active:text-[var(--drafting-ink)] active:shadow-[var(--drafting-shadow-active)] data-[state=active]:bg-[var(--drafting-panel-bg-active)] data-[state=active]:font-semibold data-[state=active]:text-[var(--drafting-ink)] data-[state=active]:shadow-[var(--drafting-shadow-active)] data-[state=active]:hover:-translate-y-px data-[state=active]:hover:bg-[var(--drafting-panel-bg-active)] data-[state=active]:hover:text-[var(--drafting-ink)] data-[state=active]:hover:shadow-[var(--drafting-shadow-hover)] data-[state=active]:active:translate-y-0 dark:bg-[var(--drafting-panel-tab-bg)] dark:text-[var(--drafting-panel-tab-label)] dark:hover:bg-[var(--drafting-panel-tab-bg-hover)] dark:hover:text-[var(--drafting-panel-tab-label-hover)] dark:hover:shadow-[var(--drafting-panel-tab-shadow-hover)] dark:active:bg-[var(--drafting-panel-tab-bg-active)] dark:active:text-[var(--drafting-panel-tab-label-selected)] dark:active:shadow-[var(--drafting-panel-tab-shadow-active)] dark:data-[state=active]:bg-[var(--drafting-panel-tab-bg-selected)] dark:data-[state=active]:text-[var(--drafting-panel-tab-label-selected)] dark:data-[state=active]:shadow-[var(--drafting-panel-tab-shadow-selected)] dark:data-[state=active]:hover:bg-[var(--drafting-panel-tab-bg-selected)] dark:data-[state=active]:hover:text-[var(--drafting-panel-tab-label-selected)] dark:data-[state=active]:hover:shadow-[var(--drafting-panel-tab-shadow-selected-hover)] sm:px-3"
 
 const DEFAULT_DRAFTING_STUDIO_STATE = createDefaultQrStudioState()
+const DEFAULT_DRAFTING_PANE_QR_SIZE = 240
 const IGNORE_DRAFTING_UPLOAD_ERROR: (message: string) => void = () => undefined
 const DEFAULT_DOWNLOAD_NAME = "new-qr-studio"
 const DRAFTING_DOWNLOAD_EXTENSIONS = ["svg", "png", "webp", "jpeg"] as const satisfies ReadonlyArray<
@@ -243,6 +244,15 @@ const DEFAULT_DRAFTING_RASTER_EXPORT_PRESET_ID: DraftingRasterExportPresetId = "
 
 function cloneDraftingQrState(state: QrStudioState): QrStudioState {
   return structuredClone(state)
+}
+
+function createDefaultDraftingQrState() {
+  const state = cloneDraftingQrState(DEFAULT_DRAFTING_STUDIO_STATE)
+
+  state.width = DEFAULT_DRAFTING_PANE_QR_SIZE
+  state.height = DEFAULT_DRAFTING_PANE_QR_SIZE
+
+  return state
 }
 
 const DRAFTING_TOOLS: DraftingTool[] = [
@@ -348,7 +358,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const [selectedRasterExportQualityPercent, setSelectedRasterExportQualityPercent] =
     useState(DEFAULT_DRAFTING_STUDIO_STATE.rasterExportQualityPercent)
   const [selectedQrSize, setSelectedQrSize] = useState(
-    DEFAULT_DRAFTING_STUDIO_STATE.width,
+    DEFAULT_DRAFTING_PANE_QR_SIZE,
   )
   const [selectedDotType, setSelectedDotType] = useState<StudioDotType>("rounded")
   const [selectedDotsColorMode, setSelectedDotsColorMode] = useState<DotsColorMode>(
@@ -404,7 +414,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     DEFAULT_DRAFTING_STUDIO_STATE.backgroundOptions.color,
   )
   const [selectedBackgroundTransparent, setSelectedBackgroundTransparent] =
-    useState(true)
+    useState(false)
   const [selectedBackgroundGradient, setSelectedBackgroundGradient] =
     useState<StudioGradient>(
       structuredClone(DEFAULT_DRAFTING_STUDIO_STATE.backgroundGradient),
@@ -477,7 +487,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     )
   const [activeQrNodeId, setActiveQrNodeId] = useState(DASHBOARD_QR_NODE_ID)
   const [qrStateByNodeId, setQrStateByNodeId] = useState<DraftingQrStateByNodeId>(() => ({
-    [DASHBOARD_QR_NODE_ID]: cloneDraftingQrState(DEFAULT_DRAFTING_STUDIO_STATE),
+    [DASHBOARD_QR_NODE_ID]: createDefaultDraftingQrState(),
   }))
   const [selectedDownloadExtension, setSelectedDownloadExtension] =
     useState<DraftingDownloadExtension>("png")
@@ -970,7 +980,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   }
 
   function resetDraftingWorkspace() {
-    const nextState = createDefaultQrStudioState()
+    const nextState = createDefaultDraftingQrState()
 
     setActiveTool(DEFAULT_QR_EDITOR_SECTION)
     applyDraftingQrStateToControls(nextState)
@@ -988,7 +998,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       status: "idle",
     })
     setActivePanelTabs({ ...DEFAULT_DRAFTING_PANEL_TABS })
-    setSelectedBackgroundTransparent(true)
+    setSelectedBackgroundTransparent(false)
   }
 
   useEffect(() => {
@@ -1100,7 +1110,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
         (id) => id !== paneId,
       ) ?? DASHBOARD_QR_NODE_ID
       setActiveQrNodeId(fallbackId)
-      const fallbackState = qrStateByNodeId[fallbackId] ?? createDefaultQrStudioState()
+      const fallbackState = qrStateByNodeId[fallbackId] ?? createDefaultDraftingQrState()
       applyDraftingQrStateToControls(fallbackState)
     }
   }

@@ -4,12 +4,18 @@ import { memo, useEffect, useMemo, useRef, useState } from "react"
 
 import { buildDashboardQrNodePayload } from "@/components/qr/dashboard-qr-svg"
 import type { QrStudioState } from "@/components/qr/qr-studio-state"
+import { cn } from "@/lib/utils"
 
 type QrPaneProps = {
   state: QrStudioState
   isSelected: boolean
   onSelect: () => void
   onQrClick: () => void
+}
+
+function getQrPreviewRenderSize(state: QrStudioState) {
+  const naturalSize = Math.max(state.width, state.height)
+  return Math.min(Math.max(naturalSize, 420), 560)
 }
 
 export const QrPane = memo(function QrPane({
@@ -49,6 +55,7 @@ export const QrPane = memo(function QrPane({
   }, [state, stateCacheKey])
 
   const isLoading = markup === null && !hasError
+  const previewRenderSize = getQrPreviewRenderSize(state)
 
   return (
     <div
@@ -65,7 +72,7 @@ export const QrPane = memo(function QrPane({
       <div
         data-slot="dashboard-compose-canvas"
         data-compose-mode="compose"
-        className="relative flex h-full w-full items-center justify-center overflow-hidden"
+        className="relative flex h-full w-full items-center justify-center overflow-visible p-4 sm:p-6 lg:p-8"
       >
         {isLoading ? (
           <div className="text-sm font-medium text-[var(--drafting-ink-muted)]">
@@ -76,13 +83,24 @@ export const QrPane = memo(function QrPane({
             data-slot="dashboard-compose-node"
             data-node-id={state.data}
             data-selected={isSelected ? "true" : "false"}
-            className="h-full w-full cursor-pointer [&_svg]:h-full [&_svg]:w-full"
-            dangerouslySetInnerHTML={{ __html: markup }}
+            className={cn(
+              "relative max-h-full max-w-full cursor-pointer transition-shadow duration-150",
+              isSelected && "shadow-[0_10px_24px_-12px_rgba(15,23,42,0.26)]",
+            )}
+            style={{
+              height: previewRenderSize,
+              width: previewRenderSize,
+            }}
             onClick={(e) => {
               e.stopPropagation()
               onQrClick()
             }}
-          />
+          >
+            <div
+              className="relative z-10 h-full w-full max-h-full max-w-full [&_svg]:h-full [&_svg]:w-full"
+              dangerouslySetInnerHTML={{ __html: markup }}
+            />
+          </div>
         ) : (
           <div className="text-sm font-medium text-[var(--drafting-ink-muted)]">
             Could not generate QR

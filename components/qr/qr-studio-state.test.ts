@@ -36,6 +36,7 @@ describe("qr studio state helpers", () => {
     expect(options.height).toBe(320);
     expect(options.data).toContain("https://");
     expect(options.image).toBeUndefined();
+    expect(options.backgroundOptions?.color).toBe("#f8fafc");
   });
 
   it("clamps shared qr size updates to the supported square range", () => {

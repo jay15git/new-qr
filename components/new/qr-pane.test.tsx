@@ -83,9 +83,86 @@ describe("QrPane", () => {
 
     expect(buildDashboardQrNodePayloadSpy).toHaveBeenCalledTimes(2)
   })
+
+  it("keeps the qr artwork inset from the pane edges", async () => {
+    const state = createDefaultQrStudioState()
+    const { container } = renderPane(state)
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const canvas = container.querySelector('[data-slot="dashboard-compose-canvas"]')
+    const node = container.querySelector('[data-slot="dashboard-compose-node"]')
+
+    expect(canvas).not.toBeNull()
+    expect(canvas?.className).toContain("p-4")
+    expect(canvas?.className).toContain("sm:p-6")
+    expect(canvas?.className).toContain("lg:p-8")
+    expect(node).not.toBeNull()
+    const nodeClasses = node?.className.split(/\s+/) ?? []
+    expect(nodeClasses).toContain("max-h-full")
+    expect(nodeClasses).toContain("max-w-full")
+    expect(nodeClasses).not.toContain("h-full")
+    expect(nodeClasses).not.toContain("w-full")
+    expect((node as HTMLElement).style.width).toBe("420px")
+    expect((node as HTMLElement).style.height).toBe("420px")
+  })
+
+  it("adds a shadow to the qr canvas when selected", async () => {
+    const state = createDefaultQrStudioState()
+    const { container } = renderPane(state, true)
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const pane = container.querySelector('[data-slot="qr-pane"]')
+    const canvas = container.querySelector('[data-slot="dashboard-compose-canvas"]')
+    const node = container.querySelector('[data-slot="dashboard-compose-node"]')
+
+    expect(pane).not.toBeNull()
+    expect(pane?.className).not.toContain("ring-2")
+    expect(canvas?.className).not.toContain("shadow-[0_24px_48px_rgba(15,23,42,0.18)]")
+    expect(node?.className).toContain("shadow-[0_10px_24px_-12px_rgba(15,23,42,0.26)]")
+    expect((node as HTMLElement | null)?.style.width).toBe("420px")
+    expect((node as HTMLElement | null)?.style.height).toBe("420px")
+  })
+
+  it("scales the preview beyond export size by default", async () => {
+    const state = createDefaultQrStudioState()
+    const { container } = renderPane(state)
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const node = container.querySelector('[data-slot="dashboard-compose-node"]')
+
+    expect(node).not.toBeNull()
+    expect((node as HTMLElement).style.width).toBe("420px")
+    expect((node as HTMLElement).style.width).not.toBe(`${state.width}px`)
+  })
+
+  it("keeps the qr canvas unshadowed when not selected", async () => {
+    const { container } = renderPane(createDefaultQrStudioState(), false)
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const node = container.querySelector('[data-slot="dashboard-compose-node"]')
+
+    expect(node).not.toBeNull()
+    expect(node?.className).not.toContain("shadow-[0_10px_24px_-12px_rgba(15,23,42,0.26)]")
+  })
 })
 
-function renderPane(state = createDefaultQrStudioState()) {
+function renderPane(state = createDefaultQrStudioState(), isSelected = false) {
   const container = document.createElement("div")
   const reactRoot = createRoot(container)
 
@@ -93,7 +170,7 @@ function renderPane(state = createDefaultQrStudioState()) {
     reactRoot.render(
       <QrPane
         state={state}
-        isSelected={false}
+        isSelected={isSelected}
         onQrClick={() => undefined}
         onSelect={() => undefined}
       />,

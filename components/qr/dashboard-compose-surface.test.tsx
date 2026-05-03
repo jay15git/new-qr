@@ -46,7 +46,7 @@ describe("DashboardComposeSurface", () => {
     expect(markup).toContain('aria-label="Resize QR from bottom left"')
     expect(markup).toContain('aria-label="Resize QR from bottom right"')
     expect(markup).toContain("320 × 320")
-    expect(markup).toContain("rounded-[4px] border border-black")
+    expect(markup).toContain("pointer-events-none absolute inset-[-10px] rounded-[4px] shadow-[0_24px_48px_rgba(15,23,42,0.24)]")
     expect(markup).toContain("h-6 w-6 items-center justify-center rounded-[4px] border border-black")
     expect(markup).not.toContain("border-sky-600")
     expect(markup).not.toContain("text-sky-700")
@@ -162,6 +162,7 @@ describe("DashboardComposeSurface", () => {
     expect(markup).toContain(`data-node-id="${DASHBOARD_QR_NODE_ID}"`)
     expect(markup).toContain('data-z-index="1"')
     expect(markup).toContain("drop-shadow-[0_22px_34px_rgba(15,23,42,0.28)]")
+    expect(markup).toContain("shadow-[0_24px_48px_rgba(15,23,42,0.24)]")
     expect(markup).toContain("z-index:10000")
   })
 
@@ -199,10 +200,42 @@ describe("DashboardComposeSurface", () => {
     expect(qrNodeIndex).toBeGreaterThan(imageNodeIndex)
     expect(markup).toContain('data-selected="true"')
     expect(markup).toContain("drop-shadow-[0_22px_34px_rgb(var(--drafting-ink-rgb)/0.28)]")
+    expect(markup).not.toContain("border border-black/10 bg-white")
     expect(markup).toContain("z-index:10000")
     expect(markup).toContain('aria-label="Rotate QR"')
     expect(markup).toContain('aria-label="Resize QR from top left"')
     expect(markup).not.toContain("border border-[#111111]")
+  })
+
+  it("keeps the document frame border when a non-qr node is selected", () => {
+    const scene = addDashboardComposeImageNode(
+      upsertDashboardQrNode(createDashboardDocumentComposeScene(), QR_PAYLOAD),
+      {
+        id: "image-node",
+        imageUrl: "/landscape.png",
+        name: "Landscape",
+        naturalHeight: 600,
+        naturalWidth: 1200,
+      },
+    )
+
+    const markup = renderToStaticMarkup(
+      <DashboardComposeSurface
+        errorMessage={null}
+        onReset={vi.fn()}
+        onQrSizeChange={vi.fn()}
+        onSceneChange={vi.fn()}
+        onSelectedNodeChange={vi.fn()}
+        qrSize={QR_PAYLOAD.naturalWidth}
+        scene={scene}
+        selectedNodeId="image-node"
+        surfaceMode="document"
+      />,
+    )
+
+    expect(markup).toContain("border border-black/10 bg-white")
+    expect(markup).toContain("shadow-[0_28px_80px_rgba(15,23,42,0.18),0_1px_0_rgba(255,255,255,0.65)_inset]")
+    expect(markup).not.toContain("shadow-[0_24px_48px_rgba(15,23,42,0.24)]")
   })
 
   it("renders the selected qr size label below the composer preview", () => {
