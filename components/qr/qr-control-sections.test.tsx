@@ -87,7 +87,7 @@ describe("QrControlSections", () => {
     expect(markup).toContain('data-preview-module-pitch="4"')
     expect(markup).toContain('data-preview-module-size="4"')
     expect(markup).toContain("min-h-28")
-    expect(markup).toContain('class="size-[5.5rem] text-foreground/80"')
+    expect(markup).toContain('class="size-[5.5rem] text-foreground/80 dark:text-white"')
     expect(markup).toMatch(
       /data-preview-style="classy"[\s\S]*?data-slot="style-preview-native-module"/,
     )

@@ -7,7 +7,7 @@ import {
 
 export type StylePreviewKind = "corner-dot" | "corner-square" | "dots"
 
-const PREVIEW_ICON_CLASS_NAME = "size-[5.5rem] text-foreground/80"
+const PREVIEW_ICON_CLASS_NAME = "size-[5.5rem] text-foreground/80 dark:text-white"
 const CORNER_DOT_PREVIEW_ROWS = Object.freeze(["111", "111", "111"])
 const CORNER_SQUARE_PREVIEW_ROWS = Object.freeze([
   "1111111",
