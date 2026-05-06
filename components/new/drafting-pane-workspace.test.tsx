@@ -18,10 +18,17 @@ vi.mock("@/components/qr/dashboard-qr-svg", () => ({
 }))
 
 const cleanupCallbacks: Array<() => void> = []
-const FIVE_PANE_FLEX_BASIS = "0 0 calc(0.3333333333333333*(100% - 1rem))"
 
 beforeEach(() => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true)
+  vi.stubGlobal(
+    "ResizeObserver",
+    class ResizeObserver {
+      disconnect() {}
+      observe() {}
+      unobserve() {}
+    },
+  )
   stubPortraitOrientation(false)
 })
 
@@ -29,6 +36,8 @@ afterEach(() => {
   while (cleanupCallbacks.length > 0) {
     cleanupCallbacks.pop()?.()
   }
+  vi.unstubAllGlobals()
+  document.body.innerHTML = ""
 })
 
 describe("DraftingPaneWorkspace", () => {
@@ -46,6 +55,34 @@ describe("DraftingPaneWorkspace", () => {
     })
 
     expect(onSwapPanes).toHaveBeenCalledWith("pane-1", "pane-2")
+  })
+
+  it("keeps resizable panel slot identity stable when pane content is swapped", async () => {
+    const panes = createPanes(2)
+    const workspace = renderWorkspace({ panes })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    const panelIdsBefore = getResizablePanels(workspace.container).map((panel) =>
+      panel.getAttribute("data-panel"),
+    )
+    const paneDataBefore = getQrNodes(workspace.container).map((node) =>
+      node.getAttribute("data-node-id"),
+    )
+
+    await act(async () => {
+      workspace.render([...panes].reverse())
+      await flushPromises()
+    })
+
+    expect(getResizablePanels(workspace.container).map((panel) =>
+      panel.getAttribute("data-panel"),
+    )).toEqual(panelIdsBefore)
+    expect(getQrNodes(workspace.container).map((node) =>
+      node.getAttribute("data-node-id"),
+    )).toEqual([...paneDataBefore].reverse())
   })
 
   it("does not swap when a pane drops onto itself", async () => {
@@ -93,7 +130,18 @@ describe("DraftingPaneWorkspace", () => {
     expect(secondPane.getAttribute("data-snap-target")).toBe("true")
   })
 
-  it("renders five landscape panes as two centered uniform rows", async () => {
+  it("renders one pane without resize handles", async () => {
+    const workspace = renderWorkspace({ paneCount: 1 })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    expect(getPaneSurfaces(workspace.container, 1)).toHaveLength(1)
+    expect(getResizeHandles(workspace.container)).toHaveLength(0)
+  })
+
+  it("renders five landscape panes as two resizable rows", async () => {
     const workspace = renderWorkspace({ paneCount: 5 })
 
     await act(async () => {
@@ -105,23 +153,19 @@ describe("DraftingPaneWorkspace", () => {
     const panes = getPaneSurfaces(workspace.container, 5)
 
     expect(layout.getAttribute("data-layout-direction")).toBe("rows")
+    expect(layout.getAttribute("data-resize-orientation")).toBe("vertical")
     expect(groups.map((group) => group.getAttribute("data-layout-group-size"))).toEqual([
       "3",
       "2",
     ])
-    expect(Array.from(groups[0].children).map((child) => (child as HTMLElement).style.flex)).toEqual([
-      FIVE_PANE_FLEX_BASIS,
-      FIVE_PANE_FLEX_BASIS,
-      FIVE_PANE_FLEX_BASIS,
-    ])
-    expect(Array.from(groups[1].children).map((child) => (child as HTMLElement).style.flex)).toEqual([
-      FIVE_PANE_FLEX_BASIS,
-      FIVE_PANE_FLEX_BASIS,
-    ])
+    expect(getNestedPanelGroups(workspace.container).map((group) =>
+      group.getAttribute("data-resize-orientation"),
+    )).toEqual(["horizontal", "horizontal"])
+    expect(getResizeHandles(workspace.container)).toHaveLength(4)
     expect(panes).toHaveLength(5)
   })
 
-  it("renders five portrait panes as two centered uniform columns", async () => {
+  it("renders five portrait panes as two resizable columns", async () => {
     stubPortraitOrientation(true)
     const workspace = renderWorkspace({ paneCount: 5 })
 
@@ -133,41 +177,48 @@ describe("DraftingPaneWorkspace", () => {
     const groups = getLayoutGroups(layout)
 
     expect(layout.getAttribute("data-layout-direction")).toBe("columns")
+    expect(layout.getAttribute("data-resize-orientation")).toBe("horizontal")
     expect(groups.map((group) => group.getAttribute("data-layout-group-size"))).toEqual([
       "3",
       "2",
     ])
-    expect(Array.from(groups[0].children).map((child) => (child as HTMLElement).style.flex)).toEqual([
-      FIVE_PANE_FLEX_BASIS,
-      FIVE_PANE_FLEX_BASIS,
-      FIVE_PANE_FLEX_BASIS,
-    ])
-    expect(Array.from(groups[1].children).map((child) => (child as HTMLElement).style.flex)).toEqual([
-      FIVE_PANE_FLEX_BASIS,
-      FIVE_PANE_FLEX_BASIS,
-    ])
+    expect(getNestedPanelGroups(workspace.container).map((group) =>
+      group.getAttribute("data-resize-orientation"),
+    )).toEqual(["vertical", "vertical"])
+    expect(getResizeHandles(workspace.container)).toHaveLength(4)
+  })
+
+  it("hides resize handles while the active pane is maximized", async () => {
+    const workspace = renderWorkspace({ paneCount: 3 })
+    const maximizeButton = workspace.container.querySelector(
+      'button[aria-label="Maximize pane"]',
+    ) as HTMLButtonElement | null
+
+    expect(maximizeButton).not.toBeNull()
+
+    await act(async () => {
+      maximizeButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+      await flushPromises()
+    })
+
+    expect(getPaneSurfaces(workspace.container, 1)).toHaveLength(1)
+    expect(getResizeHandles(workspace.container)).toHaveLength(0)
   })
 })
 
 function renderWorkspace({
   onSwapPanes = vi.fn(),
   paneCount = 2,
+  panes = createPanes(paneCount),
 }: {
   onSwapPanes?: (sourcePaneId: string, targetPaneId: string) => void
   paneCount?: number
+  panes?: ReturnType<typeof createPanes>
 }) {
   const container = document.createElement("div")
   const root = createRoot(container)
-  const panes = Array.from({ length: paneCount }, (_, index) => ({
-    id: `pane-${index + 1}`,
-    name: index === 0 ? "QR Code" : `QR Code ${index + 1}`,
-    state: {
-      ...createDefaultQrStudioState(),
-      data: `https://${index + 1}.example`,
-    },
-  }))
 
-  act(() => {
+  function render(nextPanes = panes) {
     root.render(
       <DraftingPaneWorkspace
         activePaneId="pane-1"
@@ -175,9 +226,13 @@ function renderWorkspace({
         onPaneSelect={() => undefined}
         onReset={() => undefined}
         onSwapPanes={onSwapPanes}
-        panes={panes}
+        panes={nextPanes}
       />,
     )
+  }
+
+  act(() => {
+    render()
   })
 
   cleanupCallbacks.push(() => {
@@ -188,7 +243,18 @@ function renderWorkspace({
 
   document.body.appendChild(container)
 
-  return { container }
+  return { container, render }
+}
+
+function createPanes(paneCount: number) {
+  return Array.from({ length: paneCount }, (_, index) => ({
+    id: `pane-${index + 1}`,
+    name: index === 0 ? "QR Code" : `QR Code ${index + 1}`,
+    state: {
+      ...createDefaultQrStudioState(),
+      data: `https://${index + 1}.example`,
+    },
+  }))
 }
 
 function getPaneLayout(parent: ParentNode) {
@@ -201,6 +267,29 @@ function getPaneLayout(parent: ParentNode) {
 
 function getLayoutGroups(parent: ParentNode) {
   return Array.from(parent.querySelectorAll("[data-layout-group]")) as HTMLElement[]
+}
+
+function getNestedPanelGroups(parent: ParentNode) {
+  const layout = getPaneLayout(parent)
+  return Array.from(
+    layout.querySelectorAll('[data-slot="resizable-panel-group"]'),
+  ) as HTMLElement[]
+}
+
+function getResizeHandles(parent: ParentNode) {
+  return Array.from(
+    parent.querySelectorAll('[data-slot="drafting-resize-handle"]'),
+  ) as HTMLElement[]
+}
+
+function getResizablePanels(parent: ParentNode) {
+  return Array.from(parent.querySelectorAll("[data-panel]")) as HTMLElement[]
+}
+
+function getQrNodes(parent: ParentNode) {
+  return Array.from(
+    parent.querySelectorAll('[data-slot="dashboard-compose-node"]'),
+  ) as HTMLElement[]
 }
 
 function getPaneSurfaces(parent: ParentNode, expectedCount = 2) {

@@ -16,6 +16,11 @@ import { getQrLayout } from "@/components/new/qr-layout-engine"
 import type { QrStudioState } from "@/components/qr/qr-studio-state"
 import { Button } from "@/components/ui/button"
 import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable"
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -28,6 +33,8 @@ type DraftingPane = {
   name: string
   state: QrStudioState
 }
+
+type DraftingPanelLayouts = Record<string, Record<string, number>>
 
 type DraftingPaneWorkspaceProps = {
   panes: DraftingPane[]
@@ -61,6 +68,21 @@ function subscribePortrait(callback: () => void) {
   const mql = window.matchMedia("(orientation: portrait)")
   mql.addEventListener("change", callback)
   return () => mql.removeEventListener("change", callback)
+}
+
+function DraftingResizeHandle() {
+  return (
+    <ResizableHandle
+      data-slot="drafting-resize-handle"
+      className={cn(
+        "z-10 bg-[var(--drafting-line)] transition-colors duration-150 hover:bg-[var(--drafting-line-hover)] active:bg-[var(--drafting-line-strong)]",
+        "focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0",
+        "after:w-5 after:bg-transparent aria-[orientation=horizontal]:after:h-5 aria-[orientation=horizontal]:after:bg-transparent",
+        "before:absolute before:left-1/2 before:top-1/2 before:z-10 before:h-7 before:w-px before:-translate-x-1/2 before:-translate-y-1/2 before:bg-[var(--drafting-ink-muted)] before:opacity-45 before:content-['']",
+        "aria-[orientation=horizontal]:before:h-px aria-[orientation=horizontal]:before:w-7",
+      )}
+    />
+  )
 }
 
 function DraftingPaneSurface({
@@ -176,6 +198,7 @@ export function DraftingPaneWorkspace({
   const [maximizedPaneId, setMaximizedPaneId] = useState<string | null>(null)
   const [draggingPaneId, setDraggingPaneId] = useState<string | null>(null)
   const [snapTargetPaneId, setSnapTargetPaneId] = useState<string | null>(null)
+  const [panelLayouts, setPanelLayouts] = useState<DraftingPanelLayouts>({})
   const draggingPaneIdRef = useRef<string | null>(null)
   const isPortrait = useSyncExternalStore(
     subscribePortrait,
@@ -218,6 +241,36 @@ export function DraftingPaneWorkspace({
   const layout = panes.length > 0
     ? getQrLayout(isMaximized ? 1 : panes.length, isPortrait)
     : null
+  const topLevelOrientation = layout?.direction === "rows" ? "vertical" : "horizontal"
+  const nestedOrientation = layout?.direction === "rows" ? "horizontal" : "vertical"
+  const layoutKey = layout
+    ? `${layout.direction}-${layout.groups.join("-")}`
+    : "empty"
+  const rootPanelGroupId = `drafting-pane-layout-${layoutKey}-root`
+
+  const handlePanelLayoutChange = useCallback(
+    (groupId: string) => (nextLayout: Record<string, number>) => {
+      setPanelLayouts((current) => {
+        const previousLayout = current[groupId]
+
+        if (
+          previousLayout &&
+          Object.keys(previousLayout).length === Object.keys(nextLayout).length &&
+          Object.entries(nextLayout).every(
+            ([panelId, size]) => previousLayout[panelId] === size,
+          )
+        ) {
+          return current
+        }
+
+        return {
+          ...current,
+          [groupId]: nextLayout,
+        }
+      })
+    },
+    [],
+  )
 
   const handlePaneDragStart = useCallback(
     (paneId: string, event: React.DragEvent<HTMLDivElement>) => {
@@ -309,63 +362,90 @@ export function DraftingPaneWorkspace({
               No QR codes
             </div>
           ) : (
-            <div
-              className={cn(
-                "flex h-full w-full gap-2",
-                layout?.direction === "columns" ? "flex-row" : "flex-col",
-              )}
-              data-layout-direction={layout?.direction}
-              data-slot="drafting-pane-layout"
-            >
-              {layout &&
-                groupPanes(visiblePanes, layout.groups).map((group, groupIndex) => (
-                  <div
-                    className={cn(
-                      "flex min-h-0 min-w-0 flex-1 justify-center gap-2",
-                      layout.direction === "columns" ? "flex-col" : "flex-row",
-                    )}
-                    data-layout-group={groupIndex}
-                    data-layout-group-size={group.length}
-                    key={`${layout.direction}-${groupIndex}`}
-                  >
-                    {group.map((pane) => {
-                      const isSelected = pane.id === activePaneId
-                      const paneZoom = zoomLevels[pane.id] ?? 1
+            layout ? (
+              <ResizablePanelGroup
+                className="h-full w-full"
+                data-layout-direction={layout.direction}
+                data-resize-orientation={topLevelOrientation}
+                data-slot="drafting-pane-layout"
+                defaultLayout={panelLayouts[rootPanelGroupId]}
+                id={rootPanelGroupId}
+                onLayoutChange={handlePanelLayoutChange(rootPanelGroupId)}
+                orientation={topLevelOrientation}
+              >
+                {groupPanes(visiblePanes, layout.groups).flatMap((group, groupIndex) => {
+                  const groupPanelId = `group-${groupIndex}`
+                  const nestedPanelGroupId = `drafting-pane-layout-${layoutKey}-group-${groupIndex}`
+                  const groupPanel = (
+                    <ResizablePanel
+                      data-layout-group={groupIndex}
+                      data-layout-group-size={group.length}
+                      defaultSize={100 / layout.groups.length}
+                      id={groupPanelId}
+                      key={groupPanelId}
+                      minSize={12}
+                    >
+                      <ResizablePanelGroup
+                        className="h-full w-full"
+                        data-resize-orientation={nestedOrientation}
+                        defaultLayout={panelLayouts[nestedPanelGroupId]}
+                        id={nestedPanelGroupId}
+                        onLayoutChange={handlePanelLayoutChange(nestedPanelGroupId)}
+                        orientation={nestedOrientation}
+                      >
+                        {group.flatMap((pane, paneIndex) => {
+                          const isSelected = pane.id === activePaneId
+                          const paneZoom = zoomLevels[pane.id] ?? 1
+                          const panePanelId = `pane-${groupIndex}-${paneIndex}`
 
-                      return (
-                        <div
-                          className="min-h-0 min-w-0"
-                          key={pane.id}
-                          style={{
-                            flex: `0 0 calc((100% - ${
-                              (layout.direction === "columns" ? layout.rows - 1 : layout.cols - 1) *
-                              0.5
-                            }rem) / ${
-                              layout.direction === "columns" ? layout.rows : layout.cols
-                            })`,
-                          }}
-                        >
-                          <DraftingPaneSurface
-                            canSwap={canSwapPanes}
-                            draggingPaneId={draggingPaneId}
-                            isSelected={isSelected}
-                            isSnapTarget={snapTargetPaneId === pane.id}
-                            onPaneDragEnd={handlePaneDragEnd}
-                            onPaneDragLeave={handlePaneDragLeave}
-                            onPaneDragOver={handlePaneDragOver}
-                            onPaneDragStart={handlePaneDragStart}
-                            onPaneDrop={handlePaneDrop}
-                            onPaneQrClick={onPaneQrClick}
-                            onPaneSelect={onPaneSelect}
-                            pane={pane}
-                            paneZoom={paneZoom}
-                          />
-                        </div>
-                      )
-                    })}
-                  </div>
-                ))}
-            </div>
+                          const panePanel = (
+                            <ResizablePanel
+                              className="min-h-0 min-w-0"
+                              defaultSize={100 / group.length}
+                              id={panePanelId}
+                              key={panePanelId}
+                              minSize={10}
+                            >
+                              <DraftingPaneSurface
+                                canSwap={canSwapPanes}
+                                draggingPaneId={draggingPaneId}
+                                isSelected={isSelected}
+                                isSnapTarget={snapTargetPaneId === pane.id}
+                                onPaneDragEnd={handlePaneDragEnd}
+                                onPaneDragLeave={handlePaneDragLeave}
+                                onPaneDragOver={handlePaneDragOver}
+                                onPaneDragStart={handlePaneDragStart}
+                                onPaneDrop={handlePaneDrop}
+                                onPaneQrClick={onPaneQrClick}
+                                onPaneSelect={onPaneSelect}
+                                pane={pane}
+                                paneZoom={paneZoom}
+                              />
+                            </ResizablePanel>
+                          )
+
+                          return paneIndex < group.length - 1
+                            ? [
+                                panePanel,
+                                <DraftingResizeHandle
+                                  key={`pane-${groupIndex}-${paneIndex}-handle`}
+                                />,
+                              ]
+                            : [panePanel]
+                        })}
+                      </ResizablePanelGroup>
+                    </ResizablePanel>
+                  )
+
+                  return groupIndex < layout.groups.length - 1
+                    ? [
+                        groupPanel,
+                        <DraftingResizeHandle key={`group-${groupIndex}-handle`} />,
+                      ]
+                    : [groupPanel]
+                })}
+              </ResizablePanelGroup>
+            ) : null
           )}
         </div>
 
