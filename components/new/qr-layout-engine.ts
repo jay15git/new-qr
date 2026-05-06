@@ -1,7 +1,8 @@
 export type QrLayout = {
   cols: number
   rows: number
-  areas: string | null
+  groups: number[]
+  direction: "rows" | "columns"
 }
 
 export function getQrLayout(count: number, isPortrait: boolean): QrLayout {
@@ -13,45 +14,45 @@ export function getQrLayout(count: number, isPortrait: boolean): QrLayout {
 
   switch (key) {
     case "1-landscape":
-      return { cols: 1, rows: 1, areas: null }
+      return { cols: 1, rows: 1, groups: [1], direction: "rows" }
     case "1-portrait":
-      return { cols: 1, rows: 1, areas: null }
+      return { cols: 1, rows: 1, groups: [1], direction: "columns" }
     case "2-landscape":
-      return { cols: 2, rows: 1, areas: null }
+      return { cols: 2, rows: 1, groups: [2], direction: "rows" }
     case "2-portrait":
-      return { cols: 1, rows: 2, areas: null }
+      return { cols: 1, rows: 2, groups: [2], direction: "columns" }
     case "3-landscape":
-      return { cols: 3, rows: 1, areas: null }
+      return { cols: 3, rows: 1, groups: [3], direction: "rows" }
     case "3-portrait":
-      return { cols: 1, rows: 3, areas: null }
+      return { cols: 1, rows: 3, groups: [3], direction: "columns" }
     case "4-landscape":
-      return { cols: 2, rows: 2, areas: null }
+      return { cols: 2, rows: 2, groups: [2, 2], direction: "rows" }
     case "4-portrait":
-      return { cols: 2, rows: 2, areas: null }
+      return { cols: 2, rows: 2, groups: [2, 2], direction: "columns" }
     case "5-landscape":
-      return { cols: 3, rows: 2, areas: '"a a b" "c d e"' }
+      return { cols: 3, rows: 2, groups: [3, 2], direction: "rows" }
     case "5-portrait":
-      return { cols: 2, rows: 3, areas: '"a b" "a c" "d e"' }
+      return { cols: 2, rows: 3, groups: [3, 2], direction: "columns" }
     case "6-landscape":
-      return { cols: 3, rows: 2, areas: null }
+      return { cols: 3, rows: 2, groups: [3, 3], direction: "rows" }
     case "6-portrait":
-      return { cols: 2, rows: 3, areas: null }
+      return { cols: 2, rows: 3, groups: [3, 3], direction: "columns" }
     case "7-landscape":
-      return { cols: 3, rows: 3, areas: '"a a b" "c d e" "f g ."' }
+      return { cols: 4, rows: 2, groups: [4, 3], direction: "rows" }
     case "7-portrait":
-      return { cols: 2, rows: 4, areas: '"a b" "a c" "d e" "f g"' }
+      return { cols: 2, rows: 4, groups: [4, 3], direction: "columns" }
     case "8-landscape":
-      return { cols: 4, rows: 2, areas: null }
+      return { cols: 4, rows: 2, groups: [4, 4], direction: "rows" }
     case "8-portrait":
-      return { cols: 2, rows: 4, areas: null }
+      return { cols: 2, rows: 4, groups: [4, 4], direction: "columns" }
     case "9-landscape":
-      return { cols: 3, rows: 4, areas: '"a a b" "a a c" "d e f" "g h i"' }
+      return { cols: 5, rows: 2, groups: [5, 4], direction: "rows" }
     case "9-portrait":
-      return { cols: 4, rows: 3, areas: '"a a b c" "a a d e" "f g h i"' }
+      return { cols: 2, rows: 5, groups: [5, 4], direction: "columns" }
     case "10-landscape":
-      return { cols: 5, rows: 2, areas: null }
+      return { cols: 5, rows: 2, groups: [5, 5], direction: "rows" }
     case "10-portrait":
-      return { cols: 2, rows: 5, areas: null }
+      return { cols: 2, rows: 5, groups: [5, 5], direction: "columns" }
     default:
       throw new Error(`Unhandled layout: ${key}`)
   }

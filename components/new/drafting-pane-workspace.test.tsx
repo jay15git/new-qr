@@ -18,17 +18,11 @@ vi.mock("@/components/qr/dashboard-qr-svg", () => ({
 }))
 
 const cleanupCallbacks: Array<() => void> = []
+const FIVE_PANE_FLEX_BASIS = "0 0 calc(0.3333333333333333*(100% - 1rem))"
 
 beforeEach(() => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true)
-  Object.defineProperty(window, "matchMedia", {
-    configurable: true,
-    value: vi.fn(() => ({
-      addEventListener: vi.fn(),
-      matches: false,
-      removeEventListener: vi.fn(),
-    })),
-  })
+  stubPortraitOrientation(false)
 })
 
 afterEach(() => {
@@ -98,15 +92,80 @@ describe("DraftingPaneWorkspace", () => {
 
     expect(secondPane.getAttribute("data-snap-target")).toBe("true")
   })
+
+  it("renders five landscape panes as two centered uniform rows", async () => {
+    const workspace = renderWorkspace({ paneCount: 5 })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    const layout = getPaneLayout(workspace.container)
+    const groups = getLayoutGroups(layout)
+    const panes = getPaneSurfaces(workspace.container, 5)
+
+    expect(layout.getAttribute("data-layout-direction")).toBe("rows")
+    expect(groups.map((group) => group.getAttribute("data-layout-group-size"))).toEqual([
+      "3",
+      "2",
+    ])
+    expect(Array.from(groups[0].children).map((child) => (child as HTMLElement).style.flex)).toEqual([
+      FIVE_PANE_FLEX_BASIS,
+      FIVE_PANE_FLEX_BASIS,
+      FIVE_PANE_FLEX_BASIS,
+    ])
+    expect(Array.from(groups[1].children).map((child) => (child as HTMLElement).style.flex)).toEqual([
+      FIVE_PANE_FLEX_BASIS,
+      FIVE_PANE_FLEX_BASIS,
+    ])
+    expect(panes).toHaveLength(5)
+  })
+
+  it("renders five portrait panes as two centered uniform columns", async () => {
+    stubPortraitOrientation(true)
+    const workspace = renderWorkspace({ paneCount: 5 })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    const layout = getPaneLayout(workspace.container)
+    const groups = getLayoutGroups(layout)
+
+    expect(layout.getAttribute("data-layout-direction")).toBe("columns")
+    expect(groups.map((group) => group.getAttribute("data-layout-group-size"))).toEqual([
+      "3",
+      "2",
+    ])
+    expect(Array.from(groups[0].children).map((child) => (child as HTMLElement).style.flex)).toEqual([
+      FIVE_PANE_FLEX_BASIS,
+      FIVE_PANE_FLEX_BASIS,
+      FIVE_PANE_FLEX_BASIS,
+    ])
+    expect(Array.from(groups[1].children).map((child) => (child as HTMLElement).style.flex)).toEqual([
+      FIVE_PANE_FLEX_BASIS,
+      FIVE_PANE_FLEX_BASIS,
+    ])
+  })
 })
 
 function renderWorkspace({
-  onSwapPanes,
+  onSwapPanes = vi.fn(),
+  paneCount = 2,
 }: {
-  onSwapPanes: (sourcePaneId: string, targetPaneId: string) => void
+  onSwapPanes?: (sourcePaneId: string, targetPaneId: string) => void
+  paneCount?: number
 }) {
   const container = document.createElement("div")
   const root = createRoot(container)
+  const panes = Array.from({ length: paneCount }, (_, index) => ({
+    id: `pane-${index + 1}`,
+    name: index === 0 ? "QR Code" : `QR Code ${index + 1}`,
+    state: {
+      ...createDefaultQrStudioState(),
+      data: `https://${index + 1}.example`,
+    },
+  }))
 
   act(() => {
     root.render(
@@ -116,18 +175,7 @@ function renderWorkspace({
         onPaneSelect={() => undefined}
         onReset={() => undefined}
         onSwapPanes={onSwapPanes}
-        panes={[
-          {
-            id: "pane-1",
-            name: "QR Code",
-            state: { ...createDefaultQrStudioState(), data: "https://one.example" },
-          },
-          {
-            id: "pane-2",
-            name: "QR Code 2",
-            state: { ...createDefaultQrStudioState(), data: "https://two.example" },
-          },
-        ]}
+        panes={panes}
       />,
     )
   })
@@ -143,14 +191,37 @@ function renderWorkspace({
   return { container }
 }
 
-function getPaneSurfaces(parent: ParentNode) {
+function getPaneLayout(parent: ParentNode) {
+  const layout = parent.querySelector('[data-slot="drafting-pane-layout"]') as HTMLElement | null
+
+  expect(layout).not.toBeNull()
+
+  return layout as HTMLElement
+}
+
+function getLayoutGroups(parent: ParentNode) {
+  return Array.from(parent.querySelectorAll("[data-layout-group]")) as HTMLElement[]
+}
+
+function getPaneSurfaces(parent: ParentNode, expectedCount = 2) {
   const panes = Array.from(
     parent.querySelectorAll('[data-slot="dashboard-compose-surface"]'),
   ) as HTMLElement[]
 
-  expect(panes).toHaveLength(2)
+  expect(panes).toHaveLength(expectedCount)
 
   return panes
+}
+
+function stubPortraitOrientation(matches: boolean) {
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    value: vi.fn(() => ({
+      addEventListener: vi.fn(),
+      matches,
+      removeEventListener: vi.fn(),
+    })),
+  })
 }
 
 function createDataTransfer() {

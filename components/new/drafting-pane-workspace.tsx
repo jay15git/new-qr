@@ -41,6 +41,16 @@ type DraftingPaneWorkspaceProps = {
   onSwapPanes?: (sourcePaneId: string, targetPaneId: string) => void
 }
 
+function groupPanes<T>(panes: T[], groups: number[]) {
+  let start = 0
+
+  return groups.map((groupSize) => {
+    const group = panes.slice(start, start + groupSize)
+    start += groupSize
+    return group
+  })
+}
+
 function getPortraitSnapshot() {
   if (typeof window === "undefined" || !window.matchMedia) return false
   return window.matchMedia("(orientation: portrait)").matches
@@ -300,42 +310,61 @@ export function DraftingPaneWorkspace({
             </div>
           ) : (
             <div
-              className="h-full w-full"
-              style={{
-                display: "grid",
-                gridTemplateColumns: layout ? `repeat(${layout.cols}, 1fr)` : undefined,
-                gridTemplateRows: layout ? `repeat(${layout.rows}, 1fr)` : undefined,
-                gap: "0.5rem",
-                ...(layout?.areas ? { gridTemplateAreas: layout.areas } : {}),
-              }}
+              className={cn(
+                "flex h-full w-full gap-2",
+                layout?.direction === "columns" ? "flex-row" : "flex-col",
+              )}
+              data-layout-direction={layout?.direction}
+              data-slot="drafting-pane-layout"
             >
-              {visiblePanes.map((pane, index) => {
-                const isSelected = pane.id === activePaneId
-                const paneZoom = zoomLevels[pane.id] ?? 1
-                const areaName = layout?.areas
-                  ? String.fromCharCode(97 + index)
-                  : undefined
+              {layout &&
+                groupPanes(visiblePanes, layout.groups).map((group, groupIndex) => (
+                  <div
+                    className={cn(
+                      "flex min-h-0 min-w-0 flex-1 justify-center gap-2",
+                      layout.direction === "columns" ? "flex-col" : "flex-row",
+                    )}
+                    data-layout-group={groupIndex}
+                    data-layout-group-size={group.length}
+                    key={`${layout.direction}-${groupIndex}`}
+                  >
+                    {group.map((pane) => {
+                      const isSelected = pane.id === activePaneId
+                      const paneZoom = zoomLevels[pane.id] ?? 1
 
-                return (
-                  <DraftingPaneSurface
-                    areaName={areaName}
-                    canSwap={canSwapPanes}
-                    draggingPaneId={draggingPaneId}
-                    isSelected={isSelected}
-                    isSnapTarget={snapTargetPaneId === pane.id}
-                    key={pane.id}
-                    onPaneDragEnd={handlePaneDragEnd}
-                    onPaneDragLeave={handlePaneDragLeave}
-                    onPaneDragOver={handlePaneDragOver}
-                    onPaneDragStart={handlePaneDragStart}
-                    onPaneDrop={handlePaneDrop}
-                    onPaneQrClick={onPaneQrClick}
-                    onPaneSelect={onPaneSelect}
-                    pane={pane}
-                    paneZoom={paneZoom}
-                  />
-                )
-              })}
+                      return (
+                        <div
+                          className="min-h-0 min-w-0"
+                          key={pane.id}
+                          style={{
+                            flex: `0 0 calc((100% - ${
+                              (layout.direction === "columns" ? layout.rows - 1 : layout.cols - 1) *
+                              0.5
+                            }rem) / ${
+                              layout.direction === "columns" ? layout.rows : layout.cols
+                            })`,
+                          }}
+                        >
+                          <DraftingPaneSurface
+                            canSwap={canSwapPanes}
+                            draggingPaneId={draggingPaneId}
+                            isSelected={isSelected}
+                            isSnapTarget={snapTargetPaneId === pane.id}
+                            onPaneDragEnd={handlePaneDragEnd}
+                            onPaneDragLeave={handlePaneDragLeave}
+                            onPaneDragOver={handlePaneDragOver}
+                            onPaneDragStart={handlePaneDragStart}
+                            onPaneDrop={handlePaneDrop}
+                            onPaneQrClick={onPaneQrClick}
+                            onPaneSelect={onPaneSelect}
+                            pane={pane}
+                            paneZoom={paneZoom}
+                          />
+                        </div>
+                      )
+                    })}
+                  </div>
+                ))}
             </div>
           )}
         </div>
