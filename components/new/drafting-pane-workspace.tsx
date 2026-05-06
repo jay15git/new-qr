@@ -38,6 +38,7 @@ type DraftingPaneWorkspaceProps = {
   onReset: () => void
   onPaneSelect: (paneId: string) => void
   onPaneQrClick: (paneId: string) => void
+  onSwapPanes?: (sourcePaneId: string, targetPaneId: string) => void
 }
 
 function getPortraitSnapshot() {
@@ -54,16 +55,32 @@ function subscribePortrait(callback: () => void) {
 
 function DraftingPaneSurface({
   areaName,
+  canSwap,
+  draggingPaneId,
   isSelected,
+  isSnapTarget,
   onPaneQrClick,
   onPaneSelect,
+  onPaneDragEnd,
+  onPaneDragStart,
+  onPaneDrop,
+  onPaneDragOver,
+  onPaneDragLeave,
   pane,
   paneZoom,
 }: {
   areaName?: string
+  canSwap: boolean
+  draggingPaneId: string | null
   isSelected: boolean
+  isSnapTarget: boolean
   onPaneQrClick: (paneId: string) => void
   onPaneSelect: (paneId: string) => void
+  onPaneDragEnd: () => void
+  onPaneDragStart: (paneId: string, event: React.DragEvent<HTMLDivElement>) => void
+  onPaneDrop: (paneId: string, event: React.DragEvent<HTMLDivElement>) => void
+  onPaneDragOver: (paneId: string, event: React.DragEvent<HTMLDivElement>) => void
+  onPaneDragLeave: (paneId: string, event: React.DragEvent<HTMLDivElement>) => void
   pane: DraftingPane
   paneZoom: number
 }) {
@@ -91,7 +108,16 @@ function DraftingPaneSurface({
       key={pane.id}
       data-slot="dashboard-compose-surface"
       data-surface-appearance="neutral"
-      className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-[var(--drafting-canvas-bg)]"
+      data-dragging={draggingPaneId === pane.id ? "true" : "false"}
+      data-snap-target={isSnapTarget ? "true" : "false"}
+      draggable={canSwap}
+      className={cn(
+        "relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-[var(--drafting-canvas-bg)] transition-[box-shadow,opacity] duration-150 ease-out",
+        canSwap && "cursor-grab active:cursor-grabbing",
+        draggingPaneId === pane.id && "opacity-55",
+        isSnapTarget &&
+          "shadow-[inset_0_0_0_2px_var(--drafting-ink),inset_0_0_0_6px_var(--drafting-canvas-bg)]",
+      )}
       style={{
         gridArea: areaName,
         backgroundImage:
@@ -100,6 +126,11 @@ function DraftingPaneSurface({
         backgroundSize: "30px 30px",
       }}
       onClick={handleSelect}
+      onDragEnd={onPaneDragEnd}
+      onDragLeave={(event) => onPaneDragLeave(pane.id, event)}
+      onDragOver={(event) => onPaneDragOver(pane.id, event)}
+      onDragStart={(event) => onPaneDragStart(pane.id, event)}
+      onDrop={(event) => onPaneDrop(pane.id, event)}
     >
       <div
         style={{
@@ -129,9 +160,13 @@ export function DraftingPaneWorkspace({
   onReset,
   onPaneSelect,
   onPaneQrClick,
+  onSwapPanes,
 }: DraftingPaneWorkspaceProps) {
   const [zoomLevels, setZoomLevels] = useState<Record<string, number>>({})
   const [maximizedPaneId, setMaximizedPaneId] = useState<string | null>(null)
+  const [draggingPaneId, setDraggingPaneId] = useState<string | null>(null)
+  const [snapTargetPaneId, setSnapTargetPaneId] = useState<string | null>(null)
+  const draggingPaneIdRef = useRef<string | null>(null)
   const isPortrait = useSyncExternalStore(
     subscribePortrait,
     getPortraitSnapshot,
@@ -168,14 +203,97 @@ export function DraftingPaneWorkspace({
     ? panes.filter((p) => p.id === activePaneId)
     : panes
 
+  const canSwapPanes = panes.length > 1 && Boolean(onSwapPanes)
+
   const layout = panes.length > 0
     ? getQrLayout(isMaximized ? 1 : panes.length, isPortrait)
     : null
 
+  const handlePaneDragStart = useCallback(
+    (paneId: string, event: React.DragEvent<HTMLDivElement>) => {
+      if (!canSwapPanes) {
+        event.preventDefault()
+        return
+      }
+
+      event.dataTransfer.effectAllowed = "move"
+      event.dataTransfer.setData("text/plain", paneId)
+      draggingPaneIdRef.current = paneId
+      setDraggingPaneId(paneId)
+      setSnapTargetPaneId(null)
+    },
+    [canSwapPanes],
+  )
+
+  const handlePaneDragOver = useCallback(
+    (paneId: string, event: React.DragEvent<HTMLDivElement>) => {
+      const sourcePaneId =
+        draggingPaneIdRef.current || draggingPaneId || event.dataTransfer.getData("text/plain")
+
+      if (!sourcePaneId || sourcePaneId === paneId) {
+        return
+      }
+
+      event.preventDefault()
+      event.dataTransfer.dropEffect = "move"
+      setSnapTargetPaneId(paneId)
+    },
+    [draggingPaneId],
+  )
+
+  const handlePaneDragLeave = useCallback(
+    (paneId: string, event: React.DragEvent<HTMLDivElement>) => {
+      if (
+        snapTargetPaneId === paneId &&
+        event.relatedTarget instanceof Node &&
+        event.currentTarget.contains(event.relatedTarget)
+      ) {
+        return
+      }
+
+      setSnapTargetPaneId((current) => (current === paneId ? null : current))
+    },
+    [snapTargetPaneId],
+  )
+
+  const handlePaneDrop = useCallback(
+    (targetPaneId: string, event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault()
+
+      const sourcePaneId =
+        draggingPaneIdRef.current || draggingPaneId || event.dataTransfer.getData("text/plain")
+
+      draggingPaneIdRef.current = null
+      setDraggingPaneId(null)
+      setSnapTargetPaneId(null)
+
+      if (!sourcePaneId || sourcePaneId === targetPaneId) {
+        return
+      }
+
+      onSwapPanes?.(sourcePaneId, targetPaneId)
+    },
+    [draggingPaneId, onSwapPanes],
+  )
+
+  const handlePaneDragEnd = useCallback(() => {
+    draggingPaneIdRef.current = null
+    setDraggingPaneId(null)
+    setSnapTargetPaneId(null)
+  }, [])
+
   return (
     <TooltipProvider>
       <div className="relative flex h-full w-full flex-col">
-        <div className="relative min-h-0 flex-1">
+        <div
+          className="relative min-h-0 flex-1"
+          onDrop={handlePaneDragEnd}
+          onDragOver={(event) => {
+            if (draggingPaneId) {
+              event.preventDefault()
+            }
+          }}
+        >
           {panes.length === 0 ? (
             <div className="grid h-full place-items-center text-sm font-medium text-[var(--drafting-ink-muted)]">
               No QR codes
@@ -201,8 +319,16 @@ export function DraftingPaneWorkspace({
                 return (
                   <DraftingPaneSurface
                     areaName={areaName}
+                    canSwap={canSwapPanes}
+                    draggingPaneId={draggingPaneId}
                     isSelected={isSelected}
+                    isSnapTarget={snapTargetPaneId === pane.id}
                     key={pane.id}
+                    onPaneDragEnd={handlePaneDragEnd}
+                    onPaneDragLeave={handlePaneDragLeave}
+                    onPaneDragOver={handlePaneDragOver}
+                    onPaneDragStart={handlePaneDragStart}
+                    onPaneDrop={handlePaneDrop}
                     onPaneQrClick={onPaneQrClick}
                     onPaneSelect={onPaneSelect}
                     pane={pane}

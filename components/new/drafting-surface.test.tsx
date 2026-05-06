@@ -2115,6 +2115,115 @@ describe("DraftingSurface", () => {
     )
   })
 
+  it("swaps qr panes and keeps layers plus downloads in visual order", async () => {
+    buildDashboardQrNodePayloadSpy.mockImplementation((state?: QrStudioState) =>
+      Promise.resolve({
+        markup: `<svg data-value="${state?.data ?? ""}" />`,
+        naturalHeight: 320,
+        naturalWidth: 320,
+      }),
+    )
+    const surface = renderSurface()
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    await act(async () => {
+      changeInputValue(
+        getRequiredElement(
+          surface.container,
+          'textarea[aria-label="Auto content"]',
+        ) as HTMLTextAreaElement,
+        "https://example.com/first",
+      )
+      await flushPromises()
+      await flushPromises()
+    })
+
+    await act(async () => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add QR code"]'))
+      await flushPromises()
+      await flushPromises()
+    })
+
+    await act(async () => {
+      changeInputValue(
+        getRequiredElement(
+          surface.container,
+          'textarea[aria-label="Auto content"]',
+        ) as HTMLTextAreaElement,
+        "https://example.com/second",
+      )
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const [firstPane, secondPane] = Array.from(
+      surface.container.querySelectorAll('[data-slot="dashboard-compose-surface"]'),
+    ) as HTMLElement[]
+    const dataTransfer = createDataTransfer()
+
+    await act(async () => {
+      firstPane.dispatchEvent(createDragEvent("dragstart", dataTransfer))
+      secondPane.dispatchEvent(createDragEvent("dragover", dataTransfer))
+      secondPane.dispatchEvent(createDragEvent("drop", dataTransfer))
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const swappedPaneNodes = Array.from(
+      surface.container.querySelectorAll('[data-slot="dashboard-compose-node"]'),
+    ) as HTMLElement[]
+
+    expect(swappedPaneNodes.map((node) => node.getAttribute("data-node-id"))).toEqual([
+      "https://example.com/second",
+      "https://example.com/first",
+    ])
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Layers"]'))
+    })
+
+    const layerRows = Array.from(
+      surface.container.querySelectorAll('[data-slot="drafting-layer-row"]'),
+    )
+
+    expect(layerRows.map((row) => row.textContent)).toEqual([
+      expect.stringContaining("QR Code"),
+      expect.stringContaining("QR Code 2"),
+    ])
+
+    await act(async () => {
+      activateElement(
+        getRequiredElement(surface.container, 'input[aria-label="Download All QR codes"]'),
+      )
+      activateElement(getRequiredElement(surface.container, 'input[aria-label="Export SVG"]'))
+      await flushPromises()
+    })
+
+    await act(async () => {
+      activateElement(getButtonByExactText(surface.container, "Download SVG"))
+      await flushPromises()
+    })
+
+    expect(downloadDashboardQrBatchZipExportSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        nodes: [
+          expect.objectContaining({
+            name: "QR Code",
+            originalSvgMarkup: '<svg data-value="https://example.com/second" />',
+          }),
+          expect.objectContaining({
+            name: "QR Code 2",
+            originalSvgMarkup: '<svg data-value="https://example.com/first" />',
+          }),
+        ],
+      }),
+    )
+  })
+
   it("keeps the tab tray sticky and the active middle panel as the dedicated scroll area", () => {
     const surface = renderSurface()
     const stickyTabs = getRequiredElement(surface.container, '[data-slot="drafting-tabs-sticky"]')
@@ -2363,6 +2472,32 @@ function setInputFiles(element: HTMLInputElement, files: File[]) {
     configurable: true,
     value: files,
   })
+}
+
+function createDataTransfer() {
+  const values = new Map<string, string>()
+
+  return {
+    dropEffect: "none",
+    effectAllowed: "all",
+    getData: vi.fn((type: string) => values.get(type) ?? ""),
+    setData: vi.fn((type: string, value: string) => {
+      values.set(type, value)
+    }),
+  }
+}
+
+function createDragEvent(type: string, dataTransfer: ReturnType<typeof createDataTransfer>) {
+  const event = new Event(type, {
+    bubbles: true,
+    cancelable: true,
+  }) as Event & { dataTransfer: ReturnType<typeof createDataTransfer> }
+
+  Object.defineProperty(event, "dataTransfer", {
+    value: dataTransfer,
+  })
+
+  return event
 }
 
 function getTabLabels(parent: ParentNode) {

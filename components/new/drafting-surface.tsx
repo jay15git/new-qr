@@ -255,6 +255,36 @@ function createDefaultDraftingQrState() {
   return state
 }
 
+function swapDraftingQrNodeOrder(
+  current: DraftingQrStateByNodeId,
+  sourceNodeId: string,
+  targetNodeId: string,
+  activeNodeId: string,
+  activeState: QrStudioState,
+) {
+  if (sourceNodeId === targetNodeId) {
+    return current
+  }
+
+  const entries = Object.entries(current).map(([nodeId, state]) => [
+    nodeId,
+    nodeId === activeNodeId ? activeState : state,
+  ] as const)
+  const sourceIndex = entries.findIndex(([nodeId]) => nodeId === sourceNodeId)
+  const targetIndex = entries.findIndex(([nodeId]) => nodeId === targetNodeId)
+
+  if (sourceIndex === -1 || targetIndex === -1) {
+    return current
+  }
+
+  const nextEntries = [...entries]
+  const sourceEntry = nextEntries[sourceIndex]
+  nextEntries[sourceIndex] = nextEntries[targetIndex]
+  nextEntries[targetIndex] = sourceEntry
+
+  return Object.fromEntries(nextEntries)
+}
+
 const DRAFTING_TOOLS: DraftingTool[] = [
   {
     id: "content",
@@ -2012,6 +2042,19 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
               onPaneSelect={handlePaneSelection}
               onRemoveQrCode={handleRemoveQrCode}
               onReset={resetDraftingWorkspace}
+              onSwapPanes={(sourcePaneId, targetPaneId) => {
+                const activeState = cloneDraftingQrState(draftingStudioState)
+
+                setQrStateByNodeId((current) =>
+                  swapDraftingQrNodeOrder(
+                    current,
+                    sourcePaneId,
+                    targetPaneId,
+                    activeQrNodeId,
+                    activeState,
+                  ),
+                )
+              }}
               panes={panes}
             />
           </div>
