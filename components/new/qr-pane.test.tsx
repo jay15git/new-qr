@@ -85,7 +85,7 @@ describe("QrPane", () => {
   })
 
   it("keeps the qr artwork inset from the pane edges", async () => {
-    const state = createDefaultQrStudioState()
+    const state = setSquareQrSize(createDefaultQrStudioState(), 240)
     const { container } = renderPane(state)
 
     await act(async () => {
@@ -106,12 +106,12 @@ describe("QrPane", () => {
     expect(nodeClasses).toContain("max-w-full")
     expect(nodeClasses).not.toContain("h-full")
     expect(nodeClasses).not.toContain("w-full")
-    expect((node as HTMLElement).style.width).toBe("420px")
-    expect((node as HTMLElement).style.height).toBe("420px")
+    expect((node as HTMLElement).style.width).toBe("240px")
+    expect((node as HTMLElement).style.height).toBe("240px")
   })
 
   it("adds a shadow to the qr canvas when selected", async () => {
-    const state = createDefaultQrStudioState()
+    const state = setSquareQrSize(createDefaultQrStudioState(), 240)
     const { container } = renderPane(state, true)
 
     await act(async () => {
@@ -127,12 +127,12 @@ describe("QrPane", () => {
     expect(pane?.className).not.toContain("ring-2")
     expect(canvas?.className).not.toContain("shadow-[0_24px_48px_rgba(15,23,42,0.18)]")
     expect(node?.className).toContain("shadow-[0_10px_24px_-12px_rgba(15,23,42,0.26)]")
-    expect((node as HTMLElement | null)?.style.width).toBe("420px")
-    expect((node as HTMLElement | null)?.style.height).toBe("420px")
+    expect((node as HTMLElement | null)?.style.width).toBe("240px")
+    expect((node as HTMLElement | null)?.style.height).toBe("240px")
   })
 
-  it("scales the preview beyond export size by default", async () => {
-    const state = createDefaultQrStudioState()
+  it("sizes the preview wrapper from the qr state", async () => {
+    const state = setSquareQrSize(createDefaultQrStudioState(), 320)
     const { container } = renderPane(state)
 
     await act(async () => {
@@ -143,8 +143,8 @@ describe("QrPane", () => {
     const node = container.querySelector('[data-slot="dashboard-compose-node"]')
 
     expect(node).not.toBeNull()
-    expect((node as HTMLElement).style.width).toBe("420px")
-    expect((node as HTMLElement).style.width).not.toBe(`${state.width}px`)
+    expect((node as HTMLElement).style.width).toBe("320px")
+    expect((node as HTMLElement).style.height).toBe("320px")
   })
 
   it("keeps the qr canvas unshadowed when not selected", async () => {
