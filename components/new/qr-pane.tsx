@@ -14,8 +14,7 @@ type QrPaneProps = {
 }
 
 function getQrPreviewRenderSize(state: QrStudioState) {
-  const naturalSize = Math.max(state.width, state.height)
-  return Math.min(Math.max(naturalSize, 420), 560)
+  return Math.max(state.width, state.height)
 }
 
 export const QrPane = memo(function QrPane({
