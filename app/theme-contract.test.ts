@@ -74,6 +74,18 @@ describe("theme contract", () => {
     }
 
     expect(globalsSource).toContain("--drafting-page-bg: var(--drafting-dark-page-bg);")
+    expect(globalsSource).toContain(
+      '.dark :is([data-slot="new-page"], [data-slot="drafting-download-popover"])',
+    )
+    expect(globalsSource).toContain(
+      "--drafting-option-card-border: #ffffff12;",
+    )
+    expect(globalsSource).toContain(
+      "--drafting-option-card-border-hover: var(--drafting-dark-option-border-default);",
+    )
+    expect(globalsSource).toContain(
+      "--popover: var(--drafting-dark-shell-bg);",
+    )
     expect(globalsSource).toContain("--drafting-canvas-bg: var(--drafting-dark-shell-bg);")
     expect(globalsSource).toContain("--drafting-canvas-dot-rgb: var(--drafting-ink-rgb);")
     expect(globalsSource).toContain("--drafting-canvas-dot-opacity: 0.035;")
@@ -89,6 +101,12 @@ describe("theme contract", () => {
     expect(globalsSource).toContain("--drafting-panel-tab-shadow-selected: none;")
     expect(globalsSource).toContain(
       "--drafting-option-card-shadow-rest: var(--drafting-dark-option-shadow-rest);",
+    )
+    expect(globalsSource).toContain(
+      "--drafting-option-card-border: var(--drafting-dark-option-border-default);",
+    )
+    expect(globalsSource).toContain(
+      "--drafting-option-card-border-selected: var(--drafting-dark-option-border-selected);",
     )
     expect(globalsSource).not.toContain('[data-slot="tabs-list"],')
     expect(globalsSource).not.toContain("--drafting-dark-depth-shadow")
