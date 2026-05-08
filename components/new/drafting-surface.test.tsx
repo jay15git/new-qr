@@ -1672,7 +1672,10 @@ describe("DraftingSurface", () => {
     ) as HTMLInputElement
 
     act(() => {
-      changeInputValue(solidColorInput, "15")
+      changeInputValue(solidColorInput, "#151515")
+      solidColorInput.dispatchEvent(
+        new KeyboardEvent("keydown", { bubbles: true, key: "Enter" }),
+      )
     })
 
     const surfaceRoot = getRequiredElement(surface.container, '[data-slot="drafting-surface"]')
@@ -1722,7 +1725,10 @@ describe("DraftingSurface", () => {
     ) as HTMLInputElement
 
     act(() => {
-      changeInputValue(gradientColorInput, "15")
+      changeInputValue(gradientColorInput, "#151515")
+      gradientColorInput.dispatchEvent(
+        new KeyboardEvent("keydown", { bubbles: true, key: "Enter" }),
+      )
     })
 
     const surfaceRoot = getRequiredElement(surface.container, '[data-slot="drafting-surface"]')
