@@ -30,34 +30,34 @@ export const SecondaryButton = React.forwardRef<
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         // Light mode — default
         "bg-[#00000003] text-[#00000073]",
-        "shadow-[0_0_18px_2px_#00000010,0_3px_8px_1px_#00000009]",
+        "shadow-[var(--drafting-shadow-rest)]",
         // Light mode — hover
         "hover:-translate-y-px hover:bg-[#00000006] hover:text-[#000000A6]",
-        "hover:shadow-[0_0_24px_3px_#00000030,0_4px_10px_1px_#00000018]",
+        "hover:shadow-[var(--drafting-shadow-hover)]",
         // Light mode — active/pressed
         "active:translate-y-0 active:bg-[#00000007] active:text-[#262626]",
-        "active:shadow-[0_0_14px_1px_#00000012,0_2px_6px_#0000000C]",
+        "active:shadow-[var(--drafting-shadow-active)]",
         // Light mode — selected
         "data-[selected=true]:bg-[#111111] data-[selected=true]:text-white",
-        "data-[selected=true]:shadow-[0_0_24px_3px_#00000030,0_4px_10px_1px_#00000018]",
+        "data-[selected=true]:shadow-[var(--drafting-shadow-rest)]",
         // Light mode — selected hover
         "data-[selected=true]:hover:-translate-y-px",
-        "data-[selected=true]:hover:shadow-[0_0_28px_4px_#0000001A,0_5px_12px_1px_#00000010]",
+        "data-[selected=true]:hover:shadow-[var(--drafting-shadow-hover)]",
         // Dark mode — default
         "dark:bg-[#FFFFFF08] dark:text-[#A8B0BD]",
-        "dark:shadow-[0_0_18px_2px_#00000010,0_3px_8px_1px_#00000009]",
+        "dark:shadow-[var(--drafting-button-shadow-rest)]",
         // Dark mode — hover
         "dark:hover:-translate-y-px dark:hover:bg-[#FFFFFF0D] dark:hover:text-[#C8D0DC]",
-        "dark:hover:shadow-[0_0_24px_3px_#00000016,0_4px_10px_1px_#0000000E]",
+        "dark:hover:shadow-[var(--drafting-button-shadow-hover)]",
         // Dark mode — active/pressed
         "dark:active:translate-y-0 dark:active:bg-[#FFFFFF14] dark:active:text-[#DFE5EE]",
-        "dark:active:shadow-[0_0_14px_1px_#00000012,0_2px_6px_#0000000C]",
+        "dark:active:shadow-[var(--drafting-button-shadow-active)]",
         // Dark mode — selected
         "dark:data-[selected=true]:bg-[#F6F8FB] dark:data-[selected=true]:text-[#101216]",
-        "dark:data-[selected=true]:shadow-[0_0_24px_3px_#00000016,0_4px_10px_1px_#0000000E]",
+        "dark:data-[selected=true]:shadow-[var(--drafting-button-shadow-selected)]",
         // Dark mode — selected hover
         "dark:data-[selected=true]:hover:-translate-y-px",
-        "dark:data-[selected=true]:hover:shadow-[0_0_28px_4px_#0000001A,0_5px_12px_1px_#00000010]",
+        "dark:data-[selected=true]:hover:shadow-[var(--drafting-button-shadow-selected-hover)]",
         className,
       )}
       {...props}

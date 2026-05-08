@@ -1181,6 +1181,32 @@ describe("DraftingSurface", () => {
       gradientItem,
       '[data-slot="gradient-type-option-grid"]',
     )
+    expect(gradientTypeGrid.className).toContain("max-w-[320px]")
+    expect(gradientTypeGrid.className).toContain("justify-items-stretch")
+    const gradientTypeCards = Array.from(
+      gradientTypeGrid.querySelectorAll('[data-slot="option-card"]'),
+    )
+    expect(gradientTypeCards).toHaveLength(2)
+    const gradientTypeRoots = Array.from(
+      gradientTypeGrid.querySelectorAll('[data-slot="option-card-root"]'),
+    )
+    expect(
+      gradientTypeRoots.every((root) =>
+        root.className.includes("[&_[data-slot=option-card]]:h-[44px]"),
+      ),
+    ).toBe(true)
+    expect(gradientTypeRoots.every((root) => root.className.includes("w-full"))).toBe(true)
+    expect(
+      gradientTypeRoots.every((root) =>
+        root.className.includes("[&_[data-slot=option-card]]:w-full"),
+      ),
+    ).toBe(true)
+    const gradientTypeLabels = Array.from(
+      gradientTypeGrid.querySelectorAll('[data-slot="option-card-label"]'),
+    )
+    expect(gradientTypeLabels.map((label) => label.textContent)).toEqual(["Linear", "Radial"])
+    expect(gradientTypeLabels.every((label) => label.className.includes("sr-only"))).toBe(true)
+    expect(gradientTypeCards.map((card) => card.textContent)).toEqual(["Linear", "Radial"])
     const gradientTypeIcons = Array.from(gradientTypeGrid.querySelectorAll("svg"))
     expect(gradientTypeIcons.length).toBeGreaterThan(0)
     expect(gradientTypeIcons.every((icon) => icon.getAttribute("color") === "currentColor")).toBe(true)

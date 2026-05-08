@@ -2703,6 +2703,7 @@ function GradientTypeOptionCardPicker({
   value: string
 }) {
   const labelId = `${id}-label`
+  const isDrafting = appearance === "drafting"
 
   return (
     <Field>
@@ -2711,7 +2712,10 @@ function GradientTypeOptionCardPicker({
       </FieldLabel>
       <div
         aria-labelledby={labelId}
-        className="grid grid-cols-2 justify-items-center gap-x-2 gap-y-3"
+        className={cn(
+          "grid grid-cols-2 gap-x-2 gap-y-3",
+          isDrafting ? "mx-auto w-full max-w-[320px] justify-items-stretch" : "justify-items-center",
+        )}
         data-slot="gradient-type-option-grid"
         id={id}
         role="radiogroup"
@@ -2722,13 +2726,20 @@ function GradientTypeOptionCardPicker({
             darkShadowTone={appearance === "drafting" ? "ink" : "default"}
             key={option.value}
             checked={option.value === value}
+            className={
+              isDrafting
+                ? "w-full gap-0 [&_[data-slot=option-card]]:h-[44px] [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:rounded-[7px] [&_[data-slot=option-card-motif]]:size-full"
+                : undefined
+            }
             label={option.label}
+            labelClassName={isDrafting ? "sr-only" : undefined}
+            motifClassName={isDrafting ? "size-full" : undefined}
             name={id}
             onSelect={() => onValueChange(option.value)}
             size="compact"
             value={option.value}
           >
-            <GradientTypePreview type={option.value} />
+            <GradientTypePreview label={isDrafting ? option.label : undefined} type={option.value} />
           </OptionCard>
         ))}
       </div>
@@ -2736,16 +2747,19 @@ function GradientTypeOptionCardPicker({
   )
 }
 
-function GradientTypePreview({ type }: { type: GradientType }) {
+function GradientTypePreview({ label, type }: { label?: string; type: GradientType }) {
   return (
-    <div className="flex size-full items-center justify-center">
+    <div className="flex size-full items-center justify-center gap-2 px-3">
       <HugeiconsIcon
         aria-hidden="true"
         color="currentColor"
         icon={type === "radial" ? RadiusIcon : StraightEdgeIcon}
-        size={24}
+        size={label ? 18 : 24}
         strokeWidth={1.9}
       />
+      {label ? (
+        <span className="drafting-type-caption font-medium text-current">{label}</span>
+      ) : null}
     </div>
   )
 }

@@ -128,6 +128,8 @@ describe("DraftingPaneWorkspace", () => {
     })
 
     expect(secondPane.getAttribute("data-snap-target")).toBe("true")
+    expect(secondPane.className).toContain("after:border-dashed")
+    expect(secondPane.className).toContain("after:border-[var(--drafting-ink)]")
   })
 
   it("renders one pane without resize handles", async () => {

@@ -144,11 +144,10 @@ function DraftingPaneSurface({
       data-snap-target={isSnapTarget ? "true" : "false"}
       draggable={canSwap}
       className={cn(
-        "relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-[var(--drafting-canvas-bg)] transition-[box-shadow,opacity] duration-150 ease-out",
+        "relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-[var(--drafting-canvas-bg)] transition-opacity duration-150 ease-out after:pointer-events-none after:absolute after:inset-0 after:border-2 after:border-dashed after:border-transparent after:content-[''] after:transition-colors after:duration-150 after:ease-out",
         canSwap && "cursor-grab active:cursor-grabbing",
         draggingPaneId === pane.id && "opacity-55",
-        isSnapTarget &&
-          "shadow-[inset_0_0_0_2px_var(--drafting-ink),inset_0_0_0_6px_var(--drafting-canvas-bg)]",
+        isSnapTarget && "after:border-[var(--drafting-ink)]",
       )}
       style={{
         gridArea: areaName,
