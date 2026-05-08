@@ -4,7 +4,22 @@ import { act, useState } from "react"
 import { createRoot } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { ColorPicker, useColorPicker } from "@/components/ui/fill-picker/fill-picker"
+import {
+  ColorPicker,
+  parseColor,
+  useColorPicker,
+  type OklchColor,
+} from "@/components/ui/fill-picker/fill-picker"
+
+function setInputValue(input: HTMLInputElement, value: string) {
+  const valueSetter = Object.getOwnPropertyDescriptor(
+    window.HTMLInputElement.prototype,
+    "value",
+  )?.set
+
+  valueSetter?.call(input, value)
+  input.dispatchEvent(new Event("input", { bubbles: true }))
+}
 
 describe("Fill Picker", () => {
   beforeEach(() => {
@@ -66,22 +81,27 @@ describe("Fill Picker", () => {
     const root = createRoot(container)
 
     function ControlledFillPicker() {
-      const [color, setColor] = useState("#C19B1D")
+      const [color, setColor] = useState<OklchColor>(() => parseColor("#C19B1D") as OklchColor)
+      const [hex, setHex] = useState("#C19B1D")
 
       return (
-        <ColorPicker.Root
-          defaultFormat="hex"
-          onValueChange={(_color, _formatted, formats) => {
-            setColor(formats.hex)
-            onHexChange(formats.hex)
-          }}
-          value={color}
-        >
-          <ColorPicker.Area mode="hsv-sv" />
-          <ColorPicker.Hue />
-          <ColorPicker.Alpha />
-          <ColorPicker.CssInput />
-        </ColorPicker.Root>
+        <>
+          <ColorPicker.Root
+            defaultFormat="hex"
+            onValueChange={(nextColor, _formatted, formats) => {
+              setColor(nextColor)
+              setHex(formats.hex)
+              onHexChange(formats.hex)
+            }}
+            value={color}
+          >
+            <ColorPicker.Area mode="hsv-sv" />
+            <ColorPicker.Hue />
+            <ColorPicker.Alpha />
+            <ColorPicker.CssInput />
+          </ColorPicker.Root>
+          <output data-testid="selected-hex">{hex}</output>
+        </>
       )
     }
 
@@ -136,6 +156,120 @@ describe("Fill Picker", () => {
     }).not.toThrow()
 
     expect(onHexChange).toHaveBeenCalled()
+    expect(container.querySelector('[data-testid="selected-hex"]')?.textContent).toMatch(/^#[0-9A-F]{6}$/)
+
+    act(() => {
+      root.unmount()
+    })
+  })
+
+  it("keeps in-progress CssInput edits across external color changes", () => {
+    const onValueChange = vi.fn()
+    const container = document.createElement("div")
+    const root = createRoot(container)
+    const externalColor = parseColor("#112233") as OklchColor
+
+    function EditableFillPicker() {
+      const [color, setColor] = useState<OklchColor>(() => parseColor("#C19B1D") as OklchColor)
+
+      return (
+        <ColorPicker.Root
+          defaultFormat="hex"
+          onValueChange={(next, _formatted, formats) => {
+            setColor(next)
+            onValueChange(formats.hex)
+          }}
+          value={color}
+        >
+          <button type="button" onClick={() => setColor(externalColor)}>
+            External color
+          </button>
+          <ColorPicker.CssInput />
+        </ColorPicker.Root>
+      )
+    }
+
+    act(() => {
+      root.render(<EditableFillPicker />)
+    })
+
+    const input = container.querySelector<HTMLInputElement>('[data-slot="color-picker-input"]')
+    const button = container.querySelector("button")
+    expect(input).not.toBeNull()
+    expect(button).not.toBeNull()
+    expect(input?.value).toBe("#C19B1D")
+
+    act(() => {
+      input?.focus()
+      setInputValue(input as HTMLInputElement, "#abcdef")
+    })
+
+    expect(input?.value).toBe("#abcdef")
+
+    act(() => {
+      button?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    expect(input?.value).toBe("#abcdef")
+
+    act(() => {
+      input?.dispatchEvent(new FocusEvent("focusout", { bubbles: true }))
+    })
+
+    expect(onValueChange).toHaveBeenLastCalledWith("#ABCDEF")
+    expect(input?.value).toBe("#ABCDEF")
+
+    act(() => {
+      root.unmount()
+    })
+  })
+
+  it("reports invalid CssInput commits and lets Escape revert to the formatted value", () => {
+    const container = document.createElement("div")
+    const root = createRoot(container)
+
+    function EditableFillPicker() {
+      const [color, setColor] = useState<OklchColor>(() => parseColor("#C19B1D") as OklchColor)
+
+      return (
+        <ColorPicker.Root
+          defaultFormat="hex"
+          onValueChange={(next) => setColor(next)}
+          value={color}
+        >
+          <ColorPicker.CssInput />
+        </ColorPicker.Root>
+      )
+    }
+
+    act(() => {
+      root.render(<EditableFillPicker />)
+    })
+
+    const input = container.querySelector<HTMLInputElement>('[data-slot="color-picker-input"]')
+    expect(input).not.toBeNull()
+
+    act(() => {
+      input?.focus()
+      setInputValue(input as HTMLInputElement, "definitely-not-a-color")
+      input?.dispatchEvent(new FocusEvent("focusout", { bubbles: true }))
+    })
+
+    expect(input?.getAttribute("aria-invalid")).toBe("true")
+    expect(input?.value).toBe("definitely-not-a-color")
+
+    act(() => {
+      input?.focus()
+      input?.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          bubbles: true,
+          key: "Escape",
+        }),
+      )
+    })
+
+    expect(input?.getAttribute("aria-invalid")).toBeNull()
+    expect(input?.value).toBe("#C19B1D")
 
     act(() => {
       root.unmount()

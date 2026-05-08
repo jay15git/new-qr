@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { RadiusIcon, StraightEdgeIcon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { XIcon } from "lucide-react"
@@ -2832,20 +2832,13 @@ function DraftingFillPicker({
   size: number
   value: string
 }) {
-  const [color, setColor] = useState<OklchColor>(() => parseDraftingColor(value))
+  const color = useMemo(() => parseDraftingColor(value), [value])
   const [savedSwatches, setSavedSwatches] = useState<string[]>(readDraftingSavedSwatches)
   const latestHexRef = useRef(value)
   const swatchPresets = mergeDraftingSwatches(savedSwatches)
 
   useEffect(() => {
-    const nextColor = parseDraftingColor(value)
     latestHexRef.current = value
-
-    // Keep Amplo's lossless object state synchronized with legacy hex props.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setColor((currentColor) =>
-      areOklchColorsEqual(currentColor, nextColor) ? currentColor : nextColor,
-    )
   }, [value])
 
   function savePreset(hex: string) {
@@ -2869,12 +2862,8 @@ function DraftingFillPicker({
         className,
       )}
       defaultFormat="hex"
-      onValueChange={(nextColor, _formatted, formats) => {
+      onValueChange={(_nextColor, _formatted, formats) => {
         const nextHex = formats.hex
-
-        setColor((currentColor) =>
-          areOklchColorsEqual(currentColor, nextColor) ? currentColor : nextColor,
-        )
 
         if (nextHex.toLowerCase() !== latestHexRef.current.toLowerCase()) {
           latestHexRef.current = nextHex
@@ -2991,15 +2980,6 @@ function writeDraftingSavedSwatches(swatches: string[]) {
 
 function mergeDraftingSwatches(savedSwatches: string[]) {
   return Array.from(new Set([...DRAFTING_FILL_PICKER_DEFAULT_SWATCHES, ...savedSwatches]))
-}
-
-function areOklchColorsEqual(a: OklchColor, b: OklchColor) {
-  return (
-    Math.abs(a.l - b.l) < 0.0001 &&
-    Math.abs(a.c - b.c) < 0.0001 &&
-    Math.abs(a.h - b.h) < 0.0001 &&
-    Math.abs(a.alpha - b.alpha) < 0.0001
-  )
 }
 
 function VisualStylePicker({

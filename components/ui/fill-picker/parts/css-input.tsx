@@ -15,18 +15,20 @@ export const CssInput = React.forwardRef<HTMLInputElement, CssInputProps>(functi
   ref,
 ) {
   const { formatted, setFromString } = useColorPickerContext();
-  const [draft, setDraft] = React.useState(formatted);
+  const [draft, setDraft] = React.useState("");
+  const [isEditing, setIsEditing] = React.useState(false);
   const [error, setError] = React.useState(false);
-
-  // Sync draft when canonical value changes externally (slider drags etc.)
-  React.useEffect(() => {
-    setDraft((currentDraft) => (currentDraft === formatted ? currentDraft : formatted));
-    setError((currentError) => (currentError ? false : currentError));
-  }, [formatted]);
+  const value = isEditing || error ? draft : formatted;
 
   const commit = (value: string) => {
     const ok = setFromString(value.trim());
     setError(!ok);
+    setIsEditing(false);
+    if (ok) {
+      setDraft("");
+    } else {
+      setDraft(value);
+    }
   };
 
   return (
@@ -38,10 +40,11 @@ export const CssInput = React.forwardRef<HTMLInputElement, CssInputProps>(functi
       autoComplete="off"
       autoCorrect="off"
       autoCapitalize="off"
-      value={draft}
+      value={value}
       aria-invalid={error || undefined}
       aria-label="Color value"
       onChange={(e) => {
+        setIsEditing(true);
         setDraft(e.target.value);
         setError(false);
       }}
@@ -51,7 +54,8 @@ export const CssInput = React.forwardRef<HTMLInputElement, CssInputProps>(functi
           e.preventDefault();
           commit(e.currentTarget.value);
         } else if (e.key === "Escape") {
-          setDraft(formatted);
+          setDraft("");
+          setIsEditing(false);
           setError(false);
         }
       }}
