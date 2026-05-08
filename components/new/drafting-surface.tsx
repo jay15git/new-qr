@@ -1789,28 +1789,27 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
                                 value={preset.id}
                               >
                                 <span className="flex min-w-0 flex-col gap-0.5 text-left">
+                                  <span
+                                    className={cn(
+                                      "drafting-type-meta font-semibold",
+                                      isSelected
+                                        ? "text-[var(--drafting-ink)]"
+                                        : "text-[var(--drafting-ink-strong-muted)]",
+                                    )}
+                                  >
+                                    {preset.label}
+                                  </span>
                                   <span className="flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0.5">
                                     <span
+                                      data-slot="drafting-raster-quality-value"
                                       className={cn(
-                                        "drafting-type-meta font-semibold",
+                                        "drafting-type-data font-semibold",
                                         isSelected
                                           ? "text-[var(--drafting-ink)]"
-                                          : "text-[var(--drafting-ink-strong-muted)]",
+                                          : "text-[var(--drafting-ink-muted)]",
                                       )}
                                     >
-                                      {preset.label}
-                                    </span>
-                                    <span
-                                      aria-hidden="true"
-                                      className="drafting-type-caption text-[var(--drafting-ink-subtle)]"
-                                    >
-                                      •
-                                    </span>
-                                    <span
-                                      data-slot="drafting-raster-quality-value"
-                                      className="drafting-type-data font-semibold text-[var(--drafting-ink)]"
-                                    >
-                                      {preset.sizePx} × {preset.sizePx}
+                                      {preset.sizePx} x {preset.sizePx} px
                                     </span>
                                     {selectedPresetExportSizeLabel ? (
                                       <>
@@ -1818,7 +1817,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
                                           aria-hidden="true"
                                           className="drafting-type-caption text-[var(--drafting-ink-subtle)]"
                                         >
-                                          •
+                                          ⋅
                                         </span>
                                         <span
                                           data-slot="drafting-raster-calculated-size"

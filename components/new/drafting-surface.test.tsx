@@ -363,7 +363,7 @@ describe("DraftingSurface", () => {
     expect(webpExportInput.checked).toBe(false)
     expect(surface.container.textContent).toContain("Download PNG")
     expect(surface.container.textContent).toContain("Web & social")
-    expect(surface.container.textContent).toContain("1024 × 1024")
+    expect(surface.container.textContent).toContain("1024 x 1024 px")
     expect(surface.container.textContent).toContain("Current QR")
     expect(surface.container.textContent).not.toContain("Vector master")
     expect(surface.container.textContent).not.toContain("Raster export")
@@ -383,7 +383,7 @@ describe("DraftingSurface", () => {
 
       expect(surface.container.textContent).toContain("Quality preset")
       expect(surface.container.textContent).toContain("Web & social")
-      expect(surface.container.textContent).toContain("1024 × 1024")
+      expect(surface.container.textContent).toContain("1024 x 1024 px")
       expect(surface.container.textContent).toContain("Calculating size")
 
       await act(async () => {
