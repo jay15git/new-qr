@@ -1201,6 +1201,20 @@ describe("DraftingSurface", () => {
         root.className.includes("[&_[data-slot=option-card]]:w-full"),
       ),
     ).toBe(true)
+    expect(
+      gradientTypeRoots.every((root) =>
+        root.className.includes(
+          "[&_[data-slot=option-card]]:!shadow-[0_0_12px_0_rgb(var(--drafting-ink-rgb)/0.07),0_2px_5px_0_rgb(var(--drafting-ink-rgb)/0.045)]",
+        ),
+      ),
+    ).toBe(true)
+    expect(
+      gradientTypeRoots.every((root) =>
+        root.className.includes(
+          "hover:[&_[data-slot=option-card]]:!shadow-[0_0_20px_1px_rgb(var(--drafting-ink-rgb)/0.09),0_4px_10px_0_rgb(var(--drafting-ink-rgb)/0.06)]",
+        ),
+      ),
+    ).toBe(true)
     const gradientTypeLabels = Array.from(
       gradientTypeGrid.querySelectorAll('[data-slot="option-card-label"]'),
     )

@@ -2728,7 +2728,7 @@ function GradientTypeOptionCardPicker({
             checked={option.value === value}
             className={
               isDrafting
-                ? "w-full gap-0 [&_[data-slot=option-card]]:h-[44px] [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:rounded-[7px] [&_[data-slot=option-card-motif]]:size-full"
+                ? "w-full gap-0 [&_[data-slot=option-card]]:h-[44px] [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:rounded-[7px] [&_[data-slot=option-card]]:!shadow-[0_0_12px_0_rgb(var(--drafting-ink-rgb)/0.07),0_2px_5px_0_rgb(var(--drafting-ink-rgb)/0.045)] [&_[data-slot=option-card-motif]]:size-full hover:[&_[data-slot=option-card]]:!shadow-[0_0_20px_1px_rgb(var(--drafting-ink-rgb)/0.09),0_4px_10px_0_rgb(var(--drafting-ink-rgb)/0.06)] active:[&_[data-slot=option-card]]:!shadow-[0_0_10px_0_rgb(var(--drafting-ink-rgb)/0.08),0_2px_5px_0_rgb(var(--drafting-ink-rgb)/0.055)]"
                 : undefined
             }
             label={option.label}
