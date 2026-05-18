@@ -1129,11 +1129,108 @@ describe("DraftingSurface", () => {
     )
 
     expect(sizeTab.querySelector('[data-slot="drafting-style-margin-slider"]')).not.toBeNull()
+    expect(sizeTab.querySelector('[data-slot="drafting-style-radius-slider"]')).not.toBeNull()
     expect(sizeTab.querySelector('[data-slot="drafting-style-size-slider"]')).toBeNull()
     expect(sizeTab.textContent).toContain("Outer margin")
+    expect(sizeTab.textContent).toContain("Corner radius")
+    expect(sizeTab.textContent).toContain("Corner radius: 0%")
     expect(
       sizeTab.querySelector('[data-slot="drafting-style-margin-slider"]')?.getAttribute("data-appearance"),
     ).toBe("drafting")
+  })
+
+  it("updates the drafting qr background radius from the style size tab", () => {
+    const surface = renderSurface()
+    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Style"]')
+
+    act(() => {
+      styleButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    act(() => {
+      activateElement(getTabTriggerByText(surface.container, "Size"))
+    })
+
+    const radiusInput = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-style-radius-slider"] input[type="range"]',
+    ) as HTMLInputElement
+
+    act(() => {
+      changeInputValue(radiusInput, "24")
+    })
+
+    const surfaceRoot = getRequiredElement(surface.container, '[data-slot="drafting-surface"]')
+
+    expect(surfaceRoot.getAttribute("data-qr-radius")).toBe("0.24")
+    expect(surface.container.textContent).toContain("Corner radius: 24%")
+  })
+
+  it("preserves qr background radius separately for each drafting qr layer", async () => {
+    const surface = renderSurface()
+    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Style"]')
+
+    act(() => {
+      styleButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    act(() => {
+      activateElement(getTabTriggerByText(surface.container, "Size"))
+    })
+
+    const getRadiusInput = () =>
+      getRequiredElement(
+        surface.container,
+        '[data-slot="drafting-style-radius-slider"] input[type="range"]',
+      ) as HTMLInputElement
+
+    act(() => {
+      changeInputValue(getRadiusInput(), "36")
+    })
+
+    await act(async () => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add QR code"]'))
+      await flushPromises()
+    })
+
+    act(() => {
+      changeInputValue(getRadiusInput(), "72")
+    })
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Layers"]'))
+    })
+
+    const layerRows = Array.from(
+      surface.container.querySelectorAll('[data-slot="drafting-layer-row"]'),
+    )
+
+    expect(layerRows).toHaveLength(2)
+
+    await act(async () => {
+      activateElement(
+        getRequiredElement(
+          surface.container,
+          '[data-slot="drafting-layer-row"][data-selected="false"] button:not([aria-label])',
+        ),
+      )
+      await flushPromises()
+    })
+
+    const surfaceRoot = getRequiredElement(surface.container, '[data-slot="drafting-surface"]')
+    expect(surfaceRoot.getAttribute("data-qr-radius")).toBe("0.36")
+
+    await act(async () => {
+      activateElement(
+        getRequiredElement(
+          surface.container,
+          '[data-slot="drafting-layer-row"][data-selected="false"] button:not([aria-label])',
+        ),
+      )
+      await flushPromises()
+    })
+
+    expect(surfaceRoot.getAttribute("data-qr-radius")).toBe("0.72")
   })
 
   it("expands style color modes without selecting them from the accordion header", () => {

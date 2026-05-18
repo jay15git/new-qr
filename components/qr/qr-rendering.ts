@@ -19,7 +19,12 @@ export function buildQrExtension(state: QrStudioState) {
   const alignedCornerGradientExtension = createAlignedCornerGradientExtension(state)
 
   if (backgroundImage) {
-    extensions.push(createBackgroundImageExtension(backgroundImage))
+    extensions.push(
+      createBackgroundImageExtension(
+        backgroundImage,
+        state.backgroundOptions.round,
+      ),
+    )
   }
 
   if (customDotShape) {
@@ -56,6 +61,7 @@ export function buildQrExtension(state: QrStudioState) {
 export function getQrExtensionKey(state: QrStudioState) {
   return JSON.stringify({
     backgroundImage: getAssetValue(state.backgroundImage),
+    backgroundRound: state.backgroundOptions.round,
     cornersDotGradient: getAlignedCornerGradientKey(state.cornersDotGradient),
     cornersSquareGradient: getAlignedCornerGradientKey(
       state.cornersSquareGradient,
@@ -98,7 +104,10 @@ export function createAlignedCornerGradientExtension(
   }
 }
 
-function createBackgroundImageExtension(imageHref: string): ExtensionFunction {
+function createBackgroundImageExtension(
+  imageHref: string,
+  backgroundRound: number,
+): ExtensionFunction {
   return (svg, options) => {
     const document = svg.ownerDocument
 
@@ -107,6 +116,9 @@ function createBackgroundImageExtension(imageHref: string): ExtensionFunction {
     }
 
     svg.querySelectorAll('[data-qr-layer="background-image"]').forEach((node) => {
+      node.remove()
+    })
+    svg.querySelectorAll('[data-qr-layer="background-image-clip"]').forEach((node) => {
       node.remove()
     })
 
@@ -130,9 +142,65 @@ function createBackgroundImageExtension(imageHref: string): ExtensionFunction {
       imageHref,
     )
 
+    const clipPathId = addRoundedBackgroundImageClip(svg, backgroundRound, options)
+
+    if (clipPathId) {
+      backgroundImage.setAttribute("clip-path", `url('#${clipPathId}')`)
+    }
+
     const insertReference = getBackgroundImageInsertReference(svg)
     svg.insertBefore(backgroundImage, insertReference)
   }
+}
+
+function addRoundedBackgroundImageClip(
+  svg: SVGElement,
+  backgroundRound: number,
+  options: Parameters<ExtensionFunction>[1],
+) {
+  if (backgroundRound <= 0) {
+    return null
+  }
+
+  const document = svg.ownerDocument
+
+  if (!document) {
+    return null
+  }
+
+  const width = options.width ?? 300
+  const height = options.height ?? 300
+  const size = Math.min(width, height)
+  const clipPathId = "clip-path-background-image"
+  const clipPath = document.createElementNS("http://www.w3.org/2000/svg", "clipPath")
+  const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect")
+
+  clipPath.setAttribute("id", clipPathId)
+  clipPath.setAttribute("data-qr-layer", "background-image-clip")
+  rect.setAttribute("x", String((width - size) / 2))
+  rect.setAttribute("y", String((height - size) / 2))
+  rect.setAttribute("width", String(size))
+  rect.setAttribute("height", String(size))
+  rect.setAttribute("rx", String((size / 2) * backgroundRound))
+  clipPath.appendChild(rect)
+  getOrCreateSvgDefs(svg).appendChild(clipPath)
+
+  return clipPathId
+}
+
+function getOrCreateSvgDefs(svg: SVGElement) {
+  const existingDefs = Array.from(svg.children).find(
+    (child) => child.tagName.toLowerCase() === "defs",
+  )
+
+  if (existingDefs) {
+    return existingDefs
+  }
+
+  const defs = svg.ownerDocument.createElementNS("http://www.w3.org/2000/svg", "defs")
+  svg.insertBefore(defs, svg.firstChild)
+
+  return defs
 }
 
 function getBackgroundImageInsertReference(svg: SVGElement) {

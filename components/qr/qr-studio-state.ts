@@ -75,6 +75,7 @@ export type QrStudioState = {
   };
   backgroundOptions: {
     color: string;
+    round: number;
     transparent: boolean;
   };
   logoGradient: StudioGradient;
@@ -164,6 +165,7 @@ export function createDefaultQrStudioState(): QrStudioState {
     },
     backgroundOptions: {
       color: "#f8fafc",
+      round: 0,
       transparent: false,
     },
     logoGradient: structuredClone(DEFAULT_GRADIENT),
@@ -204,6 +206,10 @@ export function clampRasterExportQualityPercent(value: number) {
     RASTER_EXPORT_QUALITY_MAX,
     DEFAULT_RASTER_EXPORT_QUALITY,
   );
+}
+
+export function clampQrBackgroundRound(value: number) {
+  return coerceNumber(value, 0, 1, 0);
 }
 
 export function setSquareQrSize(state: QrStudioState, size: number): QrStudioState {
@@ -276,6 +282,7 @@ export function toQrCodeOptions(state: QrStudioState): Options {
       gradient: buildGradient(state.cornersDotGradient),
     },
     backgroundOptions: {
+      round: clampQrBackgroundRound(state.backgroundOptions.round),
       color:
         backgroundImage ||
         state.backgroundGradient.enabled ||

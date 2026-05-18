@@ -73,6 +73,10 @@ function createStubElement(tagName: string): StubElement {
           return node.attributes["data-qr-layer"] === "background-image"
         }
 
+        if (selector === '[data-qr-layer="background-image-clip"]') {
+          return node.attributes["data-qr-layer"] === "background-image-clip"
+        }
+
         return false
       }
 
@@ -225,7 +229,49 @@ describe("qr rendering helpers", () => {
     expect(backgroundImage?.getAttribute("href")).toBe(
       "blob:https://new-qr-studio.local/background.png",
     )
+    expect(backgroundImage?.getAttribute("clip-path")).toBeNull()
     expect(svg.children[2]?.getAttribute("data-qr-layer")).toBe("background-image")
+  })
+
+  it("clips background images with the configured qr background radius", () => {
+    const state = createDefaultQrStudioState()
+    state.backgroundOptions.round = 0.5
+    state.backgroundImage = {
+      source: "upload",
+      value: "blob:https://new-qr-studio.local/background.png",
+    }
+
+    const extension = buildQrExtension(state)
+    expect(extension).toBeTypeOf("function")
+
+    if (!extension) {
+      return
+    }
+
+    const svg = createStubElement("svg")
+    const defs = createStubElement("defs")
+    svg.appendChild(defs)
+    svg.appendChild(createStubElement("rect"))
+    svg.appendChild(createStubElement("path"))
+
+    extension(svg as unknown as SVGElement, {
+      height: 120,
+      width: 160,
+    })
+
+    const backgroundImage = svg.querySelector('[data-qr-layer="background-image"]')
+    const clipPath = svg.querySelector('[data-qr-layer="background-image-clip"]')
+    const clipRect = clipPath?.querySelector("rect")
+
+    expect(backgroundImage?.getAttribute("clip-path")).toBe(
+      "url('#clip-path-background-image')",
+    )
+    expect(clipPath?.getAttribute("id")).toBe("clip-path-background-image")
+    expect(clipRect?.getAttribute("x")).toBe("20")
+    expect(clipRect?.getAttribute("y")).toBe("0")
+    expect(clipRect?.getAttribute("width")).toBe("120")
+    expect(clipRect?.getAttribute("height")).toBe("120")
+    expect(clipRect?.getAttribute("rx")).toBe("30")
   })
 
   it("normalizes all corner-frame linear gradients to the same relative direction", () => {

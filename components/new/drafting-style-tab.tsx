@@ -801,10 +801,14 @@ export function DraftingStyleTab({
 
 export function DraftingSizeTab({
   margin,
+  radius,
   onMarginChange,
+  onRadiusChange,
 }: {
   margin: number
+  radius: number
   onMarginChange: (value: number) => void
+  onRadiusChange: (value: number) => void
 }) {
   return (
     <div data-slot="drafting-style-size-tab" className="min-w-0 space-y-3">
@@ -819,6 +823,18 @@ export function DraftingSizeTab({
         step={1}
         value={margin}
         onChange={onMarginChange}
+      />
+      <DraftingSliderField
+        dataSlot="drafting-style-radius-slider"
+        description="Rounds the QR background while keeping the code modules unchanged."
+        formatValue={(value) => `${Math.round(value)}%`}
+        id="drafting-qr-radius"
+        label="Corner radius"
+        max={100}
+        min={0}
+        step={1}
+        value={radius}
+        onChange={onRadiusChange}
       />
     </div>
   )

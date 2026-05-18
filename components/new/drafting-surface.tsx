@@ -75,6 +75,7 @@ import {
   isDashboardQrNodeId,
 } from "@/components/qr/dashboard-compose-scene"
 import {
+  clampQrBackgroundRound,
   createDefaultQrStudioState,
   type AssetSourceMode,
   type DotsColorMode,
@@ -385,6 +386,9 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const [selectedQrMargin, setSelectedQrMargin] = useState(
     DEFAULT_DRAFTING_STUDIO_STATE.margin,
   )
+  const [selectedQrRadius, setSelectedQrRadius] = useState(
+    DEFAULT_DRAFTING_STUDIO_STATE.backgroundOptions.round,
+  )
   const [selectedRasterExportQualityPercent, setSelectedRasterExportQualityPercent] =
     useState(DEFAULT_DRAFTING_STUDIO_STATE.rasterExportQualityPercent)
   const [selectedQrSize, setSelectedQrSize] = useState(
@@ -608,6 +612,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       },
       backgroundOptions: {
         color: selectedBackgroundColor,
+        round: selectedQrRadius,
         transparent: selectedBackgroundTransparent,
       },
       logoGradient: {
@@ -638,6 +643,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       selectedBackgroundGradient,
       selectedBackgroundTransparent,
       selectedBackgroundRemoteUrl,
+      selectedQrRadius,
       selectedContentValue,
       selectedCornerDotColor,
       selectedCornerDotColorMode,
@@ -930,6 +936,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       },
     }))
     setSelectedQrMargin(nextState.margin)
+    setSelectedQrRadius(clampQrBackgroundRound(nextState.backgroundOptions.round))
     setSelectedRasterExportQualityPercent(nextState.rasterExportQualityPercent)
     setSelectedQrSize(nextState.width)
     setSelectedDotType(nextState.dotsOptions.type)
@@ -1268,7 +1275,9 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       return (
         <DraftingSizeTab
           margin={selectedQrMargin}
+          radius={selectedQrRadius * 100}
           onMarginChange={setSelectedQrMargin}
+          onRadiusChange={(value) => setSelectedQrRadius(clampQrBackgroundRound(value / 100))}
         />
       )
     }
@@ -1573,6 +1582,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       data-qr-content-value={selectedContentValue}
       data-qr-error-correction-level={selectedErrorCorrectionLevel}
       data-qr-margin={selectedQrMargin}
+      data-qr-radius={selectedQrRadius}
       data-qr-size={selectedQrSize}
       data-qr-type-number={selectedTypeNumber}
       data-slot="drafting-surface"

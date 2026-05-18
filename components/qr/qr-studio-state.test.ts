@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   clampRasterExportQualityPercent,
+  clampQrBackgroundRound,
   clampQrSize,
   createDefaultQrStudioState,
   setRasterExportQualityPercent,
@@ -37,6 +38,28 @@ describe("qr studio state helpers", () => {
     expect(options.data).toContain("https://");
     expect(options.image).toBeUndefined();
     expect(options.backgroundOptions?.color).toBe("#f8fafc");
+    expect(options.backgroundOptions?.round).toBe(0);
+  });
+
+  it("maps qr background radius onto upstream background round", () => {
+    const state = createDefaultQrStudioState();
+    state.backgroundOptions.round = 0.42;
+
+    const options = toQrCodeOptions(state);
+
+    expect(options.backgroundOptions?.round).toBe(0.42);
+  });
+
+  it("clamps qr background radius to the upstream round range", () => {
+    const lowRadiusState = createDefaultQrStudioState();
+    lowRadiusState.backgroundOptions.round = -0.5;
+
+    const highRadiusState = createDefaultQrStudioState();
+    highRadiusState.backgroundOptions.round = 2;
+
+    expect(toQrCodeOptions(lowRadiusState).backgroundOptions?.round).toBe(0);
+    expect(toQrCodeOptions(highRadiusState).backgroundOptions?.round).toBe(1);
+    expect(clampQrBackgroundRound(Number.NaN)).toBe(0);
   });
 
   it("clamps shared qr size updates to the supported square range", () => {
