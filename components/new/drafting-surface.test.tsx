@@ -805,11 +805,11 @@ describe("DraftingSurface", () => {
 
     expect(contentButton.getAttribute("aria-pressed")).toBe("false")
     expect(cardButton.getAttribute("aria-pressed")).toBe("true")
-    expect(getTabLabels(surface.container)).toEqual(["Card"])
+    expect(getTabLabels(surface.container)).toEqual(["Settings", "Styles", "Colors"])
     expect(
       getRequiredElement(
         surface.container,
-        '[data-active-tool="card"][data-active-tab="card"]',
+        '[data-active-tool="card"][data-active-tab="settings"]',
       ).textContent,
     ).toContain("Show card")
 
@@ -1196,6 +1196,10 @@ describe("DraftingSurface", () => {
       activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Card"]'))
     })
 
+    act(() => {
+      activateElement(getTabTriggerByText(surface.container, "Settings"))
+    })
+
     const cardPanel = getRequiredElement(surface.container, '[data-slot="drafting-card-tab"]')
     const fillInput = getRequiredElement(
       surface.container,
@@ -1233,6 +1237,88 @@ describe("DraftingSurface", () => {
     expect(card.style.width).toBe("300px")
     expect(card.style.height).toBe("460px")
     expect(card.getAttribute("data-card-shadow")).toBe("strong")
+  })
+
+  it("renders card pattern options and applies the selected pattern to the active card", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface()
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Card"]'))
+    })
+
+    act(() => {
+      activateElement(getTabTriggerByText(surface.container, "Styles"))
+    })
+
+    const stylesPanel = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-card-styles-tab"]',
+    )
+
+    expect(stylesPanel.querySelectorAll('[data-slot="option-card"]')).toHaveLength(146)
+
+    act(() => {
+      activateElement(getRadioInputByAriaLabel(stylesPanel, "Pattern 003"))
+    })
+
+    const card = getSelectedPreviewCard(surface.container)
+
+    expect(card.getAttribute("data-card-pattern")).toBe("g3")
+    expect(card.style.getPropertyValue("--s")).toBe("72px")
+  })
+
+  it("renders card pattern color controls and applies color changes to the active card", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface()
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Card"]'))
+    })
+
+    act(() => {
+      activateElement(getTabTriggerByText(surface.container, "Styles"))
+    })
+
+    act(() => {
+      activateElement(getRadioInputByAriaLabel(surface.container, "Pattern 003"))
+    })
+
+    act(() => {
+      activateElement(getTabTriggerByText(surface.container, "Colors"))
+    })
+
+    const colorsPanel = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-card-colors-tab"]',
+    )
+    const colorInputs = colorsPanel.querySelectorAll(
+      '[data-slot="drafting-card-pattern-color-input"]',
+    )
+
+    expect(colorsPanel.textContent).toContain("Pattern 003")
+    expect(colorInputs).toHaveLength(4)
+    expect(getSelectedPreviewCard(surface.container).style.getPropertyValue("--p1")).toBe(
+      "#c02942",
+    )
+
+    act(() => {
+      changeInputValue(colorInputs[0] as HTMLInputElement, "#111111")
+    })
+
+    expect(getSelectedPreviewCard(surface.container).style.getPropertyValue("--p1")).toBe(
+      "#111111",
+    )
   })
 
   it("preserves card settings separately for each drafting qr layer", async () => {
@@ -1296,6 +1382,179 @@ describe("DraftingSurface", () => {
     expect(getSelectedPreviewCard(surface.container).style.backgroundColor).toBe(
       "rgb(0, 255, 170)",
     )
+  })
+
+  it("preserves card pattern selection separately and resets it to none", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface()
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Card"]'))
+    })
+
+    act(() => {
+      activateElement(getTabTriggerByText(surface.container, "Styles"))
+    })
+
+    act(() => {
+      activateElement(getRadioInputByAriaLabel(surface.container, "Pattern 003"))
+    })
+
+    await act(async () => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add QR code"]'))
+      await flushPromises()
+      await flushPromises()
+    })
+
+    act(() => {
+      activateElement(getRadioInputByAriaLabel(surface.container, "Pattern 004"))
+    })
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Layers"]'))
+    })
+
+    await act(async () => {
+      activateElement(
+        getRequiredElement(
+          surface.container,
+          '[data-slot="drafting-layer-row"][data-selected="false"] button:not([aria-label])',
+        ),
+      )
+      await flushPromises()
+    })
+
+    expect(getSelectedPreviewCard(surface.container).getAttribute("data-card-pattern")).toBe("g3")
+
+    await act(async () => {
+      activateElement(
+        getRequiredElement(
+          surface.container,
+          '[data-slot="drafting-layer-row"][data-selected="false"] button:not([aria-label])',
+        ),
+      )
+      await flushPromises()
+    })
+
+    expect(getSelectedPreviewCard(surface.container).getAttribute("data-card-pattern")).toBe("g4")
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Reset defaults"]'))
+    })
+
+    expect(getSelectedPreviewCard(surface.container).getAttribute("data-card-pattern")).toBe(
+      "none",
+    )
+  })
+
+  it("preserves card pattern color overrides separately and clears them on reset", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface()
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Card"]'))
+    })
+
+    act(() => {
+      activateElement(getTabTriggerByText(surface.container, "Styles"))
+    })
+
+    act(() => {
+      activateElement(getRadioInputByAriaLabel(surface.container, "Pattern 003"))
+    })
+
+    act(() => {
+      activateElement(getTabTriggerByText(surface.container, "Colors"))
+    })
+
+    act(() => {
+      changeInputValue(
+        getRequiredElement(
+          surface.container,
+          '[data-slot="drafting-card-colors-tab"] [data-slot="drafting-card-pattern-color-input"]',
+        ) as HTMLInputElement,
+        "#111111",
+      )
+    })
+
+    await act(async () => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add QR code"]'))
+      await flushPromises()
+      await flushPromises()
+    })
+
+    act(() => {
+      activateElement(getTabTriggerByText(surface.container, "Styles"))
+    })
+
+    act(() => {
+      activateElement(getRadioInputByAriaLabel(surface.container, "Pattern 003"))
+    })
+
+    act(() => {
+      activateElement(getTabTriggerByText(surface.container, "Colors"))
+    })
+
+    act(() => {
+      changeInputValue(
+        getRequiredElement(
+          surface.container,
+          '[data-slot="drafting-card-colors-tab"] [data-slot="drafting-card-pattern-color-input"]',
+        ) as HTMLInputElement,
+        "#222222",
+      )
+    })
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Layers"]'))
+    })
+
+    await act(async () => {
+      activateElement(
+        getRequiredElement(
+          surface.container,
+          '[data-slot="drafting-layer-row"][data-selected="false"] button:not([aria-label])',
+        ),
+      )
+      await flushPromises()
+    })
+
+    expect(getSelectedPreviewCard(surface.container).style.getPropertyValue("--p1")).toBe(
+      "#111111",
+    )
+
+    await act(async () => {
+      activateElement(
+        getRequiredElement(
+          surface.container,
+          '[data-slot="drafting-layer-row"][data-selected="false"] button:not([aria-label])',
+        ),
+      )
+      await flushPromises()
+    })
+
+    expect(getSelectedPreviewCard(surface.container).style.getPropertyValue("--p1")).toBe(
+      "#222222",
+    )
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Reset defaults"]'))
+    })
+
+    const card = getSelectedPreviewCard(surface.container)
+
+    expect(card.getAttribute("data-card-pattern")).toBe("none")
+    expect(card.style.getPropertyValue("--p1")).toBe("")
   })
 
   it("preserves qr background radius separately for each drafting qr layer", async () => {

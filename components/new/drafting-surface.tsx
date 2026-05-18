@@ -16,7 +16,9 @@ import {
   DraftingBackgroundColorTab,
   DraftingBackgroundUploadTab,
   DraftingBrandIconTab,
-  DraftingCardTab,
+  DraftingCardColorsTab,
+  DraftingCardSettingsTab,
+  DraftingCardStylesTab,
   DraftingContentTab,
   DraftingCornerDotColorTab,
   DraftingCornerDotStyleTab,
@@ -36,6 +38,10 @@ import {
   createDefaultDraftingCardState,
   type DraftingCardState,
 } from "@/components/new/drafting-card-state"
+import type {
+  DraftingCardPatternColorSlotId,
+  DraftingCardPatternId,
+} from "@/components/new/drafting-card-patterns"
 import {
   DRAFTING_LAYERS_TAB_ICON,
   DraftingLayersTab,
@@ -158,7 +164,11 @@ type DraftingContentValuesByType = Partial<Record<QrInputType, StaticQrContentVa
 
 const DRAFTING_PANEL_TABS: Record<DraftingToolId, DraftingPanelTab[]> = {
   content: [{ id: "content", label: "Content" }],
-  card: [{ id: "card", label: "Card" }],
+  card: [
+    { id: "settings", label: "Settings" },
+    { id: "styles", label: "Styles" },
+    { id: "colors", label: "Colors" },
+  ],
   style: [
     { id: "style", label: "Style" },
     { id: "color", label: "Color" },
@@ -188,7 +198,7 @@ const DRAFTING_PANEL_TABS: Record<DraftingToolId, DraftingPanelTab[]> = {
 
 const DEFAULT_DRAFTING_PANEL_TABS: Record<DraftingToolId, string> = {
   content: "content",
-  card: "card",
+  card: "settings",
   style: "style",
   "corner-square": "style",
   "corner-dot": "style",
@@ -1326,11 +1336,64 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       )
     }
 
-    if (toolId === "card" && tabId === "card") {
+    if (toolId === "card" && tabId === "settings") {
       return (
-        <DraftingCardTab
+        <DraftingCardSettingsTab
           value={selectedCardState}
           onValueChange={setSelectedCardState}
+        />
+      )
+    }
+
+    if (toolId === "card" && tabId === "styles") {
+      return (
+        <DraftingCardStylesTab
+          fill={selectedCardState.fill}
+          patternColors={selectedCardState.patternColors}
+          value={selectedCardState.patternId}
+          onValueChange={(patternId) =>
+            setSelectedCardState((current) => ({
+              ...current,
+              patternId,
+            }))
+          }
+        />
+      )
+    }
+
+    if (toolId === "card" && tabId === "colors") {
+      return (
+        <DraftingCardColorsTab
+          fill={selectedCardState.fill}
+          patternColors={selectedCardState.patternColors}
+          patternId={selectedCardState.patternId}
+          onPatternColorChange={(
+            patternId: DraftingCardPatternId,
+            colorId: DraftingCardPatternColorSlotId,
+            value: string,
+          ) =>
+            setSelectedCardState((current) => ({
+              ...current,
+              patternColors: {
+                ...current.patternColors,
+                [patternId]: {
+                  ...(current.patternColors[patternId] ?? {}),
+                  [colorId]: value,
+                },
+              },
+            }))
+          }
+          onResetPatternColors={(patternId) =>
+            setSelectedCardState((current) => {
+              const nextPatternColors = { ...current.patternColors }
+              delete nextPatternColors[patternId]
+
+              return {
+                ...current,
+                patternColors: nextPatternColors,
+              }
+            })
+          }
         />
       )
     }

@@ -135,6 +135,7 @@ describe("QrPane", () => {
 
     expect(card).not.toBeNull()
     expect(card.getAttribute("data-card-enabled")).toBe("true")
+    expect(card.getAttribute("data-card-pattern")).toBe("none")
     expect(card.getAttribute("data-card-shadow")).toBe("strong")
     expect(card.style.backgroundColor).toBe("rgb(255, 204, 0)")
     expect(card.style.borderRadius).toBe("24px")
@@ -145,6 +146,75 @@ describe("QrPane", () => {
     expect(node.parentElement).toBe(card)
     expect(node.style.width).toBe("240px")
     expect(node.style.height).toBe("240px")
+  })
+
+  it("applies the selected card css pattern to the card layer", async () => {
+    const state = setSquareQrSize(createDefaultQrStudioState(), 240)
+    const cardState = {
+      ...createDefaultDraftingCardState(),
+      patternId: "g3" as const,
+    }
+    const { container } = renderPane(state, false, cardState)
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const card = container.querySelector('[data-slot="dashboard-compose-card"]') as HTMLElement
+
+    expect(card).not.toBeNull()
+    expect(card.getAttribute("data-card-pattern")).toBe("g3")
+    expect(card.style.getPropertyValue("--s")).toBe("72px")
+    expect(card.style.getPropertyValue("--p1")).toBe("#c02942")
+    expect(card.getAttribute("style")).toContain("background-size")
+  })
+
+  it("applies selected card css pattern color overrides to the card layer", async () => {
+    const state = setSquareQrSize(createDefaultQrStudioState(), 240)
+    const cardState = {
+      ...createDefaultDraftingCardState(),
+      patternColors: {
+        g3: {
+          "--p1": "#111111",
+        },
+      },
+      patternId: "g3" as const,
+    }
+    const { container } = renderPane(state, false, cardState)
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const card = container.querySelector('[data-slot="dashboard-compose-card"]') as HTMLElement
+
+    expect(card).not.toBeNull()
+    expect(card.getAttribute("data-card-pattern")).toBe("g3")
+    expect(card.style.getPropertyValue("--p1")).toBe("#111111")
+    expect(card.style.getPropertyValue("--p2")).toBe("#53777a")
+  })
+
+  it("renders qr artwork without the card wrapper when the card is disabled", async () => {
+    const state = setSquareQrSize(createDefaultQrStudioState(), 240)
+    const cardState = {
+      ...createDefaultDraftingCardState(),
+      enabled: false,
+      patternId: "g3" as const,
+    }
+    const { container } = renderPane(state, false, cardState)
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const card = container.querySelector('[data-slot="dashboard-compose-card"]')
+    const node = container.querySelector('[data-slot="dashboard-compose-node"]')
+
+    expect(card).toBeNull()
+    expect(node).not.toBeNull()
   })
 
   it("adds a shadow to the qr canvas when selected", async () => {

@@ -6,6 +6,7 @@ import {
   DEFAULT_DRAFTING_CARD_STATE,
   type DraftingCardState,
 } from "@/components/new/drafting-card-state"
+import { getDraftingCardPatternStyle } from "@/components/new/drafting-card-patterns"
 import { buildDashboardQrNodePayload } from "@/components/qr/dashboard-qr-svg"
 import type { QrStudioState } from "@/components/qr/qr-studio-state"
 import { cn } from "@/lib/utils"
@@ -77,6 +78,10 @@ export const QrPane = memo(function QrPane({
   const previewRenderSize = getQrPreviewRenderSize(state)
   const cardWidth = previewRenderSize + cardState.padding * 2
   const cardHeight = cardWidth + cardState.bottomSpace
+  const cardPatternStyle = getDraftingCardPatternStyle(
+    cardState.patternId,
+    cardState.patternId === "none" ? undefined : cardState.patternColors[cardState.patternId],
+  )
   const qrNode = markup ? (
     <div
       data-slot="dashboard-compose-node"
@@ -128,11 +133,13 @@ export const QrPane = memo(function QrPane({
           cardState.enabled ? (
             <div
               data-slot="dashboard-compose-card"
+              data-card-pattern={cardState.patternId}
               data-card-shadow={cardState.shadow}
               data-card-enabled="true"
               className="relative flex max-h-full max-w-full justify-center transition-[box-shadow,background-color,border-radius] duration-150"
               style={{
                 backgroundColor: cardState.fill,
+                ...cardPatternStyle,
                 borderRadius: cardState.cornerRadius,
                 boxShadow: getDraftingCardShadow(cardState.shadow),
                 height: cardHeight,

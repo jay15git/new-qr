@@ -15,6 +15,16 @@ import type {
   DraftingCardShadow,
   DraftingCardState,
 } from "@/components/new/drafting-card-state"
+import {
+  DRAFTING_CARD_PATTERN_NONE_ID,
+  DRAFTING_CARD_PATTERNS,
+  getDraftingCardPatternById,
+  getDraftingCardPatternStyle,
+  type DraftingCardPatternColorOverrides,
+  type DraftingCardPatternColorSlotId,
+  type DraftingCardPatternId,
+  type DraftingCardPatternSelectionId,
+} from "@/components/new/drafting-card-patterns"
 import type {
   BrandIconCategory,
   BrandIconEntry,
@@ -854,7 +864,7 @@ export function DraftingSizeTab({
   )
 }
 
-export function DraftingCardTab({
+export function DraftingCardSettingsTab({
   value,
   onValueChange,
 }: {
@@ -993,6 +1003,177 @@ export function DraftingCardTab({
             )
           })}
         </div>
+      </div>
+    </div>
+  )
+}
+
+export function DraftingCardStylesTab({
+  fill,
+  value,
+  patternColors,
+  onValueChange,
+}: {
+  fill: string
+  patternColors: Partial<Record<DraftingCardPatternId, DraftingCardPatternColorOverrides>>
+  value: DraftingCardPatternSelectionId
+  onValueChange: (value: DraftingCardPatternSelectionId) => void
+}) {
+  return (
+    <div data-slot="drafting-card-styles-tab" className="min-w-0 space-y-3">
+      <div
+        aria-label="Card pattern"
+        role="radiogroup"
+        className="grid grid-cols-2 gap-2"
+      >
+        <OptionCard
+          appearance="drafting"
+          darkShadowTone="ink"
+          checked={value === DRAFTING_CARD_PATTERN_NONE_ID}
+          className={cn(
+            "w-full gap-1.5",
+            "[&_[data-slot=option-card]]:h-20 [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:overflow-hidden [&_[data-slot=option-card]]:rounded-[7px]",
+            "[&_[data-slot=option-card-motif]]:size-full",
+          )}
+          label="None"
+          motifClassName="size-full"
+          name="drafting-card-pattern"
+          onSelect={() => onValueChange(DRAFTING_CARD_PATTERN_NONE_ID)}
+          size="compact"
+          value={DRAFTING_CARD_PATTERN_NONE_ID}
+        >
+          <span
+            aria-hidden="true"
+            className="block size-full"
+            style={{ backgroundColor: fill }}
+          />
+        </OptionCard>
+
+        {DRAFTING_CARD_PATTERNS.map((pattern) => (
+          <OptionCard
+            appearance="drafting"
+            darkShadowTone="ink"
+            key={pattern.id}
+            checked={value === pattern.id}
+            className={cn(
+              "w-full gap-1.5",
+              "[&_[data-slot=option-card]]:h-20 [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:overflow-hidden [&_[data-slot=option-card]]:rounded-[7px]",
+              "[&_[data-slot=option-card-motif]]:size-full",
+              "[&_[data-slot=option-card-label]]:whitespace-nowrap",
+            )}
+            label={pattern.label}
+            motifClassName="size-full"
+            name="drafting-card-pattern"
+            onSelect={() => onValueChange(pattern.id)}
+            size="compact"
+            value={pattern.id}
+          >
+            <span
+              aria-hidden="true"
+              className="block size-full"
+              style={
+                getDraftingCardPatternStyle(pattern.id, patternColors[pattern.id]) ??
+                pattern.style
+              }
+            />
+          </OptionCard>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export function DraftingCardColorsTab({
+  fill,
+  patternColors,
+  patternId,
+  onPatternColorChange,
+  onResetPatternColors,
+}: {
+  fill: string
+  patternColors: Partial<Record<DraftingCardPatternId, DraftingCardPatternColorOverrides>>
+  patternId: DraftingCardPatternSelectionId
+  onPatternColorChange: (
+    patternId: DraftingCardPatternId,
+    colorId: DraftingCardPatternColorSlotId,
+    value: string,
+  ) => void
+  onResetPatternColors: (patternId: DraftingCardPatternId) => void
+}) {
+  const pattern = getDraftingCardPatternById(patternId)
+
+  if (!pattern) {
+    return (
+      <div data-slot="drafting-card-colors-tab" className="min-w-0 space-y-3">
+        <div
+          aria-hidden="true"
+          className="h-24 overflow-hidden rounded-[7px] border border-[var(--drafting-line)]"
+          style={{ backgroundColor: fill }}
+        />
+        <p className="drafting-type-caption text-[var(--drafting-ink-muted)]">
+          Choose a pattern in Styles to edit colors.
+        </p>
+      </div>
+    )
+  }
+
+  const selectedPatternId = pattern.id as DraftingCardPatternId
+  const overrides = patternColors[selectedPatternId] ?? {}
+  const previewStyle = getDraftingCardPatternStyle(selectedPatternId, overrides)
+
+  return (
+    <div data-slot="drafting-card-colors-tab" className="min-w-0 space-y-4">
+      <div
+        aria-label={`${pattern.label} color preview`}
+        data-slot="drafting-card-pattern-color-preview"
+        className="h-24 overflow-hidden rounded-[7px] border border-[var(--drafting-line)]"
+        style={previewStyle ?? pattern.style}
+      />
+
+      <div className="flex min-w-0 items-center justify-between gap-3">
+        <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+          {pattern.label}
+        </p>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-8 rounded-[6px] px-2 text-[11px] font-semibold text-[var(--drafting-ink-muted)] hover:text-[var(--drafting-ink)]"
+          onClick={() => onResetPatternColors(selectedPatternId)}
+        >
+          Reset pattern colors
+        </Button>
+      </div>
+
+      <div className="grid min-w-0 gap-4">
+        {pattern.colorSlots.map((slot) => (
+          <label
+            className="grid min-w-0 gap-2 rounded-[7px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] p-3"
+            key={slot.id}
+          >
+            <span className="flex min-w-0 items-center justify-between gap-3">
+              <span className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+                {slot.label}
+              </span>
+              <span className="font-mono text-[11px] text-[var(--drafting-ink-muted)]">
+                {overrides[slot.id] ?? slot.defaultValue}
+              </span>
+            </span>
+            <input
+              aria-label={`${pattern.label} ${slot.label}`}
+              className="h-10 w-full cursor-pointer rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-control-bg)] p-1"
+              data-slot="drafting-card-pattern-color-input"
+              onChange={(event) =>
+                onPatternColorChange(selectedPatternId, slot.id, event.currentTarget.value)
+              }
+              onInput={(event) =>
+                onPatternColorChange(selectedPatternId, slot.id, event.currentTarget.value)
+              }
+              type="color"
+              value={overrides[slot.id] ?? slot.defaultValue}
+            />
+          </label>
+        ))}
       </div>
     </div>
   )
