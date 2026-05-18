@@ -295,13 +295,14 @@ describe("DraftingSurface", () => {
     expect(
       surface.container.querySelector('[data-slot="drafting-plus-marker"]')?.getAttribute("class"),
     ).not.toContain("text-black/")
-    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(8)
+    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(9)
     expect(surface.container.querySelector('[data-slot="tabs"]')).not.toBeNull()
     expect(
       surface.container.querySelector('button[aria-label="Open QR type options"]'),
     ).not.toBeNull()
     expect(surface.container.textContent).toContain("QR Type:")
     expect(surface.container.textContent).toContain("Content")
+    expect(surface.container.textContent).toContain("Card")
     expect(surface.container.textContent).toContain("Style")
     expect(surface.container.textContent).toContain("Corner frame")
     expect(surface.container.textContent).toContain("Corner dot")
@@ -782,6 +783,7 @@ describe("DraftingSurface", () => {
   it("switches tool button state and updates the tab tray for each dashboard section", () => {
     const surface = renderSurface()
     const contentButton = getRequiredElement(surface.container, 'button[aria-label="Open Content"]')
+    const cardButton = getRequiredElement(surface.container, 'button[aria-label="Open Card"]')
     const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Style"]')
     const logoButton = getRequiredElement(surface.container, 'button[aria-label="Open Logo"]')
     const cornerSquareButton = getRequiredElement(
@@ -790,11 +792,26 @@ describe("DraftingSurface", () => {
     )
 
     expect(contentButton.getAttribute("aria-pressed")).toBe("true")
+    expect(cardButton.getAttribute("aria-pressed")).toBe("false")
     expect(styleButton.getAttribute("aria-pressed")).toBe("false")
     expect(cornerSquareButton.getAttribute("aria-pressed")).toBe("false")
     expect(
       surface.container.querySelector('button[aria-label="Open QR type options"]'),
     ).not.toBeNull()
+
+    act(() => {
+      cardButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    expect(contentButton.getAttribute("aria-pressed")).toBe("false")
+    expect(cardButton.getAttribute("aria-pressed")).toBe("true")
+    expect(getTabLabels(surface.container)).toEqual(["Card"])
+    expect(
+      getRequiredElement(
+        surface.container,
+        '[data-active-tool="card"][data-active-tab="card"]',
+      ).textContent,
+    ).toContain("Show card")
 
     act(() => {
       styleButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -1164,6 +1181,121 @@ describe("DraftingSurface", () => {
 
     expect(surfaceRoot.getAttribute("data-qr-radius")).toBe("0.24")
     expect(surface.container.textContent).toContain("Corner radius: 24%")
+  })
+
+  it("renders editable card controls and updates the active qr card preview", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface()
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Card"]'))
+    })
+
+    const cardPanel = getRequiredElement(surface.container, '[data-slot="drafting-card-tab"]')
+    const fillInput = getRequiredElement(
+      surface.container,
+      "#drafting-card-fill",
+    ) as HTMLInputElement
+    const radiusInput = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-card-radius-slider"] input[type="range"]',
+    ) as HTMLInputElement
+    const paddingInput = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-card-padding-slider"] input[type="range"]',
+    ) as HTMLInputElement
+    const bottomSpaceInput = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-card-bottom-space-slider"] input[type="range"]',
+    ) as HTMLInputElement
+
+    expect(cardPanel.textContent).toContain("Fill")
+    expect(cardPanel.textContent).toContain("Shadow")
+
+    act(() => {
+      changeInputValue(fillInput, "#ff00aa")
+      changeInputValue(radiusInput, "36")
+      changeInputValue(paddingInput, "30")
+      changeInputValue(bottomSpaceInput, "160")
+      activateElement(getRadioInputByAriaLabel(surface.container, "Strong card shadow"))
+    })
+
+    const card = getSelectedPreviewCard(surface.container)
+
+    expect(card.style.backgroundColor).toBe("rgb(255, 0, 170)")
+    expect(card.style.borderRadius).toBe("36px")
+    expect(card.style.padding).toBe("30px")
+    expect(card.style.width).toBe("300px")
+    expect(card.style.height).toBe("460px")
+    expect(card.getAttribute("data-card-shadow")).toBe("strong")
+  })
+
+  it("preserves card settings separately for each drafting qr layer", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface()
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Card"]'))
+    })
+
+    const getFillInput = () =>
+      getRequiredElement(surface.container, "#drafting-card-fill") as HTMLInputElement
+
+    act(() => {
+      changeInputValue(getFillInput(), "#ff00aa")
+    })
+
+    await act(async () => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add QR code"]'))
+      await flushPromises()
+      await flushPromises()
+    })
+
+    act(() => {
+      changeInputValue(getFillInput(), "#00ffaa")
+    })
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Layers"]'))
+    })
+
+    await act(async () => {
+      activateElement(
+        getRequiredElement(
+          surface.container,
+          '[data-slot="drafting-layer-row"][data-selected="false"] button:not([aria-label])',
+        ),
+      )
+      await flushPromises()
+    })
+
+    expect(getSelectedPreviewCard(surface.container).style.backgroundColor).toBe(
+      "rgb(255, 0, 170)",
+    )
+
+    await act(async () => {
+      activateElement(
+        getRequiredElement(
+          surface.container,
+          '[data-slot="drafting-layer-row"][data-selected="false"] button:not([aria-label])',
+        ),
+      )
+      await flushPromises()
+    })
+
+    expect(getSelectedPreviewCard(surface.container).style.backgroundColor).toBe(
+      "rgb(0, 255, 170)",
+    )
   })
 
   it("preserves qr background radius separately for each drafting qr layer", async () => {
@@ -2657,6 +2789,18 @@ function getTabTriggerByText(parent: ParentNode, text: string) {
   expect(trigger).not.toBeNull()
 
   return trigger as HTMLElement
+}
+
+function getSelectedPreviewCard(parent: ParentNode) {
+  const selectedNode = getRequiredElement(
+    parent,
+    '[data-slot="dashboard-compose-node"][data-selected="true"]',
+  )
+  const card = selectedNode.closest('[data-slot="dashboard-compose-card"]')
+
+  expect(card).not.toBeNull()
+
+  return card as HTMLElement
 }
 
 function getAccordionTriggerByText(parent: ParentNode, text: string) {

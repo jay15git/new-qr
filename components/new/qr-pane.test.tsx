@@ -13,6 +13,7 @@ vi.mock("@/components/qr/dashboard-qr-svg", () => ({
 }))
 
 import { QrPane } from "@/components/new/qr-pane"
+import { createDefaultDraftingCardState } from "@/components/new/drafting-card-state"
 import {
   createDefaultQrStudioState,
   setSquareQrSize,
@@ -94,12 +95,14 @@ describe("QrPane", () => {
     })
 
     const canvas = container.querySelector('[data-slot="dashboard-compose-canvas"]')
+    const card = container.querySelector('[data-slot="dashboard-compose-card"]')
     const node = container.querySelector('[data-slot="dashboard-compose-node"]')
 
     expect(canvas).not.toBeNull()
     expect(canvas?.className).toContain("p-4")
     expect(canvas?.className).toContain("sm:p-6")
     expect(canvas?.className).toContain("lg:p-8")
+    expect(card).not.toBeNull()
     expect(node).not.toBeNull()
     const nodeClasses = node?.className.split(/\s+/) ?? []
     expect(nodeClasses).toContain("max-h-full")
@@ -108,6 +111,40 @@ describe("QrPane", () => {
     expect(nodeClasses).not.toContain("w-full")
     expect((node as HTMLElement).style.width).toBe("240px")
     expect((node as HTMLElement).style.height).toBe("240px")
+  })
+
+  it("renders the editable card layer behind the qr artwork", async () => {
+    const state = setSquareQrSize(createDefaultQrStudioState(), 240)
+    const cardState = {
+      ...createDefaultDraftingCardState(),
+      bottomSpace: 96,
+      cornerRadius: 24,
+      fill: "#ffcc00",
+      padding: 20,
+      shadow: "strong" as const,
+    }
+    const { container } = renderPane(state, false, cardState)
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const card = container.querySelector('[data-slot="dashboard-compose-card"]') as HTMLElement
+    const node = container.querySelector('[data-slot="dashboard-compose-node"]') as HTMLElement
+
+    expect(card).not.toBeNull()
+    expect(card.getAttribute("data-card-enabled")).toBe("true")
+    expect(card.getAttribute("data-card-shadow")).toBe("strong")
+    expect(card.style.backgroundColor).toBe("rgb(255, 204, 0)")
+    expect(card.style.borderRadius).toBe("24px")
+    expect(card.style.padding).toBe("20px")
+    expect(card.style.width).toBe("280px")
+    expect(card.style.height).toBe("376px")
+    expect(node).not.toBeNull()
+    expect(node.parentElement).toBe(card)
+    expect(node.style.width).toBe("240px")
+    expect(node.style.height).toBe("240px")
   })
 
   it("adds a shadow to the qr canvas when selected", async () => {
@@ -162,13 +199,18 @@ describe("QrPane", () => {
   })
 })
 
-function renderPane(state = createDefaultQrStudioState(), isSelected = false) {
+function renderPane(
+  state = createDefaultQrStudioState(),
+  isSelected = false,
+  cardState = createDefaultDraftingCardState(),
+) {
   const container = document.createElement("div")
   const reactRoot = createRoot(container)
 
   act(() => {
     reactRoot.render(
       <QrPane
+        cardState={cardState}
         state={state}
         isSelected={isSelected}
         onQrClick={() => undefined}

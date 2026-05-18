@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client"
 import { act } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
+import { createDefaultDraftingCardState } from "@/components/new/drafting-card-state"
 import { DraftingPaneWorkspace } from "@/components/new/drafting-pane-workspace"
 import { createDefaultQrStudioState } from "@/components/qr/qr-studio-state"
 
@@ -250,6 +251,7 @@ function renderWorkspace({
 
 function createPanes(paneCount: number) {
   return Array.from({ length: paneCount }, (_, index) => ({
+    cardState: createDefaultDraftingCardState(),
     id: `pane-${index + 1}`,
     name: index === 0 ? "QR Code" : `QR Code ${index + 1}`,
     state: {

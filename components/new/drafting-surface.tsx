@@ -16,6 +16,7 @@ import {
   DraftingBackgroundColorTab,
   DraftingBackgroundUploadTab,
   DraftingBrandIconTab,
+  DraftingCardTab,
   DraftingContentTab,
   DraftingCornerDotColorTab,
   DraftingCornerDotStyleTab,
@@ -30,6 +31,11 @@ import {
   DraftingSizeTab,
   DraftingStyleTab,
 } from "@/components/new/drafting-style-tab"
+import {
+  cloneDraftingCardState,
+  createDefaultDraftingCardState,
+  type DraftingCardState,
+} from "@/components/new/drafting-card-state"
 import {
   DRAFTING_LAYERS_TAB_ICON,
   DraftingLayersTab,
@@ -90,7 +96,7 @@ import {
   type StaticQrContentValue,
   type StaticQrContentValues,
 } from "@/components/qr/qr-static-content"
-import { DownloadIcon, LinkIcon, PieChart, Settings, Sparkles } from "lucide-react"
+import { CreditCardIcon, DownloadIcon, LinkIcon, PieChart, Settings, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SecondaryButton } from "@/components/ui/secondary-button"
 import {
@@ -138,7 +144,7 @@ type DraftingPanelTab = {
   label: string
 }
 
-type DraftingToolId = QrEditorSectionId | "layers"
+type DraftingToolId = QrEditorSectionId | "card" | "layers"
 
 type DraftingTool = {
   id: DraftingToolId
@@ -147,10 +153,12 @@ type DraftingTool = {
 }
 
 type DraftingQrStateByNodeId = Record<string, QrStudioState>
+type DraftingCardStateByNodeId = Record<string, DraftingCardState>
 type DraftingContentValuesByType = Partial<Record<QrInputType, StaticQrContentValues>>
 
 const DRAFTING_PANEL_TABS: Record<DraftingToolId, DraftingPanelTab[]> = {
   content: [{ id: "content", label: "Content" }],
+  card: [{ id: "card", label: "Card" }],
   style: [
     { id: "style", label: "Style" },
     { id: "color", label: "Color" },
@@ -180,6 +188,7 @@ const DRAFTING_PANEL_TABS: Record<DraftingToolId, DraftingPanelTab[]> = {
 
 const DEFAULT_DRAFTING_PANEL_TABS: Record<DraftingToolId, string> = {
   content: "content",
+  card: "card",
   style: "style",
   "corner-square": "style",
   "corner-dot": "style",
@@ -291,6 +300,11 @@ const DRAFTING_TOOLS: DraftingTool[] = [
     id: "content",
     title: "Content",
     renderIcon: () => <LinkIcon className="size-4 shrink-0" />,
+  },
+  {
+    id: "card",
+    title: "Card",
+    renderIcon: () => <CreditCardIcon className="size-4 shrink-0" />,
   },
   {
     id: "style",
@@ -522,6 +536,12 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const [activeQrNodeId, setActiveQrNodeId] = useState(DASHBOARD_QR_NODE_ID)
   const [qrStateByNodeId, setQrStateByNodeId] = useState<DraftingQrStateByNodeId>(() => ({
     [DASHBOARD_QR_NODE_ID]: createDefaultDraftingQrState(),
+  }))
+  const [selectedCardState, setSelectedCardState] = useState<DraftingCardState>(() =>
+    createDefaultDraftingCardState(),
+  )
+  const [cardStateByNodeId, setCardStateByNodeId] = useState<DraftingCardStateByNodeId>(() => ({
+    [DASHBOARD_QR_NODE_ID]: createDefaultDraftingCardState(),
   }))
   const [selectedDownloadExtension, setSelectedDownloadExtension] =
     useState<DraftingDownloadExtension>("png")
@@ -1003,11 +1023,17 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       ...current,
       [activeQrNodeId]: cloneDraftingQrState(draftingStudioState),
     }))
+    setCardStateByNodeId((current) => ({
+      ...current,
+      [activeQrNodeId]: cloneDraftingCardState(selectedCardState),
+    }))
 
     // Load the new pane's state into controls
     const nextState = qrStateByNodeId[paneId] ?? draftingStudioState
+    const nextCardState = cardStateByNodeId[paneId] ?? selectedCardState
     setActiveQrNodeId(paneId)
     applyDraftingQrStateToControls(nextState)
+    setSelectedCardState(cloneDraftingCardState(nextCardState))
   }
 
   function handlePaneQrClick(paneId: string) {
@@ -1026,6 +1052,11 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     setActiveQrNodeId(DASHBOARD_QR_NODE_ID)
     setQrStateByNodeId({
       [DASHBOARD_QR_NODE_ID]: cloneDraftingQrState(nextState),
+    })
+    const nextCardState = createDefaultDraftingCardState()
+    setSelectedCardState(cloneDraftingCardState(nextCardState))
+    setCardStateByNodeId({
+      [DASHBOARD_QR_NODE_ID]: cloneDraftingCardState(nextCardState),
     })
 
     setSelectedDownloadExtension("png")
@@ -1129,13 +1160,24 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       [activeQrNodeId]: cloneDraftingQrState(draftingStudioState),
       [nextNodeId]: cloneDraftingQrState(sourceState),
     }))
+    setCardStateByNodeId((current) => ({
+      ...current,
+      [activeQrNodeId]: cloneDraftingCardState(selectedCardState),
+      [nextNodeId]: cloneDraftingCardState(selectedCardState),
+    }))
 
     setActiveQrNodeId(nextNodeId)
     applyDraftingQrStateToControls(sourceState)
+    setSelectedCardState(cloneDraftingCardState(selectedCardState))
   }
 
   function handleRemoveQrCode(paneId: string) {
     setQrStateByNodeId((current) => {
+      const next = { ...current }
+      delete next[paneId]
+      return next
+    })
+    setCardStateByNodeId((current) => {
       const next = { ...current }
       delete next[paneId]
       return next
@@ -1148,7 +1190,9 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       ) ?? DASHBOARD_QR_NODE_ID
       setActiveQrNodeId(fallbackId)
       const fallbackState = qrStateByNodeId[fallbackId] ?? createDefaultDraftingQrState()
+      const fallbackCardState = cardStateByNodeId[fallbackId] ?? createDefaultDraftingCardState()
       applyDraftingQrStateToControls(fallbackState)
+      setSelectedCardState(cloneDraftingCardState(fallbackCardState))
     }
   }
 
@@ -1278,6 +1322,15 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
           radius={selectedQrRadius * 100}
           onMarginChange={setSelectedQrMargin}
           onRadiusChange={(value) => setSelectedQrRadius(clampQrBackgroundRound(value / 100))}
+        />
+      )
+    }
+
+    if (toolId === "card" && tabId === "card") {
+      return (
+        <DraftingCardTab
+          value={selectedCardState}
+          onValueChange={setSelectedCardState}
         />
       )
     }
@@ -1564,11 +1617,23 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const panes = useMemo(
     () =>
       qrNodeIds.map((id) => ({
+        cardState:
+          id === activeQrNodeId
+            ? selectedCardState
+            : (cardStateByNodeId[id] ?? selectedCardState),
         id,
         name: qrPaneNamesById.get(id) ?? "QR Code",
         state: id === activeQrNodeId ? draftingStudioState : (qrStateByNodeId[id] ?? draftingStudioState),
       })),
-    [qrNodeIds, qrPaneNamesById, qrStateByNodeId, activeQrNodeId, draftingStudioState],
+    [
+      qrNodeIds,
+      qrPaneNamesById,
+      qrStateByNodeId,
+      cardStateByNodeId,
+      activeQrNodeId,
+      draftingStudioState,
+      selectedCardState,
+    ],
   )
 
   return (

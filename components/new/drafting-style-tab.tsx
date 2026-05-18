@@ -12,6 +12,10 @@ import type {
 
 import FileUpload from "@/components/kokonutui/file-upload"
 import type {
+  DraftingCardShadow,
+  DraftingCardState,
+} from "@/components/new/drafting-card-state"
+import type {
   BrandIconCategory,
   BrandIconEntry,
 } from "@/components/qr/brand-icon-catalog"
@@ -78,6 +82,16 @@ export type DraftingBinaryColorMode = "solid" | "gradient"
 export type DraftingBackgroundColorMode = DraftingBinaryColorMode | "transparent"
 type DraftingAssetSourceMode = "upload" | "url"
 type DraftingBrandIconCategoryFilter = BrandIconCategory | "all"
+
+const DRAFTING_CARD_SHADOW_OPTIONS: Array<{
+  label: string
+  value: DraftingCardShadow
+}> = [
+  { label: "None", value: "none" },
+  { label: "Soft", value: "soft" },
+  { label: "Medium", value: "medium" },
+  { label: "Strong", value: "strong" },
+]
 
 const DRAFTING_BRAND_ICON_CATEGORY_OPTIONS: Array<{
   label: string
@@ -836,6 +850,150 @@ export function DraftingSizeTab({
         value={radius}
         onChange={onRadiusChange}
       />
+    </div>
+  )
+}
+
+export function DraftingCardTab({
+  value,
+  onValueChange,
+}: {
+  value: DraftingCardState
+  onValueChange: (value: DraftingCardState) => void
+}) {
+  const updateCard = (patch: Partial<DraftingCardState>) => {
+    onValueChange({
+      ...value,
+      ...patch,
+    })
+  }
+
+  return (
+    <div data-slot="drafting-card-tab" className="min-w-0 space-y-3">
+      <DraftingToggleField
+        checked={value.enabled}
+        dataSlot="drafting-card-enabled"
+        description="Shows the physical card layer behind the active QR preview."
+        id="drafting-card-enabled"
+        label="Show card"
+        onCheckedChange={(enabled) => updateCard({ enabled })}
+      />
+
+      <label
+        data-slot="drafting-card-fill-field"
+        htmlFor="drafting-card-fill"
+        className={cn(
+          "block min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3",
+          "shadow-[var(--drafting-shadow-rest)] transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
+          "hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)]",
+          "focus-within:border-[var(--drafting-line-strong)] focus-within:bg-[var(--drafting-panel-bg-active)]",
+        )}
+      >
+        <span className="drafting-type-control-label block font-semibold text-[var(--drafting-ink)]">
+          Fill
+        </span>
+        <span className="mt-3 flex min-w-0 items-center gap-2">
+          <input
+            aria-label="Card fill swatch"
+            className="size-10 shrink-0 cursor-pointer rounded-[6px] border border-[var(--drafting-line)] bg-transparent p-1"
+            type="color"
+            value={value.fill}
+            onChange={(event) => updateCard({ fill: event.currentTarget.value })}
+          />
+          <Input
+            id="drafting-card-fill"
+            className="drafting-type-input h-10 min-w-0 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3 text-[var(--drafting-ink)] shadow-none focus-visible:border-[var(--drafting-line-strong)] focus-visible:ring-0"
+            value={value.fill}
+            onChange={(event) => updateCard({ fill: event.currentTarget.value })}
+          />
+        </span>
+      </label>
+
+      <DraftingSliderField
+        dataSlot="drafting-card-radius-slider"
+        description="Rounds the card body behind the QR."
+        formatValue={(nextValue) => `${Math.round(nextValue)} px`}
+        id="drafting-card-radius"
+        label="Corner radius"
+        max={64}
+        min={0}
+        step={1}
+        value={value.cornerRadius}
+        onChange={(cornerRadius) => updateCard({ cornerRadius })}
+      />
+      <DraftingSliderField
+        dataSlot="drafting-card-padding-slider"
+        description="Controls the inset between the QR and the card edge."
+        formatValue={(nextValue) => `${Math.round(nextValue)} px`}
+        id="drafting-card-padding"
+        label="Padding"
+        max={72}
+        min={8}
+        step={1}
+        value={value.padding}
+        onChange={(padding) => updateCard({ padding })}
+      />
+      <DraftingSliderField
+        dataSlot="drafting-card-bottom-space-slider"
+        description="Adds room below the QR so the card reads as a taller layout."
+        formatValue={(nextValue) => `${Math.round(nextValue)} px`}
+        id="drafting-card-bottom-space"
+        label="Bottom space"
+        max={240}
+        min={0}
+        step={1}
+        value={value.bottomSpace}
+        onChange={(bottomSpace) => updateCard({ bottomSpace })}
+      />
+
+      <div
+        data-slot="drafting-card-shadow-field"
+        className="min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 shadow-[var(--drafting-shadow-rest)]"
+      >
+        <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+          Shadow
+        </p>
+        <div
+          aria-label="Card shadow"
+          role="radiogroup"
+          className="mt-3 grid grid-cols-2 gap-1"
+        >
+          {DRAFTING_CARD_SHADOW_OPTIONS.map((option) => {
+            const isSelected = option.value === value.shadow
+
+            return (
+              <OptionCard
+                appearance="drafting"
+                darkShadowTone="ink"
+                key={option.value}
+                checked={isSelected}
+                className={cn(
+                  "w-full gap-0",
+                  "[&_[data-slot=option-card]]:h-full [&_[data-slot=option-card]]:min-h-[36px] [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:rounded-[7px]",
+                  "[&_[data-slot=option-card-motif]]:size-full",
+                  "[&_[data-slot=option-card-label]]:sr-only",
+                )}
+                label={`${option.label} card shadow`}
+                motifClassName="size-full px-1.5 py-1"
+                name="drafting-card-shadow"
+                onSelect={() => updateCard({ shadow: option.value })}
+                value={option.value}
+              >
+                <span
+                  className={cn(
+                    "drafting-type-meta flex min-w-0 items-center justify-center text-center font-semibold",
+                    isSelected
+                      ? "text-[var(--drafting-ink)]"
+                      : "text-[var(--drafting-ink-muted)]",
+                  )}
+                >
+                  {option.label}
+                </span>
+              </OptionCard>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }

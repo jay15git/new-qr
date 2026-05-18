@@ -11,6 +11,7 @@ import {
   ZoomOutIcon,
 } from "lucide-react"
 
+import type { DraftingCardState } from "@/components/new/drafting-card-state"
 import { QrPane } from "@/components/new/qr-pane"
 import { getQrLayout } from "@/components/new/qr-layout-engine"
 import type { QrStudioState } from "@/components/qr/qr-studio-state"
@@ -29,6 +30,7 @@ import {
 import { cn } from "@/lib/utils"
 
 type DraftingPane = {
+  cardState: DraftingCardState
   id: string
   name: string
   state: QrStudioState
@@ -172,6 +174,7 @@ function DraftingPaneSurface({
         className="flex h-full w-full items-center justify-center"
       >
         <QrPane
+          cardState={pane.cardState}
           state={pane.state}
           isSelected={isSelected}
           onQrClick={handleQrClick}
