@@ -4,8 +4,10 @@ import { memo, useEffect, useMemo, useRef, useState } from "react"
 
 import {
   DEFAULT_DRAFTING_CARD_STATE,
+  getDraftingCardMeshGradientStyle,
   type DraftingCardState,
 } from "@/components/new/drafting-card-state"
+import { DraftingCardPaperShaderLayer } from "@/components/new/drafting-card-paper-shader-layer"
 import { getDraftingCardPatternStyle } from "@/components/new/drafting-card-patterns"
 import { buildDashboardQrNodePayload } from "@/components/qr/dashboard-qr-svg"
 import type { QrStudioState } from "@/components/qr/qr-studio-state"
@@ -78,10 +80,17 @@ export const QrPane = memo(function QrPane({
   const previewRenderSize = getQrPreviewRenderSize(state)
   const cardWidth = previewRenderSize + cardState.padding * 2
   const cardHeight = cardWidth + cardState.bottomSpace
-  const cardPatternStyle = getDraftingCardPatternStyle(
-    cardState.patternId,
-    cardState.patternId === "none" ? undefined : cardState.patternColors[cardState.patternId],
-  )
+  const isMeshGradientMode = cardState.styleMode === "mesh-gradient"
+  const isPaperShaderMode = cardState.styleMode === "paper-shader"
+  const cardPatternStyle = isMeshGradientMode
+    ? undefined
+    : getDraftingCardPatternStyle(
+        cardState.patternId,
+        cardState.patternId === "none" ? undefined : cardState.patternColors[cardState.patternId],
+      )
+  const meshGradientStyle = isMeshGradientMode
+    ? getDraftingCardMeshGradientStyle(cardState.meshGradient)
+    : undefined
   const qrNode = markup ? (
     <div
       data-slot="dashboard-compose-node"
@@ -133,10 +142,12 @@ export const QrPane = memo(function QrPane({
           cardState.enabled ? (
             <div
               data-slot="dashboard-compose-card"
-              data-card-pattern={cardState.patternId}
+              data-card-pattern={isMeshGradientMode || isPaperShaderMode ? "none" : cardState.patternId}
+              data-card-paper-shader={isPaperShaderMode ? cardState.paperShader.shaderId : "none"}
               data-card-shadow={cardState.shadow}
+              data-card-style-mode={cardState.styleMode}
               data-card-enabled="true"
-              className="relative flex max-h-full max-w-full justify-center transition-[box-shadow,background-color,border-radius] duration-150"
+              className="relative flex max-h-full max-w-full justify-center overflow-hidden transition-[box-shadow,background-color,border-radius] duration-150"
               style={{
                 backgroundColor: cardState.fill,
                 ...cardPatternStyle,
@@ -147,6 +158,20 @@ export const QrPane = memo(function QrPane({
                 width: cardWidth,
               }}
             >
+              {meshGradientStyle ? (
+                <div
+                  aria-hidden="true"
+                  data-slot="dashboard-compose-card-mesh-gradient"
+                  className="pointer-events-none absolute inset-0 z-0"
+                  style={{
+                    ...meshGradientStyle,
+                    borderRadius: "inherit",
+                  }}
+                />
+              ) : null}
+              {isPaperShaderMode ? (
+                <DraftingCardPaperShaderLayer paperShader={cardState.paperShader} />
+              ) : null}
               {qrNode}
             </div>
           ) : (

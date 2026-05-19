@@ -11,9 +11,19 @@ import type {
 } from "qr-code-styling"
 
 import FileUpload from "@/components/kokonutui/file-upload"
-import type {
-  DraftingCardShadow,
-  DraftingCardState,
+import {
+  applyDraftingCardPaperShaderPreset,
+  createRandomDraftingCardMeshColors,
+  DEFAULT_DRAFTING_CARD_MESH_FILTERS,
+  DRAFTING_CARD_MESH_PALETTES,
+  createDefaultDraftingCardPaperShader,
+  getDraftingCardMeshPaletteById,
+  type DraftingCardPaperShaderState,
+  type DraftingCardShadow,
+  type DraftingCardMeshGradientState,
+  type DraftingCardMeshPaletteId,
+  type DraftingCardState,
+  type DraftingCardStyleMode,
 } from "@/components/new/drafting-card-state"
 import {
   DRAFTING_CARD_PATTERN_NONE_ID,
@@ -25,6 +35,13 @@ import {
   type DraftingCardPatternId,
   type DraftingCardPatternSelectionId,
 } from "@/components/new/drafting-card-patterns"
+import {
+  getPaperShaderDefinition,
+  PAPER_SHADER_DEFINITIONS,
+  type PaperShaderId,
+  type PaperShaderParamValue,
+  type PaperShaderParams,
+} from "@/components/new/drafting-paper-shaders"
 import type {
   BrandIconCategory,
   BrandIconEntry,
@@ -86,7 +103,7 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { CheckIcon, ChevronDown } from "lucide-react"
+import { CheckIcon, ChevronDown, Dices, PlusIcon, RefreshCw } from "lucide-react"
 
 export type DraftingBinaryColorMode = "solid" | "gradient"
 export type DraftingBackgroundColorMode = DraftingBinaryColorMode | "transparent"
@@ -115,6 +132,9 @@ const DRAFTING_BRAND_ICON_CATEGORY_OPTIONS: Array<{
   { label: "Media", value: "media" },
   { label: "Web", value: "web" },
 ]
+
+const PAPER_SHADER_COLOR_INPUT_FALLBACK = ["#", "0", "0", "0", "0", "0", "0"].join("")
+const PAPER_SHADER_NEW_COLOR = ["#", "f", "f", "f", "f", "f", "f"].join("")
 
 export function DraftingContentTab({
   contentType,
@@ -1010,76 +1030,908 @@ export function DraftingCardSettingsTab({
 
 export function DraftingCardStylesTab({
   fill,
-  value,
+  meshGradient,
+  openItemIds,
+  paperShader,
+  patternId,
   patternColors,
-  onValueChange,
+  styleMode,
+  onMeshGradientChange,
+  onOpenItemIdsChange,
+  onPaperShaderChange,
+  onPatternChange,
 }: {
   fill: string
+  meshGradient: DraftingCardMeshGradientState
+  onMeshGradientChange: (value: DraftingCardMeshGradientState) => void
+  onOpenItemIdsChange: (itemIds: string[]) => void
+  onPaperShaderChange: (value: DraftingCardPaperShaderState) => void
+  paperShader: DraftingCardPaperShaderState
   patternColors: Partial<Record<DraftingCardPatternId, DraftingCardPatternColorOverrides>>
-  value: DraftingCardPatternSelectionId
-  onValueChange: (value: DraftingCardPatternSelectionId) => void
+  patternId: DraftingCardPatternSelectionId
+  openItemIds: string[]
+  styleMode: DraftingCardStyleMode
+  onPatternChange: (value: DraftingCardPatternSelectionId) => void
 }) {
+  const updateMeshGradient = (patch: Partial<DraftingCardMeshGradientState>) => {
+    onMeshGradientChange({
+      ...meshGradient,
+      ...patch,
+      colors: patch.colors ? [...patch.colors] : [...meshGradient.colors],
+    })
+  }
+
+  const selectMeshPalette = (paletteId: DraftingCardMeshPaletteId) => {
+    const palette = getDraftingCardMeshPaletteById(paletteId)
+
+    onMeshGradientChange({
+      ...meshGradient,
+      colors: [...palette.colors],
+      paletteId: palette.id,
+    })
+  }
+
   return (
     <div data-slot="drafting-card-styles-tab" className="min-w-0 space-y-3">
-      <div
-        aria-label="Card pattern"
-        role="radiogroup"
-        className="grid grid-cols-2 gap-2"
-      >
-        <OptionCard
-          appearance="drafting"
-          darkShadowTone="ink"
-          checked={value === DRAFTING_CARD_PATTERN_NONE_ID}
-          className={cn(
-            "w-full gap-1.5",
-            "[&_[data-slot=option-card]]:h-20 [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:overflow-hidden [&_[data-slot=option-card]]:rounded-[7px]",
-            "[&_[data-slot=option-card-motif]]:size-full",
-          )}
-          label="None"
-          motifClassName="size-full"
-          name="drafting-card-pattern"
-          onSelect={() => onValueChange(DRAFTING_CARD_PATTERN_NONE_ID)}
-          size="compact"
-          value={DRAFTING_CARD_PATTERN_NONE_ID}
-        >
-          <span
-            aria-hidden="true"
-            className="block size-full"
-            style={{ backgroundColor: fill }}
-          />
-        </OptionCard>
+      <DraftingAccordion
+        dataSlot="drafting-card-styles-accordion"
+        items={[
+          {
+            id: "patterns",
+            title: "Patterns",
+            content: (
+              <div className="min-w-0 px-4 pb-4">
+                <div
+                  aria-label="Card pattern"
+                  role="radiogroup"
+                  className="grid grid-cols-2 gap-2"
+                >
+                  <OptionCard
+                    appearance="drafting"
+                    darkShadowTone="ink"
+                    checked={styleMode === "pattern" && patternId === DRAFTING_CARD_PATTERN_NONE_ID}
+                    className={cn(
+                      "w-full gap-1.5",
+                      "[&_[data-slot=option-card]]:h-20 [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:overflow-hidden [&_[data-slot=option-card]]:rounded-[7px]",
+                      "[&_[data-slot=option-card-motif]]:size-full",
+                    )}
+                    label="None"
+                    motifClassName="size-full"
+                    name="drafting-card-pattern"
+                    onSelect={() => onPatternChange(DRAFTING_CARD_PATTERN_NONE_ID)}
+                    size="compact"
+                    value={DRAFTING_CARD_PATTERN_NONE_ID}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="block size-full"
+                      style={{ backgroundColor: fill }}
+                    />
+                  </OptionCard>
 
-        {DRAFTING_CARD_PATTERNS.map((pattern) => (
-          <OptionCard
-            appearance="drafting"
-            darkShadowTone="ink"
-            key={pattern.id}
-            checked={value === pattern.id}
+                  {DRAFTING_CARD_PATTERNS.map((pattern) => (
+                    <OptionCard
+                      appearance="drafting"
+                      darkShadowTone="ink"
+                      key={pattern.id}
+                      checked={styleMode === "pattern" && patternId === pattern.id}
+                      className={cn(
+                        "w-full gap-1.5",
+                        "[&_[data-slot=option-card]]:h-20 [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:overflow-hidden [&_[data-slot=option-card]]:rounded-[7px]",
+                        "[&_[data-slot=option-card-motif]]:size-full",
+                        "[&_[data-slot=option-card-label]]:whitespace-nowrap",
+                      )}
+                      label={pattern.label}
+                      motifClassName="size-full"
+                      name="drafting-card-pattern"
+                      onSelect={() => onPatternChange(pattern.id)}
+                      size="compact"
+                      value={pattern.id}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="block size-full"
+                        style={
+                          getDraftingCardPatternStyle(
+                            pattern.id,
+                            patternColors[pattern.id],
+                          ) ?? pattern.style
+                        }
+                      />
+                    </OptionCard>
+                  ))}
+                </div>
+              </div>
+            ),
+          },
+          {
+            id: "mesh-gradients",
+            title: "Mesh gradients",
+            content: (
+              <DraftingCardMeshGradientPanel
+                meshGradient={meshGradient}
+                onAddColor={() =>
+                  updateMeshGradient({
+                    colors: [
+                      ...meshGradient.colors,
+                      createRandomDraftingCardMeshColors()[0],
+                    ].slice(0, 6),
+                    paletteId: meshGradient.paletteId,
+                  })
+                }
+                onAdjustColorPositionChange={(adjustColorPosition) =>
+                  updateMeshGradient({ adjustColorPosition })
+                }
+                onColorChange={(index, color) => {
+                  const colors = [...meshGradient.colors]
+                  colors[index] = color
+                  updateMeshGradient({ colors })
+                }}
+                onFilterChange={(patch) => updateMeshGradient(patch)}
+                onPaletteSelect={selectMeshPalette}
+                onRandomizeColors={() =>
+                  updateMeshGradient({
+                    colors: createRandomDraftingCardMeshColors(),
+                  })
+                }
+                onRefreshFilters={() => updateMeshGradient(DEFAULT_DRAFTING_CARD_MESH_FILTERS)}
+              />
+            ),
+          },
+          {
+            id: "paper-shaders",
+            title: "Paper shaders",
+            content: (
+              <DraftingCardPaperShaderPanel
+                paperShader={paperShader}
+                styleMode={styleMode}
+                onPaperShaderChange={onPaperShaderChange}
+              />
+            ),
+          },
+        ]}
+        openItemIds={openItemIds}
+        onOpenItemIdsChange={onOpenItemIdsChange}
+      />
+    </div>
+  )
+}
+
+function DraftingCardMeshGradientPanel({
+  meshGradient,
+  onAddColor,
+  onAdjustColorPositionChange,
+  onColorChange,
+  onFilterChange,
+  onPaletteSelect,
+  onRandomizeColors,
+  onRefreshFilters,
+}: {
+  meshGradient: DraftingCardMeshGradientState
+  onAddColor: () => void
+  onAdjustColorPositionChange: (value: boolean) => void
+  onColorChange: (index: number, color: string) => void
+  onFilterChange: (patch: Partial<DraftingCardMeshGradientState>) => void
+  onPaletteSelect: (paletteId: DraftingCardMeshPaletteId) => void
+  onRandomizeColors: () => void
+  onRefreshFilters: () => void
+}) {
+  const selectedPalette = getDraftingCardMeshPaletteById(meshGradient.paletteId)
+  const hueSteps = [0, 15, 30, 45, 60, 90]
+
+  return (
+    <div
+      data-slot="drafting-card-mesh-gradient-panel"
+      className="min-w-0 space-y-6 px-4 pb-4"
+    >
+      <section data-slot="drafting-card-mesh-colors" className="min-w-0 space-y-4">
+        <div className="flex min-w-0 items-center gap-2">
+          <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+            Colors
+          </p>
+        </div>
+
+        <div className="min-w-0 space-y-3">
+          <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink-muted)]">
+            Custom Palette:
+          </p>
+          <div className="flex min-w-0 flex-wrap items-center gap-3">
+            {meshGradient.colors.map((color, index) => (
+              <label
+                key={color}
+                className="relative block size-11 shrink-0 cursor-pointer overflow-hidden rounded-full border border-[var(--drafting-line)] shadow-[var(--drafting-shadow-rest)]"
+                data-color={color}
+                data-slot="drafting-card-mesh-color-swatch"
+                style={{ backgroundColor: color }}
+              >
+                <span className="sr-only">Mesh gradient color {index + 1}</span>
+                <input
+                  aria-label={`Mesh gradient color ${index + 1}`}
+                  className="absolute inset-0 size-full cursor-pointer opacity-0"
+                  type="color"
+                  value={
+                    color.startsWith("#")
+                      ? color
+                      : selectedPalette.colors[index % selectedPalette.colors.length]
+                  }
+                  onChange={(event) => onColorChange(index, event.currentTarget.value)}
+                  onInput={(event) => onColorChange(index, event.currentTarget.value)}
+                />
+              </label>
+            ))}
+            <Button
+              aria-label="Add mesh gradient color"
+              className="size-11 rounded-full border border-dashed border-[var(--drafting-line)] bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)]"
+              disabled={meshGradient.colors.length >= 6}
+              type="button"
+              variant="ghost"
+              onClick={onAddColor}
+            >
+              <PlusIcon className="size-5" aria-hidden="true" />
+            </Button>
+          </div>
+        </div>
+
+        <Button
+          className="h-10 rounded-full bg-[var(--drafting-control-bg)] px-5 text-[var(--drafting-ink)] shadow-none hover:bg-[var(--drafting-control-bg-hover)]"
+          type="button"
+          variant="ghost"
+          onClick={onRandomizeColors}
+        >
+          <Dices className="size-4" aria-hidden="true" />
+          Randomize colors
+        </Button>
+
+        <div className="min-w-0 space-y-3">
+          <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink-muted)]">
+            Choose Palette:
+          </p>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                aria-label="Choose mesh gradient palette"
+                className="h-14 w-full justify-between rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 text-[var(--drafting-ink)] shadow-none hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] sm:w-[276px]"
+                type="button"
+                variant="ghost"
+              >
+                <MeshPalettePreview
+                  colors={meshGradient.colors}
+                  paletteId={meshGradient.paletteId}
+                />
+                <ChevronDown className="size-4 text-[var(--drafting-ink-muted)]" aria-hidden="true" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="w-[276px] rounded-[8px] border border-[var(--drafting-dropdown-border)] bg-[var(--drafting-dropdown-menu-surface-open)] p-2 text-[var(--drafting-dropdown-text)] shadow-[var(--drafting-dropdown-menu-shadow-open)]"
+            >
+              <DropdownMenuGroup>
+                {DRAFTING_CARD_MESH_PALETTES.map((palette) => (
+                  <DropdownMenuItem
+                    key={palette.id}
+                    data-mesh-palette-id={palette.id}
+                    className={cn(
+                      "flex h-11 cursor-default items-center justify-between rounded-[6px] px-2 text-[12px] font-medium",
+                      palette.id === selectedPalette.id &&
+                        "bg-[var(--drafting-dropdown-selected-fill)]",
+                    )}
+                    onClick={() => onPaletteSelect(palette.id)}
+                  >
+                    <span>{palette.label}</span>
+                    <MeshPalettePreview colors={palette.colors} paletteId={palette.id} />
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <div className="min-w-0 space-y-2">
+          <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink-muted)]">
+            Adjust color position:
+          </p>
+          <button
+            aria-pressed={meshGradient.adjustColorPosition}
             className={cn(
-              "w-full gap-1.5",
-              "[&_[data-slot=option-card]]:h-20 [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:overflow-hidden [&_[data-slot=option-card]]:rounded-[7px]",
-              "[&_[data-slot=option-card-motif]]:size-full",
-              "[&_[data-slot=option-card-label]]:whitespace-nowrap",
+              "inline-flex h-10 items-center gap-3 rounded-full px-3 pr-5 text-sm font-semibold transition-colors",
+              meshGradient.adjustColorPosition
+                ? "bg-[var(--drafting-ink)] text-[var(--drafting-ink-inverse)]"
+                : "bg-[var(--drafting-control-bg)] text-[var(--drafting-ink)]",
             )}
-            label={pattern.label}
-            motifClassName="size-full"
-            name="drafting-card-pattern"
-            onSelect={() => onValueChange(pattern.id)}
-            size="compact"
-            value={pattern.id}
+            type="button"
+            onClick={() => onAdjustColorPositionChange(!meshGradient.adjustColorPosition)}
           >
-            <span
-              aria-hidden="true"
-              className="block size-full"
-              style={
-                getDraftingCardPatternStyle(pattern.id, patternColors[pattern.id]) ??
-                pattern.style
-              }
-            />
-          </OptionCard>
+            <span className="size-7 rounded-full bg-[var(--drafting-panel-bg-active)]" aria-hidden="true" />
+            {meshGradient.adjustColorPosition ? "Yes" : "No"}
+          </button>
+        </div>
+      </section>
+
+      <section data-slot="drafting-card-mesh-filters" className="min-w-0 space-y-3">
+        <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+          Filters
+        </p>
+        <DraftingSliderField
+          dataSlot="drafting-card-mesh-grain-slider"
+          formatValue={() => ""}
+          id="drafting-card-mesh-grain"
+          label={`Grain (${Math.round(meshGradient.grain)}%)`}
+          max={100}
+          min={0}
+          step={1}
+          value={meshGradient.grain}
+          onChange={(grain) => onFilterChange({ grain })}
+        />
+        <DraftingSliderField
+          dataSlot="drafting-card-mesh-blur-slider"
+          formatValue={() => ""}
+          id="drafting-card-mesh-blur"
+          label={`Blur (${Math.round(meshGradient.blur)}%)`}
+          max={100}
+          min={0}
+          step={1}
+          value={meshGradient.blur}
+          onChange={(blur) => onFilterChange({ blur })}
+        />
+        <DraftingSliderField
+          dataSlot="drafting-card-mesh-contrast-slider"
+          formatValue={() => ""}
+          id="drafting-card-mesh-contrast"
+          label={`Contrast (${Math.round(meshGradient.contrast)}%)`}
+          max={160}
+          min={50}
+          step={1}
+          value={meshGradient.contrast}
+          onChange={(contrast) => onFilterChange({ contrast })}
+        />
+        <DraftingSliderField
+          dataSlot="drafting-card-mesh-brightness-slider"
+          formatValue={() => ""}
+          id="drafting-card-mesh-brightness"
+          label={`Brightness (${Math.round(meshGradient.brightness)}%)`}
+          max={160}
+          min={50}
+          step={1}
+          value={meshGradient.brightness}
+          onChange={(brightness) => onFilterChange({ brightness })}
+        />
+        <DraftingSliderField
+          dataSlot="drafting-card-mesh-hue-slider"
+          formatValue={() => ""}
+          id="drafting-card-mesh-hue"
+          label={`Hue (${Math.round(meshGradient.hue)}°)`}
+          max={360}
+          min={0}
+          step={1}
+          value={meshGradient.hue}
+          onChange={(hue) => onFilterChange({ hue })}
+        />
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+          {hueSteps.map((hue) => (
+            <Button
+              key={hue}
+              className={cn(
+                "h-9 rounded-[7px] border border-[var(--drafting-line)] bg-transparent px-2 text-[12px] font-semibold text-[var(--drafting-ink-muted)] shadow-none hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)]",
+                meshGradient.hue === hue &&
+                  "border-[var(--drafting-line-strong)] text-[var(--drafting-ink)]",
+              )}
+              type="button"
+              variant="ghost"
+              onClick={() => onFilterChange({ hue })}
+            >
+              {hue}°
+            </Button>
+          ))}
+        </div>
+        <Button
+          className="mt-3 h-10 rounded-full bg-[var(--drafting-control-bg)] px-5 text-[var(--drafting-ink)] shadow-none hover:bg-[var(--drafting-control-bg-hover)]"
+          type="button"
+          variant="ghost"
+          onClick={onRefreshFilters}
+        >
+          <RefreshCw className="size-4" aria-hidden="true" />
+          Refresh filters
+        </Button>
+      </section>
+    </div>
+  )
+}
+
+function DraftingCardPaperShaderPanel({
+  paperShader,
+  styleMode,
+  onPaperShaderChange,
+}: {
+  paperShader: DraftingCardPaperShaderState
+  styleMode: DraftingCardStyleMode
+  onPaperShaderChange: (value: DraftingCardPaperShaderState) => void
+}) {
+  const definition = getPaperShaderDefinition(paperShader.shaderId)
+  const selectedPreset =
+    definition.presets.find((preset) => preset.name === paperShader.presetName) ??
+    definition.presets[0]
+
+  const updatePaperShader = (patch: Partial<DraftingCardPaperShaderState>) => {
+    onPaperShaderChange({
+      ...paperShader,
+      ...patch,
+      image: patch.image ? { ...patch.image } : { ...paperShader.image },
+      params: patch.params ? structuredClone(patch.params) : structuredClone(paperShader.params),
+    })
+  }
+
+  const updateParam = (key: string, value: PaperShaderParamValue) => {
+    updatePaperShader({
+      params: {
+        ...paperShader.params,
+        [key]: value,
+      },
+    })
+  }
+
+  return (
+    <div
+      data-slot="drafting-card-paper-shader-panel"
+      className="min-w-0 space-y-6 px-4 pb-4"
+    >
+      <section className="min-w-0 space-y-3" data-slot="drafting-card-paper-shader-picker">
+        <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+          Shaders
+        </p>
+        <div
+          aria-label="Paper shader"
+          className="grid grid-cols-2 gap-2"
+          role="radiogroup"
+        >
+          {PAPER_SHADER_DEFINITIONS.map((shader) => {
+            const isSelected = styleMode === "paper-shader" && paperShader.shaderId === shader.id
+
+            return (
+              <OptionCard
+                appearance="drafting"
+                darkShadowTone="ink"
+                key={shader.id}
+                checked={isSelected}
+                className={cn(
+                  "w-full gap-1.5",
+                  shader.disabled && "cursor-not-allowed opacity-45",
+                  "[&_[data-slot=option-card]]:h-20 [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:overflow-hidden [&_[data-slot=option-card]]:rounded-[7px]",
+                  "[&_[data-slot=option-card-motif]]:size-full",
+                  "[&_[data-slot=option-card-label]]:whitespace-nowrap",
+                )}
+                label={shader.label}
+                motifClassName="size-full"
+                name="drafting-card-paper-shader"
+                onSelect={() => {
+                  if (shader.disabled) return
+                  onPaperShaderChange(createDefaultDraftingCardPaperShader(shader.id as PaperShaderId))
+                }}
+                size="compact"
+                value={shader.id}
+              >
+                <span
+                  aria-hidden="true"
+                  className="flex size-full items-center justify-center bg-[var(--drafting-control-bg)] px-2 text-center text-[11px] font-semibold text-[var(--drafting-ink-muted)]"
+                >
+                  {formatPaperShaderParamLabel(shader.group)}
+                </span>
+              </OptionCard>
+            )
+          })}
+        </div>
+      </section>
+
+      <section className="min-w-0 space-y-3" data-slot="drafting-card-paper-shader-presets">
+        <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+          Preset
+        </p>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              className="h-11 w-full justify-between rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 text-[var(--drafting-ink)] shadow-none hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)]"
+              type="button"
+              variant="ghost"
+            >
+              <span>{selectedPreset?.name ?? paperShader.presetName}</span>
+              <ChevronDown className="size-4 text-[var(--drafting-ink-muted)]" aria-hidden="true" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="start"
+            className="w-[276px] rounded-[8px] border border-[var(--drafting-dropdown-border)] bg-[var(--drafting-dropdown-menu-surface-open)] p-2 text-[var(--drafting-dropdown-text)] shadow-[var(--drafting-dropdown-menu-shadow-open)]"
+          >
+            <DropdownMenuGroup>
+              {definition.presets.map((preset) => (
+                <DropdownMenuItem
+                  key={preset.name}
+                  className={cn(
+                    "h-9 cursor-default rounded-[6px] px-2 text-[12px] font-medium",
+                    preset.name === paperShader.presetName &&
+                      "bg-[var(--drafting-dropdown-selected-fill)]",
+                  )}
+                  onClick={() =>
+                    onPaperShaderChange(
+                      applyDraftingCardPaperShaderPreset(paperShader, preset.name),
+                    )
+                  }
+                >
+                  {preset.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </section>
+
+      <section className="min-w-0 space-y-3" data-slot="drafting-card-paper-shader-motion">
+        <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+          Motion
+        </p>
+        <DraftingToggleField
+          checked={paperShader.paused}
+          dataSlot="drafting-card-paper-shader-paused"
+          description="Stops the shader animation while keeping the current frame visible."
+          id="drafting-card-paper-shader-paused"
+          label="Pause"
+          onCheckedChange={(paused) => updatePaperShader({ paused })}
+        />
+        <DraftingSliderField
+          dataSlot="drafting-card-paper-shader-speed"
+          formatValue={(value) => value.toFixed(2)}
+          id="drafting-card-paper-shader-speed"
+          label="Speed"
+          max={2}
+          min={0}
+          step={0.01}
+          value={paperShader.speed}
+          onChange={(speed) => updatePaperShader({ speed })}
+        />
+        <DraftingSliderField
+          dataSlot="drafting-card-paper-shader-frame"
+          formatValue={(value) => `${Math.round(value)}`}
+          id="drafting-card-paper-shader-frame"
+          label="Frame"
+          max={10000}
+          min={0}
+          step={1}
+          value={paperShader.frame}
+          onChange={(frame) => updatePaperShader({ frame })}
+        />
+      </section>
+
+      <section className="min-w-0 space-y-3" data-slot="drafting-card-paper-shader-params">
+        <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+          Settings
+        </p>
+        {Object.entries(paperShader.params).map(([key, value]) => (
+          <DraftingPaperShaderParamControl
+            key={key}
+            paramKey={key}
+            presets={definition.presets}
+            value={value}
+            onChange={(nextValue) => updateParam(key, nextValue)}
+          />
         ))}
+      </section>
+    </div>
+  )
+}
+
+function DraftingPaperShaderParamControl({
+  paramKey,
+  presets,
+  value,
+  onChange,
+}: {
+  paramKey: string
+  presets: Array<{ params: PaperShaderParams }>
+  value: PaperShaderParamValue
+  onChange: (value: PaperShaderParamValue) => void
+}) {
+  const label = formatPaperShaderParamLabel(paramKey)
+
+  if (paramKey === "speed" || paramKey === "frame") {
+    return null
+  }
+
+  if (typeof value === "boolean") {
+    return (
+      <DraftingToggleField
+        checked={value}
+        dataSlot={`drafting-card-paper-shader-${paramKey}`}
+        description={`Toggles ${label.toLowerCase()} for the selected shader.`}
+        id={`drafting-card-paper-shader-${paramKey}`}
+        label={label}
+        onCheckedChange={(nextValue) => onChange(nextValue)}
+      />
+    )
+  }
+
+  if (typeof value === "number") {
+    const range = getPaperShaderNumberRange(paramKey, value)
+
+    return (
+      <DraftingSliderField
+        dataSlot={`drafting-card-paper-shader-${paramKey}`}
+        formatValue={(nextValue) => formatPaperShaderNumberValue(paramKey, nextValue)}
+        id={`drafting-card-paper-shader-${paramKey}`}
+        label={label}
+        max={range.max}
+        min={range.min}
+        step={range.step}
+        value={value}
+        onChange={onChange}
+      />
+    )
+  }
+
+  if (Array.isArray(value)) {
+    if (value.every((item) => typeof item === "string")) {
+      return (
+        <DraftingPaperShaderColorArrayControl
+          colors={value as string[]}
+          label={label}
+          onChange={onChange}
+        />
+      )
+    }
+
+    return (
+      <label className="grid min-w-0 gap-2 rounded-[7px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] p-3">
+        <span className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+          {label}
+        </span>
+        <Textarea
+          className="drafting-type-input min-h-20 resize-none border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] font-mono text-[11px] text-[var(--drafting-ink)] shadow-none focus-visible:border-[var(--drafting-line-strong)] focus-visible:ring-0"
+          value={JSON.stringify(value)}
+          onChange={(event) => {
+            try {
+              const parsed = JSON.parse(event.currentTarget.value)
+              if (Array.isArray(parsed)) {
+                onChange(parsed as number[] | number[][])
+              }
+            } catch {
+              // Keep the prior value until the array text is valid JSON.
+            }
+          }}
+        />
+      </label>
+    )
+  }
+
+  if (typeof value === "string") {
+    if (isPaperShaderColorValue(value)) {
+      return (
+        <DraftingPaperShaderColorControl
+          label={label}
+          value={value}
+          onChange={onChange}
+        />
+      )
+    }
+
+    const options = getPaperShaderStringOptions(paramKey, presets)
+
+    if (options.length > 1) {
+      return (
+        <div className="min-w-0 space-y-2 rounded-[7px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] p-3">
+          <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+            {label}
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {options.map((option) => (
+              <Button
+                key={option}
+                className={cn(
+                  "h-9 rounded-[7px] border border-[var(--drafting-line)] bg-transparent px-2 text-[12px] font-semibold text-[var(--drafting-ink-muted)] shadow-none hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)]",
+                  value === option &&
+                    "border-[var(--drafting-line-strong)] text-[var(--drafting-ink)]",
+                )}
+                type="button"
+                variant="ghost"
+                onClick={() => onChange(option)}
+              >
+                {formatPaperShaderParamLabel(option)}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <label className="grid min-w-0 gap-2 rounded-[7px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] p-3">
+        <span className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+          {label}
+        </span>
+        <Input
+          className="drafting-type-input h-10 min-w-0 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3 text-[var(--drafting-ink)] shadow-none focus-visible:border-[var(--drafting-line-strong)] focus-visible:ring-0"
+          value={value}
+          onChange={(event) => onChange(event.currentTarget.value)}
+        />
+      </label>
+    )
+  }
+
+  return null
+}
+
+function DraftingPaperShaderColorArrayControl({
+  colors,
+  label,
+  onChange,
+}: {
+  colors: string[]
+  label: string
+  onChange: (value: string[]) => void
+}) {
+  return (
+    <div className="min-w-0 space-y-3 rounded-[7px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] p-3">
+      <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+        {label}
+      </p>
+      <div className="flex min-w-0 flex-wrap items-center gap-3">
+        {colors.map((color, index) => (
+          <label
+            key={`${color}-${index}`}
+            className="relative block size-10 shrink-0 cursor-pointer overflow-hidden rounded-full border border-[var(--drafting-line)] shadow-[var(--drafting-shadow-rest)]"
+            style={{ backgroundColor: color }}
+          >
+            <span className="sr-only">
+              {label} {index + 1}
+            </span>
+            <input
+              aria-label={`${label} ${index + 1}`}
+              className="absolute inset-0 size-full cursor-pointer opacity-0"
+              type="color"
+              value={isPaperShaderHexColor(color) ? color : PAPER_SHADER_COLOR_INPUT_FALLBACK}
+              onChange={(event) => {
+                const nextColors = [...colors]
+                nextColors[index] = event.currentTarget.value
+                onChange(nextColors)
+              }}
+            />
+          </label>
+        ))}
+        <Button
+          aria-label={`Add ${label}`}
+          className="size-10 rounded-full border border-dashed border-[var(--drafting-line)] bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)]"
+          disabled={colors.length >= 10}
+          type="button"
+          variant="ghost"
+          onClick={() => onChange([...colors, PAPER_SHADER_NEW_COLOR])}
+        >
+          <PlusIcon className="size-4" aria-hidden="true" />
+        </Button>
       </div>
     </div>
+  )
+}
+
+function DraftingPaperShaderColorControl({
+  label,
+  value,
+  onChange,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+}) {
+  return (
+    <label className="grid min-w-0 gap-2 rounded-[7px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] p-3">
+      <span className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+        {label}
+      </span>
+      <span className="flex min-w-0 items-center gap-2">
+        <input
+          aria-label={label}
+          className="size-10 shrink-0 cursor-pointer rounded-[6px] border border-[var(--drafting-line)] bg-transparent p-1"
+          type="color"
+          value={isPaperShaderHexColor(value) ? value : PAPER_SHADER_COLOR_INPUT_FALLBACK}
+          onChange={(event) => onChange(event.currentTarget.value)}
+        />
+        <Input
+          className="drafting-type-input h-10 min-w-0 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3 text-[var(--drafting-ink)] shadow-none focus-visible:border-[var(--drafting-line-strong)] focus-visible:ring-0"
+          value={value}
+          onChange={(event) => onChange(event.currentTarget.value)}
+        />
+      </span>
+    </label>
+  )
+}
+
+function getPaperShaderStringOptions(
+  paramKey: string,
+  presets: Array<{ params: PaperShaderParams }>,
+) {
+  return Array.from(
+    new Set(
+      presets
+        .map((preset) => preset.params[paramKey])
+        .filter((value): value is string => typeof value === "string" && !isPaperShaderColorValue(value)),
+    ),
+  )
+}
+
+function isPaperShaderHexColor(value: string) {
+  return /^#[0-9a-f]{6}$/i.test(value)
+}
+
+function isPaperShaderColorValue(value: string) {
+  return value.startsWith("#") || value.startsWith("rgb") || value.startsWith("hsl")
+}
+
+function formatPaperShaderParamLabel(value: string) {
+  return value
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase())
+}
+
+function formatPaperShaderNumberValue(paramKey: string, value: number) {
+  if (paramKey.toLowerCase().includes("angle") || paramKey === "rotation") {
+    return `${Math.round(value)}°`
+  }
+
+  return Number.isInteger(value) ? `${value}` : value.toFixed(2)
+}
+
+function getPaperShaderNumberRange(paramKey: string, value: number) {
+  const lowerKey = paramKey.toLowerCase()
+
+  if (paramKey === "rotation" || lowerKey.includes("angle")) {
+    return { min: 0, max: 360, step: 1 }
+  }
+
+  if (paramKey === "scale") {
+    return { min: 0.01, max: 4, step: 0.01 }
+  }
+
+  if (paramKey === "offsetX" || paramKey === "offsetY") {
+    return { min: -1, max: 1, step: 0.01 }
+  }
+
+  if (paramKey === "originX" || paramKey === "originY") {
+    return { min: 0, max: 1, step: 0.01 }
+  }
+
+  if (lowerKey.includes("count") || lowerKey.includes("iteration") || lowerKey.includes("steps")) {
+    return { min: 0, max: Math.max(40, Math.ceil(value * 2)), step: 1 }
+  }
+
+  if (value <= 1 && value >= -1) {
+    return { min: lowerKey.includes("shift") ? -1 : 0, max: 1, step: 0.01 }
+  }
+
+  if (value <= 10 && value >= -10) {
+    return { min: lowerKey.includes("shift") ? -10 : 0, max: 10, step: 0.01 }
+  }
+
+  return { min: 0, max: Math.max(100, Math.ceil(value * 2)), step: 1 }
+}
+
+function MeshPalettePreview({
+  colors,
+  paletteId,
+}: {
+  colors: string[]
+  paletteId: string
+}) {
+  return (
+    <span
+      aria-hidden="true"
+      className="flex h-9 w-28 shrink-0 overflow-hidden rounded-[7px] shadow-[var(--drafting-shadow-rest)]"
+      data-palette-id={paletteId}
+      data-slot="drafting-card-mesh-palette-preview"
+    >
+      {colors.map((color) => (
+        <span
+          key={color}
+          className="h-full flex-1"
+          style={{ backgroundColor: color }}
+        />
+      ))}
+    </span>
   )
 }
 

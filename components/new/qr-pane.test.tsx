@@ -13,7 +13,10 @@ vi.mock("@/components/qr/dashboard-qr-svg", () => ({
 }))
 
 import { QrPane } from "@/components/new/qr-pane"
-import { createDefaultDraftingCardState } from "@/components/new/drafting-card-state"
+import {
+  createDefaultDraftingCardPaperShader,
+  createDefaultDraftingCardState,
+} from "@/components/new/drafting-card-state"
 import {
   createDefaultQrStudioState,
   setSquareQrSize,
@@ -194,6 +197,28 @@ describe("QrPane", () => {
     expect(card.getAttribute("data-card-pattern")).toBe("g3")
     expect(card.style.getPropertyValue("--p1")).toBe("#111111")
     expect(card.style.getPropertyValue("--p2")).toBe("#53777a")
+  })
+
+  it("marks the card layer with the selected paper shader", async () => {
+    const state = setSquareQrSize(createDefaultQrStudioState(), 240)
+    const cardState = {
+      ...createDefaultDraftingCardState(),
+      paperShader: createDefaultDraftingCardPaperShader("warp"),
+      styleMode: "paper-shader" as const,
+    }
+    const { container } = renderPane(state, false, cardState)
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const card = container.querySelector('[data-slot="dashboard-compose-card"]') as HTMLElement
+
+    expect(card).not.toBeNull()
+    expect(card.getAttribute("data-card-style-mode")).toBe("paper-shader")
+    expect(card.getAttribute("data-card-pattern")).toBe("none")
+    expect(card.getAttribute("data-card-paper-shader")).toBe("warp")
   })
 
   it("renders qr artwork without the card wrapper when the card is disabled", async () => {

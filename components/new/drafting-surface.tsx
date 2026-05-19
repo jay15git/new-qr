@@ -118,6 +118,7 @@ import {
   ScrollAreaThumb,
   ScrollAreaViewport,
 } from "@/components/ui/scroll-area"
+import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   DEFAULT_QR_INPUT_TYPE,
@@ -144,6 +145,7 @@ const JUNCTION_MARKERS = [
 type DraftingBinaryColorMode = "solid" | "gradient"
 type DraftingAssetSourceMode = Extract<AssetSourceMode, "upload" | "url">
 type DraftingBrandIconCategoryFilter = BrandIconCategory | "all"
+type DraftingCardStyleItem = "patterns" | "mesh-gradients" | "paper-shaders"
 
 type DraftingPanelTab = {
   id: string
@@ -397,6 +399,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const [activeTool, setActiveTool] = useState<DraftingToolId>(
     DEFAULT_QR_EDITOR_SECTION,
   )
+  const [isCardOnlyMode, setIsCardOnlyMode] = useState(false)
   const [selectedContentType, setSelectedContentType] = useState<QrInputType>(
     DEFAULT_QR_INPUT_TYPE,
   )
@@ -432,6 +435,9 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     ...DEFAULT_DRAFTING_STUDIO_STATE.dotsPalette,
   ])
   const [openDotsColorItems, setOpenDotsColorItems] = useState<string[]>(["solid"])
+  const [openCardStyleItems, setOpenCardStyleItems] = useState<DraftingCardStyleItem[]>([
+    "patterns",
+  ])
   const [selectedCornerSquareType, setSelectedCornerSquareType] =
     useState<CornerSquareType>("extra-rounded")
   const [selectedCornerSquareColorMode, setSelectedCornerSquareColorMode] =
@@ -571,8 +577,13 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const draftingExportPreviewTimeoutRef = useRef<number | null>(null)
   const activeToolConfig =
     DRAFTING_TOOLS.find((section) => section.id === activeTool) ?? DRAFTING_TOOLS[0]
+  const visibleDraftingTools = isCardOnlyMode
+    ? DRAFTING_TOOLS.filter((tool) => tool.id === "card")
+    : DRAFTING_TOOLS.filter((tool) => tool.id !== "card")
   const activeToolTabs = DRAFTING_PANEL_TABS[activeTool]
-  const activePanelTab = activePanelTabs[activeTool]
+  const activePanelTab = activeToolTabs.some((tab) => tab.id === activePanelTabs[activeTool])
+    ? activePanelTabs[activeTool]
+    : (activeToolTabs[0]?.id ?? activePanelTabs[activeTool])
   const filteredBrandIcons = filterBrandIcons(brandIconQuery, brandIconCategory)
   const selectedContentValues =
     contentValuesByType[selectedContentType] ?? getDefaultStaticQrValues(selectedContentType)
@@ -1281,6 +1292,17 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     }
   }
 
+  function handleCardOnlyModeChange(checked: boolean) {
+    setIsCardOnlyMode(checked)
+
+    if (checked) {
+      setActiveTool("card")
+      setActivePanelTabs((current) => ({ ...current, card: "settings" }))
+    } else {
+      setActiveTool(DEFAULT_QR_EDITOR_SECTION)
+    }
+  }
+
   const renderPanelContent = (toolId: DraftingToolId, tabId: string) => {
     if (toolId === "content" && tabId === "content") {
       return (
@@ -1349,12 +1371,36 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       return (
         <DraftingCardStylesTab
           fill={selectedCardState.fill}
+          meshGradient={selectedCardState.meshGradient}
+          openItemIds={openCardStyleItems}
+          paperShader={selectedCardState.paperShader}
           patternColors={selectedCardState.patternColors}
-          value={selectedCardState.patternId}
-          onValueChange={(patternId) =>
+          patternId={selectedCardState.patternId}
+          styleMode={selectedCardState.styleMode}
+          onMeshGradientChange={(meshGradient) =>
+            setSelectedCardState((current) => ({
+              ...current,
+              meshGradient,
+              patternId: "none",
+              styleMode: "mesh-gradient",
+            }))
+          }
+          onOpenItemIdsChange={(itemIds) =>
+            setOpenCardStyleItems(itemIds as DraftingCardStyleItem[])
+          }
+          onPaperShaderChange={(paperShader) =>
+            setSelectedCardState((current) => ({
+              ...current,
+              paperShader,
+              patternId: "none",
+              styleMode: "paper-shader",
+            }))
+          }
+          onPatternChange={(patternId) =>
             setSelectedCardState((current) => ({
               ...current,
               patternId,
+              styleMode: "pattern",
             }))
           }
         />
@@ -1715,6 +1761,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       data-qr-type-number={selectedTypeNumber}
       data-slot="drafting-surface"
       className="relative grid h-dvh w-full grid-rows-[var(--new-header-height)_minmax(0,1fr)] overflow-visible bg-[var(--drafting-surface-bg)] sm:h-[calc(100dvh-4rem)] lg:shadow-[var(--drafting-shadow-shell)] [--new-header-height:3.875rem] [--new-left-rail-width:clamp(6.25rem,10vw,7.5rem)] [--new-middle-rail-width:clamp(15rem,24vw,18.5rem)] [--new-mobile-rail-height:5.75rem]"
+      data-card-only-mode={isCardOnlyMode ? "true" : "false"}
       data-compose-edit-mode="false"
       data-compose-selected-node-id={activeQrNodeId ?? ""}
     >
@@ -1748,6 +1795,20 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       >
         <div className="flex h-full min-w-0 items-center justify-end">
           <div data-slot="drafting-header-actions" className="flex h-full min-w-0 max-w-full items-center gap-1.5 sm:gap-2.5">
+            <div
+              aria-label="Card-only controls"
+              data-slot="drafting-card-only-toggle"
+              className="flex h-8 shrink-0 items-center gap-2 rounded-[6px] bg-[#00000003] px-2 text-[var(--drafting-ink)]"
+            >
+              <CreditCardIcon aria-hidden="true" className="size-4 shrink-0" />
+              <Switch
+                aria-label="Show only card controls"
+                checked={isCardOnlyMode}
+                className="dark:data-checked:bg-foreground dark:[&_[data-slot=switch-thumb]]:data-checked:bg-background"
+                size="sm"
+                onCheckedChange={handleCardOnlyModeChange}
+              />
+            </div>
             <ModeToggle appearance="drafting" className="shrink-0 text-[var(--drafting-ink)]" />
             <Popover open={isDownloadPopoverOpen} onOpenChange={setIsDownloadPopoverOpen}>
               <PopoverTrigger asChild>
@@ -2024,7 +2085,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
                 data-slot="drafting-nav-scroll-content"
                 className="flex h-full min-w-max flex-row items-center gap-2 px-3 py-2 lg:min-h-full lg:min-w-0 lg:flex-col lg:items-center lg:gap-4 lg:px-0 lg:py-4"
               >
-                {DRAFTING_TOOLS.map((tool) => {
+                {visibleDraftingTools.map((tool) => {
                   const isActive = tool.id === activeTool
 
                   return (
