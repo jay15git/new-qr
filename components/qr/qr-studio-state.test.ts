@@ -14,6 +14,7 @@ describe("qr studio state helpers", () => {
   it("starts with shared asset state for logo and background", () => {
     const state = createDefaultQrStudioState();
 
+    expect(state.backgroundShapeId).toBe("none");
     expect(state.logo).toEqual({
       source: "none",
       value: undefined,
@@ -39,6 +40,17 @@ describe("qr studio state helpers", () => {
     expect(options.image).toBeUndefined();
     expect(options.backgroundOptions?.color).toBe("#f8fafc");
     expect(options.backgroundOptions?.round).toBe(0);
+  });
+
+  it("keeps upstream qr background transparent when a vector background shape is active", () => {
+    const state = createDefaultQrStudioState();
+    state.backgroundShapeId = "circle";
+    state.backgroundOptions.color = "#d0bcff";
+
+    const options = toQrCodeOptions(state);
+
+    expect(options.backgroundOptions?.color).toBe("transparent");
+    expect(options.backgroundOptions?.gradient).toBeUndefined();
   });
 
   it("maps qr background radius onto upstream background round", () => {

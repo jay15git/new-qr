@@ -162,6 +162,8 @@ vi.mock("@/components/unlumen-ui/slider", () => ({
 }))
 
 import { DraftingSurface } from "@/components/new/drafting-surface"
+import { createDefaultDraftingCardPaperShader } from "@/components/new/drafting-card-state"
+import { createDraftingPaperShaderThumbnailCacheKey } from "@/components/new/drafting-style-tab"
 import { DASHBOARD_QR_NODE_ID } from "@/components/qr/dashboard-compose-scene"
 import { createDefaultQrStudioState, type QrStudioState } from "@/components/qr/qr-studio-state"
 
@@ -212,6 +214,22 @@ afterEach(() => {
 })
 
 describe("DraftingSurface", () => {
+  it("builds distinct shader thumbnail cache keys when shader inputs change", () => {
+    const meshGradient = createDefaultDraftingCardPaperShader("mesh-gradient")
+    const warp = createDefaultDraftingCardPaperShader("warp")
+    const laterFrame = {
+      ...meshGradient,
+      frame: meshGradient.frame + 1,
+    }
+
+    expect(createDraftingPaperShaderThumbnailCacheKey(meshGradient)).not.toBe(
+      createDraftingPaperShaderThumbnailCacheKey(warp),
+    )
+    expect(createDraftingPaperShaderThumbnailCacheKey(meshGradient)).not.toBe(
+      createDraftingPaperShaderThumbnailCacheKey(laterFrame),
+    )
+  })
+
   it("renders the framed layout with dashboard-style tool buttons and middle tabs", () => {
     const surface = renderSurface()
     const header = getRequiredElement(surface.container, '[data-slot="drafting-header"]')
@@ -295,14 +313,14 @@ describe("DraftingSurface", () => {
     expect(
       surface.container.querySelector('[data-slot="drafting-plus-marker"]')?.getAttribute("class"),
     ).not.toContain("text-black/")
-    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(9)
+    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(8)
     expect(surface.container.querySelector('[data-slot="tabs"]')).not.toBeNull()
     expect(
       surface.container.querySelector('button[aria-label="Open QR type options"]'),
     ).not.toBeNull()
     expect(surface.container.textContent).toContain("QR Type:")
     expect(surface.container.textContent).toContain("Content")
-    expect(surface.container.textContent).toContain("Card")
+    expect(surface.container.querySelector('button[aria-label="Open Card"]')).toBeNull()
     expect(surface.container.textContent).toContain("Style")
     expect(surface.container.textContent).toContain("Corner frame")
     expect(surface.container.textContent).toContain("Corner dot")
@@ -319,7 +337,7 @@ describe("DraftingSurface", () => {
     expect(getRequiredElement(header, '[data-slot="switch"]').className).not.toContain(
       "shadow-[var(--drafting-shadow-rest)]",
     )
-    expect(header.innerHTML).toContain("bg-[#00000003]")
+    expect(header.innerHTML).toContain("bg-[var(--drafting-control-bg)]")
     expect(surface.container.textContent).not.toContain("Appearance")
     expect(surface.container.innerHTML).toContain('aria-label="Toggle dark mode"')
     expect(surface.container.innerHTML).not.toMatch(
@@ -352,7 +370,8 @@ describe("DraftingSurface", () => {
       'input[type="radio"][aria-label="Export WEBP"]',
     ) as HTMLInputElement
 
-    expect(actions.firstElementChild?.getAttribute("data-slot")).toBe("switch")
+    expect(actions.firstElementChild?.getAttribute("data-slot")).toBe("drafting-card-only-toggle")
+    expect(actions.children.item(1)?.getAttribute("data-slot")).toBe("switch")
     expect(actions.querySelector('[data-slot="drafting-download-trigger"]')).not.toBeNull()
     expect(
       getRequiredElement(surface.container, '[data-slot="drafting-download-format-grid"]')
@@ -371,6 +390,53 @@ describe("DraftingSurface", () => {
     },
     15000,
   )
+
+  it("shows card frame, surface, image, and shaders tools when card-only mode is enabled", () => {
+    const surface = renderSurface()
+
+    act(() => {
+      activateElement(
+        getRequiredElement(surface.container, 'button[aria-label="Show only card controls"]'),
+      )
+    })
+
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
+        "data-card-only-mode",
+      ),
+    ).toBe("true")
+    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(4)
+    expect(surface.container.querySelector('button[aria-label="Open Content"]')).toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open Style"]')).toBeNull()
+
+    const frameButton = getRequiredElement(surface.container, 'button[aria-label="Open Frame"]')
+
+    expect(frameButton.getAttribute("aria-pressed")).toBe("true")
+    expect(surface.container.querySelector('button[aria-label="Open Surface"]')).not.toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open Image"]')).not.toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open Shaders"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="tabs-list"]')).toBeNull()
+    expect(
+      getRequiredElement(
+        surface.container,
+        '[data-active-tool="card-frame"][data-active-tab="frame"]',
+      ).textContent,
+    ).toContain("Show card")
+
+    act(() => {
+      activateElement(
+        getRequiredElement(surface.container, 'button[aria-label="Show only card controls"]'),
+      )
+    })
+
+    expect(surface.container.querySelector('button[aria-label="Open Frame"]')).toBeNull()
+    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(8)
+    expect(
+      getRequiredElement(surface.container, 'button[aria-label="Open Content"]').getAttribute(
+        "aria-pressed",
+      ),
+    ).toBe("true")
+  })
 
   it(
     "shows raster quality presets and measures the default web and social export size",
@@ -783,7 +849,6 @@ describe("DraftingSurface", () => {
   it("switches tool button state and updates the tab tray for each dashboard section", () => {
     const surface = renderSurface()
     const contentButton = getRequiredElement(surface.container, 'button[aria-label="Open Content"]')
-    const cardButton = getRequiredElement(surface.container, 'button[aria-label="Open Card"]')
     const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Style"]')
     const logoButton = getRequiredElement(surface.container, 'button[aria-label="Open Logo"]')
     const cornerSquareButton = getRequiredElement(
@@ -792,26 +857,11 @@ describe("DraftingSurface", () => {
     )
 
     expect(contentButton.getAttribute("aria-pressed")).toBe("true")
-    expect(cardButton.getAttribute("aria-pressed")).toBe("false")
     expect(styleButton.getAttribute("aria-pressed")).toBe("false")
     expect(cornerSquareButton.getAttribute("aria-pressed")).toBe("false")
     expect(
       surface.container.querySelector('button[aria-label="Open QR type options"]'),
     ).not.toBeNull()
-
-    act(() => {
-      cardButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    expect(contentButton.getAttribute("aria-pressed")).toBe("false")
-    expect(cardButton.getAttribute("aria-pressed")).toBe("true")
-    expect(getTabLabels(surface.container)).toEqual(["Settings", "Styles", "Colors"])
-    expect(
-      getRequiredElement(
-        surface.container,
-        '[data-active-tool="card"][data-active-tab="settings"]',
-      ).textContent,
-    ).toContain("Show card")
 
     act(() => {
       styleButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -1192,19 +1242,9 @@ describe("DraftingSurface", () => {
       await flushPromises()
     })
 
-    act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Card"]'))
-    })
-
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Settings"))
-    })
+    openCardOnlyMode(surface.container)
 
     const cardPanel = getRequiredElement(surface.container, '[data-slot="drafting-card-tab"]')
-    const fillInput = getRequiredElement(
-      surface.container,
-      "#drafting-card-fill",
-    ) as HTMLInputElement
     const radiusInput = getRequiredElement(
       surface.container,
       '[data-slot="drafting-card-radius-slider"] input[type="range"]',
@@ -1218,11 +1258,9 @@ describe("DraftingSurface", () => {
       '[data-slot="drafting-card-bottom-space-slider"] input[type="range"]',
     ) as HTMLInputElement
 
-    expect(cardPanel.textContent).toContain("Fill")
     expect(cardPanel.textContent).toContain("Shadow")
 
     act(() => {
-      changeInputValue(fillInput, "#ff00aa")
       changeInputValue(radiusInput, "36")
       changeInputValue(paddingInput, "30")
       changeInputValue(bottomSpaceInput, "160")
@@ -1231,7 +1269,6 @@ describe("DraftingSurface", () => {
 
     const card = getSelectedPreviewCard(surface.container)
 
-    expect(card.style.backgroundColor).toBe("rgb(255, 0, 170)")
     expect(card.style.borderRadius).toBe("36px")
     expect(card.style.padding).toBe("30px")
     expect(card.style.width).toBe("300px")
@@ -1239,7 +1276,7 @@ describe("DraftingSurface", () => {
     expect(card.getAttribute("data-card-shadow")).toBe("strong")
   })
 
-  it("renders card pattern options and applies the selected pattern to the active card", async () => {
+  it("renders card surface options and applies fill, pattern, and pattern color changes", async () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface()
 
@@ -1248,77 +1285,230 @@ describe("DraftingSurface", () => {
       await flushPromises()
     })
 
-    act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Card"]'))
-    })
+    openCardOnlyMode(surface.container)
 
     act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Styles"))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Surface"]'))
     })
 
-    const stylesPanel = getRequiredElement(
+    const surfacePanel = getRequiredElement(
       surface.container,
-      '[data-slot="drafting-card-styles-tab"]',
+      '[data-slot="drafting-card-surface-tab"]',
+    )
+    const fillInput = getRequiredElement(
+      surfacePanel,
+      "#drafting-card-fill",
+    ) as HTMLInputElement
+
+    expect(surfacePanel.textContent).toContain("Base fill")
+    expect(surfacePanel.textContent).toContain("Generated patterns")
+    expect(surfacePanel.textContent).not.toContain("Mesh gradients")
+    expect(surfacePanel.querySelectorAll('[data-slot="option-card"]')).toHaveLength(146)
+
+    act(() => {
+      changeInputValue(fillInput, "#ff00aa")
+    })
+
+    expect(getSelectedPreviewCard(surface.container).style.backgroundColor).toBe(
+      "rgb(255, 0, 170)",
     )
 
-    expect(stylesPanel.querySelectorAll('[data-slot="option-card"]')).toHaveLength(146)
-
     act(() => {
-      activateElement(getRadioInputByAriaLabel(stylesPanel, "Pattern 003"))
+      activateElement(getRadioInputByAriaLabel(surfacePanel, "Pattern 003"))
     })
 
     const card = getSelectedPreviewCard(surface.container)
-
-    expect(card.getAttribute("data-card-pattern")).toBe("g3")
-    expect(card.style.getPropertyValue("--s")).toBe("72px")
-  })
-
-  it("renders card pattern color controls and applies color changes to the active card", async () => {
-    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
-    const surface = renderSurface()
-
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
-
-    act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Card"]'))
-    })
-
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Styles"))
-    })
-
-    act(() => {
-      activateElement(getRadioInputByAriaLabel(surface.container, "Pattern 003"))
-    })
-
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Colors"))
-    })
-
-    const colorsPanel = getRequiredElement(
-      surface.container,
-      '[data-slot="drafting-card-colors-tab"]',
-    )
-    const colorInputs = colorsPanel.querySelectorAll(
+    const colorInputs = surfacePanel.querySelectorAll(
       '[data-slot="drafting-card-pattern-color-input"]',
     )
 
-    expect(colorsPanel.textContent).toContain("Pattern 003")
+    expect(card.getAttribute("data-card-pattern")).toBe("g3")
+    expect(card.style.getPropertyValue("--s")).toBe("72px")
     expect(colorInputs).toHaveLength(4)
-    expect(getSelectedPreviewCard(surface.container).style.getPropertyValue("--p1")).toBe(
-      "#c02942",
-    )
 
     act(() => {
       changeInputValue(colorInputs[0] as HTMLInputElement, "#111111")
     })
 
-    expect(getSelectedPreviewCard(surface.container).style.getPropertyValue("--p1")).toBe(
-      "#111111",
+    expect(card.style.getPropertyValue("--p1")).toBe("#111111")
+  })
+
+  it("splits card image controls into upload and filters tabs", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface()
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    openCardOnlyMode(surface.container)
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Image"]'))
+    })
+
+    expect(getButtonByExactText(surface.container, "Upload")).not.toBeNull()
+    expect(getButtonByExactText(surface.container, "Filters")).not.toBeNull()
+
+    const imagePanel = getRequiredElement(surface.container, '[data-slot="drafting-card-image-upload-tab"]')
+    const imageUrlInput = getRequiredElement(
+      imagePanel,
+      'input[aria-label="Card image URL"]',
+    ) as HTMLInputElement
+
+    expect(imagePanel.textContent).toContain("Image source")
+    expect(imagePanel.textContent).not.toContain("Image filters")
+
+    act(() => {
+      changeInputValue(imageUrlInput, "https://example.com/card.png")
+    })
+
+    const card = getSelectedPreviewCard(surface.container)
+
+    expect(card.getAttribute("data-card-style-mode")).toBe("image")
+    expect(card.style.backgroundImage).toContain("https://example.com/card.png")
+
+    act(() => {
+      activateElement(getButtonByExactText(surface.container, "Filters"))
+    })
+
+    const filtersPanel = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-card-image-filters-tab"]',
     )
+
+    expect(filtersPanel.textContent).toContain("Image filters")
+    expect(filtersPanel.querySelectorAll('[data-slot="option-card"]')).toHaveLength(6)
+    expect(filtersPanel.textContent).toContain("Paper texture")
+    expect(filtersPanel.textContent).toContain("Fluted glass")
+    expect(filtersPanel.textContent).toContain("Water")
+    expect(filtersPanel.textContent).toContain("Image dithering")
+    expect(filtersPanel.textContent).toContain("Halftone dots")
+    expect(filtersPanel.textContent).toContain("Halftone CMYK")
+    expect(filtersPanel.textContent).not.toContain("Mesh gradient")
+    expect(filtersPanel.textContent).not.toContain("Color panels")
+    expect(filtersPanel.textContent).not.toContain("Pulsing border")
+
+    expect(getAccordionTriggerByText(filtersPanel, "Filter")).not.toBeNull()
+    expect(getAccordionTriggerByText(filtersPanel, "Preset")).not.toBeNull()
+    expect(getAccordionTriggerByText(filtersPanel, "Motion")).not.toBeNull()
+    expect(getAccordionTriggerByText(filtersPanel, "Settings")).not.toBeNull()
+    expect(filtersPanel.querySelector('[data-slot="drafting-card-paper-shader-image"]')).toBeNull()
+
+    for (const [label, shaderId] of [
+      ["Paper texture", "paper-texture"],
+      ["Fluted glass", "fluted-glass"],
+      ["Water", "water"],
+      ["Image dithering", "image-dithering"],
+      ["Halftone dots", "halftone-dots"],
+      ["Halftone CMYK", "halftone-cmyk"],
+    ] as const) {
+      act(() => {
+        activateElement(getRadioInputByAriaLabel(filtersPanel, label))
+      })
+
+      expect(card.getAttribute("data-card-style-mode")).toBe("image-filter")
+      expect(card.getAttribute("data-card-paper-shader")).toBe(shaderId)
+    }
+    expect(card.querySelector('[data-slot="dashboard-compose-node"] svg')?.getAttribute("style") ?? "").not.toContain(
+      "filter",
+    )
+  })
+
+  it("prompts for an upload while still allowing card image filter browsing", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface()
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    openCardOnlyMode(surface.container)
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Image"]'))
+    })
+
+    act(() => {
+      activateElement(getButtonByExactText(surface.container, "Filters"))
+    })
+
+    const filtersPanel = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-card-image-filters-tab"]',
+    )
+
+    expect(filtersPanel.textContent).toContain("Add an image in Upload")
+
+    act(() => {
+      activateElement(getRadioInputByAriaLabel(filtersPanel, "Paper texture"))
+    })
+
+    const card = getSelectedPreviewCard(surface.container)
+
+    expect(card.getAttribute("data-card-style-mode")).toBe("image-filter")
+    expect(card.getAttribute("data-card-paper-shader")).toBe("paper-texture")
+  })
+
+  it("renders self-generating card shaders apart from image filters", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface()
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    openCardOnlyMode(surface.container)
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Shaders"]'))
+    })
+
+    const shadersPanel = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-card-shaders-tab"]',
+    )
+
+    expect(shadersPanel.textContent).toContain("Mesh gradient")
+    expect(shadersPanel.textContent).toContain("Warp")
+    expect(shadersPanel.textContent).toContain("Preset")
+    expect(
+      shadersPanel.querySelectorAll('[data-slot="drafting-card-paper-shader-preview"]'),
+    ).toHaveLength(20)
+    expect(
+      shadersPanel.querySelectorAll('[data-slot="drafting-card-paper-shader-preview-fallback"]'),
+    ).toHaveLength(20)
+    expect(shadersPanel.textContent).not.toContain("Motion")
+    expect(shadersPanel.textContent).not.toContain("Settings")
+    expect(shadersPanel.textContent).not.toContain("Image dithering")
+
+    act(() => {
+      activateElement(getRadioInputByAriaLabel(shadersPanel, "Mesh gradient"))
+    })
+
+    const card = getSelectedPreviewCard(surface.container)
+
+    expect(card.getAttribute("data-card-style-mode")).toBe("paper-shader")
+    expect(card.getAttribute("data-card-paper-shader")).toBe("mesh-gradient")
+    expect(card.querySelector('[data-slot="dashboard-compose-card-mesh-gradient"]')).toBeNull()
+
+    act(() => {
+      activateElement(getTabTriggerByText(surface.container, "Settings"))
+    })
+
+    const shaderSettingsPanel = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-card-shaders-tab"]',
+    )
+
+    expect(shaderSettingsPanel.textContent).toContain("Motion")
+    expect(shaderSettingsPanel.textContent).toContain("Settings")
+    expect(shaderSettingsPanel.textContent).toContain("Pause")
+    expect(shaderSettingsPanel.textContent).not.toContain("Preset")
+    expect(shaderSettingsPanel.textContent).not.toContain("Warp")
   })
 
   it("preserves card settings separately for each drafting qr layer", async () => {
@@ -1330,8 +1520,10 @@ describe("DraftingSurface", () => {
       await flushPromises()
     })
 
+    openCardOnlyMode(surface.container)
+
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Card"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Surface"]'))
     })
 
     const getFillInput = () =>
@@ -1350,6 +1542,8 @@ describe("DraftingSurface", () => {
     act(() => {
       changeInputValue(getFillInput(), "#00ffaa")
     })
+
+    openCardOnlyMode(surface.container)
 
     act(() => {
       activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Layers"]'))
@@ -1393,12 +1587,10 @@ describe("DraftingSurface", () => {
       await flushPromises()
     })
 
-    act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Card"]'))
-    })
+    openCardOnlyMode(surface.container)
 
     act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Styles"))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Surface"]'))
     })
 
     act(() => {
@@ -1414,6 +1606,8 @@ describe("DraftingSurface", () => {
     act(() => {
       activateElement(getRadioInputByAriaLabel(surface.container, "Pattern 004"))
     })
+
+    openCardOnlyMode(surface.container)
 
     act(() => {
       activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Layers"]'))
@@ -1461,20 +1655,14 @@ describe("DraftingSurface", () => {
       await flushPromises()
     })
 
-    act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Card"]'))
-    })
+    openCardOnlyMode(surface.container)
 
     act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Styles"))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Surface"]'))
     })
 
     act(() => {
       activateElement(getRadioInputByAriaLabel(surface.container, "Pattern 003"))
-    })
-
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Colors"))
     })
 
     act(() => {
@@ -1494,15 +1682,11 @@ describe("DraftingSurface", () => {
     })
 
     act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Styles"))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Surface"]'))
     })
 
     act(() => {
       activateElement(getRadioInputByAriaLabel(surface.container, "Pattern 003"))
-    })
-
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Colors"))
     })
 
     act(() => {
@@ -1514,6 +1698,8 @@ describe("DraftingSurface", () => {
         "#222222",
       )
     })
+
+    openCardOnlyMode(surface.container)
 
     act(() => {
       activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Layers"]'))
@@ -1622,6 +1808,70 @@ describe("DraftingSurface", () => {
     })
 
     expect(surfaceRoot.getAttribute("data-qr-radius")).toBe("0.72")
+  })
+
+  it("preserves qr background shape separately for each drafting qr layer", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface()
+    const backgroundButton = getRequiredElement(
+      surface.container,
+      'button[aria-label="Open Background"]',
+    )
+
+    act(() => {
+      backgroundButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    act(() => {
+      activateElement(getTabTriggerByText(surface.container, "Shape"))
+    })
+
+    act(() => {
+      activateElement(
+        getRadioInputByAriaLabel(surface.container, "Circle"),
+      )
+    })
+
+    await act(async () => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add QR code"]'))
+      await flushPromises()
+      await flushPromises()
+    })
+
+    act(() => {
+      activateElement(
+        getRadioInputByAriaLabel(surface.container, "Hexagon"),
+      )
+    })
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Layers"]'))
+    })
+
+    await act(async () => {
+      activateElement(
+        getRequiredElement(
+          surface.container,
+          '[data-slot="drafting-layer-row"][data-selected="false"] button:not([aria-label])',
+        ),
+      )
+      await flushPromises()
+    })
+
+    const surfaceRoot = getRequiredElement(surface.container, '[data-slot="drafting-surface"]')
+    expect(surfaceRoot.getAttribute("data-background-shape-id")).toBe("circle")
+
+    await act(async () => {
+      activateElement(
+        getRequiredElement(
+          surface.container,
+          '[data-slot="drafting-layer-row"][data-selected="false"] button:not([aria-label])',
+        ),
+      )
+      await flushPromises()
+    })
+
+    expect(surfaceRoot.getAttribute("data-background-shape-id")).toBe("hexagon")
   })
 
   it("expands style color modes without selecting them from the accordion header", () => {
@@ -1956,6 +2206,107 @@ describe("DraftingSurface", () => {
     expect(accordion.querySelectorAll('[data-slot="accordion-item"]').length).toBe(2)
     expect(accordion.textContent).toContain("Solid")
     expect(accordion.textContent).toContain("Gradient")
+  })
+
+  it("adds a dedicated background shape tab between colors and upload", () => {
+    const surface = renderSurface()
+    const backgroundButton = getRequiredElement(
+      surface.container,
+      'button[aria-label="Open Background"]',
+    )
+
+    act(() => {
+      backgroundButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    expect(getTabLabels(surface.container)).toEqual(["Colors", "Shape", "Upload"])
+  })
+
+  it("renders background shape option cards and updates the active qr payload", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface()
+    const backgroundButton = getRequiredElement(
+      surface.container,
+      'button[aria-label="Open Background"]',
+    )
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    act(() => {
+      backgroundButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    act(() => {
+      activateElement(getTabTriggerByText(surface.container, "Shape"))
+    })
+
+    const shapeGrid = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-background-shape-grid"]',
+    )
+
+    expect(shapeGrid.querySelectorAll('[data-slot="option-card"]')).toHaveLength(22)
+
+    await act(async () => {
+      activateElement(getRadioInputByAriaLabel(shapeGrid, "Circle"))
+      await flushPromises()
+      await flushPromises()
+    })
+
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
+        "data-background-shape-id",
+      ),
+    ).toBe("circle")
+    expect(buildDashboardQrNodePayloadSpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        backgroundShapeId: "circle",
+      }),
+    )
+  })
+
+  it("clears the selected background shape when reset defaults is used", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface()
+    const backgroundButton = getRequiredElement(
+      surface.container,
+      'button[aria-label="Open Background"]',
+    )
+
+    act(() => {
+      backgroundButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    act(() => {
+      activateElement(getTabTriggerByText(surface.container, "Shape"))
+    })
+
+    act(() => {
+      activateElement(
+        getRadioInputByAriaLabel(surface.container, "Circle"),
+      )
+    })
+
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
+        "data-background-shape-id",
+      ),
+    ).toBe("circle")
+
+    await act(async () => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Reset defaults"]'))
+      await flushPromises()
+      await flushPromises()
+    })
+
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
+        "data-background-shape-id",
+      ),
+    ).toBe("none")
   })
 
   it("expands the background gradient color mode without selecting it from the accordion header", () => {
@@ -3038,6 +3389,12 @@ function getTabLabels(parent: ParentNode) {
   return Array.from(parent.querySelectorAll('[data-slot="tabs-trigger"]')).map(
     (element) => element.textContent?.trim() ?? "",
   )
+}
+
+function openCardOnlyMode(parent: ParentNode) {
+  act(() => {
+    activateElement(getRequiredElement(parent, 'button[aria-label="Show only card controls"]'))
+  })
 }
 
 function getTabTriggerByText(parent: ParentNode, text: string) {

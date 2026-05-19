@@ -1,6 +1,10 @@
 import type { ExtensionFunction } from "qr-code-styling"
 
 import {
+  getQrBackgroundShapeDefinition,
+  type QrBackgroundShapeDefinition,
+} from "@/components/qr/qr-background-shapes"
+import {
   getActiveCustomDotShape,
   type CustomDotShape,
 } from "@/components/qr/custom-dot-shapes"
@@ -16,6 +20,9 @@ export function buildQrExtension(state: QrStudioState) {
   const extensions: ExtensionFunction[] = []
   const customDotShape = getSvgCustomDotShape(state)
   const backgroundImage = getAssetValue(state.backgroundImage)
+  const backgroundShape = backgroundImage
+    ? null
+    : getQrBackgroundShapeDefinition(state.backgroundShapeId)
   const alignedCornerGradientExtension = createAlignedCornerGradientExtension(state)
 
   if (backgroundImage) {
@@ -25,6 +32,10 @@ export function buildQrExtension(state: QrStudioState) {
         state.backgroundOptions.round,
       ),
     )
+  }
+
+  if (backgroundShape) {
+    extensions.push(createBackgroundShapeExtension(backgroundShape, state))
   }
 
   if (customDotShape) {
@@ -62,6 +73,10 @@ export function getQrExtensionKey(state: QrStudioState) {
   return JSON.stringify({
     backgroundImage: getAssetValue(state.backgroundImage),
     backgroundRound: state.backgroundOptions.round,
+    backgroundShapeGradient: getBackgroundShapeGradientKey(state),
+    backgroundShapeId: getAssetValue(state.backgroundImage)
+      ? null
+      : state.backgroundShapeId,
     cornersDotGradient: getAlignedCornerGradientKey(state.cornersDotGradient),
     cornersSquareGradient: getAlignedCornerGradientKey(
       state.cornersSquareGradient,
@@ -71,6 +86,151 @@ export function getQrExtensionKey(state: QrStudioState) {
     dotsPalette: state.dotsPalette,
     seed: state.data.trim(),
   })
+}
+
+function createBackgroundShapeExtension(
+  shape: QrBackgroundShapeDefinition,
+  state: Pick<QrStudioState, "backgroundGradient" | "backgroundOptions">,
+): ExtensionFunction {
+  return (svg, options) => {
+    const document = svg.ownerDocument
+
+    if (!document) {
+      return
+    }
+
+    svg.querySelectorAll('[data-qr-layer="background-shape"]').forEach((node) => {
+      node.remove()
+    })
+    svg.querySelectorAll('[data-qr-layer="background-shape-gradient"]').forEach((node) => {
+      node.remove()
+    })
+
+    const width = options.width ?? 300
+    const height = options.height ?? 300
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
+    const transform = getBackgroundShapeTransform(shape, width, height)
+
+    path.setAttribute("data-qr-layer", "background-shape")
+    path.setAttribute("d", shape.path)
+    path.setAttribute("transform", transform)
+    path.setAttribute("fill", getBackgroundShapeFill(svg, state, width, height))
+
+    const insertReference = getBackgroundImageInsertReference(svg)
+    svg.insertBefore(path, insertReference)
+  }
+}
+
+function getBackgroundShapeFill(
+  svg: SVGElement,
+  state: Pick<QrStudioState, "backgroundGradient" | "backgroundOptions">,
+  width: number,
+  height: number,
+) {
+  if (!state.backgroundGradient.enabled) {
+    return state.backgroundOptions.color
+  }
+
+  const gradientId = "background-shape-gradient"
+  const gradient = createBackgroundShapeGradient(svg, state.backgroundGradient, {
+    height,
+    id: gradientId,
+    width,
+  })
+
+  if (gradient) {
+    getOrCreateSvgDefs(svg).appendChild(gradient)
+    return `url('#${gradientId}')`
+  }
+
+  return state.backgroundOptions.color
+}
+
+function createBackgroundShapeGradient(
+  svg: SVGElement,
+  gradient: StudioGradient,
+  {
+    height,
+    id,
+    width,
+  }: {
+    height: number
+    id: string
+    width: number
+  },
+) {
+  const document = svg.ownerDocument
+
+  if (!document) {
+    return null
+  }
+
+  const gradientElement = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    gradient.type === "radial" ? "radialGradient" : "linearGradient",
+  )
+
+  gradientElement.setAttribute("id", id)
+  gradientElement.setAttribute("data-qr-layer", "background-shape-gradient")
+  gradientElement.setAttribute("gradientUnits", "userSpaceOnUse")
+
+  if (gradient.type === "radial") {
+    gradientElement.setAttribute("cx", String(width / 2))
+    gradientElement.setAttribute("cy", String(height / 2))
+    gradientElement.setAttribute("r", String(Math.max(width, height) / 2))
+  } else {
+    const endpoints = getLinearGradientEndpoints({
+      height,
+      rotation: gradient.rotation,
+      width,
+      x: 0,
+      y: 0,
+    })
+
+    gradientElement.setAttribute("x1", String(endpoints.x1))
+    gradientElement.setAttribute("y1", String(endpoints.y1))
+    gradientElement.setAttribute("x2", String(endpoints.x2))
+    gradientElement.setAttribute("y2", String(endpoints.y2))
+  }
+
+  for (const colorStop of gradient.colorStops) {
+    const stop = document.createElementNS("http://www.w3.org/2000/svg", "stop")
+    stop.setAttribute("offset", String(colorStop.offset))
+    stop.setAttribute("stop-color", colorStop.color)
+    gradientElement.appendChild(stop)
+  }
+
+  return gradientElement
+}
+
+function getBackgroundShapeTransform(
+  shape: QrBackgroundShapeDefinition,
+  width: number,
+  height: number,
+) {
+  const scale = Math.min(width / shape.viewBox.width, height / shape.viewBox.height)
+  const x = (width - shape.viewBox.width * scale) / 2
+  const y = (height - shape.viewBox.height * scale) / 2
+
+  return `translate(${formatSvgNumber(x)} ${formatSvgNumber(y)}) scale(${formatSvgNumber(scale)})`
+}
+
+function formatSvgNumber(value: number) {
+  if (Math.abs(value) < 0.000001) {
+    return "0"
+  }
+
+  return Number(value.toFixed(4)).toString()
+}
+
+function getBackgroundShapeGradientKey(
+  state: Pick<QrStudioState, "backgroundGradient" | "backgroundShapeId">,
+) {
+  if (state.backgroundShapeId === "none" || !state.backgroundGradient.enabled) {
+    return null
+  }
+
+  return state.backgroundGradient
 }
 
 export function createAlignedCornerGradientExtension(

@@ -4,7 +4,6 @@ import { memo, useEffect, useMemo, useRef, useState } from "react"
 
 import {
   DEFAULT_DRAFTING_CARD_STATE,
-  getDraftingCardMeshGradientStyle,
   type DraftingCardState,
 } from "@/components/new/drafting-card-state"
 import { DraftingCardPaperShaderLayer } from "@/components/new/drafting-card-paper-shader-layer"
@@ -80,17 +79,30 @@ export const QrPane = memo(function QrPane({
   const previewRenderSize = getQrPreviewRenderSize(state)
   const cardWidth = previewRenderSize + cardState.padding * 2
   const cardHeight = cardWidth + cardState.bottomSpace
-  const isMeshGradientMode = cardState.styleMode === "mesh-gradient"
   const isPaperShaderMode = cardState.styleMode === "paper-shader"
-  const cardPatternStyle = isMeshGradientMode
-    ? undefined
-    : getDraftingCardPatternStyle(
-        cardState.patternId,
-        cardState.patternId === "none" ? undefined : cardState.patternColors[cardState.patternId],
-      )
-  const meshGradientStyle = isMeshGradientMode
-    ? getDraftingCardMeshGradientStyle(cardState.meshGradient)
-    : undefined
+  const isImageMode = cardState.styleMode === "image"
+  const isImageFilterMode = cardState.styleMode === "image-filter"
+  const cardPatternStyle = getDraftingCardPatternStyle(
+    cardState.patternId,
+    cardState.patternId === "none" ? undefined : cardState.patternColors[cardState.patternId],
+  )
+  const cardImageStyle =
+    (isImageMode || isImageFilterMode) && cardState.cardImage.value
+      ? {
+          backgroundImage: `url("${cardState.cardImage.value}")`,
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: cardState.cardImage.fit,
+        }
+      : undefined
+  const imageFilterShader = {
+    ...cardState.imageFilter,
+    image: {
+      ...cardState.imageFilter.image,
+      source: cardState.cardImage.source === "none" ? cardState.imageFilter.image.source : cardState.cardImage.source,
+      value: cardState.cardImage.value ?? cardState.imageFilter.image.value,
+    },
+  }
   const qrNode = markup ? (
     <div
       data-slot="dashboard-compose-node"
@@ -142,35 +154,47 @@ export const QrPane = memo(function QrPane({
           cardState.enabled ? (
             <div
               data-slot="dashboard-compose-card"
-              data-card-pattern={isMeshGradientMode || isPaperShaderMode ? "none" : cardState.patternId}
-              data-card-paper-shader={isPaperShaderMode ? cardState.paperShader.shaderId : "none"}
+              data-card-pattern={isPaperShaderMode || isImageFilterMode || isImageMode ? "none" : cardState.patternId}
+              data-card-paper-shader={
+                isPaperShaderMode
+                  ? cardState.paperShader.shaderId
+                  : isImageFilterMode
+                    ? cardState.imageFilter.shaderId
+                    : "none"
+              }
               data-card-shadow={cardState.shadow}
               data-card-style-mode={cardState.styleMode}
               data-card-enabled="true"
               className="relative flex max-h-full max-w-full justify-center overflow-hidden transition-[box-shadow,background-color,border-radius] duration-150"
               style={{
                 backgroundColor: cardState.fill,
-                ...cardPatternStyle,
+                ...(isPaperShaderMode || isImageFilterMode || isImageMode ? undefined : cardPatternStyle),
+                ...cardImageStyle,
                 borderRadius: cardState.cornerRadius,
                 boxShadow: getDraftingCardShadow(cardState.shadow),
                 height: cardHeight,
+                opacity: 1,
                 padding: cardState.padding,
                 width: cardWidth,
               }}
             >
-              {meshGradientStyle ? (
+              {isImageMode && cardState.cardImage.value ? (
                 <div
                   aria-hidden="true"
-                  data-slot="dashboard-compose-card-mesh-gradient"
+                  data-slot="dashboard-compose-card-image"
                   className="pointer-events-none absolute inset-0 z-0"
                   style={{
-                    ...meshGradientStyle,
+                    ...cardImageStyle,
                     borderRadius: "inherit",
+                    opacity: cardState.cardImage.opacity / 100,
                   }}
                 />
               ) : null}
               {isPaperShaderMode ? (
                 <DraftingCardPaperShaderLayer paperShader={cardState.paperShader} />
+              ) : null}
+              {isImageFilterMode ? (
+                <DraftingCardPaperShaderLayer paperShader={imageFilterShader} />
               ) : null}
               {qrNode}
             </div>

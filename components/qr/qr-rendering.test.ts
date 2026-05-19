@@ -77,6 +77,14 @@ function createStubElement(tagName: string): StubElement {
           return node.attributes["data-qr-layer"] === "background-image-clip"
         }
 
+        if (selector === '[data-qr-layer="background-shape"]') {
+          return node.attributes["data-qr-layer"] === "background-shape"
+        }
+
+        if (selector === '[data-qr-layer="background-shape-gradient"]') {
+          return node.attributes["data-qr-layer"] === "background-shape-gradient"
+        }
+
         return false
       }
 
@@ -184,6 +192,16 @@ describe("qr rendering helpers", () => {
     )
   })
 
+  it("changes the extension key when a vector background shape is active", () => {
+    const defaultState = createDefaultQrStudioState()
+    const stateWithBackgroundShape = createDefaultQrStudioState()
+    stateWithBackgroundShape.backgroundShapeId = "circle"
+
+    expect(getQrExtensionKey(stateWithBackgroundShape)).not.toBe(
+      getQrExtensionKey(defaultState),
+    )
+  })
+
   it("changes the extension key when a linear corner gradient changes", () => {
     const defaultState = createDefaultQrStudioState()
     const stateWithCornerGradient = createDefaultQrStudioState()
@@ -272,6 +290,109 @@ describe("qr rendering helpers", () => {
     expect(clipRect?.getAttribute("width")).toBe("120")
     expect(clipRect?.getAttribute("height")).toBe("120")
     expect(clipRect?.getAttribute("rx")).toBe("30")
+  })
+
+  it("adds a solid vector background shape fitted to the svg viewport", () => {
+    const state = createDefaultQrStudioState()
+    state.backgroundShapeId = "hexagon"
+    state.backgroundOptions.color = "#d0bcff"
+
+    const extension = buildQrExtension(state)
+    expect(extension).toBeTypeOf("function")
+
+    if (!extension) {
+      return
+    }
+
+    const svg = createStubElement("svg")
+    svg.appendChild(createStubElement("defs"))
+    svg.appendChild(createStubElement("rect"))
+    svg.appendChild(createStubElement("path"))
+
+    extension(svg as unknown as SVGElement, {
+      height: 320,
+      width: 320,
+    })
+
+    const backgroundShape = svg.querySelector('[data-qr-layer="background-shape"]')
+
+    expect(backgroundShape).not.toBeNull()
+    expect(backgroundShape?.getAttribute("fill")).toBe("#d0bcff")
+    expect(backgroundShape?.getAttribute("transform")).toBe(
+      "translate(0 33) scale(1)",
+    )
+    expect(svg.children[2]?.getAttribute("data-qr-layer")).toBe("background-shape")
+  })
+
+  it("fills vector background shapes with the active background gradient", () => {
+    const state = createDefaultQrStudioState()
+    state.backgroundShapeId = "circle"
+    state.backgroundGradient = {
+      enabled: true,
+      type: "linear",
+      rotation: Math.PI / 2,
+      colorStops: [
+        { offset: 0, color: "#111111" },
+        { offset: 1, color: "#eeeeee" },
+      ],
+    }
+
+    const extension = buildQrExtension(state)
+    expect(extension).toBeTypeOf("function")
+
+    if (!extension) {
+      return
+    }
+
+    const svg = createStubElement("svg")
+    const defs = createStubElement("defs")
+    svg.appendChild(defs)
+    svg.appendChild(createStubElement("rect"))
+    svg.appendChild(createStubElement("path"))
+
+    extension(svg as unknown as SVGElement, {
+      height: 320,
+      width: 320,
+    })
+
+    const backgroundShape = svg.querySelector('[data-qr-layer="background-shape"]')
+    const gradient = svg.querySelector('[data-qr-layer="background-shape-gradient"]')
+
+    expect(backgroundShape?.getAttribute("fill")).toBe("url('#background-shape-gradient')")
+    expect(gradient?.tagName).toBe("linearGradient")
+    expect(gradient?.getAttribute("x1")).toBe("160")
+    expect(gradient?.getAttribute("y1")).toBe("0")
+    expect(gradient?.getAttribute("x2")).toBe("160")
+    expect(gradient?.getAttribute("y2")).toBe("320")
+  })
+
+  it("lets background images override vector background shapes", () => {
+    const state = createDefaultQrStudioState()
+    state.backgroundShapeId = "circle"
+    state.backgroundImage = {
+      source: "upload",
+      value: "blob:https://new-qr-studio.local/background.png",
+    }
+
+    const extension = buildQrExtension(state)
+    expect(extension).toBeTypeOf("function")
+
+    if (!extension) {
+      return
+    }
+
+    const svg = createStubElement("svg")
+    svg.appendChild(createStubElement("defs"))
+    svg.appendChild(createStubElement("rect"))
+    svg.appendChild(createStubElement("path"))
+
+    extension(svg as unknown as SVGElement, {
+      height: 320,
+      width: 320,
+    })
+
+    expect(svg.querySelector('[data-qr-layer="background-image"]')).not.toBeNull()
+    expect(svg.querySelector('[data-qr-layer="background-shape"]')).toBeNull()
   })
 
   it("normalizes all corner-frame linear gradients to the same relative direction", () => {
