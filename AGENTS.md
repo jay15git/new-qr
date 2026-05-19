@@ -20,13 +20,14 @@ This version has breaking changes. Read the relevant guide in `node_modules/next
 ## App Structure
 - `app/layout.tsx` defines the root shell, Geist/Bricolage Grotesque/Manrope fonts, and global CSS.
 - `app/page.tsx` is the home route; renders `HomePromptShell` from `components/home/`.
-- **`/new` and `/dashboard` are deprecated.** Do not add features or fixes there unless explicitly asked.
-- `app/settings/page.tsx` is the **active workspace**. It renders `<QrStudio />` (default variant) and is where all QR studio work should happen.
+- **`/new` is the active workspace** and the only route where QR studio work should happen.
+- **`/dashboard` and `/settings` are deprecated.** Do not add features or fixes there unless explicitly asked.
+- `app/settings/page.tsx` is deprecated. It renders `<QrStudio />` (default variant) for legacy access only.
 - `components/qr/qr-studio.tsx` is the main client entrypoint for QR generation. It owns the `QRCodeStyling` instance lifecycle, deferred preview updates, download flow, reset flow, and uploaded logo object URL cleanup.
 - `components/qr/qr-studio-state.ts` is the core state and mapper layer. Update this first when adding new controls, defaults, or `qr-code-styling` options.
 - `components/qr/qr-control-sections.tsx` is the large control-surface form. Follow its existing inline `setState` pattern unless there is a clear reason to refactor.
 - `components/qr/qr-preview-card.tsx` is display/export UI only.
-- `components/new/drafting-surface.tsx` is the standalone drafting UI; do not confuse it with the dashboard/settings QR studio.
+- `components/new/drafting-surface.tsx` is the active drafting UI for `/new`.
 - `lib/utils.ts` only provides `cn()`.
 
 ## MCP Tools
@@ -55,7 +56,7 @@ This version has breaking changes. Read the relevant guide in `node_modules/next
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **new-qr** (3251 symbols, 5886 relationships, 180 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **new-qr** (3478 symbols, 6264 relationships, 189 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 

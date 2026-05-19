@@ -1004,11 +1004,33 @@ export const PAPER_SHADER_DEFINITIONS: PaperShaderDefinition[] = [
 export type PaperShaderId = string
 
 export const DEFAULT_PAPER_SHADER_ID: PaperShaderId = "mesh-gradient"
+const CARD_IMAGE_FILTER_SHADER_IDS = [
+  "paper-texture",
+  "fluted-glass",
+  "water",
+  "image-dithering",
+  "halftone-dots",
+  "halftone-cmyk",
+] as const
 
 export function getPaperShaderDefinition(shaderId: PaperShaderId | string) {
   return (
     PAPER_SHADER_DEFINITIONS.find((definition) => definition.id === shaderId) ??
     PAPER_SHADER_DEFINITIONS[0]
+  )
+}
+
+export function getCardImageFilterDefinitions() {
+  return CARD_IMAGE_FILTER_SHADER_IDS.map((shaderId) => getPaperShaderDefinition(shaderId))
+}
+
+export function getCardGeneratedShaderDefinitions() {
+  return PAPER_SHADER_DEFINITIONS.filter(
+    (definition) =>
+      !definition.requiresImage &&
+      !CARD_IMAGE_FILTER_SHADER_IDS.includes(
+        definition.id as (typeof CARD_IMAGE_FILTER_SHADER_IDS)[number],
+      ),
   )
 }
 

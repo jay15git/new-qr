@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest"
 
-import { getPaperShaderDefinition } from "@/components/new/drafting-paper-shaders"
+import {
+  getCardGeneratedShaderDefinitions,
+  getCardImageFilterDefinitions,
+  getPaperShaderDefinition,
+} from "@/components/new/drafting-paper-shaders"
 
 function getNumberControl(shaderId: string, key: string) {
   const control = getPaperShaderDefinition(shaderId).controls.find(
@@ -105,6 +109,27 @@ describe("drafting paper shader metadata", () => {
       expect(controlKeys).not.toContain("originY")
       expect(getPaperShaderDefinition(shaderId).hiddenParams).toContain("originX")
       expect(getPaperShaderDefinition(shaderId).hiddenParams).toContain("originY")
+    }
+  })
+
+  it("uses a fixed card image filter allowlist in reference order", () => {
+    expect(getCardImageFilterDefinitions().map((definition) => definition.id)).toEqual([
+      "paper-texture",
+      "fluted-glass",
+      "water",
+      "image-dithering",
+      "halftone-dots",
+      "halftone-cmyk",
+    ])
+  })
+
+  it("keeps card image filters out of generated shader choices", () => {
+    const generatedShaderIds = getCardGeneratedShaderDefinitions().map(
+      (definition) => definition.id,
+    )
+
+    for (const filterId of getCardImageFilterDefinitions().map((definition) => definition.id)) {
+      expect(generatedShaderIds).not.toContain(filterId)
     }
   })
 })

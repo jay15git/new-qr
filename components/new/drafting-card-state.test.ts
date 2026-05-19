@@ -12,6 +12,14 @@ describe("drafting card state", () => {
     const state = createDefaultDraftingCardState()
 
     expect(state.styleMode).toBe("pattern")
+    expect(state.cardImage).toEqual({
+      fit: "cover",
+      opacity: 100,
+      source: "none",
+      value: undefined,
+    })
+    expect(state.imageFilter.shaderId).toBe("image-dithering")
+    expect(state.imageFilter.image.source).toBe("sample")
     expect(state.paperShader.shaderId).toBe("mesh-gradient")
     expect(state.paperShader.presetName).toBe("Default")
     expect(state.paperShader.params.colors).toEqual([
@@ -33,11 +41,16 @@ describe("drafting card state", () => {
     expect(clone).not.toBe(state)
     expect(clone.paperShader).not.toBe(state.paperShader)
     expect(clone.paperShader.params).not.toBe(state.paperShader.params)
+    expect(clone.imageFilter).not.toBe(state.imageFilter)
+    expect(clone.imageFilter.params).not.toBe(state.imageFilter.params)
+    expect(clone.cardImage).not.toBe(state.cardImage)
 
     const cloneColors = clone.paperShader.params.colors as string[]
     cloneColors[0] = "#000000"
+    clone.cardImage.value = "https://example.com/card.png"
 
     expect((state.paperShader.params.colors as string[])[0]).toBe("#e0eaff")
+    expect(state.cardImage.value).toBeUndefined()
   })
 
   it("creates defaults for another shader and applies presets", () => {

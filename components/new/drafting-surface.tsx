@@ -14,11 +14,13 @@ import type {
 
 import {
   DraftingBackgroundColorTab,
+  DraftingBackgroundShapeTab,
   DraftingBackgroundUploadTab,
   DraftingBrandIconTab,
-  DraftingCardColorsTab,
+  DraftingCardImageTab,
   DraftingCardSettingsTab,
-  DraftingCardStylesTab,
+  DraftingCardShadersTab,
+  DraftingCardSurfaceTab,
   DraftingContentTab,
   DraftingCornerDotColorTab,
   DraftingCornerDotStyleTab,
@@ -54,6 +56,7 @@ import {
   type BrandIconId,
   type BrandIconEntry,
 } from "@/components/qr/brand-icon-catalog"
+import type { QrBackgroundShapeId } from "@/components/qr/qr-background-shapes"
 import {
   createBrandIconDataUrl,
   createBrandIconGradientDataUrl,
@@ -145,14 +148,14 @@ const JUNCTION_MARKERS = [
 type DraftingBinaryColorMode = "solid" | "gradient"
 type DraftingAssetSourceMode = Extract<AssetSourceMode, "upload" | "url">
 type DraftingBrandIconCategoryFilter = BrandIconCategory | "all"
-type DraftingCardStyleItem = "patterns" | "mesh-gradients" | "paper-shaders"
+type DraftingCardToolId = "card-frame" | "card-surface" | "card-image" | "card-shaders"
 
 type DraftingPanelTab = {
   id: string
   label: string
 }
 
-type DraftingToolId = QrEditorSectionId | "card" | "layers"
+type DraftingToolId = QrEditorSectionId | DraftingCardToolId | "layers"
 
 type DraftingTool = {
   id: DraftingToolId
@@ -166,10 +169,15 @@ type DraftingContentValuesByType = Partial<Record<QrInputType, StaticQrContentVa
 
 const DRAFTING_PANEL_TABS: Record<DraftingToolId, DraftingPanelTab[]> = {
   content: [{ id: "content", label: "Content" }],
-  card: [
+  "card-frame": [{ id: "frame", label: "Frame" }],
+  "card-surface": [{ id: "surface", label: "Surface" }],
+  "card-image": [
+    { id: "upload", label: "Upload" },
+    { id: "filters", label: "Filters" },
+  ],
+  "card-shaders": [
+    { id: "shaders", label: "Shaders" },
     { id: "settings", label: "Settings" },
-    { id: "styles", label: "Styles" },
-    { id: "colors", label: "Colors" },
   ],
   style: [
     { id: "style", label: "Style" },
@@ -186,6 +194,7 @@ const DRAFTING_PANEL_TABS: Record<DraftingToolId, DraftingPanelTab[]> = {
   ],
   background: [
     { id: "colors", label: "Colors" },
+    { id: "shape", label: "Shape" },
     { id: "upload", label: "Upload" },
   ],
   logo: [
@@ -200,7 +209,10 @@ const DRAFTING_PANEL_TABS: Record<DraftingToolId, DraftingPanelTab[]> = {
 
 const DEFAULT_DRAFTING_PANEL_TABS: Record<DraftingToolId, string> = {
   content: "content",
-  card: "settings",
+  "card-frame": "frame",
+  "card-surface": "surface",
+  "card-image": "upload",
+  "card-shaders": "shaders",
   style: "style",
   "corner-square": "style",
   "corner-dot": "style",
@@ -314,9 +326,26 @@ const DRAFTING_TOOLS: DraftingTool[] = [
     renderIcon: () => <LinkIcon className="size-4 shrink-0" />,
   },
   {
-    id: "card",
-    title: "Card",
+    id: "card-frame",
+    title: "Frame",
     renderIcon: () => <CreditCardIcon className="size-4 shrink-0" />,
+  },
+  {
+    id: "card-surface",
+    title: "Surface",
+    renderIcon: () => <PieChart className="size-4 shrink-0" />,
+  },
+  {
+    id: "card-image",
+    title: "Image",
+    renderIcon: () => (
+      <HugeiconsIcon icon={Image02Icon} size={16} color="currentColor" strokeWidth={1.8} />
+    ),
+  },
+  {
+    id: "card-shaders",
+    title: "Shaders",
+    renderIcon: () => <Sparkles className="size-4 shrink-0" />,
   },
   {
     id: "style",
@@ -435,9 +464,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     ...DEFAULT_DRAFTING_STUDIO_STATE.dotsPalette,
   ])
   const [openDotsColorItems, setOpenDotsColorItems] = useState<string[]>(["solid"])
-  const [openCardStyleItems, setOpenCardStyleItems] = useState<DraftingCardStyleItem[]>([
-    "patterns",
-  ])
   const [selectedCornerSquareType, setSelectedCornerSquareType] =
     useState<CornerSquareType>("extra-rounded")
   const [selectedCornerSquareColorMode, setSelectedCornerSquareColorMode] =
@@ -483,6 +509,8 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     useState<StudioGradient>(
       structuredClone(DEFAULT_DRAFTING_STUDIO_STATE.backgroundGradient),
     )
+  const [selectedBackgroundShapeId, setSelectedBackgroundShapeId] =
+    useState<QrBackgroundShapeId>(DEFAULT_DRAFTING_STUDIO_STATE.backgroundShapeId)
   const [openBackgroundColorItems, setOpenBackgroundColorItems] = useState<string[]>([
     "solid",
   ])
@@ -577,9 +605,11 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const draftingExportPreviewTimeoutRef = useRef<number | null>(null)
   const activeToolConfig =
     DRAFTING_TOOLS.find((section) => section.id === activeTool) ?? DRAFTING_TOOLS[0]
+  const isCardTool = (toolId: DraftingToolId): toolId is DraftingCardToolId =>
+    toolId.startsWith("card-")
   const visibleDraftingTools = isCardOnlyMode
-    ? DRAFTING_TOOLS.filter((tool) => tool.id === "card")
-    : DRAFTING_TOOLS.filter((tool) => tool.id !== "card")
+    ? DRAFTING_TOOLS.filter((tool) => isCardTool(tool.id))
+    : DRAFTING_TOOLS.filter((tool) => !isCardTool(tool.id))
   const activeToolTabs = DRAFTING_PANEL_TABS[activeTool]
   const activePanelTab = activeToolTabs.some((tab) => tab.id === activePanelTabs[activeTool])
     ? activePanelTabs[activeTool]
@@ -624,6 +654,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
             ? selectedBackgroundRemoteUrl
             : undefined,
       },
+      backgroundShapeId: selectedBackgroundShapeId,
       qrOptions: {
         ...DEFAULT_DRAFTING_STUDIO_STATE.qrOptions,
         typeNumber: selectedTypeNumber,
@@ -682,6 +713,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       selectedBackgroundColor,
       selectedBackgroundColorMode,
       selectedBackgroundGradient,
+      selectedBackgroundShapeId,
       selectedBackgroundTransparent,
       selectedBackgroundRemoteUrl,
       selectedQrRadius,
@@ -1004,6 +1036,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     )
     setSelectedBackgroundColor(nextState.backgroundOptions.color)
     setSelectedBackgroundGradient(structuredClone(nextState.backgroundGradient))
+    setSelectedBackgroundShapeId(nextState.backgroundShapeId)
     setOpenBackgroundColorItems([nextState.backgroundGradient.enabled ? "gradient" : "solid"])
     setSelectedBackgroundAssetSourceMode(
       nextState.backgroundImage.source === "url" ? "url" : "upload",
@@ -1088,6 +1121,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     })
     setActivePanelTabs({ ...DEFAULT_DRAFTING_PANEL_TABS })
     setSelectedBackgroundTransparent(false)
+    setSelectedBackgroundShapeId(nextState.backgroundShapeId)
   }
 
   useEffect(() => {
@@ -1296,8 +1330,8 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     setIsCardOnlyMode(checked)
 
     if (checked) {
-      setActiveTool("card")
-      setActivePanelTabs((current) => ({ ...current, card: "settings" }))
+      setActiveTool("card-frame")
+      setActivePanelTabs((current) => ({ ...current, "card-frame": "frame" }))
     } else {
       setActiveTool(DEFAULT_QR_EDITOR_SECTION)
     }
@@ -1358,7 +1392,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       )
     }
 
-    if (toolId === "card" && tabId === "settings") {
+    if (toolId === "card-frame" && tabId === "frame") {
       return (
         <DraftingCardSettingsTab
           value={selectedCardState}
@@ -1367,33 +1401,17 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       )
     }
 
-    if (toolId === "card" && tabId === "styles") {
+    if (toolId === "card-surface" && tabId === "surface") {
       return (
-        <DraftingCardStylesTab
+        <DraftingCardSurfaceTab
           fill={selectedCardState.fill}
-          meshGradient={selectedCardState.meshGradient}
-          openItemIds={openCardStyleItems}
-          paperShader={selectedCardState.paperShader}
           patternColors={selectedCardState.patternColors}
           patternId={selectedCardState.patternId}
           styleMode={selectedCardState.styleMode}
-          onMeshGradientChange={(meshGradient) =>
+          onFillChange={(fill) =>
             setSelectedCardState((current) => ({
               ...current,
-              meshGradient,
-              patternId: "none",
-              styleMode: "mesh-gradient",
-            }))
-          }
-          onOpenItemIdsChange={(itemIds) =>
-            setOpenCardStyleItems(itemIds as DraftingCardStyleItem[])
-          }
-          onPaperShaderChange={(paperShader) =>
-            setSelectedCardState((current) => ({
-              ...current,
-              paperShader,
-              patternId: "none",
-              styleMode: "paper-shader",
+              fill,
             }))
           }
           onPatternChange={(patternId) =>
@@ -1403,16 +1421,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
               styleMode: "pattern",
             }))
           }
-        />
-      )
-    }
-
-    if (toolId === "card" && tabId === "colors") {
-      return (
-        <DraftingCardColorsTab
-          fill={selectedCardState.fill}
-          patternColors={selectedCardState.patternColors}
-          patternId={selectedCardState.patternId}
           onPatternColorChange={(
             patternId: DraftingCardPatternId,
             colorId: DraftingCardPatternColorSlotId,
@@ -1439,6 +1447,65 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
                 patternColors: nextPatternColors,
               }
             })
+          }
+        />
+      )
+    }
+
+    if (toolId === "card-image" && tabId === "upload") {
+      return (
+        <DraftingCardImageTab
+          cardImage={selectedCardState.cardImage}
+          mode="upload"
+          onCardImageChange={(cardImage) =>
+            setSelectedCardState((current) => ({
+              ...current,
+              cardImage,
+              styleMode: cardImage.source === "none" ? current.styleMode : "image",
+            }))
+          }
+        />
+      )
+    }
+
+    if (toolId === "card-image" && tabId === "filters") {
+      return (
+        <DraftingCardImageTab
+          cardImage={selectedCardState.cardImage}
+          imageFilter={selectedCardState.imageFilter}
+          mode="filters"
+          styleMode={selectedCardState.styleMode}
+          onImageFilterChange={(imageFilter) =>
+            setSelectedCardState((current) => ({
+              ...current,
+              imageFilter: {
+                ...imageFilter,
+                image: {
+                  source: current.cardImage.source === "none" ? "sample" : current.cardImage.source,
+                  value: current.cardImage.value ?? imageFilter.image.value,
+                },
+              },
+              patternId: "none",
+              styleMode: "image-filter",
+            }))
+          }
+        />
+      )
+    }
+
+    if (toolId === "card-shaders" && (tabId === "shaders" || tabId === "settings")) {
+      return (
+        <DraftingCardShadersTab
+          activeTab={tabId}
+          paperShader={selectedCardState.paperShader}
+          styleMode={selectedCardState.styleMode}
+          onPaperShaderChange={(paperShader) =>
+            setSelectedCardState((current) => ({
+              ...current,
+              paperShader,
+              patternId: "none",
+              styleMode: "paper-shader",
+            }))
           }
         />
       )
@@ -1552,17 +1619,38 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
           onModeChange={(value) => {
             ensureBackgroundUploadItemExpanded(value)
             setSelectedBackgroundAssetSourceMode(value)
+            setSelectedBackgroundShapeId("none")
           }}
           onOpenItemIdsChange={setOpenBackgroundUploadItems}
           onRemoteUrlChange={(value) => {
             ensureBackgroundUploadItemExpanded("url")
             setSelectedBackgroundAssetSourceMode("url")
             setSelectedBackgroundRemoteUrl(value)
+            setSelectedBackgroundShapeId("none")
           }}
           onUploadError={IGNORE_DRAFTING_UPLOAD_ERROR}
           onUploadSuccess={() => {
             ensureBackgroundUploadItemExpanded("upload")
             setSelectedBackgroundAssetSourceMode("upload")
+            setSelectedBackgroundShapeId("none")
+          }}
+        />
+      )
+    }
+
+    if (toolId === "background" && tabId === "shape") {
+      return (
+        <DraftingBackgroundShapeTab
+          gradient={{
+            ...structuredClone(selectedBackgroundGradient),
+            enabled: selectedBackgroundColorMode === "gradient",
+          }}
+          solidColor={selectedBackgroundColor}
+          value={selectedBackgroundShapeId}
+          onValueChange={(value) => {
+            setSelectedBackgroundShapeId(value)
+            setSelectedBackgroundAssetSourceMode("upload")
+            setSelectedBackgroundRemoteUrl("")
           }}
         />
       )
@@ -1749,6 +1837,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     <section
       aria-label="Drafting workspace"
       data-logo-color-mode={selectedLogoColorMode}
+      data-background-shape-id={selectedBackgroundShapeId}
       data-logo-preset-id={selectedLogoPresetId ?? ""}
       data-logo-preset-value={selectedLogoPresetValue ?? ""}
       data-logo-source-mode={selectedLogoSourceMode}
@@ -1798,7 +1887,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
             <div
               aria-label="Card-only controls"
               data-slot="drafting-card-only-toggle"
-              className="flex h-8 shrink-0 items-center gap-2 rounded-[6px] bg-[#00000003] px-2 text-[var(--drafting-ink)]"
+              className="flex h-8 shrink-0 items-center gap-2 rounded-[6px] bg-[var(--drafting-control-bg)] px-2 text-[var(--drafting-ink)]"
             >
               <CreditCardIcon aria-hidden="true" className="size-4 shrink-0" />
               <Switch
@@ -2166,7 +2255,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
                     onContentTypeChange={handleDraftingContentTypeChange}
                   />
                 </div>
-              ) : (
+              ) : activeToolTabs.length > 1 || !isCardTool(activeTool) ? (
                 <TabsList
                   aria-label={`${activeToolConfig.title} settings groups`}
                   className={DRAFTING_PANEL_TAB_TRAY_CLASS_NAME}
@@ -2181,7 +2270,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
                     </TabsTrigger>
                   ))}
                 </TabsList>
-              )}
+              ) : null}
             </div>
 
             <div data-slot="drafting-tab-panels" className="min-h-0 min-w-0 flex-1 overflow-hidden">

@@ -13,6 +13,7 @@ import type {
 } from "qr-code-styling";
 
 import type { BrandIconId } from "@/components/qr/brand-icon-catalog";
+import type { QrBackgroundShapeId } from "@/components/qr/qr-background-shapes";
 
 export type GradientStop = {
   offset: number;
@@ -46,6 +47,7 @@ export type QrStudioState = {
   rasterExportQualityPercent: number;
   logo: StudioAsset;
   backgroundImage: StudioAsset;
+  backgroundShapeId: QrBackgroundShapeId;
   qrOptions: {
     typeNumber: TypeNumber;
     mode: Mode;
@@ -136,6 +138,7 @@ export function createDefaultQrStudioState(): QrStudioState {
       source: "none",
       value: undefined,
     },
+    backgroundShapeId: "none",
     qrOptions: {
       typeNumber: 0,
       mode: "Byte",
@@ -245,6 +248,7 @@ export function setRasterExportQualityPercent(
 export function toQrCodeOptions(state: QrStudioState): Options {
   const logoImage = getAssetValue(state.logo);
   const backgroundImage = getAssetValue(state.backgroundImage);
+  const backgroundShapeActive = hasBackgroundShape(state) && !backgroundImage;
 
   return {
     width: clampQrSize(state.width),
@@ -285,15 +289,19 @@ export function toQrCodeOptions(state: QrStudioState): Options {
       round: clampQrBackgroundRound(state.backgroundOptions.round),
       color:
         backgroundImage ||
+        backgroundShapeActive ||
         state.backgroundGradient.enabled ||
         state.backgroundOptions.transparent
           ? backgroundImage
             ? undefined
-            : state.backgroundOptions.transparent
+            : backgroundShapeActive || state.backgroundOptions.transparent
               ? "transparent"
               : undefined
           : state.backgroundOptions.color,
-      gradient: backgroundImage ? undefined : buildGradient(state.backgroundGradient),
+      gradient:
+        backgroundImage || backgroundShapeActive
+          ? undefined
+          : buildGradient(state.backgroundGradient),
     },
   };
 }
@@ -306,6 +314,10 @@ export function getAssetValue(asset?: StudioAsset) {
 
 export function hasBackgroundImage(state: QrStudioState) {
   return Boolean(getAssetValue(state.backgroundImage));
+}
+
+export function hasBackgroundShape(state: Pick<QrStudioState, "backgroundShapeId">) {
+  return state.backgroundShapeId !== "none";
 }
 
 export function hasLogoImage(state: QrStudioState) {

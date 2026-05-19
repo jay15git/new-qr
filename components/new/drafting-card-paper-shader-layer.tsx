@@ -1,12 +1,20 @@
 "use client"
 
-import { Component, type ReactNode, useMemo, useState } from "react"
+import { Component, type CSSProperties, type ReactNode, useMemo, useState } from "react"
 
 import type { DraftingCardPaperShaderState } from "@/components/new/drafting-card-state"
 import { getPaperShaderDefinition } from "@/components/new/drafting-paper-shaders"
 
 type DraftingCardPaperShaderLayerProps = {
   paperShader: DraftingCardPaperShaderState
+}
+
+type DraftingCardPaperShaderRendererProps = {
+  dataSlot: string
+  onError: () => void
+  paperShader: DraftingCardPaperShaderState
+  renderOptions?: Record<string, unknown>
+  style: CSSProperties
 }
 
 type PaperShaderErrorBoundaryProps = {
@@ -37,65 +45,92 @@ class PaperShaderErrorBoundary extends Component<
   }
 }
 
-function hasWebGlSupport() {
+export function hasDraftingPaperShaderWebGlSupport() {
   if (typeof document === "undefined") return false
+  if (
+    typeof navigator !== "undefined" &&
+    navigator.userAgent.toLowerCase().includes("jsdom")
+  ) {
+    return false
+  }
 
   const canvas = document.createElement("canvas")
-  return Boolean(canvas.getContext("webgl2") ?? canvas.getContext("webgl"))
+  try {
+    return Boolean(canvas.getContext("webgl2") ?? canvas.getContext("webgl"))
+  } catch {
+    return false
+  }
+}
+
+export function buildDraftingPaperShaderRenderProps(
+  paperShader: DraftingCardPaperShaderState,
+  renderOptions?: Record<string, unknown>,
+) {
+  const definition = getPaperShaderDefinition(paperShader.shaderId)
+
+  return {
+    ...paperShader.params,
+    frame: paperShader.frame,
+    ...(definition.requiresImage && paperShader.image.value
+      ? { image: paperShader.image.value }
+      : {}),
+    speed: paperShader.paused ? 0 : paperShader.speed,
+    ...definition.renderOptions,
+    ...renderOptions,
+  }
+}
+
+export function DraftingCardPaperShaderRenderer({
+  dataSlot,
+  onError,
+  paperShader,
+  renderOptions,
+  style,
+}: DraftingCardPaperShaderRendererProps) {
+  const definition = getPaperShaderDefinition(paperShader.shaderId)
+  const ShaderComponent = definition.component
+  const shaderProps = useMemo(
+    () => buildDraftingPaperShaderRenderProps(paperShader, renderOptions),
+    [paperShader, renderOptions],
+  )
+
+  return (
+    <PaperShaderErrorBoundary key={paperShader.shaderId} onError={onError}>
+      <ShaderComponent
+        {...shaderProps}
+        aria-hidden="true"
+        data-slot={dataSlot}
+        style={style}
+      />
+    </PaperShaderErrorBoundary>
+  )
 }
 
 export function DraftingCardPaperShaderLayer({
   paperShader,
 }: DraftingCardPaperShaderLayerProps) {
-  const [canRenderShader] = useState(hasWebGlSupport)
+  const [canRenderShader] = useState(hasDraftingPaperShaderWebGlSupport)
   const [shaderErrorId, setShaderErrorId] = useState<string | null>(null)
-  const definition = getPaperShaderDefinition(paperShader.shaderId)
-  const ShaderComponent = definition.component
   const hasShaderError = shaderErrorId === paperShader.shaderId
-  const shaderProps = useMemo(
-    () => ({
-      ...paperShader.params,
-      frame: paperShader.frame,
-      ...(definition.requiresImage && paperShader.image.value
-        ? { image: paperShader.image.value }
-        : {}),
-      speed: paperShader.paused ? 0 : paperShader.speed,
-      ...definition.renderOptions,
-    }),
-    [
-      definition.renderOptions,
-      definition.requiresImage,
-      paperShader.frame,
-      paperShader.image.value,
-      paperShader.params,
-      paperShader.paused,
-      paperShader.speed,
-    ],
-  )
 
   if (!canRenderShader || hasShaderError) {
     return null
   }
 
   return (
-    <PaperShaderErrorBoundary
-      key={paperShader.shaderId}
+    <DraftingCardPaperShaderRenderer
+      dataSlot="dashboard-compose-card-paper-shader"
       onError={() => setShaderErrorId(paperShader.shaderId)}
-    >
-      <ShaderComponent
-        {...shaderProps}
-        aria-hidden="true"
-        data-slot="dashboard-compose-card-paper-shader"
-        style={{
-          borderRadius: "inherit",
-          height: "100%",
-          inset: 0,
-          pointerEvents: "none",
-          position: "absolute",
-          width: "100%",
-          zIndex: 0,
-        }}
-      />
-    </PaperShaderErrorBoundary>
+      paperShader={paperShader}
+      style={{
+        borderRadius: "inherit",
+        height: "100%",
+        inset: 0,
+        pointerEvents: "none",
+        position: "absolute",
+        width: "100%",
+        zIndex: 0,
+      }}
+    />
   )
 }
