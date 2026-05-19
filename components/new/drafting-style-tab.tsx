@@ -16,6 +16,7 @@ import {
   createRandomDraftingCardMeshColors,
   DEFAULT_DRAFTING_CARD_MESH_FILTERS,
   DRAFTING_CARD_MESH_PALETTES,
+  DEFAULT_DRAFTING_PAPER_SHADER_IMAGE,
   createDefaultDraftingCardPaperShader,
   getDraftingCardMeshPaletteById,
   type DraftingCardPaperShaderState,
@@ -38,9 +39,9 @@ import {
 import {
   getPaperShaderDefinition,
   PAPER_SHADER_DEFINITIONS,
+  type PaperShaderControlDefinition,
   type PaperShaderId,
   type PaperShaderParamValue,
-  type PaperShaderParams,
 } from "@/components/new/drafting-paper-shaders"
 import type {
   BrandIconCategory,
@@ -1450,6 +1451,9 @@ function DraftingCardPaperShaderPanel({
   const selectedPreset =
     definition.presets.find((preset) => preset.name === paperShader.presetName) ??
     definition.presets[0]
+  const speedControl = definition.controls.find(
+    (control) => control.type === "number" && control.key === "speed",
+  )
 
   const updatePaperShader = (patch: Partial<DraftingCardPaperShaderState>) => {
     onPaperShaderChange({
@@ -1494,7 +1498,6 @@ function DraftingCardPaperShaderPanel({
                 checked={isSelected}
                 className={cn(
                   "w-full gap-1.5",
-                  shader.disabled && "cursor-not-allowed opacity-45",
                   "[&_[data-slot=option-card]]:h-20 [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:overflow-hidden [&_[data-slot=option-card]]:rounded-[7px]",
                   "[&_[data-slot=option-card-motif]]:size-full",
                   "[&_[data-slot=option-card-label]]:whitespace-nowrap",
@@ -1503,7 +1506,6 @@ function DraftingCardPaperShaderPanel({
                 motifClassName="size-full"
                 name="drafting-card-paper-shader"
                 onSelect={() => {
-                  if (shader.disabled) return
                   onPaperShaderChange(createDefaultDraftingCardPaperShader(shader.id as PaperShaderId))
                 }}
                 size="compact"
@@ -1575,17 +1577,19 @@ function DraftingCardPaperShaderPanel({
           label="Pause"
           onCheckedChange={(paused) => updatePaperShader({ paused })}
         />
-        <DraftingSliderField
-          dataSlot="drafting-card-paper-shader-speed"
-          formatValue={(value) => value.toFixed(2)}
-          id="drafting-card-paper-shader-speed"
-          label="Speed"
-          max={2}
-          min={0}
-          step={0.01}
-          value={paperShader.speed}
-          onChange={(speed) => updatePaperShader({ speed })}
-        />
+        {speedControl?.type === "number" ? (
+          <DraftingSliderField
+            dataSlot="drafting-card-paper-shader-speed"
+            formatValue={(value) => value.toFixed(2)}
+            id="drafting-card-paper-shader-speed"
+            label="Speed"
+            max={speedControl.max}
+            min={speedControl.min}
+            step={speedControl.step ?? 0.01}
+            value={paperShader.speed}
+            onChange={(speed) => updatePaperShader({ speed })}
+          />
+        ) : null}
         <DraftingSliderField
           dataSlot="drafting-card-paper-shader-frame"
           formatValue={(value) => `${Math.round(value)}`}
@@ -1603,13 +1607,23 @@ function DraftingCardPaperShaderPanel({
         <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
           Settings
         </p>
-        {Object.entries(paperShader.params).map(([key, value]) => (
+        {definition.controls.filter((control) => control.key !== "speed").map((control) => (
           <DraftingPaperShaderParamControl
-            key={key}
-            paramKey={key}
-            presets={definition.presets}
-            value={value}
-            onChange={(nextValue) => updateParam(key, nextValue)}
+            key={control.key}
+            control={control}
+            maxColorCount={definition.maxColorCount}
+            paperShader={paperShader}
+            value={paperShader.params[control.key]}
+            onChange={(nextValue) => {
+              if (control.type === "image") {
+                updatePaperShader({
+                  image: nextValue as DraftingCardPaperShaderState["image"],
+                })
+                return
+              }
+
+              updateParam(control.key, nextValue as PaperShaderParamValue)
+            }}
           />
         ))}
       </section>
@@ -1618,151 +1632,170 @@ function DraftingCardPaperShaderPanel({
 }
 
 function DraftingPaperShaderParamControl({
-  paramKey,
-  presets,
+  control,
+  maxColorCount,
+  paperShader,
   value,
   onChange,
 }: {
-  paramKey: string
-  presets: Array<{ params: PaperShaderParams }>
+  control: PaperShaderControlDefinition
+  maxColorCount?: number
+  paperShader: DraftingCardPaperShaderState
   value: PaperShaderParamValue
-  onChange: (value: PaperShaderParamValue) => void
+  onChange: (value: DraftingCardPaperShaderState["image"] | PaperShaderParamValue) => void
 }) {
-  const label = formatPaperShaderParamLabel(paramKey)
+  const label = formatPaperShaderParamLabel(control.key)
 
-  if (paramKey === "speed" || paramKey === "frame") {
-    return null
+  if (control.type === "image") {
+    return (
+      <DraftingPaperShaderImageControl
+        image={paperShader.image}
+        label={label}
+        onChange={(image) => onChange(image)}
+      />
+    )
   }
 
-  if (typeof value === "boolean") {
+  if (control.type === "boolean") {
     return (
       <DraftingToggleField
-        checked={value}
-        dataSlot={`drafting-card-paper-shader-${paramKey}`}
+        checked={Boolean(value)}
+        dataSlot={`drafting-card-paper-shader-${control.key}`}
         description={`Toggles ${label.toLowerCase()} for the selected shader.`}
-        id={`drafting-card-paper-shader-${paramKey}`}
+        id={`drafting-card-paper-shader-${control.key}`}
         label={label}
         onCheckedChange={(nextValue) => onChange(nextValue)}
       />
     )
   }
 
-  if (typeof value === "number") {
-    const range = getPaperShaderNumberRange(paramKey, value)
-
+  if (control.type === "number" && typeof value === "number") {
     return (
       <DraftingSliderField
-        dataSlot={`drafting-card-paper-shader-${paramKey}`}
-        formatValue={(nextValue) => formatPaperShaderNumberValue(paramKey, nextValue)}
-        id={`drafting-card-paper-shader-${paramKey}`}
+        dataSlot={`drafting-card-paper-shader-${control.key}`}
+        formatValue={(nextValue) => formatPaperShaderNumberValue(control.key, nextValue)}
+        id={`drafting-card-paper-shader-${control.key}`}
         label={label}
-        max={range.max}
-        min={range.min}
-        step={range.step}
+        max={control.max}
+        min={control.min}
+        step={control.step ?? 0.01}
         value={value}
         onChange={onChange}
       />
     )
   }
 
-  if (Array.isArray(value)) {
-    if (value.every((item) => typeof item === "string")) {
-      return (
-        <DraftingPaperShaderColorArrayControl
-          colors={value as string[]}
-          label={label}
-          onChange={onChange}
-        />
-      )
-    }
-
+  if (control.type === "colors" && Array.isArray(value)) {
     return (
-      <label className="grid min-w-0 gap-2 rounded-[7px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] p-3">
-        <span className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
-          {label}
-        </span>
-        <Textarea
-          className="drafting-type-input min-h-20 resize-none border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] font-mono text-[11px] text-[var(--drafting-ink)] shadow-none focus-visible:border-[var(--drafting-line-strong)] focus-visible:ring-0"
-          value={JSON.stringify(value)}
-          onChange={(event) => {
-            try {
-              const parsed = JSON.parse(event.currentTarget.value)
-              if (Array.isArray(parsed)) {
-                onChange(parsed as number[] | number[][])
-              }
-            } catch {
-              // Keep the prior value until the array text is valid JSON.
-            }
-          }}
-        />
-      </label>
+      <DraftingPaperShaderColorArrayControl
+        colors={value as string[]}
+        label={label}
+        maxColorCount={maxColorCount ?? 10}
+        onChange={onChange}
+      />
     )
   }
 
-  if (typeof value === "string") {
-    if (isPaperShaderColorValue(value)) {
-      return (
-        <DraftingPaperShaderColorControl
-          label={label}
-          value={value}
-          onChange={onChange}
-        />
-      )
-    }
-
-    const options = getPaperShaderStringOptions(paramKey, presets)
-
-    if (options.length > 1) {
-      return (
-        <div className="min-w-0 space-y-2 rounded-[7px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] p-3">
-          <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
-            {label}
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {options.map((option) => (
-              <Button
-                key={option}
-                className={cn(
-                  "h-9 rounded-[7px] border border-[var(--drafting-line)] bg-transparent px-2 text-[12px] font-semibold text-[var(--drafting-ink-muted)] shadow-none hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)]",
-                  value === option &&
-                    "border-[var(--drafting-line-strong)] text-[var(--drafting-ink)]",
-                )}
-                type="button"
-                variant="ghost"
-                onClick={() => onChange(option)}
-              >
-                {formatPaperShaderParamLabel(option)}
-              </Button>
-            ))}
-          </div>
-        </div>
-      )
-    }
-
+  if (control.type === "color" && typeof value === "string") {
     return (
-      <label className="grid min-w-0 gap-2 rounded-[7px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] p-3">
-        <span className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+      <DraftingPaperShaderColorControl
+        label={label}
+        value={value}
+        onChange={onChange}
+      />
+    )
+  }
+
+  if (control.type === "enum" && typeof value === "string") {
+    return (
+      <div className="min-w-0 space-y-2 rounded-[7px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] p-3">
+        <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
           {label}
-        </span>
-        <Input
-          className="drafting-type-input h-10 min-w-0 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3 text-[var(--drafting-ink)] shadow-none focus-visible:border-[var(--drafting-line-strong)] focus-visible:ring-0"
-          value={value}
-          onChange={(event) => onChange(event.currentTarget.value)}
-        />
-      </label>
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          {control.options.map((option) => (
+            <Button
+              key={option}
+              className={cn(
+                "h-9 rounded-[7px] border border-[var(--drafting-line)] bg-transparent px-2 text-[12px] font-semibold text-[var(--drafting-ink-muted)] shadow-none hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)]",
+                value === option &&
+                  "border-[var(--drafting-line-strong)] text-[var(--drafting-ink)]",
+              )}
+              type="button"
+              variant="ghost"
+              onClick={() => onChange(option)}
+            >
+              {formatPaperShaderParamLabel(option)}
+            </Button>
+          ))}
+        </div>
+      </div>
     )
   }
 
   return null
 }
 
+function DraftingPaperShaderImageControl({
+  image,
+  label,
+  onChange,
+}: {
+  image: DraftingCardPaperShaderState["image"]
+  label: string
+  onChange: (value: DraftingCardPaperShaderState["image"]) => void
+}) {
+  return (
+    <div
+      className="min-w-0 space-y-3 rounded-[7px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] p-3"
+      data-slot="drafting-card-paper-shader-image"
+    >
+      <div className="flex min-w-0 items-center justify-between gap-3">
+        <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+          {label}
+        </p>
+        <Button
+          className="h-8 rounded-[6px] border border-[var(--drafting-line)] bg-transparent px-3 text-[12px] font-semibold text-[var(--drafting-ink-muted)] shadow-none hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)]"
+          type="button"
+          variant="ghost"
+          onClick={() =>
+            onChange({
+              source: "sample",
+              value: DEFAULT_DRAFTING_PAPER_SHADER_IMAGE,
+            })
+          }
+        >
+          Use sample
+        </Button>
+      </div>
+      <p className="drafting-type-caption text-[var(--drafting-ink-muted)]">
+        {image.source === "upload" ? "Uploaded image" : "Built-in sample image"}
+      </p>
+      <FileUpload
+        acceptedFileTypes={["image/*"]}
+        className="mx-0 max-w-full"
+        onUploadError={() => undefined}
+        onUploadSuccess={(file) => {
+          onChange({
+            source: "upload",
+            value: URL.createObjectURL(file),
+          })
+        }}
+        uploadDelay={0}
+      />
+    </div>
+  )
+}
+
 function DraftingPaperShaderColorArrayControl({
   colors,
   label,
+  maxColorCount,
   onChange,
 }: {
   colors: string[]
   label: string
+  maxColorCount: number
   onChange: (value: string[]) => void
 }) {
   return (
@@ -1796,7 +1829,7 @@ function DraftingPaperShaderColorArrayControl({
         <Button
           aria-label={`Add ${label}`}
           className="size-10 rounded-full border border-dashed border-[var(--drafting-line)] bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)]"
-          disabled={colors.length >= 10}
+          disabled={colors.length >= maxColorCount}
           type="button"
           variant="ghost"
           onClick={() => onChange([...colors, PAPER_SHADER_NEW_COLOR])}
@@ -1840,25 +1873,8 @@ function DraftingPaperShaderColorControl({
   )
 }
 
-function getPaperShaderStringOptions(
-  paramKey: string,
-  presets: Array<{ params: PaperShaderParams }>,
-) {
-  return Array.from(
-    new Set(
-      presets
-        .map((preset) => preset.params[paramKey])
-        .filter((value): value is string => typeof value === "string" && !isPaperShaderColorValue(value)),
-    ),
-  )
-}
-
 function isPaperShaderHexColor(value: string) {
   return /^#[0-9a-f]{6}$/i.test(value)
-}
-
-function isPaperShaderColorValue(value: string) {
-  return value.startsWith("#") || value.startsWith("rgb") || value.startsWith("hsl")
 }
 
 function formatPaperShaderParamLabel(value: string) {
@@ -1874,40 +1890,6 @@ function formatPaperShaderNumberValue(paramKey: string, value: number) {
   }
 
   return Number.isInteger(value) ? `${value}` : value.toFixed(2)
-}
-
-function getPaperShaderNumberRange(paramKey: string, value: number) {
-  const lowerKey = paramKey.toLowerCase()
-
-  if (paramKey === "rotation" || lowerKey.includes("angle")) {
-    return { min: 0, max: 360, step: 1 }
-  }
-
-  if (paramKey === "scale") {
-    return { min: 0.01, max: 4, step: 0.01 }
-  }
-
-  if (paramKey === "offsetX" || paramKey === "offsetY") {
-    return { min: -1, max: 1, step: 0.01 }
-  }
-
-  if (paramKey === "originX" || paramKey === "originY") {
-    return { min: 0, max: 1, step: 0.01 }
-  }
-
-  if (lowerKey.includes("count") || lowerKey.includes("iteration") || lowerKey.includes("steps")) {
-    return { min: 0, max: Math.max(40, Math.ceil(value * 2)), step: 1 }
-  }
-
-  if (value <= 1 && value >= -1) {
-    return { min: lowerKey.includes("shift") ? -1 : 0, max: 1, step: 0.01 }
-  }
-
-  if (value <= 10 && value >= -10) {
-    return { min: lowerKey.includes("shift") ? -10 : 0, max: 10, step: 0.01 }
-  }
-
-  return { min: 0, max: Math.max(100, Math.ceil(value * 2)), step: 1 }
 }
 
 function MeshPalettePreview({

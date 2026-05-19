@@ -56,12 +56,24 @@ export function DraftingCardPaperShaderLayer({
     () => ({
       ...paperShader.params,
       frame: paperShader.frame,
+      ...(definition.requiresImage && paperShader.image.value
+        ? { image: paperShader.image.value }
+        : {}),
       speed: paperShader.paused ? 0 : paperShader.speed,
+      ...definition.renderOptions,
     }),
-    [paperShader.frame, paperShader.params, paperShader.paused, paperShader.speed],
+    [
+      definition.renderOptions,
+      definition.requiresImage,
+      paperShader.frame,
+      paperShader.image.value,
+      paperShader.params,
+      paperShader.paused,
+      paperShader.speed,
+    ],
   )
 
-  if (!canRenderShader || hasShaderError || definition.disabled) {
+  if (!canRenderShader || hasShaderError) {
     return null
   }
 
@@ -74,8 +86,6 @@ export function DraftingCardPaperShaderLayer({
         {...shaderProps}
         aria-hidden="true"
         data-slot="dashboard-compose-card-paper-shader"
-        maxPixelCount={900000}
-        minPixelRatio={1}
         style={{
           borderRadius: "inherit",
           height: "100%",

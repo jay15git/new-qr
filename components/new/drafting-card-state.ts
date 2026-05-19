@@ -7,6 +7,7 @@ import {
 import {
   createDefaultPaperShaderParams,
   DEFAULT_PAPER_SHADER_ID,
+  getPaperShaderDefinition,
   getPaperShaderPreset,
   type PaperShaderId,
   type PaperShaderParams,
@@ -19,7 +20,7 @@ export type DraftingCardMeshPaletteId = "mist" | "ember" | "lagoon" | "candy"
 export type DraftingCardPaperShaderState = {
   frame: number
   image: {
-    source: "none" | "url"
+    source: "none" | "sample" | "upload" | "url"
     value?: string
   }
   params: PaperShaderParams
@@ -28,6 +29,9 @@ export type DraftingCardPaperShaderState = {
   shaderId: PaperShaderId
   speed: number
 }
+
+export const DEFAULT_DRAFTING_PAPER_SHADER_IMAGE =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 900'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop stop-color='%23f8fafc'/%3E%3Cstop offset='.48' stop-color='%2394a3b8'/%3E%3Cstop offset='1' stop-color='%23111827'/%3E%3C/linearGradient%3E%3CradialGradient id='r' cx='.32' cy='.28' r='.55'%3E%3Cstop stop-color='%23f59e0b' stop-opacity='.95'/%3E%3Cstop offset='.58' stop-color='%23ec4899' stop-opacity='.62'/%3E%3Cstop offset='1' stop-color='%230f172a' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='1200' height='900' fill='url(%23g)'/%3E%3Ccircle cx='360' cy='250' r='310' fill='url(%23r)'/%3E%3Crect x='590' y='170' width='390' height='540' rx='48' fill='%23ffffff' fill-opacity='.28'/%3E%3Cpath d='M145 715 C310 575 410 805 590 635 S865 535 1055 680' fill='none' stroke='%23ffffff' stroke-width='46' stroke-linecap='round' opacity='.7'/%3E%3C/svg%3E"
 
 export type DraftingCardMeshGradientState = {
   adjustColorPosition: boolean
@@ -142,14 +146,20 @@ export function cloneDraftingCardPaperShaderState(
 export function createDefaultDraftingCardPaperShader(
   shaderId: PaperShaderId = DEFAULT_PAPER_SHADER_ID,
 ): DraftingCardPaperShaderState {
+  const definition = getPaperShaderDefinition(shaderId)
   const preset = getPaperShaderPreset(shaderId)
 
   return {
     frame: Number(preset.params.frame ?? 0),
-    image: {
-      source: "none",
-      value: undefined,
-    },
+    image: definition.requiresImage
+      ? {
+          source: "sample",
+          value: DEFAULT_DRAFTING_PAPER_SHADER_IMAGE,
+        }
+      : {
+          source: "none",
+          value: undefined,
+        },
     params: createDefaultPaperShaderParams(shaderId),
     paused: false,
     presetName: preset.name,

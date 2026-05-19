@@ -53,5 +53,12 @@ describe("drafting card state", () => {
     expect(liveInk.params).not.toBe(paperShader.params)
     expect(liveInk.speed).toBe(Number(liveInk.params.speed ?? 0))
   })
-})
 
+  it("starts image-filter shaders with a sample image source", () => {
+    const paperShader = createDefaultDraftingCardPaperShader("image-dithering")
+
+    expect(paperShader.shaderId).toBe("image-dithering")
+    expect(paperShader.image.source).toBe("sample")
+    expect(paperShader.image.value).toContain("data:image/svg+xml")
+  })
+})
