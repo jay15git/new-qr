@@ -3,9 +3,22 @@ import {
   createDefaultDraftingCardState,
   type DraftingCardState,
 } from "@/components/new/drafting-card-state"
+import {
+  cloneDraftingLayerStateByNodeId,
+  createDefaultDraftingLayers,
+  normalizeDraftingCanvasLayers,
+  type DraftingLayerStateByNodeId,
+} from "@/components/new/drafting-layer-state"
 import { DASHBOARD_QR_NODE_ID } from "@/components/qr/dashboard-compose-scene"
 import {
+  clampBackgroundShapeEdgeBlur,
+  clampBackgroundShapeOffset,
+  clampBackgroundShapeOpacity,
+  clampBackgroundShapePaddingPx,
+  clampBackgroundShapeStrokeWidth,
   createDefaultQrStudioState,
+  DEFAULT_BACKGROUND_SHAPE_OPTIONS,
+  type BackgroundShapeOptions,
   type QrStudioState,
 } from "@/components/qr/qr-studio-state"
 import {
@@ -25,6 +38,7 @@ export type DraftingWorkspaceDocumentV1 = {
   activeQrNodeId: string
   cardStateByNodeId: DraftingCardStateByNodeId
   contentValuesByType: DraftingContentValuesByType
+  layerStateByNodeId: DraftingLayerStateByNodeId
   qrOrder: string[]
   qrStateByNodeId: DraftingQrStateByNodeId
   selectedContentType: QrInputType
@@ -45,6 +59,7 @@ export function cloneDraftingWorkspaceDocument(
       ]),
     ),
     contentValuesByType: structuredClone(document.contentValuesByType),
+    layerStateByNodeId: cloneDraftingLayerStateByNodeId(document.layerStateByNodeId),
     qrOrder: [...document.qrOrder],
     qrStateByNodeId: Object.fromEntries(
       Object.entries(document.qrStateByNodeId).map(([nodeId, state]) => [
@@ -71,6 +86,13 @@ export function createDefaultDraftingWorkspaceDocument(): DraftingWorkspaceDocum
         ...getDefaultStaticQrValues(DEFAULT_QR_INPUT_TYPE),
         text: qrState.data,
       },
+    },
+    layerStateByNodeId: {
+      [DASHBOARD_QR_NODE_ID]: createDefaultDraftingLayers(
+        DASHBOARD_QR_NODE_ID,
+        qrState,
+        cardState,
+      ),
     },
     qrOrder: [DASHBOARD_QR_NODE_ID],
     qrStateByNodeId: {
@@ -102,6 +124,9 @@ export function parseDraftingWorkspaceDocument(
   const rawCardStateByNodeId = isRecord(value.cardStateByNodeId)
     ? value.cardStateByNodeId
     : {}
+  const rawLayerStateByNodeId = isRecord(value.layerStateByNodeId)
+    ? value.layerStateByNodeId
+    : {}
   const qrOrder = Array.isArray(value.qrOrder)
     ? value.qrOrder.filter((nodeId): nodeId is string => typeof nodeId === "string")
     : []
@@ -120,10 +145,17 @@ export function parseDraftingWorkspaceDocument(
 
   const qrStateByNodeId: DraftingQrStateByNodeId = {}
   const cardStateByNodeId: DraftingCardStateByNodeId = {}
+  const layerStateByNodeId: DraftingLayerStateByNodeId = {}
 
   for (const nodeId of orderedNodeIds) {
     qrStateByNodeId[nodeId] = parseQrState(rawQrStateByNodeId[nodeId])
     cardStateByNodeId[nodeId] = parseCardState(rawCardStateByNodeId[nodeId])
+    layerStateByNodeId[nodeId] = normalizeDraftingCanvasLayers(
+      nodeId,
+      rawLayerStateByNodeId[nodeId],
+      qrStateByNodeId[nodeId],
+      cardStateByNodeId[nodeId],
+    )
   }
 
   const selectedContentType = parseQrInputType(value.selectedContentType)
@@ -147,6 +179,7 @@ export function parseDraftingWorkspaceDocument(
     activeQrNodeId,
     cardStateByNodeId,
     contentValuesByType,
+    layerStateByNodeId,
     qrOrder: orderedNodeIds,
     qrStateByNodeId,
     selectedContentType,
@@ -183,7 +216,69 @@ function parseQrState(value: unknown): QrStudioState {
   return {
     ...fallback,
     ...structuredClone(value),
+    backgroundShapeOptions: parseBackgroundShapeOptions(
+      isRecord(value.backgroundShapeOptions) ? value.backgroundShapeOptions : undefined,
+      fallback,
+    ),
   } as QrStudioState
+}
+
+function parseBackgroundShapeOptions(
+  value: Record<string, unknown> | undefined,
+  fallback: QrStudioState,
+): BackgroundShapeOptions {
+  const legacySizePercent =
+    typeof value?.sizePercent === "number" ? value.sizePercent : undefined
+  const legacyPaddingPx =
+    legacySizePercent !== undefined && legacySizePercent > 100
+      ? ((legacySizePercent - 100) / 200) * fallback.width
+      : undefined
+
+  return {
+    edgeBlur: clampBackgroundShapeEdgeBlur(
+      typeof value?.edgeBlur === "number"
+        ? value.edgeBlur
+        : DEFAULT_BACKGROUND_SHAPE_OPTIONS.edgeBlur,
+    ),
+    paddingPx: clampBackgroundShapePaddingPx(
+      typeof value?.paddingPx === "number"
+        ? value.paddingPx
+        : legacyPaddingPx ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.paddingPx,
+    ),
+    shadowColor:
+      typeof value?.shadowColor === "string"
+        ? value.shadowColor
+        : DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowColor,
+    shadowOffsetX: clampBackgroundShapeOffset(
+      typeof value?.shadowOffsetX === "number"
+        ? value.shadowOffsetX
+        : DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetX,
+    ),
+    shadowOffsetY: clampBackgroundShapeOffset(
+      typeof value?.shadowOffsetY === "number"
+        ? value.shadowOffsetY
+        : DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetY,
+    ),
+    shadowOpacity: clampBackgroundShapeOpacity(
+      typeof value?.shadowOpacity === "number"
+        ? value.shadowOpacity
+        : DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOpacity,
+    ),
+    strokeColor:
+      typeof value?.strokeColor === "string"
+        ? value.strokeColor
+        : DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeColor,
+    strokeOpacity: clampBackgroundShapeOpacity(
+      typeof value?.strokeOpacity === "number"
+        ? value.strokeOpacity
+        : DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeOpacity,
+    ),
+    strokeWidth: clampBackgroundShapeStrokeWidth(
+      typeof value?.strokeWidth === "number"
+        ? value.strokeWidth
+        : DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeWidth,
+    ),
+  }
 }
 
 function parseCardState(value: unknown): DraftingCardState {

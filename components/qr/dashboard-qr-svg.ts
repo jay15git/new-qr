@@ -1,7 +1,7 @@
 import QRCodeStyling from "qr-code-styling"
 
 import type { DashboardQrNodePayload } from "@/components/qr/dashboard-compose-scene"
-import { buildQrExtension } from "@/components/qr/qr-rendering"
+import { buildQrExtension, getQrRenderedDimensions } from "@/components/qr/qr-rendering"
 import { toQrCodeOptions, type QrStudioState } from "@/components/qr/qr-studio-state"
 
 export function createDashboardSurfaceQrState(state: QrStudioState): QrStudioState {
@@ -39,8 +39,8 @@ export async function buildDashboardQrNodePayload(
 
   return {
     markup: stripXmlDeclaration(markup),
-    naturalHeight: dashboardState.height,
-    naturalWidth: dashboardState.width,
+    naturalHeight: getQrRenderedDimensions(dashboardState).height,
+    naturalWidth: getQrRenderedDimensions(dashboardState).width,
   }
 }
 

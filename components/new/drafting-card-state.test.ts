@@ -18,6 +18,18 @@ describe("drafting card state", () => {
       source: "none",
       value: undefined,
     })
+    expect(state.border).toEqual({
+      color: "#111827",
+      opacity: 100,
+      width: 0,
+    })
+    expect(state.shadow).toEqual({
+      blur: 44,
+      color: "#1d1606",
+      offsetX: 0,
+      offsetY: 20,
+      opacity: 52,
+    })
     expect(state.imageFilter.shaderId).toBe("image-dithering")
     expect(state.imageFilter.image.source).toBe("sample")
     expect(state.paperShader.shaderId).toBe("mesh-gradient")
@@ -44,13 +56,38 @@ describe("drafting card state", () => {
     expect(clone.imageFilter).not.toBe(state.imageFilter)
     expect(clone.imageFilter.params).not.toBe(state.imageFilter.params)
     expect(clone.cardImage).not.toBe(state.cardImage)
+    expect(clone.border).not.toBe(state.border)
+    expect(clone.shadow).not.toBe(state.shadow)
 
     const cloneColors = clone.paperShader.params.colors as string[]
     cloneColors[0] = "#000000"
     clone.cardImage.value = "https://example.com/card.png"
+    clone.border.width = 12
+    clone.shadow.blur = 10
 
     expect((state.paperShader.params.colors as string[])[0]).toBe("#e0eaff")
     expect(state.cardImage.value).toBeUndefined()
+    expect(state.border.width).toBe(0)
+    expect(state.shadow.blur).toBe(44)
+  })
+
+  it("normalizes legacy card shadow presets when cloning saved state", () => {
+    const state = {
+      ...createDefaultDraftingCardState(),
+      shadow: "strong",
+    }
+
+    const clone = cloneDraftingCardState(
+      state as unknown as ReturnType<typeof createDefaultDraftingCardState>,
+    )
+
+    expect(clone.shadow).toEqual({
+      blur: 54,
+      color: "#1d1606",
+      offsetX: 0,
+      offsetY: 26,
+      opacity: 55,
+    })
   })
 
   it("creates defaults for another shader and applies presets", () => {

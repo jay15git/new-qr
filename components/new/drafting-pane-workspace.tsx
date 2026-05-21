@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 
 import type { DraftingCardState } from "@/components/new/drafting-card-state"
+import type { DraftingCanvasLayer } from "@/components/new/drafting-layer-state"
 import { QrPane } from "@/components/new/qr-pane"
 import { getQrLayout } from "@/components/new/qr-layout-engine"
 import type { QrStudioState } from "@/components/qr/qr-studio-state"
@@ -34,6 +35,7 @@ import { cn } from "@/lib/utils"
 type DraftingPane = {
   cardState: DraftingCardState
   id: string
+  layers?: DraftingCanvasLayer[]
   name: string
   state: QrStudioState
 }
@@ -54,6 +56,13 @@ type DraftingPaneWorkspaceProps = {
   onPaneSelect: (paneId: string) => void
   onPaneQrClick: (paneId: string) => void
   onSwapPanes?: (sourcePaneId: string, targetPaneId: string) => void
+  onLayerChange?: (
+    paneId: string,
+    layerId: string,
+    patch: Partial<DraftingCanvasLayer>,
+  ) => void
+  onLayerSelect?: (paneId: string, layerId: string) => void
+  selectedLayerId?: string | null
 }
 
 function groupPanes<T>(panes: T[], groups: number[]) {
@@ -106,8 +115,11 @@ function DraftingPaneSurface({
   onPaneDrop,
   onPaneDragOver,
   onPaneDragLeave,
+  onLayerChange,
+  onLayerSelect,
   pane,
   paneZoom,
+  selectedLayerId,
 }: {
   areaName?: string
   canSwap: boolean
@@ -121,8 +133,15 @@ function DraftingPaneSurface({
   onPaneDrop: (paneId: string, event: React.DragEvent<HTMLDivElement>) => void
   onPaneDragOver: (paneId: string, event: React.DragEvent<HTMLDivElement>) => void
   onPaneDragLeave: (paneId: string, event: React.DragEvent<HTMLDivElement>) => void
+  onLayerChange?: (
+    paneId: string,
+    layerId: string,
+    patch: Partial<DraftingCanvasLayer>,
+  ) => void
+  onLayerSelect?: (paneId: string, layerId: string) => void
   pane: DraftingPane
   paneZoom: number
+  selectedLayerId?: string | null
 }) {
   const onPaneSelectRef = useRef(onPaneSelect)
   const onPaneQrClickRef = useRef(onPaneQrClick)
@@ -181,10 +200,15 @@ function DraftingPaneSurface({
       >
         <QrPane
           cardState={pane.cardState}
+          interactionScale={paneZoom}
+          layers={pane.layers}
           state={pane.state}
           isSelected={isSelected}
+          onLayerChange={(layerId, patch) => onLayerChange?.(pane.id, layerId, patch)}
+          onLayerSelect={(layerId) => onLayerSelect?.(pane.id, layerId)}
           onQrClick={handleQrClick}
           onSelect={handleSelect}
+          selectedLayerId={isSelected ? selectedLayerId : null}
         />
       </div>
     </div>
@@ -205,6 +229,9 @@ export function DraftingPaneWorkspace({
   onPaneSelect,
   onPaneQrClick,
   onSwapPanes,
+  onLayerChange,
+  onLayerSelect,
+  selectedLayerId,
 }: DraftingPaneWorkspaceProps) {
   const [zoomLevels, setZoomLevels] = useState<Record<string, number>>({})
   const [maximizedPaneId, setMaximizedPaneId] = useState<string | null>(null)
@@ -428,10 +455,13 @@ export function DraftingPaneWorkspace({
                                 onPaneDragOver={handlePaneDragOver}
                                 onPaneDragStart={handlePaneDragStart}
                                 onPaneDrop={handlePaneDrop}
+                                onLayerChange={onLayerChange}
+                                onLayerSelect={onLayerSelect}
                                 onPaneQrClick={onPaneQrClick}
                                 onPaneSelect={onPaneSelect}
                                 pane={pane}
                                 paneZoom={paneZoom}
+                                selectedLayerId={selectedLayerId}
                               />
                             </ResizablePanel>
                           )

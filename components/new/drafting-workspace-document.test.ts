@@ -19,6 +19,14 @@ describe("drafting workspace document", () => {
     }
     document.cardStateByNodeId["qr-code-extra"] =
       cloneDraftingWorkspaceDocument(document).cardStateByNodeId[DASHBOARD_QR_NODE_ID]
+    document.layerStateByNodeId["qr-code-extra"] =
+      cloneDraftingWorkspaceDocument(document).layerStateByNodeId[DASHBOARD_QR_NODE_ID]?.map(
+        (layer) => ({
+          ...layer,
+          id: layer.kind === "card" ? "qr-code-extra:card" : "qr-code-extra:qr",
+          nodeId: "qr-code-extra",
+        }),
+      ) ?? []
     document.selectedContentType = "wifi"
     document.contentValuesByType = {
       wifi: {
@@ -32,6 +40,30 @@ describe("drafting workspace document", () => {
     expect(parseDraftingWorkspaceDocument(serializeDraftingWorkspaceDocument(document))).toEqual(
       document,
     )
+  })
+
+  it("migrates missing layer state into independent card and qr layers", () => {
+    const document = createDefaultDraftingWorkspaceDocument()
+    const serialized = JSON.parse(serializeDraftingWorkspaceDocument(document))
+    delete serialized.layerStateByNodeId
+
+    const parsed = parseDraftingWorkspaceDocument(serialized)
+    const layers = parsed.layerStateByNodeId[DASHBOARD_QR_NODE_ID] ?? []
+
+    expect(layers.map((layer) => layer.kind)).toEqual(["card", "qr"])
+    expect(layers[0]).toMatchObject({
+      id: `${DASHBOARD_QR_NODE_ID}:card`,
+      isVisible: true,
+      name: "Card",
+      zIndex: 0,
+    })
+    expect(layers[1]).toMatchObject({
+      height: 240,
+      id: `${DASHBOARD_QR_NODE_ID}:qr`,
+      name: "QR code",
+      width: 240,
+      zIndex: 1,
+    })
   })
 
   it("falls back to defaults for invalid documents", () => {
@@ -58,5 +90,82 @@ describe("drafting workspace document", () => {
       "https://new-qr-studio.local/launch",
     )
     expect(parsed.cardStateByNodeId[DASHBOARD_QR_NODE_ID]?.enabled).toBe(true)
+  })
+
+  it("migrates legacy background shape percent growth to pixel padding", () => {
+    const document = createDefaultDraftingWorkspaceDocument()
+    document.qrStateByNodeId[DASHBOARD_QR_NODE_ID]!.backgroundShapeOptions = {
+      edgeBlur: 4,
+      sizePercent: 125,
+      strokeColor: "#111827",
+      strokeOpacity: 70,
+      strokeWidth: 8,
+    } as unknown as typeof document.qrStateByNodeId[typeof DASHBOARD_QR_NODE_ID]["backgroundShapeOptions"]
+
+    const parsed = parseDraftingWorkspaceDocument(
+      serializeDraftingWorkspaceDocument(document),
+    )
+
+    expect(
+      parsed.qrStateByNodeId[DASHBOARD_QR_NODE_ID]?.backgroundShapeOptions,
+    ).toEqual({
+      edgeBlur: 4,
+      paddingPx: 30,
+      shadowColor: "#111827",
+      shadowOffsetX: 0,
+      shadowOffsetY: 0,
+      shadowOpacity: 72,
+      strokeColor: "#111827",
+      strokeOpacity: 70,
+      strokeWidth: 8,
+    })
+  })
+
+  it("keeps legacy edge blur as shadow blur and defaults missing shadow fields", () => {
+    const document = createDefaultDraftingWorkspaceDocument()
+    document.qrStateByNodeId[DASHBOARD_QR_NODE_ID]!.backgroundShapeOptions = {
+      edgeBlur: 12,
+      paddingPx: 8,
+      strokeColor: "#111827",
+      strokeOpacity: 100,
+      strokeWidth: 0,
+    } as unknown as typeof document.qrStateByNodeId[typeof DASHBOARD_QR_NODE_ID]["backgroundShapeOptions"]
+
+    const parsed = parseDraftingWorkspaceDocument(
+      serializeDraftingWorkspaceDocument(document),
+    )
+
+    expect(
+      parsed.qrStateByNodeId[DASHBOARD_QR_NODE_ID]?.backgroundShapeOptions,
+    ).toEqual({
+      edgeBlur: 12,
+      paddingPx: 8,
+      shadowColor: "#111827",
+      shadowOffsetX: 0,
+      shadowOffsetY: 0,
+      shadowOpacity: 72,
+      strokeColor: "#111827",
+      strokeOpacity: 100,
+      strokeWidth: 0,
+    })
+  })
+
+  it("drops legacy background shape percent shrinkage during migration", () => {
+    const document = createDefaultDraftingWorkspaceDocument()
+    document.qrStateByNodeId[DASHBOARD_QR_NODE_ID]!.backgroundShapeOptions = {
+      edgeBlur: 0,
+      sizePercent: 80,
+      strokeColor: "#111827",
+      strokeOpacity: 100,
+      strokeWidth: 0,
+    } as unknown as typeof document.qrStateByNodeId[typeof DASHBOARD_QR_NODE_ID]["backgroundShapeOptions"]
+
+    const parsed = parseDraftingWorkspaceDocument(
+      serializeDraftingWorkspaceDocument(document),
+    )
+
+    expect(
+      parsed.qrStateByNodeId[DASHBOARD_QR_NODE_ID]?.backgroundShapeOptions.paddingPx,
+    ).toBe(0)
   })
 })

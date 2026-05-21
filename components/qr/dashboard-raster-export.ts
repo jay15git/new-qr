@@ -1,7 +1,11 @@
 import QRCodeStyling, { type FileExtension } from "qr-code-styling"
 
 import { createDashboardSurfaceQrState } from "@/components/qr/dashboard-qr-svg"
-import { buildQrExtension } from "@/components/qr/qr-rendering"
+import {
+  buildQrExtension,
+  getQrRenderedDimensions,
+  scaleQrBackgroundShapeOptions,
+} from "@/components/qr/qr-rendering"
 import {
   clampQrSize,
   clampRasterExportQualityPercent,
@@ -73,34 +77,34 @@ export function getDashboardRasterExportDimensions(
   qualityPercent: number,
   targetSizePx?: number,
 ) {
+  const renderedDimensions = getQrRenderedDimensions(state)
+
   if (targetSizePx !== undefined) {
     const targetSize = clampDashboardRasterTargetSize(targetSizePx)
 
     return {
       height: targetSize,
-      requestedScale: targetSize / Math.max(1, clampQrSize(state.height)),
-      scale: targetSize / Math.max(1, clampQrSize(state.width)),
+      requestedScale: targetSize / Math.max(1, renderedDimensions.width),
+      scale: targetSize / Math.max(1, renderedDimensions.width),
       width: targetSize,
     }
   }
 
   const requestedScale = getDashboardRasterExportScale(qualityPercent)
-  const baseWidth = clampQrSize(state.width)
-  const baseHeight = clampQrSize(state.height)
   const effectiveScale = Math.max(
     1,
     Math.min(
       requestedScale,
-      DASHBOARD_RASTER_EXPORT_MAX_DIMENSION / baseWidth,
-      DASHBOARD_RASTER_EXPORT_MAX_DIMENSION / baseHeight,
+      DASHBOARD_RASTER_EXPORT_MAX_DIMENSION / renderedDimensions.width,
+      DASHBOARD_RASTER_EXPORT_MAX_DIMENSION / renderedDimensions.height,
     ),
   )
 
   return {
-    height: Math.max(1, Math.round(baseHeight * effectiveScale)),
+    height: Math.max(1, Math.round(renderedDimensions.height * effectiveScale)),
     requestedScale,
     scale: effectiveScale,
-    width: Math.max(1, Math.round(baseWidth * effectiveScale)),
+    width: Math.max(1, Math.round(renderedDimensions.width * effectiveScale)),
   }
 }
 
@@ -175,10 +179,16 @@ async function renderDashboardRasterExport({
     qualityPercent,
     targetSizePx,
   )
+  const baseRenderedDimensions = getQrRenderedDimensions(state)
+  const renderScale = dimensions.width / Math.max(1, baseRenderedDimensions.width)
   const exportState = {
     ...createDashboardSurfaceQrState(state),
-    height: dimensions.height,
-    width: dimensions.width,
+    backgroundShapeOptions: scaleQrBackgroundShapeOptions(
+      state.backgroundShapeOptions,
+      renderScale,
+    ),
+    height: Math.max(1, Math.round(clampQrSize(state.height) * renderScale)),
+    width: Math.max(1, Math.round(clampQrSize(state.width) * renderScale)),
   }
   const qrCode = new QRCodeStyling(toQrCodeOptions(exportState))
   const qrExtension = buildQrExtension(exportState)
@@ -197,8 +207,8 @@ async function renderDashboardRasterExport({
   const image = await loadSvgBlobAsImage(svgBlob)
   const canvas = document.createElement("canvas")
 
-  canvas.width = exportState.width
-  canvas.height = exportState.height
+  canvas.width = dimensions.width
+  canvas.height = dimensions.height
 
   const context = canvas.getContext("2d")
 
@@ -220,9 +230,9 @@ async function renderDashboardRasterExport({
     blob: rasterBlob,
     encoderQuality,
     extension,
-    height: exportState.height,
+    height: dimensions.height,
     qualityPercent: clampRasterExportQualityPercent(qualityPercent),
-    width: exportState.width,
+    width: dimensions.width,
   }
 }
 

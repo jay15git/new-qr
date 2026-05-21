@@ -19,6 +19,7 @@ type StubElement = {
   insertBefore: (child: StubElement, referenceNode: StubElement | null) => StubElement
   querySelector: (selector: string) => StubElement | null
   querySelectorAll: (selector: string) => StubElement[]
+  removeAttribute: (name: string) => void
   remove: () => void
   setAttribute: (name: string, value: string) => void
   setAttributeNS: (_namespace: string, name: string, value: string) => void
@@ -69,6 +70,17 @@ function createStubElement(tagName: string): StubElement {
           return node.tagName === "rect"
         }
 
+        if (
+          [
+            "feComposite",
+            "feFlood",
+            "feGaussianBlur",
+            "feOffset",
+          ].includes(selector)
+        ) {
+          return node.tagName === selector
+        }
+
         if (selector === '[data-qr-layer="background-image"]') {
           return node.attributes["data-qr-layer"] === "background-image"
         }
@@ -83,6 +95,26 @@ function createStubElement(tagName: string): StubElement {
 
         if (selector === '[data-qr-layer="background-shape-gradient"]') {
           return node.attributes["data-qr-layer"] === "background-shape-gradient"
+        }
+
+        if (selector === '[data-qr-layer="background-shape-blur"]') {
+          return node.attributes["data-qr-layer"] === "background-shape-blur"
+        }
+
+        if (selector === '[data-qr-layer="background-shape-blur-filter"]') {
+          return node.attributes["data-qr-layer"] === "background-shape-blur-filter"
+        }
+
+        if (selector === '[data-qr-layer="qr-content"]') {
+          return node.attributes["data-qr-layer"] === "qr-content"
+        }
+
+        if (selector === '[data-qr-layer="background-surface-blur"]') {
+          return node.attributes["data-qr-layer"] === "background-surface-blur"
+        }
+
+        if (selector === '[data-qr-layer="background-surface-blur-filter"]') {
+          return node.attributes["data-qr-layer"] === "background-surface-blur-filter"
         }
 
         return false
@@ -104,6 +136,9 @@ function createStubElement(tagName: string): StubElement {
 
       parentNode.children = parentNode.children.filter((child) => child !== element)
       delete (element as StubElement & { parentNode?: StubElement }).parentNode
+    },
+    removeAttribute(name) {
+      delete element.attributes[name]
     },
     setAttribute(name, value) {
       element.attributes[name] = value
@@ -321,7 +356,190 @@ describe("qr rendering helpers", () => {
     expect(backgroundShape?.getAttribute("transform")).toBe(
       "translate(0 33) scale(1)",
     )
+    expect(svg.children[1]?.getAttribute("data-qr-layer")).toBe("background-shape")
+  })
+
+  it("expands vector background shape bounds with padding, stroke, and edge blur", () => {
+    const state = createDefaultQrStudioState()
+    state.backgroundShapeId = "circle"
+    state.backgroundOptions.color = "#d0bcff"
+    state.backgroundShapeOptions = {
+      edgeBlur: 8,
+      paddingPx: 24,
+      shadowColor: "#020617",
+      shadowOffsetX: 12,
+      shadowOffsetY: -10,
+      shadowOpacity: 58,
+      strokeColor: "#111827",
+      strokeOpacity: 42,
+      strokeWidth: 6,
+    }
+
+    const extension = buildQrExtension(state)
+    expect(extension).toBeTypeOf("function")
+
+    if (!extension) {
+      return
+    }
+
+    const svg = createStubElement("svg")
+    svg.appendChild(createStubElement("defs"))
+    svg.appendChild(createStubElement("rect"))
+    const qrPath = createStubElement("path")
+    svg.appendChild(qrPath)
+
+    extension(svg as unknown as SVGElement, {
+      height: 320,
+      width: 320,
+    })
+
+    const backgroundShape = svg.querySelector('[data-qr-layer="background-shape"]')
+    const shadowShape = svg.querySelector('[data-qr-layer="background-shape-blur"]')
+    const shadowFilter = svg.querySelector('[data-qr-layer="background-shape-blur-filter"]')
+    const gaussianBlur = shadowFilter?.querySelectorAll("feGaussianBlur")[0]
+    const offset = shadowFilter?.querySelectorAll("feOffset")[0]
+    const flood = shadowFilter?.querySelectorAll("feFlood")[0]
+    const composite = shadowFilter?.querySelectorAll("feComposite")[0]
+    const qrContent = svg.querySelector('[data-qr-layer="qr-content"]')
+
+    expect(svg.getAttribute("width")).toBe("406")
+    expect(svg.getAttribute("height")).toBe("406")
+    expect(svg.getAttribute("viewBox")).toBe("0 0 406 406")
+    expect(qrContent?.getAttribute("transform")).toBe("translate(31 53)")
+    expect(qrContent?.children).toContain(qrPath)
+    expect(backgroundShape?.getAttribute("transform")).toBe(
+      "translate(7 29) scale(1.15)",
+    )
+    expect(backgroundShape?.getAttribute("stroke")).toBe("#111827")
+    expect(backgroundShape?.getAttribute("stroke-width")).toBe("6")
+    expect(backgroundShape?.getAttribute("stroke-opacity")).toBe("0.42")
+    expect(shadowShape?.getAttribute("filter")).toBe("url('#background-shape-blur-filter')")
+    expect(shadowShape?.getAttribute("stroke")).toBe("#020617")
+    expect(shadowShape?.getAttribute("stroke-width")).toBe("6")
+    expect(gaussianBlur?.getAttribute("stdDeviation")).toBe("8")
+    expect(gaussianBlur?.getAttribute("in")).toBe("SourceAlpha")
+    expect(offset?.getAttribute("dx")).toBe("12")
+    expect(offset?.getAttribute("dy")).toBe("-10")
+    expect(flood?.getAttribute("flood-color")).toBe("#020617")
+    expect(flood?.getAttribute("flood-opacity")).toBe("0.58")
+    expect(composite?.getAttribute("operator")).toBe("in")
+    expect(svg.children[1]?.getAttribute("data-qr-layer")).toBe("background-shape-blur")
     expect(svg.children[2]?.getAttribute("data-qr-layer")).toBe("background-shape")
+  })
+
+  it("expands the default qr background surface with padding, stroke, and edge blur", () => {
+    const state = createDefaultQrStudioState()
+    state.backgroundOptions.color = "#f8fafc"
+    state.backgroundOptions.round = 0.25
+    state.backgroundShapeOptions = {
+      edgeBlur: 10,
+      paddingPx: 20,
+      shadowColor: "#020617",
+      shadowOffsetX: -14,
+      shadowOffsetY: 18,
+      shadowOpacity: 60,
+      strokeColor: "#0f172a",
+      strokeOpacity: 55,
+      strokeWidth: 8,
+    }
+
+    const extension = buildQrExtension(state)
+    expect(extension).toBeTypeOf("function")
+
+    if (!extension) {
+      return
+    }
+
+    const svg = createStubElement("svg")
+    const defs = createStubElement("defs")
+    const backgroundRect = createStubElement("rect")
+    backgroundRect.setAttribute("clip-path", "url('#clip-path-background-color-2')")
+    backgroundRect.setAttribute("fill", "#f8fafc")
+    svg.appendChild(defs)
+    svg.appendChild(backgroundRect)
+    const qrPath = createStubElement("path")
+    svg.appendChild(qrPath)
+
+    extension(svg as unknown as SVGElement, {
+      height: 320,
+      width: 320,
+    })
+
+    const shadowSurface = svg.querySelector('[data-qr-layer="background-surface-blur"]')
+    const shadowFilter = svg.querySelector('[data-qr-layer="background-surface-blur-filter"]')
+    const gaussianBlur = shadowFilter?.querySelectorAll("feGaussianBlur")[0]
+    const offset = shadowFilter?.querySelectorAll("feOffset")[0]
+    const qrContent = svg.querySelector('[data-qr-layer="qr-content"]')
+
+    expect(svg.getAttribute("width")).toBe("408")
+    expect(svg.getAttribute("height")).toBe("408")
+    expect(svg.getAttribute("viewBox")).toBe("0 0 408 408")
+    expect(qrContent?.getAttribute("transform")).toBe("translate(58 26)")
+    expect(qrContent?.children).toContain(qrPath)
+    expect(backgroundRect.getAttribute("x")).toBe("38")
+    expect(backgroundRect.getAttribute("y")).toBe("6")
+    expect(backgroundRect.getAttribute("width")).toBe("360")
+    expect(backgroundRect.getAttribute("height")).toBe("360")
+    expect(backgroundRect.getAttribute("rx")).toBe("45")
+    expect(backgroundRect.getAttribute("stroke")).toBe("#0f172a")
+    expect(backgroundRect.getAttribute("stroke-width")).toBe("8")
+    expect(backgroundRect.getAttribute("stroke-opacity")).toBe("0.55")
+    expect(backgroundRect.getAttribute("clip-path")).toBeNull()
+    expect(shadowSurface?.getAttribute("filter")).toBe("url('#background-surface-blur-filter')")
+    expect(shadowSurface?.getAttribute("stroke")).toBe("#020617")
+    expect(shadowSurface?.getAttribute("stroke-width")).toBe("8")
+    expect(gaussianBlur?.getAttribute("stdDeviation")).toBe("10")
+    expect(offset?.getAttribute("dx")).toBe("-14")
+    expect(offset?.getAttribute("dy")).toBe("18")
+    expect(svg.children[1]?.getAttribute("data-qr-layer")).toBe("background-surface-blur")
+    expect(svg.children[2]).toBe(backgroundRect)
+  })
+
+  it("keeps shadow geometry bounds when shadow opacity is zero", () => {
+    const visibleShadowState = createDefaultQrStudioState()
+    visibleShadowState.backgroundOptions.color = "#f8fafc"
+    visibleShadowState.backgroundShapeOptions = {
+      edgeBlur: 10,
+      paddingPx: 20,
+      shadowColor: "#020617",
+      shadowOffsetX: -14,
+      shadowOffsetY: 18,
+      shadowOpacity: 60,
+      strokeColor: "#0f172a",
+      strokeOpacity: 55,
+      strokeWidth: 8,
+    }
+    const hiddenShadowState = {
+      ...visibleShadowState,
+      backgroundShapeOptions: {
+        ...visibleShadowState.backgroundShapeOptions,
+        shadowOpacity: 0,
+      },
+    }
+
+    const visibleSvg = createStubElement("svg")
+    visibleSvg.appendChild(createStubElement("defs"))
+    visibleSvg.appendChild(createStubElement("rect"))
+    visibleSvg.appendChild(createStubElement("path"))
+    const hiddenSvg = createStubElement("svg")
+    hiddenSvg.appendChild(createStubElement("defs"))
+    hiddenSvg.appendChild(createStubElement("rect"))
+    hiddenSvg.appendChild(createStubElement("path"))
+
+    buildQrExtension(visibleShadowState)?.(visibleSvg as unknown as SVGElement, {
+      height: 320,
+      width: 320,
+    })
+    buildQrExtension(hiddenShadowState)?.(hiddenSvg as unknown as SVGElement, {
+      height: 320,
+      width: 320,
+    })
+
+    expect(hiddenSvg.getAttribute("width")).toBe(visibleSvg.getAttribute("width"))
+    expect(hiddenSvg.getAttribute("height")).toBe(visibleSvg.getAttribute("height"))
+    expect(hiddenSvg.getAttribute("viewBox")).toBe(visibleSvg.getAttribute("viewBox"))
+    expect(hiddenSvg.querySelector('[data-qr-layer="background-surface-blur"]')).toBeNull()
+    expect(hiddenSvg.querySelector('[data-qr-layer="background-surface-blur-filter"]')).toBeNull()
   })
 
   it("fills vector background shapes with the active background gradient", () => {

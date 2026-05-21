@@ -24,7 +24,6 @@ import {
   createDefaultDraftingCardPaperShader,
   type DraftingCardImageState,
   type DraftingCardPaperShaderState,
-  type DraftingCardShadow,
   type DraftingCardState,
   type DraftingCardStyleMode,
 } from "@/components/new/drafting-card-state"
@@ -79,6 +78,7 @@ import {
 } from "@/components/qr/qr-style-preview-renderer"
 import { Slider as UnlumenSlider } from "@/components/unlumen-ui/slider"
 import type {
+  BackgroundShapeOptions,
   DotsColorMode,
   StudioDotType,
   StudioGradient,
@@ -121,16 +121,6 @@ export type DraftingBinaryColorMode = "solid" | "gradient"
 export type DraftingBackgroundColorMode = DraftingBinaryColorMode | "transparent"
 type DraftingAssetSourceMode = "upload" | "url"
 type DraftingBrandIconCategoryFilter = BrandIconCategory | "all"
-
-const DRAFTING_CARD_SHADOW_OPTIONS: Array<{
-  label: string
-  value: DraftingCardShadow
-}> = [
-  { label: "None", value: "none" },
-  { label: "Soft", value: "soft" },
-  { label: "Medium", value: "medium" },
-  { label: "Strong", value: "strong" },
-]
 
 const DRAFTING_BRAND_ICON_CATEGORY_OPTIONS: Array<{
   label: string
@@ -909,6 +899,12 @@ export function DraftingCardSettingsTab({
       ...patch,
     })
   }
+  const updateBorder = (patch: Partial<DraftingCardState["border"]>) => {
+    updateCard({ border: { ...value.border, ...patch } })
+  }
+  const updateShadow = (patch: Partial<DraftingCardState["shadow"]>) => {
+    updateCard({ shadow: { ...value.shadow, ...patch } })
+  }
 
   return (
     <div data-slot="drafting-card-tab" className="min-w-0 space-y-3">
@@ -958,54 +954,137 @@ export function DraftingCardSettingsTab({
         onChange={(bottomSpace) => updateCard({ bottomSpace })}
       />
 
-      <div
-        data-slot="drafting-card-shadow-field"
-        className="min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 shadow-[var(--drafting-shadow-rest)]"
+      <section
+        data-slot="drafting-card-border-settings"
+        className="min-w-0 space-y-3"
       >
-        <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
-          Shadow
-        </p>
-        <div
-          aria-label="Card shadow"
-          role="radiogroup"
-          className="mt-3 grid grid-cols-2 gap-1"
-        >
-          {DRAFTING_CARD_SHADOW_OPTIONS.map((option) => {
-            const isSelected = option.value === value.shadow
-
-            return (
-              <OptionCard
-                appearance="drafting"
-                darkShadowTone="ink"
-                key={option.value}
-                checked={isSelected}
-                className={cn(
-                  "w-full gap-0",
-                  "[&_[data-slot=option-card]]:h-full [&_[data-slot=option-card]]:min-h-[36px] [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:rounded-[7px]",
-                  "[&_[data-slot=option-card-motif]]:size-full",
-                  "[&_[data-slot=option-card-label]]:sr-only",
-                )}
-                label={`${option.label} card shadow`}
-                motifClassName="size-full px-1.5 py-1"
-                name="drafting-card-shadow"
-                onSelect={() => updateCard({ shadow: option.value })}
-                value={option.value}
-              >
-                <span
-                  className={cn(
-                    "drafting-type-meta flex min-w-0 items-center justify-center text-center font-semibold",
-                    isSelected
-                      ? "text-[var(--drafting-ink)]"
-                      : "text-[var(--drafting-ink-muted)]",
-                  )}
-                >
-                  {option.label}
-                </span>
-              </OptionCard>
-            )
-          })}
+        <div className="space-y-1">
+          <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+            Border
+          </p>
+          <p className="drafting-type-body text-[var(--drafting-ink-muted)]">
+            Adds a sharp stroke around the card.
+          </p>
         </div>
-      </div>
+        <label
+          data-slot="drafting-card-border-color-field"
+          htmlFor="drafting-card-border-color"
+          className="flex min-w-0 items-center gap-2"
+        >
+          <input
+            aria-label="Card border color swatch"
+            className="size-9 shrink-0 cursor-pointer rounded-[6px] border border-[var(--drafting-line)] bg-transparent p-1"
+            type="color"
+            value={value.border.color}
+            onChange={(event) => updateBorder({ color: event.currentTarget.value })}
+          />
+          <Input
+            id="drafting-card-border-color"
+            className="drafting-type-input h-9 min-w-0 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3 text-[var(--drafting-ink)] shadow-none focus-visible:border-[var(--drafting-line-strong)] focus-visible:ring-0"
+            value={value.border.color}
+            onChange={(event) => updateBorder({ color: event.currentTarget.value })}
+          />
+        </label>
+        <DraftingSliderField
+          dataSlot="drafting-card-border-width-slider"
+          formatValue={(nextValue) => `${Math.round(nextValue)} px`}
+          id="drafting-card-border-width"
+          label="Stroke"
+          max={24}
+          min={0}
+          step={1}
+          value={value.border.width}
+          onChange={(width) => updateBorder({ width })}
+        />
+        <DraftingSliderField
+          dataSlot="drafting-card-border-opacity-slider"
+          formatValue={(nextValue) => `${Math.round(nextValue)}%`}
+          id="drafting-card-border-opacity"
+          label="Opacity"
+          max={100}
+          min={0}
+          step={1}
+          value={value.border.opacity}
+          onChange={(opacity) => updateBorder({ opacity })}
+        />
+      </section>
+
+      <section
+        data-slot="drafting-card-shadow-field"
+        className="min-w-0 space-y-3"
+      >
+        <div className="space-y-1">
+          <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+            Shadow
+          </p>
+          <p className="drafting-type-body text-[var(--drafting-ink-muted)]">
+            Controls the card drop shadow independently from its border.
+          </p>
+        </div>
+        <label
+          data-slot="drafting-card-shadow-color-field"
+          htmlFor="drafting-card-shadow-color"
+          className="flex min-w-0 items-center gap-2"
+        >
+          <input
+            aria-label="Card shadow color swatch"
+            className="size-9 shrink-0 cursor-pointer rounded-[6px] border border-[var(--drafting-line)] bg-transparent p-1"
+            type="color"
+            value={value.shadow.color}
+            onChange={(event) => updateShadow({ color: event.currentTarget.value })}
+          />
+          <Input
+            id="drafting-card-shadow-color"
+            className="drafting-type-input h-9 min-w-0 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3 text-[var(--drafting-ink)] shadow-none focus-visible:border-[var(--drafting-line-strong)] focus-visible:ring-0"
+            value={value.shadow.color}
+            onChange={(event) => updateShadow({ color: event.currentTarget.value })}
+          />
+        </label>
+        <DraftingSliderField
+          dataSlot="drafting-card-shadow-blur-slider"
+          formatValue={(nextValue) => `${Math.round(nextValue)} px`}
+          id="drafting-card-shadow-blur"
+          label="Blur"
+          max={96}
+          min={0}
+          step={1}
+          value={value.shadow.blur}
+          onChange={(blur) => updateShadow({ blur })}
+        />
+        <DraftingSliderField
+          dataSlot="drafting-card-shadow-opacity-slider"
+          formatValue={(nextValue) => `${Math.round(nextValue)}%`}
+          id="drafting-card-shadow-opacity"
+          label="Opacity"
+          max={100}
+          min={0}
+          step={1}
+          value={value.shadow.opacity}
+          onChange={(opacity) => updateShadow({ opacity })}
+        />
+        <DraftingSliderField
+          dataSlot="drafting-card-shadow-offset-x-slider"
+          formatValue={(nextValue) => `${Math.round(nextValue)} px`}
+          id="drafting-card-shadow-offset-x"
+          label="Offset X"
+          max={64}
+          min={-64}
+          step={1}
+          value={value.shadow.offsetX}
+          onChange={(offsetX) => updateShadow({ offsetX })}
+        />
+        <DraftingSliderField
+          dataSlot="drafting-card-shadow-offset-y-slider"
+          formatValue={(nextValue) => `${Math.round(nextValue)} px`}
+          id="drafting-card-shadow-offset-y"
+          label="Offset Y"
+          max={64}
+          min={-64}
+          step={1}
+          value={value.shadow.offsetY}
+          onChange={(offsetY) => updateShadow({ offsetY })}
+        />
+      </section>
     </div>
   )
 }
@@ -2462,15 +2541,26 @@ export function DraftingBackgroundColorTab({
 
 export function DraftingBackgroundShapeTab({
   gradient,
+  options,
   solidColor,
   value,
+  onOptionsChange,
   onValueChange,
 }: {
   gradient: StudioGradient
+  onOptionsChange: (options: BackgroundShapeOptions) => void
   onValueChange: (value: QrBackgroundShapeId) => void
+  options: BackgroundShapeOptions
   solidColor: string
   value: QrBackgroundShapeId
 }) {
+  const updateShapeOptions = (patch: Partial<BackgroundShapeOptions>) => {
+    onOptionsChange({
+      ...options,
+      ...patch,
+    })
+  }
+
   return (
     <div className="min-w-0 space-y-4" data-slot="drafting-background-shape-tab">
       <div
@@ -2543,6 +2633,167 @@ export function DraftingBackgroundShapeTab({
             </OptionCard>
           )
         })}
+      </div>
+      <div
+        data-slot="drafting-background-shape-settings"
+        className="min-w-0 space-y-4"
+      >
+        <section
+          data-slot="drafting-background-shape-padding-settings"
+          className="min-w-0 space-y-3"
+        >
+          <div className="space-y-1">
+            <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+              Shape
+            </p>
+            <p className="drafting-type-body text-[var(--drafting-ink-muted)]">
+              Expands the QR backing surface without changing QR modules.
+            </p>
+          </div>
+        <DraftingSliderField
+          dataSlot="drafting-background-shape-size-slider"
+          formatValue={(nextValue) => `${Math.round(nextValue)} px`}
+          id="drafting-background-shape-size"
+          label="Shape padding"
+          max={192}
+          min={0}
+          step={1}
+          value={options.paddingPx}
+          onChange={(paddingPx) => updateShapeOptions({ paddingPx })}
+        />
+        </section>
+
+        <section
+          data-slot="drafting-background-shape-border-settings"
+          className="min-w-0 space-y-3"
+        >
+          <div className="space-y-1">
+            <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+              Border
+            </p>
+            <p className="drafting-type-body text-[var(--drafting-ink-muted)]">
+              Adds a sharp stroke around the backing shape.
+            </p>
+          </div>
+          <label
+            data-slot="drafting-background-shape-stroke-color-field"
+            htmlFor="drafting-background-shape-stroke-color"
+            className="flex min-w-0 items-center gap-2"
+          >
+            <input
+              aria-label="Shape border color swatch"
+              className="size-9 shrink-0 cursor-pointer rounded-[6px] border border-[var(--drafting-line)] bg-transparent p-1"
+              type="color"
+              value={options.strokeColor}
+              onChange={(event) => updateShapeOptions({ strokeColor: event.currentTarget.value })}
+            />
+            <Input
+              id="drafting-background-shape-stroke-color"
+              className="drafting-type-input h-9 min-w-0 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3 text-[var(--drafting-ink)] shadow-none focus-visible:border-[var(--drafting-line-strong)] focus-visible:ring-0"
+              value={options.strokeColor}
+              onChange={(event) => updateShapeOptions({ strokeColor: event.currentTarget.value })}
+            />
+          </label>
+          <DraftingSliderField
+            dataSlot="drafting-background-shape-stroke-width-slider"
+            formatValue={(nextValue) => `${Math.round(nextValue)} px`}
+            id="drafting-background-shape-stroke-width"
+            label="Width"
+            max={24}
+            min={0}
+            step={1}
+            value={options.strokeWidth}
+            onChange={(strokeWidth) => updateShapeOptions({ strokeWidth })}
+          />
+          <DraftingSliderField
+            dataSlot="drafting-background-shape-stroke-opacity-slider"
+            formatValue={(nextValue) => `${Math.round(nextValue)}%`}
+            id="drafting-background-shape-stroke-opacity"
+            label="Opacity"
+            max={100}
+            min={0}
+            step={1}
+            value={options.strokeOpacity}
+            onChange={(strokeOpacity) => updateShapeOptions({ strokeOpacity })}
+          />
+        </section>
+
+        <section
+          data-slot="drafting-background-shape-shadow-settings"
+          className="min-w-0 space-y-3"
+        >
+          <div className="space-y-1">
+            <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+              Shadow
+            </p>
+            <p className="drafting-type-body text-[var(--drafting-ink-muted)]">
+              Softens the shape edge independently from its border.
+            </p>
+          </div>
+          <label
+            data-slot="drafting-background-shape-shadow-color-field"
+            htmlFor="drafting-background-shape-shadow-color"
+            className="flex min-w-0 items-center gap-2"
+          >
+            <input
+              aria-label="Shape shadow color swatch"
+              className="size-9 shrink-0 cursor-pointer rounded-[6px] border border-[var(--drafting-line)] bg-transparent p-1"
+              type="color"
+              value={options.shadowColor}
+              onChange={(event) => updateShapeOptions({ shadowColor: event.currentTarget.value })}
+            />
+            <Input
+              id="drafting-background-shape-shadow-color"
+              className="drafting-type-input h-9 min-w-0 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3 text-[var(--drafting-ink)] shadow-none focus-visible:border-[var(--drafting-line-strong)] focus-visible:ring-0"
+              value={options.shadowColor}
+              onChange={(event) => updateShapeOptions({ shadowColor: event.currentTarget.value })}
+            />
+          </label>
+          <DraftingSliderField
+            dataSlot="drafting-background-shape-shadow-blur-slider"
+            formatValue={(nextValue) => `${Math.round(nextValue)} px`}
+            id="drafting-background-shape-edge-blur"
+            label="Blur"
+            max={32}
+            min={0}
+            step={1}
+            value={options.edgeBlur}
+            onChange={(edgeBlur) => updateShapeOptions({ edgeBlur })}
+          />
+          <DraftingSliderField
+            dataSlot="drafting-background-shape-shadow-opacity-slider"
+            formatValue={(nextValue) => `${Math.round(nextValue)}%`}
+            id="drafting-background-shape-shadow-opacity"
+            label="Opacity"
+            max={100}
+            min={0}
+            step={1}
+            value={options.shadowOpacity}
+            onChange={(shadowOpacity) => updateShapeOptions({ shadowOpacity })}
+          />
+          <DraftingSliderField
+            dataSlot="drafting-background-shape-shadow-offset-x-slider"
+            formatValue={(nextValue) => `${Math.round(nextValue)} px`}
+            id="drafting-background-shape-shadow-offset-x"
+            label="Offset X"
+            max={64}
+            min={-64}
+            step={1}
+            value={options.shadowOffsetX}
+            onChange={(shadowOffsetX) => updateShapeOptions({ shadowOffsetX })}
+          />
+          <DraftingSliderField
+            dataSlot="drafting-background-shape-shadow-offset-y-slider"
+            formatValue={(nextValue) => `${Math.round(nextValue)} px`}
+            id="drafting-background-shape-shadow-offset-y"
+            label="Offset Y"
+            max={64}
+            min={-64}
+            step={1}
+            value={options.shadowOffsetY}
+            onChange={(shadowOffsetY) => updateShapeOptions({ shadowOffsetY })}
+          />
+        </section>
       </div>
     </div>
   )

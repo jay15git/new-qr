@@ -11,7 +11,13 @@ import {
 import { createDotsPaletteExtension } from "@/components/qr/qr-dots-palette"
 import { createCustomDotShapeExtension } from "@/components/qr/qr-svg-custom-shape-extension"
 import {
+  clampBackgroundShapeOffset,
+  clampBackgroundShapeOpacity,
+  clampBackgroundShapePaddingPx,
+  DEFAULT_BACKGROUND_SHAPE_OPTIONS,
+  clampQrSize,
   getAssetValue,
+  hasActiveBackgroundShapeOptions,
   type QrStudioState,
   type StudioGradient,
 } from "@/components/qr/qr-studio-state"
@@ -36,6 +42,8 @@ export function buildQrExtension(state: QrStudioState) {
 
   if (backgroundShape) {
     extensions.push(createBackgroundShapeExtension(backgroundShape, state))
+  } else if (!backgroundImage && hasActiveBackgroundSurfaceOptions(state.backgroundShapeOptions)) {
+    extensions.push(createBackgroundSurfaceExtension(state))
   }
 
   if (customDotShape) {
@@ -77,6 +85,9 @@ export function getQrExtensionKey(state: QrStudioState) {
     backgroundShapeId: getAssetValue(state.backgroundImage)
       ? null
       : state.backgroundShapeId,
+    backgroundShapeOptions: getAssetValue(state.backgroundImage)
+      ? null
+      : state.backgroundShapeOptions,
     cornersDotGradient: getAlignedCornerGradientKey(state.cornersDotGradient),
     cornersSquareGradient: getAlignedCornerGradientKey(
       state.cornersSquareGradient,
@@ -90,7 +101,7 @@ export function getQrExtensionKey(state: QrStudioState) {
 
 function createBackgroundShapeExtension(
   shape: QrBackgroundShapeDefinition,
-  state: Pick<QrStudioState, "backgroundGradient" | "backgroundOptions">,
+  state: Pick<QrStudioState, "backgroundGradient" | "backgroundOptions" | "backgroundShapeOptions">,
 ): ExtensionFunction {
   return (svg, options) => {
     const document = svg.ownerDocument
@@ -105,20 +116,574 @@ function createBackgroundShapeExtension(
     svg.querySelectorAll('[data-qr-layer="background-shape-gradient"]').forEach((node) => {
       node.remove()
     })
+    svg.querySelectorAll('[data-qr-layer="background-shape-blur"]').forEach((node) => {
+      node.remove()
+    })
+    svg.querySelectorAll('[data-qr-layer="background-shape-blur-filter"]').forEach((node) => {
+      node.remove()
+    })
 
     const width = options.width ?? 300
     const height = options.height ?? 300
+    const shapeOptions = normalizeBackgroundShapeOptions(state.backgroundShapeOptions)
+    const metrics = getBackgroundRenderMetrics(width, height, shapeOptions)
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
-    const transform = getBackgroundShapeTransform(shape, width, height)
+    const transform = getBackgroundShapeTransform(
+      shape,
+      metrics.backingRegion,
+    )
+    const fill = getBackgroundShapeFill(svg, state, metrics.outerWidth, metrics.outerHeight)
+
+    applySvgRenderBounds(svg, metrics)
+    const insertReference = wrapQrContent(svg, metrics.translateX, metrics.translateY)
 
     path.setAttribute("data-qr-layer", "background-shape")
     path.setAttribute("d", shape.path)
     path.setAttribute("transform", transform)
-    path.setAttribute("fill", getBackgroundShapeFill(svg, state, width, height))
+    path.setAttribute("fill", fill)
+    applyBackgroundShapeStroke(path, shapeOptions)
 
-    const insertReference = getBackgroundImageInsertReference(svg)
+    const blurPath = createBackgroundShapeBlurPath({
+      d: shape.path,
+      metrics,
+      shapeOptions,
+      svg,
+      transform,
+    })
+
+    if (blurPath) {
+      svg.insertBefore(blurPath, insertReference)
+    }
+
     svg.insertBefore(path, insertReference)
   }
+}
+
+function normalizeBackgroundShapeOptions(
+  options:
+    | (Partial<QrStudioState["backgroundShapeOptions"]> & {
+        sizePercent?: number
+      })
+    | undefined,
+) {
+  const legacyPaddingPx =
+    options?.paddingPx === undefined && typeof options?.sizePercent === "number"
+      ? getLegacyBackgroundShapePaddingPx(options.sizePercent)
+      : undefined
+
+  return {
+    ...DEFAULT_BACKGROUND_SHAPE_OPTIONS,
+    ...options,
+    edgeBlur: coerceNonNegativeSvgNumber(
+      options?.edgeBlur ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.edgeBlur,
+      DEFAULT_BACKGROUND_SHAPE_OPTIONS.edgeBlur,
+    ),
+    paddingPx: coerceNonNegativeSvgNumber(
+      options?.paddingPx ?? legacyPaddingPx ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.paddingPx,
+      DEFAULT_BACKGROUND_SHAPE_OPTIONS.paddingPx,
+    ),
+    shadowColor: options?.shadowColor ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowColor,
+    shadowOffsetX: clampBackgroundShapeOffset(
+      options?.shadowOffsetX ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetX,
+    ),
+    shadowOffsetY: clampBackgroundShapeOffset(
+      options?.shadowOffsetY ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetY,
+    ),
+    shadowOpacity: clampBackgroundShapeOpacity(
+      options?.shadowOpacity ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOpacity,
+    ),
+    strokeOpacity: clampBackgroundShapeOpacity(
+      options?.strokeOpacity ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeOpacity,
+    ),
+    strokeWidth: coerceNonNegativeSvgNumber(
+      options?.strokeWidth ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeWidth,
+      DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeWidth,
+    ),
+  }
+}
+
+function coerceNonNegativeSvgNumber(value: number, fallback: number) {
+  if (!Number.isFinite(value)) {
+    return fallback
+  }
+
+  return Math.max(0, value)
+}
+
+function getLegacyBackgroundShapePaddingPx(sizePercent: number) {
+  if (!Number.isFinite(sizePercent) || sizePercent <= 100) {
+    return 0
+  }
+
+  return clampBackgroundShapePaddingPx(((sizePercent - 100) / 200) * 240)
+}
+
+function applyBackgroundShapeStroke(
+  path: Element,
+  shapeOptions: ReturnType<typeof normalizeBackgroundShapeOptions>,
+) {
+  if (shapeOptions.strokeWidth <= 0) {
+    path.removeAttribute("stroke")
+    path.removeAttribute("stroke-width")
+    path.removeAttribute("stroke-opacity")
+    path.removeAttribute("stroke-linejoin")
+    return
+  }
+
+  path.setAttribute("stroke", shapeOptions.strokeColor)
+  path.setAttribute("stroke-width", formatSvgNumber(shapeOptions.strokeWidth))
+  path.setAttribute("stroke-opacity", formatSvgNumber(shapeOptions.strokeOpacity / 100))
+  path.setAttribute("stroke-linejoin", "round")
+}
+
+function hasActiveBackgroundSurfaceOptions(
+  options: Partial<QrStudioState["backgroundShapeOptions"]> | undefined,
+) {
+  return hasActiveBackgroundShapeOptions(normalizeBackgroundShapeOptions(options))
+}
+
+type BackgroundRenderMetrics = {
+  backingRegion: {
+    height: number
+    width: number
+    x: number
+    y: number
+  }
+  bottomEffectOutset: number
+  outerHeight: number
+  outerWidth: number
+  leftEffectOutset: number
+  rightEffectOutset: number
+  shapeOutset: number
+  topEffectOutset: number
+  totalOutset: number
+  translateX: number
+  translateY: number
+}
+
+function getBackgroundRenderMetrics(
+  width: number,
+  height: number,
+  shapeOptions: ReturnType<typeof normalizeBackgroundShapeOptions>,
+): BackgroundRenderMetrics {
+  const shapeOutset = shapeOptions.paddingPx
+  const strokeOutset = Math.ceil(shapeOptions.strokeWidth / 2)
+  const shadowGeometryIsActive =
+    shapeOptions.edgeBlur > 0 ||
+    shapeOptions.shadowOffsetX !== 0 ||
+    shapeOptions.shadowOffsetY !== 0
+  const shadowAlphaOutset = shadowGeometryIsActive
+    ? strokeOutset + Math.ceil(shapeOptions.edgeBlur * 2)
+    : strokeOutset
+  const leftEffectOutset = Math.max(strokeOutset, shadowAlphaOutset - shapeOptions.shadowOffsetX)
+  const rightEffectOutset = Math.max(strokeOutset, shadowAlphaOutset + shapeOptions.shadowOffsetX)
+  const topEffectOutset = Math.max(strokeOutset, shadowAlphaOutset - shapeOptions.shadowOffsetY)
+  const bottomEffectOutset = Math.max(strokeOutset, shadowAlphaOutset + shapeOptions.shadowOffsetY)
+  const translateX = shapeOutset + leftEffectOutset
+  const translateY = shapeOutset + topEffectOutset
+
+  return {
+    backingRegion: {
+      height: height + shapeOutset * 2,
+      width: width + shapeOutset * 2,
+      x: leftEffectOutset,
+      y: topEffectOutset,
+    },
+    bottomEffectOutset,
+    leftEffectOutset,
+    outerHeight: height + shapeOutset * 2 + topEffectOutset + bottomEffectOutset,
+    outerWidth: width + shapeOutset * 2 + leftEffectOutset + rightEffectOutset,
+    rightEffectOutset,
+    shapeOutset,
+    topEffectOutset,
+    totalOutset: Math.max(translateX, translateY),
+    translateX,
+    translateY,
+  }
+}
+
+export function getQrBackgroundRenderMetrics(
+  state: Pick<QrStudioState, "backgroundShapeOptions" | "height" | "width">,
+) {
+  return getBackgroundRenderMetrics(
+    clampQrSize(state.width),
+    clampQrSize(state.height),
+    normalizeBackgroundShapeOptions(state.backgroundShapeOptions),
+  )
+}
+
+export function getQrRenderedDimensions(
+  state: Pick<
+    QrStudioState,
+    "backgroundImage" | "backgroundShapeId" | "backgroundShapeOptions" | "height" | "width"
+  >,
+) {
+  const width = clampQrSize(state.width)
+  const height = clampQrSize(state.height)
+
+  if (
+    getAssetValue(state.backgroundImage) ||
+    (state.backgroundShapeId === "none" &&
+      !hasActiveBackgroundSurfaceOptions(state.backgroundShapeOptions))
+  ) {
+    return {
+      height,
+      width,
+    }
+  }
+
+  const metrics = getBackgroundRenderMetrics(
+    width,
+    height,
+    normalizeBackgroundShapeOptions(state.backgroundShapeOptions),
+  )
+
+  return {
+    height: metrics.outerHeight,
+    width: metrics.outerWidth,
+  }
+}
+
+export function scaleQrBackgroundShapeOptions(
+  options: QrStudioState["backgroundShapeOptions"],
+  scale: number,
+): QrStudioState["backgroundShapeOptions"] {
+  const shapeOptions = normalizeBackgroundShapeOptions(options)
+
+  return {
+    ...shapeOptions,
+    edgeBlur: coerceNonNegativeSvgNumber(shapeOptions.edgeBlur * scale, shapeOptions.edgeBlur),
+    paddingPx: coerceNonNegativeSvgNumber(shapeOptions.paddingPx * scale, shapeOptions.paddingPx),
+    shadowOffsetX: coerceSvgNumber(shapeOptions.shadowOffsetX * scale, shapeOptions.shadowOffsetX),
+    shadowOffsetY: coerceSvgNumber(shapeOptions.shadowOffsetY * scale, shapeOptions.shadowOffsetY),
+    strokeWidth: coerceNonNegativeSvgNumber(
+      shapeOptions.strokeWidth * scale,
+      shapeOptions.strokeWidth,
+    ),
+  }
+}
+
+function applySvgRenderBounds(svg: SVGElement, metrics: BackgroundRenderMetrics) {
+  svg.setAttribute("width", formatSvgNumber(metrics.outerWidth))
+  svg.setAttribute("height", formatSvgNumber(metrics.outerHeight))
+  svg.setAttribute(
+    "viewBox",
+    `0 0 ${formatSvgNumber(metrics.outerWidth)} ${formatSvgNumber(metrics.outerHeight)}`,
+  )
+}
+
+function coerceSvgNumber(value: number, fallback: number) {
+  if (!Number.isFinite(value)) {
+    return fallback
+  }
+
+  return value
+}
+
+function wrapQrContent(svg: SVGElement, translateX: number, translateY: number) {
+  if (translateX <= 0 && translateY <= 0) {
+    return getFirstDrawableSvgChild(svg)
+  }
+
+  const existingGroup = svg.querySelector('[data-qr-layer="qr-content"]')
+
+  if (existingGroup) {
+    existingGroup.setAttribute(
+      "transform",
+      `translate(${formatSvgNumber(translateX)} ${formatSvgNumber(translateY)})`,
+    )
+    return existingGroup
+  }
+
+  const document = svg.ownerDocument
+  const group = document.createElementNS("http://www.w3.org/2000/svg", "g")
+  const children = Array.from(svg.children).filter(
+    (child) =>
+      child.tagName.toLowerCase() !== "defs" && !isManagedBackgroundLayer(child),
+  )
+
+  group.setAttribute("data-qr-layer", "qr-content")
+  group.setAttribute(
+    "transform",
+    `translate(${formatSvgNumber(translateX)} ${formatSvgNumber(translateY)})`,
+  )
+
+  for (const child of children) {
+    group.appendChild(child)
+  }
+
+  svg.appendChild(group)
+
+  return group
+}
+
+function getFirstDrawableSvgChild(svg: SVGElement) {
+  return (
+    Array.from(svg.children).find(
+      (child) =>
+        child.tagName.toLowerCase() !== "defs" && !isManagedBackgroundLayer(child),
+    ) ?? null
+  )
+}
+
+function isManagedBackgroundLayer(node: Element) {
+  const layer = node.getAttribute("data-qr-layer")
+
+  return Boolean(layer?.startsWith("background-"))
+}
+
+function createBackgroundSurfaceExtension(
+  state: Pick<QrStudioState, "backgroundGradient" | "backgroundOptions" | "backgroundShapeOptions">,
+): ExtensionFunction {
+  return (svg, options) => {
+    const document = svg.ownerDocument
+
+    if (!document) {
+      return
+    }
+
+    svg.querySelectorAll('[data-qr-layer="background-surface-blur"]').forEach((node) => {
+      node.remove()
+    })
+    svg.querySelectorAll('[data-qr-layer="background-surface-blur-filter"]').forEach((node) => {
+      node.remove()
+    })
+
+    const width = options.width ?? 300
+    const height = options.height ?? 300
+    const shapeOptions = normalizeBackgroundShapeOptions(state.backgroundShapeOptions)
+    const metrics = getBackgroundRenderMetrics(width, height, shapeOptions)
+    const region = metrics.backingRegion
+    const radius = (Math.min(region.width, region.height) / 2) * state.backgroundOptions.round
+    const backgroundRect =
+      getQrBackgroundSurfaceRect(svg) ??
+      document.createElementNS("http://www.w3.org/2000/svg", "rect")
+    const fill = getBackgroundShapeFill(svg, state, metrics.outerWidth, metrics.outerHeight)
+
+    backgroundRect.remove()
+    backgroundRect.setAttribute("data-qr-layer", "background-surface")
+    backgroundRect.setAttribute("fill", fill)
+    backgroundRect.removeAttribute("clip-path")
+    applySvgRenderBounds(svg, metrics)
+    const insertReference = wrapQrContent(svg, metrics.translateX, metrics.translateY)
+
+    applyBackgroundSurfaceRect(backgroundRect, region, radius)
+    applyBackgroundShapeStroke(backgroundRect, shapeOptions)
+
+    const blurRect = createBackgroundSurfaceBlurRect({
+      radius,
+      region,
+      shapeOptions,
+      svg,
+    })
+
+    if (blurRect) {
+      svg.insertBefore(blurRect, insertReference)
+    }
+
+    svg.insertBefore(backgroundRect, insertReference)
+  }
+}
+
+function getQrBackgroundSurfaceRect(svg: SVGElement) {
+  return Array.from(svg.children).find(
+    (child) =>
+      child.tagName.toLowerCase() === "rect" &&
+      child.getAttribute("data-qr-layer") !== "background-surface-blur",
+  )
+}
+
+function applyBackgroundSurfaceRect(
+  rect: Element,
+  region: BackgroundRenderMetrics["backingRegion"],
+  radius: number,
+) {
+  rect.setAttribute("x", formatSvgNumber(region.x))
+  rect.setAttribute("y", formatSvgNumber(region.y))
+  rect.setAttribute("width", formatSvgNumber(region.width))
+  rect.setAttribute("height", formatSvgNumber(region.height))
+  rect.setAttribute("rx", formatSvgNumber(radius))
+  rect.setAttribute("ry", formatSvgNumber(radius))
+}
+
+function createBackgroundSurfaceBlurRect({
+  radius,
+  region,
+  shapeOptions,
+  svg,
+}: {
+  radius: number
+  region: BackgroundRenderMetrics["backingRegion"]
+  shapeOptions: ReturnType<typeof normalizeBackgroundShapeOptions>
+  svg: SVGElement
+}) {
+  if (!hasActiveBackgroundShapeShadow(shapeOptions)) {
+    return null
+  }
+
+  const document = svg.ownerDocument
+
+  if (!document) {
+    return null
+  }
+
+  const filterId = "background-surface-blur-filter"
+  const filter = createBackgroundShapeShadowFilter({
+    filterId,
+    layer: "background-surface-blur-filter",
+    metrics: {
+      height: region.height + shapeOptions.edgeBlur * 4 + Math.abs(shapeOptions.shadowOffsetY),
+      width: region.width + shapeOptions.edgeBlur * 4 + Math.abs(shapeOptions.shadowOffsetX),
+      x: 0,
+      y: 0,
+    },
+    shapeOptions,
+    svg,
+  })
+
+  getOrCreateSvgDefs(svg).appendChild(filter)
+
+  const blurRect = document.createElementNS("http://www.w3.org/2000/svg", "rect")
+
+  blurRect.setAttribute("data-qr-layer", "background-surface-blur")
+  blurRect.setAttribute("fill", shapeOptions.shadowColor)
+  blurRect.setAttribute("filter", `url('#${filterId}')`)
+  applyBackgroundShapeShadowSourceStroke(blurRect, shapeOptions)
+  applyBackgroundSurfaceRect(blurRect, region, radius)
+
+  return blurRect
+}
+
+function createBackgroundShapeBlurPath({
+  d,
+  metrics,
+  shapeOptions,
+  svg,
+  transform,
+}: {
+  d: string
+  metrics: BackgroundRenderMetrics
+  shapeOptions: ReturnType<typeof normalizeBackgroundShapeOptions>
+  svg: SVGElement
+  transform: string
+}) {
+  if (!hasActiveBackgroundShapeShadow(shapeOptions)) {
+    return null
+  }
+
+  const document = svg.ownerDocument
+
+  if (!document) {
+    return null
+  }
+
+  const filterId = "background-shape-blur-filter"
+  const filter = createBackgroundShapeShadowFilter({
+    filterId,
+    layer: "background-shape-blur-filter",
+    metrics: {
+      height: metrics.outerHeight,
+      width: metrics.outerWidth,
+      x: 0,
+      y: 0,
+    },
+    shapeOptions,
+    svg,
+  })
+
+  getOrCreateSvgDefs(svg).appendChild(filter)
+
+  const blurPath = document.createElementNS("http://www.w3.org/2000/svg", "path")
+
+  blurPath.setAttribute("data-qr-layer", "background-shape-blur")
+  blurPath.setAttribute("d", d)
+  blurPath.setAttribute("fill", shapeOptions.shadowColor)
+  blurPath.setAttribute("filter", `url('#${filterId}')`)
+  blurPath.setAttribute("transform", transform)
+  applyBackgroundShapeShadowSourceStroke(blurPath, shapeOptions)
+
+  return blurPath
+}
+
+function hasActiveBackgroundShapeShadow(
+  shapeOptions: ReturnType<typeof normalizeBackgroundShapeOptions>,
+) {
+  return (
+    shapeOptions.shadowOpacity > 0 &&
+    (shapeOptions.edgeBlur > 0 ||
+      shapeOptions.shadowOffsetX !== 0 ||
+      shapeOptions.shadowOffsetY !== 0)
+  )
+}
+
+function applyBackgroundShapeShadowSourceStroke(
+  node: Element,
+  shapeOptions: ReturnType<typeof normalizeBackgroundShapeOptions>,
+) {
+  if (shapeOptions.strokeWidth <= 0) {
+    node.removeAttribute("stroke")
+    node.removeAttribute("stroke-width")
+    node.removeAttribute("stroke-linejoin")
+    return
+  }
+
+  node.setAttribute("stroke", shapeOptions.shadowColor)
+  node.setAttribute("stroke-width", formatSvgNumber(shapeOptions.strokeWidth))
+  node.setAttribute("stroke-linejoin", "round")
+}
+
+function createBackgroundShapeShadowFilter({
+  filterId,
+  layer,
+  metrics,
+  shapeOptions,
+  svg,
+}: {
+  filterId: string
+  layer: string
+  metrics: {
+    height: number
+    width: number
+    x: number
+    y: number
+  }
+  shapeOptions: ReturnType<typeof normalizeBackgroundShapeOptions>
+  svg: SVGElement
+}) {
+  const document = svg.ownerDocument
+  const filter = document.createElementNS("http://www.w3.org/2000/svg", "filter")
+  const blur = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur")
+  const offset = document.createElementNS("http://www.w3.org/2000/svg", "feOffset")
+  const flood = document.createElementNS("http://www.w3.org/2000/svg", "feFlood")
+  const composite = document.createElementNS("http://www.w3.org/2000/svg", "feComposite")
+
+  filter.setAttribute("id", filterId)
+  filter.setAttribute("data-qr-layer", layer)
+  filter.setAttribute("filterUnits", "userSpaceOnUse")
+  filter.setAttribute("x", formatSvgNumber(metrics.x))
+  filter.setAttribute("y", formatSvgNumber(metrics.y))
+  filter.setAttribute("width", formatSvgNumber(metrics.width))
+  filter.setAttribute("height", formatSvgNumber(metrics.height))
+  blur.setAttribute("in", "SourceAlpha")
+  blur.setAttribute("result", "shadow-blur")
+  blur.setAttribute("stdDeviation", formatSvgNumber(shapeOptions.edgeBlur))
+  offset.setAttribute("dx", formatSvgNumber(shapeOptions.shadowOffsetX))
+  offset.setAttribute("dy", formatSvgNumber(shapeOptions.shadowOffsetY))
+  offset.setAttribute("in", "shadow-blur")
+  offset.setAttribute("result", "shadow-offset")
+  flood.setAttribute("flood-color", shapeOptions.shadowColor)
+  flood.setAttribute("flood-opacity", formatSvgNumber(shapeOptions.shadowOpacity / 100))
+  flood.setAttribute("result", "shadow-color")
+  composite.setAttribute("in", "shadow-color")
+  composite.setAttribute("in2", "shadow-offset")
+  composite.setAttribute("operator", "in")
+
+  filter.appendChild(blur)
+  filter.appendChild(offset)
+  filter.appendChild(flood)
+  filter.appendChild(composite)
+
+  return filter
 }
 
 function getBackgroundShapeFill(
@@ -205,12 +770,12 @@ function createBackgroundShapeGradient(
 
 function getBackgroundShapeTransform(
   shape: QrBackgroundShapeDefinition,
-  width: number,
-  height: number,
+  region: BackgroundRenderMetrics["backingRegion"],
 ) {
-  const scale = Math.min(width / shape.viewBox.width, height / shape.viewBox.height)
-  const x = (width - shape.viewBox.width * scale) / 2
-  const y = (height - shape.viewBox.height * scale) / 2
+  const scale =
+    Math.min(region.width / shape.viewBox.width, region.height / shape.viewBox.height)
+  const x = region.x + (region.width - shape.viewBox.width * scale) / 2
+  const y = region.y + (region.height - shape.viewBox.height * scale) / 2
 
   return `translate(${formatSvgNumber(x)} ${formatSvgNumber(y)}) scale(${formatSvgNumber(scale)})`
 }
@@ -224,9 +789,13 @@ function formatSvgNumber(value: number) {
 }
 
 function getBackgroundShapeGradientKey(
-  state: Pick<QrStudioState, "backgroundGradient" | "backgroundShapeId">,
+  state: Pick<QrStudioState, "backgroundGradient" | "backgroundShapeId" | "backgroundShapeOptions">,
 ) {
-  if (state.backgroundShapeId === "none" || !state.backgroundGradient.enabled) {
+  if (
+    !state.backgroundGradient.enabled ||
+    (state.backgroundShapeId === "none" &&
+      !hasActiveBackgroundSurfaceOptions(state.backgroundShapeOptions))
+  ) {
     return null
   }
 

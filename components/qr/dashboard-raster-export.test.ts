@@ -48,6 +48,7 @@ describe("dashboard raster export helper", () => {
     clearRect: ReturnType<typeof vi.fn>
     drawImage: ReturnType<typeof vi.fn>
   }
+  let createdCanvases: Array<{ height: number; width: number }>
   let canvasToBlobSpy: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
@@ -59,6 +60,7 @@ describe("dashboard raster export helper", () => {
       clearRect: vi.fn(),
       drawImage: vi.fn(),
     }
+    createdCanvases = []
     canvasToBlobSpy = vi.fn((callback: (blob: Blob | null) => void) => {
       callback(
         new Blob(["raster"], {
@@ -69,12 +71,16 @@ describe("dashboard raster export helper", () => {
 
     vi.spyOn(document, "createElement").mockImplementation((tagName: string) => {
       if (tagName === "canvas") {
-        return {
+        const canvas = {
           getContext: vi.fn(() => canvasContext),
           height: 0,
           toBlob: canvasToBlobSpy,
           width: 0,
-        } as unknown as HTMLCanvasElement
+        }
+
+        createdCanvases.push(canvas)
+
+        return canvas as unknown as HTMLCanvasElement
       }
 
       if (tagName === "a") {
@@ -165,6 +171,90 @@ describe("dashboard raster export helper", () => {
       scale: 4096 / 320,
       width: 4096,
     })
+  })
+
+  it("expands natural raster dimensions for background shape effects", async () => {
+    const state = setSquareQrSize(createDefaultQrStudioState(), 320)
+    state.backgroundShapeId = "circle"
+    state.backgroundShapeOptions = {
+      edgeBlur: 8,
+      paddingPx: 24,
+      shadowColor: "#020617",
+      shadowOffsetX: 12,
+      shadowOffsetY: -10,
+      shadowOpacity: 58,
+      strokeColor: "#111827",
+      strokeOpacity: 50,
+      strokeWidth: 6,
+    }
+
+    expect(getDashboardRasterExportDimensions(state, 25)).toEqual({
+      height: 406,
+      requestedScale: 1,
+      scale: 1,
+      width: 406,
+    })
+
+    await downloadDashboardRasterExport({
+      extension: "png",
+      name: "poster",
+      qualityPercent: 25,
+      state,
+    })
+
+    expect(qrCodeConstructorSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        height: 320,
+        type: "svg",
+        width: 320,
+      }),
+    )
+    expect(createdCanvases[0]).toEqual(expect.objectContaining({
+      height: 406,
+      width: 406,
+    }))
+  })
+
+  it("treats fixed raster target size as final outer bounds", async () => {
+    const state = setSquareQrSize(createDefaultQrStudioState(), 320)
+    state.backgroundShapeId = "circle"
+    state.backgroundShapeOptions = {
+      edgeBlur: 8,
+      paddingPx: 24,
+      shadowColor: "#020617",
+      shadowOffsetX: 12,
+      shadowOffsetY: -10,
+      shadowOpacity: 58,
+      strokeColor: "#111827",
+      strokeOpacity: 50,
+      strokeWidth: 6,
+    }
+
+    await downloadDashboardRasterExport({
+      extension: "png",
+      name: "poster",
+      qualityPercent: 100,
+      state,
+      targetSizePx: 812,
+    })
+
+    expect(getDashboardRasterExportDimensions(state, 100, 812)).toEqual({
+      height: 812,
+      requestedScale: 2,
+      scale: 2,
+      width: 812,
+    })
+    expect(qrCodeConstructorSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        height: 640,
+        type: "svg",
+        width: 640,
+      }),
+    )
+    expect(createdCanvases[0]).toEqual(expect.objectContaining({
+      height: 812,
+      width: 812,
+    }))
   })
 
   it("passes lossy encoder quality for jpeg and webp exports", async () => {

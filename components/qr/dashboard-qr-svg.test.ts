@@ -82,4 +82,27 @@ describe("dashboard qr svg helpers", () => {
     expect(payload.naturalHeight).toBe(state.height)
     expect(applyExtensionSpy).toHaveBeenCalledTimes(1)
   })
+
+  it("reports expanded natural size when background effects grow outside the qr", async () => {
+    applyExtensionSpy.mockClear()
+    const state = setSquareQrSize(createDefaultQrStudioState(), 320)
+    state.backgroundShapeId = "circle"
+    state.backgroundShapeOptions = {
+      edgeBlur: 8,
+      paddingPx: 24,
+      shadowColor: "#020617",
+      shadowOffsetX: 12,
+      shadowOffsetY: -10,
+      shadowOpacity: 58,
+      strokeColor: "#111827",
+      strokeOpacity: 50,
+      strokeWidth: 6,
+    }
+
+    const payload = await buildDashboardQrNodePayload(state)
+
+    expect(payload.naturalWidth).toBe(406)
+    expect(payload.naturalHeight).toBe(406)
+    expect(applyExtensionSpy).toHaveBeenCalledTimes(1)
+  })
 })

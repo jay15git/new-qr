@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  clampBackgroundShapeOffset,
+  clampBackgroundShapeOpacity,
+  clampBackgroundShapePaddingPx,
   clampRasterExportQualityPercent,
   clampQrBackgroundRound,
   clampQrSize,
@@ -15,6 +18,17 @@ describe("qr studio state helpers", () => {
     const state = createDefaultQrStudioState();
 
     expect(state.backgroundShapeId).toBe("none");
+    expect(state.backgroundShapeOptions).toEqual({
+      edgeBlur: 0,
+      paddingPx: 0,
+      shadowColor: "#111827",
+      shadowOffsetX: 0,
+      shadowOffsetY: 0,
+      shadowOpacity: 72,
+      strokeColor: "#f8fafc",
+      strokeOpacity: 100,
+      strokeWidth: 0,
+    });
     expect(state.logo).toEqual({
       source: "none",
       value: undefined,
@@ -100,6 +114,23 @@ describe("qr studio state helpers", () => {
     expect(lowQuality.rasterExportQualityPercent).toBe(25);
     expect(highQuality.rasterExportQualityPercent).toBe(100);
     expect(clampRasterExportQualityPercent(Number.NaN)).toBe(100);
+  });
+
+  it("clamps background shape padding to the supported pixel range", () => {
+    expect(clampBackgroundShapePaddingPx(-12)).toBe(0);
+    expect(clampBackgroundShapePaddingPx(96)).toBe(96);
+    expect(clampBackgroundShapePaddingPx(240)).toBe(192);
+    expect(clampBackgroundShapePaddingPx(Number.NaN)).toBe(0);
+  });
+
+  it("clamps background shape shadow values to the supported ranges", () => {
+    expect(clampBackgroundShapeOpacity(-12)).toBe(0);
+    expect(clampBackgroundShapeOpacity(72)).toBe(72);
+    expect(clampBackgroundShapeOpacity(240)).toBe(100);
+    expect(clampBackgroundShapeOffset(-96)).toBe(-64);
+    expect(clampBackgroundShapeOffset(24)).toBe(24);
+    expect(clampBackgroundShapeOffset(96)).toBe(64);
+    expect(clampBackgroundShapeOffset(Number.NaN)).toBe(0);
   });
 
   it("uses the reference swatch colors as the default body palette", () => {

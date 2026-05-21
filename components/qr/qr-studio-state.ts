@@ -38,6 +38,18 @@ export type StudioAsset = {
   value?: string;
 };
 
+export type BackgroundShapeOptions = {
+  edgeBlur: number;
+  paddingPx: number;
+  shadowColor: string;
+  shadowOffsetX: number;
+  shadowOffsetY: number;
+  shadowOpacity: number;
+  strokeColor: string;
+  strokeOpacity: number;
+  strokeWidth: number;
+};
+
 export type QrStudioState = {
   data: string;
   type: DrawType;
@@ -48,6 +60,7 @@ export type QrStudioState = {
   logo: StudioAsset;
   backgroundImage: StudioAsset;
   backgroundShapeId: QrBackgroundShapeId;
+  backgroundShapeOptions: BackgroundShapeOptions;
   qrOptions: {
     typeNumber: TypeNumber;
     mode: Mode;
@@ -100,6 +113,12 @@ export const DEFAULT_QR_SIZE = 320;
 export const RASTER_EXPORT_QUALITY_MIN = 25;
 export const RASTER_EXPORT_QUALITY_MAX = 100;
 export const DEFAULT_RASTER_EXPORT_QUALITY = 100;
+export const BACKGROUND_SHAPE_PADDING_PX_MAX = 192;
+export const BACKGROUND_SHAPE_STROKE_WIDTH_MAX = 24;
+export const BACKGROUND_SHAPE_EDGE_BLUR_MAX = 32;
+export const BACKGROUND_SHAPE_OPACITY_MAX = 100;
+export const BACKGROUND_SHAPE_SHADOW_OFFSET_MIN = -64;
+export const BACKGROUND_SHAPE_SHADOW_OFFSET_MAX = 64;
 
 const DEFAULT_GRADIENT: StudioGradient = {
   enabled: false,
@@ -117,6 +136,18 @@ const DEFAULT_DOTS_PALETTE = [
   "#090030",
   "#f30a49",
 ];
+
+export const DEFAULT_BACKGROUND_SHAPE_OPTIONS: BackgroundShapeOptions = {
+  edgeBlur: 0,
+  paddingPx: 0,
+  shadowColor: "#111827",
+  shadowOffsetX: 0,
+  shadowOffsetY: 0,
+  shadowOpacity: 72,
+  strokeColor: "#f8fafc",
+  strokeOpacity: 100,
+  strokeWidth: 0,
+};
 
 export function createDefaultQrStudioState(): QrStudioState {
   return {
@@ -139,6 +170,7 @@ export function createDefaultQrStudioState(): QrStudioState {
       value: undefined,
     },
     backgroundShapeId: "none",
+    backgroundShapeOptions: { ...DEFAULT_BACKGROUND_SHAPE_OPTIONS },
     qrOptions: {
       typeNumber: 0,
       mode: "Byte",
@@ -211,6 +243,51 @@ export function clampRasterExportQualityPercent(value: number) {
   );
 }
 
+export function clampBackgroundShapePaddingPx(value: number) {
+  return coerceNumber(
+    value,
+    0,
+    BACKGROUND_SHAPE_PADDING_PX_MAX,
+    DEFAULT_BACKGROUND_SHAPE_OPTIONS.paddingPx,
+  );
+}
+
+export function clampBackgroundShapeStrokeWidth(value: number) {
+  return coerceNumber(
+    value,
+    0,
+    BACKGROUND_SHAPE_STROKE_WIDTH_MAX,
+    DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeWidth,
+  );
+}
+
+export function clampBackgroundShapeOpacity(value: number) {
+  return coerceNumber(
+    value,
+    0,
+    BACKGROUND_SHAPE_OPACITY_MAX,
+    DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeOpacity,
+  );
+}
+
+export function clampBackgroundShapeOffset(value: number) {
+  return coerceNumber(
+    value,
+    BACKGROUND_SHAPE_SHADOW_OFFSET_MIN,
+    BACKGROUND_SHAPE_SHADOW_OFFSET_MAX,
+    DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetX,
+  );
+}
+
+export function clampBackgroundShapeEdgeBlur(value: number) {
+  return coerceNumber(
+    value,
+    0,
+    BACKGROUND_SHAPE_EDGE_BLUR_MAX,
+    DEFAULT_BACKGROUND_SHAPE_OPTIONS.edgeBlur,
+  );
+}
+
 export function clampQrBackgroundRound(value: number) {
   return coerceNumber(value, 0, 1, 0);
 }
@@ -248,7 +325,9 @@ export function setRasterExportQualityPercent(
 export function toQrCodeOptions(state: QrStudioState): Options {
   const logoImage = getAssetValue(state.logo);
   const backgroundImage = getAssetValue(state.backgroundImage);
-  const backgroundShapeActive = hasBackgroundShape(state) && !backgroundImage;
+  const customBackgroundSurfaceActive =
+    !backgroundImage &&
+    (hasBackgroundShape(state) || hasActiveBackgroundShapeOptions(state.backgroundShapeOptions));
 
   return {
     width: clampQrSize(state.width),
@@ -289,17 +368,17 @@ export function toQrCodeOptions(state: QrStudioState): Options {
       round: clampQrBackgroundRound(state.backgroundOptions.round),
       color:
         backgroundImage ||
-        backgroundShapeActive ||
+        customBackgroundSurfaceActive ||
         state.backgroundGradient.enabled ||
         state.backgroundOptions.transparent
           ? backgroundImage
             ? undefined
-            : backgroundShapeActive || state.backgroundOptions.transparent
+            : customBackgroundSurfaceActive || state.backgroundOptions.transparent
               ? "transparent"
               : undefined
           : state.backgroundOptions.color,
       gradient:
-        backgroundImage || backgroundShapeActive
+        backgroundImage || customBackgroundSurfaceActive
           ? undefined
           : buildGradient(state.backgroundGradient),
     },
@@ -318,6 +397,22 @@ export function hasBackgroundImage(state: QrStudioState) {
 
 export function hasBackgroundShape(state: Pick<QrStudioState, "backgroundShapeId">) {
   return state.backgroundShapeId !== "none";
+}
+
+export function hasActiveBackgroundShapeOptions(
+  options: Partial<BackgroundShapeOptions> | undefined,
+) {
+  return Boolean(
+    options &&
+      ((options.paddingPx ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.paddingPx) >
+        DEFAULT_BACKGROUND_SHAPE_OPTIONS.paddingPx ||
+        (options.strokeWidth ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeWidth) > 0 ||
+        (options.edgeBlur ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.edgeBlur) > 0 ||
+        (options.shadowOffsetX ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetX) !==
+          DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetX ||
+        (options.shadowOffsetY ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetY) !==
+          DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetY),
+  );
 }
 
 export function hasLogoImage(state: QrStudioState) {

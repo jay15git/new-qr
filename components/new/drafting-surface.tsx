@@ -41,6 +41,28 @@ import {
   type DraftingCardState,
 } from "@/components/new/drafting-card-state"
 import {
+  cloneDraftingCanvasLayer,
+  createDefaultDraftingLayers,
+  getDraftingCardLayerId,
+  getDraftingQrLayerId,
+  isDraftingCardLayerId,
+  patchDraftingCanvasLayer,
+  type DraftingCanvasLayer,
+  type DraftingLayerStateByNodeId,
+} from "@/components/new/drafting-layer-state"
+import {
+  applyDraftingQrForegroundShadow,
+  hasDraftingLayerShadow,
+} from "@/components/new/drafting-qr-layer-shadow"
+import {
+  createDraftingQrArtworkState,
+  sanitizeDraftingQrArtworkMarkup,
+} from "@/components/new/drafting-qr-artwork"
+import {
+  getDraftingQrBackgroundBounds,
+  getDraftingQrBackgroundSvgMarkup,
+} from "@/components/new/drafting-qr-background"
+import {
   cloneDraftingQrState,
   cloneDraftingWorkspaceDocument,
   createDefaultDraftingWorkspaceDocument,
@@ -102,12 +124,12 @@ import {
 } from "@/components/qr/dashboard-raster-export"
 import {
   DASHBOARD_QR_NODE_ID,
-  isDashboardQrNodeId,
 } from "@/components/qr/dashboard-compose-scene"
 import {
   clampQrBackgroundRound,
   createDefaultQrStudioState,
   type AssetSourceMode,
+  type BackgroundShapeOptions,
   type DotsColorMode,
   type QrStudioState,
   type StudioDotType,
@@ -508,6 +530,10 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     )
   const [selectedBackgroundShapeId, setSelectedBackgroundShapeId] =
     useState<QrBackgroundShapeId>(DEFAULT_DRAFTING_STUDIO_STATE.backgroundShapeId)
+  const [selectedBackgroundShapeOptions, setSelectedBackgroundShapeOptions] =
+    useState<BackgroundShapeOptions>(() => ({
+      ...DEFAULT_DRAFTING_STUDIO_STATE.backgroundShapeOptions,
+    }))
   const [openBackgroundColorItems, setOpenBackgroundColorItems] = useState<string[]>([
     "solid",
   ])
@@ -584,6 +610,21 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const [cardStateByNodeId, setCardStateByNodeId] = useState<DraftingCardStateByNodeId>(() => ({
     [DASHBOARD_QR_NODE_ID]: createDefaultDraftingCardState(),
   }))
+  const [layerStateByNodeId, setLayerStateByNodeId] = useState<DraftingLayerStateByNodeId>(() => {
+    const qrState = createDefaultDraftingWorkspaceQrState()
+    const cardState = createDefaultDraftingCardState()
+
+    return {
+      [DASHBOARD_QR_NODE_ID]: createDefaultDraftingLayers(
+        DASHBOARD_QR_NODE_ID,
+        qrState,
+        cardState,
+      ),
+    }
+  })
+  const [selectedLayerId, setSelectedLayerId] = useState(
+    getDraftingQrLayerId(DASHBOARD_QR_NODE_ID),
+  )
   const [selectedDownloadExtension, setSelectedDownloadExtension] =
     useState<DraftingDownloadExtension>("png")
   const [selectedDownloadTarget, setSelectedDownloadTarget] =
@@ -661,6 +702,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
             : undefined,
       },
       backgroundShapeId: selectedBackgroundShapeId,
+      backgroundShapeOptions: { ...selectedBackgroundShapeOptions },
       qrOptions: {
         ...DEFAULT_DRAFTING_STUDIO_STATE.qrOptions,
         typeNumber: selectedTypeNumber,
@@ -720,6 +762,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       selectedBackgroundColorMode,
       selectedBackgroundGradient,
       selectedBackgroundShapeId,
+      selectedBackgroundShapeOptions,
       selectedBackgroundTransparent,
       selectedBackgroundRemoteUrl,
       selectedQrRadius,
@@ -852,6 +895,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       cardStateByNodeId,
       contentValuesByType,
       draftingStudioState,
+      layerStateByNodeId,
       qrStateByNodeId,
       selectedCardState,
       selectedContentType,
@@ -1063,6 +1107,10 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     setSelectedBackgroundColor(nextState.backgroundOptions.color)
     setSelectedBackgroundGradient(structuredClone(nextState.backgroundGradient))
     setSelectedBackgroundShapeId(nextState.backgroundShapeId)
+    setSelectedBackgroundShapeOptions({
+      ...DEFAULT_DRAFTING_STUDIO_STATE.backgroundShapeOptions,
+      ...nextState.backgroundShapeOptions,
+    })
     setOpenBackgroundColorItems([nextState.backgroundGradient.enabled ? "gradient" : "solid"])
     setSelectedBackgroundAssetSourceMode(
       nextState.backgroundImage.source === "url" ? "url" : "upload",
@@ -1097,6 +1145,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     const qrStateEntries = Object.entries(qrStateByNodeId)
     const nextQrStateByNodeId: DraftingQrStateByNodeId = {}
     const nextCardStateByNodeId: DraftingCardStateByNodeId = {}
+    const nextLayerStateByNodeId: DraftingLayerStateByNodeId = {}
     const qrOrder = qrStateEntries.length > 0
       ? qrStateEntries.map(([nodeId]) => nodeId)
       : [activeQrNodeId]
@@ -1110,18 +1159,32 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
         nodeId === activeQrNodeId
           ? cloneDraftingCardState(selectedCardState)
           : cloneDraftingCardState(cardStateByNodeId[nodeId] ?? selectedCardState)
+      nextLayerStateByNodeId[nodeId] = (
+        layerStateByNodeId[nodeId] ??
+        createDefaultDraftingLayers(
+          nodeId,
+          nextQrStateByNodeId[nodeId],
+          nextCardStateByNodeId[nodeId],
+        )
+      ).map(cloneDraftingCanvasLayer)
     }
 
     if (!nextQrStateByNodeId[activeQrNodeId]) {
       qrOrder.push(activeQrNodeId)
       nextQrStateByNodeId[activeQrNodeId] = cloneDraftingQrState(draftingStudioState)
       nextCardStateByNodeId[activeQrNodeId] = cloneDraftingCardState(selectedCardState)
+      nextLayerStateByNodeId[activeQrNodeId] = createDefaultDraftingLayers(
+        activeQrNodeId,
+        draftingStudioState,
+        selectedCardState,
+      )
     }
 
     return {
       activeQrNodeId,
       cardStateByNodeId: nextCardStateByNodeId,
       contentValuesByType: structuredClone(contentValuesByType),
+      layerStateByNodeId: nextLayerStateByNodeId,
       qrOrder,
       qrStateByNodeId: nextQrStateByNodeId,
       selectedContentType,
@@ -1144,6 +1207,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       nextDocument.cardStateByNodeId[activeNodeId] ?? createDefaultDraftingCardState()
     const nextQrStateByNodeId: DraftingQrStateByNodeId = {}
     const nextCardStateByNodeId: DraftingCardStateByNodeId = {}
+    const nextLayerStateByNodeId: DraftingLayerStateByNodeId = {}
 
     for (const nodeId of nextQrOrder.length > 0 ? nextQrOrder : [activeNodeId]) {
       nextQrStateByNodeId[nodeId] = cloneDraftingQrState(
@@ -1152,15 +1216,25 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       nextCardStateByNodeId[nodeId] = cloneDraftingCardState(
         nextDocument.cardStateByNodeId[nodeId] ?? activeCardState,
       )
+      nextLayerStateByNodeId[nodeId] = (
+        nextDocument.layerStateByNodeId[nodeId] ??
+        createDefaultDraftingLayers(
+          nodeId,
+          nextQrStateByNodeId[nodeId],
+          nextCardStateByNodeId[nodeId],
+        )
+      ).map(cloneDraftingCanvasLayer)
     }
 
     setActiveQrNodeId(activeNodeId)
     setQrStateByNodeId(nextQrStateByNodeId)
     setCardStateByNodeId(nextCardStateByNodeId)
+    setLayerStateByNodeId(nextLayerStateByNodeId)
     applyDraftingQrStateToControls(activeState)
     setSelectedContentType(nextDocument.selectedContentType)
     setContentValuesByType(structuredClone(nextDocument.contentValuesByType))
     setSelectedCardState(cloneDraftingCardState(activeCardState))
+    setSelectedLayerId(getDraftingQrLayerId(activeNodeId))
   }
 
   function setDraftingHistoryStack(nextStack: DraftingWorkspaceDocumentV1[], nextIndex: number) {
@@ -1222,6 +1296,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     setActiveQrNodeId(paneId)
     applyDraftingQrStateToControls(nextState)
     setSelectedCardState(cloneDraftingCardState(nextCardState))
+    setSelectedLayerId(getDraftingQrLayerId(paneId))
   }
 
   function handlePaneQrClick(paneId: string) {
@@ -1246,6 +1321,14 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     setCardStateByNodeId({
       [DASHBOARD_QR_NODE_ID]: cloneDraftingCardState(nextCardState),
     })
+    setLayerStateByNodeId({
+      [DASHBOARD_QR_NODE_ID]: createDefaultDraftingLayers(
+        DASHBOARD_QR_NODE_ID,
+        nextState,
+        nextCardState,
+      ),
+    })
+    setSelectedLayerId(getDraftingQrLayerId(DASHBOARD_QR_NODE_ID))
 
     setSelectedDownloadExtension("png")
     setSelectedDownloadTarget("current")
@@ -1501,10 +1584,19 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       [activeQrNodeId]: cloneDraftingCardState(selectedCardState),
       [nextNodeId]: cloneDraftingCardState(selectedCardState),
     }))
+    setLayerStateByNodeId((current) => ({
+      ...current,
+      [nextNodeId]: createDefaultDraftingLayers(
+        nextNodeId,
+        sourceState,
+        selectedCardState,
+      ),
+    }))
 
     setActiveQrNodeId(nextNodeId)
     applyDraftingQrStateToControls(sourceState)
     setSelectedCardState(cloneDraftingCardState(selectedCardState))
+    setSelectedLayerId(getDraftingQrLayerId(nextNodeId))
   }
 
   function handleRemoveQrCode(paneId: string) {
@@ -1514,6 +1606,11 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       return next
     })
     setCardStateByNodeId((current) => {
+      const next = { ...current }
+      delete next[paneId]
+      return next
+    })
+    setLayerStateByNodeId((current) => {
       const next = { ...current }
       delete next[paneId]
       return next
@@ -1530,7 +1627,77 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       const fallbackCardState = cardStateByNodeId[fallbackId] ?? createDefaultDraftingCardState()
       applyDraftingQrStateToControls(fallbackState)
       setSelectedCardState(cloneDraftingCardState(fallbackCardState))
+      setSelectedLayerId(getDraftingQrLayerId(fallbackId))
     }
+  }
+
+  function handleLayerSelect(paneId: string, layerId: string) {
+    if (paneId !== activeQrNodeId) {
+      handlePaneSelection(paneId)
+    }
+
+    setSelectedLayerId(layerId)
+
+    if (isDraftingCardLayerId(layerId)) {
+      setActiveTool("card-frame")
+      return
+    }
+
+    setActiveTool(DEFAULT_QR_EDITOR_SECTION)
+  }
+
+  function handleLayerChange(
+    paneId: string,
+    layerId: string,
+    patch: Partial<DraftingCanvasLayer>,
+  ) {
+    setLayerStateByNodeId((current) => {
+      const currentQrState =
+        paneId === activeQrNodeId
+          ? draftingStudioState
+          : (qrStateByNodeId[paneId] ?? createDefaultDraftingWorkspaceQrState())
+      const currentCardState =
+        paneId === activeQrNodeId
+          ? selectedCardState
+          : (cardStateByNodeId[paneId] ?? createDefaultDraftingCardState())
+      const layers =
+        current[paneId] ??
+        createDefaultDraftingLayers(paneId, currentQrState, currentCardState)
+
+      return {
+        ...current,
+        [paneId]: layers.map((layer) =>
+          layer.id === layerId ? patchDraftingCanvasLayer(layer, patch) : layer,
+        ),
+      }
+    })
+  }
+
+  function handleLayerReorder(orderedIds: string[]) {
+    setLayerStateByNodeId((current) => {
+      const currentLayers =
+        current[activeQrNodeId] ??
+        createDefaultDraftingLayers(activeQrNodeId, draftingStudioState, selectedCardState)
+      const layerById = new Map(currentLayers.map((layer) => [layer.id, layer]))
+      const nextOrder = [
+        ...orderedIds.filter((layerId) => layerById.has(layerId)),
+        ...currentLayers
+          .map((layer) => layer.id)
+          .filter((layerId) => !orderedIds.includes(layerId)),
+      ]
+      const zIndexByLayerId = new Map(
+        nextOrder.map((layerId, index) => [layerId, nextOrder.length - index]),
+      )
+
+      return {
+        ...current,
+        [activeQrNodeId]: currentLayers.map((layer) =>
+          patchDraftingCanvasLayer(layer, {
+            zIndex: zIndexByLayerId.get(layer.id) ?? layer.zIndex,
+          }),
+        ),
+      }
+    })
   }
 
   async function handleDownload() {
@@ -1539,14 +1706,21 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
         const nodes = await Promise.all(
           Object.entries(qrStateByNodeId).map(async ([nodeId, state]) => {
             const activeState = nodeId === activeQrNodeId ? draftingStudioState : state
-            const payload = await buildDashboardQrNodePayload(activeState)
-            return {
-              id: nodeId,
+            const activeCardState =
+              nodeId === activeQrNodeId
+                ? selectedCardState
+                : (cardStateByNodeId[nodeId] ?? selectedCardState)
+            const activeLayers =
+              layerStateByNodeId[nodeId] ??
+              createDefaultDraftingLayers(nodeId, activeState, activeCardState)
+
+            return await buildDraftingLayeredNodePayload({
+              cardState: activeCardState,
+              layers: activeLayers,
               name: qrPaneNamesById.get(nodeId) ?? "QR Code",
-              naturalHeight: payload.naturalHeight,
-              naturalWidth: payload.naturalWidth,
-              originalSvgMarkup: payload.markup,
-            }
+              nodeId,
+              state: activeState,
+            })
           }),
         )
 
@@ -1572,18 +1746,25 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
           throw new Error("The selected QR code is unavailable for export.")
         }
 
-        const payload = await buildDashboardQrNodePayload(state)
+        const activeCardState =
+          nodeId === activeQrNodeId
+            ? selectedCardState
+            : (cardStateByNodeId[nodeId] ?? selectedCardState)
+        const activeLayers =
+          layerStateByNodeId[nodeId] ??
+          createDefaultDraftingLayers(nodeId, state, activeCardState)
+        const payload = await buildDraftingLayeredNodePayload({
+          cardState: activeCardState,
+          layers: activeLayers,
+          name: qrPaneNamesById.get(nodeId) ?? "QR Code",
+          nodeId,
+          state,
+        })
 
         await downloadDashboardQrNodeExport({
           extension: selectedDownloadExtension,
           name: qrPaneNamesById.get(nodeId) ?? "QR Code",
-          node: {
-            id: nodeId,
-            name: qrPaneNamesById.get(nodeId) ?? "QR Code",
-            naturalHeight: payload.naturalHeight,
-            naturalWidth: payload.naturalWidth,
-            originalSvgMarkup: payload.markup,
-          },
+          node: payload,
           qualityPercent: draftingStudioState.rasterExportQualityPercent,
           targetSizePx: selectedRasterExportTargetSizePx,
         })
@@ -1618,6 +1799,13 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       setActiveTool(DEFAULT_QR_EDITOR_SECTION)
     }
   }
+
+  const activeCanvasLayers =
+    layerStateByNodeId[activeQrNodeId] ??
+    createDefaultDraftingLayers(activeQrNodeId, draftingStudioState, selectedCardState)
+  const activeCanvasLayerRows = [...activeCanvasLayers].sort(
+    (a, b) => b.zIndex - a.zIndex,
+  )
 
   const renderPanelContent = (toolId: DraftingToolId, tabId: string) => {
     if (toolId === "content" && tabId === "content") {
@@ -1678,7 +1866,13 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       return (
         <DraftingCardSettingsTab
           value={selectedCardState}
-          onValueChange={setSelectedCardState}
+          onValueChange={(nextCardState) => {
+            setSelectedCardState(nextCardState)
+            handleLayerChange(activeQrNodeId, getDraftingCardLayerId(activeQrNodeId), {
+              isVisible: nextCardState.enabled,
+              shadow: nextCardState.shadow,
+            })
+          }}
         />
       )
     }
@@ -1929,6 +2123,8 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
           }}
           solidColor={selectedBackgroundColor}
           value={selectedBackgroundShapeId}
+          options={selectedBackgroundShapeOptions}
+          onOptionsChange={setSelectedBackgroundShapeOptions}
           onValueChange={(value) => {
             setSelectedBackgroundShapeId(value)
             setSelectedBackgroundAssetSourceMode("upload")
@@ -2047,45 +2243,15 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     if (toolId === "layers" && tabId === "layers") {
       return (
         <DraftingLayersTab
-          onReorder={(orderedIds) => {
-            const activeState = cloneDraftingQrState(draftingStudioState)
-
-            setQrStateByNodeId((current) => {
-              const next: DraftingQrStateByNodeId = {}
-              for (const id of orderedIds) {
-                if (id === activeQrNodeId) {
-                  next[id] = activeState
-                  continue
-                }
-
-                if (current[id]) {
-                  next[id] = current[id]
-                }
-              }
-              // Add any missing ids at the end
-              for (const id of Object.keys(current)) {
-                if (!next[id]) {
-                  next[id] = id === activeQrNodeId ? activeState : current[id]
-                }
-              }
-              return next
-            })
-          }}
+          onLayerPatch={(layerId, patch) => handleLayerChange(activeQrNodeId, layerId, patch)}
+          onReorder={handleLayerReorder}
           onSelectedNodeChange={(nodeId) => {
-            if (nodeId && isDashboardQrNodeId(nodeId)) {
-              handlePaneSelection(nodeId)
+            if (nodeId) {
+              handleLayerSelect(activeQrNodeId, nodeId)
             }
           }}
-          panes={qrNodeIds.map((id) => ({
-            id,
-            name: qrPaneNamesById.get(id) ?? "QR Code",
-          }))}
-          selectedNodeId={activeQrNodeId}
-          onRemoveNode={(nodeId) => {
-            if (isDashboardQrNodeId(nodeId)) {
-              handleRemoveQrCode(nodeId)
-            }
-          }}
+          panes={activeCanvasLayerRows}
+          selectedNodeId={selectedLayerId}
         />
       )
     }
@@ -2101,6 +2267,17 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
             ? selectedCardState
             : (cardStateByNodeId[id] ?? selectedCardState),
         id,
+        layers:
+          layerStateByNodeId[id] ??
+          createDefaultDraftingLayers(
+            id,
+            id === activeQrNodeId
+              ? draftingStudioState
+              : (qrStateByNodeId[id] ?? draftingStudioState),
+            id === activeQrNodeId
+              ? selectedCardState
+              : (cardStateByNodeId[id] ?? selectedCardState),
+          ),
         name: qrPaneNamesById.get(id) ?? "QR Code",
         state: id === activeQrNodeId ? draftingStudioState : (qrStateByNodeId[id] ?? draftingStudioState),
       })),
@@ -2109,6 +2286,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       qrPaneNamesById,
       qrStateByNodeId,
       cardStateByNodeId,
+      layerStateByNodeId,
       activeQrNodeId,
       draftingStudioState,
       selectedCardState,
@@ -2610,6 +2788,8 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
               onAddQrCode={() => {
                 void handleAddQrCode()
               }}
+              onLayerChange={handleLayerChange}
+              onLayerSelect={handleLayerSelect}
               onPaneQrClick={handlePaneQrClick}
               onPaneSelect={handlePaneSelection}
               onRedo={handleRedoDraftingWorkspace}
@@ -2630,6 +2810,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
               }}
               onUndo={handleUndoDraftingWorkspace}
               panes={panes}
+              selectedLayerId={selectedLayerId}
             />
           </div>
         </section>
@@ -2653,6 +2834,206 @@ async function downloadDraftingSvgExport({
   const blob = new Blob([payload.markup], { type: "image/svg+xml;charset=utf-8" })
 
   downloadBlob(blob, `${name}.svg`)
+}
+
+async function buildDraftingLayeredNodePayload({
+  cardState,
+  layers,
+  name,
+  nodeId,
+  state,
+}: {
+  cardState: DraftingCardState
+  layers: DraftingCanvasLayer[]
+  name: string
+  nodeId: string
+  state: QrStudioState
+}) {
+  const qrPayload = await buildDashboardQrNodePayload(createDraftingQrArtworkState(state))
+  const qrArtworkMarkup = sanitizeDraftingQrArtworkMarkup(qrPayload.markup)
+  const visibleLayers = layers
+    .filter((layer) => layer.isVisible)
+    .sort((a, b) => a.zIndex - b.zIndex)
+  const bounds = getDraftingLayerBounds(visibleLayers, state)
+
+  return {
+    id: nodeId,
+    name,
+    naturalHeight: bounds.height,
+    naturalWidth: bounds.width,
+    originalSvgMarkup: buildDraftingLayeredSvgMarkup({
+      bounds,
+      cardState,
+      layers: visibleLayers,
+      qrMarkup: qrArtworkMarkup,
+      state,
+    }),
+  }
+}
+
+function buildDraftingLayeredSvgMarkup({
+  bounds,
+  cardState,
+  layers,
+  qrMarkup,
+  state,
+}: {
+  bounds: DraftingLayerBounds
+  cardState: DraftingCardState
+  layers: DraftingCanvasLayer[]
+  qrMarkup: string
+  state: QrStudioState
+}) {
+  const defs = layers
+    .map((layer) => getDraftingLayerFilterMarkup(layer))
+    .filter(Boolean)
+    .join("")
+  const body = layers
+    .map((layer) =>
+      layer.kind === "card"
+        ? getDraftingCardLayerSvg(layer, cardState)
+        : getDraftingQrLayerSvg(layer, qrMarkup, state),
+    )
+    .join("")
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${bounds.width}" height="${bounds.height}" viewBox="${bounds.minX} ${bounds.minY} ${bounds.width} ${bounds.height}"><defs>${defs}</defs>${body}</svg>`
+}
+
+type DraftingLayerBounds = {
+  height: number
+  minX: number
+  minY: number
+  width: number
+}
+
+function getDraftingLayerBounds(
+  layers: DraftingCanvasLayer[],
+  state: QrStudioState,
+): DraftingLayerBounds {
+  if (layers.length === 0) {
+    return {
+      height: 1,
+      minX: 0,
+      minY: 0,
+      width: 1,
+    }
+  }
+
+  const visualBounds = layers.map((layer) => {
+    if (layer.kind === "qr") {
+      return getDraftingQrBackgroundBounds(layer, state)
+    }
+
+    return {
+      maxX: layer.x + layer.width,
+      maxY: layer.y + layer.height,
+      minX: layer.x,
+      minY: layer.y,
+    }
+  })
+  const minX = Math.floor(Math.min(...visualBounds.map((bounds) => bounds.minX)))
+  const minY = Math.floor(Math.min(...visualBounds.map((bounds) => bounds.minY)))
+  const maxX = Math.ceil(Math.max(...visualBounds.map((bounds) => bounds.maxX)))
+  const maxY = Math.ceil(Math.max(...visualBounds.map((bounds) => bounds.maxY)))
+
+  return {
+    height: Math.max(1, maxY - minY),
+    minX,
+    minY,
+    width: Math.max(1, maxX - minX),
+  }
+}
+
+function getDraftingLayerFilterMarkup(layer: DraftingCanvasLayer) {
+  const hasShadow =
+    layer.kind !== "qr" &&
+    layer.shadow.opacity > 0 &&
+    (layer.shadow.blur > 0 || layer.shadow.offsetX !== 0 || layer.shadow.offsetY !== 0)
+  const hasBlur = layer.blur > 0
+
+  if (!hasShadow && !hasBlur) {
+    return ""
+  }
+
+  return `<filter id="${getSvgId(layer.id)}-filter" x="-50%" y="-50%" width="200%" height="200%">${hasShadow ? `<feDropShadow dx="${layer.shadow.offsetX}" dy="${layer.shadow.offsetY}" stdDeviation="${layer.shadow.blur / 2}" flood-color="${escapeXml(layer.shadow.color)}" flood-opacity="${layer.shadow.opacity / 100}"/>` : ""}${hasBlur ? `<feGaussianBlur stdDeviation="${layer.blur}"/>` : ""}</filter>`
+}
+
+function getDraftingCardLayerSvg(layer: DraftingCanvasLayer, cardState: DraftingCardState) {
+  const filter = getDraftingLayerFilterMarkup(layer)
+    ? ` filter="url(#${getSvgId(layer.id)}-filter)"`
+    : ""
+  const strokeWidth = Math.max(0, cardState.border.width)
+  const stroke =
+    strokeWidth > 0
+      ? ` stroke="${escapeXml(cardState.border.color)}" stroke-opacity="${cardState.border.opacity / 100}" stroke-width="${strokeWidth}"`
+      : ""
+
+  return `<g opacity="${layer.opacity}" transform="${getDraftingLayerSvgTransform(layer)}"${filter}><rect x="0" y="0" width="${layer.width}" height="${layer.height}" rx="${cardState.cornerRadius}" fill="${escapeXml(cardState.fill)}"${stroke}/></g>`
+}
+
+function getDraftingQrLayerSvg(
+  layer: DraftingCanvasLayer,
+  qrMarkup: string,
+  state: QrStudioState,
+) {
+  const filter = getDraftingLayerFilterMarkup(layer)
+    ? ` filter="url(#${getSvgId(layer.id)}-filter)"`
+    : ""
+  const shadowedQrMarkup = hasDraftingLayerShadow(layer)
+    ? applyDraftingQrForegroundShadow(qrMarkup, layer)
+    : qrMarkup
+
+  return `<g opacity="${layer.opacity}" transform="${getDraftingLayerSvgTransform(layer)}"${filter}>${getDraftingQrBackgroundSvgMarkup(layer, state)}${scaleNestedSvgMarkup(shadowedQrMarkup, layer.width, layer.height)}</g>`
+}
+
+function getDraftingLayerSvgTransform(layer: DraftingCanvasLayer) {
+  const centerX = layer.width / 2
+  const centerY = layer.height / 2
+
+  return `translate(${layer.x} ${layer.y}) rotate(${layer.rotation} ${centerX} ${centerY})`
+}
+
+function scaleNestedSvgMarkup(markup: string, width: number, height: number) {
+  const withScaledSelfClosingSvg = markup.replace(
+    /<svg\b([^>]*)\/>/i,
+    (_match, attributes: string) => {
+      const nextAttributes = cleanNestedSvgAttributes(attributes)
+
+      return `<svg${nextAttributes} width="${width}" height="${height}" preserveAspectRatio="none"></svg>`
+    },
+  )
+
+  if (withScaledSelfClosingSvg !== markup) {
+    return withScaledSelfClosingSvg
+  }
+
+  return markup.replace(
+    /<svg\b([^>]*)>/i,
+    (_match, attributes: string) => {
+      const nextAttributes = cleanNestedSvgAttributes(attributes)
+
+      return `<svg${nextAttributes} width="${width}" height="${height}" preserveAspectRatio="none">`
+    },
+  )
+}
+
+function cleanNestedSvgAttributes(attributes: string) {
+  return String(attributes)
+    .replace(/\swidth="[^"]*"/i, "")
+    .replace(/\sheight="[^"]*"/i, "")
+    .replace(/\spreserveAspectRatio="[^"]*"/i, "")
+}
+
+function getSvgId(value: string) {
+  return value.replace(/[^\w-]+/g, "-")
+}
+
+function escapeXml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
 }
 
 function downloadBlob(blob: Blob, fileName: string) {
