@@ -40,6 +40,21 @@ import {
   createDefaultDraftingCardState,
   type DraftingCardState,
 } from "@/components/new/drafting-card-state"
+import {
+  cloneDraftingQrState,
+  cloneDraftingWorkspaceDocument,
+  createDefaultDraftingWorkspaceDocument,
+  createDefaultDraftingWorkspaceQrState,
+  serializeDraftingWorkspaceDocument,
+  type DraftingCardStateByNodeId,
+  type DraftingContentValuesByType,
+  type DraftingQrStateByNodeId,
+  type DraftingWorkspaceDocumentV1,
+} from "@/components/new/drafting-workspace-document"
+import {
+  readDraftingWorkspaceDraft,
+  writeDraftingWorkspaceDraft,
+} from "@/components/new/drafting-workspace-storage"
 import type {
   DraftingCardPatternColorSlotId,
   DraftingCardPatternId,
@@ -103,7 +118,6 @@ import {
   getDefaultStaticQrValues,
   validateStaticQrContent,
   type StaticQrContentValue,
-  type StaticQrContentValues,
 } from "@/components/qr/qr-static-content"
 import { CreditCardIcon, DownloadIcon, LinkIcon, PieChart, Settings, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -162,10 +176,6 @@ type DraftingTool = {
   title: string
   renderIcon: () => ReactNode
 }
-
-type DraftingQrStateByNodeId = Record<string, QrStudioState>
-type DraftingCardStateByNodeId = Record<string, DraftingCardState>
-type DraftingContentValuesByType = Partial<Record<QrInputType, StaticQrContentValues>>
 
 const DRAFTING_PANEL_TABS: Record<DraftingToolId, DraftingPanelTab[]> = {
   content: [{ id: "content", label: "Content" }],
@@ -275,19 +285,6 @@ const DRAFTING_RASTER_EXPORT_PRESETS = [
 ] as const
 type DraftingRasterExportPresetId = (typeof DRAFTING_RASTER_EXPORT_PRESETS)[number]["id"]
 const DEFAULT_DRAFTING_RASTER_EXPORT_PRESET_ID: DraftingRasterExportPresetId = "web-social"
-
-function cloneDraftingQrState(state: QrStudioState): QrStudioState {
-  return structuredClone(state)
-}
-
-function createDefaultDraftingQrState() {
-  const state = cloneDraftingQrState(DEFAULT_DRAFTING_STUDIO_STATE)
-
-  state.width = DEFAULT_DRAFTING_PANE_QR_SIZE
-  state.height = DEFAULT_DRAFTING_PANE_QR_SIZE
-
-  return state
-}
 
 function swapDraftingQrNodeOrder(
   current: DraftingQrStateByNodeId,
@@ -579,7 +576,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     )
   const [activeQrNodeId, setActiveQrNodeId] = useState(DASHBOARD_QR_NODE_ID)
   const [qrStateByNodeId, setQrStateByNodeId] = useState<DraftingQrStateByNodeId>(() => ({
-    [DASHBOARD_QR_NODE_ID]: createDefaultDraftingQrState(),
+    [DASHBOARD_QR_NODE_ID]: createDefaultDraftingWorkspaceQrState(),
   }))
   const [selectedCardState, setSelectedCardState] = useState<DraftingCardState>(() =>
     createDefaultDraftingCardState(),
@@ -601,8 +598,17 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const [activePanelTabs, setActivePanelTabs] = useState<Record<DraftingToolId, string>>(
     DEFAULT_DRAFTING_PANEL_TABS,
   )
+  const [isDraftingWorkspaceReady, setIsDraftingWorkspaceReady] = useState(false)
+  const [draftingHistoryRevision, setDraftingHistoryRevision] = useState(0)
   const draftingExportPreviewRequestRef = useRef(0)
   const draftingExportPreviewTimeoutRef = useRef<number | null>(null)
+  const draftingWorkspaceAutosaveTimerRef = useRef<number | null>(null)
+  const draftingWorkspaceHistoryTimerRef = useRef<number | null>(null)
+  const draftingWorkspaceHistoryRef = useRef<DraftingWorkspaceDocumentV1[]>([])
+  const draftingWorkspaceHistoryIndexRef = useRef(-1)
+  const isApplyingDraftingWorkspaceHistoryRef = useRef(false)
+  const shouldReplaceCurrentDraftingHistoryEntryRef = useRef(false)
+  const draftingSurfaceRef = useRef<HTMLElement | null>(null)
   const activeToolConfig =
     DRAFTING_TOOLS.find((section) => section.id === activeTool) ?? DRAFTING_TOOLS[0]
   const isCardTool = (toolId: DraftingToolId): toolId is DraftingCardToolId =>
@@ -837,6 +843,26 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const activeDraftingExportPreviewTargetSizePx = isDownloadPopoverOpen
     ? selectedRasterExportTargetSizePx
     : undefined
+  const draftingWorkspaceDocument = useMemo(
+    () => buildDraftingWorkspaceDocument(),
+    // buildDraftingWorkspaceDocument reads exactly the state listed here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      activeQrNodeId,
+      cardStateByNodeId,
+      contentValuesByType,
+      draftingStudioState,
+      qrStateByNodeId,
+      selectedCardState,
+      selectedContentType,
+    ],
+  )
+  const canUndoDraftingWorkspace =
+    draftingHistoryRevision >= 0 && draftingWorkspaceHistoryIndexRef.current > 0
+  const canRedoDraftingWorkspace =
+    draftingHistoryRevision >= 0 &&
+    draftingWorkspaceHistoryIndexRef.current <
+      draftingWorkspaceHistoryRef.current.length - 1
 
   function buildDraftingLogoStateSnapshot({
     logoColor = selectedLogoColor,
@@ -1067,10 +1093,118 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     setSelectedErrorCorrectionLevel(nextState.qrOptions.errorCorrectionLevel)
   }
 
+  function buildDraftingWorkspaceDocument(): DraftingWorkspaceDocumentV1 {
+    const qrStateEntries = Object.entries(qrStateByNodeId)
+    const nextQrStateByNodeId: DraftingQrStateByNodeId = {}
+    const nextCardStateByNodeId: DraftingCardStateByNodeId = {}
+    const qrOrder = qrStateEntries.length > 0
+      ? qrStateEntries.map(([nodeId]) => nodeId)
+      : [activeQrNodeId]
+
+    for (const nodeId of qrOrder) {
+      nextQrStateByNodeId[nodeId] =
+        nodeId === activeQrNodeId
+          ? cloneDraftingQrState(draftingStudioState)
+          : cloneDraftingQrState(qrStateByNodeId[nodeId] ?? draftingStudioState)
+      nextCardStateByNodeId[nodeId] =
+        nodeId === activeQrNodeId
+          ? cloneDraftingCardState(selectedCardState)
+          : cloneDraftingCardState(cardStateByNodeId[nodeId] ?? selectedCardState)
+    }
+
+    if (!nextQrStateByNodeId[activeQrNodeId]) {
+      qrOrder.push(activeQrNodeId)
+      nextQrStateByNodeId[activeQrNodeId] = cloneDraftingQrState(draftingStudioState)
+      nextCardStateByNodeId[activeQrNodeId] = cloneDraftingCardState(selectedCardState)
+    }
+
+    return {
+      activeQrNodeId,
+      cardStateByNodeId: nextCardStateByNodeId,
+      contentValuesByType: structuredClone(contentValuesByType),
+      qrOrder,
+      qrStateByNodeId: nextQrStateByNodeId,
+      selectedContentType,
+      version: 1,
+    }
+  }
+
+  function applyDraftingWorkspaceDocumentToControls(
+    nextDocument: DraftingWorkspaceDocumentV1,
+  ) {
+    const nextQrOrder = nextDocument.qrOrder.filter(
+      (nodeId) => nextDocument.qrStateByNodeId[nodeId],
+    )
+    const activeNodeId = nextDocument.qrStateByNodeId[nextDocument.activeQrNodeId]
+      ? nextDocument.activeQrNodeId
+      : (nextQrOrder[0] ?? DASHBOARD_QR_NODE_ID)
+    const activeState =
+      nextDocument.qrStateByNodeId[activeNodeId] ?? createDefaultDraftingWorkspaceQrState()
+    const activeCardState =
+      nextDocument.cardStateByNodeId[activeNodeId] ?? createDefaultDraftingCardState()
+    const nextQrStateByNodeId: DraftingQrStateByNodeId = {}
+    const nextCardStateByNodeId: DraftingCardStateByNodeId = {}
+
+    for (const nodeId of nextQrOrder.length > 0 ? nextQrOrder : [activeNodeId]) {
+      nextQrStateByNodeId[nodeId] = cloneDraftingQrState(
+        nextDocument.qrStateByNodeId[nodeId] ?? activeState,
+      )
+      nextCardStateByNodeId[nodeId] = cloneDraftingCardState(
+        nextDocument.cardStateByNodeId[nodeId] ?? activeCardState,
+      )
+    }
+
+    setActiveQrNodeId(activeNodeId)
+    setQrStateByNodeId(nextQrStateByNodeId)
+    setCardStateByNodeId(nextCardStateByNodeId)
+    applyDraftingQrStateToControls(activeState)
+    setSelectedContentType(nextDocument.selectedContentType)
+    setContentValuesByType(structuredClone(nextDocument.contentValuesByType))
+    setSelectedCardState(cloneDraftingCardState(activeCardState))
+  }
+
+  function setDraftingHistoryStack(nextStack: DraftingWorkspaceDocumentV1[], nextIndex: number) {
+    draftingWorkspaceHistoryRef.current = nextStack
+    draftingWorkspaceHistoryIndexRef.current = nextIndex
+    setDraftingHistoryRevision((current) => current + 1)
+  }
+
+  function restoreDraftingHistorySnapshot(nextIndex: number) {
+    const snapshot = draftingWorkspaceHistoryRef.current[nextIndex]
+
+    if (!snapshot) {
+      return
+    }
+
+    isApplyingDraftingWorkspaceHistoryRef.current = true
+    setDraftingHistoryStack(draftingWorkspaceHistoryRef.current, nextIndex)
+    applyDraftingWorkspaceDocumentToControls(snapshot)
+    window.setTimeout(() => {
+      isApplyingDraftingWorkspaceHistoryRef.current = false
+    }, 0)
+  }
+
+  function handleUndoDraftingWorkspace() {
+    restoreDraftingHistorySnapshot(
+      Math.max(0, draftingWorkspaceHistoryIndexRef.current - 1),
+    )
+  }
+
+  function handleRedoDraftingWorkspace() {
+    restoreDraftingHistorySnapshot(
+      Math.min(
+        draftingWorkspaceHistoryRef.current.length - 1,
+        draftingWorkspaceHistoryIndexRef.current + 1,
+      ),
+    )
+  }
+
   function handlePaneSelection(paneId: string) {
     if (paneId === activeQrNodeId) {
       return
     }
+
+    shouldReplaceCurrentDraftingHistoryEntryRef.current = true
 
     // Save current controls state to the old active pane
     setQrStateByNodeId((current) => ({
@@ -1097,7 +1231,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   }
 
   function resetDraftingWorkspace() {
-    const nextState = createDefaultDraftingQrState()
+    const nextState = createDefaultDraftingWorkspaceQrState()
 
     setActiveTool(DEFAULT_QR_EDITOR_SECTION)
     applyDraftingQrStateToControls(nextState)
@@ -1125,9 +1259,156 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   }
 
   useEffect(() => {
+    let cancelled = false
+
+    void readDraftingWorkspaceDraft().then((savedDocument) => {
+      if (cancelled) {
+        return
+      }
+
+      const nextDocument = savedDocument ?? createDefaultDraftingWorkspaceDocument()
+
+      isApplyingDraftingWorkspaceHistoryRef.current = true
+      if (savedDocument) {
+        applyDraftingWorkspaceDocumentToControls(nextDocument)
+      }
+      setDraftingHistoryStack([cloneDraftingWorkspaceDocument(nextDocument)], 0)
+      setIsDraftingWorkspaceReady(true)
+      window.setTimeout(() => {
+        isApplyingDraftingWorkspaceHistoryRef.current = false
+      }, 0)
+    })
+
+    return () => {
+      cancelled = true
+    }
+    // Initial draft hydration must run once on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (!isDraftingWorkspaceReady) {
+      return
+    }
+
+    if (draftingWorkspaceHistoryTimerRef.current !== null) {
+      window.clearTimeout(draftingWorkspaceHistoryTimerRef.current)
+    }
+
+    draftingWorkspaceHistoryTimerRef.current = window.setTimeout(() => {
+      const snapshot = cloneDraftingWorkspaceDocument(draftingWorkspaceDocument)
+      const serializedSnapshot = serializeDraftingWorkspaceDocument(snapshot)
+      const currentIndex = draftingWorkspaceHistoryIndexRef.current
+      const currentSnapshot = draftingWorkspaceHistoryRef.current[currentIndex]
+
+      if (
+        currentSnapshot &&
+        serializeDraftingWorkspaceDocument(currentSnapshot) === serializedSnapshot
+      ) {
+        return
+      }
+
+      if (isApplyingDraftingWorkspaceHistoryRef.current) {
+        return
+      }
+
+      if (shouldReplaceCurrentDraftingHistoryEntryRef.current) {
+        const nextStack = [...draftingWorkspaceHistoryRef.current]
+        nextStack[currentIndex] = snapshot
+        shouldReplaceCurrentDraftingHistoryEntryRef.current = false
+        setDraftingHistoryStack(nextStack, currentIndex)
+        return
+      }
+
+      const nextStack = draftingWorkspaceHistoryRef.current.slice(0, currentIndex + 1)
+      nextStack.push(snapshot)
+
+      if (nextStack.length > 80) {
+        nextStack.shift()
+      }
+
+      setDraftingHistoryStack(nextStack, nextStack.length - 1)
+    }, 160)
+
+    return () => {
+      if (draftingWorkspaceHistoryTimerRef.current !== null) {
+        window.clearTimeout(draftingWorkspaceHistoryTimerRef.current)
+      }
+    }
+  }, [draftingWorkspaceDocument, isDraftingWorkspaceReady])
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target
+      const targetInSurface =
+        target instanceof Node && draftingSurfaceRef.current?.contains(target)
+
+      if (!targetInSurface || isEditableShortcutTarget(target)) {
+        return
+      }
+
+      const usesModifier = event.metaKey || event.ctrlKey
+
+      if (!usesModifier) {
+        return
+      }
+
+      const key = event.key.toLowerCase()
+
+      if (key === "z" && event.shiftKey) {
+        event.preventDefault()
+        handleRedoDraftingWorkspace()
+        return
+      }
+
+      if (key === "z") {
+        event.preventDefault()
+        handleUndoDraftingWorkspace()
+        return
+      }
+
+      if (key === "y") {
+        event.preventDefault()
+        handleRedoDraftingWorkspace()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown, true)
+    return () => window.removeEventListener("keydown", handleKeyDown, true)
+    // Keyboard handlers use history refs, so they do not need render-time state.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (!isDraftingWorkspaceReady) {
+      return
+    }
+
+    if (draftingWorkspaceAutosaveTimerRef.current !== null) {
+      window.clearTimeout(draftingWorkspaceAutosaveTimerRef.current)
+    }
+
+    draftingWorkspaceAutosaveTimerRef.current = window.setTimeout(() => {
+      void writeDraftingWorkspaceDraft(draftingWorkspaceDocument)
+    }, 240)
+
+    return () => {
+      if (draftingWorkspaceAutosaveTimerRef.current !== null) {
+        window.clearTimeout(draftingWorkspaceAutosaveTimerRef.current)
+      }
+    }
+  }, [draftingWorkspaceDocument, isDraftingWorkspaceReady])
+
+  useEffect(() => {
     return () => {
       if (draftingExportPreviewTimeoutRef.current !== null) {
         window.clearTimeout(draftingExportPreviewTimeoutRef.current)
+      }
+      if (draftingWorkspaceAutosaveTimerRef.current !== null) {
+        window.clearTimeout(draftingWorkspaceAutosaveTimerRef.current)
+      }
+      if (draftingWorkspaceHistoryTimerRef.current !== null) {
+        window.clearTimeout(draftingWorkspaceHistoryTimerRef.current)
       }
     }
   }, [])
@@ -1244,7 +1525,8 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
         (id) => id !== paneId,
       ) ?? DASHBOARD_QR_NODE_ID
       setActiveQrNodeId(fallbackId)
-      const fallbackState = qrStateByNodeId[fallbackId] ?? createDefaultDraftingQrState()
+      const fallbackState =
+        qrStateByNodeId[fallbackId] ?? createDefaultDraftingWorkspaceQrState()
       const fallbackCardState = cardStateByNodeId[fallbackId] ?? createDefaultDraftingCardState()
       applyDraftingQrStateToControls(fallbackState)
       setSelectedCardState(cloneDraftingCardState(fallbackCardState))
@@ -1835,6 +2117,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
 
   return (
     <section
+      ref={draftingSurfaceRef}
       aria-label="Drafting workspace"
       data-logo-color-mode={selectedLogoColorMode}
       data-background-shape-id={selectedBackgroundShapeId}
@@ -2321,12 +2604,15 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
           >
             <DraftingPaneWorkspace
               activePaneId={activeQrNodeId}
+              canRedo={canRedoDraftingWorkspace}
               canAddQrCode={qrNodeIds.length < 10}
+              canUndo={canUndoDraftingWorkspace}
               onAddQrCode={() => {
                 void handleAddQrCode()
               }}
               onPaneQrClick={handlePaneQrClick}
               onPaneSelect={handlePaneSelection}
+              onRedo={handleRedoDraftingWorkspace}
               onRemoveQrCode={handleRemoveQrCode}
               onReset={resetDraftingWorkspace}
               onSwapPanes={(sourcePaneId, targetPaneId) => {
@@ -2342,6 +2628,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
                   ),
                 )
               }}
+              onUndo={handleUndoDraftingWorkspace}
               panes={panes}
             />
           </div>
@@ -2378,4 +2665,16 @@ function downloadBlob(blob: Blob, fileName: string) {
   anchor.click()
   document.body.removeChild(anchor)
   URL.revokeObjectURL(objectUrl)
+}
+
+function isEditableShortcutTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) {
+    return false
+  }
+
+  return Boolean(
+    target.closest(
+      'input, textarea, select, [contenteditable="true"], [contenteditable=""], [role="textbox"]',
+    ),
+  )
 }

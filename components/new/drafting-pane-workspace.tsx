@@ -5,8 +5,10 @@ import {
   CopyPlusIcon,
   Maximize2Icon,
   Minimize2Icon,
+  Redo2Icon,
   RefreshCcwIcon,
   Trash2Icon,
+  Undo2Icon,
   ZoomInIcon,
   ZoomOutIcon,
 } from "lucide-react"
@@ -42,9 +44,13 @@ type DraftingPaneWorkspaceProps = {
   panes: DraftingPane[]
   activePaneId: string
   canAddQrCode?: boolean
+  canRedo?: boolean
+  canUndo?: boolean
   onAddQrCode?: () => void
+  onRedo?: () => void
   onRemoveQrCode?: (paneId: string) => void
   onReset: () => void
+  onUndo?: () => void
   onPaneSelect: (paneId: string) => void
   onPaneQrClick: (paneId: string) => void
   onSwapPanes?: (sourcePaneId: string, targetPaneId: string) => void
@@ -189,9 +195,13 @@ export function DraftingPaneWorkspace({
   panes,
   activePaneId,
   canAddQrCode = true,
+  canRedo = false,
+  canUndo = false,
   onAddQrCode,
+  onRedo,
   onRemoveQrCode,
   onReset,
+  onUndo,
   onPaneSelect,
   onPaneQrClick,
   onSwapPanes,
@@ -566,6 +576,40 @@ export function DraftingPaneWorkspace({
                 <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" />
               </>
             ) : null}
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  aria-label="Undo"
+                  className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] disabled:opacity-40"
+                  disabled={!canUndo || !onUndo}
+                  onClick={onUndo}
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+                >
+                  <Undo2Icon />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Undo</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  aria-label="Redo"
+                  className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] disabled:opacity-40"
+                  disabled={!canRedo || !onRedo}
+                  onClick={onRedo}
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+                >
+                  <Redo2Icon />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Redo</TooltipContent>
+            </Tooltip>
 
             <Tooltip>
               <TooltipTrigger asChild>

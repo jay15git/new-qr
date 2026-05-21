@@ -207,17 +207,63 @@ describe("DraftingPaneWorkspace", () => {
     expect(getPaneSurfaces(workspace.container, 1)).toHaveLength(1)
     expect(getResizeHandles(workspace.container)).toHaveLength(0)
   })
+
+  it("renders disabled undo and redo controls when history is unavailable", () => {
+    const workspace = renderWorkspace()
+    const undoButton = workspace.container.querySelector(
+      'button[aria-label="Undo"]',
+    ) as HTMLButtonElement | null
+    const redoButton = workspace.container.querySelector(
+      'button[aria-label="Redo"]',
+    ) as HTMLButtonElement | null
+
+    expect(undoButton).not.toBeNull()
+    expect(redoButton).not.toBeNull()
+    expect(undoButton?.disabled).toBe(true)
+    expect(redoButton?.disabled).toBe(true)
+  })
+
+  it("calls undo and redo toolbar handlers when history is available", () => {
+    const onUndo = vi.fn()
+    const onRedo = vi.fn()
+    const workspace = renderWorkspace({
+      canRedo: true,
+      canUndo: true,
+      onRedo,
+      onUndo,
+    })
+
+    act(() => {
+      workspace.container
+        .querySelector('button[aria-label="Undo"]')
+        ?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+      workspace.container
+        .querySelector('button[aria-label="Redo"]')
+        ?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    expect(onUndo).toHaveBeenCalledTimes(1)
+    expect(onRedo).toHaveBeenCalledTimes(1)
+  })
 })
 
 function renderWorkspace({
+  canRedo,
+  canUndo,
+  onRedo,
   onSwapPanes = vi.fn(),
+  onUndo,
   paneCount = 2,
   panes = createPanes(paneCount),
 }: {
+  canRedo?: boolean
+  canUndo?: boolean
+  onRedo?: () => void
   onSwapPanes?: (sourcePaneId: string, targetPaneId: string) => void
+  onUndo?: () => void
   paneCount?: number
   panes?: ReturnType<typeof createPanes>
-}) {
+} = {}) {
   const container = document.createElement("div")
   const root = createRoot(container)
 
@@ -225,10 +271,14 @@ function renderWorkspace({
     root.render(
       <DraftingPaneWorkspace
         activePaneId="pane-1"
+        canRedo={canRedo}
+        canUndo={canUndo}
+        onRedo={onRedo}
         onPaneQrClick={() => undefined}
         onPaneSelect={() => undefined}
         onReset={() => undefined}
         onSwapPanes={onSwapPanes}
+        onUndo={onUndo}
         panes={nextPanes}
       />,
     )

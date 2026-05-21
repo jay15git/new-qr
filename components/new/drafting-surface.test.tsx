@@ -178,6 +178,10 @@ const cleanupCallbacks: Array<() => void> = []
 
 beforeEach(() => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true)
+  Object.defineProperty(window, "localStorage", {
+    configurable: true,
+    value: createMemoryStorage(),
+  })
   buildDashboardQrNodePayloadSpy.mockClear()
   buildDashboardQrNodePayloadSpy.mockImplementation(() => new Promise(() => undefined))
   downloadDashboardQrBatchZipExportSpy.mockClear()
@@ -3264,6 +3268,195 @@ describe("DraftingSurface", () => {
     expect(composeSurface.style.backgroundImage).not.toContain("linear-gradient(45deg")
     expect(composeSurface.style.backgroundSize).toBe("30px 30px")
   })
+
+  it("undoes and redoes QR content edits from the bottom toolbar", async () => {
+    vi.useFakeTimers()
+    const surface = renderSurface({ openDownloadPopover: false })
+    const contentInput = getRequiredElement(
+      surface.container,
+      'textarea[aria-label="Auto content"]',
+    ) as HTMLTextAreaElement
+
+    await advanceDraftingTimers()
+
+    act(() => {
+      changeInputValue(contentInput, "https://example.com/history")
+    })
+    await advanceDraftingTimers()
+
+    const undoButton = getRequiredElement(
+      surface.container,
+      'button[aria-label="Undo"]',
+    ) as HTMLButtonElement
+    const redoButton = getRequiredElement(
+      surface.container,
+      'button[aria-label="Redo"]',
+    ) as HTMLButtonElement
+
+    expect(undoButton.disabled).toBe(false)
+    expect(redoButton.disabled).toBe(true)
+
+    act(() => {
+      activateElement(undoButton)
+    })
+
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
+        "data-qr-content-value",
+      ),
+    ).toBe("https://new-qr-studio.local/launch")
+    expect(redoButton.disabled).toBe(false)
+
+    act(() => {
+      activateElement(redoButton)
+    })
+
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
+        "data-qr-content-value",
+      ),
+    ).toBe("https://example.com/history")
+  })
+
+  it("uses keyboard shortcuts for undo and redo without intercepting text input undo", async () => {
+    vi.useFakeTimers()
+    const surface = renderSurface({ openDownloadPopover: false })
+    const contentInput = getRequiredElement(
+      surface.container,
+      'textarea[aria-label="Auto content"]',
+    ) as HTMLTextAreaElement
+
+    await advanceDraftingTimers()
+
+    act(() => {
+      changeInputValue(contentInput, "https://example.com/keyboard")
+    })
+    await advanceDraftingTimers()
+
+    act(() => {
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').dispatchEvent(
+        new KeyboardEvent("keydown", {
+          bubbles: true,
+          ctrlKey: true,
+          key: "z",
+        }),
+      )
+    })
+
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
+        "data-qr-content-value",
+      ),
+    ).toBe("https://new-qr-studio.local/launch")
+
+    act(() => {
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').dispatchEvent(
+        new KeyboardEvent("keydown", {
+          bubbles: true,
+          ctrlKey: true,
+          key: "Z",
+          shiftKey: true,
+        }),
+      )
+    })
+
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
+        "data-qr-content-value",
+      ),
+    ).toBe("https://example.com/keyboard")
+
+    const preventedInputUndo = !contentInput.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        bubbles: true,
+        cancelable: true,
+        ctrlKey: true,
+        key: "z",
+      }),
+    )
+
+    expect(preventedInputUndo).toBe(false)
+  })
+
+  it("keeps add QR and reset changes undoable", async () => {
+    vi.useFakeTimers()
+    const surface = renderSurface({ openDownloadPopover: false })
+
+    await advanceDraftingTimers()
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add QR code"]'))
+    })
+    await advanceDraftingTimers()
+
+    expect(surface.container.querySelectorAll('[data-slot="dashboard-compose-surface"]')).toHaveLength(2)
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Undo"]'))
+    })
+
+    expect(surface.container.querySelectorAll('[data-slot="dashboard-compose-surface"]')).toHaveLength(1)
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Redo"]'))
+    })
+
+    expect(surface.container.querySelectorAll('[data-slot="dashboard-compose-surface"]')).toHaveLength(2)
+
+    act(() => {
+      changeInputValue(
+        getRequiredElement(surface.container, 'textarea[aria-label="Auto content"]') as HTMLTextAreaElement,
+        "https://example.com/before-reset",
+      )
+    })
+    await advanceDraftingTimers()
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Reset defaults"]'))
+    })
+    await advanceDraftingTimers()
+
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
+        "data-qr-content-value",
+      ),
+    ).toBe("https://new-qr-studio.local/launch")
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Undo"]'))
+    })
+
+    expect(
+      getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
+        "data-qr-content-value",
+      ),
+    ).toBe("https://example.com/before-reset")
+  })
+
+  it("restores the autosaved drafting workspace after remount", async () => {
+    vi.useFakeTimers()
+    const firstSurface = renderSurface({ openDownloadPopover: false })
+
+    await advanceDraftingTimers()
+
+    act(() => {
+      changeInputValue(
+        getRequiredElement(firstSurface.container, 'textarea[aria-label="Auto content"]') as HTMLTextAreaElement,
+        "https://example.com/autosaved",
+      )
+    })
+    await advanceDraftingTimers()
+
+    firstSurface.unmount()
+    const secondSurface = renderSurface({ openDownloadPopover: false })
+    await advanceDraftingTimers()
+
+    expect(
+      getRequiredElement(secondSurface.container, '[data-slot="drafting-surface"]').getAttribute(
+        "data-qr-content-value",
+      ),
+    ).toBe("https://example.com/autosaved")
+  })
 })
 
 function renderSurface({ openDownloadPopover = true }: { openDownloadPopover?: boolean } = {}) {
@@ -3274,11 +3467,13 @@ function renderSurface({ openDownloadPopover = true }: { openDownloadPopover?: b
     root.render(<DraftingSurface />)
   })
 
-  cleanupCallbacks.push(() => {
+  const cleanup = () => {
     act(() => {
       root.unmount()
     })
-  })
+  }
+
+  cleanupCallbacks.push(cleanup)
 
   document.body.appendChild(container)
 
@@ -3294,7 +3489,16 @@ function renderSurface({ openDownloadPopover = true }: { openDownloadPopover?: b
     }
   }
 
-  return { container }
+  return {
+    container,
+    unmount: () => {
+      const index = cleanupCallbacks.indexOf(cleanup)
+      if (index >= 0) {
+        cleanupCallbacks.splice(index, 1)
+      }
+      cleanup()
+    },
+  }
 }
 
 function getRequiredElement(parent: ParentNode, selector: string) {
@@ -3441,4 +3645,32 @@ function getButtonByExactText(parent: ParentNode, text: string) {
 
 async function flushPromises() {
   await Promise.resolve()
+}
+
+async function advanceDraftingTimers() {
+  await act(async () => {
+    await flushPromises()
+    vi.advanceTimersByTime(300)
+    await flushPromises()
+    await flushPromises()
+  })
+}
+
+function createMemoryStorage(): Storage {
+  const values = new Map<string, string>()
+
+  return {
+    get length() {
+      return values.size
+    },
+    clear: vi.fn(() => values.clear()),
+    getItem: vi.fn((key: string) => values.get(key) ?? null),
+    key: vi.fn((index: number) => Array.from(values.keys())[index] ?? null),
+    removeItem: vi.fn((key: string) => {
+      values.delete(key)
+    }),
+    setItem: vi.fn((key: string, value: string) => {
+      values.set(key, value)
+    }),
+  }
 }
