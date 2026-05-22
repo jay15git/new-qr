@@ -89,7 +89,6 @@ import {
   QR_DOT_MATRIX_ANIMATION_SPEED_MAX,
   QR_DOT_MATRIX_ANIMATION_SPEED_MIN,
   QR_DOT_MATRIX_COLOR_PRESET_OPTIONS,
-  QR_DOT_MATRIX_DOT_SHAPE_OPTIONS,
   QR_DOT_MATRIX_HALO_MAX,
   QR_DOT_MATRIX_HALO_MIN,
   QR_DOT_MATRIX_OPACITY_MAX,
@@ -1008,7 +1007,7 @@ export function DraftingLoaderPlaygroundTab({
 
       <section className="min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 shadow-[var(--drafting-shadow-rest)]">
         <p className="drafting-type-control-label mb-3 font-semibold text-[var(--drafting-ink)]">
-          Color preset
+          Loader color
         </p>
         <div className="grid min-w-0 grid-cols-2 gap-2">
           {QR_DOT_MATRIX_COLOR_PRESET_OPTIONS.map((preset) => (
@@ -1030,7 +1029,7 @@ export function DraftingLoaderPlaygroundTab({
         </div>
         <label className="mt-3 flex min-w-0 items-center justify-between gap-3 rounded-[6px] bg-[var(--drafting-control-bg)] px-3 py-2">
           <span className="drafting-type-control-label font-semibold text-[var(--drafting-ink-muted)]">
-            Custom color
+            Custom loader color
           </span>
           <Input
             aria-label="Custom loader color"
@@ -1061,30 +1060,6 @@ export function DraftingLoaderPlaygroundTab({
               )}
             >
               <span className="drafting-type-meta font-semibold">{pattern.label}</span>
-            </Button>
-          ))}
-        </div>
-      </section>
-
-      <section className="min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 shadow-[var(--drafting-shadow-rest)]">
-        <p className="drafting-type-control-label mb-3 font-semibold text-[var(--drafting-ink)]">
-          Dot shape
-        </p>
-        <div className="grid min-w-0 grid-cols-2 gap-2">
-          {QR_DOT_MATRIX_DOT_SHAPE_OPTIONS.map((shape) => (
-            <Button
-              key={shape.value}
-              type="button"
-              variant="ghost"
-              onClick={() => onAnimationChange({ dotShape: shape.value })}
-              className={cn(
-                "h-9 rounded-[6px] border px-3 shadow-none",
-                animation.dotShape === shape.value
-                  ? "border-[var(--drafting-line-strong)] bg-[var(--drafting-panel-bg-active)] text-[var(--drafting-ink)]"
-                  : "border-[var(--drafting-line)] bg-[var(--drafting-control-bg)] text-[var(--drafting-ink-muted)]",
-              )}
-            >
-              <span className="drafting-type-meta font-semibold">{shape.label}</span>
             </Button>
           ))}
         </div>

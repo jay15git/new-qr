@@ -173,7 +173,7 @@ export const RASTER_EXPORT_QUALITY_MAX = 100;
 export const DEFAULT_RASTER_EXPORT_QUALITY = 100;
 export const QR_DOT_MATRIX_ANIMATION_SPEED_MIN = 1;
 export const QR_DOT_MATRIX_ANIMATION_SPEED_MAX = 5;
-export const QR_DOT_MATRIX_OVERLAY_SCALE_MIN = 40;
+export const QR_DOT_MATRIX_OVERLAY_SCALE_MIN = 100;
 export const QR_DOT_MATRIX_OVERLAY_SCALE_MAX = 140;
 export const QR_DOT_MATRIX_OPACITY_MIN = 0;
 export const QR_DOT_MATRIX_OPACITY_MAX = 1;
@@ -281,10 +281,10 @@ export const DEFAULT_DOT_MATRIX_ANIMATION: QrDotMatrixAnimationOptions = {
   hoverAnimated: false,
   loader: "neon-drift",
   muted: false,
-  opacityBase: 0,
+  opacityBase: 0.2,
   opacityMid: 0.55,
   opacityPeak: 1,
-  overlayScale: 84,
+  overlayScale: 100,
   pattern: "full",
   speed: 3,
 };

@@ -980,9 +980,14 @@ describe("DraftingSurface", () => {
     expect(surface.container.textContent).toContain("Neon Drift")
     expect(surface.container.textContent).toContain("Mobius Run")
     expect(surface.container.textContent).not.toContain("Honey Gate")
+    expect(surface.container.textContent).toContain("Loader color")
+    expect(surface.container.textContent).toContain("Custom loader color")
     expect(surface.container.textContent).toContain("Overlay scale")
     expect(surface.container.textContent).toContain("Bloom")
+    expect(surface.container.textContent).toContain("Base")
+    expect(surface.container.textContent).toContain("Mid")
     expect(surface.container.textContent).toContain("Peak")
+    expect(surface.container.textContent).not.toContain("Dot shape")
 
     await act(async () => {
       activateElement(

@@ -15,10 +15,12 @@ import {
   clampBackgroundShapeOpacity,
   clampBackgroundShapePaddingPx,
   DEFAULT_BACKGROUND_SHAPE_OPTIONS,
+  DEFAULT_DOT_MATRIX_ANIMATION,
   clampQrSize,
   getAssetValue,
   hasActiveBackgroundShapeOptions,
   type QrDotMatrixAnimationOptions,
+  type QrDotMatrixSquareLoader,
   type QrStudioState,
   type StudioGradient,
 } from "@/components/qr/qr-studio-state"
@@ -27,6 +29,9 @@ type QrAnimationRenderMode = "export" | "none" | "preview"
 
 const SVG_NS = "http://www.w3.org/2000/svg"
 const DOTS_CLIP_PATH_PREFIX = "clip-path-dot-color-"
+const QR_MODULE_CLIP_PATH_PREFIXES = [DOTS_CLIP_PATH_PREFIX]
+const DOT_MATRIX_TILE_SIZE = 5
+const DOT_MATRIX_QUIET_TRACK_INDEX = -1
 
 export function buildQrExtension(
   state: QrStudioState,
@@ -134,7 +139,7 @@ export function createDotMatrixAnimationExtension(
     return null
   }
 
-  return (svg) => {
+  return (svg, options) => {
     const document = svg.ownerDocument
 
     if (!document) {
@@ -145,7 +150,7 @@ export function createDotMatrixAnimationExtension(
       node.remove()
     })
 
-    const dotLayers = getDotClipLayers(svg)
+    const dotLayers = getQrModuleClipLayers(svg)
 
     if (dotLayers.length === 0) {
       return
@@ -158,34 +163,8 @@ export function createDotMatrixAnimationExtension(
       return
     }
 
-    const group = document.createElementNS(SVG_NS, "g")
-    group.setAttribute("data-qr-layer", "dot-matrix-animation")
-    group.setAttribute(
-      "class",
-      [
-        "qr-dot-matrix-layer",
-        `qr-dot-loader-${state.dotMatrixAnimation.loader}`,
-        `qr-dot-pattern-${state.dotMatrixAnimation.pattern}`,
-        `qr-dot-shape-${state.dotMatrixAnimation.dotShape}`,
-        state.dotMatrixAnimation.bloom ? "qr-dot-matrix-bloom" : "",
-        state.dotMatrixAnimation.hoverAnimated ? "qr-dot-matrix-hover" : "",
-        state.dotMatrixAnimation.muted ? "qr-dot-matrix-muted" : "",
-      ].filter(Boolean).join(" "),
-    )
-    group.setAttribute("data-qr-dot-loader", state.dotMatrixAnimation.loader)
-    group.appendChild(createDotMatrixAnimationStyle(document))
-    group.setAttribute(
-      "style",
-      [
-        `--qr-dot-matrix-color:${resolveDotMatrixColor(state)}`,
-        `--qr-dot-matrix-duration:${getDotMatrixAnimationDuration(state.dotMatrixAnimation)}s`,
-        `--qr-dot-matrix-halo:${formatSvgNumber(state.dotMatrixAnimation.halo)}`,
-        `--qr-dot-matrix-opacity-base:${formatSvgNumber(state.dotMatrixAnimation.opacityBase)}`,
-        `--qr-dot-matrix-opacity-mid:${formatSvgNumber(state.dotMatrixAnimation.opacityMid)}`,
-        `--qr-dot-matrix-opacity-peak:${formatSvgNumber(state.dotMatrixAnimation.opacityPeak)}`,
-        `--qr-dot-matrix-scale:${formatSvgNumber(state.dotMatrixAnimation.overlayScale / 100)}`,
-      ].join(";"),
-    )
+    const animationColor = resolveDotMatrixColor(state)
+    const modules: DotMatrixModule[] = []
 
     for (const layer of dotLayers) {
       for (const shape of layer.shapes) {
@@ -195,21 +174,116 @@ export function createDotMatrixAnimationExtension(
           continue
         }
 
-        if (!shouldRenderDotMatrixOverlayModule(coordinates, metrics, state.dotMatrixAnimation.pattern)) {
-          continue
-        }
-
-        const animatedShape = shape.cloneNode(true) as SVGElement
-        animatedShape.removeAttribute("clip-path")
-        animatedShape.setAttribute("fill", resolveDotMatrixColor(state))
-        animatedShape.setAttribute("data-qr-dot-loader", state.dotMatrixAnimation.loader)
-        animatedShape.setAttribute("class", "qr-dot-matrix-module")
-        animatedShape.setAttribute("style", getDotMatrixModuleStyle(coordinates, metrics))
-        group.appendChild(animatedShape)
+        modules.push(createDotMatrixModule(shape, coordinates, metrics))
       }
     }
 
-    if (group.children.length <= 1) {
+    if (modules.length === 0) {
+      return
+    }
+
+    const tracks = createDotMatrixLoaderTracks(
+      modules,
+      state.dotMatrixAnimation,
+    )
+
+    if (tracks.size === 0) {
+      return
+    }
+
+    suppressDotMatrixBaseLayers(dotLayers)
+
+    const group = document.createElementNS(SVG_NS, "g")
+    group.setAttribute("data-qr-layer", "dot-matrix-animation")
+    group.setAttribute(
+      "class",
+      [
+        "qr-dot-matrix-layer",
+        `qr-dot-loader-${state.dotMatrixAnimation.loader}`,
+        `qr-dot-pattern-${state.dotMatrixAnimation.pattern}`,
+        state.dotMatrixAnimation.bloom ? "qr-dot-matrix-bloom" : "",
+        state.dotMatrixAnimation.hoverAnimated ? "qr-dot-matrix-hover" : "",
+        state.dotMatrixAnimation.muted ? "qr-dot-matrix-muted" : "",
+      ].filter(Boolean).join(" "),
+    )
+    group.setAttribute("data-qr-dot-loader", state.dotMatrixAnimation.loader)
+    group.appendChild(createDotMatrixAnimationStyle(document, Array.from(tracks.values())))
+    const defs = document.createElementNS(SVG_NS, "defs")
+    defs.setAttribute("data-qr-layer", "dot-matrix-animation-defs")
+    group.appendChild(defs)
+    group.setAttribute(
+      "style",
+      [
+        `--qr-dot-matrix-color:${animationColor}`,
+        `--qr-dot-matrix-duration:${getDotMatrixAnimationDuration(state.dotMatrixAnimation)}s`,
+        `--qr-dot-matrix-halo:${formatSvgNumber(state.dotMatrixAnimation.halo)}`,
+        `--qr-dot-matrix-opacity-base:${formatSvgOpacity(getDotMatrixBaseOpacity(state.dotMatrixAnimation))}`,
+        `--qr-dot-matrix-opacity-mid:${formatSvgOpacity(state.dotMatrixAnimation.opacityMid)}`,
+        `--qr-dot-matrix-opacity-peak:${formatSvgOpacity(state.dotMatrixAnimation.opacityPeak)}`,
+        `--qr-dot-matrix-scale:${formatSvgNumber(getDotMatrixOverlayScale(state.dotMatrixAnimation) / 100)}`,
+      ].join(";"),
+    )
+
+    const coverRect = getDotMatrixCoverRect(svg, options, metrics)
+
+    const sortedTracks = Array.from(tracks.values()).sort(
+      (left, right) => left.index - right.index || left.topology.localeCompare(right.topology),
+    )
+
+    for (const [trackOffset, track] of sortedTracks.entries()) {
+      const clipPath = document.createElementNS(SVG_NS, "clipPath")
+      const clipPathId = `qr-dot-matrix-animation-clip-${trackOffset}`
+
+      clipPath.setAttribute("id", clipPathId)
+      clipPath.setAttribute("data-qr-layer", "dot-matrix-animation-clip")
+
+      for (const qrModule of track.modules) {
+        const shape = qrModule.shape.cloneNode(true) as SVGElement
+        shape.removeAttribute("clip-path")
+        applyDotMatrixOverlayScale(
+          shape,
+          metrics,
+          getDotMatrixOverlayScale(state.dotMatrixAnimation),
+        )
+        clipPath.appendChild(shape)
+      }
+
+      defs.appendChild(clipPath)
+
+      const animatedLayer = document.createElementNS(SVG_NS, "rect")
+      animatedLayer.setAttribute("x", formatSvgNumber(coverRect.x))
+      animatedLayer.setAttribute("y", formatSvgNumber(coverRect.y))
+      animatedLayer.setAttribute("width", formatSvgNumber(coverRect.width))
+      animatedLayer.setAttribute("height", formatSvgNumber(coverRect.height))
+      animatedLayer.setAttribute("clip-path", `url('#${clipPathId}')`)
+      animatedLayer.setAttribute("fill", animationColor)
+      animatedLayer.setAttribute("data-qr-dot-loader", state.dotMatrixAnimation.loader)
+      animatedLayer.setAttribute("data-qr-dot-track", String(track.index))
+      animatedLayer.setAttribute("data-qr-dot-keyframes", track.keyframes)
+      animatedLayer.setAttribute("data-qr-dot-duration-ms", String(track.durationMs))
+      animatedLayer.setAttribute("data-qr-dot-easing", track.timingFunction)
+      animatedLayer.setAttribute("data-qr-dot-topology", track.topology)
+      animatedLayer.setAttribute("data-qr-dot-upstream-loader", track.upstreamLoader)
+      if (track.upstreamClass) {
+        animatedLayer.setAttribute("data-qr-dot-upstream-class", track.upstreamClass)
+      }
+      animatedLayer.setAttribute("data-qr-dot-grid", "5x5")
+      animatedLayer.setAttribute("data-qr-dot-region", track.region)
+      animatedLayer.setAttribute("data-qr-dot-state", track.state)
+      animatedLayer.setAttribute(
+        "class",
+        track.state === "quiet"
+          ? "qr-dot-matrix-track qr-dot-matrix-track-quiet"
+          : "qr-dot-matrix-track",
+      )
+      animatedLayer.setAttribute(
+        "style",
+        getDotMatrixTrackStyle(track),
+      )
+      group.appendChild(animatedLayer)
+    }
+
+    if (group.children.length <= 2) {
       return
     }
 
@@ -250,6 +324,8 @@ type DotMatrixMetrics = {
   cellSize: number
   maxCol: number
   maxRow: number
+  maxX: number
+  maxY: number
   originX: number
   originY: number
 }
@@ -259,18 +335,82 @@ type DotMatrixCoordinates = {
   row: number
 }
 
+type DotMatrixModule = DotMatrixCoordinates & {
+  angle: number
+  colN: number
+  diagonal: number
+  distance: number
+  distanceN: number
+  hash: number
+  index: number
+  outline: number
+  outlineN: number
+  perimeterIndex: number
+  regionCol: number
+  regionIndex: number
+  regionRow: number
+  ring: number
+  rowN: number
+  shape: SVGElement
+}
+
 type DotMatrixAnchor = {
   size?: number
   x: number
   y: number
 }
 
-function getDotClipLayers(svg: SVGElement): DotClipLayer[] {
+type DotMatrixTrack = {
+  durationMs: number
+  index: number
+  keyframes: string
+  modules: DotMatrixModule[]
+  opacity?: number
+  region: string
+  state: "active" | "quiet"
+  styleVars: Record<string, number | string>
+  timingFunction: string
+  topology: string
+  upstreamClass?: string
+  upstreamLoader: DotMatrixSquareLoaderId
+}
+
+type DotMatrixCell = {
+  col: number
+  index: number
+  row: number
+}
+
+type DotMatrixCellAnimation = {
+  active: boolean
+  durationMs: number
+  keyframes: string
+  opacity?: number
+  styleVars?: Record<string, number | string>
+  timingFunction: string
+  topology: string
+  upstreamClass?: string
+  upstreamLoader: DotMatrixSquareLoaderId
+}
+
+type DotMatrixLoaderSpec = {
+  resolve: (cell: DotMatrixCell) => DotMatrixCellAnimation
+  topology: string
+  upstreamLoader: DotMatrixSquareLoaderId
+}
+
+type DotMatrixLoaderResolver = (
+  cell: DotMatrixCell,
+  upstreamLoader: DotMatrixSquareLoaderId,
+  topology: string,
+) => DotMatrixCellAnimation
+
+function getQrModuleClipLayers(svg: SVGElement): DotClipLayer[] {
   return Array.from(svg.querySelectorAll("rect"))
     .map((element) => {
       const clipPathId = getClipPathId(element.getAttribute("clip-path"))
 
-      if (!clipPathId?.startsWith(DOTS_CLIP_PATH_PREFIX)) {
+      if (!clipPathId || !QR_MODULE_CLIP_PATH_PREFIXES.some((prefix) => clipPathId.startsWith(prefix))) {
         return null
       }
 
@@ -297,6 +437,12 @@ function getDotClipLayers(svg: SVGElement): DotClipLayer[] {
       } satisfies DotClipLayer
     })
     .filter((layer): layer is DotClipLayer => layer !== null)
+}
+
+function suppressDotMatrixBaseLayers(dotLayers: DotClipLayer[]) {
+  for (const layer of dotLayers) {
+    layer.element.setAttribute("opacity", "0")
+  }
 }
 
 function getClipPathId(clipPath: string | null) {
@@ -342,6 +488,8 @@ function collectDotMatrixMetrics(dotShapes: SVGElement[]): DotMatrixMetrics | nu
     cellSize,
     maxCol: Math.max(...coordinates.map((coordinate) => coordinate.col)),
     maxRow: Math.max(...coordinates.map((coordinate) => coordinate.row)),
+    maxX: Math.max(...anchors.map((anchor) => anchor.x + (anchor.size ?? cellSize))),
+    maxY: Math.max(...anchors.map((anchor) => anchor.y + (anchor.size ?? cellSize))),
     originX,
     originY,
   }
@@ -442,91 +590,626 @@ function getDotMatrixAnimationDuration(animation: QrDotMatrixAnimationOptions) {
   return formatSvgNumber(4.7 - Math.min(5, Math.max(1, animation.speed)) * 0.58)
 }
 
-function getDotMatrixModuleStyle(
-  coordinates: DotMatrixCoordinates,
-  metrics: DotMatrixMetrics,
-) {
-  const centerRow = metrics.maxRow / 2
-  const centerCol = metrics.maxCol / 2
-  const rowN = metrics.maxRow > 0 ? coordinates.row / metrics.maxRow : 0
-  const colN = metrics.maxCol > 0 ? coordinates.col / metrics.maxCol : 0
-  const diagonal = rowN + colN
-  const distance = Math.hypot(coordinates.row - centerRow, coordinates.col - centerCol)
-  const maxDistance = Math.max(1, Math.hypot(centerRow, centerCol))
-  const ring = distance / maxDistance
-  const angle = Math.atan2(coordinates.row - centerRow, coordinates.col - centerCol)
-  const index = coordinates.row * (metrics.maxCol + 1) + coordinates.col
-
-  return [
-    `--qr-dot-row:${coordinates.row}`,
-    `--qr-dot-col:${coordinates.col}`,
-    `--qr-dot-index:${index}`,
-    `--qr-dot-row-n:${formatSvgNumber(rowN)}`,
-    `--qr-dot-col-n:${formatSvgNumber(colN)}`,
-    `--qr-dot-diagonal:${formatSvgNumber(diagonal)}`,
-    `--qr-dot-ring:${formatSvgNumber(ring)}`,
-    `--qr-dot-angle:${formatSvgNumber(angle)}`,
-    `--qr-dot-distance:${formatSvgNumber(distance)}`,
-    `--qr-dot-order:${formatSvgNumber(((coordinates.row * 2 + coordinates.col * 3) % 17) / 17)}`,
-  ].join(";")
+function getDotMatrixAnimationSpeedMultiplier(animation: QrDotMatrixAnimationOptions) {
+  return 2 ** ((3 - Math.min(5, Math.max(1, animation.speed))) / 2)
 }
 
-function shouldRenderDotMatrixOverlayModule(
-  coordinates: DotMatrixCoordinates,
-  metrics: DotMatrixMetrics,
-  pattern: QrDotMatrixAnimationOptions["pattern"],
-) {
-  if (pattern === "full") {
-    return true
+function getDotMatrixBaseOpacity(animation: QrDotMatrixAnimationOptions) {
+  return animation.opacityBase
+}
+
+function getDotMatrixOverlayScale(animation: QrDotMatrixAnimationOptions) {
+  return Math.max(DEFAULT_DOT_MATRIX_ANIMATION.overlayScale, animation.overlayScale)
+}
+
+const DOT_MATRIX_CENTER = (DOT_MATRIX_TILE_SIZE - 1) / 2
+type DotMatrixSquareLoaderId =
+  | "dotm-square-1"
+  | "dotm-square-2"
+  | "dotm-square-3"
+  | "dotm-square-4"
+  | "dotm-square-5"
+  | "dotm-square-6"
+  | "dotm-square-7"
+  | "dotm-square-8"
+  | "dotm-square-9"
+  | "dotm-square-10"
+  | "dotm-square-11"
+  | "dotm-square-12"
+  | "dotm-square-13"
+  | "dotm-square-14"
+  | "dotm-square-15"
+  | "dotm-square-16"
+  | "dotm-square-17"
+  | "dotm-square-18"
+  | "dotm-square-19"
+  | "dotm-square-20"
+
+const DOT_MATRIX_SPIRAL_INWARD: ReadonlyArray<readonly [number, number]> = [
+  [0, 0],
+  [1, 0],
+  [2, 0],
+  [3, 0],
+  [4, 0],
+  [4, 1],
+  [4, 2],
+  [4, 3],
+  [4, 4],
+  [3, 4],
+  [2, 4],
+  [1, 4],
+  [0, 4],
+  [0, 3],
+  [0, 2],
+  [0, 1],
+  [1, 1],
+  [2, 1],
+  [3, 1],
+  [3, 2],
+  [3, 3],
+  [2, 3],
+  [1, 3],
+  [1, 2],
+  [2, 2],
+]
+const DOT_MATRIX_OUTER_RING_CW: ReadonlyArray<readonly [number, number]> = [
+  [0, 0],
+  [1, 0],
+  [2, 0],
+  [3, 0],
+  [4, 0],
+  [4, 1],
+  [4, 2],
+  [4, 3],
+  [4, 4],
+  [3, 4],
+  [2, 4],
+  [1, 4],
+  [0, 4],
+  [0, 3],
+  [0, 2],
+  [0, 1],
+]
+const DOT_MATRIX_MIDDLE_RING_CCW: ReadonlyArray<readonly [number, number]> = [
+  [1, 1],
+  [2, 1],
+  [3, 1],
+  [3, 2],
+  [3, 3],
+  [2, 3],
+  [1, 3],
+  [1, 2],
+]
+
+const DOT_MATRIX_LOADER_SPECS: Record<QrDotMatrixSquareLoader, DotMatrixLoaderSpec> = {
+  "block-drop": createDotMatrixLoaderSpec("dotm-square-7", "frame-mask", createGeneratedCellAnimation),
+  "core-rotor": createDotMatrixLoaderSpec("dotm-square-13", "frame-mask", createGeneratedCellAnimation),
+  "core-spiral": createDotMatrixLoaderSpec("dotm-square-3", "spiral-inward", (cell) =>
+    createClassCellAnimation("dotm-square-3", "spiral-inward", "dmx-spiral-snake", "dmx-spiral-snake", 1500, {
+      "--dmx-spiral-order": spiralInwardOrderValue(cell.index),
+    }),
+  ),
+  "crt-glide": createDotMatrixLoaderSpec("dotm-square-10", "scan-line", createGeneratedCellAnimation),
+  "echo-ring": createDotMatrixLoaderSpec("dotm-square-11", "ripple-echo", (cell) =>
+    createClassCellAnimation("dotm-square-11", "ripple-echo", "dmx-ripple-echo", "dmx-ripple-echo", 1500, {
+      "--dmx-ripple-ring": Math.max(Math.abs(cell.col - DOT_MATRIX_CENTER), Math.abs(cell.row - DOT_MATRIX_CENTER)),
+      "--dmx-ripple-parity": (cell.row + cell.col) % 2,
+    }),
+  ),
+  "flux-columns": createDotMatrixLoaderSpec("dotm-square-6", "column-snake", (cell) =>
+    createClassCellAnimation("dotm-square-6", "column-snake", "dmx-square6-col-snake", "dmx-square6-col-snake", 1500, {
+      "--dmx-col-pos": cell.col % 2 === 0 ? DOT_MATRIX_TILE_SIZE - 1 - cell.row : cell.row,
+    }),
+  ),
+  "glyph-pulse": createDotMatrixLoaderSpec("dotm-square-9", "glyph-bits", (cell) => {
+    return createClassCellAnimation(
+      "dotm-square-9",
+      "glyph-bits",
+      "dmx-square9-bit",
+      "dmx-square9-bit",
+      5200,
+      { "--dmx-square9-delay": cell.index % 6 },
+      "steps(52, end)",
+    )
+  }),
+  "half-helix": createDotMatrixLoaderSpec("dotm-square-17", "half-helix", createGeneratedCellAnimation),
+  "helix-core": createDotMatrixLoaderSpec("dotm-square-16", "helix-core", createGeneratedCellAnimation),
+  "helix-glow": createDotMatrixLoaderSpec("dotm-square-15", "helix-glow", createGeneratedCellAnimation),
+  "infinity-run": createDotMatrixLoaderSpec("dotm-square-19", "infinity-run", createGeneratedCellAnimation),
+  "mobius-run": createDotMatrixLoaderSpec("dotm-square-20", "mobius-run", createGeneratedCellAnimation),
+  "neon-drift": createDotMatrixLoaderSpec("dotm-square-1", "diagonal-alt-sweep", (cell) =>
+    createClassCellAnimation("dotm-square-1", "diagonal-alt-sweep", "dmx-diagonal-alt-sweep", "dmx-diagonal-alt-sweep", 1500, {
+      "--dmx-diagonal-parity": (cell.row + cell.col) % 2,
+      "--dmx-path": trBlPathNormFromIndex(cell.index),
+    }),
+  ),
+  "origin-wave": createDotMatrixLoaderSpec("dotm-square-12", "center-origin-ripple", (cell) =>
+    createClassCellAnimation("dotm-square-12", "center-origin-ripple", "dmx-center-origin-ripple", "dmx-center-origin-ripple", 1500, {
+      "--dmx-center-ripple-ring": Math.abs(cell.row - 1) + Math.abs(cell.col - 1),
+    }),
+  ),
+  "prism-bloom": createDotMatrixLoaderSpec("dotm-square-14", "diamond-bloom", createGeneratedCellAnimation),
+  "prism-sweep": createDotMatrixLoaderSpec("dotm-square-5", "diagonal-snake", (cell) =>
+    createClassCellAnimation("dotm-square-5", "diagonal-snake", "dmx-diagonal-snake", "dmx-diagonal-snake", 1500, {
+      "--dmx-diagonal-snake-order": diagonalSnakeOrderValue(cell.index),
+    }),
+  ),
+  "pulse-ladder": createDotMatrixLoaderSpec("dotm-square-2", "row-cycle-snake", createGeneratedCellAnimation),
+  "sound-bars": createDotMatrixLoaderSpec("dotm-square-18", "sound-bars", createGeneratedCellAnimation),
+  "strobe-stack": createDotMatrixLoaderSpec("dotm-square-8", "stack-drain", createGeneratedCellAnimation),
+  "twin-orbit": createDotMatrixLoaderSpec("dotm-square-4", "twin-orbit", (cell) => {
+    const outerOrder = outerRingClockwiseOrderValue(cell.index)
+    if (outerOrder >= 0) {
+      return createClassCellAnimation("dotm-square-4", "twin-orbit", "dmx-outer-snake", "dmx-outer-snake", 1500, {
+        "--dmx-outer-order": outerOrder,
+      })
+    }
+
+    const middleOrder = middleRingAntiClockwiseOrderValue(cell.index)
+    if (middleOrder >= 0) {
+      return createClassCellAnimation("dotm-square-4", "twin-orbit", "dmx-middle-snake", "dmx-middle-snake", 1500, {
+        "--dmx-middle-order": middleOrder,
+      })
+    }
+
+    return createQuietCellAnimation("dotm-square-4", "twin-orbit")
+  }),
+}
+
+function createDotMatrixLoaderSpec(
+  upstreamLoader: DotMatrixSquareLoaderId,
+  topology: string,
+  resolve: DotMatrixLoaderResolver,
+): DotMatrixLoaderSpec {
+  return {
+    resolve: (cell) => resolve(cell, upstreamLoader, topology),
+    topology,
+    upstreamLoader,
+  }
+}
+
+function createClassCellAnimation(
+  upstreamLoader: DotMatrixSquareLoaderId,
+  topology: string,
+  upstreamClass: string,
+  keyframes: string,
+  durationMs: number,
+  styleVars: Record<string, number | string>,
+  timingFunction = "linear",
+): DotMatrixCellAnimation {
+  return {
+    active: true,
+    durationMs,
+    keyframes,
+    styleVars,
+    timingFunction,
+    topology,
+    upstreamClass,
+    upstreamLoader,
+  }
+}
+
+function createQuietCellAnimation(
+  upstreamLoader: DotMatrixSquareLoaderId,
+  topology: string,
+): DotMatrixCellAnimation {
+  return {
+    active: false,
+    durationMs: 1500,
+    keyframes: `${upstreamLoader}-quiet`,
+    timingFunction: "linear",
+    topology,
+    upstreamLoader,
+  }
+}
+
+function createGeneratedCellAnimation(
+  cell: DotMatrixCell,
+  upstreamLoader: DotMatrixSquareLoaderId,
+  topology: string,
+): DotMatrixCellAnimation {
+  const durationByLoader: Record<DotMatrixSquareLoaderId, number> = {
+    "dotm-square-1": 1500,
+    "dotm-square-2": 1500,
+    "dotm-square-3": 1500,
+    "dotm-square-4": 1500,
+    "dotm-square-5": 1500,
+    "dotm-square-6": 1500,
+    "dotm-square-7": 1900,
+    "dotm-square-8": 2000,
+    "dotm-square-9": 5200,
+    "dotm-square-10": 1500,
+    "dotm-square-11": 1500,
+    "dotm-square-12": 1500,
+    "dotm-square-13": 1550,
+    "dotm-square-14": 1700,
+    "dotm-square-15": 1600,
+    "dotm-square-16": 1400,
+    "dotm-square-17": 1600,
+    "dotm-square-18": 1750,
+    "dotm-square-19": 1700,
+    "dotm-square-20": 1600,
   }
 
+  return {
+    active: true,
+    durationMs: durationByLoader[upstreamLoader],
+    keyframes: getGeneratedDotMatrixKeyframesName(upstreamLoader, cell),
+    timingFunction: "linear",
+    topology,
+    upstreamLoader,
+  }
+}
+
+function createDotMatrixModule(
+  shape: SVGElement,
+  coordinates: DotMatrixCoordinates,
+  metrics: DotMatrixMetrics,
+): DotMatrixModule {
   const centerRow = metrics.maxRow / 2
   const centerCol = metrics.maxCol / 2
-  const rowDistance = Math.abs(coordinates.row - centerRow)
-  const colDistance = Math.abs(coordinates.col - centerCol)
-  const distance = Math.hypot(rowDistance, colDistance)
+  const distance = Math.hypot(coordinates.row - centerRow, coordinates.col - centerCol)
   const maxDistance = Math.max(1, Math.hypot(centerRow, centerCol))
-  const ring = distance / maxDistance
-  const edgeDistance = Math.min(
+  const angle = Math.atan2(coordinates.row - centerRow, coordinates.col - centerCol)
+  const index = coordinates.row * (metrics.maxCol + 1) + coordinates.col
+  const outlineDistance = Math.min(
     coordinates.row,
     coordinates.col,
     metrics.maxRow - coordinates.row,
     metrics.maxCol - coordinates.col,
   )
+  const maxOutlineDistance = Math.max(1, Math.min(centerRow, centerCol))
+  const perimeterIndex = getDotMatrixPerimeterIndex(coordinates, metrics)
+  const colN = metrics.maxCol > 0 ? coordinates.col / metrics.maxCol : 0
+  const rowN = metrics.maxRow > 0 ? coordinates.row / metrics.maxRow : 0
+  const regionCol = getDotMatrixRegionCoordinate(colN)
+  const regionRow = getDotMatrixRegionCoordinate(rowN)
 
-  if (pattern === "outline") {
-    return edgeDistance <= 1
+  return {
+    ...coordinates,
+    angle,
+    colN,
+    diagonal:
+      rowN +
+      colN,
+    distance,
+    distanceN: distance / maxDistance,
+    hash: getDotMatrixHash01(index, coordinates.row + coordinates.col * 17),
+    index,
+    outline: outlineDistance,
+    outlineN: outlineDistance / maxOutlineDistance,
+    perimeterIndex,
+    regionCol,
+    regionIndex: regionRow * DOT_MATRIX_TILE_SIZE + regionCol,
+    regionRow,
+    ring: getDotMatrixRing(coordinates, metrics),
+    rowN,
+    shape,
+  }
+}
+
+function createDotMatrixLoaderTracks(
+  modules: DotMatrixModule[],
+  animation: QrDotMatrixAnimationOptions,
+) {
+  const spec = DOT_MATRIX_LOADER_SPECS[animation.loader] ?? DOT_MATRIX_LOADER_SPECS["neon-drift"]
+  const tracks = new Map<string, DotMatrixTrack>()
+  const speedMultiplier = getDotMatrixAnimationSpeedMultiplier(animation)
+  const activePatternIndexes = new Set(getDotMatrixPatternIndexes(animation.pattern))
+
+  for (const qrModule of modules) {
+    const cell = getDotMatrixCell(qrModule)
+    const resolved = activePatternIndexes.has(cell.index)
+      ? spec.resolve(cell)
+      : createQuietCellAnimation(spec.upstreamLoader, spec.topology)
+    const assignment = {
+      ...resolved,
+      durationMs: Math.round(resolved.durationMs * speedMultiplier),
+    }
+    const trackIndex = assignment.active ? tracks.size : DOT_MATRIX_QUIET_TRACK_INDEX
+    const styleVars = assignment.styleVars ?? {}
+    const upstreamClass = assignment.upstreamClass ?? ""
+    const trackKey = [
+      assignment.active ? "active" : "quiet",
+      assignment.upstreamLoader,
+      assignment.topology,
+      upstreamClass,
+      assignment.keyframes,
+      assignment.durationMs,
+      assignment.timingFunction,
+      assignment.opacity ?? "",
+      stableDotMatrixStyleVarSignature(styleVars),
+    ].join(":")
+    const existing = tracks.get(trackKey)
+    const region = `${qrModule.regionCol},${qrModule.regionRow}`
+
+    if (existing) {
+      existing.modules.push(qrModule)
+      if (!existing.region.split(" ").includes(region)) {
+        existing.region = `${existing.region} ${region}`
+      }
+      continue
+    }
+
+    tracks.set(trackKey, {
+      durationMs: assignment.durationMs,
+      index: trackIndex,
+      keyframes: assignment.keyframes,
+      modules: [qrModule],
+      opacity: assignment.opacity,
+      region,
+      state: assignment.active ? "active" : "quiet",
+      styleVars,
+      timingFunction: assignment.timingFunction,
+      topology: assignment.topology,
+      upstreamClass: assignment.upstreamClass,
+      upstreamLoader: assignment.upstreamLoader,
+    })
   }
 
-  if (pattern === "diamond") {
-    return (
-      Math.abs(rowDistance - colDistance) <= 1 ||
-      rowDistance + colDistance <= Math.max(2, Math.min(metrics.maxRow, metrics.maxCol) * 0.18)
-    )
+  return tracks
+}
+
+function getDotMatrixRegionCoordinate(value: number) {
+  return Math.min(
+    DOT_MATRIX_TILE_SIZE - 1,
+    Math.max(0, Math.floor(clampDotMatrixUnit(value) * DOT_MATRIX_TILE_SIZE)),
+  )
+}
+
+function getDotMatrixCell(module: DotMatrixModule): DotMatrixCell {
+  return {
+    col: module.regionCol,
+    index: module.regionIndex,
+    row: module.regionRow,
+  }
+}
+
+function rowMajorIndex(row: number, col: number) {
+  return row * DOT_MATRIX_TILE_SIZE + col
+}
+
+function indexToCoord(index: number): DotMatrixCell {
+  return {
+    col: index % DOT_MATRIX_TILE_SIZE,
+    index,
+    row: Math.floor(index / DOT_MATRIX_TILE_SIZE),
+  }
+}
+
+function findDotMatrixCellIndex(
+  path: ReadonlyArray<readonly [number, number]>,
+  col: number,
+  row: number,
+) {
+  return path.findIndex(([pathCol, pathRow]) => pathCol === col && pathRow === row)
+}
+
+function trBlPathNormFromIndex(index: number) {
+  const { col, row } = indexToCoord(index)
+
+  return (row + (DOT_MATRIX_TILE_SIZE - 1 - col)) / ((DOT_MATRIX_TILE_SIZE - 1) * 2)
+}
+
+function spiralInwardOrderValue(index: number) {
+  const { col, row } = indexToCoord(index)
+
+  return findDotMatrixCellIndex(DOT_MATRIX_SPIRAL_INWARD, col, row)
+}
+
+function outerRingClockwiseOrderValue(index: number) {
+  const { col, row } = indexToCoord(index)
+
+  return findDotMatrixCellIndex(DOT_MATRIX_OUTER_RING_CW, col, row)
+}
+
+function middleRingAntiClockwiseOrderValue(index: number) {
+  const { col, row } = indexToCoord(index)
+
+  return findDotMatrixCellIndex(DOT_MATRIX_MIDDLE_RING_CCW, col, row)
+}
+
+function diagonalSnakeOrderValue(index: number) {
+  const { col, row } = indexToCoord(index)
+  let order = 0
+
+  for (let diagonal = 0; diagonal <= (DOT_MATRIX_TILE_SIZE - 1) * 2; diagonal += 1) {
+    const cells: DotMatrixCell[] = []
+
+    for (let candidateRow = 0; candidateRow < DOT_MATRIX_TILE_SIZE; candidateRow += 1) {
+      const candidateCol = diagonal - candidateRow
+
+      if (candidateCol >= 0 && candidateCol < DOT_MATRIX_TILE_SIZE) {
+        cells.push(indexToCoord(rowMajorIndex(candidateRow, candidateCol)))
+      }
+    }
+
+    const orderedCells = diagonal % 2 === 0 ? cells : [...cells].reverse()
+
+    for (const cell of orderedCells) {
+      if (cell.col === col && cell.row === row) {
+        return order
+      }
+
+      order += 1
+    }
   }
 
-  if (pattern === "cross") {
-    return Math.abs(coordinates.row - centerRow) <= 1 || Math.abs(coordinates.col - centerCol) <= 1
+  return 0
+}
+
+function getDotMatrixPatternIndexes(pattern: QrDotMatrixAnimationOptions["pattern"]) {
+  const indexes: number[] = []
+
+  for (let row = 0; row < DOT_MATRIX_TILE_SIZE; row += 1) {
+    for (let col = 0; col < DOT_MATRIX_TILE_SIZE; col += 1) {
+      const index = rowMajorIndex(row, col)
+      const distance = Math.hypot(row - DOT_MATRIX_CENTER, col - DOT_MATRIX_CENTER)
+      const manhattan = Math.abs(row - DOT_MATRIX_CENTER) + Math.abs(col - DOT_MATRIX_CENTER)
+      const angle = Math.atan2(row - DOT_MATRIX_CENTER, col - DOT_MATRIX_CENTER)
+      const active =
+        pattern === "full" ||
+        (pattern === "diamond" && manhattan <= 2) ||
+        (pattern === "outline" &&
+          (row === 0 || col === 0 || row === DOT_MATRIX_TILE_SIZE - 1 || col === DOT_MATRIX_TILE_SIZE - 1)) ||
+        (pattern === "cross" && (row === DOT_MATRIX_CENTER || col === DOT_MATRIX_CENTER)) ||
+        (pattern === "rings" && (distance >= 1 || row === 0 || col === 0 || row === 4 || col === 4)) ||
+        (pattern === "rose" && Math.abs(Math.sin(3 * angle)) > 0.5 && distance >= 1)
+
+      if (active) {
+        indexes.push(index)
+      }
+    }
   }
 
-  if (pattern === "rings") {
-    return Math.abs((ring * 5) % 1 - 0.5) > 0.25
+  return indexes
+}
+
+function stableDotMatrixStyleVarSignature(styleVars: Record<string, number | string>) {
+  return Object.keys(styleVars)
+    .sort()
+    .map((key) => `${key}=${styleVars[key]}`)
+    .join(";")
+}
+
+function getGeneratedDotMatrixKeyframesName(
+  upstreamLoader: DotMatrixSquareLoaderId,
+  cell: DotMatrixCell,
+) {
+  const squareNumber = upstreamLoader.replace("dotm-square-", "")
+
+  return `dmx-square${squareNumber}-${upstreamLoader}-r${cell.row}c${cell.col}`.replaceAll(".", "-")
+}
+
+function getDotMatrixPerimeterIndex(
+  coordinates: DotMatrixCoordinates,
+  metrics: DotMatrixMetrics,
+) {
+  const { col, row } = coordinates
+
+  if (row === 0) {
+    return col
   }
 
-  if (pattern === "rose") {
-    const angle = Math.atan2(coordinates.row - centerRow, coordinates.col - centerCol)
-
-    return Math.cos(angle * 4) * 0.35 + 0.55 > ring
+  if (col === metrics.maxCol) {
+    return metrics.maxCol + row
   }
 
-  return true
+  if (row === metrics.maxRow) {
+    return metrics.maxCol + metrics.maxRow + (metrics.maxCol - col)
+  }
+
+  if (col === 0) {
+    return metrics.maxCol * 2 + metrics.maxRow + (metrics.maxRow - row)
+  }
+
+  return -1
+}
+
+function getDotMatrixRing(coordinates: DotMatrixCoordinates, metrics: DotMatrixMetrics) {
+  return Math.min(
+    coordinates.row,
+    coordinates.col,
+    metrics.maxRow - coordinates.row,
+    metrics.maxCol - coordinates.col,
+  )
+}
+
+function getDotMatrixHash01(index: number, salt = 1) {
+  const hash =
+    (Math.imul(index + 1, 2654435761) ^
+      Math.imul(index + salt + 7, 2246822519) ^
+      Math.imul(salt + 3, 3266489917)) >>>
+    0
+
+  return (hash % 1000) / 1000
+}
+
+function clampDotMatrixUnit(value: number) {
+  if (!Number.isFinite(value)) {
+    return 0
+  }
+
+  return Math.max(0, Math.min(0.999, value))
+}
+
+function getDotMatrixTrackStyle(track: DotMatrixTrack) {
+  const style = [
+    `--qr-dot-track:${track.index}`,
+    `--qr-dot-duration-ms:${track.durationMs}`,
+    `--qr-dot-easing:${track.timingFunction}`,
+    `--qr-dot-keyframes-name:${track.keyframes}`,
+    ...Object.entries(track.styleVars).map(([key, value]) => `${key}:${value}`),
+  ]
+
+  if (track.opacity !== undefined) {
+    style.push(`opacity:${formatSvgNumber(track.opacity)}`)
+  }
+
+  return style.join(";")
+}
+
+function getDotMatrixCoverRect(
+  svg: SVGElement,
+  options: Parameters<ExtensionFunction>[1],
+  metrics: DotMatrixMetrics,
+) {
+  const width =
+    Number(options.width) ||
+    Number(svg.getAttribute("width")) ||
+    Math.max(metrics.maxX, metrics.originX + metrics.cellSize)
+  const height =
+    Number(options.height) ||
+    Number(svg.getAttribute("height")) ||
+    Math.max(metrics.maxY, metrics.originY + metrics.cellSize)
+
+  return {
+    height,
+    width,
+    x: 0,
+    y: 0,
+  }
+}
+
+function applyDotMatrixOverlayScale(
+  shape: SVGElement,
+  metrics: DotMatrixMetrics,
+  overlayScale: number,
+) {
+  const scale = overlayScale / 100
+
+  if (!Number.isFinite(scale) || Math.abs(scale - 1) < 0.001) {
+    return
+  }
+
+  const anchor = getDotMatrixAnchor(shape)
+
+  if (!anchor) {
+    return
+  }
+
+  const size = anchor.size ?? metrics.cellSize
+  const centerX = anchor.x + size / 2
+  const centerY = anchor.y + size / 2
+  const existingTransform = shape.getAttribute("transform")
+  const scaleTransform = [
+    `translate(${formatSvgNumber(centerX)} ${formatSvgNumber(centerY)})`,
+    `scale(${formatSvgNumber(scale)})`,
+    `translate(${formatSvgNumber(-centerX)} ${formatSvgNumber(-centerY)})`,
+  ].join(" ")
+
+  shape.setAttribute(
+    "transform",
+    existingTransform ? `${existingTransform} ${scaleTransform}` : scaleTransform,
+  )
 }
 
 function resolveDotMatrixColor(state: QrStudioState) {
   const animation = state.dotMatrixAnimation
+  const defaultLoaderColor = DEFAULT_DOT_MATRIX_ANIMATION.customColor
 
   if (animation.colorPreset === "theme") {
-    return animation.customColor || state.dotsOptions.color || "#22d3ee"
+    return animation.customColor || defaultLoaderColor
   }
 
   const presetColors: Record<QrDotMatrixAnimationOptions["colorPreset"], string> = {
@@ -537,90 +1220,198 @@ function resolveDotMatrixColor(state: QrStudioState) {
     ocean: "#38bdf8",
     prism: "#f0abfc",
     sunset: "#fb923c",
-    theme: animation.customColor || state.dotsOptions.color || "#22d3ee",
+    theme: animation.customColor || defaultLoaderColor,
   }
 
   return presetColors[animation.colorPreset]
 }
 
-function createDotMatrixAnimationStyle(document: Document) {
+function createGeneratedDotMatrixKeyframes(
+  name: string,
+  upstreamLoader: DotMatrixSquareLoaderId,
+  region: string,
+) {
+  const [col = 0, row = 0] = region.split(" ")[0]?.split(",").map(Number) ?? []
+  const samples = getGeneratedDotMatrixOpacitySamples(upstreamLoader, {
+    col,
+    index: rowMajorIndex(row, col),
+    row,
+  })
+
+  return createDotMatrixOpacityKeyframes(name, samples)
+}
+
+function getGeneratedDotMatrixOpacitySamples(
+  upstreamLoader: DotMatrixSquareLoaderId,
+  cell: DotMatrixCell,
+) {
+  switch (upstreamLoader) {
+    case "dotm-square-2":
+      return Array.from({ length: 10 }, (_, frame) => {
+        const head = [4, 3, 2, 1, 0, 0, 1, 2, 3, 4][frame] ?? 0
+        const distance = Math.abs(cell.row - head)
+        const tail = [1, 0.82, 0.68, 0.54, 0.42, 0.31, 0.22, 0.14]
+        return tail[distance + Math.abs(cell.col - (frame % DOT_MATRIX_TILE_SIZE))] ?? 0.08
+      })
+    case "dotm-square-7":
+      return Array.from({ length: 11 }, (_, frame) => {
+        const sequence = [0, 1, 2, 3, 4, 4, 5, 6, 7, 8, 9]
+        const step = sequence[frame] ?? 0
+        const filled = DOT_MATRIX_TILE_SIZE - 1 - cell.row < step
+        const cap = DOT_MATRIX_TILE_SIZE - 1 - cell.row === step
+        return cap ? 1 : filled ? 0.42 : 0.08
+      })
+    case "dotm-square-8":
+      return Array.from({ length: 24 }, (_, frame) => {
+        if (frame < 9) {
+          return DOT_MATRIX_TILE_SIZE - 1 - cell.row <= frame / 2 ? 0.52 : 0.08
+        }
+        if (frame < 14) {
+          return frame % 2 === 0 ? 1 : 0.38
+        }
+        return cell.row <= (frame - 14) / 2 ? 0.08 : 0.52
+      })
+    case "dotm-square-10":
+      return Array.from({ length: 5 }, (_, frame) => {
+        const distance = Math.abs(cell.row - frame)
+        return distance === 0 ? 1 : distance === 1 ? 0.72 : 0.08 + cell.col * 0.07
+      })
+    case "dotm-square-13":
+      return Array.from({ length: 16 }, (_, frame) => {
+        const order = outerRingClockwiseOrderValue(cell.index)
+        if (cell.row === DOT_MATRIX_CENTER && cell.col === DOT_MATRIX_CENTER) {
+          return frame % 4 === 0 ? 1 : 0.56
+        }
+        return order >= 0 && Math.abs(order - frame) <= 1 ? 1 : 0.08
+      })
+    case "dotm-square-14":
+      return Array.from({ length: 6 }, (_, frame) => {
+        const sequence = [0, 1, 2, 3, 2, 1]
+        const distance = Math.abs(cell.row - DOT_MATRIX_CENTER) + Math.abs(cell.col - DOT_MATRIX_CENTER)
+        return distance === sequence[frame] ? 1 : distance < sequence[frame] ? 0.52 : 0.08
+      })
+    case "dotm-square-15":
+    case "dotm-square-16":
+      return Array.from({ length: 20 }, (_, frame) => {
+        const phase = (frame / 19) * Math.PI * 2 + cell.row * 1.24
+        const left = Math.round(1.5 + 0.5 * Math.sin(phase))
+        const right = DOT_MATRIX_TILE_SIZE - 1 - left
+        const bridge = Math.cos(phase * 2) > 0.82 && cell.col === 2
+        return cell.col === left || cell.col === right ? 1 : bridge ? 0.58 : Math.abs(cell.col - left) === 1 ? 0.24 : 0.08
+      })
+    case "dotm-square-17":
+      return Array.from({ length: 20 }, (_, frame) => {
+        const phase = (frame / 19) * Math.PI * 2 + cell.row * 1.24
+        const strandCol = Math.round(2 + 2 * Math.sin(phase))
+        return cell.col === strandCol ? 1 : Math.abs(cell.col - strandCol) === 1 ? 0.24 : 0.08
+      })
+    case "dotm-square-18":
+      return Array.from({ length: 24 }, (_, frame) => {
+        const colPhase = frame * 0.52 + cell.col * 1.15
+        const level = Math.round(1 + ((Math.sin(colPhase) + 1) / 2) * 4)
+        return DOT_MATRIX_TILE_SIZE - cell.row <= level ? 1 : 0.08
+      })
+    case "dotm-square-19":
+      return Array.from({ length: 48 }, (_, frame) => {
+        const a = (frame % DOT_MATRIX_OUTER_RING_CW.length)
+        const b = (a + DOT_MATRIX_OUTER_RING_CW.length / 2) % DOT_MATRIX_OUTER_RING_CW.length
+        const order = outerRingClockwiseOrderValue(cell.index)
+        if (cell.row === DOT_MATRIX_CENTER && cell.col === DOT_MATRIX_CENTER) {
+          return 0.62
+        }
+        return order === a || order === b ? 1 : order >= 0 && Math.min(Math.abs(order - a), Math.abs(order - b)) <= 2 ? 0.32 : 0.08
+      })
+    case "dotm-square-20":
+      return Array.from({ length: DOT_MATRIX_OUTER_RING_CW.length }, (_, frame) => {
+        const order = outerRingClockwiseOrderValue(cell.index)
+        if (cell.row === DOT_MATRIX_CENTER && cell.col === DOT_MATRIX_CENTER) {
+          return frame % 4 === 0 ? 0.62 : 0.08
+        }
+        return order === frame ? 1 : order >= 0 && Math.abs(order - frame) <= 2 ? 0.38 : 0.08
+      })
+    default:
+      return [0.08, 1, 0.32, 0.08]
+  }
+}
+
+function createDotMatrixOpacityKeyframes(name: string, samples: number[]) {
+  const last = Math.max(1, samples.length - 1)
+  const frames = samples.map((opacity, index) => {
+    const percent = formatSvgNumber((index / last) * 100)
+
+    return `${percent}% { opacity: ${getDotMatrixOpacityAnchorValue(opacity)}; }`
+  })
+
+  return `@keyframes ${name} { ${frames.join(" ")} }`
+}
+
+function getDotMatrixOpacityAnchorValue(sourceOpacity: number) {
+  if (!Number.isFinite(sourceOpacity) || sourceOpacity <= 0.08) {
+    return "var(--qr-dot-matrix-opacity-base)"
+  }
+
+  if (sourceOpacity >= 0.94) {
+    return "var(--qr-dot-matrix-opacity-peak)"
+  }
+
+  return "var(--qr-dot-matrix-opacity-mid)"
+}
+
+function createDotMatrixAnimationStyle(document: Document, tracks: DotMatrixTrack[]) {
   const style = document.createElementNS(SVG_NS, "style")
+  const generatedKeyframes = tracks
+    .filter((track) => track.state === "active" && track.keyframes.includes("-dotm-square-"))
+    .map((track) => createGeneratedDotMatrixKeyframes(track.keyframes, track.upstreamLoader, track.region))
+    .join("\n")
 
   style.setAttribute("data-qr-layer", "dot-matrix-animation")
   style.textContent = `
 .qr-dot-matrix-layer {
   pointer-events: none;
 }
-.qr-dot-matrix-module {
-  animation-duration: var(--qr-dot-matrix-duration);
+.qr-dot-matrix-track {
+  animation-duration: calc(var(--qr-dot-duration-ms, 2200) * 1ms);
   animation-iteration-count: infinite;
-  animation-timing-function: ease-in-out;
+  animation-name: var(--qr-dot-keyframes-name);
+  animation-timing-function: var(--qr-dot-easing, ease-in-out);
   filter: drop-shadow(0 0 calc(8px * var(--qr-dot-matrix-halo)) var(--qr-dot-matrix-color));
   opacity: var(--qr-dot-matrix-opacity-base);
-  transform-box: fill-box;
-  transform-origin: center;
 }
-.qr-dot-matrix-muted .qr-dot-matrix-module {
-  opacity: calc(var(--qr-dot-matrix-opacity-base) * 0.65);
+.qr-dot-matrix-track-quiet {
+  animation: none !important;
+  opacity: var(--qr-dot-matrix-opacity-base);
+  filter: none;
 }
-.qr-dot-matrix-bloom .qr-dot-matrix-module {
+.qr-dot-matrix-bloom .qr-dot-matrix-track {
   filter: drop-shadow(0 0 calc(4px + 10px * var(--qr-dot-matrix-halo)) var(--qr-dot-matrix-color));
 }
-.qr-dot-matrix-hover:not(:hover) .qr-dot-matrix-module {
+.qr-dot-matrix-hover:not(:hover) .qr-dot-matrix-track {
   animation-play-state: paused;
 }
-.qr-dot-shape-diamond .qr-dot-matrix-module {
-  transform: scale(var(--qr-dot-matrix-scale)) rotate(45deg);
-}
-.qr-dot-shape-circle .qr-dot-matrix-module,
-.qr-dot-shape-square .qr-dot-matrix-module,
-.qr-dot-shape-hearts .qr-dot-matrix-module {
-  transform: scale(var(--qr-dot-matrix-scale));
-}
-.qr-dot-loader-neon-drift .qr-dot-matrix-module { animation-name: qr-dot-loader-pulse; animation-delay: calc((var(--qr-dot-diagonal) + var(--qr-dot-order)) * -0.42s); }
-.qr-dot-loader-pulse-ladder .qr-dot-matrix-module { animation-name: qr-dot-loader-step; animation-delay: calc(var(--qr-dot-row-n) * -1.4s); }
-.qr-dot-loader-core-spiral .qr-dot-matrix-module { animation-name: qr-dot-loader-spin; animation-delay: calc((var(--qr-dot-angle) + var(--qr-dot-ring) * 4) * -0.22s); }
-.qr-dot-loader-twin-orbit .qr-dot-matrix-module { animation-name: qr-dot-loader-orbit; animation-delay: calc((var(--qr-dot-ring) + var(--qr-dot-col-n)) * -0.9s); }
-.qr-dot-loader-prism-sweep .qr-dot-matrix-module { animation-name: qr-dot-loader-sweep; animation-delay: calc(var(--qr-dot-col-n) * -1.6s); }
-.qr-dot-loader-flux-columns .qr-dot-matrix-module { animation-name: qr-dot-loader-bars; animation-delay: calc(var(--qr-dot-col) * -0.08s); }
-.qr-dot-loader-block-drop .qr-dot-matrix-module { animation-name: qr-dot-loader-drop; animation-delay: calc((1 - var(--qr-dot-row-n)) * -1.2s); }
-.qr-dot-loader-strobe-stack .qr-dot-matrix-module { animation-name: qr-dot-loader-strobe; animation-delay: calc(var(--qr-dot-order) * -0.8s); }
-.qr-dot-loader-glyph-pulse .qr-dot-matrix-module { animation-name: qr-dot-loader-glyph; animation-delay: calc(var(--qr-dot-order) * -1.8s); }
-.qr-dot-loader-crt-glide .qr-dot-matrix-module { animation-name: qr-dot-loader-crt; animation-delay: calc((var(--qr-dot-row-n) + var(--qr-dot-col-n) * 0.35) * -1.6s); }
-.qr-dot-loader-echo-ring .qr-dot-matrix-module { animation-name: qr-dot-loader-ring; animation-delay: calc(var(--qr-dot-ring) * -1.8s); }
-.qr-dot-loader-origin-wave .qr-dot-matrix-module { animation-name: qr-dot-loader-wave; animation-delay: calc(var(--qr-dot-distance) * -0.08s); }
-.qr-dot-loader-core-rotor .qr-dot-matrix-module { animation-name: qr-dot-loader-rotor; animation-delay: calc(var(--qr-dot-angle) * -0.28s); }
-.qr-dot-loader-prism-bloom .qr-dot-matrix-module { animation-name: qr-dot-loader-bloom; animation-delay: calc((var(--qr-dot-ring) + var(--qr-dot-order)) * -1s); }
-.qr-dot-loader-helix-glow .qr-dot-matrix-module { animation-name: qr-dot-loader-helix; animation-delay: calc((var(--qr-dot-row-n) * 2 - var(--qr-dot-col-n)) * -1.1s); }
-.qr-dot-loader-helix-core .qr-dot-matrix-module { animation-name: qr-dot-loader-core; animation-delay: calc((var(--qr-dot-col-n) * 2 + var(--qr-dot-row-n)) * -1s); }
-.qr-dot-loader-half-helix .qr-dot-matrix-module { animation-name: qr-dot-loader-half; animation-delay: calc((var(--qr-dot-col-n) + var(--qr-dot-ring)) * -1.2s); }
-.qr-dot-loader-sound-bars .qr-dot-matrix-module { animation-name: qr-dot-loader-bars; animation-delay: calc(var(--qr-dot-col) * -0.11s); }
-.qr-dot-loader-infinity-run .qr-dot-matrix-module { animation-name: qr-dot-loader-infinity; animation-delay: calc((var(--qr-dot-row-n) + var(--qr-dot-col-n)) * -1.1s); }
-.qr-dot-loader-mobius-run .qr-dot-matrix-module { animation-name: qr-dot-loader-mobius; animation-delay: calc((var(--qr-dot-diagonal) + var(--qr-dot-ring)) * -0.8s); }
-@keyframes qr-dot-loader-pulse { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 42% { opacity: var(--qr-dot-matrix-opacity-peak); transform: scale(calc(var(--qr-dot-matrix-scale) * 1.14)); } 66% { opacity: var(--qr-dot-matrix-opacity-mid); } }
-@keyframes qr-dot-loader-step { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 35%, 55% { opacity: var(--qr-dot-matrix-opacity-peak); } 72% { opacity: var(--qr-dot-matrix-opacity-mid); } }
-@keyframes qr-dot-loader-spin { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); transform: scale(var(--qr-dot-matrix-scale)) rotate(0deg); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); transform: scale(calc(var(--qr-dot-matrix-scale) * 1.2)) rotate(90deg); } }
-@keyframes qr-dot-loader-orbit { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 25%, 75% { opacity: var(--qr-dot-matrix-opacity-mid); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); } }
-@keyframes qr-dot-loader-sweep { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 45% { opacity: var(--qr-dot-matrix-opacity-peak); } 58% { opacity: var(--qr-dot-matrix-opacity-mid); } }
-@keyframes qr-dot-loader-bars { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); transform: scaleY(calc(var(--qr-dot-matrix-scale) * 0.72)); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); transform: scaleY(calc(var(--qr-dot-matrix-scale) * 1.28)); } }
-@keyframes qr-dot-loader-drop { 0% { opacity: var(--qr-dot-matrix-opacity-base); transform: translateY(-12%) scale(var(--qr-dot-matrix-scale)); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); transform: translateY(0) scale(calc(var(--qr-dot-matrix-scale) * 1.08)); } 100% { opacity: var(--qr-dot-matrix-opacity-base); transform: translateY(12%) scale(var(--qr-dot-matrix-scale)); } }
-@keyframes qr-dot-loader-strobe { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 12%, 20%, 52% { opacity: var(--qr-dot-matrix-opacity-peak); } 16%, 44% { opacity: var(--qr-dot-matrix-opacity-mid); } }
-@keyframes qr-dot-loader-glyph { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); transform: scale(var(--qr-dot-matrix-scale)); } 40% { opacity: var(--qr-dot-matrix-opacity-peak); transform: scale(calc(var(--qr-dot-matrix-scale) * 0.78)); } }
-@keyframes qr-dot-loader-crt { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 48% { opacity: var(--qr-dot-matrix-opacity-peak); } 54% { opacity: var(--qr-dot-matrix-opacity-mid); } }
-@keyframes qr-dot-loader-ring { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); transform: scale(calc(var(--qr-dot-matrix-scale) * 1.16)); } }
-@keyframes qr-dot-loader-wave { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 46% { opacity: var(--qr-dot-matrix-opacity-peak); } 62% { opacity: var(--qr-dot-matrix-opacity-mid); } }
-@keyframes qr-dot-loader-rotor { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); transform: scale(var(--qr-dot-matrix-scale)) rotate(0deg); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); transform: scale(calc(var(--qr-dot-matrix-scale) * 1.1)) rotate(180deg); } }
-@keyframes qr-dot-loader-bloom { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); filter: drop-shadow(0 0 calc(9px + 12px * var(--qr-dot-matrix-halo)) var(--qr-dot-matrix-color)); } }
-@keyframes qr-dot-loader-helix { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 35%, 65% { opacity: var(--qr-dot-matrix-opacity-peak); } }
-@keyframes qr-dot-loader-core { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); transform: scale(calc(var(--qr-dot-matrix-scale) * 1.12)); } }
-@keyframes qr-dot-loader-half { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 45% { opacity: var(--qr-dot-matrix-opacity-peak); } 60% { opacity: var(--qr-dot-matrix-opacity-mid); } }
-@keyframes qr-dot-loader-infinity { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 40%, 60% { opacity: var(--qr-dot-matrix-opacity-peak); } }
-@keyframes qr-dot-loader-mobius { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); transform: scale(var(--qr-dot-matrix-scale)) rotate(0deg); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); transform: scale(calc(var(--qr-dot-matrix-scale) * 1.08)) rotate(135deg); } }
+.qr-dot-matrix-track[data-qr-dot-upstream-class="dmx-diagonal-alt-sweep"] { animation-delay: calc((var(--dmx-path, 0) + var(--dmx-diagonal-parity, 0) * .08) * -1.5s); }
+.qr-dot-matrix-track[data-qr-dot-upstream-class="dmx-spiral-snake"] { animation-delay: calc(var(--dmx-spiral-order, 0) * -56ms); }
+.qr-dot-matrix-track[data-qr-dot-upstream-class="dmx-diagonal-snake"] { animation-delay: calc(var(--dmx-diagonal-snake-order, 0) * -48ms); }
+.qr-dot-matrix-track[data-qr-dot-upstream-class="dmx-outer-snake"] { animation-delay: calc(var(--dmx-outer-order, 0) * -70ms); }
+.qr-dot-matrix-track[data-qr-dot-upstream-class="dmx-middle-snake"] { animation-delay: calc(var(--dmx-middle-order, 0) * -96ms); }
+.qr-dot-matrix-track[data-qr-dot-upstream-class="dmx-square6-col-snake"] { animation-delay: calc(var(--dmx-col-pos, 0) * -110ms); }
+.qr-dot-matrix-track[data-qr-dot-upstream-class="dmx-ripple-echo"] { animation-delay: calc(var(--dmx-ripple-ring, 0) * -120ms); }
+.qr-dot-matrix-track[data-qr-dot-upstream-class="dmx-center-origin-ripple"] { animation-delay: calc(var(--dmx-center-ripple-ring, 0) * -120ms); }
+@keyframes qr-dot-loader-legacy { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); } }
+@keyframes dmx-diagonal-alt-sweep { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 44% { opacity: var(--qr-dot-matrix-opacity-peak); } 68% { opacity: var(--qr-dot-matrix-opacity-mid); } }
+@keyframes dmx-spiral-snake { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 10% { opacity: var(--qr-dot-matrix-opacity-peak); } 34% { opacity: var(--qr-dot-matrix-opacity-mid); } }
+@keyframes dmx-diagonal-snake { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 12% { opacity: var(--qr-dot-matrix-opacity-peak); } 36% { opacity: var(--qr-dot-matrix-opacity-mid); } }
+@keyframes dmx-outer-snake { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 8% { opacity: var(--qr-dot-matrix-opacity-peak); } 30% { opacity: var(--qr-dot-matrix-opacity-mid); } }
+@keyframes dmx-middle-snake { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 8% { opacity: var(--qr-dot-matrix-opacity-peak); } 30% { opacity: var(--qr-dot-matrix-opacity-mid); } }
+@keyframes dmx-square6-col-snake { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 18% { opacity: var(--qr-dot-matrix-opacity-peak); } 42% { opacity: var(--qr-dot-matrix-opacity-mid); } }
+@keyframes dmx-ripple-echo { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 35% { opacity: var(--qr-dot-matrix-opacity-peak); } 60% { opacity: var(--qr-dot-matrix-opacity-mid); } }
+@keyframes dmx-center-origin-ripple { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 32% { opacity: var(--qr-dot-matrix-opacity-peak); } 62% { opacity: var(--qr-dot-matrix-opacity-mid); } }
+@keyframes dmx-square9-bit { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 8%, 22%, 38%, 56% { opacity: var(--qr-dot-matrix-opacity-peak); } 14%, 30%, 48%, 68% { opacity: var(--qr-dot-matrix-opacity-mid); } }
+${generatedKeyframes}
 @media (prefers-reduced-motion: reduce) {
   .qr-dot-matrix-layer {
     display: none;
   }
-  .qr-dot-matrix-module {
+  .qr-dot-matrix-track {
     animation: none;
     opacity: 0;
   }
@@ -635,13 +1426,7 @@ function findDotMatrixLayerAnchor(svg: SVGElement) {
       return false
     }
 
-    if (child.tagName.toLowerCase() === "image") {
-      return true
-    }
-
-    const clipPath = child.getAttribute("clip-path") ?? ""
-
-    return clipPath.includes("clip-path-corners-square-color-")
+    return child.tagName.toLowerCase() === "image"
   }) ?? null
 }
 
@@ -1332,6 +2117,14 @@ function formatSvgNumber(value: number) {
   }
 
   return Number(value.toFixed(4)).toString()
+}
+
+function formatSvgOpacity(value: number) {
+  if (!Number.isFinite(value)) {
+    return "0"
+  }
+
+  return formatSvgNumber(Math.max(0, Math.min(1, value)))
 }
 
 function getBackgroundShapeGradientKey(

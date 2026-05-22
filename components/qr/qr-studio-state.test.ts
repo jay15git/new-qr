@@ -178,7 +178,7 @@ describe("qr studio state helpers", () => {
     expect(lowAnimation.dotMatrixAnimation.opacityBase).toBe(0);
     expect(lowAnimation.dotMatrixAnimation.opacityMid).toBe(0);
     expect(lowAnimation.dotMatrixAnimation.opacityPeak).toBe(0);
-    expect(lowAnimation.dotMatrixAnimation.overlayScale).toBe(40);
+    expect(lowAnimation.dotMatrixAnimation.overlayScale).toBe(100);
     expect(lowAnimation.dotMatrixAnimation.speed).toBe(1);
     expect(highAnimation.dotMatrixAnimation).toEqual({
       animated: true,
@@ -209,6 +209,49 @@ describe("qr studio state helpers", () => {
     expect(clampDotMatrixAnimationSpeed(Number.NaN)).toBe(
       DEFAULT_DOT_MATRIX_ANIMATION.speed,
     );
+  });
+
+  it("keeps loader color controls independent and persists opacity anchors", () => {
+    const state = createDefaultQrStudioState();
+
+    const custom = setDotMatrixAnimationOptions(state, {
+      colorPreset: "mint",
+      customColor: "#abcdef",
+      opacityBase: 0.14,
+      opacityMid: 0.48,
+      opacityPeak: 0.92,
+    });
+
+    expect(custom.dotMatrixAnimation.colorPreset).toBe("mint");
+    expect(custom.dotMatrixAnimation.customColor).toBe("#abcdef");
+    expect(custom.dotMatrixAnimation.opacityBase).toBe(0.14);
+    expect(custom.dotMatrixAnimation.opacityMid).toBe(0.48);
+    expect(custom.dotMatrixAnimation.opacityPeak).toBe(0.92);
+
+    const styleColorChanged = {
+      ...custom,
+      dotsOptions: {
+        ...custom.dotsOptions,
+        color: "#ff0000",
+      },
+    };
+
+    expect(styleColorChanged.dotMatrixAnimation.colorPreset).toBe("mint");
+    expect(styleColorChanged.dotMatrixAnimation.customColor).toBe("#abcdef");
+  });
+
+  it("persists zero opacity anchors as literal zero values", () => {
+    const state = createDefaultQrStudioState();
+
+    const zeroOpacity = setDotMatrixAnimationOptions(state, {
+      opacityBase: 0,
+      opacityMid: 0,
+      opacityPeak: 0,
+    });
+
+    expect(zeroOpacity.dotMatrixAnimation.opacityBase).toBe(0);
+    expect(zeroOpacity.dotMatrixAnimation.opacityMid).toBe(0);
+    expect(zeroOpacity.dotMatrixAnimation.opacityPeak).toBe(0);
   });
 
   it("clamps raster export quality updates to the supported range", () => {
