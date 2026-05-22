@@ -208,6 +208,41 @@ describe("DraftingPaneWorkspace", () => {
     expect(getResizeHandles(workspace.container)).toHaveLength(0)
   })
 
+  it("zooms the active preview with the mouse wheel", async () => {
+    const workspace = renderWorkspace({ paneCount: 1 })
+    const [pane] = getPaneSurfaces(workspace.container, 1)
+
+    await act(async () => {
+      pane.dispatchEvent(new WheelEvent("wheel", {
+        bubbles: true,
+        cancelable: true,
+        deltaY: -100,
+      }))
+      await flushPromises()
+    })
+
+    expect(workspace.container.textContent).toContain("111%")
+  })
+
+  it("zooms the active preview with a two finger pinch", async () => {
+    const workspace = renderWorkspace({ paneCount: 1 })
+    const [pane] = getPaneSurfaces(workspace.container, 1)
+
+    await act(async () => {
+      pane.dispatchEvent(createTouchEvent("touchstart", [
+        { clientX: 0, clientY: 0 },
+        { clientX: 100, clientY: 0 },
+      ]))
+      pane.dispatchEvent(createTouchEvent("touchmove", [
+        { clientX: 0, clientY: 0 },
+        { clientX: 150, clientY: 0 },
+      ]))
+      await flushPromises()
+    })
+
+    expect(workspace.container.textContent).toContain("150%")
+  })
+
   it("renders disabled undo and redo controls when history is unavailable", () => {
     const workspace = renderWorkspace()
     const undoButton = workspace.container.querySelector(
@@ -388,6 +423,26 @@ function createDragEvent(type: string, dataTransfer: ReturnType<typeof createDat
 
   Object.defineProperty(event, "dataTransfer", {
     value: dataTransfer,
+  })
+
+  return event
+}
+
+function createTouchEvent(
+  type: string,
+  touches: Array<{ clientX: number; clientY: number }>,
+) {
+  const event = new Event(type, {
+    bubbles: true,
+    cancelable: true,
+  })
+  const touchList = {
+    item: (index: number) => touches[index] ?? null,
+    length: touches.length,
+  }
+
+  Object.defineProperty(event, "touches", {
+    value: touchList,
   })
 
   return event

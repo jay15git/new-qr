@@ -36,7 +36,7 @@ type QrPaneProps = {
   isSelected: boolean
   layers?: DraftingCanvasLayer[]
   onLayerChange?: (layerId: string, patch: Partial<DraftingCanvasLayer>) => void
-  onLayerSelect?: (layerId: string) => void
+  onLayerSelect?: (layerId: string | null) => void
   onSelect: () => void
   onQrClick: () => void
   selectedLayerId?: string | null
@@ -44,6 +44,8 @@ type QrPaneProps = {
 }
 
 type ResizeDirection = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw"
+
+const RESIZE_CONTROL_PADDING_PX = 12
 
 const RESIZE_HANDLES: Array<{
   className: string
@@ -368,13 +370,24 @@ export const QrPane = memo(function QrPane({
       return null
     }
 
+    const controlHeight = layer.height + RESIZE_CONTROL_PADDING_PX * 2
+    const controlWidth = layer.width + RESIZE_CONTROL_PADDING_PX * 2
+
     return (
-      <>
+      <div
+        className="pointer-events-none absolute left-1/2 top-1/2 z-30 border border-[var(--drafting-ink)]"
+        data-slot="drafting-layer-resize-frame"
+        style={{
+          height: controlHeight,
+          transform: "translate(-50%, -50%)",
+          width: controlWidth,
+        }}
+      >
         {RESIZE_HANDLES.map((handle) => (
           <button
             aria-label={`Resize ${layer.name} from ${handle.label}`}
             className={cn(
-              "absolute z-30 size-3 rounded-[3px] border border-[var(--drafting-ink)] bg-[var(--drafting-panel-bg-active)] shadow-[var(--drafting-shadow-rest)]",
+              "pointer-events-auto absolute z-30 size-3 rounded-[3px] border border-[var(--drafting-ink)] bg-[var(--drafting-panel-bg-active)] shadow-[var(--drafting-shadow-rest)]",
               handle.className,
               handle.cursorClassName,
             )}
@@ -389,7 +402,7 @@ export const QrPane = memo(function QrPane({
             type="button"
           />
         ))}
-      </>
+      </div>
     )
   }
 
@@ -408,8 +421,6 @@ export const QrPane = memo(function QrPane({
           data-selected={isLayerSelected ? "true" : "false"}
           className={cn(
             "absolute max-h-none max-w-none cursor-move touch-none",
-            "outline outline-0 outline-offset-2 transition-[outline-color] duration-150",
-            isLayerSelected && "outline-1 outline-[var(--drafting-ink)]",
             layer.isLocked && "cursor-default",
           )}
           style={{
@@ -457,10 +468,8 @@ export const QrPane = memo(function QrPane({
         data-card-border-width={cardState.border.width}
         data-selected={isLayerSelected ? "true" : "false"}
         className={cn(
-          "absolute max-h-none max-w-none cursor-move transition-[box-shadow,background-color,border-radius,outline-color] duration-150",
-          "outline outline-0 outline-offset-2",
-          "overflow-hidden",
-          isLayerSelected && "outline-1 outline-[var(--drafting-ink)]",
+          "absolute max-h-none max-w-none cursor-move transition-[box-shadow,background-color,border-radius] duration-150",
+          "overflow-visible",
           layer.isLocked && "cursor-default",
         )}
         style={{
@@ -517,6 +526,10 @@ export const QrPane = memo(function QrPane({
         data-slot="dashboard-compose-canvas"
         data-compose-mode="compose"
         className="relative h-full w-full overflow-hidden p-4 sm:p-6 lg:p-8"
+        onClick={() => {
+          onLayerSelect?.(null)
+          onSelect()
+        }}
       >
         {isLoading ? (
           <div className="grid h-full place-items-center text-sm font-medium text-[var(--drafting-ink-muted)]">

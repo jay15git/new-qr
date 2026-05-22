@@ -1,6 +1,14 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react"
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type TouchEvent,
+  type WheelEvent,
+} from "react"
 import {
   CopyPlusIcon,
   Maximize2Icon,
@@ -42,6 +50,11 @@ type DraftingPane = {
 
 type DraftingPanelLayouts = Record<string, Record<string, number>>
 
+const MIN_PREVIEW_ZOOM = 0.5
+const MAX_PREVIEW_ZOOM = 2
+const PREVIEW_ZOOM_STEP = 0.1
+const WHEEL_ZOOM_SENSITIVITY = 0.001
+
 type DraftingPaneWorkspaceProps = {
   panes: DraftingPane[]
   activePaneId: string
@@ -61,7 +74,7 @@ type DraftingPaneWorkspaceProps = {
     layerId: string,
     patch: Partial<DraftingCanvasLayer>,
   ) => void
-  onLayerSelect?: (paneId: string, layerId: string) => void
+  onLayerSelect?: (paneId: string, layerId: string | null) => void
   selectedLayerId?: string | null
 }
 
@@ -102,6 +115,21 @@ function DraftingResizeHandle() {
   )
 }
 
+function clampPreviewZoom(value: number) {
+  return Math.min(MAX_PREVIEW_ZOOM, Math.max(MIN_PREVIEW_ZOOM, value))
+}
+
+function getTouchDistance(touches: React.TouchList) {
+  const first = touches.item(0)
+  const second = touches.item(1)
+
+  if (!first || !second) {
+    return null
+  }
+
+  return Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY)
+}
+
 function DraftingPaneSurface({
   areaName,
   canSwap,
@@ -115,6 +143,7 @@ function DraftingPaneSurface({
   onPaneDrop,
   onPaneDragOver,
   onPaneDragLeave,
+  onPaneZoom,
   onLayerChange,
   onLayerSelect,
   pane,
@@ -133,18 +162,21 @@ function DraftingPaneSurface({
   onPaneDrop: (paneId: string, event: React.DragEvent<HTMLDivElement>) => void
   onPaneDragOver: (paneId: string, event: React.DragEvent<HTMLDivElement>) => void
   onPaneDragLeave: (paneId: string, event: React.DragEvent<HTMLDivElement>) => void
+  onPaneZoom: (paneId: string, nextZoom: number) => void
   onLayerChange?: (
     paneId: string,
     layerId: string,
     patch: Partial<DraftingCanvasLayer>,
   ) => void
-  onLayerSelect?: (paneId: string, layerId: string) => void
+  onLayerSelect?: (paneId: string, layerId: string | null) => void
   pane: DraftingPane
   paneZoom: number
   selectedLayerId?: string | null
 }) {
   const onPaneSelectRef = useRef(onPaneSelect)
   const onPaneQrClickRef = useRef(onPaneQrClick)
+  const pinchDistanceRef = useRef<number | null>(null)
+  const pinchZoomRef = useRef(paneZoom)
 
   useEffect(() => {
     onPaneSelectRef.current = onPaneSelect
@@ -154,6 +186,10 @@ function DraftingPaneSurface({
     onPaneQrClickRef.current = onPaneQrClick
   }, [onPaneQrClick])
 
+  useEffect(() => {
+    pinchZoomRef.current = paneZoom
+  }, [paneZoom])
+
   const handleSelect = useCallback(() => {
     onPaneSelectRef.current(pane.id)
   }, [pane.id])
@@ -161,6 +197,57 @@ function DraftingPaneSurface({
   const handleQrClick = useCallback(() => {
     onPaneQrClickRef.current(pane.id)
   }, [pane.id])
+
+  const handleWheel = useCallback(
+    (event: WheelEvent<HTMLDivElement>) => {
+      event.preventDefault()
+      event.stopPropagation()
+      onPaneSelectRef.current(pane.id)
+
+      const nextZoom = clampPreviewZoom(paneZoom * Math.exp(-event.deltaY * WHEEL_ZOOM_SENSITIVITY))
+      onPaneZoom(pane.id, nextZoom)
+    },
+    [onPaneZoom, pane.id, paneZoom],
+  )
+
+  const handleTouchStart = useCallback(
+    (event: TouchEvent<HTMLDivElement>) => {
+      const distance = getTouchDistance(event.touches)
+
+      if (distance === null) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+      onPaneSelectRef.current(pane.id)
+      pinchDistanceRef.current = distance
+      pinchZoomRef.current = paneZoom
+    },
+    [pane.id, paneZoom],
+  )
+
+  const handleTouchMove = useCallback(
+    (event: TouchEvent<HTMLDivElement>) => {
+      const startDistance = pinchDistanceRef.current
+      const nextDistance = getTouchDistance(event.touches)
+
+      if (startDistance === null || nextDistance === null || startDistance <= 0) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+      onPaneZoom(pane.id, clampPreviewZoom(pinchZoomRef.current * (nextDistance / startDistance)))
+    },
+    [onPaneZoom, pane.id],
+  )
+
+  const handleTouchEnd = useCallback((event: TouchEvent<HTMLDivElement>) => {
+    if (event.touches.length < 2) {
+      pinchDistanceRef.current = null
+    }
+  }, [])
 
   return (
     <div
@@ -171,7 +258,7 @@ function DraftingPaneSurface({
       data-snap-target={isSnapTarget ? "true" : "false"}
       draggable={canSwap}
       className={cn(
-        "relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-[var(--drafting-canvas-bg)] transition-opacity duration-150 ease-out after:pointer-events-none after:absolute after:inset-0 after:border-2 after:border-dashed after:border-transparent after:content-[''] after:transition-colors after:duration-150 after:ease-out",
+        "relative flex h-full w-full touch-none flex-col items-center justify-center overflow-hidden bg-[var(--drafting-canvas-bg)] transition-opacity duration-150 ease-out after:pointer-events-none after:absolute after:inset-0 after:border-2 after:border-dashed after:border-transparent after:content-[''] after:transition-colors after:duration-150 after:ease-out",
         canSwap && "cursor-grab active:cursor-grabbing",
         draggingPaneId === pane.id && "opacity-55",
         isSnapTarget && "after:border-[var(--drafting-ink)]",
@@ -189,6 +276,10 @@ function DraftingPaneSurface({
       onDragOver={(event) => onPaneDragOver(pane.id, event)}
       onDragStart={(event) => onPaneDragStart(pane.id, event)}
       onDrop={(event) => onPaneDrop(pane.id, event)}
+      onTouchEnd={handleTouchEnd}
+      onTouchMove={handleTouchMove}
+      onTouchStart={handleTouchStart}
+      onWheel={handleWheel}
     >
       <div
         style={{
@@ -250,16 +341,23 @@ export function DraftingPaneWorkspace({
   const handleZoomOut = useCallback(() => {
     setZoomLevels((current) => ({
       ...current,
-      [activePaneId]: Math.max(0.5, (current[activePaneId] ?? 1) - 0.1),
+      [activePaneId]: clampPreviewZoom((current[activePaneId] ?? 1) - PREVIEW_ZOOM_STEP),
     }))
   }, [activePaneId])
 
   const handleZoomIn = useCallback(() => {
     setZoomLevels((current) => ({
       ...current,
-      [activePaneId]: Math.min(2, (current[activePaneId] ?? 1) + 0.1),
+      [activePaneId]: clampPreviewZoom((current[activePaneId] ?? 1) + PREVIEW_ZOOM_STEP),
     }))
   }, [activePaneId])
+
+  const handlePaneZoom = useCallback((paneId: string, nextZoom: number) => {
+    setZoomLevels((current) => ({
+      ...current,
+      [paneId]: clampPreviewZoom(nextZoom),
+    }))
+  }, [])
 
   const zoomPercent = `${Math.round(activeZoom * 100)}%`
 
@@ -455,6 +553,7 @@ export function DraftingPaneWorkspace({
                                 onPaneDragOver={handlePaneDragOver}
                                 onPaneDragStart={handlePaneDragStart}
                                 onPaneDrop={handlePaneDrop}
+                                onPaneZoom={handlePaneZoom}
                                 onLayerChange={onLayerChange}
                                 onLayerSelect={onLayerSelect}
                                 onPaneQrClick={onPaneQrClick}

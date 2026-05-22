@@ -17,7 +17,10 @@ import {
   createDefaultDraftingCardPaperShader,
   createDefaultDraftingCardState,
 } from "@/components/new/drafting-card-state"
-import type { DraftingCanvasLayer } from "@/components/new/drafting-layer-state"
+import {
+  getDraftingCardLayerId,
+  type DraftingCanvasLayer,
+} from "@/components/new/drafting-layer-state"
 import {
   createDefaultQrStudioState,
   setSquareQrSize,
@@ -414,6 +417,59 @@ describe("QrPane", () => {
     expect(directions).toEqual(["n", "ne", "e", "se", "s", "sw", "w", "nw"])
   })
 
+  it("keeps resize control padding equal around rectangular layers", async () => {
+    const state = setSquareQrSize(createDefaultQrStudioState(), 240)
+    const cardState = {
+      ...createDefaultDraftingCardState(),
+      bottomSpace: 96,
+      padding: 20,
+    }
+    const { container } = renderPane(state, true, cardState, {
+      onLayerChange: () => undefined,
+      selectedLayerId: getDraftingCardLayerId("preview"),
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const card = container.querySelector('[data-slot="dashboard-compose-card"]') as HTMLElement
+    const frame = container.querySelector('[data-slot="drafting-layer-resize-frame"]') as HTMLElement
+
+    expect(card).not.toBeNull()
+    expect(card.className).toContain("overflow-visible")
+    expect(card.className).not.toContain("outline")
+    expect(frame).not.toBeNull()
+    expect(frame.className).toContain("border")
+    expect(frame.style.width).toBe("304px")
+    expect(frame.style.height).toBe("400px")
+  })
+
+  it("clears layer selection when clicking empty preview canvas space", async () => {
+    const onLayerSelect = vi.fn()
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      onLayerChange: () => undefined,
+      onLayerSelect,
+      selectedLayerId: "preview:qr",
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const canvas = container.querySelector('[data-slot="dashboard-compose-canvas"]')
+
+    expect(canvas).not.toBeNull()
+
+    act(() => {
+      canvas?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    expect(onLayerSelect).toHaveBeenCalledWith(null)
+  })
+
   it("applies qr layer shadow to foreground qr shapes instead of the background rect", async () => {
     buildDashboardQrNodePayloadSpy.mockImplementationOnce(async () => ({
       markup:
@@ -495,6 +551,7 @@ function renderPane(
   props: {
     layers?: DraftingCanvasLayer[]
     onLayerChange?: (layerId: string, patch: Partial<DraftingCanvasLayer>) => void
+    onLayerSelect?: (layerId: string | null) => void
     selectedLayerId?: string | null
   } = {},
 ) {
@@ -509,6 +566,7 @@ function renderPane(
         state={state}
         isSelected={isSelected}
         onLayerChange={props.onLayerChange}
+        onLayerSelect={props.onLayerSelect}
         onQrClick={() => undefined}
         onSelect={() => undefined}
         selectedLayerId={props.selectedLayerId}

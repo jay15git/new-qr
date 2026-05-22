@@ -622,7 +622,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       ),
     }
   })
-  const [selectedLayerId, setSelectedLayerId] = useState(
+  const [selectedLayerId, setSelectedLayerId] = useState<string | null>(
     getDraftingQrLayerId(DASHBOARD_QR_NODE_ID),
   )
   const [selectedDownloadExtension, setSelectedDownloadExtension] =
@@ -1631,12 +1631,16 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     }
   }
 
-  function handleLayerSelect(paneId: string, layerId: string) {
+  function handleLayerSelect(paneId: string, layerId: string | null) {
     if (paneId !== activeQrNodeId) {
       handlePaneSelection(paneId)
     }
 
     setSelectedLayerId(layerId)
+
+    if (layerId === null) {
+      return
+    }
 
     if (isDraftingCardLayerId(layerId)) {
       setActiveTool("card-frame")
