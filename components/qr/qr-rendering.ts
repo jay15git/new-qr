@@ -18,11 +18,20 @@ import {
   clampQrSize,
   getAssetValue,
   hasActiveBackgroundShapeOptions,
+  type QrDotMatrixAnimationOptions,
   type QrStudioState,
   type StudioGradient,
 } from "@/components/qr/qr-studio-state"
 
-export function buildQrExtension(state: QrStudioState) {
+type QrAnimationRenderMode = "export" | "none" | "preview"
+
+const SVG_NS = "http://www.w3.org/2000/svg"
+const DOTS_CLIP_PATH_PREFIX = "clip-path-dot-color-"
+
+export function buildQrExtension(
+  state: QrStudioState,
+  options: { animationMode?: QrAnimationRenderMode } = {},
+) {
   const extensions: ExtensionFunction[] = []
   const customDotShape = getSvgCustomDotShape(state)
   const backgroundImage = getAssetValue(state.backgroundImage)
@@ -30,6 +39,10 @@ export function buildQrExtension(state: QrStudioState) {
     ? null
     : getQrBackgroundShapeDefinition(state.backgroundShapeId)
   const alignedCornerGradientExtension = createAlignedCornerGradientExtension(state)
+  const dotMatrixAnimationExtension = createDotMatrixAnimationExtension(
+    state,
+    options.animationMode ?? "none",
+  )
 
   if (backgroundImage) {
     extensions.push(
@@ -63,6 +76,10 @@ export function buildQrExtension(state: QrStudioState) {
     extensions.push(alignedCornerGradientExtension)
   }
 
+  if (dotMatrixAnimationExtension) {
+    extensions.push(dotMatrixAnimationExtension)
+  }
+
   if (extensions.length === 0) {
     return null
   }
@@ -77,8 +94,18 @@ export function buildQrExtension(state: QrStudioState) {
   }
 }
 
-export function getQrExtensionKey(state: QrStudioState) {
+export function getQrExtensionKey(
+  state: QrStudioState,
+  options: { animationMode?: QrAnimationRenderMode } = {},
+) {
+  const animationMode = options.animationMode ?? "none"
+
   return JSON.stringify({
+    animation:
+      shouldApplyDotMatrixAnimation(state, animationMode)
+        ? state.dotMatrixAnimation
+        : null,
+    animationMode,
     backgroundImage: getAssetValue(state.backgroundImage),
     backgroundRound: state.backgroundOptions.round,
     backgroundShapeGradient: getBackgroundShapeGradientKey(state),
@@ -97,6 +124,378 @@ export function getQrExtensionKey(state: QrStudioState) {
     dotsPalette: state.dotsPalette,
     seed: state.data.trim(),
   })
+}
+
+export function createDotMatrixAnimationExtension(
+  state: QrStudioState,
+  mode: QrAnimationRenderMode,
+): ExtensionFunction | null {
+  if (!shouldApplyDotMatrixAnimation(state, mode)) {
+    return null
+  }
+
+  return (svg) => {
+    const document = svg.ownerDocument
+
+    if (!document) {
+      return
+    }
+
+    svg.querySelectorAll('[data-qr-layer="dot-matrix-animation"]').forEach((node) => {
+      node.remove()
+    })
+
+    const dotLayers = getDotClipLayers(svg)
+
+    if (dotLayers.length === 0) {
+      return
+    }
+
+    const dotShapes = dotLayers.flatMap((layer) => layer.shapes)
+    const metrics = collectDotMatrixMetrics(dotShapes)
+
+    if (!metrics) {
+      return
+    }
+
+    const group = document.createElementNS(SVG_NS, "g")
+    group.setAttribute("data-qr-layer", "dot-matrix-animation")
+    group.setAttribute("class", "qr-dot-matrix-layer")
+    group.appendChild(createDotMatrixAnimationStyle(document, state.dotMatrixAnimation))
+    group.setAttribute(
+      "style",
+      `--qr-dot-matrix-overlay-opacity:${getDotMatrixOverlayOpacity(state.dotMatrixAnimation)}`,
+    )
+
+    for (const layer of dotLayers) {
+      for (const shape of layer.shapes) {
+        const coordinates = resolveDotMatrixCoordinates(shape, metrics)
+
+        if (!coordinates) {
+          continue
+        }
+
+        const animatedShape = shape.cloneNode(true) as SVGElement
+        animatedShape.removeAttribute("clip-path")
+        animatedShape.setAttribute("fill", "#22d3ee")
+        animatedShape.setAttribute("class", "qr-dot-matrix-module")
+        animatedShape.setAttribute(
+          "style",
+          [
+            `--qr-dot-matrix-delay:${getDotMatrixDelay(
+              state.dotMatrixAnimation.preset,
+              coordinates.row,
+              coordinates.col,
+              metrics.maxRow,
+              metrics.maxCol,
+            )}s`,
+          ].join(";"),
+        )
+        group.appendChild(animatedShape)
+      }
+    }
+
+    if (group.children.length <= 1) {
+      return
+    }
+
+    svg.insertBefore(group, findDotMatrixLayerAnchor(svg))
+  }
+}
+
+function shouldApplyDotMatrixAnimation(
+  state: QrStudioState,
+  mode: QrAnimationRenderMode,
+) {
+  if (!state.dotMatrixAnimation.enabled || state.type !== "svg") {
+    return false
+  }
+
+  if (mode === "preview") {
+    return true
+  }
+
+  if (mode === "export") {
+    return state.dotMatrixAnimation.exportAnimatedSvg
+  }
+
+  return false
+}
+
+type DotClipLayer = {
+  element: SVGRectElement
+  fill: string
+  shapes: SVGElement[]
+}
+
+type DotMatrixMetrics = {
+  cellSize: number
+  maxCol: number
+  maxRow: number
+  originX: number
+  originY: number
+}
+
+type DotMatrixAnchor = {
+  size?: number
+  x: number
+  y: number
+}
+
+function getDotClipLayers(svg: SVGElement): DotClipLayer[] {
+  return Array.from(svg.querySelectorAll("rect"))
+    .map((element) => {
+      const clipPathId = getClipPathId(element.getAttribute("clip-path"))
+
+      if (!clipPathId?.startsWith(DOTS_CLIP_PATH_PREFIX)) {
+        return null
+      }
+
+      const clipPath = Array.from(svg.querySelectorAll("clipPath")).find(
+        (candidate) => candidate.getAttribute("id") === clipPathId,
+      )
+
+      if (!clipPath) {
+        return null
+      }
+
+      const shapes = Array.from(clipPath.children).filter(
+        (child): child is SVGElement => isSvgElementLike(child),
+      )
+
+      if (shapes.length === 0) {
+        return null
+      }
+
+      return {
+        element,
+        fill: element.getAttribute("fill") ?? "currentColor",
+        shapes,
+      } satisfies DotClipLayer
+    })
+    .filter((layer): layer is DotClipLayer => layer !== null)
+}
+
+function getClipPathId(clipPath: string | null) {
+  return /url\(['"]?#([^'")]+)['"]?\)/.exec(clipPath ?? "")?.[1] ?? null
+}
+
+function isSvgElementLike(node: Element): node is SVGElement {
+  return typeof node.getAttribute === "function" && typeof node.setAttribute === "function"
+}
+
+function collectDotMatrixMetrics(dotShapes: SVGElement[]): DotMatrixMetrics | null {
+  const anchors = dotShapes
+    .map((shape) => getDotMatrixAnchor(shape))
+    .filter((anchor): anchor is DotMatrixAnchor => anchor !== null)
+
+  if (anchors.length === 0) {
+    return null
+  }
+
+  const explicitSizes = anchors
+    .map((anchor) => anchor.size)
+    .filter((size): size is number => size !== undefined && Number.isFinite(size) && size > 0)
+  const cellSize =
+    explicitSizes.length > 0
+      ? Math.min(...explicitSizes)
+      : getSmallestPositiveDelta([
+          ...anchors.map((anchor) => anchor.x),
+          ...anchors.map((anchor) => anchor.y),
+        ])
+
+  if (!Number.isFinite(cellSize) || cellSize <= 0) {
+    return null
+  }
+
+  const originX = Math.min(...anchors.map((anchor) => anchor.x))
+  const originY = Math.min(...anchors.map((anchor) => anchor.y))
+  const coordinates = anchors.map((anchor) => ({
+    col: Math.max(0, Math.round((anchor.x - originX) / cellSize)),
+    row: Math.max(0, Math.round((anchor.y - originY) / cellSize)),
+  }))
+
+  return {
+    cellSize,
+    maxCol: Math.max(...coordinates.map((coordinate) => coordinate.col)),
+    maxRow: Math.max(...coordinates.map((coordinate) => coordinate.row)),
+    originX,
+    originY,
+  }
+}
+
+function resolveDotMatrixCoordinates(shape: SVGElement, metrics: DotMatrixMetrics) {
+  const anchor = getDotMatrixAnchor(shape)
+
+  if (!anchor) {
+    return null
+  }
+
+  return {
+    col: Math.max(0, Math.round((anchor.x - metrics.originX) / metrics.cellSize)),
+    row: Math.max(0, Math.round((anchor.y - metrics.originY) / metrics.cellSize)),
+  }
+}
+
+function getDotMatrixAnchor(shape: SVGElement): DotMatrixAnchor | null {
+  if (shape.tagName.toLowerCase() === "rect") {
+    const x = getDotNumericAttribute(shape, "x")
+    const y = getDotNumericAttribute(shape, "y")
+    const width = getDotNumericAttribute(shape, "width")
+    const height = getDotNumericAttribute(shape, "height")
+
+    if (x !== null && y !== null && width !== null && height !== null) {
+      return { size: Math.min(width, height), x, y }
+    }
+  }
+
+  if (shape.tagName.toLowerCase() === "circle") {
+    const cx = getDotNumericAttribute(shape, "cx")
+    const cy = getDotNumericAttribute(shape, "cy")
+    const r = getDotNumericAttribute(shape, "r")
+
+    if (cx !== null && cy !== null && r !== null) {
+      return { size: r * 2, x: cx - r, y: cy - r }
+    }
+  }
+
+  if (shape.tagName.toLowerCase() === "path") {
+    return getPathAnchor(shape.getAttribute("d"))
+  }
+
+  return null
+}
+
+function getPathAnchor(pathDefinition: string | null): DotMatrixAnchor | null {
+  if (!pathDefinition) {
+    return null
+  }
+
+  const match =
+    /M\s*([+-]?(?:\d+\.?\d*|\.\d+))[\s,]+([+-]?(?:\d+\.?\d*|\.\d+))/.exec(pathDefinition)
+
+  if (!match) {
+    return null
+  }
+
+  const x = Number(match[1])
+  const y = Number(match[2])
+
+  if (!Number.isFinite(x) || !Number.isFinite(y)) {
+    return null
+  }
+
+  return { x, y }
+}
+
+function getDotNumericAttribute(shape: SVGElement, attributeName: string) {
+  const value = shape.getAttribute(attributeName)
+
+  if (value === null) {
+    return null
+  }
+
+  const parsedValue = Number(value)
+
+  return Number.isFinite(parsedValue) ? parsedValue : null
+}
+
+function getSmallestPositiveDelta(values: number[]) {
+  const uniqueValues = Array.from(new Set(values.filter(Number.isFinite))).sort((a, b) => a - b)
+  let smallestDelta = Number.POSITIVE_INFINITY
+
+  for (let index = 1; index < uniqueValues.length; index += 1) {
+    const delta = uniqueValues[index] - uniqueValues[index - 1]
+
+    if (delta > 0 && delta < smallestDelta) {
+      smallestDelta = delta
+    }
+  }
+
+  return smallestDelta
+}
+
+function getDotMatrixDelay(
+  preset: QrDotMatrixAnimationOptions["preset"],
+  row: number,
+  col: number,
+  maxRow: number,
+  maxCol: number,
+) {
+  if (preset === "scanline") {
+    return formatSvgNumber(row * 0.08)
+  }
+
+  if (preset === "radial") {
+    const centerRow = maxRow / 2
+    const centerCol = maxCol / 2
+    const distance = Math.hypot(row - centerRow, col - centerCol)
+
+    return formatSvgNumber(distance * 0.07)
+  }
+
+  if (preset === "helix") {
+    return formatSvgNumber(((row * 2 + col) % 13) * 0.08)
+  }
+
+  return formatSvgNumber((row + col) * 0.055)
+}
+
+function getDotMatrixOverlayOpacity(animation: QrDotMatrixAnimationOptions) {
+  return formatSvgNumber(0.18 + (Math.min(100, Math.max(0, animation.intensity)) / 100) * 0.42)
+}
+
+function getDotMatrixAnimationDuration(animation: QrDotMatrixAnimationOptions) {
+  return formatSvgNumber(4.4 - Math.min(5, Math.max(1, animation.speed)) * 0.52)
+}
+
+function createDotMatrixAnimationStyle(
+  document: Document,
+  animation: QrDotMatrixAnimationOptions,
+) {
+  const style = document.createElementNS(SVG_NS, "style")
+
+  style.setAttribute("data-qr-layer", "dot-matrix-animation")
+  style.textContent = `
+.qr-dot-matrix-module {
+  animation: qr-dot-matrix-pulse ${getDotMatrixAnimationDuration(animation)}s ease-in-out infinite;
+  animation-delay: var(--qr-dot-matrix-delay);
+  filter: drop-shadow(0 0 3px rgba(34, 211, 238, 0.75));
+  opacity: 0;
+}
+@keyframes qr-dot-matrix-pulse {
+  0%, 100% { opacity: 0; }
+  38% { opacity: var(--qr-dot-matrix-overlay-opacity); }
+  52% { opacity: calc(var(--qr-dot-matrix-overlay-opacity) * 0.72); }
+  66% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qr-dot-matrix-layer {
+    display: none;
+  }
+  .qr-dot-matrix-module {
+    animation: none;
+    opacity: 0;
+  }
+}`
+
+  return style
+}
+
+function findDotMatrixLayerAnchor(svg: SVGElement) {
+  return Array.from(svg.children).find((child) => {
+    if (!isSvgElementLike(child)) {
+      return false
+    }
+
+    if (child.tagName.toLowerCase() === "image") {
+      return true
+    }
+
+    const clipPath = child.getAttribute("clip-path") ?? ""
+
+    return clipPath.includes("clip-path-corners-square-color-")
+  }) ?? null
 }
 
 function createBackgroundShapeExtension(

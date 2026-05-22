@@ -4,10 +4,14 @@ import {
   clampBackgroundShapeOffset,
   clampBackgroundShapeOpacity,
   clampBackgroundShapePaddingPx,
+  clampDotMatrixAnimationIntensity,
+  clampDotMatrixAnimationSpeed,
   clampRasterExportQualityPercent,
   clampQrBackgroundRound,
   clampQrSize,
   createDefaultQrStudioState,
+  DEFAULT_DOT_MATRIX_ANIMATION,
+  setDotMatrixAnimationOptions,
   setRasterExportQualityPercent,
   setSquareQrSize,
   toQrCodeOptions,
@@ -104,6 +108,45 @@ describe("qr studio state helpers", () => {
     const state = createDefaultQrStudioState();
 
     expect(state.rasterExportQualityPercent).toBe(100);
+  });
+
+  it("starts with dot matrix animation disabled and SVG export static", () => {
+    const state = createDefaultQrStudioState();
+
+    expect(state.dotMatrixAnimation).toEqual(DEFAULT_DOT_MATRIX_ANIMATION);
+    expect(state.dotMatrixAnimation.enabled).toBe(false);
+    expect(state.dotMatrixAnimation.exportAnimatedSvg).toBe(false);
+  });
+
+  it("clamps dot matrix animation updates to supported ranges", () => {
+    const state = createDefaultQrStudioState();
+    const lowAnimation = setDotMatrixAnimationOptions(state, {
+      intensity: -20,
+      speed: -1,
+    });
+    const highAnimation = setDotMatrixAnimationOptions(state, {
+      enabled: true,
+      exportAnimatedSvg: true,
+      intensity: 240,
+      preset: "radial",
+      speed: 12,
+    });
+
+    expect(lowAnimation.dotMatrixAnimation.intensity).toBe(0);
+    expect(lowAnimation.dotMatrixAnimation.speed).toBe(1);
+    expect(highAnimation.dotMatrixAnimation).toEqual({
+      enabled: true,
+      exportAnimatedSvg: true,
+      intensity: 100,
+      preset: "radial",
+      speed: 5,
+    });
+    expect(clampDotMatrixAnimationIntensity(Number.NaN)).toBe(
+      DEFAULT_DOT_MATRIX_ANIMATION.intensity,
+    );
+    expect(clampDotMatrixAnimationSpeed(Number.NaN)).toBe(
+      DEFAULT_DOT_MATRIX_ANIMATION.speed,
+    );
   });
 
   it("clamps raster export quality updates to the supported range", () => {

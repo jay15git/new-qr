@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import {
   buildQrExtension,
   createAlignedCornerGradientExtension,
+  createDotMatrixAnimationExtension,
   getQrExtensionKey,
 } from "./qr-rendering"
 import { createDefaultQrStudioState } from "./qr-studio-state"
@@ -11,6 +12,7 @@ type StubElement = {
   tagName: string
   attributes: Record<string, string>
   children: StubElement[]
+  cloneNode: (deep?: boolean) => StubElement
   ownerDocument: {
     createElementNS: (_namespace: string, tagName: string) => StubElement
   }
@@ -23,6 +25,7 @@ type StubElement = {
   remove: () => void
   setAttribute: (name: string, value: string) => void
   setAttributeNS: (_namespace: string, name: string, value: string) => void
+  textContent?: string | null
 }
 
 function createStubElement(tagName: string): StubElement {
@@ -30,6 +33,19 @@ function createStubElement(tagName: string): StubElement {
     tagName,
     attributes: {},
     children: [],
+    cloneNode(deep = false) {
+      const clone = createStubElement(element.tagName)
+      clone.attributes = { ...element.attributes }
+      clone.textContent = element.textContent ?? null
+
+      if (deep) {
+        for (const child of element.children) {
+          clone.appendChild(child.cloneNode(true))
+        }
+      }
+
+      return clone
+    },
     ownerDocument: {
       createElementNS: (_namespace, nextTagName) => createStubElement(nextTagName),
     },
@@ -68,6 +84,10 @@ function createStubElement(tagName: string): StubElement {
       const matches = (node: StubElement) => {
         if (selector === "rect") {
           return node.tagName === "rect"
+        }
+
+        if (selector === "clipPath") {
+          return node.tagName === "clipPath"
         }
 
         if (
@@ -115,6 +135,10 @@ function createStubElement(tagName: string): StubElement {
 
         if (selector === '[data-qr-layer="background-surface-blur-filter"]') {
           return node.attributes["data-qr-layer"] === "background-surface-blur-filter"
+        }
+
+        if (selector === '[data-qr-layer="dot-matrix-animation"]') {
+          return node.attributes["data-qr-layer"] === "dot-matrix-animation"
         }
 
         return false
@@ -235,6 +259,96 @@ describe("qr rendering helpers", () => {
     expect(getQrExtensionKey(stateWithBackgroundShape)).not.toBe(
       getQrExtensionKey(defaultState),
     )
+  })
+
+  it("adds dot matrix animation as a visible overlay without changing base or corner layers", () => {
+    const state = createDefaultQrStudioState()
+    state.dotMatrixAnimation = {
+      enabled: true,
+      exportAnimatedSvg: false,
+      intensity: 40,
+      preset: "scanline",
+      speed: 4,
+    }
+
+    const extension = createDotMatrixAnimationExtension(state, "preview")
+    expect(extension).toBeTypeOf("function")
+
+    if (!extension) {
+      return
+    }
+
+    const svg = createStubElement("svg")
+    const defs = createStubElement("defs")
+    const dotClipPath = createStubElement("clipPath")
+    dotClipPath.setAttribute("id", "clip-path-dot-color-0")
+    const firstDot = createStubElement("rect")
+    firstDot.setAttribute("x", "10")
+    firstDot.setAttribute("y", "10")
+    firstDot.setAttribute("width", "5")
+    firstDot.setAttribute("height", "5")
+    const secondDot = createStubElement("circle")
+    secondDot.setAttribute("cx", "17.5")
+    secondDot.setAttribute("cy", "12.5")
+    secondDot.setAttribute("r", "2.5")
+    dotClipPath.appendChild(firstDot)
+    dotClipPath.appendChild(secondDot)
+    defs.appendChild(dotClipPath)
+    svg.appendChild(defs)
+
+    const dotLayer = createStubElement("rect")
+    dotLayer.setAttribute("clip-path", "url('#clip-path-dot-color-0')")
+    dotLayer.setAttribute("fill", "#111827")
+    svg.appendChild(dotLayer)
+    const cornerLayer = createStubElement("rect")
+    cornerLayer.setAttribute("clip-path", "url('#clip-path-corners-square-color-0-0-0')")
+    cornerLayer.setAttribute("fill", "#111827")
+    svg.appendChild(cornerLayer)
+
+    extension(svg as unknown as SVGElement, {
+      height: 120,
+      width: 120,
+    })
+
+    const animationLayer = svg.querySelector('[data-qr-layer="dot-matrix-animation"]')
+    const animatedModules =
+      animationLayer?.children.filter(
+        (child) => child.attributes.class === "qr-dot-matrix-module",
+      ) ?? []
+
+    expect(svg.children).toContain(dotLayer)
+    expect(svg.children).toContain(cornerLayer)
+    expect(animationLayer?.children[0]?.tagName).toBe("style")
+    expect(animationLayer?.children[0]?.textContent).toContain(
+      "@media (prefers-reduced-motion: reduce)",
+    )
+    expect(animationLayer?.children[0]?.textContent).toContain(
+      ".qr-dot-matrix-layer",
+    )
+    expect(animationLayer?.getAttribute("style")).toContain(
+      "--qr-dot-matrix-overlay-opacity:",
+    )
+    expect(animatedModules).toHaveLength(2)
+    expect(animatedModules[0]?.getAttribute("fill")).toBe("#22d3ee")
+    expect(animatedModules[0]?.getAttribute("x")).toBe("10")
+    expect(animatedModules[1]?.getAttribute("style")).toContain(
+      "--qr-dot-matrix-delay:",
+    )
+  })
+
+  it("keeps dot matrix animation out of export mode unless animated SVG export is enabled", () => {
+    const state = createDefaultQrStudioState()
+    state.dotMatrixAnimation = {
+      ...state.dotMatrixAnimation,
+      enabled: true,
+      exportAnimatedSvg: false,
+    }
+
+    expect(createDotMatrixAnimationExtension(state, "export")).toBeNull()
+
+    state.dotMatrixAnimation.exportAnimatedSvg = true
+
+    expect(createDotMatrixAnimationExtension(state, "export")).toBeTypeOf("function")
   })
 
   it("changes the extension key when a linear corner gradient changes", () => {

@@ -30,6 +30,15 @@ export type StudioGradient = {
 export type StudioDotType = DotType | "diamond" | "heart";
 export type DotsColorMode = "solid" | "gradient" | "palette";
 export type AssetSourceMode = "none" | "preset" | "url" | "upload";
+export type QrDotMatrixAnimationPreset = "wave" | "scanline" | "radial" | "helix";
+
+export type QrDotMatrixAnimationOptions = {
+  enabled: boolean;
+  exportAnimatedSvg: boolean;
+  intensity: number;
+  preset: QrDotMatrixAnimationPreset;
+  speed: number;
+};
 
 export type StudioAsset = {
   presetColor?: string;
@@ -78,6 +87,7 @@ export type QrStudioState = {
     color: string;
     roundSize: boolean;
   };
+  dotMatrixAnimation: QrDotMatrixAnimationOptions;
   dotsColorMode: DotsColorMode;
   dotsPalette: string[];
   cornersSquareOptions: {
@@ -113,6 +123,10 @@ export const DEFAULT_QR_SIZE = 320;
 export const RASTER_EXPORT_QUALITY_MIN = 25;
 export const RASTER_EXPORT_QUALITY_MAX = 100;
 export const DEFAULT_RASTER_EXPORT_QUALITY = 100;
+export const QR_DOT_MATRIX_ANIMATION_SPEED_MIN = 1;
+export const QR_DOT_MATRIX_ANIMATION_SPEED_MAX = 5;
+export const QR_DOT_MATRIX_ANIMATION_INTENSITY_MIN = 0;
+export const QR_DOT_MATRIX_ANIMATION_INTENSITY_MAX = 100;
 export const BACKGROUND_SHAPE_PADDING_PX_MAX = 192;
 export const BACKGROUND_SHAPE_STROKE_WIDTH_MAX = 24;
 export const BACKGROUND_SHAPE_EDGE_BLUR_MAX = 32;
@@ -136,6 +150,14 @@ const DEFAULT_DOTS_PALETTE = [
   "#090030",
   "#f30a49",
 ];
+
+export const DEFAULT_DOT_MATRIX_ANIMATION: QrDotMatrixAnimationOptions = {
+  enabled: false,
+  exportAnimatedSvg: false,
+  intensity: 35,
+  preset: "wave",
+  speed: 3,
+};
 
 export const DEFAULT_BACKGROUND_SHAPE_OPTIONS: BackgroundShapeOptions = {
   edgeBlur: 0,
@@ -188,6 +210,7 @@ export function createDefaultQrStudioState(): QrStudioState {
       color: "#111827",
       roundSize: true,
     },
+    dotMatrixAnimation: { ...DEFAULT_DOT_MATRIX_ANIMATION },
     dotsColorMode: "solid",
     dotsPalette: [...DEFAULT_DOTS_PALETTE],
     cornersSquareOptions: {
@@ -240,6 +263,24 @@ export function clampRasterExportQualityPercent(value: number) {
     RASTER_EXPORT_QUALITY_MIN,
     RASTER_EXPORT_QUALITY_MAX,
     DEFAULT_RASTER_EXPORT_QUALITY,
+  );
+}
+
+export function clampDotMatrixAnimationSpeed(value: number) {
+  return coerceNumber(
+    value,
+    QR_DOT_MATRIX_ANIMATION_SPEED_MIN,
+    QR_DOT_MATRIX_ANIMATION_SPEED_MAX,
+    DEFAULT_DOT_MATRIX_ANIMATION.speed,
+  );
+}
+
+export function clampDotMatrixAnimationIntensity(value: number) {
+  return coerceNumber(
+    value,
+    QR_DOT_MATRIX_ANIMATION_INTENSITY_MIN,
+    QR_DOT_MATRIX_ANIMATION_INTENSITY_MAX,
+    DEFAULT_DOT_MATRIX_ANIMATION.intensity,
   );
 }
 
@@ -319,6 +360,37 @@ export function setRasterExportQualityPercent(
   return {
     ...state,
     rasterExportQualityPercent: nextQualityPercent,
+  };
+}
+
+export function setDotMatrixAnimationOptions(
+  state: QrStudioState,
+  patch: Partial<QrDotMatrixAnimationOptions>,
+): QrStudioState {
+  const nextAnimation: QrDotMatrixAnimationOptions = {
+    ...state.dotMatrixAnimation,
+    ...patch,
+    intensity: clampDotMatrixAnimationIntensity(
+      patch.intensity ?? state.dotMatrixAnimation.intensity,
+    ),
+    speed: clampDotMatrixAnimationSpeed(
+      patch.speed ?? state.dotMatrixAnimation.speed,
+    ),
+  };
+
+  if (
+    state.dotMatrixAnimation.enabled === nextAnimation.enabled &&
+    state.dotMatrixAnimation.exportAnimatedSvg === nextAnimation.exportAnimatedSvg &&
+    state.dotMatrixAnimation.intensity === nextAnimation.intensity &&
+    state.dotMatrixAnimation.preset === nextAnimation.preset &&
+    state.dotMatrixAnimation.speed === nextAnimation.speed
+  ) {
+    return state;
+  }
+
+  return {
+    ...state,
+    dotMatrixAnimation: nextAnimation,
   };
 }
 

@@ -80,8 +80,16 @@ import { Slider as UnlumenSlider } from "@/components/unlumen-ui/slider"
 import type {
   BackgroundShapeOptions,
   DotsColorMode,
+  QrDotMatrixAnimationOptions,
+  QrDotMatrixAnimationPreset,
   StudioDotType,
   StudioGradient,
+} from "@/components/qr/qr-studio-state"
+import {
+  QR_DOT_MATRIX_ANIMATION_INTENSITY_MAX,
+  QR_DOT_MATRIX_ANIMATION_INTENSITY_MIN,
+  QR_DOT_MATRIX_ANIMATION_SPEED_MAX,
+  QR_DOT_MATRIX_ANIMATION_SPEED_MIN,
 } from "@/components/qr/qr-studio-state"
 import {
   type StaticQrContentValue,
@@ -137,6 +145,16 @@ const DRAFTING_BRAND_ICON_CATEGORY_OPTIONS: Array<{
 
 const PAPER_SHADER_COLOR_INPUT_FALLBACK = ["#", "0", "0", "0", "0", "0", "0"].join("")
 const PAPER_SHADER_NEW_COLOR = ["#", "f", "f", "f", "f", "f", "f"].join("")
+
+const DRAFTING_DOT_MATRIX_ANIMATION_PRESETS: Array<{
+  label: string
+  value: QrDotMatrixAnimationPreset
+}> = [
+  { label: "Wave", value: "wave" },
+  { label: "Scanline", value: "scanline" },
+  { label: "Radial", value: "radial" },
+  { label: "Helix", value: "helix" },
+]
 
 export function DraftingContentTab({
   contentType,
@@ -881,6 +899,109 @@ export function DraftingSizeTab({
         step={1}
         value={radius}
         onChange={onRadiusChange}
+      />
+    </div>
+  )
+}
+
+export function DraftingMotionTab({
+  animation,
+  onAnimationChange,
+}: {
+  animation: QrDotMatrixAnimationOptions
+  onAnimationChange: (patch: Partial<QrDotMatrixAnimationOptions>) => void
+}) {
+  return (
+    <div data-slot="drafting-motion-tab" className="min-w-0 space-y-3">
+      <DraftingToggleField
+        checked={animation.enabled}
+        dataSlot="drafting-dot-matrix-animation-enabled"
+        description="Pulses QR modules without moving scanner-critical geometry."
+        id="drafting-dot-matrix-animation-enabled"
+        label="Dot matrix motion"
+        onCheckedChange={(enabled) => onAnimationChange({ enabled })}
+      />
+
+      <section
+        data-slot="drafting-dot-matrix-animation-preset"
+        className="min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 shadow-[var(--drafting-shadow-rest)]"
+      >
+        <div className="mb-3 min-w-0 space-y-1">
+          <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+            Motion preset
+          </p>
+          <p className="drafting-type-body text-[var(--drafting-ink-muted)]">
+            Choose how the pulse travels across the fixed dot grid.
+          </p>
+        </div>
+        <div className="grid min-w-0 grid-cols-2 gap-2">
+          {DRAFTING_DOT_MATRIX_ANIMATION_PRESETS.map((preset) => {
+            const isSelected = animation.preset === preset.value
+
+            return (
+              <OptionCard
+                appearance="drafting"
+                darkShadowTone="ink"
+                key={preset.value}
+                checked={isSelected}
+                label={preset.label}
+                name="drafting-dot-matrix-animation-preset"
+                onSelect={() => onAnimationChange({ preset: preset.value })}
+                size="compact"
+                value={preset.value}
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "drafting-type-meta font-semibold",
+                    isSelected
+                      ? "text-[var(--drafting-ink)]"
+                      : "text-[var(--drafting-ink-muted)]",
+                  )}
+                >
+                  {preset.label}
+                </span>
+              </OptionCard>
+            )
+          })}
+        </div>
+      </section>
+
+      <DraftingSliderField
+        dataSlot="drafting-dot-matrix-animation-speed-slider"
+        description="Controls pulse travel rate in preview and animated SVG export."
+        formatValue={(value) => `${Math.round(value)}x`}
+        id="drafting-dot-matrix-animation-speed"
+        label="Speed"
+        max={QR_DOT_MATRIX_ANIMATION_SPEED_MAX}
+        min={QR_DOT_MATRIX_ANIMATION_SPEED_MIN}
+        step={1}
+        value={animation.speed}
+        onChange={(speed) => onAnimationChange({ speed })}
+      />
+
+      <DraftingSliderField
+        dataSlot="drafting-dot-matrix-animation-intensity-slider"
+        description="Keeps the low point readable while making the pulse visible."
+        formatValue={(value) => `${Math.round(value)}%`}
+        id="drafting-dot-matrix-animation-intensity"
+        label="Pulse depth"
+        max={QR_DOT_MATRIX_ANIMATION_INTENSITY_MAX}
+        min={QR_DOT_MATRIX_ANIMATION_INTENSITY_MIN}
+        step={1}
+        value={animation.intensity}
+        onChange={(intensity) => onAnimationChange({ intensity })}
+      />
+
+      <DraftingToggleField
+        checked={animation.exportAnimatedSvg}
+        dataSlot="drafting-dot-matrix-animation-export"
+        description="Keeps raster exports static; only SVG preserves motion."
+        id="drafting-dot-matrix-animation-export"
+        label="Animated SVG export"
+        onCheckedChange={(exportAnimatedSvg) =>
+          onAnimationChange({ exportAnimatedSvg })
+        }
       />
     </div>
   )

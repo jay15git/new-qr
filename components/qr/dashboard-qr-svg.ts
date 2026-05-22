@@ -20,10 +20,13 @@ export function stripXmlDeclaration(markup: string) {
 
 export async function buildDashboardQrNodePayload(
   state: QrStudioState,
+  options: { animationMode?: "export" | "none" | "preview" } = {},
 ): Promise<DashboardQrNodePayload> {
   const dashboardState = createDashboardSurfaceQrState(state)
   const qrCode = new QRCodeStyling(toQrCodeOptions(dashboardState))
-  const extension = buildQrExtension(dashboardState)
+  const extension = buildQrExtension(dashboardState, {
+    animationMode: options.animationMode ?? "none",
+  })
 
   if (extension) {
     qrCode.applyExtension(extension)

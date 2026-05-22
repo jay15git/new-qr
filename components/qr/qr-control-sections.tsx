@@ -87,6 +87,7 @@ import {
 import type {
   AssetSourceMode,
   DotsColorMode,
+  QrDotMatrixAnimationPreset,
   QrStudioState,
   StudioDotType,
   StudioGradient,
@@ -98,6 +99,11 @@ import {
 } from "@/components/qr/brand-icon-svg"
 import {
   hasBackgroundImage,
+  QR_DOT_MATRIX_ANIMATION_INTENSITY_MAX,
+  QR_DOT_MATRIX_ANIMATION_INTENSITY_MIN,
+  QR_DOT_MATRIX_ANIMATION_SPEED_MAX,
+  QR_DOT_MATRIX_ANIMATION_SPEED_MIN,
+  setDotMatrixAnimationOptions,
 } from "@/components/qr/qr-studio-state"
 
 type QrControlSectionsProps = {
@@ -123,7 +129,7 @@ type StyleOption = {
   value: string
 }
 
-type StyleSettingsTabId = "style" | "color"
+type StyleSettingsTabId = "style" | "color" | "motion"
 type BackgroundSettingsTabId = "colors" | "upload"
 type LogoSettingsTabId = "brand-icons" | "colors" | "upload" | "size"
 type BrandIconCategoryFilter = BrandIconCategory | "all"
@@ -167,6 +173,16 @@ const DOT_COLOR_MODES: Array<{ label: string; value: DotsColorMode }> = [
   { label: "Solid", value: "solid" },
   { label: "Gradient", value: "gradient" },
   { label: "Palette", value: "palette" },
+]
+
+const DOT_MATRIX_ANIMATION_PRESETS: Array<{
+  label: string
+  value: QrDotMatrixAnimationPreset
+}> = [
+  { label: "Wave", value: "wave" },
+  { label: "Scanline", value: "scanline" },
+  { label: "Radial", value: "radial" },
+  { label: "Helix", value: "helix" },
 ]
 
 const LOGO_MODES: Array<{ label: string; value: AssetSourceMode }> = [
@@ -1055,6 +1071,121 @@ export function QrControlSections({
     <div className="flex flex-col gap-4">{logoSizeControls}</div>
   )
 
+  const dotMatrixAnimationControls = (
+    <FieldGroup className="gap-4" data-slot="dot-matrix-animation-controls">
+      <Field orientation="horizontal">
+        <FieldContent>
+          <FieldLabel htmlFor="dot-matrix-animation-enabled">
+            Dot matrix motion
+          </FieldLabel>
+          {!isDashboardMode ? (
+            <FieldDescription>
+              Pulses QR modules without moving scanner-critical geometry.
+            </FieldDescription>
+          ) : null}
+        </FieldContent>
+        <Switch
+          id="dot-matrix-animation-enabled"
+          checked={state.dotMatrixAnimation.enabled}
+          onCheckedChange={(checked) =>
+            setState((current) =>
+              setDotMatrixAnimationOptions(current, { enabled: checked }),
+            )
+          }
+        />
+      </Field>
+
+      {state.type !== "svg" ? (
+        <p className="text-sm text-muted-foreground">
+          Live dot motion is available in SVG mode. Animated SVG export can still be prepared from these settings.
+        </p>
+      ) : null}
+
+      <SelectField
+        id="dot-matrix-animation-preset"
+        label="Motion preset"
+        onValueChange={(value) =>
+          setState((current) =>
+            setDotMatrixAnimationOptions(current, {
+              preset: value as QrDotMatrixAnimationPreset,
+            }),
+          )
+        }
+        options={DOT_MATRIX_ANIMATION_PRESETS}
+        value={state.dotMatrixAnimation.preset}
+      />
+
+      <Field>
+        <UnlumenSlider
+          data-slot="dot-matrix-animation-speed-slider"
+          id="dot-matrix-animation-speed"
+          label="Speed"
+          disabled={!state.dotMatrixAnimation.enabled}
+          formatValue={(value) => `${Math.round(value)}x`}
+          max={QR_DOT_MATRIX_ANIMATION_SPEED_MAX}
+          min={QR_DOT_MATRIX_ANIMATION_SPEED_MIN}
+          onChange={(value) =>
+            setState((current) =>
+              setDotMatrixAnimationOptions(current, {
+                speed: Array.isArray(value) ? value[0] : value,
+              }),
+            )
+          }
+          showValue
+          step={1}
+          value={state.dotMatrixAnimation.speed}
+        />
+      </Field>
+
+      <Field>
+        <UnlumenSlider
+          data-slot="dot-matrix-animation-intensity-slider"
+          id="dot-matrix-animation-intensity"
+          label="Pulse depth"
+          disabled={!state.dotMatrixAnimation.enabled}
+          formatValue={(value) => `${Math.round(value)}%`}
+          max={QR_DOT_MATRIX_ANIMATION_INTENSITY_MAX}
+          min={QR_DOT_MATRIX_ANIMATION_INTENSITY_MIN}
+          onChange={(value) =>
+            setState((current) =>
+              setDotMatrixAnimationOptions(current, {
+                intensity: Array.isArray(value) ? value[0] : value,
+              }),
+            )
+          }
+          showValue
+          step={1}
+          value={state.dotMatrixAnimation.intensity}
+        />
+      </Field>
+
+      <Field orientation="horizontal">
+        <FieldContent>
+          <FieldLabel htmlFor="dot-matrix-animation-export">
+            Animated SVG export
+          </FieldLabel>
+          {!isDashboardMode ? (
+            <FieldDescription>
+              Keeps raster exports static; only SVG can preserve motion.
+            </FieldDescription>
+          ) : null}
+        </FieldContent>
+        <Switch
+          id="dot-matrix-animation-export"
+          checked={state.dotMatrixAnimation.exportAnimatedSvg}
+          disabled={!state.dotMatrixAnimation.enabled}
+          onCheckedChange={(checked) =>
+            setState((current) =>
+              setDotMatrixAnimationOptions(current, {
+                exportAnimatedSvg: checked,
+              }),
+            )
+          }
+        />
+      </Field>
+    </FieldGroup>
+  )
+
   return (
     <div className={cn("flex flex-col", isDashboardMode ? "gap-3" : "gap-4")}>
       {showsSection("content") ? (
@@ -1167,6 +1298,15 @@ export function QrControlSections({
                       ),
                     },
                     {
+                      id: "motion",
+                      label: "Motion",
+                      content: (
+                        <div className="flex flex-col gap-4">
+                          {dotMatrixAnimationControls}
+                        </div>
+                      ),
+                    },
+                    {
                       id: "color",
                       label: "Color",
                       content: (
@@ -1230,6 +1370,8 @@ export function QrControlSections({
                   variant="dot-enhanced"
                 />
               ) : null}
+
+              {!isDashboardStyleSection ? dotMatrixAnimationControls : null}
             </>
           ),
         })

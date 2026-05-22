@@ -536,7 +536,7 @@ export const QrPane = memo(function QrPane({
       return
     }
 
-    void buildDashboardQrNodePayload(qrArtworkState)
+    void buildDashboardQrNodePayload(qrArtworkState, { animationMode: "preview" })
       .then((payload) => {
         if (requestRef.current !== requestId) return
         const nextMarkup = sanitizeDraftingQrArtworkMarkup(payload.markup)

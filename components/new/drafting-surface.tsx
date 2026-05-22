@@ -31,6 +31,7 @@ import {
   DraftingLogoColorTab,
   DraftingLogoSizeTab,
   DraftingLogoUploadTab,
+  DraftingMotionTab,
   DraftingQrTypeDropdown,
   DraftingSizeTab,
   DraftingStyleTab,
@@ -131,9 +132,11 @@ import {
   type AssetSourceMode,
   type BackgroundShapeOptions,
   type DotsColorMode,
+  type QrDotMatrixAnimationOptions,
   type QrStudioState,
   type StudioDotType,
   type StudioGradient,
+  setDotMatrixAnimationOptions,
 } from "@/components/qr/qr-studio-state"
 import {
   buildStaticQrPayload,
@@ -215,6 +218,7 @@ const DRAFTING_PANEL_TABS: Record<DraftingToolId, DraftingPanelTab[]> = {
     { id: "style", label: "Style" },
     { id: "color", label: "Color" },
     { id: "size", label: "Size" },
+    { id: "motion", label: "Motion" },
   ],
   "corner-square": [
     { id: "style", label: "Style" },
@@ -482,6 +486,10 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const [selectedDotsPalette] = useState<string[]>([
     ...DEFAULT_DRAFTING_STUDIO_STATE.dotsPalette,
   ])
+  const [selectedDotMatrixAnimation, setSelectedDotMatrixAnimation] =
+    useState<QrDotMatrixAnimationOptions>({
+      ...DEFAULT_DRAFTING_STUDIO_STATE.dotMatrixAnimation,
+    })
   const [openDotsColorItems, setOpenDotsColorItems] = useState<string[]>(["solid"])
   const [selectedCornerSquareType, setSelectedCornerSquareType] =
     useState<CornerSquareType>("extra-rounded")
@@ -722,6 +730,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       },
       dotsColorMode: selectedDotsColorMode,
       dotsPalette: [...selectedDotsPalette],
+      dotMatrixAnimation: { ...selectedDotMatrixAnimation },
       cornersSquareOptions: {
         type: selectedCornerSquareType,
         color: selectedCornerSquareColor,
@@ -776,6 +785,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       selectedCornerSquareGradient,
       selectedCornerSquareType,
       selectedDotColor,
+      selectedDotMatrixAnimation,
       selectedDotsColorMode,
       selectedDotsGradient,
       selectedDotsPalette,
@@ -1086,6 +1096,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     setSelectedDotsColorMode(nextState.dotsColorMode)
     setSelectedDotColor(nextState.dotsOptions.color)
     setSelectedDotsGradient(structuredClone(nextState.dotsGradient))
+    setSelectedDotMatrixAnimation({ ...nextState.dotMatrixAnimation })
     setOpenDotsColorItems([nextState.dotsColorMode])
     setSelectedCornerSquareType(nextState.cornersSquareOptions.type)
     setSelectedCornerSquareColorMode(
@@ -1862,6 +1873,26 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
           radius={selectedQrRadius * 100}
           onMarginChange={setSelectedQrMargin}
           onRadiusChange={(value) => setSelectedQrRadius(clampQrBackgroundRound(value / 100))}
+        />
+      )
+    }
+
+    if (toolId === "style" && tabId === "motion") {
+      return (
+        <DraftingMotionTab
+          animation={selectedDotMatrixAnimation}
+          onAnimationChange={(patch) =>
+            setSelectedDotMatrixAnimation(
+              (current) =>
+                setDotMatrixAnimationOptions(
+                  {
+                    ...DEFAULT_DRAFTING_STUDIO_STATE,
+                    dotMatrixAnimation: current,
+                  },
+                  patch,
+                ).dotMatrixAnimation,
+            )
+          }
         />
       )
     }
@@ -2834,7 +2865,7 @@ async function downloadDraftingSvgExport({
   name: string
   state: QrStudioState
 }) {
-  const payload = await buildDashboardQrNodePayload(state)
+  const payload = await buildDashboardQrNodePayload(state, { animationMode: "export" })
   const blob = new Blob([payload.markup], { type: "image/svg+xml;charset=utf-8" })
 
   downloadBlob(blob, `${name}.svg`)
@@ -2853,7 +2884,9 @@ async function buildDraftingLayeredNodePayload({
   nodeId: string
   state: QrStudioState
 }) {
-  const qrPayload = await buildDashboardQrNodePayload(createDraftingQrArtworkState(state))
+  const qrPayload = await buildDashboardQrNodePayload(createDraftingQrArtworkState(state), {
+    animationMode: "export",
+  })
   const qrArtworkMarkup = sanitizeDraftingQrArtworkMarkup(qrPayload.markup)
   const visibleLayers = layers
     .filter((layer) => layer.isVisible)

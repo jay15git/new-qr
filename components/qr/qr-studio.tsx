@@ -128,7 +128,7 @@ export function QrStudio({
   const previewRef = useRef<HTMLDivElement>(null)
   const initialStateRef = useRef(state)
   const qrCodeRef = useRef<QRCodeStyling | null>(null)
-  const qrExtensionKeyRef = useRef(getQrExtensionKey(state))
+  const qrExtensionKeyRef = useRef(getQrExtensionKey(state, { animationMode: "preview" }))
   const dashboardPayloadRequestRef = useRef(0)
   const dashboardQualityRequestRef = useRef(0)
   const dashboardExportPreviewRequestRef = useRef(0)
@@ -193,9 +193,11 @@ export function QrStudio({
 
   useEffect(() => {
     const previewElement = previewRef.current
-    const qrCode = createQrCodeInstance(initialStateRef.current)
+    const qrCode = createQrCodeInstance(initialStateRef.current, "preview")
     qrCodeRef.current = qrCode
-    qrExtensionKeyRef.current = getQrExtensionKey(initialStateRef.current)
+    qrExtensionKeyRef.current = getQrExtensionKey(initialStateRef.current, {
+      animationMode: "preview",
+    })
     previewElement?.replaceChildren()
 
     if (previewElement) {
@@ -232,10 +234,12 @@ export function QrStudio({
     }
 
     try {
-      const nextExtensionKey = getQrExtensionKey(deferredState)
+      const nextExtensionKey = getQrExtensionKey(deferredState, {
+        animationMode: "preview",
+      })
 
       if (nextExtensionKey !== qrExtensionKeyRef.current) {
-        const qrCode = createQrCodeInstance(deferredState)
+        const qrCode = createQrCodeInstance(deferredState, "preview")
         const previewElement = previewRef.current
 
         qrCodeRef.current = qrCode
@@ -264,7 +268,7 @@ export function QrStudio({
 
     const requestId = ++dashboardPayloadRequestRef.current
 
-    void buildDashboardQrNodePayload(deferredState)
+    void buildDashboardQrNodePayload(deferredState, { animationMode: "preview" })
       .then((payload) => {
         if (dashboardPayloadRequestRef.current !== requestId) {
           return
@@ -402,7 +406,15 @@ export function QrStudio({
           state: latestStateRef.current,
         })
       } else {
-        await qrCodeRef.current.download({
+        const qrCode =
+          latestStateRef.current.dotMatrixAnimation.enabled
+            ? createQrCodeInstance(
+                latestStateRef.current,
+                extension === "svg" ? "export" : "none",
+              )
+            : qrCodeRef.current
+
+        await qrCode.download({
           extension,
           name: exportName,
         })
@@ -841,9 +853,12 @@ export function cleanupComposeImageUrls(
   composeImageUrlsRef.current = {}
 }
 
-function createQrCodeInstance(state: QrStudioState) {
+function createQrCodeInstance(
+  state: QrStudioState,
+  animationMode: "export" | "none" | "preview" = "none",
+) {
   const qrCode = new QRCodeStyling(toQrCodeOptions(state))
-  const extension = buildQrExtension(state)
+  const extension = buildQrExtension(state, { animationMode })
 
   if (extension) {
     qrCode.applyExtension(extension)

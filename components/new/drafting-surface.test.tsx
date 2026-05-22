@@ -923,7 +923,12 @@ describe("DraftingSurface", () => {
 
     expect(contentButton.getAttribute("aria-pressed")).toBe("false")
     expect(styleButton.getAttribute("aria-pressed")).toBe("true")
-    expect(getTabLabels(surface.container)).toEqual(["Style", "Color", "Size"])
+    expect(getTabLabels(surface.container)).toEqual([
+      "Style",
+      "Color",
+      "Size",
+      "Motion",
+    ])
 
     act(() => {
       cornerSquareButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -955,6 +960,41 @@ describe("DraftingSurface", () => {
     expect(layersButton.getAttribute("aria-pressed")).toBe("true")
     expect(getTabLabels(surface.container)).toEqual(["Layers"])
     expect(surface.container.querySelector('[data-slot="drafting-layers-tab"]')).not.toBeNull()
+  })
+
+  it("renders dot matrix motion controls in the active style panel", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface()
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Style"]'))
+    })
+    act(() => {
+      activateElement(getTabTriggerByText(surface.container, "Motion"))
+    })
+
+    expect(surface.container.textContent).toContain("Dot matrix motion")
+    expect(surface.container.textContent).toContain("Animated SVG export")
+
+    await act(async () => {
+      activateElement(
+        getRequiredElement(
+          surface.container,
+          "#drafting-dot-matrix-animation-enabled",
+        ),
+      )
+      await flushPromises()
+      await flushPromises()
+    })
+
+    expect(buildDashboardQrNodePayloadSpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        dotMatrixAnimation: expect.objectContaining({
+          enabled: true,
+        }),
+      }),
+      { animationMode: "preview" },
+    )
   })
 
   it("ports static content controls into the default /new panel without render type cards", () => {
@@ -2376,6 +2416,7 @@ describe("DraftingSurface", () => {
           strokeWidth: 0,
         }),
       }),
+      { animationMode: "preview" },
     )
   })
 
@@ -2433,6 +2474,7 @@ describe("DraftingSurface", () => {
           strokeWidth: 0,
         }),
       }),
+      { animationMode: "preview" },
     )
   })
 
@@ -3165,6 +3207,7 @@ describe("DraftingSurface", () => {
       expect.objectContaining({
         data: "https://new-qr-studio.local/launch",
       }),
+      { animationMode: "preview" },
     )
   })
 
