@@ -18,6 +18,7 @@ import {
   createDefaultDraftingCardState,
 } from "@/components/new/drafting-card-state"
 import {
+  createDefaultDraftingLayers,
   getDraftingCardLayerId,
   type DraftingCanvasLayer,
 } from "@/components/new/drafting-layer-state"
@@ -35,9 +36,12 @@ beforeEach(() => {
     naturalHeight: state.height,
     naturalWidth: state.width,
   }))
+  HTMLElement.prototype.setPointerCapture = vi.fn()
 })
 
 afterEach(() => {
+  vi.useRealTimers()
+
   for (const cleanup of cleanupCallbacks.splice(0)) {
     cleanup()
   }
@@ -92,7 +96,7 @@ describe("QrPane", () => {
     expect(buildDashboardQrNodePayloadSpy).toHaveBeenCalledTimes(2)
   })
 
-  it("keeps the qr artwork inset from the pane edges", async () => {
+  it("lets the qr canvas fill the preview pane", async () => {
     const state = setSquareQrSize(createDefaultQrStudioState(), 240)
     const { container } = renderPane(state)
 
@@ -106,9 +110,12 @@ describe("QrPane", () => {
     const node = container.querySelector('[data-slot="dashboard-compose-node"]')
 
     expect(canvas).not.toBeNull()
-    expect(canvas?.className).toContain("p-4")
-    expect(canvas?.className).toContain("sm:p-6")
-    expect(canvas?.className).toContain("lg:p-8")
+    expect(canvas?.className).toContain("h-full")
+    expect(canvas?.className).toContain("w-full")
+    expect(canvas?.className).toContain("overflow-visible")
+    expect(canvas?.className).not.toContain("p-4")
+    expect(canvas?.className).not.toContain("sm:p-6")
+    expect(canvas?.className).not.toContain("lg:p-8")
     expect(card).not.toBeNull()
     expect(node).not.toBeNull()
     const nodeClasses = node?.className.split(/\s+/) ?? []
@@ -413,8 +420,12 @@ describe("QrPane", () => {
     const directions = Array.from(
       container.querySelectorAll('[data-slot="drafting-layer-resize-handle"]'),
     ).map((handle) => handle.getAttribute("data-resize-direction"))
+    const resizeHandle = container.querySelector('[data-slot="drafting-layer-resize-handle"]')
 
     expect(directions).toEqual(["n", "ne", "e", "se", "s", "sw", "w", "nw"])
+    expect(resizeHandle?.className).toContain("rounded-full")
+    expect(resizeHandle?.className).toContain("border-[#a8b0bb]")
+    expect(resizeHandle?.className).toContain("bg-white")
   })
 
   it("keeps resize control padding equal around rectangular layers", async () => {
@@ -444,6 +455,389 @@ describe("QrPane", () => {
     expect(frame.className).toContain("border")
     expect(frame.style.width).toBe("304px")
     expect(frame.style.height).toBe("400px")
+    expect(frame.style.transform).toBe("translate3d(-152px, -200px, 0) rotate(0deg)")
+    expect(frame.style.zIndex).toBe("10000")
+  })
+
+  it("snaps moving layers to nearby layer center guides", async () => {
+    const onLayerChange = vi.fn()
+    const layers: DraftingCanvasLayer[] = [
+      createLayer({ height: 300, id: "preview:card", kind: "card", width: 300, x: -150, y: -150, zIndex: 0 }),
+      createLayer({ height: 100, id: "preview:qr", kind: "qr", width: 100, x: -100, y: -80, zIndex: 1 }),
+    ]
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers,
+      onLayerChange,
+      selectedLayerId: "preview:qr",
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const qrLayer = container.querySelector('[data-layer-id="preview:qr"]') as HTMLElement
+
+    act(() => {
+      qrLayer.dispatchEvent(createPointerEvent("pointerdown", 0, 0))
+      qrLayer.dispatchEvent(createPointerEvent("pointermove", 45, 0))
+    })
+
+    expect(onLayerChange).toHaveBeenLastCalledWith("preview:qr", {
+      x: -50,
+      y: -80,
+    })
+    expect(container.querySelector('[data-slot="drafting-layer-snap-guide"][data-axis="vertical"]')).not.toBeNull()
+  })
+
+  it("keeps moving layers freeform outside the snap threshold", async () => {
+    const onLayerChange = vi.fn()
+    const layers: DraftingCanvasLayer[] = [
+      createLayer({ height: 300, id: "preview:card", kind: "card", width: 300, x: -150, y: -150, zIndex: 0 }),
+      createLayer({ height: 100, id: "preview:qr", kind: "qr", width: 100, x: -100, y: -80, zIndex: 1 }),
+    ]
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers,
+      onLayerChange,
+      selectedLayerId: "preview:qr",
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const qrLayer = container.querySelector('[data-layer-id="preview:qr"]') as HTMLElement
+
+    act(() => {
+      qrLayer.dispatchEvent(createPointerEvent("pointerdown", 0, 0))
+      qrLayer.dispatchEvent(createPointerEvent("pointermove", 30, 0))
+    })
+
+    expect(onLayerChange).toHaveBeenLastCalledWith("preview:qr", {
+      x: -70,
+      y: -80,
+    })
+    expect(container.querySelector('[data-slot="drafting-layer-snap-guide"]')).toBeNull()
+  })
+
+  it("snaps resize handles to nearby layer edges", async () => {
+    const onLayerChange = vi.fn()
+    const layers: DraftingCanvasLayer[] = [
+      createLayer({ height: 240, id: "preview:card", kind: "card", width: 240, x: -120, y: -120, zIndex: 0 }),
+      createLayer({ height: 100, id: "preview:qr", kind: "qr", width: 100, x: 0, y: 0, zIndex: 1 }),
+    ]
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers,
+      onLayerChange,
+      selectedLayerId: "preview:qr",
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const handle = container.querySelector(
+      '[data-slot="drafting-layer-resize-handle"][data-resize-direction="e"]',
+    ) as HTMLButtonElement
+
+    act(() => {
+      handle.dispatchEvent(createPointerEvent("pointerdown", 100, 100))
+      handle.dispatchEvent(createPointerEvent("pointermove", 117, 100))
+    })
+
+    expect(onLayerChange).toHaveBeenLastCalledWith("preview:qr", {
+      height: 120,
+      width: 120,
+      x: 0,
+      y: 0,
+    })
+    expect(container.querySelector('[data-slot="drafting-layer-snap-guide"][data-axis="vertical"]')).not.toBeNull()
+  })
+
+  it("renders selected layer controls above higher z-index layer content", async () => {
+    const state = createDefaultQrStudioState()
+    const cardState = createDefaultDraftingCardState()
+    const layers = createDefaultDraftingLayers("preview", state, cardState).map((layer) =>
+      layer.id === "preview:qr"
+        ? { ...layer, zIndex: 1 }
+        : { ...layer, zIndex: 50 },
+    )
+    const { container } = renderPane(state, true, cardState, {
+      layers,
+      onLayerChange: () => undefined,
+      selectedLayerId: "preview:qr",
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const selectedLayer = container.querySelector('[data-layer-id="preview:qr"]') as HTMLElement
+    const upperLayer = container.querySelector('[data-layer-id="preview:card"]') as HTMLElement
+    const frame = container.querySelector('[data-slot="drafting-layer-resize-frame"]') as HTMLElement
+
+    expect(selectedLayer.style.zIndex).toBe("1")
+    expect(upperLayer.style.zIndex).toBe("50")
+    expect(frame.style.zIndex).toBe("10000")
+    expect(frame.compareDocumentPosition(upperLayer) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy()
+  })
+
+  it("shows a rotation handle above the selected layer controls", async () => {
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      onLayerChange: () => undefined,
+      selectedLayerId: "preview:qr",
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const rotateHandle = container.querySelector('[data-slot="drafting-layer-rotate-handle"]')
+
+    expect(rotateHandle).not.toBeNull()
+    expect(rotateHandle?.querySelector("svg")).not.toBeNull()
+    expect(rotateHandle?.className).toContain("rounded-full")
+    expect(rotateHandle?.className).toContain("border-[#a8b0bb]")
+    expect(rotateHandle?.className).toContain("bg-white")
+    expect(rotateHandle?.className).toContain("text-[#111827]")
+    expect((rotateHandle as HTMLElement | null)?.style.transform).toBe(
+      "translate(-50%, calc(-34px - 50%))",
+    )
+    expect(container.querySelector('[data-slot="drafting-layer-rotation-value"]')).toBeNull()
+    expect(container.innerHTML).toContain('aria-label="Rotate QR code"')
+  })
+
+  it("updates layer rotation when dragging the rotation handle", async () => {
+    const onLayerChange = vi.fn()
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      onLayerChange,
+      selectedLayerId: "preview:qr",
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const frame = container.querySelector('[data-slot="drafting-layer-resize-frame"]') as HTMLElement
+    const rotateHandle = container.querySelector(
+      '[data-slot="drafting-layer-rotate-handle"]',
+    ) as HTMLButtonElement
+
+    expect(frame).not.toBeNull()
+    expect(rotateHandle).not.toBeNull()
+
+    frame.getBoundingClientRect = () => ({
+      bottom: 352,
+      height: 264,
+      left: 88,
+      right: 352,
+      top: 88,
+      width: 264,
+      x: 88,
+      y: 88,
+      toJSON: () => ({}),
+    })
+
+    act(() => {
+      rotateHandle.dispatchEvent(createPointerEvent("pointerdown", 220, 100))
+    })
+
+    const rotationValue = container.querySelector(
+      '[data-slot="drafting-layer-rotation-value"]',
+    ) as HTMLElement
+
+    expect(rotationValue).not.toBeNull()
+    expect(rotationValue.style.transform).toBe(
+      "translate(-50%, calc(-34px - 10px - 8px - 100%))",
+    )
+    expect(rotationValue.textContent).toBe("0°")
+
+    act(() => {
+      rotateHandle.dispatchEvent(createPointerEvent("pointermove", 340, 220))
+    })
+
+    expect(onLayerChange).toHaveBeenLastCalledWith("preview:qr", { rotation: 90 })
+    expect(rotationValue.textContent).toBe("90°")
+  })
+
+  it("soft-snaps rotation near cardinal angles", async () => {
+    const onLayerChange = vi.fn()
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      onLayerChange,
+      selectedLayerId: "preview:qr",
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const frame = container.querySelector('[data-slot="drafting-layer-resize-frame"]') as HTMLElement
+    const rotateHandle = container.querySelector(
+      '[data-slot="drafting-layer-rotate-handle"]',
+    ) as HTMLButtonElement
+
+    frame.getBoundingClientRect = () => ({
+      bottom: 352,
+      height: 264,
+      left: 88,
+      right: 352,
+      top: 88,
+      width: 264,
+      x: 88,
+      y: 88,
+      toJSON: () => ({}),
+    })
+
+    act(() => {
+      rotateHandle.dispatchEvent(createPointerEvent("pointerdown", 220, 100))
+      rotateHandle.dispatchEvent(createPointerEvent("pointermove", 339, 226))
+    })
+
+    expect(onLayerChange).toHaveBeenLastCalledWith("preview:qr", { rotation: 90 })
+  })
+
+  it("keeps rotation freeform outside the soft snap threshold", async () => {
+    const onLayerChange = vi.fn()
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      onLayerChange,
+      selectedLayerId: "preview:qr",
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const frame = container.querySelector('[data-slot="drafting-layer-resize-frame"]') as HTMLElement
+    const rotateHandle = container.querySelector(
+      '[data-slot="drafting-layer-rotate-handle"]',
+    ) as HTMLButtonElement
+
+    frame.getBoundingClientRect = () => ({
+      bottom: 352,
+      height: 264,
+      left: 88,
+      right: 352,
+      top: 88,
+      width: 264,
+      x: 88,
+      y: 88,
+      toJSON: () => ({}),
+    })
+
+    act(() => {
+      rotateHandle.dispatchEvent(createPointerEvent("pointerdown", 220, 100))
+      rotateHandle.dispatchEvent(createPointerEvent("pointermove", 340, 231))
+    })
+
+    expect(onLayerChange.mock.calls.at(-1)?.[0]).toBe("preview:qr")
+    expect(onLayerChange.mock.calls.at(-1)?.[1].rotation).toBeGreaterThan(94)
+    expect(onLayerChange.mock.calls.at(-1)?.[1].rotation).toBeLessThan(96)
+  })
+
+  it("keeps the rotation value visible for two seconds after rotation ends", async () => {
+    const onLayerChange = vi.fn()
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      onLayerChange,
+      selectedLayerId: "preview:qr",
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    vi.useFakeTimers()
+
+    const frame = container.querySelector('[data-slot="drafting-layer-resize-frame"]') as HTMLElement
+    const rotateHandle = container.querySelector(
+      '[data-slot="drafting-layer-rotate-handle"]',
+    ) as HTMLButtonElement
+
+    frame.getBoundingClientRect = () => ({
+      bottom: 352,
+      height: 264,
+      left: 88,
+      right: 352,
+      top: 88,
+      width: 264,
+      x: 88,
+      y: 88,
+      toJSON: () => ({}),
+    })
+
+    act(() => {
+      rotateHandle.dispatchEvent(createPointerEvent("pointerdown", 220, 100))
+      rotateHandle.dispatchEvent(createPointerEvent("pointermove", 340, 220))
+      rotateHandle.dispatchEvent(createPointerEvent("pointerup", 340, 220))
+    })
+
+    expect(container.querySelector('[data-slot="drafting-layer-rotation-value"]')?.textContent).toBe(
+      "90°",
+    )
+
+    act(() => {
+      vi.advanceTimersByTime(1999)
+    })
+
+    expect(container.querySelector('[data-slot="drafting-layer-rotation-value"]')?.textContent).toBe(
+      "90°",
+    )
+
+    act(() => {
+      vi.advanceTimersByTime(1)
+    })
+
+    expect(container.querySelector('[data-slot="drafting-layer-rotation-value"]')).toBeNull()
+  })
+
+  it("wraps the rotation value label from 359 degrees back to zero", async () => {
+    const state = createDefaultQrStudioState()
+    const cardState = createDefaultDraftingCardState()
+    const layers = createDefaultDraftingLayers("preview", state, cardState).map((layer) =>
+      layer.id === "preview:qr" ? { ...layer, rotation: 359.6 } : layer,
+    )
+    const { container } = renderPane(state, true, cardState, {
+      layers,
+      onLayerChange: () => undefined,
+      selectedLayerId: "preview:qr",
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const frame = container.querySelector('[data-slot="drafting-layer-resize-frame"]') as HTMLElement
+    const rotateHandle = container.querySelector(
+      '[data-slot="drafting-layer-rotate-handle"]',
+    ) as HTMLButtonElement
+
+    frame.getBoundingClientRect = () => ({
+      bottom: 352,
+      height: 264,
+      left: 88,
+      right: 352,
+      top: 88,
+      width: 264,
+      x: 88,
+      y: 88,
+      toJSON: () => ({}),
+    })
+
+    act(() => {
+      rotateHandle.dispatchEvent(createPointerEvent("pointerdown", 220, 100))
+    })
+
+    expect(container.querySelector('[data-slot="drafting-layer-rotation-value"]')?.textContent).toBe(
+      "0°",
+    )
   })
 
   it("clears layer selection when clicking empty preview canvas space", async () => {
@@ -553,6 +947,7 @@ function renderPane(
     onLayerChange?: (layerId: string, patch: Partial<DraftingCanvasLayer>) => void
     onLayerSelect?: (layerId: string | null) => void
     selectedLayerId?: string | null
+    snapEnabled?: boolean
   } = {},
 ) {
   const container = document.createElement("div")
@@ -570,6 +965,7 @@ function renderPane(
         onQrClick={() => undefined}
         onSelect={() => undefined}
         selectedLayerId={props.selectedLayerId}
+        snapEnabled={props.snapEnabled}
       />,
     )
   })
@@ -587,4 +983,47 @@ function renderPane(
 
 function flushPromises() {
   return Promise.resolve()
+}
+
+function createPointerEvent(type: string, clientX: number, clientY: number) {
+  const PointerEventConstructor = window.PointerEvent ?? window.MouseEvent
+
+  return new PointerEventConstructor(type, {
+    bubbles: true,
+    cancelable: true,
+    clientX,
+    clientY,
+    pointerId: 1,
+  } as PointerEventInit)
+}
+
+function createLayer(
+  overrides: Partial<DraftingCanvasLayer> & Pick<DraftingCanvasLayer, "id" | "kind">,
+): DraftingCanvasLayer {
+  const { id, kind, ...rest } = overrides
+
+  return {
+    blur: 0,
+    height: 100,
+    id,
+    isLocked: false,
+    isVisible: true,
+    kind,
+    name: kind === "card" ? "Card" : "QR code",
+    nodeId: "preview",
+    opacity: 1,
+    rotation: 0,
+    shadow: {
+      blur: 0,
+      color: "#111827",
+      offsetX: 0,
+      offsetY: 0,
+      opacity: 0,
+    },
+    width: 100,
+    x: 0,
+    y: 0,
+    zIndex: 0,
+    ...rest,
+  }
 }

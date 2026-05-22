@@ -9,6 +9,7 @@ import {
   type CSSProperties,
   type PointerEvent,
 } from "react"
+import { RotateCwIcon } from "lucide-react"
 
 import {
   DEFAULT_DRAFTING_CARD_STATE,
@@ -40,12 +41,26 @@ type QrPaneProps = {
   onSelect: () => void
   onQrClick: () => void
   selectedLayerId?: string | null
+  snapEnabled?: boolean
   state: QrStudioState
 }
 
 type ResizeDirection = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw"
+type SnapAxis = "x" | "y"
+type SnapGuides = {
+  horizontal: number[]
+  vertical: number[]
+}
+type LayerBounds = Pick<DraftingCanvasLayer, "height" | "id" | "width" | "x" | "y">
 
 const RESIZE_CONTROL_PADDING_PX = 12
+const ROTATE_HANDLE_OFFSET_PX = 34
+const ROTATE_HANDLE_RADIUS_PX = 10
+const ROTATE_LABEL_GAP_PX = 8
+const ROTATION_LABEL_HIDE_DELAY_MS = 2000
+const SNAP_THRESHOLD_PX = 6
+const ROTATION_SNAP_THRESHOLD_DEGREES = 4
+const ROTATION_SNAP_TARGETS = [0, 90, 180, 270] as const
 
 const RESIZE_HANDLES: Array<{
   className: string
@@ -202,9 +217,280 @@ function resizeSquareLayer(
   }
 }
 
+function normalizeLayerRotation(rotation: number) {
+  if (!Number.isFinite(rotation)) {
+    return 0
+  }
+
+  const normalized = rotation % 360
+  return normalized < 0 ? normalized + 360 : normalized
+}
+
+function getLayerRotationLabel(rotation: number) {
+  return Math.round(normalizeLayerRotation(rotation)) % 360
+}
+
+function snapLayerMove({
+  layer,
+  layers,
+  proposedX,
+  proposedY,
+  threshold,
+}: {
+  layer: DraftingCanvasLayer
+  layers: DraftingCanvasLayer[]
+  proposedX: number
+  proposedY: number
+  threshold: number
+}) {
+  const horizontal = snapAxis({
+    axis: "y",
+    bounds: { ...layer, x: proposedX, y: proposedY },
+    layers,
+    threshold,
+  })
+  const vertical = snapAxis({
+    axis: "x",
+    bounds: { ...layer, x: proposedX, y: proposedY },
+    layers,
+    threshold,
+  })
+
+  return {
+    guides: {
+      horizontal: horizontal.guide === null ? [] : [horizontal.guide],
+      vertical: vertical.guide === null ? [] : [vertical.guide],
+    },
+    x: proposedX + vertical.offset,
+    y: proposedY + horizontal.offset,
+  }
+}
+
+function snapLayerResize({
+  direction,
+  layer,
+  layers,
+  geometry,
+  threshold,
+}: {
+  direction: ResizeDirection
+  layer: DraftingCanvasLayer
+  layers: DraftingCanvasLayer[]
+  geometry: Pick<DraftingCanvasLayer, "height" | "width" | "x" | "y">
+  threshold: number
+}) {
+  const nextGeometry = { ...geometry }
+  const vertical = snapResizeAxis({
+    affectsEnd: direction.includes("e"),
+    affectsStart: direction.includes("w"),
+    axis: "x",
+    bounds: { ...layer, ...nextGeometry },
+    layers,
+    threshold,
+  })
+
+  if (vertical.guide !== null) {
+    if (vertical.edge === "start") {
+      nextGeometry.x += vertical.offset
+      nextGeometry.width = Math.max(24, nextGeometry.width - vertical.offset)
+    } else {
+      nextGeometry.width = Math.max(24, nextGeometry.width + vertical.offset)
+    }
+  }
+
+  const horizontal = snapResizeAxis({
+    affectsEnd: direction.includes("s"),
+    affectsStart: direction.includes("n"),
+    axis: "y",
+    bounds: { ...layer, ...nextGeometry },
+    layers,
+    threshold,
+  })
+
+  if (horizontal.guide !== null) {
+    if (horizontal.edge === "start") {
+      nextGeometry.y += horizontal.offset
+      nextGeometry.height = Math.max(24, nextGeometry.height - horizontal.offset)
+    } else {
+      nextGeometry.height = Math.max(24, nextGeometry.height + horizontal.offset)
+    }
+  }
+
+  if (layer.kind === "qr" && (vertical.guide !== null || horizontal.guide !== null)) {
+    const size = Math.max(nextGeometry.width, nextGeometry.height)
+    nextGeometry.width = size
+    nextGeometry.height = size
+  }
+
+  return {
+    guides: {
+      horizontal: horizontal.guide === null ? [] : [horizontal.guide],
+      vertical: vertical.guide === null ? [] : [vertical.guide],
+    },
+    geometry: nextGeometry,
+  }
+}
+
+function snapResizeAxis({
+  affectsEnd,
+  affectsStart,
+  axis,
+  bounds,
+  layers,
+  threshold,
+}: {
+  affectsEnd: boolean
+  affectsStart: boolean
+  axis: SnapAxis
+  bounds: LayerBounds
+  layers: DraftingCanvasLayer[]
+  threshold: number
+}) {
+  if (!affectsStart && !affectsEnd) {
+    return { edge: null, guide: null, offset: 0 } as const
+  }
+
+  const source = axis === "x"
+    ? affectsStart
+      ? bounds.x
+      : bounds.x + bounds.width
+    : affectsStart
+      ? bounds.y
+      : bounds.y + bounds.height
+  const edge = affectsStart ? "start" : "end"
+  let best: { distance: number; edge: "start" | "end"; guide: number; offset: number } | null = null
+
+  for (const target of getSnapTargets(layers, bounds.id, axis)) {
+    const distance = Math.abs(target - source)
+
+    if (distance <= threshold && (!best || distance < best.distance)) {
+      best = {
+        distance,
+        edge,
+        guide: target,
+        offset: target - source,
+      }
+    }
+  }
+
+  return best ?? { edge: null, guide: null, offset: 0 }
+}
+
+function snapAxis({
+  axis,
+  bounds,
+  layers,
+  threshold,
+}: {
+  axis: SnapAxis
+  bounds: LayerBounds
+  layers: DraftingCanvasLayer[]
+  threshold: number
+}) {
+  let best: { distance: number; guide: number; offset: number } | null = null
+
+  for (const source of getBoundsSnapPoints(bounds, axis)) {
+    for (const target of getSnapTargets(layers, bounds.id, axis)) {
+      const distance = Math.abs(target - source)
+
+      if (distance <= threshold && (!best || distance < best.distance)) {
+        best = {
+          distance,
+          guide: target,
+          offset: target - source,
+        }
+      }
+    }
+  }
+
+  return best ?? { guide: null, offset: 0 }
+}
+
+function getSnapTargets(
+  layers: DraftingCanvasLayer[],
+  activeLayerId: string,
+  axis: SnapAxis,
+) {
+  const targets = [0]
+
+  for (const layer of layers) {
+    if (layer.id === activeLayerId || !layer.isVisible) {
+      continue
+    }
+
+    targets.push(...getBoundsSnapPoints(layer, axis))
+  }
+
+  return targets
+}
+
+function getBoundsSnapPoints(bounds: LayerBounds, axis: SnapAxis) {
+  if (axis === "x") {
+    return [bounds.x, bounds.x + bounds.width / 2, bounds.x + bounds.width]
+  }
+
+  return [bounds.y, bounds.y + bounds.height / 2, bounds.y + bounds.height]
+}
+
+function snapLayerRotation(rotation: number) {
+  const normalized = normalizeLayerRotation(rotation)
+  let closest: number | null = null
+  let closestDistance = Number.POSITIVE_INFINITY
+
+  for (const target of ROTATION_SNAP_TARGETS) {
+    const distance = getShortestAngleDistance(normalized, target)
+
+    if (distance < closestDistance) {
+      closest = target
+      closestDistance = distance
+    }
+  }
+
+  return closest !== null && closestDistance <= ROTATION_SNAP_THRESHOLD_DEGREES
+    ? closest
+    : normalized
+}
+
+function getShortestAngleDistance(left: number, right: number) {
+  const distance = Math.abs(left - right) % 360
+  return Math.min(distance, 360 - distance)
+}
+
+function SnapGuideOverlay({ guides }: { guides: SnapGuides }) {
+  if (guides.horizontal.length === 0 && guides.vertical.length === 0) {
+    return null
+  }
+
+  return (
+    <>
+      {guides.vertical.map((x) => (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 z-[9999] w-px bg-[var(--drafting-ink)] opacity-55"
+          data-slot="drafting-layer-snap-guide"
+          data-axis="vertical"
+          key={`v-${x}`}
+          style={{ left: `calc(50% + ${x}px)` }}
+        />
+      ))}
+      {guides.horizontal.map((y) => (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 z-[9999] h-px bg-[var(--drafting-ink)] opacity-55"
+          data-slot="drafting-layer-snap-guide"
+          data-axis="horizontal"
+          key={`h-${y}`}
+          style={{ top: `calc(50% + ${y}px)` }}
+        />
+      ))}
+    </>
+  )
+}
+
 export const QrPane = memo(function QrPane({
   cardState = DEFAULT_DRAFTING_CARD_STATE,
   interactionScale = 1,
+  snapEnabled = true,
   state,
   isSelected,
   layers,
@@ -216,14 +502,25 @@ export const QrPane = memo(function QrPane({
 }: QrPaneProps) {
   const [markup, setMarkup] = useState<string | null>(null)
   const [hasError, setHasError] = useState(false)
+  const [rotatingLayerId, setRotatingLayerId] = useState<string | null>(null)
+  const [rotationPreviewDegrees, setRotationPreviewDegrees] = useState<number | null>(null)
+  const [snapGuides, setSnapGuides] = useState<SnapGuides>({
+    horizontal: [],
+    vertical: [],
+  })
   const interactionRef = useRef<{
+    centerClientX?: number
+    centerClientY?: number
     layer: DraftingCanvasLayer
-    mode: "move" | "resize"
+    mode: "move" | "resize" | "rotate"
     pointerId: number
     resizeDirection?: ResizeDirection
+    startAngle?: number
+    startRotation?: number
     startX: number
     startY: number
   } | null>(null)
+  const rotationLabelTimeoutRef = useRef<number | null>(null)
   const requestRef = useRef(0)
   const markupCacheRef = useRef(new Map<string, string>())
   const qrArtworkState = useMemo(() => createDraftingQrArtworkState(state), [state])
@@ -253,6 +550,15 @@ export const QrPane = memo(function QrPane({
         setHasError(true)
       })
   }, [qrArtworkState, stateCacheKey])
+
+  useEffect(
+    () => () => {
+      if (rotationLabelTimeoutRef.current !== null) {
+        window.clearTimeout(rotationLabelTimeoutRef.current)
+      }
+    },
+    [],
+  )
 
   const isLoading = markup === null && !hasError
   const resolvedLayers = useMemo(
@@ -299,7 +605,7 @@ export const QrPane = memo(function QrPane({
   function startLayerInteraction(
     event: PointerEvent<HTMLElement>,
     layer: DraftingCanvasLayer,
-    mode: "move" | "resize",
+    mode: "move" | "resize" | "rotate",
     resizeDirection?: ResizeDirection,
   ) {
     if (layer.isLocked || !onLayerChange) {
@@ -309,13 +615,32 @@ export const QrPane = memo(function QrPane({
     event.stopPropagation()
     event.preventDefault()
     event.currentTarget.setPointerCapture(event.pointerId)
+    const layerElement = event.currentTarget.closest<HTMLElement>("[data-layer-id]")
+    const layerRect = layerElement?.getBoundingClientRect()
+    const centerClientX = layerRect ? layerRect.left + layerRect.width / 2 : event.clientX
+    const centerClientY = layerRect ? layerRect.top + layerRect.height / 2 : event.clientY
+
     interactionRef.current = {
+      centerClientX,
+      centerClientY,
       layer,
       mode,
       pointerId: event.pointerId,
       resizeDirection,
+      startAngle:
+        (Math.atan2(event.clientY - centerClientY, event.clientX - centerClientX) * 180) /
+        Math.PI,
+      startRotation: layer.rotation,
       startX: event.clientX,
       startY: event.clientY,
+    }
+    if (mode === "rotate") {
+      if (rotationLabelTimeoutRef.current !== null) {
+        window.clearTimeout(rotationLabelTimeoutRef.current)
+        rotationLabelTimeoutRef.current = null
+      }
+      setRotatingLayerId(layer.id)
+      setRotationPreviewDegrees(getLayerRotationLabel(layer.rotation))
     }
     onLayerSelect?.(layer.id)
   }
@@ -329,25 +654,81 @@ export const QrPane = memo(function QrPane({
 
     event.stopPropagation()
     const scale = interactionScale > 0 ? interactionScale : 1
+    const snapThreshold = SNAP_THRESHOLD_PX / scale
     const deltaX = (event.clientX - interaction.startX) / scale
     const deltaY = (event.clientY - interaction.startY) / scale
     const layer = interaction.layer
 
+    if (interaction.mode === "rotate") {
+      const centerClientX = interaction.centerClientX ?? event.clientX
+      const centerClientY = interaction.centerClientY ?? event.clientY
+      const angle =
+        (Math.atan2(event.clientY - centerClientY, event.clientX - centerClientX) * 180) /
+        Math.PI
+
+      const freeRotation = normalizeLayerRotation(
+        angle - (interaction.startAngle ?? angle) + (interaction.startRotation ?? layer.rotation),
+      )
+      const rotation = snapEnabled ? snapLayerRotation(freeRotation) : freeRotation
+
+      setRotationPreviewDegrees(getLayerRotationLabel(rotation))
+      setSnapGuides({
+        horizontal: [],
+        vertical: snapEnabled && rotation !== freeRotation ? [0] : [],
+      })
+      onLayerChange?.(layer.id, { rotation })
+      return
+    }
+
     if (interaction.mode === "move") {
+      const proposedX = layer.x + deltaX
+      const proposedY = layer.y + deltaY
+      const nextMove = snapEnabled
+        ? snapLayerMove({
+            layer,
+            layers: visibleLayers,
+            proposedX,
+            proposedY,
+            threshold: snapThreshold,
+          })
+        : { guides: { horizontal: [], vertical: [] }, x: proposedX, y: proposedY }
+
+      setSnapGuides(nextMove.guides)
       onLayerChange?.(layer.id, {
-        x: layer.x + deltaX,
-        y: layer.y + deltaY,
+        x: nextMove.x,
+        y: nextMove.y,
       })
       return
     }
 
     const nextGeometry = resizeDraftingLayer(layer, interaction.resizeDirection ?? "se", deltaX, deltaY)
+    const snappedResize = snapEnabled
+      ? snapLayerResize({
+          direction: interaction.resizeDirection ?? "se",
+          layer,
+          layers: visibleLayers,
+          geometry: nextGeometry,
+          threshold: snapThreshold,
+        })
+      : { geometry: nextGeometry, guides: { horizontal: [], vertical: [] } }
 
-    onLayerChange?.(layer.id, nextGeometry)
+    setSnapGuides(snappedResize.guides)
+    onLayerChange?.(layer.id, snappedResize.geometry)
   }
 
   function endLayerInteraction(event: PointerEvent<HTMLElement>) {
     if (interactionRef.current?.pointerId === event.pointerId) {
+      setSnapGuides({ horizontal: [], vertical: [] })
+      if (interactionRef.current.mode === "rotate") {
+        if (rotationLabelTimeoutRef.current !== null) {
+          window.clearTimeout(rotationLabelTimeoutRef.current)
+        }
+        rotationLabelTimeoutRef.current = window.setTimeout(() => {
+          setRotatingLayerId(null)
+          setRotationPreviewDegrees(null)
+          rotationLabelTimeoutRef.current = null
+        }, ROTATION_LABEL_HIDE_DELAY_MS)
+      }
       interactionRef.current = null
     }
   }
@@ -365,29 +746,66 @@ export const QrPane = memo(function QrPane({
     }
   }
 
-  function renderResizeHandles(layer: DraftingCanvasLayer) {
+  function renderLayerControls(layer: DraftingCanvasLayer) {
     if (layer.isLocked || selectedLayerId !== layer.id) {
       return null
     }
 
     const controlHeight = layer.height + RESIZE_CONTROL_PADDING_PX * 2
     const controlWidth = layer.width + RESIZE_CONTROL_PADDING_PX * 2
+    const isRotating = rotatingLayerId === layer.id
+    const rotationDegrees = rotationPreviewDegrees ?? getLayerRotationLabel(layer.rotation)
 
     return (
       <div
-        className="pointer-events-none absolute left-1/2 top-1/2 z-30 border border-[var(--drafting-ink)]"
+        className="pointer-events-none absolute left-1/2 top-1/2 touch-none border border-[var(--drafting-ink)]"
+        data-layer-id={layer.id}
         data-slot="drafting-layer-resize-frame"
+        key={`${layer.id}:controls`}
         style={{
           height: controlHeight,
-          transform: "translate(-50%, -50%)",
+          transform: `translate3d(${layer.x - RESIZE_CONTROL_PADDING_PX}px, ${layer.y - RESIZE_CONTROL_PADDING_PX}px, 0) rotate(${layer.rotation}deg)`,
+          transformOrigin: "center center",
           width: controlWidth,
+          zIndex: 10000,
         }}
       >
+        <div
+          className="pointer-events-none absolute left-1/2 top-0 w-px -translate-x-1/2 -translate-y-full bg-[var(--drafting-ink)]"
+          style={{ height: ROTATE_HANDLE_OFFSET_PX }}
+        />
+        {isRotating ? (
+          <div
+            className="pointer-events-none absolute left-1/2 top-0 rounded-[4px] border border-[var(--drafting-line-hover)] bg-[var(--drafting-panel-bg-active)] px-2 py-0.5 text-[0.68rem] font-semibold text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)]"
+            data-slot="drafting-layer-rotation-value"
+            style={{
+              transform: `translate(-50%, calc(-${ROTATE_HANDLE_OFFSET_PX}px - ${ROTATE_HANDLE_RADIUS_PX}px - ${ROTATE_LABEL_GAP_PX}px - 100%))`,
+            }}
+          >
+            {rotationDegrees}°
+          </div>
+        ) : null}
+        <button
+          aria-label={`Rotate ${layer.name}`}
+          className="pointer-events-auto absolute left-1/2 top-0 z-30 flex size-5 items-center justify-center rounded-full border border-[#a8b0bb] bg-white text-[#111827] shadow-[var(--drafting-shadow-rest)]"
+          data-slot="drafting-layer-rotate-handle"
+          onClick={(event) => event.stopPropagation()}
+          onPointerCancel={endLayerInteraction}
+          onPointerDown={(event) => startLayerInteraction(event, layer, "rotate")}
+          onPointerMove={updateLayerInteraction}
+          onPointerUp={endLayerInteraction}
+          style={{
+            transform: `translate(-50%, calc(-${ROTATE_HANDLE_OFFSET_PX}px - 50%))`,
+          }}
+          type="button"
+        >
+          <RotateCwIcon aria-hidden="true" className="size-3" strokeWidth={2.2} />
+        </button>
         {RESIZE_HANDLES.map((handle) => (
           <button
             aria-label={`Resize ${layer.name} from ${handle.label}`}
             className={cn(
-              "pointer-events-auto absolute z-30 size-3 rounded-[3px] border border-[var(--drafting-ink)] bg-[var(--drafting-panel-bg-active)] shadow-[var(--drafting-shadow-rest)]",
+              "pointer-events-auto absolute z-30 size-3 rounded-full border border-[#a8b0bb] bg-white shadow-[var(--drafting-shadow-rest)]",
               handle.className,
               handle.cursorClassName,
             )}
@@ -442,7 +860,6 @@ export const QrPane = memo(function QrPane({
             className="relative z-10 h-full w-full max-h-full max-w-full [&_svg]:h-full [&_svg]:w-full"
             dangerouslySetInnerHTML={{ __html: qrMarkup }}
           />
-          {renderResizeHandles(layer)}
         </div>
       )
     }
@@ -505,7 +922,6 @@ export const QrPane = memo(function QrPane({
         {isImageFilterMode ? (
           <DraftingCardPaperShaderLayer paperShader={imageFilterShader} />
         ) : null}
-        {renderResizeHandles(layer)}
       </div>
     )
   }
@@ -525,7 +941,7 @@ export const QrPane = memo(function QrPane({
       <div
         data-slot="dashboard-compose-canvas"
         data-compose-mode="compose"
-        className="relative h-full w-full overflow-hidden p-4 sm:p-6 lg:p-8"
+        className="relative h-full w-full overflow-visible"
         onClick={() => {
           onLayerSelect?.(null)
           onSelect()
@@ -536,7 +952,13 @@ export const QrPane = memo(function QrPane({
             Loading QR…
           </div>
         ) : markup ? (
-          visibleLayers.map(renderLayer)
+          <>
+            <SnapGuideOverlay guides={snapGuides} />
+            {visibleLayers.map(renderLayer)}
+            {selectedLayerId
+              ? visibleLayers.map((layer) => renderLayerControls(layer))
+              : null}
+          </>
         ) : (
           <div className="grid h-full place-items-center text-sm font-medium text-[var(--drafting-ink-muted)]">
             Could not generate QR
@@ -550,6 +972,8 @@ export const QrPane = memo(function QrPane({
   previousProps.cardState === nextProps.cardState &&
   previousProps.state === nextProps.state &&
   previousProps.isSelected === nextProps.isSelected &&
+  previousProps.interactionScale === nextProps.interactionScale &&
   previousProps.layers === nextProps.layers &&
-  previousProps.selectedLayerId === nextProps.selectedLayerId,
+  previousProps.selectedLayerId === nextProps.selectedLayerId &&
+  previousProps.snapEnabled === nextProps.snapEnabled,
 )

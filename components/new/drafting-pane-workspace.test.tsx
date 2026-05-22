@@ -30,6 +30,7 @@ beforeEach(() => {
       unobserve() {}
     },
   )
+  HTMLElement.prototype.setPointerCapture = vi.fn()
   stubPortraitOrientation(false)
 })
 
@@ -243,6 +244,77 @@ describe("DraftingPaneWorkspace", () => {
     expect(workspace.container.textContent).toContain("150%")
   })
 
+  it("toggles layer snapping from the preview toolbar", async () => {
+    const workspace = renderWorkspace({ paneCount: 1 })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    const snapButton = workspace.container.querySelector(
+      'button[aria-label="Disable snapping"]',
+    ) as HTMLButtonElement | null
+
+    expect(snapButton).not.toBeNull()
+    expect(snapButton?.getAttribute("aria-pressed")).toBe("true")
+
+    await act(async () => {
+      snapButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+      await flushPromises()
+    })
+
+    const disabledSnapButton = workspace.container.querySelector(
+      'button[aria-label="Enable snapping"]',
+    ) as HTMLButtonElement | null
+
+    expect(disabledSnapButton).not.toBeNull()
+    expect(disabledSnapButton?.getAttribute("aria-pressed")).toBe("false")
+  })
+
+  it("pans the active preview by dragging empty canvas space", async () => {
+    const workspace = renderWorkspace({ paneCount: 1 })
+    const [pane] = getPaneSurfaces(workspace.container, 1)
+    const viewport = pane.firstElementChild as HTMLElement
+
+    await act(async () => {
+      pane.dispatchEvent(createPointerEvent("pointerdown", 100, 120))
+      pane.dispatchEvent(createPointerEvent("pointermove", 140, 145))
+      pane.dispatchEvent(createPointerEvent("pointerup", 140, 145))
+      await flushPromises()
+    })
+
+    expect(viewport.style.transform).toBe("translate3d(40px, 25px, 0) scale(1)")
+  })
+
+  it("clears selected layer when pressing empty canvas space", async () => {
+    const onLayerSelect = vi.fn()
+    const workspace = renderWorkspace({ onLayerSelect, paneCount: 1 })
+    const [pane] = getPaneSurfaces(workspace.container, 1)
+
+    await act(async () => {
+      pane.dispatchEvent(createPointerEvent("pointerdown", 100, 120))
+      await flushPromises()
+    })
+
+    expect(onLayerSelect).toHaveBeenCalledWith("pane-1", null)
+  })
+
+  it("does not pan when dragging a layer", async () => {
+    const workspace = renderWorkspace({ paneCount: 1 })
+    const [pane] = getPaneSurfaces(workspace.container, 1)
+    const viewport = pane.firstElementChild as HTMLElement
+    const layer = getQrNodes(workspace.container)[0]
+
+    await act(async () => {
+      layer?.dispatchEvent(createPointerEvent("pointerdown", 100, 120))
+      pane.dispatchEvent(createPointerEvent("pointermove", 140, 145))
+      pane.dispatchEvent(createPointerEvent("pointerup", 140, 145))
+      await flushPromises()
+    })
+
+    expect(viewport.style.transform).toBe("translate3d(0px, 0px, 0) scale(1)")
+  })
+
   it("renders disabled undo and redo controls when history is unavailable", () => {
     const workspace = renderWorkspace()
     const undoButton = workspace.container.querySelector(
@@ -286,6 +358,7 @@ function renderWorkspace({
   canRedo,
   canUndo,
   onRedo,
+  onLayerSelect,
   onSwapPanes = vi.fn(),
   onUndo,
   paneCount = 2,
@@ -294,6 +367,7 @@ function renderWorkspace({
   canRedo?: boolean
   canUndo?: boolean
   onRedo?: () => void
+  onLayerSelect?: (paneId: string, layerId: string | null) => void
   onSwapPanes?: (sourcePaneId: string, targetPaneId: string) => void
   onUndo?: () => void
   paneCount?: number
@@ -311,6 +385,7 @@ function renderWorkspace({
         onRedo={onRedo}
         onPaneQrClick={() => undefined}
         onPaneSelect={() => undefined}
+        onLayerSelect={onLayerSelect}
         onReset={() => undefined}
         onSwapPanes={onSwapPanes}
         onUndo={onUndo}
@@ -446,6 +521,20 @@ function createTouchEvent(
   })
 
   return event
+}
+
+function createPointerEvent(type: string, clientX: number, clientY: number) {
+  const PointerEventConstructor = window.PointerEvent ?? window.MouseEvent
+
+  return new PointerEventConstructor(type, {
+    bubbles: true,
+    button: 0,
+    cancelable: true,
+    clientX,
+    clientY,
+    pointerId: 1,
+    pointerType: "mouse",
+  } as PointerEventInit)
 }
 
 async function flushPromises() {

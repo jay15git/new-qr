@@ -6,11 +6,13 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type PointerEvent as ReactPointerEvent,
   type TouchEvent,
   type WheelEvent,
 } from "react"
 import {
   CopyPlusIcon,
+  MagnetIcon,
   Maximize2Icon,
   Minimize2Icon,
   Redo2Icon,
@@ -49,6 +51,7 @@ type DraftingPane = {
 }
 
 type DraftingPanelLayouts = Record<string, Record<string, number>>
+type DraftingPanePanOffsets = Record<string, { x: number; y: number }>
 
 const MIN_PREVIEW_ZOOM = 0.5
 const MAX_PREVIEW_ZOOM = 2
@@ -144,11 +147,14 @@ function DraftingPaneSurface({
   onPaneDragOver,
   onPaneDragLeave,
   onPaneZoom,
+  onPanePan,
   onLayerChange,
   onLayerSelect,
   pane,
+  panePan,
   paneZoom,
   selectedLayerId,
+  snapEnabled,
 }: {
   areaName?: string
   canSwap: boolean
@@ -162,6 +168,7 @@ function DraftingPaneSurface({
   onPaneDrop: (paneId: string, event: React.DragEvent<HTMLDivElement>) => void
   onPaneDragOver: (paneId: string, event: React.DragEvent<HTMLDivElement>) => void
   onPaneDragLeave: (paneId: string, event: React.DragEvent<HTMLDivElement>) => void
+  onPanePan: (paneId: string, nextPan: { x: number; y: number }) => void
   onPaneZoom: (paneId: string, nextZoom: number) => void
   onLayerChange?: (
     paneId: string,
@@ -170,11 +177,20 @@ function DraftingPaneSurface({
   ) => void
   onLayerSelect?: (paneId: string, layerId: string | null) => void
   pane: DraftingPane
+  panePan: { x: number; y: number }
   paneZoom: number
   selectedLayerId?: string | null
+  snapEnabled: boolean
 }) {
   const onPaneSelectRef = useRef(onPaneSelect)
   const onPaneQrClickRef = useRef(onPaneQrClick)
+  const panInteractionRef = useRef<{
+    pointerId: number
+    startClientX: number
+    startClientY: number
+    startPanX: number
+    startPanY: number
+  } | null>(null)
   const pinchDistanceRef = useRef<number | null>(null)
   const pinchZoomRef = useRef(paneZoom)
 
@@ -197,6 +213,59 @@ function DraftingPaneSurface({
   const handleQrClick = useCallback(() => {
     onPaneQrClickRef.current(pane.id)
   }, [pane.id])
+
+  const handlePanePointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (event.button !== 0 || event.pointerType === "touch") {
+        return
+      }
+
+      if (
+        event.target instanceof Element &&
+        event.target.closest("[data-layer-id], [data-slot='drafting-layer-resize-frame'], button")
+      ) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+      event.currentTarget.setPointerCapture(event.pointerId)
+      onPaneSelectRef.current(pane.id)
+      onLayerSelect?.(pane.id, null)
+      panInteractionRef.current = {
+        pointerId: event.pointerId,
+        startClientX: event.clientX,
+        startClientY: event.clientY,
+        startPanX: panePan.x,
+        startPanY: panePan.y,
+      }
+    },
+    [onLayerSelect, pane.id, panePan.x, panePan.y],
+  )
+
+  const handlePanePointerMove = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      const interaction = panInteractionRef.current
+
+      if (!interaction || interaction.pointerId !== event.pointerId) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+      onPanePan(pane.id, {
+        x: interaction.startPanX + event.clientX - interaction.startClientX,
+        y: interaction.startPanY + event.clientY - interaction.startClientY,
+      })
+    },
+    [onPanePan, pane.id],
+  )
+
+  const handlePanePointerEnd = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    if (panInteractionRef.current?.pointerId === event.pointerId) {
+      panInteractionRef.current = null
+    }
+  }, [])
 
   const handleWheel = useCallback(
     (event: WheelEvent<HTMLDivElement>) => {
@@ -276,23 +345,28 @@ function DraftingPaneSurface({
       onDragOver={(event) => onPaneDragOver(pane.id, event)}
       onDragStart={(event) => onPaneDragStart(pane.id, event)}
       onDrop={(event) => onPaneDrop(pane.id, event)}
+      onPointerCancel={handlePanePointerEnd}
+      onPointerDown={handlePanePointerDown}
+      onPointerMove={handlePanePointerMove}
+      onPointerUp={handlePanePointerEnd}
       onTouchEnd={handleTouchEnd}
       onTouchMove={handleTouchMove}
       onTouchStart={handleTouchStart}
       onWheel={handleWheel}
     >
-      <div
-        style={{
-          transform: `scale(${paneZoom})`,
-          transformOrigin: "center center",
-          transition: "transform 150ms ease-out",
-        }}
+        <div
+          style={{
+            transform: `translate3d(${panePan.x}px, ${panePan.y}px, 0) scale(${paneZoom})`,
+            transformOrigin: "center center",
+            transition: "transform 150ms ease-out",
+          }}
         className="flex h-full w-full items-center justify-center"
       >
         <QrPane
           cardState={pane.cardState}
           interactionScale={paneZoom}
           layers={pane.layers}
+          snapEnabled={snapEnabled}
           state={pane.state}
           isSelected={isSelected}
           onLayerChange={(layerId, patch) => onLayerChange?.(pane.id, layerId, patch)}
@@ -325,6 +399,8 @@ export function DraftingPaneWorkspace({
   selectedLayerId,
 }: DraftingPaneWorkspaceProps) {
   const [zoomLevels, setZoomLevels] = useState<Record<string, number>>({})
+  const [panOffsets, setPanOffsets] = useState<DraftingPanePanOffsets>({})
+  const [snapEnabled, setSnapEnabled] = useState(true)
   const [maximizedPaneId, setMaximizedPaneId] = useState<string | null>(null)
   const [draggingPaneId, setDraggingPaneId] = useState<string | null>(null)
   const [snapTargetPaneId, setSnapTargetPaneId] = useState<string | null>(null)
@@ -356,6 +432,13 @@ export function DraftingPaneWorkspace({
     setZoomLevels((current) => ({
       ...current,
       [paneId]: clampPreviewZoom(nextZoom),
+    }))
+  }, [])
+
+  const handlePanePan = useCallback((paneId: string, nextPan: { x: number; y: number }) => {
+    setPanOffsets((current) => ({
+      ...current,
+      [paneId]: nextPan,
     }))
   }, [])
 
@@ -532,6 +615,7 @@ export function DraftingPaneWorkspace({
                       >
                         {group.flatMap((pane, paneIndex) => {
                           const isSelected = pane.id === activePaneId
+                          const panePan = panOffsets[pane.id] ?? { x: 0, y: 0 }
                           const paneZoom = zoomLevels[pane.id] ?? 1
                           const panePanelId = `pane-${groupIndex}-${paneIndex}`
 
@@ -553,14 +637,17 @@ export function DraftingPaneWorkspace({
                                 onPaneDragOver={handlePaneDragOver}
                                 onPaneDragStart={handlePaneDragStart}
                                 onPaneDrop={handlePaneDrop}
+                                onPanePan={handlePanePan}
                                 onPaneZoom={handlePaneZoom}
                                 onLayerChange={onLayerChange}
                                 onLayerSelect={onLayerSelect}
                                 onPaneQrClick={onPaneQrClick}
                                 onPaneSelect={onPaneSelect}
                                 pane={pane}
+                                panePan={panePan}
                                 paneZoom={paneZoom}
                                 selectedLayerId={selectedLayerId}
+                                snapEnabled={snapEnabled}
                               />
                             </ResizablePanel>
                           )
@@ -632,6 +719,29 @@ export function DraftingPaneWorkspace({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Zoom in</TooltipContent>
+            </Tooltip>
+
+            <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" />
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  aria-label={snapEnabled ? "Disable snapping" : "Enable snapping"}
+                  aria-pressed={snapEnabled}
+                  className={cn(
+                    "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]",
+                    snapEnabled &&
+                      "bg-[var(--drafting-ink)] text-[var(--drafting-paper)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-paper)]",
+                  )}
+                  onClick={() => setSnapEnabled((current) => !current)}
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+                >
+                  <MagnetIcon />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{snapEnabled ? "Snapping on" : "Snapping off"}</TooltipContent>
             </Tooltip>
 
             {panes.length > 1 && (

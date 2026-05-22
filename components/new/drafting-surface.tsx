@@ -2782,7 +2782,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
         >
           <div
             data-slot="drafting-workspace-inset"
-            className="h-full min-h-0 px-0 pb-3 pt-0 sm:p-5 lg:p-6"
+            className="h-full min-h-0 p-0"
           >
             <DraftingPaneWorkspace
               activePaneId={activeQrNodeId}

@@ -255,10 +255,10 @@ describe("DraftingSurface", () => {
     ).not.toBeNull()
     expect(
       surface.container.querySelector('[data-slot="drafting-workspace-inset"]')?.className,
-    ).toContain("pb-3")
+    ).toContain("p-0")
     expect(
       surface.container.querySelector('[data-slot="drafting-workspace-inset"]')?.className,
-    ).toContain("pt-0")
+    ).not.toContain("lg:p-6")
     expect(
       getRequiredElement(surface.container, '[data-slot="drafting-surface"]').className,
     ).toContain("h-dvh")
