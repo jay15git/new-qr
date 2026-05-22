@@ -87,7 +87,6 @@ import {
 import type {
   AssetSourceMode,
   DotsColorMode,
-  QrDotMatrixAnimationPreset,
   QrStudioState,
   StudioDotType,
   StudioGradient,
@@ -99,10 +98,11 @@ import {
 } from "@/components/qr/brand-icon-svg"
 import {
   hasBackgroundImage,
-  QR_DOT_MATRIX_ANIMATION_INTENSITY_MAX,
-  QR_DOT_MATRIX_ANIMATION_INTENSITY_MIN,
   QR_DOT_MATRIX_ANIMATION_SPEED_MAX,
   QR_DOT_MATRIX_ANIMATION_SPEED_MIN,
+  QR_DOT_MATRIX_OVERLAY_SCALE_MAX,
+  QR_DOT_MATRIX_OVERLAY_SCALE_MIN,
+  QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS,
   setDotMatrixAnimationOptions,
 } from "@/components/qr/qr-studio-state"
 
@@ -173,16 +173,6 @@ const DOT_COLOR_MODES: Array<{ label: string; value: DotsColorMode }> = [
   { label: "Solid", value: "solid" },
   { label: "Gradient", value: "gradient" },
   { label: "Palette", value: "palette" },
-]
-
-const DOT_MATRIX_ANIMATION_PRESETS: Array<{
-  label: string
-  value: QrDotMatrixAnimationPreset
-}> = [
-  { label: "Wave", value: "wave" },
-  { label: "Scanline", value: "scanline" },
-  { label: "Radial", value: "radial" },
-  { label: "Helix", value: "helix" },
 ]
 
 const LOGO_MODES: Array<{ label: string; value: AssetSourceMode }> = [
@@ -1103,16 +1093,16 @@ export function QrControlSections({
 
       <SelectField
         id="dot-matrix-animation-preset"
-        label="Motion preset"
+        label="Loader"
         onValueChange={(value) =>
           setState((current) =>
             setDotMatrixAnimationOptions(current, {
-              preset: value as QrDotMatrixAnimationPreset,
+              loader: value,
             }),
           )
         }
-        options={DOT_MATRIX_ANIMATION_PRESETS}
-        value={state.dotMatrixAnimation.preset}
+        options={QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS}
+        value={state.dotMatrixAnimation.loader}
       />
 
       <Field>
@@ -1139,23 +1129,23 @@ export function QrControlSections({
 
       <Field>
         <UnlumenSlider
-          data-slot="dot-matrix-animation-intensity-slider"
-          id="dot-matrix-animation-intensity"
-          label="Pulse depth"
+          data-slot="dot-matrix-overlay-scale-slider"
+          id="dot-matrix-overlay-scale"
+          label="Overlay scale"
           disabled={!state.dotMatrixAnimation.enabled}
           formatValue={(value) => `${Math.round(value)}%`}
-          max={QR_DOT_MATRIX_ANIMATION_INTENSITY_MAX}
-          min={QR_DOT_MATRIX_ANIMATION_INTENSITY_MIN}
+          max={QR_DOT_MATRIX_OVERLAY_SCALE_MAX}
+          min={QR_DOT_MATRIX_OVERLAY_SCALE_MIN}
           onChange={(value) =>
             setState((current) =>
               setDotMatrixAnimationOptions(current, {
-                intensity: Array.isArray(value) ? value[0] : value,
+                overlayScale: Array.isArray(value) ? value[0] : value,
               }),
             )
           }
           showValue
           step={1}
-          value={state.dotMatrixAnimation.intensity}
+          value={state.dotMatrixAnimation.overlayScale}
         />
       </Field>
 

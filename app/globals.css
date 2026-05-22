@@ -330,7 +330,7 @@
   --drafting-paper-rgb: 255 255 255;
   --drafting-page-bg: oklch(0.9821 0 0);
   --drafting-surface-bg: oklch(0.9821 0 0);
-  --drafting-canvas-bg: oklch(0.9821 0 0);
+  --drafting-canvas-bg: oklch(1 0 0);
   --drafting-canvas-dot-rgb: var(--drafting-ink-rgb);
   --drafting-canvas-dot-opacity: 0.08;
   --drafting-canvas-check-rgb: 255 255 255;
@@ -440,8 +440,8 @@
 }
 
 .dark :is([data-slot="new-page"], [data-slot="drafting-download-popover"]) {
-  --drafting-dark-page-bg: oklch(0.1822 0 0);
-  --drafting-dark-shell-bg: oklch(0.1822 0 0);
+  --drafting-dark-page-bg: #101216;
+  --drafting-dark-shell-bg: #101216;
   --drafting-dark-surface-muted: #ffffff08;
   --drafting-dark-surface-subtle: #ffffff0d;
   --drafting-dark-surface-raised: #171a20;

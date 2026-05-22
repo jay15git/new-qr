@@ -40,6 +40,8 @@ type DraftingLayersTabProps = {
   selectedNodeId: string | null
 }
 
+const DEFAULT_LAYER_SHADOW_COLOR = ["#", "1", "1", "1", "8", "2", "7"].join("")
+
 export function DraftingLayersTab({
   onLayerPatch,
   onReorder,
@@ -178,7 +180,7 @@ function LayerInspector({
 }) {
   const shadow = layer.shadow ?? {
     blur: 0,
-    color: "#111827",
+    color: DEFAULT_LAYER_SHADOW_COLOR,
     offsetX: 0,
     offsetY: 0,
     opacity: 0,

@@ -4,13 +4,16 @@ import {
   clampBackgroundShapeOffset,
   clampBackgroundShapeOpacity,
   clampBackgroundShapePaddingPx,
-  clampDotMatrixAnimationIntensity,
+  clampDotMatrixAnimationHalo,
+  clampDotMatrixAnimationOpacity,
+  clampDotMatrixAnimationOverlayScale,
   clampDotMatrixAnimationSpeed,
   clampRasterExportQualityPercent,
   clampQrBackgroundRound,
   clampQrSize,
   createDefaultQrStudioState,
   DEFAULT_DOT_MATRIX_ANIMATION,
+  QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS,
   setDotMatrixAnimationOptions,
   setRasterExportQualityPercent,
   setSquareQrSize,
@@ -113,36 +116,95 @@ describe("qr studio state helpers", () => {
   it("starts with dot matrix animation disabled and SVG export static", () => {
     const state = createDefaultQrStudioState();
 
+    expect(QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS).toHaveLength(20);
+    expect(QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS.map((option) => option.label)).toEqual([
+      "Neon Drift",
+      "Pulse Ladder",
+      "Core Spiral",
+      "Twin Orbit",
+      "Prism Sweep",
+      "Flux Columns",
+      "Block Drop",
+      "Strobe Stack",
+      "Glyph Pulse",
+      "CRT Glide",
+      "Echo Ring",
+      "Origin Wave",
+      "Core Rotor",
+      "Prism Bloom",
+      "Helix Glow",
+      "Helix Core",
+      "Half Helix",
+      "Sound Bars",
+      "Infinity Run",
+      "Mobius Run",
+    ]);
     expect(state.dotMatrixAnimation).toEqual(DEFAULT_DOT_MATRIX_ANIMATION);
     expect(state.dotMatrixAnimation.enabled).toBe(false);
     expect(state.dotMatrixAnimation.exportAnimatedSvg).toBe(false);
+    expect(state.dotMatrixAnimation.loader).toBe("neon-drift");
+    expect(state.dotMatrixAnimation.pattern).toBe("full");
+    expect(state.dotMatrixAnimation.dotShape).toBe("circle");
   });
 
   it("clamps dot matrix animation updates to supported ranges", () => {
     const state = createDefaultQrStudioState();
     const lowAnimation = setDotMatrixAnimationOptions(state, {
-      intensity: -20,
+      halo: -1,
+      opacityBase: -1,
+      opacityMid: -2,
+      opacityPeak: -3,
+      overlayScale: -20,
       speed: -1,
     });
     const highAnimation = setDotMatrixAnimationOptions(state, {
+      bloom: true,
+      customColor: "#f4f4f5",
       enabled: true,
       exportAnimatedSvg: true,
-      intensity: 240,
-      preset: "radial",
+      halo: 8,
+      loader: "honey-gate",
+      muted: true,
+      opacityBase: 2,
+      opacityMid: 3,
+      opacityPeak: 4,
+      overlayScale: 240,
+      pattern: "rings",
+      dotShape: "diamond",
       speed: 12,
     });
 
-    expect(lowAnimation.dotMatrixAnimation.intensity).toBe(0);
+    expect(lowAnimation.dotMatrixAnimation.halo).toBe(0);
+    expect(lowAnimation.dotMatrixAnimation.opacityBase).toBe(0);
+    expect(lowAnimation.dotMatrixAnimation.opacityMid).toBe(0);
+    expect(lowAnimation.dotMatrixAnimation.opacityPeak).toBe(0);
+    expect(lowAnimation.dotMatrixAnimation.overlayScale).toBe(40);
     expect(lowAnimation.dotMatrixAnimation.speed).toBe(1);
     expect(highAnimation.dotMatrixAnimation).toEqual({
+      animated: true,
+      bloom: true,
+      colorPreset: "theme",
+      customColor: "#f4f4f5",
+      dotShape: "diamond",
       enabled: true,
       exportAnimatedSvg: true,
-      intensity: 100,
-      preset: "radial",
+      halo: 1,
+      hoverAnimated: false,
+      loader: "neon-drift",
+      muted: true,
+      opacityBase: 1,
+      opacityMid: 1,
+      opacityPeak: 1,
+      overlayScale: 140,
+      pattern: "rings",
       speed: 5,
     });
-    expect(clampDotMatrixAnimationIntensity(Number.NaN)).toBe(
-      DEFAULT_DOT_MATRIX_ANIMATION.intensity,
+    expect(clampDotMatrixAnimationHalo(Number.NaN)).toBe(DEFAULT_DOT_MATRIX_ANIMATION.halo);
+    expect(clampDotMatrixAnimationOpacity(Number.NaN, DEFAULT_DOT_MATRIX_ANIMATION.opacityMid)).toBe(
+      DEFAULT_DOT_MATRIX_ANIMATION.opacityMid,
+    );
+    expect(clampDotMatrixAnimationOverlayScale(Number.NaN)).toBe(
+      DEFAULT_DOT_MATRIX_ANIMATION.overlayScale,
     );
     expect(clampDotMatrixAnimationSpeed(Number.NaN)).toBe(
       DEFAULT_DOT_MATRIX_ANIMATION.speed,

@@ -42,4 +42,5 @@ next-env.d.ts
 
 # hidden nested app copy
 /.portable-compose-editor/
+/.external/
 .gitnexus

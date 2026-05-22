@@ -18,6 +18,7 @@ import {
   clampBackgroundShapeStrokeWidth,
   createDefaultQrStudioState,
   DEFAULT_BACKGROUND_SHAPE_OPTIONS,
+  setDotMatrixAnimationOptions,
   type BackgroundShapeOptions,
   type QrStudioState,
 } from "@/components/qr/qr-studio-state"
@@ -212,10 +213,25 @@ function parseQrState(value: unknown): QrStudioState {
   if (!isRecord(value)) {
     return fallback
   }
+  const clonedValue = structuredClone(value)
+  const rawDotMatrixAnimation = isRecord(value.dotMatrixAnimation)
+    ? value.dotMatrixAnimation
+    : {}
+  const dotMatrixAnimation = setDotMatrixAnimationOptions(
+    {
+      ...fallback,
+      dotMatrixAnimation: {
+        ...fallback.dotMatrixAnimation,
+        ...rawDotMatrixAnimation,
+      },
+    },
+    rawDotMatrixAnimation,
+  ).dotMatrixAnimation
 
   return {
     ...fallback,
-    ...structuredClone(value),
+    ...clonedValue,
+    dotMatrixAnimation,
     backgroundShapeOptions: parseBackgroundShapeOptions(
       isRecord(value.backgroundShapeOptions) ? value.backgroundShapeOptions : undefined,
       fallback,

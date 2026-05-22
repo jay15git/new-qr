@@ -317,7 +317,7 @@ describe("DraftingSurface", () => {
     expect(
       surface.container.querySelector('[data-slot="drafting-plus-marker"]')?.getAttribute("class"),
     ).not.toContain("text-black/")
-    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(8)
+    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(9)
     expect(surface.container.querySelector('[data-slot="tabs"]')).not.toBeNull()
     expect(
       surface.container.querySelector('button[aria-label="Open QR type options"]'),
@@ -434,7 +434,7 @@ describe("DraftingSurface", () => {
     })
 
     expect(surface.container.querySelector('button[aria-label="Open Frame"]')).toBeNull()
-    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(8)
+    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(9)
     expect(
       getRequiredElement(surface.container, 'button[aria-label="Open Content"]').getAttribute(
         "aria-pressed",
@@ -960,6 +960,49 @@ describe("DraftingSurface", () => {
     expect(layersButton.getAttribute("aria-pressed")).toBe("true")
     expect(getTabLabels(surface.container)).toEqual(["Layers"])
     expect(surface.container.querySelector('[data-slot="drafting-layers-tab"]')).not.toBeNull()
+  })
+
+  it("opens the loader playground tool with square loader controls", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface()
+    const loaderButton = getRequiredElement(
+      surface.container,
+      'button[aria-label="Open Loader Playground"]',
+    )
+
+    act(() => {
+      activateElement(loaderButton)
+    })
+
+    expect(loaderButton.getAttribute("aria-pressed")).toBe("true")
+    expect(getTabLabels(surface.container)).toEqual(["Playground"])
+    expect(surface.container.querySelector('[data-slot="drafting-loader-playground-tab"]')).not.toBeNull()
+    expect(surface.container.textContent).toContain("Neon Drift")
+    expect(surface.container.textContent).toContain("Mobius Run")
+    expect(surface.container.textContent).not.toContain("Honey Gate")
+    expect(surface.container.textContent).toContain("Overlay scale")
+    expect(surface.container.textContent).toContain("Bloom")
+    expect(surface.container.textContent).toContain("Peak")
+
+    await act(async () => {
+      activateElement(
+        getRequiredElement(
+          surface.container,
+          'button[aria-label="Select loader Mobius Run"]',
+        ),
+      )
+      await flushPromises()
+      await flushPromises()
+    })
+
+    expect(buildDashboardQrNodePayloadSpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        dotMatrixAnimation: expect.objectContaining({
+          loader: "mobius-run",
+        }),
+      }),
+      { animationMode: "preview" },
+    )
   })
 
   it("renders dot matrix motion controls in the active style panel", async () => {

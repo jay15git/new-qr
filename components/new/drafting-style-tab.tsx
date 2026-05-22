@@ -81,15 +81,23 @@ import type {
   BackgroundShapeOptions,
   DotsColorMode,
   QrDotMatrixAnimationOptions,
-  QrDotMatrixAnimationPreset,
+  QrDotMatrixAnimationPatch,
   StudioDotType,
   StudioGradient,
 } from "@/components/qr/qr-studio-state"
 import {
-  QR_DOT_MATRIX_ANIMATION_INTENSITY_MAX,
-  QR_DOT_MATRIX_ANIMATION_INTENSITY_MIN,
   QR_DOT_MATRIX_ANIMATION_SPEED_MAX,
   QR_DOT_MATRIX_ANIMATION_SPEED_MIN,
+  QR_DOT_MATRIX_COLOR_PRESET_OPTIONS,
+  QR_DOT_MATRIX_DOT_SHAPE_OPTIONS,
+  QR_DOT_MATRIX_HALO_MAX,
+  QR_DOT_MATRIX_HALO_MIN,
+  QR_DOT_MATRIX_OPACITY_MAX,
+  QR_DOT_MATRIX_OPACITY_MIN,
+  QR_DOT_MATRIX_OVERLAY_SCALE_MAX,
+  QR_DOT_MATRIX_OVERLAY_SCALE_MIN,
+  QR_DOT_MATRIX_PATTERN_OPTIONS,
+  QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS,
 } from "@/components/qr/qr-studio-state"
 import {
   type StaticQrContentValue,
@@ -145,16 +153,6 @@ const DRAFTING_BRAND_ICON_CATEGORY_OPTIONS: Array<{
 
 const PAPER_SHADER_COLOR_INPUT_FALLBACK = ["#", "0", "0", "0", "0", "0", "0"].join("")
 const PAPER_SHADER_NEW_COLOR = ["#", "f", "f", "f", "f", "f", "f"].join("")
-
-const DRAFTING_DOT_MATRIX_ANIMATION_PRESETS: Array<{
-  label: string
-  value: QrDotMatrixAnimationPreset
-}> = [
-  { label: "Wave", value: "wave" },
-  { label: "Scanline", value: "scanline" },
-  { label: "Radial", value: "radial" },
-  { label: "Helix", value: "helix" },
-]
 
 export function DraftingContentTab({
   contentType,
@@ -909,10 +907,30 @@ export function DraftingMotionTab({
   onAnimationChange,
 }: {
   animation: QrDotMatrixAnimationOptions
-  onAnimationChange: (patch: Partial<QrDotMatrixAnimationOptions>) => void
+  onAnimationChange: (patch: QrDotMatrixAnimationPatch) => void
 }) {
   return (
-    <div data-slot="drafting-motion-tab" className="min-w-0 space-y-3">
+    <DraftingLoaderPlaygroundTab
+      animation={animation}
+      dataSlot="drafting-motion-tab"
+      onAnimationChange={onAnimationChange}
+    />
+  )
+}
+
+export function DraftingLoaderPlaygroundTab({
+  animation,
+  dataSlot = "drafting-loader-playground-tab",
+  onAnimationChange,
+}: {
+  animation: QrDotMatrixAnimationOptions
+  dataSlot?: string
+  onAnimationChange: (patch: QrDotMatrixAnimationPatch) => void
+}) {
+  const [previewZoom, setPreviewZoom] = useState(3.65)
+
+  return (
+    <div data-slot={dataSlot} className="min-w-0 space-y-3">
       <DraftingToggleField
         checked={animation.enabled}
         dataSlot="drafting-dot-matrix-animation-enabled"
@@ -923,45 +941,40 @@ export function DraftingMotionTab({
       />
 
       <section
-        data-slot="drafting-dot-matrix-animation-preset"
+        data-slot="drafting-dot-matrix-loader-section"
         className="min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 shadow-[var(--drafting-shadow-rest)]"
       >
         <div className="mb-3 min-w-0 space-y-1">
           <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
-            Motion preset
+            Loader
           </p>
           <p className="drafting-type-body text-[var(--drafting-ink-muted)]">
-            Choose how the pulse travels across the fixed dot grid.
+            Square loaders adapted from the upstream matrix motion set.
           </p>
         </div>
         <div className="grid min-w-0 grid-cols-2 gap-2">
-          {DRAFTING_DOT_MATRIX_ANIMATION_PRESETS.map((preset) => {
-            const isSelected = animation.preset === preset.value
+          {QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS.map((loader) => {
+            const isSelected = animation.loader === loader.value
 
             return (
-              <OptionCard
-                appearance="drafting"
-                darkShadowTone="ink"
-                key={preset.value}
-                checked={isSelected}
-                label={preset.label}
-                name="drafting-dot-matrix-animation-preset"
-                onSelect={() => onAnimationChange({ preset: preset.value })}
-                size="compact"
-                value={preset.value}
+              <Button
+                aria-label={`Select loader ${loader.label}`}
+                key={loader.value}
+                type="button"
+                variant="ghost"
+                onClick={() => onAnimationChange({ enabled: true, loader: loader.value })}
+                className={cn(
+                  "h-auto min-h-10 justify-start rounded-[6px] border px-3 py-2 text-left shadow-none",
+                  "border-[var(--drafting-line)] bg-[var(--drafting-control-bg)] text-[var(--drafting-ink-muted)]",
+                  "hover:bg-[var(--drafting-panel-bg-hover)] hover:text-[var(--drafting-ink)]",
+                  isSelected &&
+                    "border-[var(--drafting-line-strong)] bg-[var(--drafting-panel-bg-active)] text-[var(--drafting-ink)]",
+                )}
               >
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "drafting-type-meta font-semibold",
-                    isSelected
-                      ? "text-[var(--drafting-ink)]"
-                      : "text-[var(--drafting-ink-muted)]",
-                  )}
-                >
-                  {preset.label}
+                <span className="drafting-type-meta min-w-0 truncate font-semibold">
+                  {loader.label}
                 </span>
-              </OptionCard>
+              </Button>
             )
           })}
         </div>
@@ -981,17 +994,207 @@ export function DraftingMotionTab({
       />
 
       <DraftingSliderField
-        dataSlot="drafting-dot-matrix-animation-intensity-slider"
-        description="Keeps the low point readable while making the pulse visible."
+        dataSlot="drafting-dot-matrix-overlay-scale-slider"
+        description="Scales only the animated overlay modules; the QR base stays fixed."
         formatValue={(value) => `${Math.round(value)}%`}
-        id="drafting-dot-matrix-animation-intensity"
-        label="Pulse depth"
-        max={QR_DOT_MATRIX_ANIMATION_INTENSITY_MAX}
-        min={QR_DOT_MATRIX_ANIMATION_INTENSITY_MIN}
+        id="drafting-dot-matrix-overlay-scale"
+        label="Overlay scale"
+        max={QR_DOT_MATRIX_OVERLAY_SCALE_MAX}
+        min={QR_DOT_MATRIX_OVERLAY_SCALE_MIN}
         step={1}
-        value={animation.intensity}
-        onChange={(intensity) => onAnimationChange({ intensity })}
+        value={animation.overlayScale}
+        onChange={(overlayScale) => onAnimationChange({ overlayScale })}
       />
+
+      <section className="min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 shadow-[var(--drafting-shadow-rest)]">
+        <p className="drafting-type-control-label mb-3 font-semibold text-[var(--drafting-ink)]">
+          Color preset
+        </p>
+        <div className="grid min-w-0 grid-cols-2 gap-2">
+          {QR_DOT_MATRIX_COLOR_PRESET_OPTIONS.map((preset) => (
+            <Button
+              key={preset.value}
+              type="button"
+              variant="ghost"
+              onClick={() => onAnimationChange({ colorPreset: preset.value })}
+              className={cn(
+                "h-9 justify-start rounded-[6px] border px-3 text-left shadow-none",
+                animation.colorPreset === preset.value
+                  ? "border-[var(--drafting-line-strong)] bg-[var(--drafting-panel-bg-active)] text-[var(--drafting-ink)]"
+                  : "border-[var(--drafting-line)] bg-[var(--drafting-control-bg)] text-[var(--drafting-ink-muted)]",
+              )}
+            >
+              <span className="drafting-type-meta font-semibold">{preset.label}</span>
+            </Button>
+          ))}
+        </div>
+        <label className="mt-3 flex min-w-0 items-center justify-between gap-3 rounded-[6px] bg-[var(--drafting-control-bg)] px-3 py-2">
+          <span className="drafting-type-control-label font-semibold text-[var(--drafting-ink-muted)]">
+            Custom color
+          </span>
+          <Input
+            aria-label="Custom loader color"
+            type="color"
+            value={animation.customColor}
+            onChange={(event) => onAnimationChange({ customColor: event.target.value })}
+            className="h-8 w-12 shrink-0 border-0 bg-transparent p-0"
+          />
+        </label>
+      </section>
+
+      <section className="min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 shadow-[var(--drafting-shadow-rest)]">
+        <p className="drafting-type-control-label mb-3 font-semibold text-[var(--drafting-ink)]">
+          Pattern
+        </p>
+        <div className="grid min-w-0 grid-cols-3 gap-2">
+          {QR_DOT_MATRIX_PATTERN_OPTIONS.map((pattern) => (
+            <Button
+              key={pattern.value}
+              type="button"
+              variant="ghost"
+              onClick={() => onAnimationChange({ pattern: pattern.value })}
+              className={cn(
+                "h-9 rounded-[6px] border px-2 shadow-none",
+                animation.pattern === pattern.value
+                  ? "border-[var(--drafting-line-strong)] bg-[var(--drafting-panel-bg-active)] text-[var(--drafting-ink)]"
+                  : "border-[var(--drafting-line)] bg-[var(--drafting-control-bg)] text-[var(--drafting-ink-muted)]",
+              )}
+            >
+              <span className="drafting-type-meta font-semibold">{pattern.label}</span>
+            </Button>
+          ))}
+        </div>
+      </section>
+
+      <section className="min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 shadow-[var(--drafting-shadow-rest)]">
+        <p className="drafting-type-control-label mb-3 font-semibold text-[var(--drafting-ink)]">
+          Dot shape
+        </p>
+        <div className="grid min-w-0 grid-cols-2 gap-2">
+          {QR_DOT_MATRIX_DOT_SHAPE_OPTIONS.map((shape) => (
+            <Button
+              key={shape.value}
+              type="button"
+              variant="ghost"
+              onClick={() => onAnimationChange({ dotShape: shape.value })}
+              className={cn(
+                "h-9 rounded-[6px] border px-3 shadow-none",
+                animation.dotShape === shape.value
+                  ? "border-[var(--drafting-line-strong)] bg-[var(--drafting-panel-bg-active)] text-[var(--drafting-ink)]"
+                  : "border-[var(--drafting-line)] bg-[var(--drafting-control-bg)] text-[var(--drafting-ink-muted)]",
+              )}
+            >
+              <span className="drafting-type-meta font-semibold">{shape.label}</span>
+            </Button>
+          ))}
+        </div>
+      </section>
+
+      <section className="min-w-0 space-y-2 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 shadow-[var(--drafting-shadow-rest)]">
+        <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+          States
+        </p>
+        <DraftingToggleField
+          checked={animation.animated}
+          dataSlot="drafting-dot-matrix-animated"
+          description="Runs the loader in preview."
+          id="drafting-dot-matrix-animated"
+          label="Animated"
+          onCheckedChange={(animated) => onAnimationChange({ animated })}
+        />
+        <DraftingToggleField
+          checked={animation.hoverAnimated}
+          dataSlot="drafting-dot-matrix-hover-animated"
+          description="Pauses motion until the QR is hovered."
+          id="drafting-dot-matrix-hover-animated"
+          label="Hover animated"
+          onCheckedChange={(hoverAnimated) => onAnimationChange({ hoverAnimated })}
+        />
+        <DraftingToggleField
+          checked={animation.muted}
+          dataSlot="drafting-dot-matrix-muted"
+          description="Softens the overlay against dense codes."
+          id="drafting-dot-matrix-muted"
+          label="Muted"
+          onCheckedChange={(muted) => onAnimationChange({ muted })}
+        />
+        <DraftingToggleField
+          checked={animation.bloom}
+          dataSlot="drafting-dot-matrix-bloom"
+          description="Adds a brighter SVG glow around active modules."
+          id="drafting-dot-matrix-bloom"
+          label="Bloom"
+          onCheckedChange={(bloom) => onAnimationChange({ bloom })}
+        />
+      </section>
+
+      <DraftingSliderField
+        dataSlot="drafting-dot-matrix-halo-slider"
+        formatValue={(value) => value.toFixed(2)}
+        id="drafting-dot-matrix-halo"
+        label="Halo"
+        max={QR_DOT_MATRIX_HALO_MAX}
+        min={QR_DOT_MATRIX_HALO_MIN}
+        step={0.01}
+        value={animation.halo}
+        onChange={(halo) => onAnimationChange({ halo })}
+      />
+
+      <section className="min-w-0 space-y-3 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 shadow-[var(--drafting-shadow-rest)]">
+        <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+          Opacity
+        </p>
+        <DraftingSliderField
+          dataSlot="drafting-dot-matrix-opacity-base-slider"
+          formatValue={(value) => value.toFixed(2)}
+          id="drafting-dot-matrix-opacity-base"
+          label="Base"
+          max={QR_DOT_MATRIX_OPACITY_MAX}
+          min={QR_DOT_MATRIX_OPACITY_MIN}
+          step={0.01}
+          value={animation.opacityBase}
+          onChange={(opacityBase) => onAnimationChange({ opacityBase })}
+        />
+        <DraftingSliderField
+          dataSlot="drafting-dot-matrix-opacity-mid-slider"
+          formatValue={(value) => value.toFixed(2)}
+          id="drafting-dot-matrix-opacity-mid"
+          label="Mid"
+          max={QR_DOT_MATRIX_OPACITY_MAX}
+          min={QR_DOT_MATRIX_OPACITY_MIN}
+          step={0.01}
+          value={animation.opacityMid}
+          onChange={(opacityMid) => onAnimationChange({ opacityMid })}
+        />
+        <DraftingSliderField
+          dataSlot="drafting-dot-matrix-opacity-peak-slider"
+          formatValue={(value) => value.toFixed(2)}
+          id="drafting-dot-matrix-opacity-peak"
+          label="Peak"
+          max={QR_DOT_MATRIX_OPACITY_MAX}
+          min={QR_DOT_MATRIX_OPACITY_MIN}
+          step={0.01}
+          value={animation.opacityPeak}
+          onChange={(opacityPeak) => onAnimationChange({ opacityPeak })}
+        />
+      </section>
+
+      <section className="min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 shadow-[var(--drafting-shadow-rest)]">
+        <p className="drafting-type-control-label mb-3 font-semibold text-[var(--drafting-ink)]">
+          Preview
+        </p>
+        <DraftingSliderField
+          dataSlot="drafting-dot-matrix-preview-zoom-slider"
+          formatValue={(value) => value.toFixed(2)}
+          id="drafting-dot-matrix-preview-zoom"
+          label="Zoom"
+          max={5}
+          min={1}
+          step={0.05}
+          value={previewZoom}
+          onChange={setPreviewZoom}
+        />
+      </section>
 
       <DraftingToggleField
         checked={animation.exportAnimatedSvg}

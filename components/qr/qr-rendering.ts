@@ -160,11 +160,31 @@ export function createDotMatrixAnimationExtension(
 
     const group = document.createElementNS(SVG_NS, "g")
     group.setAttribute("data-qr-layer", "dot-matrix-animation")
-    group.setAttribute("class", "qr-dot-matrix-layer")
-    group.appendChild(createDotMatrixAnimationStyle(document, state.dotMatrixAnimation))
+    group.setAttribute(
+      "class",
+      [
+        "qr-dot-matrix-layer",
+        `qr-dot-loader-${state.dotMatrixAnimation.loader}`,
+        `qr-dot-pattern-${state.dotMatrixAnimation.pattern}`,
+        `qr-dot-shape-${state.dotMatrixAnimation.dotShape}`,
+        state.dotMatrixAnimation.bloom ? "qr-dot-matrix-bloom" : "",
+        state.dotMatrixAnimation.hoverAnimated ? "qr-dot-matrix-hover" : "",
+        state.dotMatrixAnimation.muted ? "qr-dot-matrix-muted" : "",
+      ].filter(Boolean).join(" "),
+    )
+    group.setAttribute("data-qr-dot-loader", state.dotMatrixAnimation.loader)
+    group.appendChild(createDotMatrixAnimationStyle(document))
     group.setAttribute(
       "style",
-      `--qr-dot-matrix-overlay-opacity:${getDotMatrixOverlayOpacity(state.dotMatrixAnimation)}`,
+      [
+        `--qr-dot-matrix-color:${resolveDotMatrixColor(state)}`,
+        `--qr-dot-matrix-duration:${getDotMatrixAnimationDuration(state.dotMatrixAnimation)}s`,
+        `--qr-dot-matrix-halo:${formatSvgNumber(state.dotMatrixAnimation.halo)}`,
+        `--qr-dot-matrix-opacity-base:${formatSvgNumber(state.dotMatrixAnimation.opacityBase)}`,
+        `--qr-dot-matrix-opacity-mid:${formatSvgNumber(state.dotMatrixAnimation.opacityMid)}`,
+        `--qr-dot-matrix-opacity-peak:${formatSvgNumber(state.dotMatrixAnimation.opacityPeak)}`,
+        `--qr-dot-matrix-scale:${formatSvgNumber(state.dotMatrixAnimation.overlayScale / 100)}`,
+      ].join(";"),
     )
 
     for (const layer of dotLayers) {
@@ -175,22 +195,16 @@ export function createDotMatrixAnimationExtension(
           continue
         }
 
+        if (!shouldRenderDotMatrixOverlayModule(coordinates, metrics, state.dotMatrixAnimation.pattern)) {
+          continue
+        }
+
         const animatedShape = shape.cloneNode(true) as SVGElement
         animatedShape.removeAttribute("clip-path")
-        animatedShape.setAttribute("fill", "#22d3ee")
+        animatedShape.setAttribute("fill", resolveDotMatrixColor(state))
+        animatedShape.setAttribute("data-qr-dot-loader", state.dotMatrixAnimation.loader)
         animatedShape.setAttribute("class", "qr-dot-matrix-module")
-        animatedShape.setAttribute(
-          "style",
-          [
-            `--qr-dot-matrix-delay:${getDotMatrixDelay(
-              state.dotMatrixAnimation.preset,
-              coordinates.row,
-              coordinates.col,
-              metrics.maxRow,
-              metrics.maxCol,
-            )}s`,
-          ].join(";"),
-        )
+        animatedShape.setAttribute("style", getDotMatrixModuleStyle(coordinates, metrics))
         group.appendChild(animatedShape)
       }
     }
@@ -208,6 +222,10 @@ function shouldApplyDotMatrixAnimation(
   mode: QrAnimationRenderMode,
 ) {
   if (!state.dotMatrixAnimation.enabled || state.type !== "svg") {
+    return false
+  }
+
+  if (!state.dotMatrixAnimation.animated && !state.dotMatrixAnimation.hoverAnimated) {
     return false
   }
 
@@ -234,6 +252,11 @@ type DotMatrixMetrics = {
   maxRow: number
   originX: number
   originY: number
+}
+
+type DotMatrixCoordinates = {
+  col: number
+  row: number
 }
 
 type DotMatrixAnchor = {
@@ -415,60 +438,184 @@ function getSmallestPositiveDelta(values: number[]) {
   return smallestDelta
 }
 
-function getDotMatrixDelay(
-  preset: QrDotMatrixAnimationOptions["preset"],
-  row: number,
-  col: number,
-  maxRow: number,
-  maxCol: number,
-) {
-  if (preset === "scanline") {
-    return formatSvgNumber(row * 0.08)
-  }
-
-  if (preset === "radial") {
-    const centerRow = maxRow / 2
-    const centerCol = maxCol / 2
-    const distance = Math.hypot(row - centerRow, col - centerCol)
-
-    return formatSvgNumber(distance * 0.07)
-  }
-
-  if (preset === "helix") {
-    return formatSvgNumber(((row * 2 + col) % 13) * 0.08)
-  }
-
-  return formatSvgNumber((row + col) * 0.055)
-}
-
-function getDotMatrixOverlayOpacity(animation: QrDotMatrixAnimationOptions) {
-  return formatSvgNumber(0.18 + (Math.min(100, Math.max(0, animation.intensity)) / 100) * 0.42)
-}
-
 function getDotMatrixAnimationDuration(animation: QrDotMatrixAnimationOptions) {
-  return formatSvgNumber(4.4 - Math.min(5, Math.max(1, animation.speed)) * 0.52)
+  return formatSvgNumber(4.7 - Math.min(5, Math.max(1, animation.speed)) * 0.58)
 }
 
-function createDotMatrixAnimationStyle(
-  document: Document,
-  animation: QrDotMatrixAnimationOptions,
+function getDotMatrixModuleStyle(
+  coordinates: DotMatrixCoordinates,
+  metrics: DotMatrixMetrics,
 ) {
+  const centerRow = metrics.maxRow / 2
+  const centerCol = metrics.maxCol / 2
+  const rowN = metrics.maxRow > 0 ? coordinates.row / metrics.maxRow : 0
+  const colN = metrics.maxCol > 0 ? coordinates.col / metrics.maxCol : 0
+  const diagonal = rowN + colN
+  const distance = Math.hypot(coordinates.row - centerRow, coordinates.col - centerCol)
+  const maxDistance = Math.max(1, Math.hypot(centerRow, centerCol))
+  const ring = distance / maxDistance
+  const angle = Math.atan2(coordinates.row - centerRow, coordinates.col - centerCol)
+  const index = coordinates.row * (metrics.maxCol + 1) + coordinates.col
+
+  return [
+    `--qr-dot-row:${coordinates.row}`,
+    `--qr-dot-col:${coordinates.col}`,
+    `--qr-dot-index:${index}`,
+    `--qr-dot-row-n:${formatSvgNumber(rowN)}`,
+    `--qr-dot-col-n:${formatSvgNumber(colN)}`,
+    `--qr-dot-diagonal:${formatSvgNumber(diagonal)}`,
+    `--qr-dot-ring:${formatSvgNumber(ring)}`,
+    `--qr-dot-angle:${formatSvgNumber(angle)}`,
+    `--qr-dot-distance:${formatSvgNumber(distance)}`,
+    `--qr-dot-order:${formatSvgNumber(((coordinates.row * 2 + coordinates.col * 3) % 17) / 17)}`,
+  ].join(";")
+}
+
+function shouldRenderDotMatrixOverlayModule(
+  coordinates: DotMatrixCoordinates,
+  metrics: DotMatrixMetrics,
+  pattern: QrDotMatrixAnimationOptions["pattern"],
+) {
+  if (pattern === "full") {
+    return true
+  }
+
+  const centerRow = metrics.maxRow / 2
+  const centerCol = metrics.maxCol / 2
+  const rowDistance = Math.abs(coordinates.row - centerRow)
+  const colDistance = Math.abs(coordinates.col - centerCol)
+  const distance = Math.hypot(rowDistance, colDistance)
+  const maxDistance = Math.max(1, Math.hypot(centerRow, centerCol))
+  const ring = distance / maxDistance
+  const edgeDistance = Math.min(
+    coordinates.row,
+    coordinates.col,
+    metrics.maxRow - coordinates.row,
+    metrics.maxCol - coordinates.col,
+  )
+
+  if (pattern === "outline") {
+    return edgeDistance <= 1
+  }
+
+  if (pattern === "diamond") {
+    return (
+      Math.abs(rowDistance - colDistance) <= 1 ||
+      rowDistance + colDistance <= Math.max(2, Math.min(metrics.maxRow, metrics.maxCol) * 0.18)
+    )
+  }
+
+  if (pattern === "cross") {
+    return Math.abs(coordinates.row - centerRow) <= 1 || Math.abs(coordinates.col - centerCol) <= 1
+  }
+
+  if (pattern === "rings") {
+    return Math.abs((ring * 5) % 1 - 0.5) > 0.25
+  }
+
+  if (pattern === "rose") {
+    const angle = Math.atan2(coordinates.row - centerRow, coordinates.col - centerCol)
+
+    return Math.cos(angle * 4) * 0.35 + 0.55 > ring
+  }
+
+  return true
+}
+
+function resolveDotMatrixColor(state: QrStudioState) {
+  const animation = state.dotMatrixAnimation
+
+  if (animation.colorPreset === "theme") {
+    return animation.customColor || state.dotsOptions.color || "#22d3ee"
+  }
+
+  const presetColors: Record<QrDotMatrixAnimationOptions["colorPreset"], string> = {
+    aurora: "#a78bfa",
+    fire: "#fb7185",
+    mint: "#34d399",
+    neon: "#22d3ee",
+    ocean: "#38bdf8",
+    prism: "#f0abfc",
+    sunset: "#fb923c",
+    theme: animation.customColor || state.dotsOptions.color || "#22d3ee",
+  }
+
+  return presetColors[animation.colorPreset]
+}
+
+function createDotMatrixAnimationStyle(document: Document) {
   const style = document.createElementNS(SVG_NS, "style")
 
   style.setAttribute("data-qr-layer", "dot-matrix-animation")
   style.textContent = `
+.qr-dot-matrix-layer {
+  pointer-events: none;
+}
 .qr-dot-matrix-module {
-  animation: qr-dot-matrix-pulse ${getDotMatrixAnimationDuration(animation)}s ease-in-out infinite;
-  animation-delay: var(--qr-dot-matrix-delay);
-  filter: drop-shadow(0 0 3px rgba(34, 211, 238, 0.75));
-  opacity: 0;
+  animation-duration: var(--qr-dot-matrix-duration);
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  filter: drop-shadow(0 0 calc(8px * var(--qr-dot-matrix-halo)) var(--qr-dot-matrix-color));
+  opacity: var(--qr-dot-matrix-opacity-base);
+  transform-box: fill-box;
+  transform-origin: center;
 }
-@keyframes qr-dot-matrix-pulse {
-  0%, 100% { opacity: 0; }
-  38% { opacity: var(--qr-dot-matrix-overlay-opacity); }
-  52% { opacity: calc(var(--qr-dot-matrix-overlay-opacity) * 0.72); }
-  66% { opacity: 0; }
+.qr-dot-matrix-muted .qr-dot-matrix-module {
+  opacity: calc(var(--qr-dot-matrix-opacity-base) * 0.65);
 }
+.qr-dot-matrix-bloom .qr-dot-matrix-module {
+  filter: drop-shadow(0 0 calc(4px + 10px * var(--qr-dot-matrix-halo)) var(--qr-dot-matrix-color));
+}
+.qr-dot-matrix-hover:not(:hover) .qr-dot-matrix-module {
+  animation-play-state: paused;
+}
+.qr-dot-shape-diamond .qr-dot-matrix-module {
+  transform: scale(var(--qr-dot-matrix-scale)) rotate(45deg);
+}
+.qr-dot-shape-circle .qr-dot-matrix-module,
+.qr-dot-shape-square .qr-dot-matrix-module,
+.qr-dot-shape-hearts .qr-dot-matrix-module {
+  transform: scale(var(--qr-dot-matrix-scale));
+}
+.qr-dot-loader-neon-drift .qr-dot-matrix-module { animation-name: qr-dot-loader-pulse; animation-delay: calc((var(--qr-dot-diagonal) + var(--qr-dot-order)) * -0.42s); }
+.qr-dot-loader-pulse-ladder .qr-dot-matrix-module { animation-name: qr-dot-loader-step; animation-delay: calc(var(--qr-dot-row-n) * -1.4s); }
+.qr-dot-loader-core-spiral .qr-dot-matrix-module { animation-name: qr-dot-loader-spin; animation-delay: calc((var(--qr-dot-angle) + var(--qr-dot-ring) * 4) * -0.22s); }
+.qr-dot-loader-twin-orbit .qr-dot-matrix-module { animation-name: qr-dot-loader-orbit; animation-delay: calc((var(--qr-dot-ring) + var(--qr-dot-col-n)) * -0.9s); }
+.qr-dot-loader-prism-sweep .qr-dot-matrix-module { animation-name: qr-dot-loader-sweep; animation-delay: calc(var(--qr-dot-col-n) * -1.6s); }
+.qr-dot-loader-flux-columns .qr-dot-matrix-module { animation-name: qr-dot-loader-bars; animation-delay: calc(var(--qr-dot-col) * -0.08s); }
+.qr-dot-loader-block-drop .qr-dot-matrix-module { animation-name: qr-dot-loader-drop; animation-delay: calc((1 - var(--qr-dot-row-n)) * -1.2s); }
+.qr-dot-loader-strobe-stack .qr-dot-matrix-module { animation-name: qr-dot-loader-strobe; animation-delay: calc(var(--qr-dot-order) * -0.8s); }
+.qr-dot-loader-glyph-pulse .qr-dot-matrix-module { animation-name: qr-dot-loader-glyph; animation-delay: calc(var(--qr-dot-order) * -1.8s); }
+.qr-dot-loader-crt-glide .qr-dot-matrix-module { animation-name: qr-dot-loader-crt; animation-delay: calc((var(--qr-dot-row-n) + var(--qr-dot-col-n) * 0.35) * -1.6s); }
+.qr-dot-loader-echo-ring .qr-dot-matrix-module { animation-name: qr-dot-loader-ring; animation-delay: calc(var(--qr-dot-ring) * -1.8s); }
+.qr-dot-loader-origin-wave .qr-dot-matrix-module { animation-name: qr-dot-loader-wave; animation-delay: calc(var(--qr-dot-distance) * -0.08s); }
+.qr-dot-loader-core-rotor .qr-dot-matrix-module { animation-name: qr-dot-loader-rotor; animation-delay: calc(var(--qr-dot-angle) * -0.28s); }
+.qr-dot-loader-prism-bloom .qr-dot-matrix-module { animation-name: qr-dot-loader-bloom; animation-delay: calc((var(--qr-dot-ring) + var(--qr-dot-order)) * -1s); }
+.qr-dot-loader-helix-glow .qr-dot-matrix-module { animation-name: qr-dot-loader-helix; animation-delay: calc((var(--qr-dot-row-n) * 2 - var(--qr-dot-col-n)) * -1.1s); }
+.qr-dot-loader-helix-core .qr-dot-matrix-module { animation-name: qr-dot-loader-core; animation-delay: calc((var(--qr-dot-col-n) * 2 + var(--qr-dot-row-n)) * -1s); }
+.qr-dot-loader-half-helix .qr-dot-matrix-module { animation-name: qr-dot-loader-half; animation-delay: calc((var(--qr-dot-col-n) + var(--qr-dot-ring)) * -1.2s); }
+.qr-dot-loader-sound-bars .qr-dot-matrix-module { animation-name: qr-dot-loader-bars; animation-delay: calc(var(--qr-dot-col) * -0.11s); }
+.qr-dot-loader-infinity-run .qr-dot-matrix-module { animation-name: qr-dot-loader-infinity; animation-delay: calc((var(--qr-dot-row-n) + var(--qr-dot-col-n)) * -1.1s); }
+.qr-dot-loader-mobius-run .qr-dot-matrix-module { animation-name: qr-dot-loader-mobius; animation-delay: calc((var(--qr-dot-diagonal) + var(--qr-dot-ring)) * -0.8s); }
+@keyframes qr-dot-loader-pulse { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 42% { opacity: var(--qr-dot-matrix-opacity-peak); transform: scale(calc(var(--qr-dot-matrix-scale) * 1.14)); } 66% { opacity: var(--qr-dot-matrix-opacity-mid); } }
+@keyframes qr-dot-loader-step { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 35%, 55% { opacity: var(--qr-dot-matrix-opacity-peak); } 72% { opacity: var(--qr-dot-matrix-opacity-mid); } }
+@keyframes qr-dot-loader-spin { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); transform: scale(var(--qr-dot-matrix-scale)) rotate(0deg); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); transform: scale(calc(var(--qr-dot-matrix-scale) * 1.2)) rotate(90deg); } }
+@keyframes qr-dot-loader-orbit { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 25%, 75% { opacity: var(--qr-dot-matrix-opacity-mid); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); } }
+@keyframes qr-dot-loader-sweep { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 45% { opacity: var(--qr-dot-matrix-opacity-peak); } 58% { opacity: var(--qr-dot-matrix-opacity-mid); } }
+@keyframes qr-dot-loader-bars { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); transform: scaleY(calc(var(--qr-dot-matrix-scale) * 0.72)); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); transform: scaleY(calc(var(--qr-dot-matrix-scale) * 1.28)); } }
+@keyframes qr-dot-loader-drop { 0% { opacity: var(--qr-dot-matrix-opacity-base); transform: translateY(-12%) scale(var(--qr-dot-matrix-scale)); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); transform: translateY(0) scale(calc(var(--qr-dot-matrix-scale) * 1.08)); } 100% { opacity: var(--qr-dot-matrix-opacity-base); transform: translateY(12%) scale(var(--qr-dot-matrix-scale)); } }
+@keyframes qr-dot-loader-strobe { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 12%, 20%, 52% { opacity: var(--qr-dot-matrix-opacity-peak); } 16%, 44% { opacity: var(--qr-dot-matrix-opacity-mid); } }
+@keyframes qr-dot-loader-glyph { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); transform: scale(var(--qr-dot-matrix-scale)); } 40% { opacity: var(--qr-dot-matrix-opacity-peak); transform: scale(calc(var(--qr-dot-matrix-scale) * 0.78)); } }
+@keyframes qr-dot-loader-crt { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 48% { opacity: var(--qr-dot-matrix-opacity-peak); } 54% { opacity: var(--qr-dot-matrix-opacity-mid); } }
+@keyframes qr-dot-loader-ring { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); transform: scale(calc(var(--qr-dot-matrix-scale) * 1.16)); } }
+@keyframes qr-dot-loader-wave { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 46% { opacity: var(--qr-dot-matrix-opacity-peak); } 62% { opacity: var(--qr-dot-matrix-opacity-mid); } }
+@keyframes qr-dot-loader-rotor { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); transform: scale(var(--qr-dot-matrix-scale)) rotate(0deg); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); transform: scale(calc(var(--qr-dot-matrix-scale) * 1.1)) rotate(180deg); } }
+@keyframes qr-dot-loader-bloom { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); filter: drop-shadow(0 0 calc(9px + 12px * var(--qr-dot-matrix-halo)) var(--qr-dot-matrix-color)); } }
+@keyframes qr-dot-loader-helix { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 35%, 65% { opacity: var(--qr-dot-matrix-opacity-peak); } }
+@keyframes qr-dot-loader-core { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); transform: scale(calc(var(--qr-dot-matrix-scale) * 1.12)); } }
+@keyframes qr-dot-loader-half { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 45% { opacity: var(--qr-dot-matrix-opacity-peak); } 60% { opacity: var(--qr-dot-matrix-opacity-mid); } }
+@keyframes qr-dot-loader-infinity { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 40%, 60% { opacity: var(--qr-dot-matrix-opacity-peak); } }
+@keyframes qr-dot-loader-mobius { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); transform: scale(var(--qr-dot-matrix-scale)) rotate(0deg); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); transform: scale(calc(var(--qr-dot-matrix-scale) * 1.08)) rotate(135deg); } }
 @media (prefers-reduced-motion: reduce) {
   .qr-dot-matrix-layer {
     display: none;

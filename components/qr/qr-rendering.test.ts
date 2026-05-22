@@ -6,7 +6,10 @@ import {
   createDotMatrixAnimationExtension,
   getQrExtensionKey,
 } from "./qr-rendering"
-import { createDefaultQrStudioState } from "./qr-studio-state"
+import {
+  createDefaultQrStudioState,
+  QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS,
+} from "./qr-studio-state"
 
 type StubElement = {
   tagName: string
@@ -264,10 +267,11 @@ describe("qr rendering helpers", () => {
   it("adds dot matrix animation as a visible overlay without changing base or corner layers", () => {
     const state = createDefaultQrStudioState()
     state.dotMatrixAnimation = {
+      ...state.dotMatrixAnimation,
       enabled: true,
       exportAnimatedSvg: false,
-      intensity: 40,
-      preset: "scanline",
+      loader: "crt-glide",
+      overlayScale: 84,
       speed: 4,
     }
 
@@ -326,14 +330,73 @@ describe("qr rendering helpers", () => {
       ".qr-dot-matrix-layer",
     )
     expect(animationLayer?.getAttribute("style")).toContain(
-      "--qr-dot-matrix-overlay-opacity:",
+      "--qr-dot-matrix-opacity-base:",
     )
     expect(animatedModules).toHaveLength(2)
     expect(animatedModules[0]?.getAttribute("fill")).toBe("#22d3ee")
+    expect(animatedModules[0]?.getAttribute("data-qr-dot-loader")).toBe("crt-glide")
     expect(animatedModules[0]?.getAttribute("x")).toBe("10")
     expect(animatedModules[1]?.getAttribute("style")).toContain(
-      "--qr-dot-matrix-delay:",
+      "--qr-dot-row:",
     )
+  })
+
+  it("creates overlay modules for every square loader preset", () => {
+    for (const loader of QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS.map((option) => option.value)) {
+      const state = createDefaultQrStudioState()
+      state.dotMatrixAnimation = {
+        ...state.dotMatrixAnimation,
+        enabled: true,
+        loader,
+      }
+      const extension = createDotMatrixAnimationExtension(state, "preview")
+      expect(extension, loader).toBeTypeOf("function")
+
+      if (!extension) {
+        continue
+      }
+
+      const svg = createStubElement("svg")
+      const defs = createStubElement("defs")
+      const dotClipPath = createStubElement("clipPath")
+      dotClipPath.setAttribute("id", "clip-path-dot-color-0")
+
+      for (let row = 0; row < 3; row += 1) {
+        for (let col = 0; col < 3; col += 1) {
+          const dot = createStubElement("rect")
+          dot.setAttribute("x", String(10 + col * 5))
+          dot.setAttribute("y", String(10 + row * 5))
+          dot.setAttribute("width", "5")
+          dot.setAttribute("height", "5")
+          dotClipPath.appendChild(dot)
+        }
+      }
+
+      defs.appendChild(dotClipPath)
+      svg.appendChild(defs)
+
+      const dotLayer = createStubElement("rect")
+      dotLayer.setAttribute("clip-path", "url('#clip-path-dot-color-0')")
+      dotLayer.setAttribute("fill", "#111827")
+      svg.appendChild(dotLayer)
+
+      extension(svg as unknown as SVGElement, {
+        height: 120,
+        width: 120,
+      })
+
+      const animationLayer = svg.querySelector('[data-qr-layer="dot-matrix-animation"]')
+      const animatedModules =
+        animationLayer?.children.filter(
+          (child) => child.attributes.class === "qr-dot-matrix-module",
+        ) ?? []
+
+      expect(animatedModules.length, loader).toBeGreaterThan(0)
+      expect(animatedModules[0]?.getAttribute("data-qr-dot-loader")).toBe(loader)
+      expect(animationLayer?.children[0]?.textContent, loader).toContain(
+        `qr-dot-loader-${loader}`,
+      )
+    }
   })
 
   it("keeps dot matrix animation out of export mode unless animated SVG export is enabled", () => {

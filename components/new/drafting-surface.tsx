@@ -31,6 +31,7 @@ import {
   DraftingLogoColorTab,
   DraftingLogoSizeTab,
   DraftingLogoUploadTab,
+  DraftingLoaderPlaygroundTab,
   DraftingMotionTab,
   DraftingQrTypeDropdown,
   DraftingSizeTab,
@@ -144,7 +145,7 @@ import {
   validateStaticQrContent,
   type StaticQrContentValue,
 } from "@/components/qr/qr-static-content"
-import { CreditCardIcon, DownloadIcon, LinkIcon, PieChart, Settings, Sparkles } from "lucide-react"
+import { CreditCardIcon, DownloadIcon, LinkIcon, PieChart, Settings, SlidersHorizontal, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SecondaryButton } from "@/components/ui/secondary-button"
 import {
@@ -194,7 +195,7 @@ type DraftingPanelTab = {
   label: string
 }
 
-type DraftingToolId = QrEditorSectionId | DraftingCardToolId | "layers"
+type DraftingToolId = QrEditorSectionId | DraftingCardToolId | "layers" | "loader-playground"
 
 type DraftingTool = {
   id: DraftingToolId
@@ -220,6 +221,7 @@ const DRAFTING_PANEL_TABS: Record<DraftingToolId, DraftingPanelTab[]> = {
     { id: "size", label: "Size" },
     { id: "motion", label: "Motion" },
   ],
+  "loader-playground": [{ id: "playground", label: "Playground" }],
   "corner-square": [
     { id: "style", label: "Style" },
     { id: "color", label: "Color" },
@@ -250,6 +252,7 @@ const DEFAULT_DRAFTING_PANEL_TABS: Record<DraftingToolId, string> = {
   "card-image": "upload",
   "card-shaders": "shaders",
   style: "style",
+  "loader-playground": "playground",
   "corner-square": "style",
   "corner-dot": "style",
   background: "colors",
@@ -374,6 +377,11 @@ const DRAFTING_TOOLS: DraftingTool[] = [
     id: "style",
     title: "Style",
     renderIcon: () => <Sparkles className="size-4 shrink-0" />,
+  },
+  {
+    id: "loader-playground",
+    title: "Loader Playground",
+    renderIcon: () => <SlidersHorizontal className="size-4 shrink-0" />,
   },
   {
     id: "corner-square",
@@ -1880,6 +1888,26 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     if (toolId === "style" && tabId === "motion") {
       return (
         <DraftingMotionTab
+          animation={selectedDotMatrixAnimation}
+          onAnimationChange={(patch) =>
+            setSelectedDotMatrixAnimation(
+              (current) =>
+                setDotMatrixAnimationOptions(
+                  {
+                    ...DEFAULT_DRAFTING_STUDIO_STATE,
+                    dotMatrixAnimation: current,
+                  },
+                  patch,
+                ).dotMatrixAnimation,
+            )
+          }
+        />
+      )
+    }
+
+    if (toolId === "loader-playground" && tabId === "playground") {
+      return (
+        <DraftingLoaderPlaygroundTab
           animation={selectedDotMatrixAnimation}
           onAnimationChange={(patch) =>
             setSelectedDotMatrixAnimation(
