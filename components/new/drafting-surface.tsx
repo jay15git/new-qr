@@ -638,9 +638,12 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       ),
     }
   })
-  const [selectedLayerId, setSelectedLayerId] = useState<string | null>(
+  const [selectedLayerId, setSelectedLayerId] = useState<string | null>(() =>
     getDraftingQrLayerId(DASHBOARD_QR_NODE_ID),
   )
+  const [selectedLayerIds, setSelectedLayerIds] = useState<string[]>(() => [
+    getDraftingQrLayerId(DASHBOARD_QR_NODE_ID),
+  ])
   const [selectedDownloadExtension, setSelectedDownloadExtension] =
     useState<DraftingDownloadExtension>("png")
   const [selectedDownloadTarget, setSelectedDownloadTarget] =
@@ -1253,7 +1256,12 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     setSelectedContentType(nextDocument.selectedContentType)
     setContentValuesByType(structuredClone(nextDocument.contentValuesByType))
     setSelectedCardState(cloneDraftingCardState(activeCardState))
-    setSelectedLayerId(getDraftingQrLayerId(activeNodeId))
+    selectSingleLayer(getDraftingQrLayerId(activeNodeId))
+  }
+
+  function selectSingleLayer(layerId: string | null) {
+    setSelectedLayerId(layerId)
+    setSelectedLayerIds(layerId ? [layerId] : [])
   }
 
   function setDraftingHistoryStack(nextStack: DraftingWorkspaceDocumentV1[], nextIndex: number) {
@@ -1315,7 +1323,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     setActiveQrNodeId(paneId)
     applyDraftingQrStateToControls(nextState)
     setSelectedCardState(cloneDraftingCardState(nextCardState))
-    setSelectedLayerId(getDraftingQrLayerId(paneId))
+    selectSingleLayer(getDraftingQrLayerId(paneId))
   }
 
   function handlePaneQrClick(paneId: string) {
@@ -1347,7 +1355,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
         nextCardState,
       ),
     })
-    setSelectedLayerId(getDraftingQrLayerId(DASHBOARD_QR_NODE_ID))
+    selectSingleLayer(getDraftingQrLayerId(DASHBOARD_QR_NODE_ID))
 
     setSelectedDownloadExtension("png")
     setSelectedDownloadTarget("current")
@@ -1615,7 +1623,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     setActiveQrNodeId(nextNodeId)
     applyDraftingQrStateToControls(sourceState)
     setSelectedCardState(cloneDraftingCardState(selectedCardState))
-    setSelectedLayerId(getDraftingQrLayerId(nextNodeId))
+    selectSingleLayer(getDraftingQrLayerId(nextNodeId))
   }
 
   function handleRemoveQrCode(paneId: string) {
@@ -1646,16 +1654,31 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       const fallbackCardState = cardStateByNodeId[fallbackId] ?? createDefaultDraftingCardState()
       applyDraftingQrStateToControls(fallbackState)
       setSelectedCardState(cloneDraftingCardState(fallbackCardState))
-      setSelectedLayerId(getDraftingQrLayerId(fallbackId))
+      selectSingleLayer(getDraftingQrLayerId(fallbackId))
     }
   }
 
-  function handleLayerSelect(paneId: string, layerId: string | null) {
+  function handleLayerSelect(
+    paneId: string,
+    layerId: string | null,
+    options?: { additive?: boolean },
+  ) {
     if (paneId !== activeQrNodeId) {
       handlePaneSelection(paneId)
     }
 
-    setSelectedLayerId(layerId)
+    if (options?.additive && paneId === activeQrNodeId && layerId !== null) {
+      setSelectedLayerIds((current) => {
+        const next = current.includes(layerId)
+          ? current.filter((id) => id !== layerId)
+          : [...current, layerId]
+
+        setSelectedLayerId(next.at(-1) ?? null)
+        return next
+      })
+    } else {
+      selectSingleLayer(layerId)
+    }
 
     if (layerId === null) {
       return
@@ -2874,6 +2897,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
               onUndo={handleUndoDraftingWorkspace}
               panes={panes}
               selectedLayerId={selectedLayerId}
+              selectedLayerIds={selectedLayerIds}
             />
           </div>
         </section>

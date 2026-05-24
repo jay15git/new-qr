@@ -77,8 +77,13 @@ type DraftingPaneWorkspaceProps = {
     layerId: string,
     patch: Partial<DraftingCanvasLayer>,
   ) => void
-  onLayerSelect?: (paneId: string, layerId: string | null) => void
+  onLayerSelect?: (
+    paneId: string,
+    layerId: string | null,
+    options?: { additive?: boolean },
+  ) => void
   selectedLayerId?: string | null
+  selectedLayerIds?: string[]
 }
 
 function groupPanes<T>(panes: T[], groups: number[]) {
@@ -154,6 +159,7 @@ function DraftingPaneSurface({
   panePan,
   paneZoom,
   selectedLayerId,
+  selectedLayerIds,
   snapEnabled,
 }: {
   areaName?: string
@@ -175,11 +181,16 @@ function DraftingPaneSurface({
     layerId: string,
     patch: Partial<DraftingCanvasLayer>,
   ) => void
-  onLayerSelect?: (paneId: string, layerId: string | null) => void
+  onLayerSelect?: (
+    paneId: string,
+    layerId: string | null,
+    options?: { additive?: boolean },
+  ) => void
   pane: DraftingPane
   panePan: { x: number; y: number }
   paneZoom: number
   selectedLayerId?: string | null
+  selectedLayerIds?: string[]
   snapEnabled: boolean
 }) {
   const onPaneSelectRef = useRef(onPaneSelect)
@@ -370,10 +381,11 @@ function DraftingPaneSurface({
           state={pane.state}
           isSelected={isSelected}
           onLayerChange={(layerId, patch) => onLayerChange?.(pane.id, layerId, patch)}
-          onLayerSelect={(layerId) => onLayerSelect?.(pane.id, layerId)}
+          onLayerSelect={(layerId, options) => onLayerSelect?.(pane.id, layerId, options)}
           onQrClick={handleQrClick}
           onSelect={handleSelect}
           selectedLayerId={isSelected ? selectedLayerId : null}
+          selectedLayerIds={isSelected ? selectedLayerIds : undefined}
         />
       </div>
     </div>
@@ -397,6 +409,7 @@ export function DraftingPaneWorkspace({
   onLayerChange,
   onLayerSelect,
   selectedLayerId,
+  selectedLayerIds,
 }: DraftingPaneWorkspaceProps) {
   const [zoomLevels, setZoomLevels] = useState<Record<string, number>>({})
   const [panOffsets, setPanOffsets] = useState<DraftingPanePanOffsets>({})
@@ -647,6 +660,7 @@ export function DraftingPaneWorkspace({
                                 panePan={panePan}
                                 paneZoom={paneZoom}
                                 selectedLayerId={selectedLayerId}
+                                selectedLayerIds={selectedLayerIds}
                                 snapEnabled={snapEnabled}
                               />
                             </ResizablePanel>

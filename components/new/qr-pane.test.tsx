@@ -20,6 +20,7 @@ import {
 import {
   createDefaultDraftingLayers,
   getDraftingCardLayerId,
+  getDraftingQrLayerId,
   type DraftingCanvasLayer,
 } from "@/components/new/drafting-layer-state"
 import {
@@ -936,6 +937,301 @@ describe("QrPane", () => {
     expect(node).not.toBeNull()
     expect(node?.className).not.toContain("shadow-[0_10px_24px_-12px_rgba(15,23,42,0.26)]")
   })
+
+  it("passes modifier-click layer selection intent to the parent", async () => {
+    const onLayerSelect = vi.fn()
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      onLayerSelect,
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const card = container.querySelector('[data-slot="dashboard-compose-card"]') as HTMLElement
+
+    act(() => {
+      card.dispatchEvent(new MouseEvent("click", { bubbles: true, metaKey: true }))
+    })
+
+    expect(onLayerSelect).toHaveBeenLastCalledWith(getDraftingCardLayerId("preview"), {
+      additive: true,
+    })
+  })
+
+  it("renders padded resize and rotate controls around multiple selected layers", async () => {
+    const selectedLayerIds = [getDraftingCardLayerId("preview"), getDraftingQrLayerId("preview")]
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      selectedLayerIds,
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    expect(container.querySelectorAll('[data-layer-id][data-selected="true"]')).toHaveLength(2)
+    expect(container.querySelector('[data-slot="drafting-layer-resize-frame"]')).toBeNull()
+    const multiFrame = container.querySelector(
+      '[data-slot="drafting-layer-multi-select-frame"]',
+    ) as HTMLElement
+    const rotateHandle = container.querySelector('[data-slot="drafting-layer-rotate-handle"]')
+
+    expect(multiFrame).not.toBeNull()
+    expect(multiFrame.style.width).toBe("392px")
+    expect(multiFrame.style.height).toBe("520px")
+    expect(multiFrame.style.transform).toBe("translate3d(-196px, -260px, 0)")
+    expect(container.querySelectorAll('[data-slot="drafting-layer-resize-handle"]')).toHaveLength(8)
+    expect(rotateHandle).not.toBeNull()
+    expect(container.innerHTML).toContain('aria-label="Rotate selection"')
+  })
+
+  it("resizes every selected layer from the combined resize handles", async () => {
+    const onLayerChange = vi.fn()
+    const layers: DraftingCanvasLayer[] = [
+      createLayer({ height: 100, id: "preview:card", kind: "card", width: 100, x: -100, y: -50, zIndex: 0 }),
+      createLayer({ height: 100, id: "preview:qr", kind: "qr", width: 100, x: 50, y: -50, zIndex: 1 }),
+    ]
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers,
+      onLayerChange,
+      selectedLayerIds: ["preview:card", "preview:qr"],
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const handle = container.querySelector(
+      '[data-slot="drafting-layer-resize-handle"][data-resize-direction="e"]',
+    ) as HTMLButtonElement
+
+    act(() => {
+      handle.dispatchEvent(createPointerEvent("pointerdown", 100, 100))
+      handle.dispatchEvent(createPointerEvent("pointermove", 150, 100))
+    })
+
+    expect(onLayerChange).toHaveBeenCalledWith("preview:card", {
+      height: 100,
+      width: 120,
+      x: -100,
+      y: -50,
+    })
+    expect(onLayerChange).toHaveBeenCalledWith("preview:qr", {
+      height: 100,
+      width: 120,
+      x: 80,
+      y: -50,
+    })
+  })
+
+  it("rotates every selected layer around the combined selector center", async () => {
+    const onLayerChange = vi.fn()
+    const layers: DraftingCanvasLayer[] = [
+      createLayer({ height: 100, id: "preview:card", kind: "card", width: 100, x: -100, y: -50, zIndex: 0 }),
+      createLayer({ height: 100, id: "preview:qr", kind: "qr", width: 100, x: 50, y: -50, zIndex: 1 }),
+    ]
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers,
+      onLayerChange,
+      selectedLayerIds: ["preview:card", "preview:qr"],
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const frame = container.querySelector(
+      '[data-slot="drafting-layer-multi-select-frame"]',
+    ) as HTMLElement
+    const rotateHandle = container.querySelector(
+      '[data-slot="drafting-layer-rotate-handle"]',
+    ) as HTMLButtonElement
+
+    frame.getBoundingClientRect = () => ({
+      bottom: 162,
+      height: 124,
+      left: 88,
+      right: 362,
+      top: 38,
+      width: 274,
+      x: 88,
+      y: 38,
+      toJSON: () => ({}),
+    })
+
+    act(() => {
+      rotateHandle.dispatchEvent(createPointerEvent("pointerdown", 225, 50))
+      rotateHandle.dispatchEvent(createPointerEvent("pointermove", 337, 100))
+    })
+
+    expect(onLayerChange).toHaveBeenCalledWith("preview:card", {
+      rotation: 90,
+      x: -25,
+      y: -125,
+    })
+    expect(onLayerChange).toHaveBeenCalledWith("preview:qr", {
+      rotation: 90,
+      x: -25,
+      y: 25,
+    })
+  })
+
+  it("rotates the combined selector while a multi-layer rotation is active", async () => {
+    const onLayerChange = vi.fn()
+    const layers: DraftingCanvasLayer[] = [
+      createLayer({ height: 100, id: "preview:card", kind: "card", width: 100, x: -100, y: -50, zIndex: 0 }),
+      createLayer({ height: 100, id: "preview:qr", kind: "qr", width: 100, x: 50, y: -50, zIndex: 1 }),
+    ]
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers,
+      onLayerChange,
+      selectedLayerIds: ["preview:card", "preview:qr"],
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const frame = container.querySelector(
+      '[data-slot="drafting-layer-multi-select-frame"]',
+    ) as HTMLElement
+    const rotateHandle = container.querySelector(
+      '[data-slot="drafting-layer-rotate-handle"]',
+    ) as HTMLButtonElement
+
+    frame.getBoundingClientRect = () => ({
+      bottom: 162,
+      height: 124,
+      left: 88,
+      right: 362,
+      top: 38,
+      width: 274,
+      x: 88,
+      y: 38,
+      toJSON: () => ({}),
+    })
+
+    act(() => {
+      rotateHandle.dispatchEvent(createPointerEvent("pointerdown", 225, 50))
+      rotateHandle.dispatchEvent(createPointerEvent("pointermove", 337, 100))
+    })
+
+    expect(frame.style.transform).toBe("translate3d(-112px, -62px, 0) rotate(90deg)")
+    expect(container.querySelector('[data-slot="drafting-layer-rotation-value"]')?.textContent).toBe(
+      "90°",
+    )
+  })
+
+  it("keeps the combined selector size fixed during multi-layer rotation", async () => {
+    const onLayerChange = vi.fn()
+    const layers: DraftingCanvasLayer[] = [
+      createLayer({ height: 100, id: "preview:card", kind: "card", width: 100, x: -100, y: -50, zIndex: 0 }),
+      createLayer({ height: 100, id: "preview:qr", kind: "qr", width: 100, x: 50, y: -50, zIndex: 1 }),
+    ]
+    const { container, reactRoot } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers,
+      onLayerChange,
+      selectedLayerIds: ["preview:card", "preview:qr"],
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const frame = container.querySelector(
+      '[data-slot="drafting-layer-multi-select-frame"]',
+    ) as HTMLElement
+    const rotateHandle = container.querySelector(
+      '[data-slot="drafting-layer-rotate-handle"]',
+    ) as HTMLButtonElement
+
+    frame.getBoundingClientRect = () => ({
+      bottom: 162,
+      height: 124,
+      left: 88,
+      right: 362,
+      top: 38,
+      width: 274,
+      x: 88,
+      y: 38,
+      toJSON: () => ({}),
+    })
+
+    act(() => {
+      rotateHandle.dispatchEvent(createPointerEvent("pointerdown", 225, 50))
+      rotateHandle.dispatchEvent(createPointerEvent("pointermove", 337, 100))
+    })
+
+    act(() => {
+      reactRoot.render(
+        <QrPane
+          cardState={createDefaultDraftingCardState()}
+          layers={[
+            createLayer({ height: 100, id: "preview:card", kind: "card", rotation: 90, width: 100, x: -25, y: -125, zIndex: 0 }),
+            createLayer({ height: 100, id: "preview:qr", kind: "qr", rotation: 90, width: 100, x: -25, y: 25, zIndex: 1 }),
+          ]}
+          state={createDefaultQrStudioState()}
+          isSelected={true}
+          onLayerChange={onLayerChange}
+          onQrClick={() => undefined}
+          onSelect={() => undefined}
+          selectedLayerIds={["preview:card", "preview:qr"]}
+        />,
+      )
+    })
+
+    const activeFrame = container.querySelector(
+      '[data-slot="drafting-layer-multi-select-frame"]',
+    ) as HTMLElement
+
+    expect(activeFrame.style.width).toBe("274px")
+    expect(activeFrame.style.height).toBe("124px")
+    expect(activeFrame.style.transform).toBe("translate3d(-112px, -62px, 0) rotate(90deg)")
+  })
+
+  it("moves every selected layer without collapsing the combined selector", async () => {
+    const onLayerChange = vi.fn()
+    const onLayerSelect = vi.fn()
+    const layers: DraftingCanvasLayer[] = [
+      createLayer({ height: 100, id: "preview:card", kind: "card", width: 100, x: -100, y: -50, zIndex: 0 }),
+      createLayer({ height: 100, id: "preview:qr", kind: "qr", width: 100, x: 50, y: -50, zIndex: 1 }),
+    ]
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers,
+      onLayerChange,
+      onLayerSelect,
+      selectedLayerIds: ["preview:card", "preview:qr"],
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const qrLayer = container.querySelector('[data-layer-id="preview:qr"]') as HTMLElement
+
+    act(() => {
+      qrLayer.dispatchEvent(createPointerEvent("pointerdown", 0, 0))
+      qrLayer.dispatchEvent(createPointerEvent("pointermove", 20, 30))
+    })
+
+    expect(onLayerSelect).not.toHaveBeenCalledWith("preview:qr")
+    expect(onLayerChange).toHaveBeenCalledWith("preview:card", {
+      x: -80,
+      y: -20,
+    })
+    expect(onLayerChange).toHaveBeenCalledWith("preview:qr", {
+      x: 70,
+      y: -20,
+    })
+    expect(container.querySelector('[data-slot="drafting-layer-multi-select-frame"]')).not.toBeNull()
+  })
 })
 
 function renderPane(
@@ -945,8 +1241,9 @@ function renderPane(
   props: {
     layers?: DraftingCanvasLayer[]
     onLayerChange?: (layerId: string, patch: Partial<DraftingCanvasLayer>) => void
-    onLayerSelect?: (layerId: string | null) => void
+    onLayerSelect?: (layerId: string | null, options?: { additive?: boolean }) => void
     selectedLayerId?: string | null
+    selectedLayerIds?: string[]
     snapEnabled?: boolean
   } = {},
 ) {
@@ -965,6 +1262,7 @@ function renderPane(
         onQrClick={() => undefined}
         onSelect={() => undefined}
         selectedLayerId={props.selectedLayerId}
+        selectedLayerIds={props.selectedLayerIds}
         snapEnabled={props.snapEnabled}
       />,
     )

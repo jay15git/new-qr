@@ -37,10 +37,11 @@ type QrPaneProps = {
   isSelected: boolean
   layers?: DraftingCanvasLayer[]
   onLayerChange?: (layerId: string, patch: Partial<DraftingCanvasLayer>) => void
-  onLayerSelect?: (layerId: string | null) => void
+  onLayerSelect?: (layerId: string | null, options?: { additive?: boolean }) => void
   onSelect: () => void
   onQrClick: () => void
   selectedLayerId?: string | null
+  selectedLayerIds?: string[]
   snapEnabled?: boolean
   state: QrStudioState
 }
@@ -228,6 +229,45 @@ function normalizeLayerRotation(rotation: number) {
 
 function getLayerRotationLabel(rotation: number) {
   return Math.round(normalizeLayerRotation(rotation)) % 360
+}
+
+function getCombinedLayerBounds(layers: DraftingCanvasLayer[]) {
+  if (layers.length === 0) {
+    return null
+  }
+
+  const left = Math.min(...layers.map((layer) => layer.x))
+  const top = Math.min(...layers.map((layer) => layer.y))
+  const right = Math.max(...layers.map((layer) => layer.x + layer.width))
+  const bottom = Math.max(...layers.map((layer) => layer.y + layer.height))
+
+  return {
+    height: bottom - top,
+    width: right - left,
+    x: left,
+    y: top,
+  }
+}
+
+function rotatePoint(
+  point: { x: number; y: number },
+  center: { x: number; y: number },
+  degrees: number,
+) {
+  const radians = (degrees * Math.PI) / 180
+  const cos = Math.cos(radians)
+  const sin = Math.sin(radians)
+  const dx = point.x - center.x
+  const dy = point.y - center.y
+
+  return {
+    x: center.x + dx * cos - dy * sin,
+    y: center.y + dx * sin + dy * cos,
+  }
+}
+
+function roundLayerNumber(value: number) {
+  return Math.round(value * 1000) / 1000
 }
 
 function snapLayerMove({
@@ -499,11 +539,16 @@ export const QrPane = memo(function QrPane({
   onSelect,
   onQrClick,
   selectedLayerId,
+  selectedLayerIds,
 }: QrPaneProps) {
   const [markup, setMarkup] = useState<string | null>(null)
   const [hasError, setHasError] = useState(false)
   const [rotatingLayerId, setRotatingLayerId] = useState<string | null>(null)
   const [rotationPreviewDegrees, setRotationPreviewDegrees] = useState<number | null>(null)
+  const [multiSelectionPreview, setMultiSelectionPreview] = useState<{
+    bounds: Pick<DraftingCanvasLayer, "height" | "width" | "x" | "y">
+    rotation: number
+  } | null>(null)
   const [snapGuides, setSnapGuides] = useState<SnapGuides>({
     horizontal: [],
     vertical: [],
@@ -511,6 +556,9 @@ export const QrPane = memo(function QrPane({
   const interactionRef = useRef<{
     centerClientX?: number
     centerClientY?: number
+    groupBounds?: Pick<DraftingCanvasLayer, "height" | "width" | "x" | "y">
+    groupCenter?: { x: number; y: number }
+    layers?: DraftingCanvasLayer[]
     layer: DraftingCanvasLayer
     mode: "move" | "resize" | "rotate"
     pointerId: number
@@ -571,6 +619,10 @@ export const QrPane = memo(function QrPane({
   const visibleLayers = resolvedLayers
     .filter((layer) => layer.isVisible)
     .sort((a, b) => a.zIndex - b.zIndex)
+  const activeSelectedLayerIds = selectedLayerIds ?? (selectedLayerId ? [selectedLayerId] : [])
+  const activeSelectedLayerIdSet = new Set(activeSelectedLayerIds)
+  const selectedVisibleLayers = visibleLayers.filter((layer) => activeSelectedLayerIdSet.has(layer.id))
+  const combinedLayerBounds = getCombinedLayerBounds(selectedVisibleLayers)
   const isPaperShaderMode = cardState.styleMode === "paper-shader"
   const isImageMode = cardState.styleMode === "image"
   const isImageFilterMode = cardState.styleMode === "image-filter"
@@ -608,7 +660,20 @@ export const QrPane = memo(function QrPane({
     mode: "move" | "resize" | "rotate",
     resizeDirection?: ResizeDirection,
   ) {
+    if (event.metaKey || event.ctrlKey) {
+      return
+    }
+
     if (layer.isLocked || !onLayerChange) {
+      return
+    }
+
+    if (
+      mode === "move" &&
+      activeSelectedLayerIds.length > 1 &&
+      activeSelectedLayerIdSet.has(layer.id)
+    ) {
+      startMultiLayerInteraction(event, "move")
       return
     }
 
@@ -645,6 +710,61 @@ export const QrPane = memo(function QrPane({
     onLayerSelect?.(layer.id)
   }
 
+  function startMultiLayerInteraction(
+    event: PointerEvent<HTMLElement>,
+    mode: "move" | "resize" | "rotate",
+    resizeDirection?: ResizeDirection,
+  ) {
+    if (!combinedLayerBounds || selectedVisibleLayers.length < 2 || !onLayerChange) {
+      return
+    }
+
+    event.stopPropagation()
+    event.preventDefault()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    const frameElement =
+      event.currentTarget.closest<HTMLElement>("[data-slot='drafting-layer-multi-select-frame']") ??
+      event.currentTarget
+        .closest<HTMLElement>("[data-slot='dashboard-compose-canvas']")
+        ?.querySelector<HTMLElement>("[data-slot='drafting-layer-multi-select-frame']")
+    const frameRect = frameElement?.getBoundingClientRect()
+    const centerClientX = frameRect ? frameRect.left + frameRect.width / 2 : event.clientX
+    const centerClientY = frameRect ? frameRect.top + frameRect.height / 2 : event.clientY
+
+    interactionRef.current = {
+      centerClientX,
+      centerClientY,
+      groupBounds: combinedLayerBounds,
+      groupCenter: {
+        x: combinedLayerBounds.x + combinedLayerBounds.width / 2,
+        y: combinedLayerBounds.y + combinedLayerBounds.height / 2,
+      },
+      layer: selectedVisibleLayers[0],
+      layers: selectedVisibleLayers,
+      mode,
+      pointerId: event.pointerId,
+      resizeDirection,
+      startAngle:
+        (Math.atan2(event.clientY - centerClientY, event.clientX - centerClientX) * 180) /
+        Math.PI,
+      startRotation: 0,
+      startX: event.clientX,
+      startY: event.clientY,
+    }
+    if (mode === "rotate") {
+      if (rotationLabelTimeoutRef.current !== null) {
+        window.clearTimeout(rotationLabelTimeoutRef.current)
+        rotationLabelTimeoutRef.current = null
+      }
+      setRotatingLayerId("selection")
+      setRotationPreviewDegrees(0)
+      setMultiSelectionPreview({
+        bounds: combinedLayerBounds,
+        rotation: 0,
+      })
+    }
+  }
+
   function updateLayerInteraction(event: PointerEvent<HTMLElement>) {
     const interaction = interactionRef.current
 
@@ -658,6 +778,85 @@ export const QrPane = memo(function QrPane({
     const deltaX = (event.clientX - interaction.startX) / scale
     const deltaY = (event.clientY - interaction.startY) / scale
     const layer = interaction.layer
+
+    if (interaction.layers && interaction.groupBounds && interaction.groupCenter) {
+      if (interaction.mode === "move") {
+        for (const selectedLayer of interaction.layers) {
+          onLayerChange?.(selectedLayer.id, {
+            x: roundLayerNumber(selectedLayer.x + deltaX),
+            y: roundLayerNumber(selectedLayer.y + deltaY),
+          })
+        }
+        return
+      }
+
+      if (interaction.mode === "rotate") {
+        const centerClientX = interaction.centerClientX ?? event.clientX
+        const centerClientY = interaction.centerClientY ?? event.clientY
+        const angle =
+          (Math.atan2(event.clientY - centerClientY, event.clientX - centerClientX) * 180) /
+          Math.PI
+        const freeRotation = normalizeLayerRotation(angle - (interaction.startAngle ?? angle))
+        const rotation = snapEnabled ? snapLayerRotation(freeRotation) : freeRotation
+
+        setRotationPreviewDegrees(getLayerRotationLabel(rotation))
+        setMultiSelectionPreview((current) =>
+          current ? { ...current, rotation: getLayerRotationLabel(rotation) } : current,
+        )
+        setSnapGuides({
+          horizontal: [],
+          vertical: snapEnabled && rotation !== freeRotation ? [0] : [],
+        })
+
+        for (const selectedLayer of interaction.layers) {
+          const center = {
+            x: selectedLayer.x + selectedLayer.width / 2,
+            y: selectedLayer.y + selectedLayer.height / 2,
+          }
+          const nextCenter = rotatePoint(center, interaction.groupCenter, rotation)
+          onLayerChange?.(selectedLayer.id, {
+            rotation: normalizeLayerRotation(selectedLayer.rotation + rotation),
+            x: roundLayerNumber(nextCenter.x - selectedLayer.width / 2),
+            y: roundLayerNumber(nextCenter.y - selectedLayer.height / 2),
+          })
+        }
+        return
+      }
+
+      if (interaction.mode === "resize") {
+        const nextBounds = resizeDraftingLayer(
+          {
+            ...interaction.groupBounds,
+            blur: 0,
+            id: "selection",
+            isLocked: false,
+            isVisible: true,
+            kind: "card",
+            name: "Selection",
+            nodeId: "selection",
+            opacity: 1,
+            rotation: 0,
+            shadow: { blur: 0, color: "#000000", offsetX: 0, offsetY: 0, opacity: 0 },
+            zIndex: 0,
+          },
+          interaction.resizeDirection ?? "se",
+          deltaX,
+          deltaY,
+        )
+        const scaleX = interaction.groupBounds.width > 0 ? nextBounds.width / interaction.groupBounds.width : 1
+        const scaleY = interaction.groupBounds.height > 0 ? nextBounds.height / interaction.groupBounds.height : 1
+
+        for (const selectedLayer of interaction.layers) {
+          onLayerChange?.(selectedLayer.id, {
+            height: roundLayerNumber(selectedLayer.height * scaleY),
+            width: roundLayerNumber(selectedLayer.width * scaleX),
+            x: roundLayerNumber(nextBounds.x + (selectedLayer.x - interaction.groupBounds.x) * scaleX),
+            y: roundLayerNumber(nextBounds.y + (selectedLayer.y - interaction.groupBounds.y) * scaleY),
+          })
+        }
+        return
+      }
+    }
 
     if (interaction.mode === "rotate") {
       const centerClientX = interaction.centerClientX ?? event.clientX
@@ -726,6 +925,7 @@ export const QrPane = memo(function QrPane({
         rotationLabelTimeoutRef.current = window.setTimeout(() => {
           setRotatingLayerId(null)
           setRotationPreviewDegrees(null)
+          setMultiSelectionPreview(null)
           rotationLabelTimeoutRef.current = null
         }, ROTATION_LABEL_HIDE_DELAY_MS)
       }
@@ -747,7 +947,7 @@ export const QrPane = memo(function QrPane({
   }
 
   function renderLayerControls(layer: DraftingCanvasLayer) {
-    if (layer.isLocked || selectedLayerId !== layer.id) {
+    if (activeSelectedLayerIds.length !== 1 || layer.isLocked || !activeSelectedLayerIdSet.has(layer.id)) {
       return null
     }
 
@@ -824,8 +1024,88 @@ export const QrPane = memo(function QrPane({
     )
   }
 
+  function createMultiLayerControls() {
+    const bounds = multiSelectionPreview?.bounds ?? combinedLayerBounds
+
+    if (activeSelectedLayerIds.length < 2 || !bounds) {
+      return null
+    }
+
+    const controlHeight = bounds.height + RESIZE_CONTROL_PADDING_PX * 2
+    const controlWidth = bounds.width + RESIZE_CONTROL_PADDING_PX * 2
+    const isRotating = rotatingLayerId === "selection"
+    const rotationDegrees = multiSelectionPreview?.rotation ?? rotationPreviewDegrees ?? 0
+    const rotationTransform = isRotating ? ` rotate(${rotationDegrees}deg)` : ""
+
+    return (
+      <div
+        className="pointer-events-none absolute left-1/2 top-1/2 touch-none border border-[var(--drafting-ink)]"
+        data-layer-ids={activeSelectedLayerIds.join(" ")}
+        data-slot="drafting-layer-multi-select-frame"
+        style={{
+          height: controlHeight,
+          transform: `translate3d(${bounds.x - RESIZE_CONTROL_PADDING_PX}px, ${bounds.y - RESIZE_CONTROL_PADDING_PX}px, 0)${rotationTransform}`,
+          transformOrigin: "center center",
+          width: controlWidth,
+          zIndex: 50,
+        }}
+      >
+        <div
+          className="pointer-events-none absolute left-1/2 top-0 w-px -translate-x-1/2 -translate-y-full bg-[var(--drafting-ink)]"
+          style={{ height: ROTATE_HANDLE_OFFSET_PX }}
+        />
+        {isRotating ? (
+          <div
+            className="pointer-events-none absolute left-1/2 top-0 rounded-[4px] border border-[var(--drafting-line-hover)] bg-[var(--drafting-panel-bg-active)] px-2 py-0.5 text-[0.68rem] font-semibold text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)]"
+            data-slot="drafting-layer-rotation-value"
+            style={{
+              transform: `translate(-50%, calc(-${ROTATE_HANDLE_OFFSET_PX}px - ${ROTATE_HANDLE_RADIUS_PX}px - ${ROTATE_LABEL_GAP_PX}px - 100%))`,
+            }}
+          >
+            {rotationDegrees}°
+          </div>
+        ) : null}
+        <button
+          aria-label="Rotate selection"
+          className="pointer-events-auto absolute left-1/2 top-0 z-30 flex size-5 items-center justify-center rounded-full border border-[#a8b0bb] bg-white text-[#111827] shadow-[var(--drafting-shadow-rest)]"
+          data-slot="drafting-layer-rotate-handle"
+          onClick={(event) => event.stopPropagation()}
+          onPointerCancel={endLayerInteraction}
+          onPointerDown={(event) => startMultiLayerInteraction(event, "rotate")}
+          onPointerMove={updateLayerInteraction}
+          onPointerUp={endLayerInteraction}
+          style={{
+            transform: `translate(-50%, calc(-${ROTATE_HANDLE_OFFSET_PX}px - 50%))`,
+          }}
+          type="button"
+        >
+          <RotateCwIcon aria-hidden="true" className="size-3" strokeWidth={2.2} />
+        </button>
+        {RESIZE_HANDLES.map((handle) => (
+          <button
+            aria-label={`Resize selection from ${handle.label}`}
+            className={cn(
+              "pointer-events-auto absolute z-30 size-3 rounded-full border border-[#a8b0bb] bg-white shadow-[var(--drafting-shadow-rest)]",
+              handle.className,
+              handle.cursorClassName,
+            )}
+            data-resize-direction={handle.direction}
+            data-slot="drafting-layer-resize-handle"
+            key={handle.direction}
+            onClick={(event) => event.stopPropagation()}
+            onPointerCancel={endLayerInteraction}
+            onPointerDown={(event) => startMultiLayerInteraction(event, "resize", handle.direction)}
+            onPointerMove={updateLayerInteraction}
+            onPointerUp={endLayerInteraction}
+            type="button"
+          />
+        ))}
+      </div>
+    )
+  }
+
   function renderLayer(layer: DraftingCanvasLayer) {
-    const isLayerSelected = selectedLayerId === layer.id
+    const isLayerSelected = activeSelectedLayerIdSet.has(layer.id)
 
     if (layer.kind === "qr") {
       const qrMarkup = markup ? applyDraftingQrForegroundShadow(markup, layer) : ""
@@ -847,7 +1127,7 @@ export const QrPane = memo(function QrPane({
           }}
           onClick={(event) => {
             event.stopPropagation()
-            onLayerSelect?.(layer.id)
+            onLayerSelect?.(layer.id, { additive: event.metaKey || event.ctrlKey })
             onQrClick()
           }}
           onPointerDown={(event) => startLayerInteraction(event, layer, "move")}
@@ -897,7 +1177,7 @@ export const QrPane = memo(function QrPane({
         }}
         onClick={(event) => {
           event.stopPropagation()
-          onLayerSelect?.(layer.id)
+          onLayerSelect?.(layer.id, { additive: event.metaKey || event.ctrlKey })
         }}
         onPointerDown={(event) => startLayerInteraction(event, layer, "move")}
         onPointerMove={updateLayerInteraction}
@@ -955,9 +1235,10 @@ export const QrPane = memo(function QrPane({
           <>
             <SnapGuideOverlay guides={snapGuides} />
             {visibleLayers.map(renderLayer)}
-            {selectedLayerId
+            {activeSelectedLayerIds.length > 0
               ? visibleLayers.map((layer) => renderLayerControls(layer))
               : null}
+            {createMultiLayerControls()}
           </>
         ) : (
           <div className="grid h-full place-items-center text-sm font-medium text-[var(--drafting-ink-muted)]">
@@ -975,5 +1256,6 @@ export const QrPane = memo(function QrPane({
   previousProps.interactionScale === nextProps.interactionScale &&
   previousProps.layers === nextProps.layers &&
   previousProps.selectedLayerId === nextProps.selectedLayerId &&
+  previousProps.selectedLayerIds === nextProps.selectedLayerIds &&
   previousProps.snapEnabled === nextProps.snapEnabled,
 )

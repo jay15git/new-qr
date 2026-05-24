@@ -89,8 +89,6 @@ import {
   QR_DOT_MATRIX_ANIMATION_SPEED_MAX,
   QR_DOT_MATRIX_ANIMATION_SPEED_MIN,
   QR_DOT_MATRIX_COLOR_PRESET_OPTIONS,
-  QR_DOT_MATRIX_HALO_MAX,
-  QR_DOT_MATRIX_HALO_MIN,
   QR_DOT_MATRIX_OPACITY_MAX,
   QR_DOT_MATRIX_OPACITY_MIN,
   QR_DOT_MATRIX_OVERLAY_SCALE_MAX,
@@ -926,8 +924,6 @@ export function DraftingLoaderPlaygroundTab({
   dataSlot?: string
   onAnimationChange: (patch: QrDotMatrixAnimationPatch) => void
 }) {
-  const [previewZoom, setPreviewZoom] = useState(3.65)
-
   return (
     <div data-slot={dataSlot} className="min-w-0 space-y-3">
       <DraftingToggleField
@@ -1077,43 +1073,7 @@ export function DraftingLoaderPlaygroundTab({
           label="Animated"
           onCheckedChange={(animated) => onAnimationChange({ animated })}
         />
-        <DraftingToggleField
-          checked={animation.hoverAnimated}
-          dataSlot="drafting-dot-matrix-hover-animated"
-          description="Pauses motion until the QR is hovered."
-          id="drafting-dot-matrix-hover-animated"
-          label="Hover animated"
-          onCheckedChange={(hoverAnimated) => onAnimationChange({ hoverAnimated })}
-        />
-        <DraftingToggleField
-          checked={animation.muted}
-          dataSlot="drafting-dot-matrix-muted"
-          description="Softens the overlay against dense codes."
-          id="drafting-dot-matrix-muted"
-          label="Muted"
-          onCheckedChange={(muted) => onAnimationChange({ muted })}
-        />
-        <DraftingToggleField
-          checked={animation.bloom}
-          dataSlot="drafting-dot-matrix-bloom"
-          description="Adds a brighter SVG glow around active modules."
-          id="drafting-dot-matrix-bloom"
-          label="Bloom"
-          onCheckedChange={(bloom) => onAnimationChange({ bloom })}
-        />
       </section>
-
-      <DraftingSliderField
-        dataSlot="drafting-dot-matrix-halo-slider"
-        formatValue={(value) => value.toFixed(2)}
-        id="drafting-dot-matrix-halo"
-        label="Halo"
-        max={QR_DOT_MATRIX_HALO_MAX}
-        min={QR_DOT_MATRIX_HALO_MIN}
-        step={0.01}
-        value={animation.halo}
-        onChange={(halo) => onAnimationChange({ halo })}
-      />
 
       <section className="min-w-0 space-y-3 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 shadow-[var(--drafting-shadow-rest)]">
         <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
@@ -1151,23 +1111,6 @@ export function DraftingLoaderPlaygroundTab({
           step={0.01}
           value={animation.opacityPeak}
           onChange={(opacityPeak) => onAnimationChange({ opacityPeak })}
-        />
-      </section>
-
-      <section className="min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 shadow-[var(--drafting-shadow-rest)]">
-        <p className="drafting-type-control-label mb-3 font-semibold text-[var(--drafting-ink)]">
-          Preview
-        </p>
-        <DraftingSliderField
-          dataSlot="drafting-dot-matrix-preview-zoom-slider"
-          formatValue={(value) => value.toFixed(2)}
-          id="drafting-dot-matrix-preview-zoom"
-          label="Zoom"
-          max={5}
-          min={1}
-          step={0.05}
-          value={previewZoom}
-          onChange={setPreviewZoom}
         />
       </section>
 

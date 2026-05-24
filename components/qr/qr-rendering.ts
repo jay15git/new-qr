@@ -201,9 +201,6 @@ export function createDotMatrixAnimationExtension(
         "qr-dot-matrix-layer",
         `qr-dot-loader-${state.dotMatrixAnimation.loader}`,
         `qr-dot-pattern-${state.dotMatrixAnimation.pattern}`,
-        state.dotMatrixAnimation.bloom ? "qr-dot-matrix-bloom" : "",
-        state.dotMatrixAnimation.hoverAnimated ? "qr-dot-matrix-hover" : "",
-        state.dotMatrixAnimation.muted ? "qr-dot-matrix-muted" : "",
       ].filter(Boolean).join(" "),
     )
     group.setAttribute("data-qr-dot-loader", state.dotMatrixAnimation.loader)
@@ -216,7 +213,6 @@ export function createDotMatrixAnimationExtension(
       [
         `--qr-dot-matrix-color:${animationColor}`,
         `--qr-dot-matrix-duration:${getDotMatrixAnimationDuration(state.dotMatrixAnimation)}s`,
-        `--qr-dot-matrix-halo:${formatSvgNumber(state.dotMatrixAnimation.halo)}`,
         `--qr-dot-matrix-opacity-base:${formatSvgOpacity(getDotMatrixBaseOpacity(state.dotMatrixAnimation))}`,
         `--qr-dot-matrix-opacity-mid:${formatSvgOpacity(state.dotMatrixAnimation.opacityMid)}`,
         `--qr-dot-matrix-opacity-peak:${formatSvgOpacity(state.dotMatrixAnimation.opacityPeak)}`,
@@ -299,7 +295,7 @@ function shouldApplyDotMatrixAnimation(
     return false
   }
 
-  if (!state.dotMatrixAnimation.animated && !state.dotMatrixAnimation.hoverAnimated) {
+  if (!state.dotMatrixAnimation.animated) {
     return false
   }
 
@@ -1374,19 +1370,13 @@ function createDotMatrixAnimationStyle(document: Document, tracks: DotMatrixTrac
   animation-iteration-count: infinite;
   animation-name: var(--qr-dot-keyframes-name);
   animation-timing-function: var(--qr-dot-easing, ease-in-out);
-  filter: drop-shadow(0 0 calc(8px * var(--qr-dot-matrix-halo)) var(--qr-dot-matrix-color));
+  filter: drop-shadow(0 0 3px var(--qr-dot-matrix-color));
   opacity: var(--qr-dot-matrix-opacity-base);
 }
 .qr-dot-matrix-track-quiet {
   animation: none !important;
   opacity: var(--qr-dot-matrix-opacity-base);
   filter: none;
-}
-.qr-dot-matrix-bloom .qr-dot-matrix-track {
-  filter: drop-shadow(0 0 calc(4px + 10px * var(--qr-dot-matrix-halo)) var(--qr-dot-matrix-color));
-}
-.qr-dot-matrix-hover:not(:hover) .qr-dot-matrix-track {
-  animation-play-state: paused;
 }
 .qr-dot-matrix-track[data-qr-dot-upstream-class="dmx-diagonal-alt-sweep"] { animation-delay: calc((var(--dmx-path, 0) + var(--dmx-diagonal-parity, 0) * .08) * -1.5s); }
 .qr-dot-matrix-track[data-qr-dot-upstream-class="dmx-spiral-snake"] { animation-delay: calc(var(--dmx-spiral-order, 0) * -56ms); }

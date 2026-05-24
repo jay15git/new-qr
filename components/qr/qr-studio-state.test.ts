@@ -4,7 +4,6 @@ import {
   clampBackgroundShapeOffset,
   clampBackgroundShapeOpacity,
   clampBackgroundShapePaddingPx,
-  clampDotMatrixAnimationHalo,
   clampDotMatrixAnimationOpacity,
   clampDotMatrixAnimationOverlayScale,
   clampDotMatrixAnimationSpeed,
@@ -150,7 +149,6 @@ describe("qr studio state helpers", () => {
   it("clamps dot matrix animation updates to supported ranges", () => {
     const state = createDefaultQrStudioState();
     const lowAnimation = setDotMatrixAnimationOptions(state, {
-      halo: -1,
       opacityBase: -1,
       opacityMid: -2,
       opacityPeak: -3,
@@ -158,13 +156,10 @@ describe("qr studio state helpers", () => {
       speed: -1,
     });
     const highAnimation = setDotMatrixAnimationOptions(state, {
-      bloom: true,
       customColor: "#f4f4f5",
       enabled: true,
       exportAnimatedSvg: true,
-      halo: 8,
       loader: "honey-gate",
-      muted: true,
       opacityBase: 2,
       opacityMid: 3,
       opacityPeak: 4,
@@ -174,7 +169,6 @@ describe("qr studio state helpers", () => {
       speed: 12,
     });
 
-    expect(lowAnimation.dotMatrixAnimation.halo).toBe(0);
     expect(lowAnimation.dotMatrixAnimation.opacityBase).toBe(0);
     expect(lowAnimation.dotMatrixAnimation.opacityMid).toBe(0);
     expect(lowAnimation.dotMatrixAnimation.opacityPeak).toBe(0);
@@ -182,16 +176,12 @@ describe("qr studio state helpers", () => {
     expect(lowAnimation.dotMatrixAnimation.speed).toBe(1);
     expect(highAnimation.dotMatrixAnimation).toEqual({
       animated: true,
-      bloom: true,
       colorPreset: "theme",
       customColor: "#f4f4f5",
       dotShape: "diamond",
       enabled: true,
       exportAnimatedSvg: true,
-      halo: 1,
-      hoverAnimated: false,
       loader: "neon-drift",
-      muted: true,
       opacityBase: 1,
       opacityMid: 1,
       opacityPeak: 1,
@@ -199,7 +189,6 @@ describe("qr studio state helpers", () => {
       pattern: "rings",
       speed: 5,
     });
-    expect(clampDotMatrixAnimationHalo(Number.NaN)).toBe(DEFAULT_DOT_MATRIX_ANIMATION.halo);
     expect(clampDotMatrixAnimationOpacity(Number.NaN, DEFAULT_DOT_MATRIX_ANIMATION.opacityMid)).toBe(
       DEFAULT_DOT_MATRIX_ANIMATION.opacityMid,
     );
@@ -209,6 +198,28 @@ describe("qr studio state helpers", () => {
     expect(clampDotMatrixAnimationSpeed(Number.NaN)).toBe(
       DEFAULT_DOT_MATRIX_ANIMATION.speed,
     );
+  });
+
+  it("drops removed dot matrix animation options from legacy state", () => {
+    const state = createDefaultQrStudioState();
+    const legacyState = {
+      ...state,
+      dotMatrixAnimation: {
+        ...state.dotMatrixAnimation,
+        bloom: true,
+        halo: 1,
+        hoverAnimated: true,
+        muted: true,
+      },
+    } as typeof state;
+
+    const cleaned = setDotMatrixAnimationOptions(legacyState, {});
+    const animationRecord = cleaned.dotMatrixAnimation as Record<string, unknown>;
+
+    expect(animationRecord.bloom).toBeUndefined();
+    expect(animationRecord.halo).toBeUndefined();
+    expect(animationRecord.hoverAnimated).toBeUndefined();
+    expect(animationRecord.muted).toBeUndefined();
   });
 
   it("keeps loader color controls independent and persists opacity anchors", () => {

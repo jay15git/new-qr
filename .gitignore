@@ -44,3 +44,8 @@ next-env.d.ts
 /.portable-compose-editor/
 /.external/
 .gitnexus
+
+# generated visual artifacts
+/.codex-screenshots/
+/designs/image-import*.png
+/designs/image-import*.jpg

@@ -65,16 +65,12 @@ export type QrDotMatrixDotShape = "circle" | "diamond" | "hearts" | "square";
 
 export type QrDotMatrixAnimationOptions = {
   animated: boolean;
-  bloom: boolean;
   colorPreset: QrDotMatrixColorPreset;
   customColor: string;
   dotShape: QrDotMatrixDotShape;
   enabled: boolean;
   exportAnimatedSvg: boolean;
-  halo: number;
-  hoverAnimated: boolean;
   loader: QrDotMatrixSquareLoader;
-  muted: boolean;
   opacityBase: number;
   opacityMid: number;
   opacityPeak: number;
@@ -177,8 +173,6 @@ export const QR_DOT_MATRIX_OVERLAY_SCALE_MIN = 100;
 export const QR_DOT_MATRIX_OVERLAY_SCALE_MAX = 140;
 export const QR_DOT_MATRIX_OPACITY_MIN = 0;
 export const QR_DOT_MATRIX_OPACITY_MAX = 1;
-export const QR_DOT_MATRIX_HALO_MIN = 0;
-export const QR_DOT_MATRIX_HALO_MAX = 1;
 export const BACKGROUND_SHAPE_PADDING_PX_MAX = 192;
 export const BACKGROUND_SHAPE_STROKE_WIDTH_MAX = 24;
 export const BACKGROUND_SHAPE_EDGE_BLUR_MAX = 32;
@@ -271,16 +265,12 @@ export const QR_DOT_MATRIX_DOT_SHAPE_OPTIONS: Array<{
 
 export const DEFAULT_DOT_MATRIX_ANIMATION: QrDotMatrixAnimationOptions = {
   animated: true,
-  bloom: false,
   colorPreset: "theme",
   customColor: "#22d3ee",
   dotShape: "circle",
   enabled: false,
   exportAnimatedSvg: false,
-  halo: 0,
-  hoverAnimated: false,
   loader: "neon-drift",
-  muted: false,
   opacityBase: 0.2,
   opacityMid: 0.55,
   opacityPeak: 1,
@@ -423,15 +413,6 @@ export function clampDotMatrixAnimationOpacity(value: number, fallback: number) 
   );
 }
 
-export function clampDotMatrixAnimationHalo(value: number) {
-  return coerceNumber(
-    value,
-    QR_DOT_MATRIX_HALO_MIN,
-    QR_DOT_MATRIX_HALO_MAX,
-    DEFAULT_DOT_MATRIX_ANIMATION.halo,
-  );
-}
-
 function coerceDotMatrixSquareLoader(value: string | undefined) {
   return value && QR_DOT_MATRIX_SQUARE_LOADER_VALUES.has(value)
     ? (value as QrDotMatrixSquareLoader)
@@ -521,12 +502,19 @@ export function setDotMatrixAnimationOptions(
   state: QrStudioState,
   patch: QrDotMatrixAnimationPatch,
 ): QrStudioState {
+  const hasRemovedAnimationOptions =
+    Object.prototype.hasOwnProperty.call(state.dotMatrixAnimation, "bloom") ||
+    Object.prototype.hasOwnProperty.call(state.dotMatrixAnimation, "halo") ||
+    Object.prototype.hasOwnProperty.call(state.dotMatrixAnimation, "hoverAnimated") ||
+    Object.prototype.hasOwnProperty.call(state.dotMatrixAnimation, "muted");
   const nextAnimation: QrDotMatrixAnimationOptions = {
-    ...state.dotMatrixAnimation,
-    ...patch,
-    halo: clampDotMatrixAnimationHalo(
-      patch.halo ?? state.dotMatrixAnimation.halo,
-    ),
+    animated: patch.animated ?? state.dotMatrixAnimation.animated,
+    colorPreset: patch.colorPreset ?? state.dotMatrixAnimation.colorPreset,
+    customColor: patch.customColor ?? state.dotMatrixAnimation.customColor,
+    dotShape: patch.dotShape ?? state.dotMatrixAnimation.dotShape,
+    enabled: patch.enabled ?? state.dotMatrixAnimation.enabled,
+    exportAnimatedSvg:
+      patch.exportAnimatedSvg ?? state.dotMatrixAnimation.exportAnimatedSvg,
     loader: coerceDotMatrixSquareLoader(
       patch.loader ?? state.dotMatrixAnimation.loader,
     ),
@@ -545,6 +533,7 @@ export function setDotMatrixAnimationOptions(
     overlayScale: clampDotMatrixAnimationOverlayScale(
       patch.overlayScale ?? state.dotMatrixAnimation.overlayScale,
     ),
+    pattern: patch.pattern ?? state.dotMatrixAnimation.pattern,
     speed: clampDotMatrixAnimationSpeed(
       patch.speed ?? state.dotMatrixAnimation.speed,
     ),
@@ -554,20 +543,17 @@ export function setDotMatrixAnimationOptions(
     state.dotMatrixAnimation.enabled === nextAnimation.enabled &&
     state.dotMatrixAnimation.exportAnimatedSvg === nextAnimation.exportAnimatedSvg &&
     state.dotMatrixAnimation.animated === nextAnimation.animated &&
-    state.dotMatrixAnimation.bloom === nextAnimation.bloom &&
     state.dotMatrixAnimation.colorPreset === nextAnimation.colorPreset &&
     state.dotMatrixAnimation.customColor === nextAnimation.customColor &&
     state.dotMatrixAnimation.dotShape === nextAnimation.dotShape &&
-    state.dotMatrixAnimation.halo === nextAnimation.halo &&
-    state.dotMatrixAnimation.hoverAnimated === nextAnimation.hoverAnimated &&
     state.dotMatrixAnimation.loader === nextAnimation.loader &&
-    state.dotMatrixAnimation.muted === nextAnimation.muted &&
     state.dotMatrixAnimation.opacityBase === nextAnimation.opacityBase &&
     state.dotMatrixAnimation.opacityMid === nextAnimation.opacityMid &&
     state.dotMatrixAnimation.opacityPeak === nextAnimation.opacityPeak &&
     state.dotMatrixAnimation.overlayScale === nextAnimation.overlayScale &&
     state.dotMatrixAnimation.pattern === nextAnimation.pattern &&
-    state.dotMatrixAnimation.speed === nextAnimation.speed
+    state.dotMatrixAnimation.speed === nextAnimation.speed &&
+    !hasRemovedAnimationOptions
   ) {
     return state;
   }
