@@ -1,13 +1,14 @@
 "use client"
 
 import { useMemo, type ReactNode } from "react"
-import { Trash2Icon, Layers3Icon } from "lucide-react"
+import { ArrowDownIcon, ArrowUpIcon, Trash2Icon, Layers3Icon } from "lucide-react"
 
 import {
   DASHBOARD_QR_NODE_ID,
   isDashboardQrNodeId,
 } from "@/components/qr/dashboard-compose-scene"
 import type { DraftingCanvasLayer } from "@/components/new/drafting-layer-state"
+import type { DraftingLayerMenuAction } from "@/components/new/qr-pane"
 import {
   DraggableList,
   DraggableListHandle,
@@ -18,6 +19,7 @@ import { cn } from "@/lib/utils"
 
 type DraftingLayerPane = {
   blur?: number
+  children?: DraftingLayerPane[]
   height?: number
   id: string
   isLocked?: boolean
@@ -32,6 +34,7 @@ type DraftingLayerPane = {
 }
 
 type DraftingLayersTabProps = {
+  onLayerAction?: (layerIds: string[], action: DraftingLayerMenuAction) => void
   onLayerPatch?: (layerId: string, patch: Partial<DraftingCanvasLayer>) => void
   onReorder: (orderedIds: string[]) => void
   onRemoveNode?: (nodeId: string) => void
@@ -44,6 +47,7 @@ const DEFAULT_LAYER_SHADOW_COLOR = ["#", "1", "1", "1", "8", "2", "7"].join("")
 
 export function DraftingLayersTab({
   onLayerPatch,
+  onLayerAction,
   onReorder,
   onRemoveNode,
   onSelectedNodeChange,
@@ -55,7 +59,7 @@ export function DraftingLayersTab({
   const qrNodeCount = layerNodes.filter(
     (p) => p.kind !== "card" && isDashboardQrNodeId(p.id),
   ).length
-  const selectedLayer = layerNodes.find((node) => node.id === selectedNodeId)
+  const selectedLayer = findLayerPane(layerNodes, selectedNodeId)
 
   return (
     <section data-slot="drafting-layers-tab" className="space-y-3">
@@ -155,8 +159,45 @@ export function DraftingLayersTab({
                           <Trash2Icon className="size-3.5" />
                         </IconActionButton>
                       ) : null}
+                      {node.kind ? (
+                        <>
+                          <IconActionButton
+                            ariaLabel={`Send ${node.name} backward`}
+                            onClick={() => onLayerAction?.([node.id], "backward")}
+                          >
+                            <ArrowDownIcon className="size-3.5" />
+                          </IconActionButton>
+                          <IconActionButton
+                            ariaLabel={`Bring ${node.name} forward`}
+                            onClick={() => onLayerAction?.([node.id], "forward")}
+                          >
+                            <ArrowUpIcon className="size-3.5" />
+                          </IconActionButton>
+                        </>
+                      ) : null}
                     </div>
                   </div>
+                  {node.children?.length ? (
+                    <div className="mt-2 space-y-1 border-l border-[var(--drafting-line)] pl-3">
+                      {node.children.map((child) => (
+                        <button
+                          key={child.id}
+                          className={cn(
+                            "block w-full rounded-[6px] px-2 py-1.5 text-left",
+                            child.id === selectedNodeId
+                              ? "bg-[var(--drafting-control-bg-active)] text-[var(--drafting-ink)]"
+                              : "text-[var(--drafting-ink-muted)] hover:bg-[var(--drafting-control-bg)] hover:text-[var(--drafting-ink)]",
+                          )}
+                          type="button"
+                          onClick={() => onSelectedNodeChange(child.id)}
+                        >
+                          <span className="drafting-type-meta block truncate font-semibold">
+                            {child.name}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               </DraggableListItem>
             )
@@ -169,6 +210,26 @@ export function DraftingLayersTab({
       ) : null}
     </section>
   )
+}
+
+function findLayerPane(layers: DraftingLayerPane[], layerId: string | null): DraftingLayerPane | undefined {
+  if (!layerId) {
+    return undefined
+  }
+
+  for (const layer of layers) {
+    if (layer.id === layerId) {
+      return layer
+    }
+
+    const child = layer.children ? findLayerPane(layer.children, layerId) : undefined
+
+    if (child) {
+      return child
+    }
+  }
+
+  return undefined
 }
 
 function LayerInspector({
@@ -208,6 +269,18 @@ function LayerInspector({
         <LayerNumberInput label="Opacity" max={100} min={0} value={Math.round((layer.opacity ?? 1) * 100)} onChange={(opacity) => onLayerPatch(layer.id, { opacity: opacity / 100 })} />
         <LayerNumberInput label="Blur" max={96} min={0} value={layer.blur ?? 0} onChange={(blur) => onLayerPatch(layer.id, { blur })} />
       </div>
+
+      <label className="block min-w-0">
+        <span className="drafting-type-meta mb-1 block font-semibold text-[var(--drafting-ink-muted)]">
+          Name
+        </span>
+        <input
+          aria-label="Layer name"
+          className="drafting-type-input h-9 w-full min-w-0 rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-2 text-[var(--drafting-ink)] shadow-none"
+          value={layer.name}
+          onChange={(event) => onLayerPatch(layer.id, { name: event.currentTarget.value })}
+        />
+      </label>
 
       <div className="space-y-2">
         <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">

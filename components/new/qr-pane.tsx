@@ -7,8 +7,10 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type MouseEvent,
   type PointerEvent,
 } from "react"
+import { createPortal } from "react-dom"
 import { RotateCwIcon } from "lucide-react"
 
 import {
@@ -19,8 +21,16 @@ import { DraftingCardPaperShaderLayer } from "@/components/new/drafting-card-pap
 import { getDraftingCardPatternStyle } from "@/components/new/drafting-card-patterns"
 import {
   createDefaultDraftingLayers,
+  getDraftingMarqueeSelection,
+  type DraftingLayerAlignAction,
+  type DraftingLayerDistributeAction,
+  type DraftingLayerReorderAction,
   type DraftingCanvasLayer,
 } from "@/components/new/drafting-layer-state"
+import {
+  ensureDraftingFontsForLayers,
+  getDraftingFontCssFamily,
+} from "@/components/new/drafting-font-registry"
 import {
   createDraftingQrArtworkState,
   sanitizeDraftingQrArtworkMarkup,
@@ -36,8 +46,12 @@ type QrPaneProps = {
   interactionScale?: number
   isSelected: boolean
   layers?: DraftingCanvasLayer[]
+  onLayerAction?: (layerIds: string[], action: DraftingLayerMenuAction) => void
   onLayerChange?: (layerId: string, patch: Partial<DraftingCanvasLayer>) => void
+  onLayerCopy?: (layerIds: string[]) => void
+  onLayerPaste?: (point: { x: number; y: number }) => void
   onLayerSelect?: (layerId: string | null, options?: { additive?: boolean }) => void
+  onLayerSelectionChange?: (layerIds: string[], options?: { additive?: boolean }) => void
   onSelect: () => void
   onQrClick: () => void
   selectedLayerId?: string | null
@@ -48,6 +62,17 @@ type QrPaneProps = {
 
 type ResizeDirection = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw"
 type SnapAxis = "x" | "y"
+export type DraftingLayerMenuAction =
+  | DraftingLayerAlignAction
+  | DraftingLayerDistributeAction
+  | DraftingLayerReorderAction
+  | "group"
+  | "hide"
+  | "lock"
+  | "reset-rotation"
+  | "show"
+  | "ungroup"
+  | "unlock"
 type SnapGuides = {
   horizontal: number[]
   vertical: number[]
@@ -58,8 +83,12 @@ const RESIZE_CONTROL_PADDING_PX = 12
 const ROTATE_HANDLE_OFFSET_PX = 34
 const ROTATE_HANDLE_RADIUS_PX = 10
 const ROTATE_LABEL_GAP_PX = 8
+const SIZE_LABEL_GAP_PX = 10
 const ROTATION_LABEL_HIDE_DELAY_MS = 2000
 const SNAP_THRESHOLD_PX = 6
+const RESIZE_SNAP_THRESHOLD_PX = 3
+const INTERACTION_START_THRESHOLD_PX = 3
+const CONTEXT_MENU_POINTER_OFFSET_PX = 8
 const ROTATION_SNAP_THRESHOLD_DEGREES = 4
 const ROTATION_SNAP_TARGETS = [0, 90, 180, 270] as const
 
@@ -210,11 +239,40 @@ function resizeSquareLayer(
       : horizontalDelta || verticalDelta
   const size = Math.max(24, layer.width + sizeDelta)
 
+  return anchorSquareLayerResize(layer, direction, {
+    height: size,
+    width: size,
+    x: layer.x,
+    y: layer.y,
+  })
+}
+
+function anchorSquareLayerResize(
+  layer: DraftingCanvasLayer,
+  direction: ResizeDirection,
+  geometry: Pick<DraftingCanvasLayer, "height" | "width" | "x" | "y">,
+): Pick<DraftingCanvasLayer, "height" | "width" | "x" | "y"> {
+  const affectsWest = direction.includes("w")
+  const affectsEast = direction.includes("e")
+  const affectsNorth = direction.includes("n")
+  const affectsSouth = direction.includes("s")
+  const size = Math.max(24, Math.max(geometry.width, geometry.height))
+  const right = geometry.x + geometry.width
+  const bottom = geometry.y + geometry.height
+
   return {
     height: size,
     width: size,
-    x: affectsWest ? layer.x + (layer.width - size) : layer.x,
-    y: affectsNorth ? layer.y + (layer.height - size) : layer.y,
+    x: affectsWest
+      ? right - size
+      : affectsEast
+        ? geometry.x
+        : layer.x + (layer.width - size) / 2,
+    y: affectsNorth
+      ? bottom - size
+      : affectsSouth
+        ? geometry.y
+        : layer.y + (layer.height - size) / 2,
   }
 }
 
@@ -236,16 +294,90 @@ function getCombinedLayerBounds(layers: DraftingCanvasLayer[]) {
     return null
   }
 
-  const left = Math.min(...layers.map((layer) => layer.x))
-  const top = Math.min(...layers.map((layer) => layer.y))
-  const right = Math.max(...layers.map((layer) => layer.x + layer.width))
-  const bottom = Math.max(...layers.map((layer) => layer.y + layer.height))
+  const layerCorners = layers.flatMap(getLayerRotatedCorners)
+  const commonRotation = getCommonLayerRotation(layers)
+
+  if (commonRotation !== null) {
+    const localCorners = layerCorners.map((point) =>
+      rotatePoint(point, { x: 0, y: 0 }, -commonRotation),
+    )
+    const localBounds = getPointBounds(localCorners)
+    const localCenter = {
+      x: localBounds.x + localBounds.width / 2,
+      y: localBounds.y + localBounds.height / 2,
+    }
+    const center = rotatePoint(localCenter, { x: 0, y: 0 }, commonRotation)
+
+    return {
+      height: roundLayerNumber(localBounds.height),
+      rotation: commonRotation,
+      width: roundLayerNumber(localBounds.width),
+      x: roundLayerNumber(center.x - localBounds.width / 2),
+      y: roundLayerNumber(center.y - localBounds.height / 2),
+    }
+  }
+
+  const bounds = getPointBounds(layerCorners)
+
+  return {
+    height: roundLayerNumber(bounds.height),
+    rotation: 0,
+    width: roundLayerNumber(bounds.width),
+    x: roundLayerNumber(bounds.x),
+    y: roundLayerNumber(bounds.y),
+  }
+}
+
+function getLayerRotatedCorners(layer: DraftingCanvasLayer) {
+  const center = {
+    x: layer.x + layer.width / 2,
+    y: layer.y + layer.height / 2,
+  }
+  const corners = [
+    { x: layer.x, y: layer.y },
+    { x: layer.x + layer.width, y: layer.y },
+    { x: layer.x + layer.width, y: layer.y + layer.height },
+    { x: layer.x, y: layer.y + layer.height },
+  ]
+
+  return corners.map((point) => rotatePoint(point, center, layer.rotation))
+}
+
+function getCommonLayerRotation(layers: DraftingCanvasLayer[]) {
+  const [firstLayer] = layers
+  const firstRotation = normalizeLayerRotation(firstLayer?.rotation ?? 0)
+
+  return layers.every((layer) => Math.abs(normalizeLayerRotation(layer.rotation) - firstRotation) < 0.001)
+    ? firstRotation
+    : null
+}
+
+function getPointBounds(points: { x: number; y: number }[]) {
+  const left = Math.min(...points.map((point) => point.x))
+  const top = Math.min(...points.map((point) => point.y))
+  const right = Math.max(...points.map((point) => point.x))
+  const bottom = Math.max(...points.map((point) => point.y))
 
   return {
     height: bottom - top,
     width: right - left,
     x: left,
     y: top,
+  }
+}
+
+function getMarqueeBounds(
+  start: { x: number; y: number },
+  end: { x: number; y: number },
+) {
+  const x = Math.min(start.x, end.x)
+  const y = Math.min(start.y, end.y)
+
+  return {
+    height: Math.abs(end.y - start.y),
+    width: Math.abs(end.x - start.x),
+    x,
+    y,
   }
 }
 
@@ -268,6 +400,13 @@ function rotatePoint(
 
 function roundLayerNumber(value: number) {
   return Math.round(value * 1000) / 1000
+}
+
+function getLayerSizeLabel({
+  height,
+  width,
+}: Pick<DraftingCanvasLayer, "height" | "width">) {
+  return `${Math.round(width)} x ${Math.round(height)}`
 }
 
 function snapLayerMove({
@@ -357,9 +496,7 @@ function snapLayerResize({
   }
 
   if (layer.kind === "qr" && (vertical.guide !== null || horizontal.guide !== null)) {
-    const size = Math.max(nextGeometry.width, nextGeometry.height)
-    nextGeometry.width = size
-    nextGeometry.height = size
+    Object.assign(nextGeometry, anchorSquareLayerResize(layer, direction, nextGeometry))
   }
 
   return {
@@ -527,6 +664,134 @@ function SnapGuideOverlay({ guides }: { guides: SnapGuides }) {
   )
 }
 
+function LayerContextMenu({
+  layerCount,
+  layers,
+  onAction,
+  onCopy,
+  onPaste,
+  style,
+}: {
+  layerCount: number
+  layers: DraftingCanvasLayer[]
+  onAction: (action: DraftingLayerMenuAction) => void
+  onCopy?: () => void
+  onPaste?: () => void
+  style: CSSProperties
+}) {
+  const isMultiLayer = layerCount > 1
+  const hasSelection = layerCount > 0
+  const hasHiddenLayer = layers.some((layer) => !layer.isVisible)
+  const hasLockedLayer = layers.some((layer) => layer.isLocked)
+  const hasGroupLayer = layers.some((layer) => layer.kind === "group")
+
+  return (
+    <div
+      className="fixed z-[20000] min-w-48 rounded-[8px] border border-[var(--drafting-dropdown-border)] bg-[var(--drafting-dropdown-menu-surface-open)] p-1.5 text-[var(--drafting-dropdown-text)] shadow-[var(--drafting-dropdown-menu-shadow-open)]"
+      data-drafting-dropdown-content="true"
+      data-slot="drafting-layer-context-menu"
+      role="menu"
+      style={style}
+      onClick={(event) => event.stopPropagation()}
+      onContextMenu={(event) => event.preventDefault()}
+    >
+      {onPaste ? <LayerContextMenuButton label="Paste" onClick={onPaste} /> : null}
+      {hasSelection ? (
+        <>
+          {onPaste ? <div className="my-1 h-px bg-[var(--drafting-dropdown-border)]" /> : null}
+          {onCopy ? <LayerContextMenuButton label="Copy" onClick={onCopy} /> : null}
+          <LayerContextMenuButton label="Bring to front" onClick={() => onAction("front")} />
+          <LayerContextMenuButton label="Bring forward" onClick={() => onAction("forward")} />
+          <LayerContextMenuButton label="Send backward" onClick={() => onAction("backward")} />
+          <LayerContextMenuButton label="Send to back" onClick={() => onAction("back")} />
+          <div className="my-1 h-px bg-[var(--drafting-dropdown-border)]" />
+          <LayerContextMenuButton
+            label={hasLockedLayer ? "Unlock" : "Lock"}
+            onClick={() => onAction(hasLockedLayer ? "unlock" : "lock")}
+          />
+          <LayerContextMenuButton
+            label={hasHiddenLayer ? "Show" : "Hide"}
+            onClick={() => onAction(hasHiddenLayer ? "show" : "hide")}
+          />
+          <LayerContextMenuButton label="Reset rotation" onClick={() => onAction("reset-rotation")} />
+          <div className="my-1 h-px bg-[var(--drafting-dropdown-border)]" />
+          <LayerContextMenuButton label="Align left" onClick={() => onAction("left")} />
+          <LayerContextMenuButton label="Align center" onClick={() => onAction("center-x")} />
+          <LayerContextMenuButton label="Align middle" onClick={() => onAction("center-y")} />
+          <LayerContextMenuButton label="Align right" onClick={() => onAction("right")} />
+          {isMultiLayer ? (
+            <>
+              <div className="my-1 h-px bg-[var(--drafting-dropdown-border)]" />
+              <LayerContextMenuButton label="Group" onClick={() => onAction("group")} />
+              <LayerContextMenuButton label="Distribute selection horizontally" onClick={() => onAction("horizontal")} />
+              <LayerContextMenuButton label="Distribute selection vertically" onClick={() => onAction("vertical")} />
+            </>
+          ) : null}
+          {hasGroupLayer ? (
+            <>
+              <div className="my-1 h-px bg-[var(--drafting-dropdown-border)]" />
+              <LayerContextMenuButton label="Ungroup" onClick={() => onAction("ungroup")} />
+            </>
+          ) : null}
+        </>
+      ) : null}
+    </div>
+  )
+}
+
+function LayerContextMenuButton({
+  label,
+  onClick,
+}: {
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      aria-label={label}
+      className="block h-8 w-full rounded-[5px] px-2.5 text-left text-[12px] font-semibold text-[var(--drafting-dropdown-text)] hover:bg-[var(--drafting-dropdown-selected-fill)]"
+      role="menuitem"
+      type="button"
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  )
+}
+
+function LayerSizeValue({ height, width }: Pick<DraftingCanvasLayer, "height" | "width">) {
+  return (
+    <div
+      className="pointer-events-none absolute left-1/2 bottom-0 rounded-[4px] border border-[var(--drafting-line-hover)] bg-[var(--drafting-panel-bg-active)] px-2 py-0.5 text-[0.68rem] font-semibold text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)]"
+      data-slot="drafting-layer-size-value"
+      style={{
+        transform: `translate(-50%, calc(100% + ${SIZE_LABEL_GAP_PX}px))`,
+      }}
+    >
+      {getLayerSizeLabel({ height, width })}
+    </div>
+  )
+}
+
+function getTextLayerStyle(layer: DraftingCanvasLayer): CSSProperties {
+  return {
+    color: layer.fill ?? "#171717",
+    fontFamily: getDraftingFontCssFamily({
+      fontFamily: layer.fontFamily,
+      fontId: layer.fontId,
+    }),
+    fontSize: layer.fontSize ?? 32,
+    fontStyle: layer.fontStyle ?? "normal",
+    fontWeight: layer.fontWeight ?? "normal",
+    letterSpacing: layer.letterSpacing ?? 0,
+    lineHeight: layer.lineHeight ?? 1.22,
+    textAlign: layer.textAlign ?? "left",
+    textDecorationLine: layer.underline ? "underline" : "none",
+    whiteSpace: "pre-wrap",
+    wordBreak: "break-word",
+  }
+}
+
 export const QrPane = memo(function QrPane({
   cardState = DEFAULT_DRAFTING_CARD_STATE,
   interactionScale = 1,
@@ -534,8 +799,12 @@ export const QrPane = memo(function QrPane({
   state,
   isSelected,
   layers,
+  onLayerAction,
   onLayerChange,
+  onLayerCopy,
+  onLayerPaste,
   onLayerSelect,
+  onLayerSelectionChange,
   onSelect,
   onQrClick,
   selectedLayerId,
@@ -546,17 +815,30 @@ export const QrPane = memo(function QrPane({
   const [rotatingLayerId, setRotatingLayerId] = useState<string | null>(null)
   const [rotationPreviewDegrees, setRotationPreviewDegrees] = useState<number | null>(null)
   const [multiSelectionPreview, setMultiSelectionPreview] = useState<{
-    bounds: Pick<DraftingCanvasLayer, "height" | "width" | "x" | "y">
+    bounds: Pick<DraftingCanvasLayer, "height" | "width" | "x" | "y"> & { rotation?: number }
     rotation: number
   } | null>(null)
   const [snapGuides, setSnapGuides] = useState<SnapGuides>({
     horizontal: [],
     vertical: [],
   })
+  const [contextMenu, setContextMenu] = useState<{
+    layerIds: string[]
+    scenePoint?: { x: number; y: number }
+    x: number
+    y: number
+  } | null>(null)
+  const [marquee, setMarquee] = useState<{
+    additive: boolean
+    end: { x: number; y: number }
+    pointerId: number
+    start: { x: number; y: number }
+  } | null>(null)
+  const [editingTextLayerId, setEditingTextLayerId] = useState<string | null>(null)
   const interactionRef = useRef<{
     centerClientX?: number
     centerClientY?: number
-    groupBounds?: Pick<DraftingCanvasLayer, "height" | "width" | "x" | "y">
+    groupBounds?: Pick<DraftingCanvasLayer, "height" | "width" | "x" | "y"> & { rotation?: number }
     groupCenter?: { x: number; y: number }
     layers?: DraftingCanvasLayer[]
     layer: DraftingCanvasLayer
@@ -569,6 +851,10 @@ export const QrPane = memo(function QrPane({
     startY: number
   } | null>(null)
   const rotationLabelTimeoutRef = useRef<number | null>(null)
+  const canvasRef = useRef<HTMLDivElement | null>(null)
+  const marqueeRef = useRef<typeof marquee>(null)
+  const suppressCanvasClickRef = useRef(false)
+  const suppressLayerClickRef = useRef(false)
   const requestRef = useRef(0)
   const markupCacheRef = useRef(new Map<string, string>())
   const qrArtworkState = useMemo(() => createDraftingQrArtworkState(state), [state])
@@ -608,6 +894,31 @@ export const QrPane = memo(function QrPane({
     [],
   )
 
+  useEffect(() => {
+    if (!contextMenu) {
+      return
+    }
+
+    function closeContextMenuOnOutsidePointer(event: Event) {
+      const target = event.target
+
+      if (
+        target instanceof Element &&
+        target.closest('[data-slot="drafting-layer-context-menu"]')
+      ) {
+        return
+      }
+
+      setContextMenu(null)
+    }
+
+    document.addEventListener("pointerdown", closeContextMenuOnOutsidePointer, true)
+
+    return () => {
+      document.removeEventListener("pointerdown", closeContextMenuOnOutsidePointer, true)
+    }
+  }, [contextMenu])
+
   const isLoading = markup === null && !hasError
   const resolvedLayers = useMemo(
     () =>
@@ -616,12 +927,20 @@ export const QrPane = memo(function QrPane({
         : createDefaultDraftingLayers("preview", state, cardState),
     [cardState, layers, state],
   )
+
+  useEffect(() => {
+    void ensureDraftingFontsForLayers(resolvedLayers)
+  }, [resolvedLayers])
+
   const visibleLayers = resolvedLayers
     .filter((layer) => layer.isVisible)
     .sort((a, b) => a.zIndex - b.zIndex)
   const activeSelectedLayerIds = selectedLayerIds ?? (selectedLayerId ? [selectedLayerId] : [])
   const activeSelectedLayerIdSet = new Set(activeSelectedLayerIds)
   const selectedVisibleLayers = visibleLayers.filter((layer) => activeSelectedLayerIdSet.has(layer.id))
+  const contextMenuLayers = contextMenu
+    ? resolvedLayers.filter((layer) => contextMenu.layerIds.includes(layer.id))
+    : []
   const combinedLayerBounds = getCombinedLayerBounds(selectedVisibleLayers)
   const isPaperShaderMode = cardState.styleMode === "paper-shader"
   const isImageMode = cardState.styleMode === "image"
@@ -710,6 +1029,145 @@ export const QrPane = memo(function QrPane({
     onLayerSelect?.(layer.id)
   }
 
+  function openLayerContextMenu(
+    event: MouseEvent<HTMLElement>,
+    layerIds: string[],
+  ) {
+    if (layerIds.length === 0) {
+      return
+    }
+
+    event.preventDefault()
+    event.stopPropagation()
+    setContextMenu({
+      layerIds,
+      scenePoint: getScenePointFromClientPoint(event.clientX, event.clientY),
+      x: event.clientX,
+      y: event.clientY + CONTEXT_MENU_POINTER_OFFSET_PX,
+    })
+    onLayerSelect?.(layerIds.at(-1) ?? null)
+  }
+
+  function openCanvasContextMenu(event: MouseEvent<HTMLElement>) {
+    if (event.target !== event.currentTarget) {
+      return
+    }
+
+    event.preventDefault()
+    event.stopPropagation()
+    setContextMenu({
+      layerIds: activeSelectedLayerIds,
+      scenePoint: getScenePointFromClientPoint(event.clientX, event.clientY),
+      x: event.clientX,
+      y: event.clientY + CONTEXT_MENU_POINTER_OFFSET_PX,
+    })
+  }
+
+  function runLayerAction(action: DraftingLayerMenuAction) {
+    if (!contextMenu || contextMenu.layerIds.length === 0) {
+      return
+    }
+
+    onLayerAction?.(contextMenu.layerIds, action)
+    setContextMenu(null)
+  }
+
+  function runLayerCopy() {
+    if (!contextMenu || contextMenu.layerIds.length === 0) {
+      return
+    }
+
+    onLayerCopy?.(contextMenu.layerIds)
+    setContextMenu(null)
+  }
+
+  function runLayerPaste() {
+    if (!contextMenu?.scenePoint) {
+      return
+    }
+
+    onLayerPaste?.(contextMenu.scenePoint)
+    setContextMenu(null)
+  }
+
+  function getScenePointFromClientPoint(clientX: number, clientY: number) {
+    const rect = canvasRef.current?.getBoundingClientRect()
+    const scale = interactionScale > 0 ? interactionScale : 1
+
+    if (!rect) {
+      return { x: 0, y: 0 }
+    }
+
+    return {
+      x: (clientX - (rect.left + rect.width / 2)) / scale,
+      y: (clientY - (rect.top + rect.height / 2)) / scale,
+    }
+  }
+
+  function startMarqueeSelection(event: PointerEvent<HTMLElement>) {
+    if (event.button !== 0 || event.target !== event.currentTarget) {
+      return
+    }
+
+    const point = getScenePointFromClientPoint(event.clientX, event.clientY)
+
+    event.preventDefault()
+    event.stopPropagation()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    setContextMenu(null)
+    const nextMarquee = {
+      additive: event.shiftKey || event.metaKey || event.ctrlKey,
+      end: point,
+      pointerId: event.pointerId,
+      start: point,
+    }
+    marqueeRef.current = nextMarquee
+    setMarquee(nextMarquee)
+  }
+
+  function updateMarqueeSelection(event: PointerEvent<HTMLElement>) {
+    const current = marqueeRef.current
+
+    if (!current || current.pointerId !== event.pointerId) {
+      return
+    }
+
+    event.preventDefault()
+    event.stopPropagation()
+
+    const nextMarquee = {
+      ...current,
+      end: getScenePointFromClientPoint(event.clientX, event.clientY),
+    }
+    marqueeRef.current = nextMarquee
+    setMarquee(nextMarquee)
+  }
+
+  function endMarqueeSelection(event: PointerEvent<HTMLElement>) {
+    const current = marqueeRef.current
+
+    if (!current || current.pointerId !== event.pointerId) {
+      return
+    }
+
+    event.preventDefault()
+    event.stopPropagation()
+    marqueeRef.current = null
+    setMarquee(null)
+
+    const moved =
+      Math.abs(current.end.x - current.start.x) > 1 ||
+      Math.abs(current.end.y - current.start.y) > 1
+    suppressCanvasClickRef.current = moved
+
+    const selectedIds = getDraftingMarqueeSelection(
+      visibleLayers,
+      getMarqueeBounds(current.start, current.end),
+    )
+
+    onLayerSelectionChange?.(selectedIds, { additive: current.additive })
+  }
+
   function startMultiLayerInteraction(
     event: PointerEvent<HTMLElement>,
     mode: "move" | "resize" | "rotate",
@@ -760,7 +1218,7 @@ export const QrPane = memo(function QrPane({
       setRotationPreviewDegrees(0)
       setMultiSelectionPreview({
         bounds: combinedLayerBounds,
-        rotation: 0,
+        rotation: combinedLayerBounds.rotation ?? 0,
       })
     }
   }
@@ -775,9 +1233,18 @@ export const QrPane = memo(function QrPane({
     event.stopPropagation()
     const scale = interactionScale > 0 ? interactionScale : 1
     const snapThreshold = SNAP_THRESHOLD_PX / scale
+    const resizeSnapThreshold = RESIZE_SNAP_THRESHOLD_PX / scale
     const deltaX = (event.clientX - interaction.startX) / scale
     const deltaY = (event.clientY - interaction.startY) / scale
     const layer = interaction.layer
+    const hasStartedInteraction =
+      Math.hypot(event.clientX - interaction.startX, event.clientY - interaction.startY) >=
+      INTERACTION_START_THRESHOLD_PX
+
+    if (!hasStartedInteraction && interaction.mode !== "rotate") {
+      setSnapGuides({ horizontal: [], vertical: [] })
+      return
+    }
 
     if (interaction.layers && interaction.groupBounds && interaction.groupCenter) {
       if (interaction.mode === "move") {
@@ -801,7 +1268,12 @@ export const QrPane = memo(function QrPane({
 
         setRotationPreviewDegrees(getLayerRotationLabel(rotation))
         setMultiSelectionPreview((current) =>
-          current ? { ...current, rotation: getLayerRotationLabel(rotation) } : current,
+          current
+            ? {
+                ...current,
+                rotation: getLayerRotationLabel((interaction.groupBounds?.rotation ?? 0) + rotation),
+              }
+            : current,
         )
         setSnapGuides({
           horizontal: [],
@@ -907,7 +1379,7 @@ export const QrPane = memo(function QrPane({
           layer,
           layers: visibleLayers,
           geometry: nextGeometry,
-          threshold: snapThreshold,
+          threshold: resizeSnapThreshold,
         })
       : { geometry: nextGeometry, guides: { horizontal: [], vertical: [] } }
 
@@ -916,9 +1388,15 @@ export const QrPane = memo(function QrPane({
   }
 
   function endLayerInteraction(event: PointerEvent<HTMLElement>) {
-    if (interactionRef.current?.pointerId === event.pointerId) {
+    const interaction = interactionRef.current
+
+    if (interaction?.pointerId === event.pointerId) {
       setSnapGuides({ horizontal: [], vertical: [] })
-      if (interactionRef.current.mode === "rotate") {
+      suppressLayerClickRef.current =
+        Math.abs(event.clientX - interaction.startX) > 1 ||
+        Math.abs(event.clientY - interaction.startY) > 1
+
+      if (interaction.mode === "rotate") {
         if (rotationLabelTimeoutRef.current !== null) {
           window.clearTimeout(rotationLabelTimeoutRef.current)
         }
@@ -933,17 +1411,67 @@ export const QrPane = memo(function QrPane({
     }
   }
 
-  function getLayerPlacementStyle(layer: DraftingCanvasLayer): CSSProperties {
+  function selectLayerFromClick(
+    event: MouseEvent<HTMLElement>,
+    layer: DraftingCanvasLayer,
+    options?: { qr?: boolean },
+  ) {
+    event.stopPropagation()
+
+    if (suppressLayerClickRef.current) {
+      event.preventDefault()
+      suppressLayerClickRef.current = false
+      return
+    }
+
+    onLayerSelect?.(layer.id, { additive: event.metaKey || event.ctrlKey })
+    if (options?.qr) {
+      onQrClick()
+    }
+  }
+
+  function startTextEditing(event: MouseEvent<HTMLElement>, layer: DraftingCanvasLayer) {
+    if (layer.kind !== "text" || layer.isLocked) {
+      return
+    }
+
+    event.preventDefault()
+    event.stopPropagation()
+    onLayerSelect?.(layer.id)
+    setEditingTextLayerId(layer.id)
+  }
+
+  function getLayerPlacementStyle(layer: DraftingCanvasLayer, nested = false): CSSProperties {
     return {
       height: layer.height,
-      left: "50%",
+      left: nested ? 0 : "50%",
       opacity: layer.opacity,
-      top: "50%",
+      top: nested ? 0 : "50%",
       transform: `translate3d(${layer.x}px, ${layer.y}px, 0) rotate(${layer.rotation}deg)`,
       transformOrigin: "center center",
       width: layer.width,
       zIndex: layer.zIndex,
     }
+  }
+
+  function renderMarquee() {
+    if (!marquee) {
+      return null
+    }
+
+    const bounds = getMarqueeBounds(marquee.start, marquee.end)
+
+    return (
+      <div
+        className="pointer-events-none absolute left-1/2 top-1/2 z-[9998] border border-[var(--drafting-ink)] bg-[var(--drafting-ink)]/10"
+        data-slot="drafting-layer-marquee"
+        style={{
+          height: bounds.height,
+          transform: `translate3d(${bounds.x}px, ${bounds.y}px, 0)`,
+          width: bounds.width,
+        }}
+      />
+    )
   }
 
   function renderLayerControls(layer: DraftingCanvasLayer) {
@@ -969,6 +1497,7 @@ export const QrPane = memo(function QrPane({
           width: controlWidth,
           zIndex: 10000,
         }}
+        onContextMenu={(event) => openLayerContextMenu(event, [layer.id])}
       >
         <div
           className="pointer-events-none absolute left-1/2 top-0 w-px -translate-x-1/2 -translate-y-full bg-[var(--drafting-ink)]"
@@ -985,6 +1514,7 @@ export const QrPane = memo(function QrPane({
             {rotationDegrees}°
           </div>
         ) : null}
+        <LayerSizeValue height={layer.height} width={layer.width} />
         <button
           aria-label={`Rotate ${layer.name}`}
           className="pointer-events-auto absolute left-1/2 top-0 z-30 flex size-5 items-center justify-center rounded-full border border-[#a8b0bb] bg-white text-[#111827] shadow-[var(--drafting-shadow-rest)]"
@@ -1034,8 +1564,8 @@ export const QrPane = memo(function QrPane({
     const controlHeight = bounds.height + RESIZE_CONTROL_PADDING_PX * 2
     const controlWidth = bounds.width + RESIZE_CONTROL_PADDING_PX * 2
     const isRotating = rotatingLayerId === "selection"
-    const rotationDegrees = multiSelectionPreview?.rotation ?? rotationPreviewDegrees ?? 0
-    const rotationTransform = isRotating ? ` rotate(${rotationDegrees}deg)` : ""
+    const rotationDegrees = multiSelectionPreview?.rotation ?? bounds.rotation ?? rotationPreviewDegrees ?? 0
+    const rotationTransform = rotationDegrees ? ` rotate(${rotationDegrees}deg)` : ""
 
     return (
       <div
@@ -1049,6 +1579,7 @@ export const QrPane = memo(function QrPane({
           width: controlWidth,
           zIndex: 50,
         }}
+        onContextMenu={(event) => openLayerContextMenu(event, activeSelectedLayerIds)}
       >
         <div
           className="pointer-events-none absolute left-1/2 top-0 w-px -translate-x-1/2 -translate-y-full bg-[var(--drafting-ink)]"
@@ -1065,6 +1596,7 @@ export const QrPane = memo(function QrPane({
             {rotationDegrees}°
           </div>
         ) : null}
+        <LayerSizeValue height={bounds.height} width={bounds.width} />
         <button
           aria-label="Rotate selection"
           className="pointer-events-auto absolute left-1/2 top-0 z-30 flex size-5 items-center justify-center rounded-full border border-[#a8b0bb] bg-white text-[#111827] shadow-[var(--drafting-shadow-rest)]"
@@ -1107,6 +1639,36 @@ export const QrPane = memo(function QrPane({
   function renderLayer(layer: DraftingCanvasLayer) {
     const isLayerSelected = activeSelectedLayerIdSet.has(layer.id)
 
+    if (layer.kind === "group") {
+      return (
+        <div
+          key={layer.id}
+          data-slot="drafting-layer-group"
+          data-layer-id={layer.id}
+          data-selected={isLayerSelected ? "true" : "false"}
+          className={cn(
+            "absolute max-h-none max-w-none cursor-move touch-none",
+            layer.isLocked && "cursor-default",
+          )}
+          style={{
+            ...getLayerPlacementStyle(layer),
+            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+          }}
+          onClick={(event) => selectLayerFromClick(event, layer)}
+          onPointerDown={(event) => startLayerInteraction(event, layer, "move")}
+          onPointerMove={updateLayerInteraction}
+          onPointerUp={endLayerInteraction}
+          onPointerCancel={endLayerInteraction}
+          onContextMenu={(event) => openLayerContextMenu(event, [layer.id])}
+        >
+          {(layer.children ?? [])
+            .filter((child) => child.isVisible)
+            .sort((a, b) => a.zIndex - b.zIndex)
+            .map((child) => renderNestedLayer(child))}
+        </div>
+      )
+    }
+
     if (layer.kind === "qr") {
       const qrMarkup = markup ? applyDraftingQrForegroundShadow(markup, layer) : ""
 
@@ -1125,21 +1687,74 @@ export const QrPane = memo(function QrPane({
             ...getLayerPlacementStyle(layer),
             filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
           }}
-          onClick={(event) => {
-            event.stopPropagation()
-            onLayerSelect?.(layer.id, { additive: event.metaKey || event.ctrlKey })
-            onQrClick()
-          }}
+          onClick={(event) => selectLayerFromClick(event, layer, { qr: true })}
           onPointerDown={(event) => startLayerInteraction(event, layer, "move")}
           onPointerMove={updateLayerInteraction}
           onPointerUp={endLayerInteraction}
           onPointerCancel={endLayerInteraction}
+          onContextMenu={(event) => openLayerContextMenu(event, [layer.id])}
         >
           <DraftingQrBackground layer={layer} state={state} />
           <div
             className="relative z-10 h-full w-full max-h-full max-w-full [&_svg]:h-full [&_svg]:w-full"
             dangerouslySetInnerHTML={{ __html: qrMarkup }}
           />
+        </div>
+      )
+    }
+
+    if (layer.kind === "text") {
+      const isEditing = editingTextLayerId === layer.id
+
+      return (
+        <div
+          key={layer.id}
+          data-slot="drafting-text-layer"
+          data-layer-id={layer.id}
+          data-selected={isLayerSelected ? "true" : "false"}
+          className={cn(
+            "absolute max-h-none max-w-none cursor-move touch-none overflow-hidden",
+            layer.isLocked && "cursor-default",
+          )}
+          style={{
+            ...getLayerPlacementStyle(layer),
+            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+          }}
+          onClick={(event) => selectLayerFromClick(event, layer)}
+          onDoubleClick={(event) => startTextEditing(event, layer)}
+          onPointerDown={(event) => startLayerInteraction(event, layer, "move")}
+          onPointerMove={updateLayerInteraction}
+          onPointerUp={endLayerInteraction}
+          onPointerCancel={endLayerInteraction}
+          onContextMenu={(event) => openLayerContextMenu(event, [layer.id])}
+        >
+          {isEditing ? (
+            <textarea
+              aria-label="Edit text layer"
+              autoFocus
+              className="h-full w-full resize-none border-0 bg-transparent p-0 outline-none"
+              data-slot="drafting-text-editor"
+              spellCheck={false}
+              style={getTextLayerStyle(layer)}
+              value={layer.text ?? ""}
+              onBlur={() => setEditingTextLayerId(null)}
+              onChange={(event) => onLayerChange?.(layer.id, { text: event.currentTarget.value })}
+              onClick={(event) => event.stopPropagation()}
+              onDoubleClick={(event) => event.stopPropagation()}
+              onKeyDown={(event) => {
+                event.stopPropagation()
+                if (event.key === "Escape") {
+                  event.preventDefault()
+                  setEditingTextLayerId(null)
+                }
+              }}
+              onPointerDown={(event) => event.stopPropagation()}
+            />
+          ) : (
+            <div className="h-full w-full" data-slot="drafting-text-content" style={getTextLayerStyle(layer)}>
+              {layer.text}
+            </div>
+          )}
         </div>
       )
     }
@@ -1175,14 +1790,12 @@ export const QrPane = memo(function QrPane({
           boxShadow: getDraftingCardShadow({ ...cardState, shadow: layer.shadow }),
           filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
         }}
-        onClick={(event) => {
-          event.stopPropagation()
-          onLayerSelect?.(layer.id, { additive: event.metaKey || event.ctrlKey })
-        }}
+        onClick={(event) => selectLayerFromClick(event, layer)}
         onPointerDown={(event) => startLayerInteraction(event, layer, "move")}
         onPointerMove={updateLayerInteraction}
         onPointerUp={endLayerInteraction}
         onPointerCancel={endLayerInteraction}
+        onContextMenu={(event) => openLayerContextMenu(event, [layer.id])}
       >
         {isImageMode && cardState.cardImage.value ? (
           <div
@@ -1206,6 +1819,93 @@ export const QrPane = memo(function QrPane({
     )
   }
 
+  function renderNestedLayer(layer: DraftingCanvasLayer) {
+    const isLayerSelected = activeSelectedLayerIdSet.has(layer.id)
+
+    if (layer.kind === "group") {
+      return (
+        <div
+          key={layer.id}
+          data-slot="drafting-layer-group"
+          data-layer-id={layer.id}
+          data-selected={isLayerSelected ? "true" : "false"}
+          className="absolute max-h-none max-w-none"
+          style={{
+            ...getLayerPlacementStyle(layer, true),
+            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+          }}
+        >
+          {(layer.children ?? [])
+            .filter((child) => child.isVisible)
+            .sort((a, b) => a.zIndex - b.zIndex)
+            .map((child) => renderNestedLayer(child))}
+        </div>
+      )
+    }
+
+    if (layer.kind === "qr") {
+      const qrMarkup = markup ? applyDraftingQrForegroundShadow(markup, layer) : ""
+
+      return (
+        <div
+          key={layer.id}
+          data-slot="dashboard-compose-node"
+          data-layer-id={layer.id}
+          data-selected={isLayerSelected ? "true" : "false"}
+          className="absolute max-h-none max-w-none"
+          style={{
+            ...getLayerPlacementStyle(layer, true),
+            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+          }}
+        >
+          <DraftingQrBackground layer={layer} state={state} />
+          <div
+            className="relative z-10 h-full w-full max-h-full max-w-full [&_svg]:h-full [&_svg]:w-full"
+            dangerouslySetInnerHTML={{ __html: qrMarkup }}
+          />
+        </div>
+      )
+    }
+
+    if (layer.kind === "text") {
+      return (
+        <div
+          key={layer.id}
+          data-slot="drafting-text-layer"
+          data-layer-id={layer.id}
+          data-selected={isLayerSelected ? "true" : "false"}
+          className="absolute max-h-none max-w-none overflow-hidden"
+          style={{
+            ...getLayerPlacementStyle(layer, true),
+            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+          }}
+        >
+          <div className="h-full w-full" data-slot="drafting-text-content" style={getTextLayerStyle(layer)}>
+            {layer.text}
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div
+        key={layer.id}
+        data-slot="dashboard-compose-card"
+        data-layer-id={layer.id}
+        data-selected={isLayerSelected ? "true" : "false"}
+        className="absolute max-h-none max-w-none overflow-visible"
+        style={{
+          ...cardStyle,
+          ...getLayerPlacementStyle(layer, true),
+          boxShadow: getDraftingCardShadow({ ...cardState, shadow: layer.shadow }),
+          filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+        }}
+      >
+        {isPaperShaderMode ? <DraftingCardPaperShaderLayer paperShader={cardState.paperShader} /> : null}
+      </div>
+    )
+  }
+
   return (
     <div
       data-slot="qr-pane"
@@ -1219,13 +1919,26 @@ export const QrPane = memo(function QrPane({
       }}
     >
       <div
+        ref={canvasRef}
         data-slot="dashboard-compose-canvas"
         data-compose-mode="compose"
         className="relative h-full w-full overflow-visible"
-        onClick={() => {
+        onClick={(event) => {
+          if (suppressCanvasClickRef.current) {
+            event.preventDefault()
+            event.stopPropagation()
+            suppressCanvasClickRef.current = false
+            return
+          }
+
           onLayerSelect?.(null)
           onSelect()
         }}
+        onContextMenu={openCanvasContextMenu}
+        onPointerCancel={endMarqueeSelection}
+        onPointerDown={startMarqueeSelection}
+        onPointerMove={updateMarqueeSelection}
+        onPointerUp={endMarqueeSelection}
       >
         {isLoading ? (
           <div className="grid h-full place-items-center text-sm font-medium text-[var(--drafting-ink-muted)]">
@@ -1234,11 +1947,28 @@ export const QrPane = memo(function QrPane({
         ) : markup ? (
           <>
             <SnapGuideOverlay guides={snapGuides} />
+            {renderMarquee()}
             {visibleLayers.map(renderLayer)}
             {activeSelectedLayerIds.length > 0
               ? visibleLayers.map((layer) => renderLayerControls(layer))
               : null}
             {createMultiLayerControls()}
+            {contextMenu && typeof document !== "undefined"
+              ? createPortal(
+                  <LayerContextMenu
+                    layerCount={contextMenu.layerIds.length}
+                    layers={contextMenuLayers}
+                    onAction={runLayerAction}
+                    onCopy={onLayerCopy ? runLayerCopy : undefined}
+                    onPaste={onLayerPaste ? runLayerPaste : undefined}
+                    style={{
+                      left: contextMenu.x,
+                      top: contextMenu.y,
+                    }}
+                  />,
+                  document.body,
+                )
+              : null}
           </>
         ) : (
           <div className="grid h-full place-items-center text-sm font-medium text-[var(--drafting-ink-muted)]">
@@ -1255,6 +1985,7 @@ export const QrPane = memo(function QrPane({
   previousProps.isSelected === nextProps.isSelected &&
   previousProps.interactionScale === nextProps.interactionScale &&
   previousProps.layers === nextProps.layers &&
+  previousProps.onLayerAction === nextProps.onLayerAction &&
   previousProps.selectedLayerId === nextProps.selectedLayerId &&
   previousProps.selectedLayerIds === nextProps.selectedLayerIds &&
   previousProps.snapEnabled === nextProps.snapEnabled,

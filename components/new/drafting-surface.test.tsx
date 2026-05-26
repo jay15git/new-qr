@@ -317,7 +317,7 @@ describe("DraftingSurface", () => {
     expect(
       surface.container.querySelector('[data-slot="drafting-plus-marker"]')?.getAttribute("class"),
     ).not.toContain("text-black/")
-    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(9)
+    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(10)
     expect(surface.container.querySelector('[data-slot="tabs"]')).not.toBeNull()
     expect(
       surface.container.querySelector('button[aria-label="Open QR type options"]'),
@@ -374,8 +374,10 @@ describe("DraftingSurface", () => {
       'input[type="radio"][aria-label="Export WEBP"]',
     ) as HTMLInputElement
 
-    expect(actions.firstElementChild?.getAttribute("data-slot")).toBe("drafting-card-only-toggle")
-    expect(actions.children.item(1)?.getAttribute("data-slot")).toBe("switch")
+    expect(actions.firstElementChild?.getAttribute("data-slot")).toBe("popover")
+    expect(actions.children.item(1)?.getAttribute("data-slot")).toBe("drafting-card-only-toggle")
+    expect(actions.children.item(2)?.getAttribute("data-slot")).toBe("switch")
+    expect(actions.querySelector('[data-slot="drafting-shortcuts-trigger"]')).not.toBeNull()
     expect(actions.querySelector('[data-slot="drafting-download-trigger"]')).not.toBeNull()
     expect(
       getRequiredElement(surface.container, '[data-slot="drafting-download-format-grid"]')
@@ -394,6 +396,49 @@ describe("DraftingSurface", () => {
     },
     15000,
   )
+
+  it("opens a header keyboard shortcuts popover next to the card toggle", () => {
+    const surface = renderSurface({ openDownloadPopover: false })
+    const actions = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-header-actions"]',
+    )
+    const shortcutsWrapper = actions.children.item(0)
+    const cardToggle = getRequiredElement(actions, '[data-slot="drafting-card-only-toggle"]')
+    const shortcutsTrigger = getRequiredElement(
+      actions,
+      'button[aria-label="Open keyboard shortcuts"]',
+    )
+
+    expect(shortcutsWrapper?.contains(shortcutsTrigger)).toBe(true)
+    expect(actions.children.item(1)).toBe(cardToggle)
+    expect(surface.container.querySelector('[data-slot="drafting-shortcuts-popover"]')).toBeNull()
+
+    act(() => {
+      activateElement(shortcutsTrigger)
+    })
+
+    const popover = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-shortcuts-popover"]',
+    )
+
+    expect(popover.textContent).toContain("Shortcuts")
+    expect(popover.textContent).toContain("Arrow keys")
+    expect(popover.textContent).toContain("Nudge selected layer 1px")
+    expect(popover.textContent).toContain("Cmd/Ctrl + C")
+    expect(popover.textContent).toContain("Copy selected layers")
+    expect(popover.textContent).toContain("Delete / Backspace")
+    expect(popover.textContent).toContain("Delete selected layers")
+    expect(popover.textContent).toContain("Cmd/Ctrl + A")
+    expect(popover.textContent).toContain("Select all visible unlocked layers")
+    expect(popover.textContent).toContain("Esc")
+    expect(popover.textContent).toContain("Clear selection")
+    expect(popover.textContent).toContain("Cmd/Ctrl + Shift + G")
+    expect(popover.textContent).toContain("Ungroup selected groups")
+    expect(popover.textContent).toContain("Cmd/Ctrl + Shift + H")
+    expect(popover.textContent).toContain("Hide/show selected layers")
+  })
 
   it("shows card frame, surface, image, and shaders tools when card-only mode is enabled", () => {
     const surface = renderSurface()
@@ -434,7 +479,7 @@ describe("DraftingSurface", () => {
     })
 
     expect(surface.container.querySelector('button[aria-label="Open Frame"]')).toBeNull()
-    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(9)
+    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(10)
     expect(
       getRequiredElement(surface.container, 'button[aria-label="Open Content"]').getAttribute(
         "aria-pressed",
@@ -706,7 +751,9 @@ describe("DraftingSurface", () => {
       activateElement(
         getRequiredElement(surface.container, 'input[aria-label="Export WEBP"]'),
       )
-      await flushPromises()
+      for (let i = 0; i < 5; i += 1) {
+        await flushPromises()
+      }
     })
 
     await act(async () => {
@@ -960,6 +1007,106 @@ describe("DraftingSurface", () => {
     expect(layersButton.getAttribute("aria-pressed")).toBe("true")
     expect(getTabLabels(surface.container)).toEqual(["Layers"])
     expect(surface.container.querySelector('[data-slot="drafting-layers-tab"]')).not.toBeNull()
+  })
+
+  it("adds and edits a simple Avnac-style text layer from the Text tool", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface({ openDownloadPopover: false })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Text"]'))
+    })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    const textLayer = getRequiredElement(surface.container, '[data-slot="drafting-text-layer"]')
+    const textPanel = getRequiredElement(surface.container, '[data-slot="drafting-text-tab"]')
+    const textArea = getRequiredElement(
+      textPanel,
+      'textarea[aria-label="Text layer content"]',
+    ) as HTMLTextAreaElement
+    const sizeInput = getRequiredElement(textPanel, 'input[type="number"]') as HTMLInputElement
+    const fillInput = getRequiredElement(
+      textPanel,
+      'input[aria-label="Text fill color"]',
+    ) as HTMLInputElement
+    const weightInput = getRequiredElement(
+      textPanel,
+      'input[aria-label="Text font weight"]',
+    ) as HTMLInputElement
+    const generalSansButton = getRequiredElement(
+      textPanel,
+      'button[aria-label="Choose General Sans"]',
+    )
+
+    expect(textLayer.getAttribute("data-selected")).toBe("true")
+    expect(textLayer.textContent).toContain("Add text")
+    expect(textArea.value).toBe("Add text")
+
+    act(() => {
+      changeInputValue(weightInput, "532")
+    })
+
+    expect(
+      (getRequiredElement(surface.container, '[data-slot="drafting-text-content"]') as HTMLElement)
+        .style.fontWeight,
+    ).toBe("500")
+
+    act(() => {
+      activateElement(generalSansButton)
+      document
+        .querySelector("link#drafting-font-fontshare-general-sans")
+        ?.dispatchEvent(new Event("load"))
+      changeInputValue(textArea, "Scan at counter")
+      changeInputValue(sizeInput, "42")
+      changeInputValue(fillInput, "#123456")
+      changeInputValue(weightInput, "680")
+    })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    const content = getRequiredElement(surface.container, '[data-slot="drafting-text-content"]') as HTMLElement
+
+    expect(content.textContent).toContain("Scan at counter")
+    expect(content.style.fontFamily).toBe('"General Sans", system-ui, Arial, sans-serif')
+    expect(content.style.fontSize).toBe("42px")
+    expect(content.style.fontWeight).toBe("700")
+    expect(content.style.color).toBe("rgb(18, 52, 86)")
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open download options"]'))
+    })
+    await act(async () => {
+      await flushPromises()
+    })
+    act(() => {
+      activateElement(getRequiredElement(surface.container, '[data-slot="drafting-download-submit"]'))
+    })
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const exportCall = downloadDashboardQrNodeExportSpy.mock.calls.at(-1) as unknown as
+      | [{ node: { originalSvgMarkup: string } }]
+      | undefined
+    const nodeMarkup = exportCall?.[0].node.originalSvgMarkup
+
+    expect(nodeMarkup).toContain(">Scan at<")
+    expect(nodeMarkup).toContain(">counter<")
+    expect(nodeMarkup).toContain("General Sans")
+    expect(nodeMarkup).toContain('font-size="42"')
+    expect(nodeMarkup).toContain('font-weight="700"')
+    expect(nodeMarkup).toContain('fill="#123456"')
   })
 
   it("opens the loader playground tool with square loader controls", async () => {
@@ -3637,6 +3784,380 @@ describe("DraftingSurface", () => {
     expect(preventedInputUndo).toBe(false)
   })
 
+  it("uses keyboard shortcuts from body focus for layer nudging, ordering, and duplicating QR codes", async () => {
+    vi.useFakeTimers()
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface({ openDownloadPopover: false })
+
+    await advanceDraftingTimers()
+
+    const qrLayer = getRequiredElement(
+      surface.container,
+      '[data-slot="dashboard-compose-node"]',
+    ) as HTMLElement
+
+    expect(qrLayer.style.transform).toContain("translate3d(-120px")
+
+    act(() => {
+      document.body.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          bubbles: true,
+          key: "ArrowRight",
+          shiftKey: true,
+        }),
+      )
+    })
+
+    expect(qrLayer.style.transform).toContain("translate3d(-110px")
+
+    act(() => {
+      document.body.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          bubbles: true,
+          ctrlKey: true,
+          key: "d",
+        }),
+      )
+    })
+    await advanceDraftingTimers()
+
+    expect(surface.container.querySelectorAll('[data-slot="dashboard-compose-surface"]')).toHaveLength(2)
+  })
+
+  it("copies and pastes selected layers with keyboard shortcuts", async () => {
+    vi.useFakeTimers()
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    let clipboardText = ""
+    const writeText = vi.fn(async (value: string) => {
+      clipboardText = value
+    })
+    const readText = vi.fn(async () => clipboardText)
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { readText, writeText },
+    })
+    const surface = renderSurface({ openDownloadPopover: false })
+
+    await advanceDraftingTimers()
+
+    expect(surface.container.querySelectorAll('[data-slot="dashboard-compose-node"]')).toHaveLength(1)
+
+    await act(async () => {
+      document.body.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          bubbles: true,
+          ctrlKey: true,
+          key: "c",
+        }),
+      )
+      await flushPromises()
+      await flushPromises()
+    })
+
+    expect(writeText).toHaveBeenCalledOnce()
+    expect(JSON.parse(clipboardText)).toMatchObject({
+      sourceNodeId: "dashboard-qr-node",
+      type: "new-qr/drafting-layers",
+      version: 1,
+    })
+    expect(JSON.parse(clipboardText).layers).toHaveLength(1)
+
+    await act(async () => {
+      document.body.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          bubbles: true,
+          ctrlKey: true,
+          key: "v",
+        }),
+      )
+      await flushPromises()
+    })
+    await advanceDraftingTimers()
+
+    expect(readText).toHaveBeenCalledOnce()
+    expect(surface.container.querySelectorAll('[data-slot="dashboard-compose-node"]')).toHaveLength(2)
+  })
+
+  it("uses keyboard shortcuts to select all, clear selection, order layers, delete cards, and keep the canonical QR", async () => {
+    vi.useFakeTimers()
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    let clipboardText = ""
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        readText: vi.fn(async () => clipboardText),
+        writeText: vi.fn(async (value: string) => {
+          clipboardText = value
+        }),
+      },
+    })
+    const surface = renderSurface({ openDownloadPopover: false })
+
+    await advanceDraftingTimers()
+
+    await act(async () => {
+      dispatchBodyShortcut("c", { ctrlKey: true })
+      await flushPromises()
+      dispatchBodyShortcut("v", { ctrlKey: true })
+      await flushPromises()
+    })
+    await advanceDraftingTimers()
+
+    const pastedQrLayer = Array.from(
+      surface.container.querySelectorAll<HTMLElement>('[data-slot="dashboard-compose-node"]'),
+    ).find((node) => node.dataset.layerId?.includes(":qr:"))
+
+    expect(pastedQrLayer).toBeDefined()
+    expect(pastedQrLayer?.dataset.selected).toBe("true")
+
+    act(() => {
+      dispatchBodyShortcut("]", { ctrlKey: true, shiftKey: true })
+    })
+
+    expect(Number(pastedQrLayer?.style.zIndex)).toBeGreaterThan(1)
+
+    act(() => {
+      dispatchBodyShortcut("[", { ctrlKey: true, shiftKey: true })
+    })
+
+    expect(Number(pastedQrLayer?.style.zIndex)).toBe(0)
+
+    act(() => {
+      dispatchBodyShortcut("a", { ctrlKey: true })
+    })
+
+    expect(
+      Array.from(surface.container.querySelectorAll<HTMLElement>("[data-layer-id]"))
+        .filter((layer) => layer.dataset.selected === "true")
+        .map((layer) => layer.dataset.layerId)
+        .filter(Boolean),
+    ).toEqual(
+      expect.arrayContaining([
+        "dashboard-qr-node:card",
+        "dashboard-qr-node:qr",
+        pastedQrLayer?.dataset.layerId,
+      ]),
+    )
+
+    act(() => {
+      dispatchBodyShortcut("Escape")
+    })
+
+    expect(
+      Array.from(surface.container.querySelectorAll<HTMLElement>("[data-layer-id]")).some(
+        (layer) => layer.dataset.selected === "true",
+      ),
+    ).toBe(false)
+
+    act(() => {
+      pastedQrLayer?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    act(() => {
+      dispatchBodyShortcut("Delete")
+    })
+
+    expect(surface.container.querySelectorAll('[data-slot="dashboard-compose-node"]')).toHaveLength(1)
+
+    act(() => {
+      getRequiredElement(
+        surface.container,
+        '[data-slot="dashboard-compose-card"][data-layer-id="dashboard-qr-node:card"]',
+      ).dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    act(() => {
+      dispatchBodyShortcut("Delete")
+    })
+
+    expect(
+      surface.container.querySelector(
+        '[data-slot="dashboard-compose-card"][data-layer-id="dashboard-qr-node:card"]',
+      ),
+    ).toBeNull()
+
+    act(() => {
+      getRequiredElement(
+        surface.container,
+        '[data-slot="dashboard-compose-node"][data-layer-id="dashboard-qr-node:qr"]',
+      ).dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    act(() => {
+      dispatchBodyShortcut("Backspace")
+    })
+
+    expect(surface.container.querySelectorAll('[data-slot="dashboard-compose-node"]')).toHaveLength(1)
+  })
+
+  it("uses keyboard shortcuts to group, ungroup, lock, and hide selected layers", async () => {
+    vi.useFakeTimers()
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface({ openDownloadPopover: false })
+
+    await advanceDraftingTimers()
+
+    act(() => {
+      dispatchBodyShortcut("a", { ctrlKey: true })
+    })
+
+    act(() => {
+      dispatchBodyShortcut("g", { ctrlKey: true })
+    })
+
+    let groupLayer = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-layer-group"]',
+    )
+
+    act(() => {
+      groupLayer.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    act(() => {
+      dispatchBodyShortcut("g", { ctrlKey: true, shiftKey: true })
+    })
+
+    expect(surface.container.querySelector('[data-slot="drafting-layer-group"]')).toBeNull()
+
+    act(() => {
+      dispatchBodyShortcut("a", { ctrlKey: true })
+    })
+
+    act(() => {
+      dispatchBodyShortcut("g", { ctrlKey: true })
+    })
+
+    groupLayer = getRequiredElement(surface.container, '[data-slot="drafting-layer-group"]')
+
+    act(() => {
+      groupLayer.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    act(() => {
+      dispatchBodyShortcut("l", { ctrlKey: true, shiftKey: true })
+    })
+
+    expect(groupLayer.className).toContain("cursor-default")
+
+    act(() => {
+      dispatchBodyShortcut("l", { ctrlKey: true, shiftKey: true })
+    })
+
+    expect(groupLayer.className).toContain("cursor-move")
+
+    act(() => {
+      dispatchBodyShortcut("h", { ctrlKey: true, shiftKey: true })
+    })
+
+    expect(surface.container.querySelector('[data-slot="drafting-layer-group"]')).toBeNull()
+
+    act(() => {
+      dispatchBodyShortcut("h", { ctrlKey: true, shiftKey: true })
+    })
+
+    expect(surface.container.querySelector('[data-slot="drafting-layer-group"]')).not.toBeNull()
+  })
+
+  it("keeps editing fields native for select-all, delete, clipboard, and layer shortcuts", async () => {
+    vi.useFakeTimers()
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface({ openDownloadPopover: false })
+    const contentInput = getRequiredElement(
+      surface.container,
+      'textarea[aria-label="Auto content"]',
+    ) as HTMLTextAreaElement
+
+    await advanceDraftingTimers()
+
+    act(() => {
+      changeInputValue(contentInput, "https://example.com/native-shortcuts")
+      contentInput.focus()
+    })
+
+    const shortcutEvents = [
+      new KeyboardEvent("keydown", { bubbles: true, cancelable: true, ctrlKey: true, key: "a" }),
+      new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "Delete" }),
+      new KeyboardEvent("keydown", { bubbles: true, cancelable: true, ctrlKey: true, key: "c" }),
+      new KeyboardEvent("keydown", { bubbles: true, cancelable: true, ctrlKey: true, key: "v" }),
+      new KeyboardEvent("keydown", {
+        bubbles: true,
+        cancelable: true,
+        ctrlKey: true,
+        shiftKey: true,
+        key: "]",
+      }),
+    ]
+
+    for (const event of shortcutEvents) {
+      expect(contentInput.dispatchEvent(event)).toBe(true)
+    }
+
+    expect(contentInput.value).toBe("https://example.com/native-shortcuts")
+    expect(surface.container.querySelectorAll('[data-slot="dashboard-compose-node"]')).toHaveLength(1)
+  })
+
+  it("uses native clipboard events for copy and paste when keyboard shortcuts become clipboard events", async () => {
+    vi.useFakeTimers()
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    let copiedText = ""
+    const surface = renderSurface({ openDownloadPopover: false })
+
+    await advanceDraftingTimers()
+
+    const copyEvent = new Event("copy", { bubbles: true, cancelable: true })
+    Object.defineProperty(copyEvent, "clipboardData", {
+      value: {
+        setData: (_type: string, value: string) => {
+          copiedText = value
+        },
+      },
+    })
+
+    act(() => {
+      document.body.dispatchEvent(copyEvent)
+    })
+
+    expect(copiedText).toContain('"type":"new-qr/drafting-layers"')
+
+    const pasteEvent = new Event("paste", { bubbles: true, cancelable: true })
+    Object.defineProperty(pasteEvent, "clipboardData", {
+      value: {
+        getData: () => copiedText,
+      },
+    })
+
+    act(() => {
+      document.body.dispatchEvent(pasteEvent)
+    })
+    await advanceDraftingTimers()
+
+    expect(surface.container.querySelectorAll('[data-slot="dashboard-compose-node"]')).toHaveLength(2)
+  })
+
+  it("focuses the drafting surface after selecting a canvas layer", async () => {
+    vi.useFakeTimers()
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface({ openDownloadPopover: false })
+
+    await advanceDraftingTimers()
+
+    const draftingSurface = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-surface"]',
+    )
+    const qrLayer = getRequiredElement(
+      surface.container,
+      '[data-slot="dashboard-compose-node"]',
+    )
+
+    act(() => {
+      qrLayer.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    expect(document.activeElement).toBe(draftingSurface)
+  })
+
   it("keeps add QR and reset changes undoable", async () => {
     vi.useFakeTimers()
     const surface = renderSurface({ openDownloadPopover: false })
@@ -3798,6 +4319,20 @@ function activateElement(element: HTMLElement) {
   element.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, button: 0 }))
   element.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, button: 0 }))
   element.dispatchEvent(new MouseEvent("click", { bubbles: true, button: 0 }))
+}
+
+function dispatchBodyShortcut(
+  key: string,
+  options: Omit<KeyboardEventInit, "bubbles" | "cancelable" | "key"> = {},
+) {
+  document.body.dispatchEvent(
+    new KeyboardEvent("keydown", {
+      bubbles: true,
+      cancelable: true,
+      key,
+      ...options,
+    }),
+  )
 }
 
 function changeInputValue(element: HTMLInputElement | HTMLTextAreaElement, value: string) {

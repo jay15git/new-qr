@@ -38,6 +38,7 @@ describe("theme contract", () => {
 
   it("maps the new drafting dark theme to Pencil token aliases", () => {
     const globalsSource = readFileSync(resolve(process.cwd(), "app/globals.css"), "utf8")
+    const qrPaneSource = readFileSync(resolve(process.cwd(), "components/new/qr-pane.tsx"), "utf8")
     const requiredDarkTokens = [
       "--drafting-dark-page-bg: #101216;",
       "--drafting-dark-shell-bg: #101216;",
@@ -77,6 +78,8 @@ describe("theme contract", () => {
     expect(globalsSource).toContain(
       '.dark :is([data-slot="new-page"], [data-slot="drafting-download-popover"])',
     )
+    expect(qrPaneSource).toContain('data-drafting-dropdown-content="true"')
+    expect(qrPaneSource).toContain("bg-[var(--drafting-dropdown-menu-surface-open)]")
     expect(globalsSource).toContain(
       "--drafting-option-card-border: #ffffff12;",
     )

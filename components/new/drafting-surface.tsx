@@ -43,13 +43,25 @@ import {
   type DraftingCardState,
 } from "@/components/new/drafting-card-state"
 import {
+  alignDraftingCanvasLayers,
   cloneDraftingCanvasLayer,
+  cloneDraftingCanvasLayersForPaste,
+  createDraftingTextLayer,
   createDefaultDraftingLayers,
+  DEFAULT_DRAFTING_TEXT_LAYER,
+  distributeDraftingCanvasLayers,
   getDraftingCardLayerId,
   getDraftingQrLayerId,
+  groupDraftingCanvasLayers,
   isDraftingCardLayerId,
+  isDraftingQrLayerId,
   patchDraftingCanvasLayer,
+  reorderDraftingCanvasLayer,
+  ungroupDraftingCanvasLayer,
   type DraftingCanvasLayer,
+  type DraftingLayerAlignAction,
+  type DraftingLayerDistributeAction,
+  type DraftingLayerReorderAction,
   type DraftingLayerStateByNodeId,
 } from "@/components/new/drafting-layer-state"
 import {
@@ -87,7 +99,16 @@ import {
   DRAFTING_LAYERS_TAB_ICON,
   DraftingLayersTab,
 } from "@/components/new/drafting-layers-tab"
+import {
+  DRAFTING_FONT_REGISTRY,
+  ensureDraftingFontsForLayers,
+  getDraftingFontCssFamily,
+  loadDraftingFont,
+  resolveDraftingFont,
+  type DraftingFontSource,
+} from "@/components/new/drafting-font-registry"
 import { DraftingPaneWorkspace } from "@/components/new/drafting-pane-workspace"
+import type { DraftingLayerMenuAction } from "@/components/new/qr-pane"
 import {
   filterBrandIcons,
   findBrandIconById,
@@ -145,7 +166,17 @@ import {
   validateStaticQrContent,
   type StaticQrContentValue,
 } from "@/components/qr/qr-static-content"
-import { CreditCardIcon, DownloadIcon, LinkIcon, PieChart, Settings, SlidersHorizontal, Sparkles } from "lucide-react"
+import {
+  CreditCardIcon,
+  DownloadIcon,
+  KeyboardIcon,
+  LinkIcon,
+  PieChart,
+  Settings,
+  SlidersHorizontal,
+  Sparkles,
+  TypeIcon,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SecondaryButton } from "@/components/ui/secondary-button"
 import {
@@ -167,6 +198,7 @@ import {
   DEFAULT_QR_INPUT_TYPE,
   type QrInputType,
 } from "@/components/ui/qr-input-config"
+import { Slider as UnlumenSlider } from "@/components/unlumen-ui/slider"
 import { cn } from "@/lib/utils"
 
 const OUTER_MARKERS = [
@@ -195,7 +227,7 @@ type DraftingPanelTab = {
   label: string
 }
 
-type DraftingToolId = QrEditorSectionId | DraftingCardToolId | "layers" | "loader-playground"
+type DraftingToolId = QrEditorSectionId | DraftingCardToolId | "layers" | "loader-playground" | "text"
 
 type DraftingTool = {
   id: DraftingToolId
@@ -222,6 +254,7 @@ const DRAFTING_PANEL_TABS: Record<DraftingToolId, DraftingPanelTab[]> = {
     { id: "motion", label: "Motion" },
   ],
   "loader-playground": [{ id: "playground", label: "Playground" }],
+  text: [{ id: "text", label: "Text" }],
   "corner-square": [
     { id: "style", label: "Style" },
     { id: "color", label: "Color" },
@@ -253,6 +286,7 @@ const DEFAULT_DRAFTING_PANEL_TABS: Record<DraftingToolId, string> = {
   "card-shaders": "shaders",
   style: "style",
   "loader-playground": "playground",
+  text: "text",
   "corner-square": "style",
   "corner-dot": "style",
   background: "colors",
@@ -269,6 +303,45 @@ const DRAFTING_PANEL_TAB_TRIGGER_CLASS_NAME =
 
 const DEFAULT_DRAFTING_STUDIO_STATE = createDefaultQrStudioState()
 const DEFAULT_DRAFTING_PANE_QR_SIZE = 240
+const DRAFTING_LAYER_CLIPBOARD_TYPE = "new-qr/drafting-layers"
+const DRAFTING_LAYER_CLIPBOARD_VERSION = 1
+const DRAFTING_LAYER_PASTE_OFFSET = 24
+const DRAFTING_KEYBOARD_SHORTCUT_GROUPS = [
+  {
+    title: "Canvas",
+    shortcuts: [
+      ["Arrow keys", "Nudge selected layer 1px"],
+      ["Shift + Arrow", "Nudge selected layer 10px"],
+      ["Delete / Backspace", "Delete selected layers"],
+      ["Cmd/Ctrl + A", "Select all visible unlocked layers"],
+      ["Esc", "Clear selection"],
+    ],
+  },
+  {
+    title: "Edit",
+    shortcuts: [
+      ["Cmd/Ctrl + Z", "Undo"],
+      ["Cmd/Ctrl + Shift + Z", "Redo"],
+      ["Cmd/Ctrl + Y", "Redo"],
+      ["Cmd/Ctrl + C", "Copy selected layers"],
+      ["Cmd/Ctrl + V", "Paste copied layers"],
+      ["Cmd/Ctrl + D", "Duplicate QR pane"],
+      ["Cmd/Ctrl + G", "Group selected layers"],
+      ["Cmd/Ctrl + Shift + G", "Ungroup selected groups"],
+    ],
+  },
+  {
+    title: "Layers",
+    shortcuts: [
+      ["Cmd/Ctrl + [", "Send backward"],
+      ["Cmd/Ctrl + ]", "Bring forward"],
+      ["Cmd/Ctrl + Shift + [", "Send to back"],
+      ["Cmd/Ctrl + Shift + ]", "Bring to front"],
+      ["Cmd/Ctrl + Shift + L", "Lock/unlock selected layers"],
+      ["Cmd/Ctrl + Shift + H", "Hide/show selected layers"],
+    ],
+  },
+] as const
 const IGNORE_DRAFTING_UPLOAD_ERROR: (message: string) => void = () => undefined
 const DEFAULT_DOWNLOAD_NAME = "new-qr-studio"
 const DRAFTING_DOWNLOAD_EXTENSIONS = ["svg", "png", "webp", "jpeg"] as const satisfies ReadonlyArray<
@@ -382,6 +455,11 @@ const DRAFTING_TOOLS: DraftingTool[] = [
     id: "loader-playground",
     title: "Loader Playground",
     renderIcon: () => <SlidersHorizontal className="size-4 shrink-0" />,
+  },
+  {
+    id: "text",
+    title: "Text",
+    renderIcon: () => <TypeIcon className="size-4 shrink-0" />,
   },
   {
     id: "corner-square",
@@ -669,6 +747,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const isApplyingDraftingWorkspaceHistoryRef = useRef(false)
   const shouldReplaceCurrentDraftingHistoryEntryRef = useRef(false)
   const draftingSurfaceRef = useRef<HTMLElement | null>(null)
+  const draftingLayerClipboardRef = useRef<string>("")
   const activeToolConfig =
     DRAFTING_TOOLS.find((section) => section.id === activeTool) ?? DRAFTING_TOOLS[0]
   const isCardTool = (toolId: DraftingToolId): toolId is DraftingCardToolId =>
@@ -819,6 +898,14 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       selectedTypeNumber,
     ],
   )
+  const keyboardStateRef = useRef({
+    activeQrNodeId,
+    draftingStudioState,
+    layerStateByNodeId,
+    qrNodeCount: Object.keys(qrStateByNodeId).length,
+    selectedCardState,
+    selectedLayerIds,
+  })
   const ensureDotsColorItemExpanded = (itemId: DotsColorMode) =>
     setOpenDotsColorItems((current) =>
       current.includes(itemId) ? current : [...current, itemId],
@@ -1301,6 +1388,8 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   }
 
   function handlePaneSelection(paneId: string) {
+    draftingSurfaceRef.current?.focus({ preventScroll: true })
+
     if (paneId === activeQrNodeId) {
       return
     }
@@ -1448,22 +1537,88 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   }, [draftingWorkspaceDocument, isDraftingWorkspaceReady])
 
   useEffect(() => {
+    keyboardStateRef.current = {
+      activeQrNodeId,
+      draftingStudioState,
+      layerStateByNodeId,
+      qrNodeCount: qrNodeIds.length,
+      selectedCardState,
+      selectedLayerIds,
+    }
+  }, [
+    activeQrNodeId,
+    draftingStudioState,
+    layerStateByNodeId,
+    qrNodeIds.length,
+    selectedCardState,
+    selectedLayerIds,
+  ])
+
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const target = event.target
+      const isBodyOrDocumentTarget =
+        target === document.body || target === document.documentElement || target === document
       const targetInSurface =
         target instanceof Node && draftingSurfaceRef.current?.contains(target)
 
-      if (!targetInSurface || isEditableShortcutTarget(target)) {
-        return
-      }
-
-      const usesModifier = event.metaKey || event.ctrlKey
-
-      if (!usesModifier) {
+      if (
+        !draftingSurfaceRef.current ||
+        (!targetInSurface && !isBodyOrDocumentTarget) ||
+        isEditableShortcutTarget(target)
+      ) {
         return
       }
 
       const key = event.key.toLowerCase()
+      const usesModifier = event.metaKey || event.ctrlKey
+
+      if (!usesModifier) {
+        if (
+          key === "arrowleft" ||
+          key === "arrowright" ||
+          key === "arrowup" ||
+          key === "arrowdown"
+        ) {
+          const delta = event.shiftKey ? 10 : 1
+          const x = key === "arrowleft" ? -delta : key === "arrowright" ? delta : 0
+          const y = key === "arrowup" ? -delta : key === "arrowdown" ? delta : 0
+          const {
+            activeQrNodeId: currentActiveQrNodeId,
+            layerStateByNodeId: currentLayerStateByNodeId,
+            selectedLayerIds: currentSelectedLayerIds,
+          } = keyboardStateRef.current
+          const activeLayers = currentLayerStateByNodeId[currentActiveQrNodeId] ?? []
+
+          if (currentSelectedLayerIds.length > 0) {
+            event.preventDefault()
+            for (const layerId of currentSelectedLayerIds) {
+              const layer = activeLayers.find((item) => item.id === layerId)
+
+              if (layer && !layer.isLocked) {
+                handleLayerChange(currentActiveQrNodeId, layerId, {
+                  x: layer.x + x,
+                  y: layer.y + y,
+                })
+              }
+            }
+          }
+          return
+        }
+
+        if (key === "delete" || key === "backspace") {
+          event.preventDefault()
+          deleteSelectedLayersOrPane()
+          return
+        }
+
+        if (key === "escape") {
+          event.preventDefault()
+          clearDraftingLayerSelection()
+        }
+
+        return
+      }
 
       if (key === "z" && event.shiftKey) {
         event.preventDefault()
@@ -1480,13 +1635,150 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       if (key === "y") {
         event.preventDefault()
         handleRedoDraftingWorkspace()
+        return
+      }
+
+      if (key === "d") {
+        event.preventDefault()
+        void handleAddQrCode()
+        return
+      }
+
+      if (key === "a") {
+        event.preventDefault()
+        selectAllActiveDraftingLayers()
+        return
+      }
+
+      if (key === "c" && keyboardStateRef.current.selectedLayerIds.length > 0) {
+        event.preventDefault()
+        void copySelectedDraftingLayers(keyboardStateRef.current.selectedLayerIds)
+        return
+      }
+
+      if (key === "v") {
+        event.preventDefault()
+        void pasteDraftingLayers()
+        return
+      }
+
+      if (key === "[" && keyboardStateRef.current.selectedLayerIds.length > 0) {
+        event.preventDefault()
+        handleLayerAction(
+          keyboardStateRef.current.activeQrNodeId,
+          keyboardStateRef.current.selectedLayerIds,
+          event.shiftKey ? "back" : "backward",
+        )
+        return
+      }
+
+      if (key === "]" && keyboardStateRef.current.selectedLayerIds.length > 0) {
+        event.preventDefault()
+        handleLayerAction(
+          keyboardStateRef.current.activeQrNodeId,
+          keyboardStateRef.current.selectedLayerIds,
+          event.shiftKey ? "front" : "forward",
+        )
+        return
+      }
+
+      if (key === "g" && keyboardStateRef.current.selectedLayerIds.length > 0) {
+        event.preventDefault()
+        handleLayerAction(
+          keyboardStateRef.current.activeQrNodeId,
+          keyboardStateRef.current.selectedLayerIds,
+          event.shiftKey ? "ungroup" : "group",
+        )
+        return
+      }
+
+      if (key === "l" && event.shiftKey) {
+        event.preventDefault()
+        toggleSelectedLayerLock()
+        return
+      }
+
+      if (key === "h" && event.shiftKey) {
+        event.preventDefault()
+        toggleSelectedLayerVisibility()
       }
     }
 
     window.addEventListener("keydown", handleKeyDown, true)
     return () => window.removeEventListener("keydown", handleKeyDown, true)
-    // Keyboard handlers use history refs, so they do not need render-time state.
+    // Keyboard listener is stable; current workspace values are read from keyboardStateRef.
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    const shouldUseDraftingClipboardEvent = (event: ClipboardEvent) => {
+      const target = event.target
+      const isBodyOrDocumentTarget =
+        target === document.body || target === document.documentElement || target === document
+      const targetInSurface =
+        target instanceof Node && draftingSurfaceRef.current?.contains(target)
+
+      return Boolean(
+        draftingSurfaceRef.current &&
+          (targetInSurface || isBodyOrDocumentTarget) &&
+          !isEditableShortcutTarget(target),
+      )
+    }
+
+    const handleCopy = (event: ClipboardEvent) => {
+      if (!shouldUseDraftingClipboardEvent(event)) {
+        return
+      }
+
+      const {
+        activeQrNodeId: currentActiveQrNodeId,
+        draftingStudioState: currentDraftingStudioState,
+        layerStateByNodeId: currentLayerStateByNodeId,
+        selectedCardState: currentSelectedCardState,
+        selectedLayerIds: currentSelectedLayerIds,
+      } = keyboardStateRef.current
+      const payload = getDraftingLayerClipboardPayload({
+        layerIds: currentSelectedLayerIds,
+        layers:
+          currentLayerStateByNodeId[currentActiveQrNodeId] ??
+          createDefaultDraftingLayers(
+            currentActiveQrNodeId,
+            currentDraftingStudioState,
+            currentSelectedCardState,
+          ),
+        paneId: currentActiveQrNodeId,
+      })
+
+      if (!payload) {
+        return
+      }
+
+      event.preventDefault()
+      draftingLayerClipboardRef.current = payload
+      event.clipboardData?.setData("text/plain", payload)
+    }
+
+    const handlePaste = (event: ClipboardEvent) => {
+      if (!shouldUseDraftingClipboardEvent(event)) {
+        return
+      }
+
+      const rawPayload = event.clipboardData?.getData("text/plain") ?? ""
+
+      if (!parseDraftingLayerClipboardPayload(rawPayload)) {
+        return
+      }
+
+      event.preventDefault()
+      void pasteDraftingLayers(undefined, rawPayload)
+    }
+
+    window.addEventListener("copy", handleCopy, true)
+    window.addEventListener("paste", handlePaste, true)
+    return () => {
+      window.removeEventListener("copy", handleCopy, true)
+      window.removeEventListener("paste", handlePaste, true)
+    }
   }, [])
 
   useEffect(() => {
@@ -1626,6 +1918,26 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     selectSingleLayer(getDraftingQrLayerId(nextNodeId))
   }
 
+  function handleAddTextLayer() {
+    const layers =
+      layerStateByNodeId[activeQrNodeId] ??
+      createDefaultDraftingLayers(activeQrNodeId, draftingStudioState, selectedCardState)
+    const maxZIndex = layers.reduce((max, layer) => Math.max(max, layer.zIndex), -1)
+    const textLayer = createDraftingTextLayer(activeQrNodeId, {
+      id: `${activeQrNodeId}:text:${Date.now()}`,
+      zIndex: maxZIndex + 1,
+    })
+
+    setLayerStateByNodeId((current) => ({
+      ...current,
+      [activeQrNodeId]: [...layers.map(cloneDraftingCanvasLayer), textLayer],
+    }))
+    selectSingleLayer(textLayer.id)
+    setActiveTool("text")
+    setActivePanelTabs((current) => ({ ...current, text: "text" }))
+    draftingSurfaceRef.current?.focus({ preventScroll: true })
+  }
+
   function handleRemoveQrCode(paneId: string) {
     setQrStateByNodeId((current) => {
       const next = { ...current }
@@ -1663,6 +1975,8 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     layerId: string | null,
     options?: { additive?: boolean },
   ) {
+    draftingSurfaceRef.current?.focus({ preventScroll: true })
+
     if (paneId !== activeQrNodeId) {
       handlePaneSelection(paneId)
     }
@@ -1684,12 +1998,179 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       return
     }
 
+    const selectedLayer = findDraftingLayerById(
+      layerStateByNodeId[paneId] ??
+        createDefaultDraftingLayers(paneId, draftingStudioState, selectedCardState),
+      layerId,
+    )
+
+    if (selectedLayer?.kind === "group") {
+      setActiveTool("layers")
+      return
+    }
+
+    if (selectedLayer?.kind === "text") {
+      setActiveTool("text")
+      return
+    }
+
     if (isDraftingCardLayerId(layerId)) {
       setActiveTool("card-frame")
       return
     }
 
     setActiveTool(DEFAULT_QR_EDITOR_SECTION)
+  }
+
+  function handleLayerSelectionChange(
+    paneId: string,
+    layerIds: string[],
+    options?: { additive?: boolean },
+  ) {
+    if (paneId !== activeQrNodeId) {
+      handlePaneSelection(paneId)
+    }
+
+    setSelectedLayerIds((current) => {
+      const next = options?.additive
+        ? Array.from(new Set([...current, ...layerIds]))
+        : layerIds
+
+      setSelectedLayerId(next.at(-1) ?? null)
+      return next
+    })
+  }
+
+  function getActiveSelectableLayers() {
+    const {
+      activeQrNodeId: currentActiveQrNodeId,
+      draftingStudioState: currentDraftingStudioState,
+      layerStateByNodeId: currentLayerStateByNodeId,
+      selectedCardState: currentSelectedCardState,
+    } = keyboardStateRef.current
+    const layers =
+      currentLayerStateByNodeId[currentActiveQrNodeId] ??
+      createDefaultDraftingLayers(
+        currentActiveQrNodeId,
+        currentDraftingStudioState,
+        currentSelectedCardState,
+      )
+
+    return layers.filter((layer) => layer.isVisible && !layer.isLocked)
+  }
+
+  function getSelectedActiveLayers() {
+    const {
+      activeQrNodeId: currentActiveQrNodeId,
+      draftingStudioState: currentDraftingStudioState,
+      layerStateByNodeId: currentLayerStateByNodeId,
+      selectedCardState: currentSelectedCardState,
+      selectedLayerIds: currentSelectedLayerIds,
+    } = keyboardStateRef.current
+    const selectedLayerIdSet = new Set(currentSelectedLayerIds)
+    const layers =
+      currentLayerStateByNodeId[currentActiveQrNodeId] ??
+      createDefaultDraftingLayers(
+        currentActiveQrNodeId,
+        currentDraftingStudioState,
+        currentSelectedCardState,
+      )
+
+    return layers.filter((layer) => selectedLayerIdSet.has(layer.id))
+  }
+
+  function selectAllActiveDraftingLayers() {
+    const layerIds = getActiveSelectableLayers().map((layer) => layer.id)
+
+    setSelectedLayerIds(layerIds)
+    setSelectedLayerId(layerIds.at(-1) ?? null)
+  }
+
+  function clearDraftingLayerSelection() {
+    setSelectedLayerIds([])
+    setSelectedLayerId(null)
+  }
+
+  function toggleSelectedLayerLock() {
+    const selectedLayers = getSelectedActiveLayers()
+
+    if (selectedLayers.length === 0) {
+      return
+    }
+
+    handleLayerAction(
+      keyboardStateRef.current.activeQrNodeId,
+      selectedLayers.map((layer) => layer.id),
+      selectedLayers.some((layer) => !layer.isLocked) ? "lock" : "unlock",
+    )
+  }
+
+  function toggleSelectedLayerVisibility() {
+    const selectedLayers = getSelectedActiveLayers()
+
+    if (selectedLayers.length === 0) {
+      return
+    }
+
+    handleLayerAction(
+      keyboardStateRef.current.activeQrNodeId,
+      selectedLayers.map((layer) => layer.id),
+      selectedLayers.some((layer) => layer.isVisible) ? "hide" : "show",
+    )
+  }
+
+  function deleteSelectedLayersOrPane() {
+    const {
+      activeQrNodeId: currentActiveQrNodeId,
+      draftingStudioState: currentDraftingStudioState,
+      layerStateByNodeId: currentLayerStateByNodeId,
+      qrNodeCount: currentQrNodeCount,
+      selectedCardState: currentSelectedCardState,
+      selectedLayerIds: currentSelectedLayerIds,
+    } = keyboardStateRef.current
+    const layers =
+      currentLayerStateByNodeId[currentActiveQrNodeId] ??
+      createDefaultDraftingLayers(
+        currentActiveQrNodeId,
+        currentDraftingStudioState,
+        currentSelectedCardState,
+      )
+    const selectedLayerIdSet = new Set(currentSelectedLayerIds)
+    const removableLayerIds = layers
+      .filter((layer) => selectedLayerIdSet.has(layer.id))
+      .filter((layer) => !isDraftingQrLayerId(layer.id))
+      .map((layer) => layer.id)
+
+    if (removableLayerIds.length > 0) {
+      setLayerStateByNodeId((current) => {
+        const currentLayers =
+          current[currentActiveQrNodeId] ??
+          createDefaultDraftingLayers(
+            currentActiveQrNodeId,
+            currentDraftingStudioState,
+            currentSelectedCardState,
+          )
+
+        return {
+          ...current,
+          [currentActiveQrNodeId]: currentLayers
+            .filter((layer) => !removableLayerIds.includes(layer.id))
+            .map(cloneDraftingCanvasLayer),
+        }
+      })
+
+      setSelectedLayerIds((current) => {
+        const next = current.filter((layerId) => !removableLayerIds.includes(layerId))
+
+        setSelectedLayerId(next.at(-1) ?? null)
+        return next
+      })
+      return
+    }
+
+    if (currentSelectedLayerIds.length === 0 && currentQrNodeCount > 1) {
+      handleRemoveQrCode(currentActiveQrNodeId)
+    }
   }
 
   function handleLayerChange(
@@ -1712,9 +2193,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
 
       return {
         ...current,
-        [paneId]: layers.map((layer) =>
-          layer.id === layerId ? patchDraftingCanvasLayer(layer, patch) : layer,
-        ),
+        [paneId]: layers.map((layer) => patchDraftingLayerById(layer, layerId, patch)),
       }
     })
   }
@@ -1742,6 +2221,178 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
             zIndex: zIndexByLayerId.get(layer.id) ?? layer.zIndex,
           }),
         ),
+      }
+    })
+  }
+
+  async function copySelectedDraftingLayers(
+    layerIds = selectedLayerIds,
+    paneId = keyboardStateRef.current.activeQrNodeId,
+  ) {
+    const {
+      draftingStudioState: currentDraftingStudioState,
+      layerStateByNodeId: currentLayerStateByNodeId,
+      selectedCardState: currentSelectedCardState,
+    } = keyboardStateRef.current
+    const layers =
+      currentLayerStateByNodeId[paneId] ??
+      createDefaultDraftingLayers(paneId, currentDraftingStudioState, currentSelectedCardState)
+    const payload = getDraftingLayerClipboardPayload({
+      layerIds,
+      layers,
+      paneId,
+    })
+
+    if (!payload) {
+      return
+    }
+
+    draftingLayerClipboardRef.current = payload
+    await navigator.clipboard?.writeText(payload).catch(() => undefined)
+  }
+
+  async function pasteDraftingLayers(
+    point?: { x: number; y: number },
+    payloadText?: string,
+    paneId = keyboardStateRef.current.activeQrNodeId,
+  ) {
+    const rawPayload =
+      payloadText ??
+      (await navigator.clipboard?.readText().catch(() => draftingLayerClipboardRef.current)) ??
+      draftingLayerClipboardRef.current
+    const payload = parseDraftingLayerClipboardPayload(rawPayload)
+
+    if (!payload) {
+      return
+    }
+
+    setLayerStateByNodeId((current) => {
+      const {
+        draftingStudioState: currentDraftingStudioState,
+        selectedCardState: currentSelectedCardState,
+      } = keyboardStateRef.current
+      const layers =
+        current[paneId] ??
+        createDefaultDraftingLayers(paneId, currentDraftingStudioState, currentSelectedCardState)
+      const maxZIndex = layers.reduce((max, layer) => Math.max(max, layer.zIndex), -1)
+      const offset = point
+        ? {
+            x: point.x - payload.bounds.x,
+            y: point.y - payload.bounds.y,
+          }
+        : { x: DRAFTING_LAYER_PASTE_OFFSET, y: DRAFTING_LAYER_PASTE_OFFSET }
+      const pastedLayers = cloneDraftingCanvasLayersForPaste({
+        layers: payload.layers,
+        nodeId: paneId,
+        offset,
+        startingZIndex: maxZIndex + 1,
+      })
+
+      setSelectedLayerIds(pastedLayers.map((layer) => layer.id))
+      setSelectedLayerId(pastedLayers.at(-1)?.id ?? null)
+
+      return {
+        ...current,
+        [paneId]: [...layers.map(cloneDraftingCanvasLayer), ...pastedLayers],
+      }
+    })
+  }
+
+  function handleLayerAction(
+    paneId: string,
+    layerIds: string[],
+    action: DraftingLayerMenuAction,
+  ) {
+    if (layerIds.length === 0) {
+      return
+    }
+
+    setLayerStateByNodeId((current) => {
+      const currentQrState =
+        paneId === activeQrNodeId
+          ? draftingStudioState
+          : (qrStateByNodeId[paneId] ?? createDefaultDraftingWorkspaceQrState())
+      const currentCardState =
+        paneId === activeQrNodeId
+          ? selectedCardState
+          : (cardStateByNodeId[paneId] ?? createDefaultDraftingCardState())
+      const layers =
+        current[paneId] ??
+        createDefaultDraftingLayers(paneId, currentQrState, currentCardState)
+      const reorderActions: DraftingLayerReorderAction[] = [
+        "back",
+        "backward",
+        "forward",
+        "front",
+      ]
+      const alignActions: DraftingLayerAlignAction[] = [
+        "bottom",
+        "center-x",
+        "center-y",
+        "left",
+        "right",
+        "top",
+      ]
+      const distributeActions: DraftingLayerDistributeAction[] = [
+        "horizontal",
+        "vertical",
+      ]
+
+      let nextLayers = layers
+
+      if (reorderActions.includes(action as DraftingLayerReorderAction)) {
+        for (const layerId of layerIds) {
+          nextLayers = reorderDraftingCanvasLayer(
+            nextLayers,
+            layerId,
+            action as DraftingLayerReorderAction,
+          )
+        }
+      } else if (alignActions.includes(action as DraftingLayerAlignAction)) {
+        nextLayers = alignDraftingCanvasLayers(
+          nextLayers,
+          layerIds,
+          action as DraftingLayerAlignAction,
+        )
+      } else if (action === "group") {
+        nextLayers = groupDraftingCanvasLayers(nextLayers, layerIds, {
+          groupId: `${paneId}:group:${Date.now()}`,
+          name: "Group",
+        })
+      } else if (action === "ungroup") {
+        for (const layerId of layerIds) {
+          nextLayers = ungroupDraftingCanvasLayer(nextLayers, layerId)
+        }
+      } else if (distributeActions.includes(action as DraftingLayerDistributeAction)) {
+        nextLayers = distributeDraftingCanvasLayers(
+          nextLayers,
+          layerIds,
+          action as DraftingLayerDistributeAction,
+        )
+      } else {
+        nextLayers = nextLayers.map((layer) => {
+          if (!layerIds.includes(layer.id)) {
+            return cloneDraftingCanvasLayer(layer)
+          }
+
+          const patch =
+            action === "hide"
+              ? { isVisible: false }
+              : action === "show"
+                ? { isVisible: true }
+                : action === "lock"
+                  ? { isLocked: true }
+                  : action === "unlock"
+                    ? { isLocked: false }
+                    : { rotation: 0 }
+
+          return patchDraftingCanvasLayer(layer, patch)
+        })
+      }
+
+      return {
+        ...current,
+        [paneId]: nextLayers,
       }
     })
   }
@@ -1852,8 +2503,24 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const activeCanvasLayerRows = [...activeCanvasLayers].sort(
     (a, b) => b.zIndex - a.zIndex,
   )
+  const selectedTextLayer =
+    selectedLayerId ? findDraftingLayerById(activeCanvasLayers, selectedLayerId) : null
 
   const renderPanelContent = (toolId: DraftingToolId, tabId: string) => {
+    if (toolId === "text" && tabId === "text") {
+      return (
+        <DraftingTextLayerTab
+          layer={selectedTextLayer?.kind === "text" ? selectedTextLayer : null}
+          onAddText={handleAddTextLayer}
+          onLayerPatch={(patch) => {
+            if (selectedTextLayer?.kind === "text") {
+              handleLayerChange(activeQrNodeId, selectedTextLayer.id, patch)
+            }
+          }}
+        />
+      )
+    }
+
     if (toolId === "content" && tabId === "content") {
       return (
         <DraftingContentTab
@@ -2329,6 +2996,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     if (toolId === "layers" && tabId === "layers") {
       return (
         <DraftingLayersTab
+          onLayerAction={(layerIds, action) => handleLayerAction(activeQrNodeId, layerIds, action)}
           onLayerPatch={(layerId, patch) => handleLayerChange(activeQrNodeId, layerId, patch)}
           onReorder={handleLayerReorder}
           onSelectedNodeChange={(nodeId) => {
@@ -2396,6 +3064,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       data-qr-size={selectedQrSize}
       data-qr-type-number={selectedTypeNumber}
       data-slot="drafting-surface"
+      tabIndex={-1}
       className="relative grid h-dvh w-full grid-rows-[var(--new-header-height)_minmax(0,1fr)] overflow-visible bg-[var(--drafting-surface-bg)] sm:h-[calc(100dvh-4rem)] lg:shadow-[var(--drafting-shadow-shell)] [--new-header-height:3.875rem] [--new-left-rail-width:clamp(6.25rem,10vw,7.5rem)] [--new-middle-rail-width:clamp(15rem,24vw,18.5rem)] [--new-mobile-rail-height:5.75rem]"
       data-card-only-mode={isCardOnlyMode ? "true" : "false"}
       data-compose-edit-mode="false"
@@ -2431,6 +3100,64 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       >
         <div className="flex h-full min-w-0 items-center justify-end">
           <div data-slot="drafting-header-actions" className="flex h-full min-w-0 max-w-full items-center gap-1.5 sm:gap-2.5">
+            <Popover>
+              <PopoverTrigger asChild>
+                <SecondaryButton
+                  aria-label="Open keyboard shortcuts"
+                  data-slot="drafting-shortcuts-trigger"
+                  className="h-8 shrink-0 px-2 sm:px-3"
+                >
+                  <KeyboardIcon data-icon="inline-start" />
+                  <span className="hidden sm:inline">Shortcuts</span>
+                </SecondaryButton>
+              </PopoverTrigger>
+              <PopoverContent
+                align="end"
+                data-slot="drafting-shortcuts-popover"
+                sideOffset={10}
+                className={cn(
+                  fontClassName,
+                  "z-[20000] w-[min(24rem,calc(100vw-1rem))] rounded-[12px] border border-[var(--drafting-dropdown-border)] p-0 text-[var(--drafting-dropdown-text)] shadow-[var(--drafting-dropdown-menu-shadow-open)]",
+                )}
+                style={{
+                  backgroundColor:
+                    "var(--drafting-dropdown-menu-surface-open, var(--popover, #ffffff))",
+                }}
+              >
+                <div className="border-b border-[var(--drafting-dropdown-border)] px-4 py-3">
+                  <div className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-[var(--drafting-ink-muted)]">
+                    Keyboard
+                  </div>
+                  <h2 className="mt-1 text-sm font-semibold text-[var(--drafting-ink)]">
+                    Shortcuts
+                  </h2>
+                </div>
+                <div className="grid gap-3 p-3">
+                  {DRAFTING_KEYBOARD_SHORTCUT_GROUPS.map((group) => (
+                    <section key={group.title} aria-label={`${group.title} shortcuts`}>
+                      <h3 className="px-1 pb-1 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-[var(--drafting-ink-muted)]">
+                        {group.title}
+                      </h3>
+                      <div className="grid gap-1">
+                        {group.shortcuts.map(([keys, description]) => (
+                          <div
+                            key={keys}
+                            className="grid grid-cols-[minmax(7.5rem,auto)_1fr] items-center gap-3 rounded-[7px] px-2 py-1.5 text-xs"
+                          >
+                            <kbd className="justify-self-start rounded-[5px] border border-[var(--drafting-dropdown-border)] bg-[var(--drafting-control-bg)] px-2 py-1 font-mono text-[0.68rem] font-semibold text-[var(--drafting-ink)]">
+                              {keys}
+                            </kbd>
+                            <span className="text-[var(--drafting-ink-muted)]">
+                              {description}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
             <div
               aria-label="Card-only controls"
               data-slot="drafting-card-only-toggle"
@@ -2738,7 +3465,14 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
                       size="default"
                       type="button"
                       variant="ghost"
-                      onClick={() => setActiveTool(tool.id)}
+                      onClick={() => {
+                        if (tool.id === "text") {
+                          handleAddTextLayer()
+                          return
+                        }
+
+                        setActiveTool(tool.id)
+                      }}
                     >
                       <span
                         data-slot="drafting-tool-button-icon"
@@ -2875,7 +3609,15 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
                 void handleAddQrCode()
               }}
               onLayerChange={handleLayerChange}
+              onLayerAction={handleLayerAction}
+              onLayerCopy={(_paneId, layerIds) => {
+                void copySelectedDraftingLayers(layerIds, _paneId)
+              }}
+              onLayerPaste={(_paneId, point) => {
+                void pasteDraftingLayers(point, undefined, _paneId)
+              }}
               onLayerSelect={handleLayerSelect}
+              onLayerSelectionChange={handleLayerSelectionChange}
               onPaneQrClick={handlePaneQrClick}
               onPaneSelect={handlePaneSelection}
               onRedo={handleRedoDraftingWorkspace}
@@ -2903,6 +3645,397 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
         </section>
       </div>
     </section>
+  )
+}
+
+function DraftingTextLayerTab({
+  layer,
+  onAddText,
+  onLayerPatch,
+}: {
+  layer: DraftingCanvasLayer | null
+  onAddText: () => void
+  onLayerPatch: (patch: Partial<DraftingCanvasLayer>) => void
+}) {
+  const textLayer = layer ?? createDraftingTextLayer("preview")
+  const selectedFont = resolveDraftingFont({
+    fontFamily: textLayer.fontFamily,
+    fontId: textLayer.fontId,
+  })
+  const supportedFontWeights = selectedFont.weights
+  const fontWeight = getDraftingTextInspectorFontWeight(textLayer.fontWeight, supportedFontWeights)
+  const [fontQuery, setFontQuery] = useState("")
+  const filteredFonts = useMemo(() => {
+    const query = fontQuery.trim().toLowerCase()
+
+    return DRAFTING_FONT_REGISTRY.filter((font) => {
+      if (!query) {
+        return true
+      }
+
+      return (
+        font.label.toLowerCase().includes(query) ||
+        font.family.toLowerCase().includes(query) ||
+        font.source.toLowerCase().includes(query)
+      )
+    })
+  }, [fontQuery])
+  const groupedFonts = useMemo(
+    () =>
+      (["local", "fontshare", "system"] as const).map((source) => ({
+        fonts: filteredFonts.filter((font) => font.source === source),
+        source,
+      })),
+    [filteredFonts],
+  )
+
+  useEffect(() => {
+    void loadDraftingFont(selectedFont.id)
+  }, [selectedFont.id])
+
+  return (
+    <section data-slot="drafting-text-tab" className="min-w-0 space-y-4">
+      <SecondaryButton
+        className="h-9 w-full"
+        data-slot="drafting-add-text-layer"
+        type="button"
+        onClick={onAddText}
+      >
+        <TypeIcon data-icon="inline-start" />
+        Add text
+      </SecondaryButton>
+
+      {layer ? (
+        <div className="min-w-0 space-y-4 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] p-4 shadow-[var(--drafting-shadow-rest)]">
+          <label className="block min-w-0">
+            <span className="drafting-type-control-label mb-1.5 block font-semibold text-[var(--drafting-ink)]">
+              Text
+            </span>
+            <textarea
+              aria-label="Text layer content"
+              className="drafting-type-input min-h-24 w-full resize-y rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3 py-2 text-[var(--drafting-ink)] shadow-none"
+              value={textLayer.text ?? ""}
+              onChange={(event) => onLayerPatch({ text: event.currentTarget.value })}
+            />
+          </label>
+
+          <div className="block min-w-0" data-slot="drafting-font-picker">
+            <span className="drafting-type-meta mb-1 block font-semibold text-[var(--drafting-ink-muted)]">
+              Font
+            </span>
+            <input
+              aria-label="Search text fonts"
+              className="drafting-type-input h-9 w-full rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-2 text-[var(--drafting-ink)] shadow-none"
+              placeholder={selectedFont.label}
+              type="search"
+              value={fontQuery}
+              onChange={(event) => setFontQuery(event.currentTarget.value)}
+            />
+            <div className="mt-2 max-h-52 min-w-0 space-y-3 overflow-y-auto rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] p-2">
+              {groupedFonts.map(({ fonts, source }) =>
+                fonts.length > 0 ? (
+                  <div key={source} className="min-w-0 space-y-1">
+                    <p className="drafting-type-meta px-1 font-semibold uppercase text-[var(--drafting-ink-muted)]">
+                      {getDraftingFontSourceLabel(source)}
+                    </p>
+                    {fonts.map((font) => {
+                      const isSelected = font.id === selectedFont.id
+
+                      return (
+                        <button
+                          key={font.id}
+                          aria-label={`Choose ${font.label}`}
+                          aria-pressed={isSelected}
+                          className={cn(
+                            "flex h-9 w-full items-center justify-between gap-2 rounded-[5px] px-2 text-left text-xs font-semibold text-[var(--drafting-ink-muted)] hover:bg-[var(--drafting-control-bg-active)] hover:text-[var(--drafting-ink)]",
+                            isSelected &&
+                              "bg-[var(--drafting-control-bg-active)] text-[var(--drafting-ink)]",
+                          )}
+                          style={{ fontFamily: getDraftingFontCssFamily({ fontId: font.id }) }}
+                          type="button"
+                          onClick={() => {
+                            void loadDraftingFont(font.id)
+                            onLayerPatch({ fontFamily: font.family, fontId: font.id })
+                          }}
+                          onMouseEnter={() => {
+                            void loadDraftingFont(font.id)
+                          }}
+                        >
+                          <span className="truncate">{font.label}</span>
+                          <span className="drafting-type-meta shrink-0 text-[var(--drafting-ink-muted)]">
+                            {font.source === "fontshare" ? "Fontshare" : font.source}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                ) : null,
+              )}
+              {filteredFonts.length === 0 ? (
+                <p className="drafting-type-meta px-2 py-3 text-center text-[var(--drafting-ink-muted)]">
+                  No fonts found
+                </p>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <TextNumberInput
+              label="Size"
+              max={300}
+              min={6}
+              value={textLayer.fontSize ?? DEFAULT_DRAFTING_TEXT_LAYER.fontSize}
+              onChange={(fontSize) => onLayerPatch({ fontSize })}
+            />
+            <TextNumberInput
+              label="Spacing"
+              max={200}
+              min={-50}
+              value={textLayer.letterSpacing ?? DEFAULT_DRAFTING_TEXT_LAYER.letterSpacing}
+              onChange={(letterSpacing) => onLayerPatch({ letterSpacing })}
+            />
+            <TextNumberInput
+              label="Line"
+              max={4}
+              min={0.6}
+              step={0.05}
+              value={textLayer.lineHeight ?? DEFAULT_DRAFTING_TEXT_LAYER.lineHeight}
+              onChange={(lineHeight) => onLayerPatch({ lineHeight })}
+            />
+            <label className="min-w-0">
+              <span className="drafting-type-meta mb-1 block font-semibold text-[var(--drafting-ink-muted)]">
+                Fill
+              </span>
+              <input
+                aria-label="Text fill color"
+                className="h-9 w-full rounded-[6px] border border-[var(--drafting-line)] bg-transparent p-1"
+                type="color"
+                value={textLayer.fill ?? DEFAULT_DRAFTING_TEXT_LAYER.fill}
+                onChange={(event) => onLayerPatch({ fill: event.currentTarget.value })}
+              />
+            </label>
+          </div>
+
+          <TextWeightSlider
+            supportedWeights={supportedFontWeights}
+            value={fontWeight}
+            onChange={(fontWeight) =>
+              onLayerPatch({ fontWeight: getNearestDraftingFontWeight(fontWeight, supportedFontWeights) })
+            }
+          />
+
+          <div className="grid grid-cols-3 gap-2">
+            {(["left", "center", "right"] as const).map((textAlign) => (
+              <button
+                key={textAlign}
+                aria-pressed={(textLayer.textAlign ?? DEFAULT_DRAFTING_TEXT_LAYER.textAlign) === textAlign}
+                className={cn(
+                  "h-9 rounded-[6px] border border-[var(--drafting-line)] px-2 text-xs font-semibold capitalize text-[var(--drafting-ink-muted)]",
+                  (textLayer.textAlign ?? DEFAULT_DRAFTING_TEXT_LAYER.textAlign) === textAlign &&
+                    "border-[var(--drafting-ink)] bg-[var(--drafting-control-bg-active)] text-[var(--drafting-ink)]",
+                )}
+                type="button"
+                onClick={() => onLayerPatch({ textAlign })}
+              >
+                {textAlign}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-3 gap-2">
+            <TextToggleButton
+              active={fontWeight >= 700}
+              label="Bold"
+              onClick={() =>
+                onLayerPatch({
+                  fontWeight:
+                    fontWeight >= 700
+                      ? getNearestDraftingFontWeight(400, supportedFontWeights)
+                      : getNearestDraftingFontWeight(700, supportedFontWeights),
+                })
+              }
+            />
+            <TextToggleButton
+              active={(textLayer.fontStyle ?? DEFAULT_DRAFTING_TEXT_LAYER.fontStyle) === "italic"}
+              label="Italic"
+              onClick={() =>
+                onLayerPatch({
+                  fontStyle:
+                    (textLayer.fontStyle ?? DEFAULT_DRAFTING_TEXT_LAYER.fontStyle) === "italic"
+                      ? "normal"
+                      : "italic",
+                })
+              }
+            />
+            <TextToggleButton
+              active={Boolean(textLayer.underline)}
+              label="Underline"
+              onClick={() => onLayerPatch({ underline: !textLayer.underline })}
+            />
+          </div>
+        </div>
+      ) : (
+        <p className="drafting-type-body rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 text-[var(--drafting-ink-muted)] shadow-[var(--drafting-shadow-rest)]">
+          Select a text layer to edit its copy and type style.
+        </p>
+      )}
+    </section>
+  )
+}
+
+function getDraftingFontSourceLabel(source: DraftingFontSource) {
+  if (source === "local") {
+    return "Brand / App fonts"
+  }
+
+  if (source === "fontshare") {
+    return "Fontshare"
+  }
+
+  return "System"
+}
+
+function TextWeightSlider({
+  onChange,
+  supportedWeights,
+  value,
+}: {
+  onChange: (value: number) => void
+  supportedWeights: readonly number[]
+  value: number
+}) {
+  const min = Math.min(...supportedWeights)
+  const max = Math.max(...supportedWeights)
+  const step = getDraftingFontWeightSliderStep(supportedWeights)
+
+  return (
+    <div className="min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3 py-2">
+      <UnlumenSlider
+        aria-label="Text font weight"
+        appearance="drafting"
+        className="w-full"
+        data-slot="drafting-text-font-weight"
+        formatValue={(fontWeight) => String(Math.round(fontWeight))}
+        label="Weight"
+        max={max}
+        min={min}
+        showValue
+        step={step}
+        value={value}
+        onChange={(nextValue) => {
+          onChange(
+            getNearestDraftingFontWeight(
+              Array.isArray(nextValue) ? (nextValue[0] ?? value) : nextValue,
+              supportedWeights,
+            ),
+          )
+        }}
+      />
+    </div>
+  )
+}
+
+function getDraftingTextInspectorFontWeight(
+  fontWeight: DraftingCanvasLayer["fontWeight"],
+  supportedWeights: readonly number[],
+) {
+  if (fontWeight === "bold") {
+    return getNearestDraftingFontWeight(700, supportedWeights)
+  }
+
+  if (typeof fontWeight === "number" && Number.isFinite(fontWeight)) {
+    return getNearestDraftingFontWeight(fontWeight, supportedWeights)
+  }
+
+  return getNearestDraftingFontWeight(400, supportedWeights)
+}
+
+function getNearestDraftingFontWeight(value: number, supportedWeights: readonly number[]) {
+  return supportedWeights.reduce((nearestWeight, candidateWeight) => {
+    const nearestDistance = Math.abs(nearestWeight - value)
+    const candidateDistance = Math.abs(candidateWeight - value)
+
+    if (candidateDistance === nearestDistance) {
+      return candidateWeight > nearestWeight ? candidateWeight : nearestWeight
+    }
+
+    return candidateDistance < nearestDistance ? candidateWeight : nearestWeight
+  }, supportedWeights[0] ?? 400)
+}
+
+function getDraftingFontWeightSliderStep(supportedWeights: readonly number[]) {
+  const sortedWeights = [...new Set(supportedWeights)].sort((a, b) => a - b)
+
+  if (sortedWeights.length < 2) {
+    return 1
+  }
+
+  return Math.min(
+    ...sortedWeights.slice(1).map((fontWeight, index) => fontWeight - sortedWeights[index]),
+  )
+}
+
+function TextNumberInput({
+  label,
+  max,
+  min,
+  onChange,
+  step = 1,
+  value,
+}: {
+  label: string
+  max: number
+  min: number
+  onChange: (value: number) => void
+  step?: number
+  value: number
+}) {
+  return (
+    <label className="min-w-0">
+      <span className="drafting-type-meta mb-1 block font-semibold text-[var(--drafting-ink-muted)]">
+        {label}
+      </span>
+      <input
+        className="drafting-type-input h-9 w-full rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-2 text-[var(--drafting-ink)] shadow-none"
+        max={max}
+        min={min}
+        step={step}
+        type="number"
+        value={value}
+        onChange={(event) => {
+          const nextValue = Number(event.currentTarget.value)
+
+          if (Number.isFinite(nextValue)) {
+            onChange(nextValue)
+          }
+        }}
+      />
+    </label>
+  )
+}
+
+function TextToggleButton({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      aria-pressed={active}
+      className={cn(
+        "h-9 rounded-[6px] border border-[var(--drafting-line)] px-2 text-xs font-semibold text-[var(--drafting-ink-muted)]",
+        active &&
+          "border-[var(--drafting-ink)] bg-[var(--drafting-control-bg-active)] text-[var(--drafting-ink)]",
+      )}
+      type="button"
+      onClick={onClick}
+    >
+      {label}
+    </button>
   )
 }
 
@@ -2936,6 +4069,8 @@ async function buildDraftingLayeredNodePayload({
   nodeId: string
   state: QrStudioState
 }) {
+  await ensureDraftingFontsForLayers(layers)
+
   const qrPayload = await buildDashboardQrNodePayload(createDraftingQrArtworkState(state), {
     animationMode: "export",
   })
@@ -2974,13 +4109,17 @@ function buildDraftingLayeredSvgMarkup({
   state: QrStudioState
 }) {
   const defs = layers
-    .map((layer) => getDraftingLayerFilterMarkup(layer))
+    .flatMap(getDraftingLayerFilterMarkups)
     .filter(Boolean)
     .join("")
   const body = layers
     .map((layer) =>
-      layer.kind === "card"
+      layer.kind === "group"
+        ? getDraftingGroupLayerSvg(layer, cardState, qrMarkup, state)
+        : layer.kind === "card"
         ? getDraftingCardLayerSvg(layer, cardState)
+        : layer.kind === "text"
+          ? getDraftingTextLayerSvg(layer)
         : getDraftingQrLayerSvg(layer, qrMarkup, state),
     )
     .join("")
@@ -3047,6 +4186,13 @@ function getDraftingLayerFilterMarkup(layer: DraftingCanvasLayer) {
   return `<filter id="${getSvgId(layer.id)}-filter" x="-50%" y="-50%" width="200%" height="200%">${hasShadow ? `<feDropShadow dx="${layer.shadow.offsetX}" dy="${layer.shadow.offsetY}" stdDeviation="${layer.shadow.blur / 2}" flood-color="${escapeXml(layer.shadow.color)}" flood-opacity="${layer.shadow.opacity / 100}"/>` : ""}${hasBlur ? `<feGaussianBlur stdDeviation="${layer.blur}"/>` : ""}</filter>`
 }
 
+function getDraftingLayerFilterMarkups(layer: DraftingCanvasLayer): string[] {
+  return [
+    getDraftingLayerFilterMarkup(layer),
+    ...(layer.children?.flatMap(getDraftingLayerFilterMarkups) ?? []),
+  ].filter(Boolean)
+}
+
 function getDraftingCardLayerSvg(layer: DraftingCanvasLayer, cardState: DraftingCardState) {
   const filter = getDraftingLayerFilterMarkup(layer)
     ? ` filter="url(#${getSvgId(layer.id)}-filter)"`
@@ -3058,6 +4204,32 @@ function getDraftingCardLayerSvg(layer: DraftingCanvasLayer, cardState: Drafting
       : ""
 
   return `<g opacity="${layer.opacity}" transform="${getDraftingLayerSvgTransform(layer)}"${filter}><rect x="0" y="0" width="${layer.width}" height="${layer.height}" rx="${cardState.cornerRadius}" fill="${escapeXml(cardState.fill)}"${stroke}/></g>`
+}
+
+function getDraftingGroupLayerSvg(
+  layer: DraftingCanvasLayer,
+  cardState: DraftingCardState,
+  qrMarkup: string,
+  state: QrStudioState,
+): string {
+  const filter = getDraftingLayerFilterMarkup(layer)
+    ? ` filter="url(#${getSvgId(layer.id)}-filter)"`
+    : ""
+  const body: string = (layer.children ?? [])
+    .filter((child) => child.isVisible)
+    .sort((a, b) => a.zIndex - b.zIndex)
+    .map((child) =>
+      child.kind === "group"
+        ? getDraftingGroupLayerSvg(child, cardState, qrMarkup, state)
+        : child.kind === "card"
+          ? getDraftingCardLayerSvg(child, cardState)
+          : child.kind === "text"
+            ? getDraftingTextLayerSvg(child)
+            : getDraftingQrLayerSvg(child, qrMarkup, state),
+    )
+    .join("")
+
+  return `<g opacity="${layer.opacity}" transform="${getDraftingLayerSvgTransform(layer)}"${filter}>${body}</g>`
 }
 
 function getDraftingQrLayerSvg(
@@ -3075,11 +4247,128 @@ function getDraftingQrLayerSvg(
   return `<g opacity="${layer.opacity}" transform="${getDraftingLayerSvgTransform(layer)}"${filter}>${getDraftingQrBackgroundSvgMarkup(layer, state)}${scaleNestedSvgMarkup(shadowedQrMarkup, layer.width, layer.height)}</g>`
 }
 
+function getDraftingTextLayerSvg(layer: DraftingCanvasLayer) {
+  const filter = getDraftingLayerFilterMarkup(layer)
+    ? ` filter="url(#${getSvgId(layer.id)}-filter)"`
+    : ""
+  const fontSize = layer.fontSize ?? DEFAULT_DRAFTING_TEXT_LAYER.fontSize
+  const lineHeight = layer.lineHeight ?? DEFAULT_DRAFTING_TEXT_LAYER.lineHeight
+  const textAlign = layer.textAlign ?? DEFAULT_DRAFTING_TEXT_LAYER.textAlign
+  const anchor = textAlign === "center" ? "middle" : textAlign === "right" ? "end" : "start"
+  const x = textAlign === "center" ? layer.width / 2 : textAlign === "right" ? layer.width : 0
+  const lines = wrapDraftingTextForSvg(layer.text ?? "", {
+    fontSize,
+    letterSpacing: layer.letterSpacing ?? DEFAULT_DRAFTING_TEXT_LAYER.letterSpacing,
+    width: layer.width,
+  })
+  const tspans = lines
+    .map((line, index) => {
+      const dy = index === 0 ? fontSize : fontSize * lineHeight
+
+      return `<tspan x="${x}" dy="${dy}">${escapeXml(line)}</tspan>`
+    })
+    .join("")
+  const decoration = layer.underline ? ` text-decoration="underline"` : ""
+
+  return `<g opacity="${layer.opacity}" transform="${getDraftingLayerSvgTransform(layer)}"${filter}><text fill="${escapeXml(layer.fill ?? DEFAULT_DRAFTING_TEXT_LAYER.fill)}" font-family="${escapeXml(getDraftingFontCssFamily({ fontFamily: layer.fontFamily, fontId: layer.fontId }))}" font-size="${fontSize}" font-style="${layer.fontStyle ?? DEFAULT_DRAFTING_TEXT_LAYER.fontStyle}" font-weight="${layer.fontWeight ?? DEFAULT_DRAFTING_TEXT_LAYER.fontWeight}" letter-spacing="${layer.letterSpacing ?? DEFAULT_DRAFTING_TEXT_LAYER.letterSpacing}" text-anchor="${anchor}"${decoration}>${tspans}</text></g>`
+}
+
+function wrapDraftingTextForSvg(
+  text: string,
+  options: { fontSize: number; letterSpacing: number; width: number },
+) {
+  const maxChars = Math.max(
+    1,
+    Math.floor(options.width / Math.max(1, options.fontSize * 0.58 + options.letterSpacing)),
+  )
+  const sourceLines = text.split(/\r?\n/)
+  const wrapped: string[] = []
+
+  for (const sourceLine of sourceLines) {
+    if (sourceLine.length === 0) {
+      wrapped.push("")
+      continue
+    }
+
+    let current = ""
+
+    for (const word of sourceLine.split(/\s+/)) {
+      if (!word) {
+        continue
+      }
+
+      if (!current) {
+        while (word.length > maxChars) {
+          wrapped.push(word.slice(0, maxChars))
+          current = word.slice(maxChars)
+          break
+        }
+        if (!current) {
+          current = word
+        }
+        continue
+      }
+
+      if (`${current} ${word}`.length <= maxChars) {
+        current = `${current} ${word}`
+      } else {
+        wrapped.push(current)
+        current = word
+      }
+    }
+
+    wrapped.push(current)
+  }
+
+  return wrapped.length ? wrapped : [""]
+}
+
 function getDraftingLayerSvgTransform(layer: DraftingCanvasLayer) {
   const centerX = layer.width / 2
   const centerY = layer.height / 2
 
   return `translate(${layer.x} ${layer.y}) rotate(${layer.rotation} ${centerX} ${centerY})`
+}
+
+function patchDraftingLayerById(
+  layer: DraftingCanvasLayer,
+  layerId: string,
+  patch: Partial<DraftingCanvasLayer>,
+): DraftingCanvasLayer {
+  if (layer.id === layerId) {
+    return patchDraftingCanvasLayer(layer, patch)
+  }
+
+  if (!layer.children?.length) {
+    return cloneDraftingCanvasLayer(layer)
+  }
+
+  return patchDraftingCanvasLayer(
+    {
+      ...cloneDraftingCanvasLayer(layer),
+      children: layer.children.map((child) => patchDraftingLayerById(child, layerId, patch)),
+    },
+    {},
+  )
+}
+
+function findDraftingLayerById(
+  layers: DraftingCanvasLayer[],
+  layerId: string,
+): DraftingCanvasLayer | null {
+  for (const layer of layers) {
+    if (layer.id === layerId) {
+      return layer
+    }
+
+    const child = layer.children ? findDraftingLayerById(layer.children, layerId) : null
+
+    if (child) {
+      return child
+    }
+  }
+
+  return null
 }
 
 function scaleNestedSvgMarkup(markup: string, width: number, height: number) {
@@ -3147,4 +4436,82 @@ function isEditableShortcutTarget(target: EventTarget | null): boolean {
       'input, textarea, select, [contenteditable="true"], [contenteditable=""], [role="textbox"]',
     ),
   )
+}
+
+function getDraftingClipboardBounds(layers: DraftingCanvasLayer[]) {
+  const left = Math.min(...layers.map((layer) => layer.x))
+  const top = Math.min(...layers.map((layer) => layer.y))
+  const right = Math.max(...layers.map((layer) => layer.x + layer.width))
+  const bottom = Math.max(...layers.map((layer) => layer.y + layer.height))
+
+  return {
+    height: bottom - top,
+    width: right - left,
+    x: left,
+    y: top,
+  }
+}
+
+function getDraftingLayerClipboardPayload({
+  layerIds,
+  layers,
+  paneId,
+}: {
+  layerIds: string[]
+  layers: DraftingCanvasLayer[]
+  paneId: string
+}) {
+  const selectedIdSet = new Set(layerIds)
+  const selectedLayers = layers.filter((layer) => selectedIdSet.has(layer.id))
+
+  if (selectedLayers.length === 0) {
+    return null
+  }
+
+  return JSON.stringify({
+    bounds: getDraftingClipboardBounds(selectedLayers),
+    layers: selectedLayers.map(cloneDraftingCanvasLayer),
+    sourceNodeId: paneId,
+    type: DRAFTING_LAYER_CLIPBOARD_TYPE,
+    version: DRAFTING_LAYER_CLIPBOARD_VERSION,
+  })
+}
+
+function parseDraftingLayerClipboardPayload(value: string) {
+  try {
+    const payload = JSON.parse(value) as unknown
+
+    if (!isRecord(payload) || payload.type !== DRAFTING_LAYER_CLIPBOARD_TYPE) {
+      return null
+    }
+
+    if (payload.version !== DRAFTING_LAYER_CLIPBOARD_VERSION || !Array.isArray(payload.layers)) {
+      return null
+    }
+
+    const bounds = isRecord(payload.bounds)
+      ? {
+          height: readClipboardNumber(payload.bounds.height, 1),
+          width: readClipboardNumber(payload.bounds.width, 1),
+          x: readClipboardNumber(payload.bounds.x, 0),
+          y: readClipboardNumber(payload.bounds.y, 0),
+        }
+      : { height: 1, width: 1, x: 0, y: 0 }
+
+    return {
+      bounds,
+      layers: payload.layers as DraftingCanvasLayer[],
+      sourceNodeId: typeof payload.sourceNodeId === "string" ? payload.sourceNodeId : null,
+    }
+  } catch {
+    return null
+  }
+}
+
+function readClipboardNumber(value: unknown, fallback: number) {
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value))
 }

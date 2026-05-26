@@ -25,7 +25,7 @@ import {
 
 import type { DraftingCardState } from "@/components/new/drafting-card-state"
 import type { DraftingCanvasLayer } from "@/components/new/drafting-layer-state"
-import { QrPane } from "@/components/new/qr-pane"
+import { QrPane, type DraftingLayerMenuAction } from "@/components/new/qr-pane"
 import { getQrLayout } from "@/components/new/qr-layout-engine"
 import type { QrStudioState } from "@/components/qr/qr-studio-state"
 import { Button } from "@/components/ui/button"
@@ -77,9 +77,21 @@ type DraftingPaneWorkspaceProps = {
     layerId: string,
     patch: Partial<DraftingCanvasLayer>,
   ) => void
+  onLayerAction?: (
+    paneId: string,
+    layerIds: string[],
+    action: DraftingLayerMenuAction,
+  ) => void
+  onLayerCopy?: (paneId: string, layerIds: string[]) => void
+  onLayerPaste?: (paneId: string, point: { x: number; y: number }) => void
   onLayerSelect?: (
     paneId: string,
     layerId: string | null,
+    options?: { additive?: boolean },
+  ) => void
+  onLayerSelectionChange?: (
+    paneId: string,
+    layerIds: string[],
     options?: { additive?: boolean },
   ) => void
   selectedLayerId?: string | null
@@ -154,7 +166,11 @@ function DraftingPaneSurface({
   onPaneZoom,
   onPanePan,
   onLayerChange,
+  onLayerAction,
+  onLayerCopy,
+  onLayerPaste,
   onLayerSelect,
+  onLayerSelectionChange,
   pane,
   panePan,
   paneZoom,
@@ -181,9 +197,21 @@ function DraftingPaneSurface({
     layerId: string,
     patch: Partial<DraftingCanvasLayer>,
   ) => void
+  onLayerAction?: (
+    paneId: string,
+    layerIds: string[],
+    action: DraftingLayerMenuAction,
+  ) => void
+  onLayerCopy?: (paneId: string, layerIds: string[]) => void
+  onLayerPaste?: (paneId: string, point: { x: number; y: number }) => void
   onLayerSelect?: (
     paneId: string,
     layerId: string | null,
+    options?: { additive?: boolean },
+  ) => void
+  onLayerSelectionChange?: (
+    paneId: string,
+    layerIds: string[],
     options?: { additive?: boolean },
   ) => void
   pane: DraftingPane
@@ -381,7 +409,13 @@ function DraftingPaneSurface({
           state={pane.state}
           isSelected={isSelected}
           onLayerChange={(layerId, patch) => onLayerChange?.(pane.id, layerId, patch)}
+          onLayerAction={(layerIds, action) => onLayerAction?.(pane.id, layerIds, action)}
+          onLayerCopy={(layerIds) => onLayerCopy?.(pane.id, layerIds)}
+          onLayerPaste={(point) => onLayerPaste?.(pane.id, point)}
           onLayerSelect={(layerId, options) => onLayerSelect?.(pane.id, layerId, options)}
+          onLayerSelectionChange={(layerIds, options) =>
+            onLayerSelectionChange?.(pane.id, layerIds, options)
+          }
           onQrClick={handleQrClick}
           onSelect={handleSelect}
           selectedLayerId={isSelected ? selectedLayerId : null}
@@ -407,7 +441,11 @@ export function DraftingPaneWorkspace({
   onPaneQrClick,
   onSwapPanes,
   onLayerChange,
+  onLayerAction,
+  onLayerCopy,
+  onLayerPaste,
   onLayerSelect,
+  onLayerSelectionChange,
   selectedLayerId,
   selectedLayerIds,
 }: DraftingPaneWorkspaceProps) {
@@ -653,7 +691,11 @@ export function DraftingPaneWorkspace({
                                 onPanePan={handlePanePan}
                                 onPaneZoom={handlePaneZoom}
                                 onLayerChange={onLayerChange}
+                                onLayerAction={onLayerAction}
+                                onLayerCopy={onLayerCopy}
+                                onLayerPaste={onLayerPaste}
                                 onLayerSelect={onLayerSelect}
+                                onLayerSelectionChange={onLayerSelectionChange}
                                 onPaneQrClick={onPaneQrClick}
                                 onPaneSelect={onPaneSelect}
                                 pane={pane}

@@ -19,6 +19,7 @@ import {
 } from "@/components/new/drafting-card-state"
 import {
   createDefaultDraftingLayers,
+  createDraftingTextLayer,
   getDraftingCardLayerId,
   getDraftingQrLayerId,
   type DraftingCanvasLayer,
@@ -522,6 +523,34 @@ describe("QrPane", () => {
     expect(container.querySelector('[data-slot="drafting-layer-snap-guide"]')).toBeNull()
   })
 
+  it("does not flash snap guides while clicking a layer", async () => {
+    const onLayerChange = vi.fn()
+    const layers: DraftingCanvasLayer[] = [
+      createLayer({ height: 300, id: "preview:card", kind: "card", width: 300, x: -150, y: -150, zIndex: 0 }),
+      createLayer({ height: 100, id: "preview:qr", kind: "qr", width: 100, x: -50, y: -50, zIndex: 1 }),
+    ]
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers,
+      onLayerChange,
+      selectedLayerId: "preview:qr",
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const qrLayer = container.querySelector('[data-layer-id="preview:qr"]') as HTMLElement
+
+    act(() => {
+      qrLayer.dispatchEvent(createPointerEvent("pointerdown", 0, 0))
+      qrLayer.dispatchEvent(createPointerEvent("pointermove", 1, 1))
+    })
+
+    expect(onLayerChange).not.toHaveBeenCalled()
+    expect(container.querySelector('[data-slot="drafting-layer-snap-guide"]')).toBeNull()
+  })
+
   it("snaps resize handles to nearby layer edges", async () => {
     const onLayerChange = vi.fn()
     const layers: DraftingCanvasLayer[] = [
@@ -552,9 +581,79 @@ describe("QrPane", () => {
       height: 120,
       width: 120,
       x: 0,
-      y: 0,
+      y: -10,
     })
     expect(container.querySelector('[data-slot="drafting-layer-snap-guide"][data-axis="vertical"]')).not.toBeNull()
+  })
+
+  it("keeps resize handles freeform unless very close to layer edges", async () => {
+    const onLayerChange = vi.fn()
+    const layers: DraftingCanvasLayer[] = [
+      createLayer({ height: 240, id: "preview:card", kind: "card", width: 240, x: -120, y: -120, zIndex: 0 }),
+      createLayer({ height: 100, id: "preview:qr", kind: "qr", width: 100, x: 0, y: 0, zIndex: 1 }),
+    ]
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers,
+      onLayerChange,
+      selectedLayerId: "preview:qr",
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const handle = container.querySelector(
+      '[data-slot="drafting-layer-resize-handle"][data-resize-direction="e"]',
+    ) as HTMLButtonElement
+
+    act(() => {
+      handle.dispatchEvent(createPointerEvent("pointerdown", 100, 100))
+      handle.dispatchEvent(createPointerEvent("pointermove", 116, 100))
+    })
+
+    expect(onLayerChange).toHaveBeenLastCalledWith("preview:qr", {
+      height: 116,
+      width: 116,
+      x: 0,
+      y: -8,
+    })
+    expect(container.querySelector('[data-slot="drafting-layer-snap-guide"]')).toBeNull()
+  })
+
+  it("keeps QR side-handle resize centered on the perpendicular axis", async () => {
+    const onLayerChange = vi.fn()
+    const layers: DraftingCanvasLayer[] = [
+      createLayer({ height: 300, id: "preview:card", kind: "card", width: 300, x: -150, y: -150, zIndex: 0 }),
+      createLayer({ height: 250, id: "preview:qr", kind: "qr", width: 250, x: -125, y: -125, zIndex: 1 }),
+    ]
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers,
+      onLayerChange,
+      selectedLayerId: "preview:qr",
+      snapEnabled: false,
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const handle = container.querySelector(
+      '[data-slot="drafting-layer-resize-handle"][data-resize-direction="e"]',
+    ) as HTMLButtonElement
+
+    act(() => {
+      handle.dispatchEvent(createPointerEvent("pointerdown", 250, 0))
+      handle.dispatchEvent(createPointerEvent("pointermove", 270, 0))
+    })
+
+    expect(onLayerChange).toHaveBeenLastCalledWith("preview:qr", {
+      height: 270,
+      width: 270,
+      x: -125,
+      y: -135,
+    })
   })
 
   it("renders selected layer controls above higher z-index layer content", async () => {
@@ -610,6 +709,266 @@ describe("QrPane", () => {
     )
     expect(container.querySelector('[data-slot="drafting-layer-rotation-value"]')).toBeNull()
     expect(container.innerHTML).toContain('aria-label="Rotate QR code"')
+  })
+
+  it("shows the selected layer size below the resize frame", async () => {
+    const state = createDefaultQrStudioState()
+    const cardState = createDefaultDraftingCardState()
+    const layers = createDefaultDraftingLayers("preview", state, cardState).map((layer) =>
+      layer.id === "preview:card" ? { ...layer, height: 320, width: 420 } : layer,
+    )
+    const { container } = renderPane(state, true, cardState, {
+      layers,
+      onLayerChange: () => undefined,
+      selectedLayerId: "preview:card",
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const sizeValue = container.querySelector('[data-slot="drafting-layer-size-value"]') as HTMLElement
+
+    expect(sizeValue).not.toBeNull()
+    expect(sizeValue.textContent).toBe("420 x 320")
+    expect(sizeValue.style.transform).toBe("translate(-50%, calc(100% + 10px))")
+  })
+
+  it("renders and edits Avnac-style text layers inline", async () => {
+    const onLayerChange = vi.fn()
+    const onLayerSelect = vi.fn()
+    const textLayer = createDraftingTextLayer("preview", {
+      fill: "#123456",
+      fontFamily: "Manrope",
+      fontSize: 38,
+      id: "preview:text",
+      text: "Scan here",
+      textAlign: "center",
+      width: 260,
+      zIndex: 2,
+    })
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers: [...createDefaultDraftingLayers("preview", createDefaultQrStudioState(), createDefaultDraftingCardState()), textLayer],
+      onLayerChange,
+      onLayerSelect,
+      selectedLayerId: "preview:text",
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const text = getRequiredElement(container, '[data-slot="drafting-text-layer"]') as HTMLElement
+    const content = getRequiredElement(text, '[data-slot="drafting-text-content"]') as HTMLElement
+
+    expect(text.getAttribute("data-selected")).toBe("true")
+    expect(content.textContent).toBe("Scan here")
+    expect(content.style.color).toBe("rgb(18, 52, 86)")
+    expect(content.style.fontFamily).toBe('"Manrope", system-ui, Arial, sans-serif')
+    expect(content.style.fontSize).toBe("38px")
+    expect(content.style.textAlign).toBe("center")
+
+    act(() => {
+      text.dispatchEvent(new MouseEvent("dblclick", { bubbles: true, cancelable: true }))
+    })
+
+    const editor = getRequiredElement(text, '[data-slot="drafting-text-editor"]') as HTMLTextAreaElement
+
+    expect(onLayerSelect).toHaveBeenCalledWith("preview:text")
+    expect(editor.value).toBe("Scan here")
+
+    act(() => {
+      const valueSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLTextAreaElement.prototype,
+        "value",
+      )?.set
+
+      valueSetter?.call(editor, "Table 12")
+      editor.dispatchEvent(new Event("input", { bubbles: true }))
+      editor.dispatchEvent(new Event("change", { bubbles: true }))
+    })
+
+    expect(onLayerChange).toHaveBeenCalledWith("preview:text", { text: "Table 12" })
+  })
+
+  it("opens a selected layer context menu and emits layer actions", async () => {
+    const onLayerAction = vi.fn()
+    const onLayerCopy = vi.fn()
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      onLayerCopy,
+      onLayerAction,
+      selectedLayerId: "preview:qr",
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const frame = container.querySelector('[data-slot="drafting-layer-resize-frame"]') as HTMLElement
+
+    act(() => {
+      frame.dispatchEvent(
+        new MouseEvent("contextmenu", {
+          bubbles: true,
+          cancelable: true,
+          clientX: 120,
+          clientY: 140,
+        }),
+      )
+    })
+
+    const menu = document.body.querySelector('[data-slot="drafting-layer-context-menu"]') as HTMLElement
+
+    expect(menu).not.toBeNull()
+    expect(menu.style.left).toBe("120px")
+    expect(menu.style.top).toBe("148px")
+    expect(menu.textContent).not.toContain("QR code")
+    expect(menu.textContent).not.toContain("Card")
+
+    act(() => {
+      clickElement(getRequiredElement(document.body, 'button[aria-label="Copy"]'))
+    })
+
+    expect(onLayerCopy).toHaveBeenCalledWith(["preview:qr"])
+
+    act(() => {
+      frame.dispatchEvent(
+        new MouseEvent("contextmenu", {
+          bubbles: true,
+          cancelable: true,
+          clientX: 120,
+          clientY: 140,
+        }),
+      )
+    })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    act(() => {
+      clickElement(getRequiredElement(document.body, 'button[aria-label="Bring to front"]'))
+    })
+
+    expect(onLayerAction).toHaveBeenCalledWith(["preview:qr"], "front")
+  })
+
+  it("closes the layer context menu after clicking outside it", async () => {
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      selectedLayerId: "preview:qr",
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const frame = container.querySelector('[data-slot="drafting-layer-resize-frame"]') as HTMLElement
+
+    act(() => {
+      frame.dispatchEvent(
+        new MouseEvent("contextmenu", {
+          bubbles: true,
+          cancelable: true,
+          clientX: 120,
+          clientY: 140,
+        }),
+      )
+    })
+
+    expect(document.body.querySelector('[data-slot="drafting-layer-context-menu"]')).not.toBeNull()
+
+    act(() => {
+      document.body.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, button: 0 }))
+    })
+
+    expect(document.body.querySelector('[data-slot="drafting-layer-context-menu"]')).toBeNull()
+  })
+
+  it("opens an empty canvas context menu and emits paste at the scene point", async () => {
+    const onLayerPaste = vi.fn()
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      onLayerPaste,
+      selectedLayerId: null,
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const canvas = getRequiredElement(container, '[data-slot="dashboard-compose-canvas"]')
+    setElementRect(canvas, { height: 400, left: 0, top: 0, width: 400 })
+
+    act(() => {
+      canvas.dispatchEvent(
+        new MouseEvent("contextmenu", {
+          bubbles: true,
+          cancelable: true,
+          clientX: 220,
+          clientY: 240,
+        }),
+      )
+    })
+
+    act(() => {
+      clickElement(getRequiredElement(document.body, 'button[aria-label="Paste"]'))
+    })
+
+    expect(onLayerPaste).toHaveBeenCalledWith({ x: 20, y: 40 })
+  })
+
+  it("marquee selects visible unlocked layers intersecting the drag box", async () => {
+    const onLayerSelectionChange = vi.fn()
+    const onLayerSelect = vi.fn()
+    const layers: DraftingCanvasLayer[] = [
+      createLayer({
+        height: 80,
+        id: "preview:card",
+        kind: "card",
+        width: 80,
+        x: -100,
+        y: -100,
+        zIndex: 0,
+      }),
+      createLayer({
+        height: 80,
+        id: "preview:qr",
+        isLocked: true,
+        kind: "qr",
+        width: 80,
+        x: 40,
+        y: 40,
+        zIndex: 1,
+      }),
+    ]
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers,
+      onLayerSelect,
+      onLayerSelectionChange,
+      selectedLayerId: null,
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const canvas = getRequiredElement(container, '[data-slot="dashboard-compose-canvas"]')
+    setElementRect(canvas, { height: 400, left: 0, top: 0, width: 400 })
+
+    act(() => {
+      canvas.dispatchEvent(createPointerEvent("pointerdown", 90, 90))
+      canvas.dispatchEvent(createPointerEvent("pointermove", 190, 190))
+      canvas.dispatchEvent(createPointerEvent("pointerup", 190, 190))
+      canvas.dispatchEvent(new MouseEvent("click", { bubbles: true, button: 0 }))
+    })
+
+    expect(onLayerSelectionChange).toHaveBeenCalledWith(["preview:card"], { additive: false })
+    expect(onLayerSelect).not.toHaveBeenCalledWith(null)
   })
 
   it("updates layer rotation when dragging the rotation handle", async () => {
@@ -1195,6 +1554,30 @@ describe("QrPane", () => {
     expect(activeFrame.style.transform).toBe("translate3d(-112px, -62px, 0) rotate(90deg)")
   })
 
+  it("matches the combined selector to already rotated selected layers", async () => {
+    const layers: DraftingCanvasLayer[] = [
+      createLayer({ height: 100, id: "preview:card", kind: "card", rotation: 90, width: 100, x: -25, y: -125, zIndex: 0 }),
+      createLayer({ height: 100, id: "preview:qr", kind: "qr", rotation: 90, width: 100, x: -25, y: 25, zIndex: 1 }),
+    ]
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers,
+      selectedLayerIds: ["preview:card", "preview:qr"],
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    const activeFrame = container.querySelector(
+      '[data-slot="drafting-layer-multi-select-frame"]',
+    ) as HTMLElement
+
+    expect(activeFrame.style.width).toBe("274px")
+    expect(activeFrame.style.height).toBe("124px")
+    expect(activeFrame.style.transform).toBe("translate3d(-112px, -62px, 0) rotate(90deg)")
+  })
+
   it("moves every selected layer without collapsing the combined selector", async () => {
     const onLayerChange = vi.fn()
     const onLayerSelect = vi.fn()
@@ -1219,6 +1602,8 @@ describe("QrPane", () => {
     act(() => {
       qrLayer.dispatchEvent(createPointerEvent("pointerdown", 0, 0))
       qrLayer.dispatchEvent(createPointerEvent("pointermove", 20, 30))
+      qrLayer.dispatchEvent(createPointerEvent("pointerup", 20, 30))
+      qrLayer.dispatchEvent(new MouseEvent("click", { bubbles: true, button: 0 }))
     })
 
     expect(onLayerSelect).not.toHaveBeenCalledWith("preview:qr")
@@ -1232,6 +1617,27 @@ describe("QrPane", () => {
     })
     expect(container.querySelector('[data-slot="drafting-layer-multi-select-frame"]')).not.toBeNull()
   })
+
+  it("shows the selected multi-layer size below the selection frame", async () => {
+    const layers: DraftingCanvasLayer[] = [
+      createLayer({ height: 100, id: "preview:card", kind: "card", width: 160, x: -100, y: -50, zIndex: 0 }),
+      createLayer({ height: 120, id: "preview:qr", kind: "qr", width: 120, x: 80, y: -30, zIndex: 1 }),
+    ]
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers,
+      onLayerChange: () => undefined,
+      selectedLayerIds: ["preview:card", "preview:qr"],
+    })
+
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    expect(container.querySelector('[data-slot="drafting-layer-size-value"]')?.textContent).toBe(
+      "300 x 140",
+    )
+  })
 })
 
 function renderPane(
@@ -1241,7 +1647,11 @@ function renderPane(
   props: {
     layers?: DraftingCanvasLayer[]
     onLayerChange?: (layerId: string, patch: Partial<DraftingCanvasLayer>) => void
+    onLayerAction?: (layerIds: string[], action: string) => void
+    onLayerCopy?: (layerIds: string[]) => void
+    onLayerPaste?: (point: { x: number; y: number }) => void
     onLayerSelect?: (layerId: string | null, options?: { additive?: boolean }) => void
+    onLayerSelectionChange?: (layerIds: string[], options?: { additive?: boolean }) => void
     selectedLayerId?: string | null
     selectedLayerIds?: string[]
     snapEnabled?: boolean
@@ -1258,7 +1668,11 @@ function renderPane(
         state={state}
         isSelected={isSelected}
         onLayerChange={props.onLayerChange}
+        onLayerAction={props.onLayerAction}
+        onLayerCopy={props.onLayerCopy}
+        onLayerPaste={props.onLayerPaste}
         onLayerSelect={props.onLayerSelect}
+        onLayerSelectionChange={props.onLayerSelectionChange}
         onQrClick={() => undefined}
         onSelect={() => undefined}
         selectedLayerId={props.selectedLayerId}
@@ -1283,6 +1697,18 @@ function flushPromises() {
   return Promise.resolve()
 }
 
+function getRequiredElement(parent: ParentNode, selector: string) {
+  const element = parent.querySelector(selector)
+
+  expect(element).not.toBeNull()
+
+  return element as HTMLElement
+}
+
+function clickElement(element: Element) {
+  element.dispatchEvent(new MouseEvent("click", { bubbles: true, button: 0 }))
+}
+
 function createPointerEvent(type: string, clientX: number, clientY: number) {
   const PointerEventConstructor = window.PointerEvent ?? window.MouseEvent
 
@@ -1293,6 +1719,22 @@ function createPointerEvent(type: string, clientX: number, clientY: number) {
     clientY,
     pointerId: 1,
   } as PointerEventInit)
+}
+
+function setElementRect(
+  element: Element,
+  rect: { height: number; left: number; top: number; width: number },
+) {
+  const fullRect = {
+    ...rect,
+    bottom: rect.top + rect.height,
+    right: rect.left + rect.width,
+    x: rect.left,
+    y: rect.top,
+    toJSON: () => ({}),
+  } as DOMRect
+
+  vi.spyOn(element, "getBoundingClientRect").mockReturnValue(fullRect)
 }
 
 function createLayer(
