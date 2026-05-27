@@ -144,6 +144,9 @@ describe("qr studio state helpers", () => {
     expect(state.dotMatrixAnimation.loader).toBe("neon-drift");
     expect(state.dotMatrixAnimation.pattern).toBe("full");
     expect(state.dotMatrixAnimation.dotShape).toBe("circle");
+    expect(state.dotMatrixAnimation.customColorBase).toBe(state.dotMatrixAnimation.customColor);
+    expect(state.dotMatrixAnimation.customColorMid).toBe(state.dotMatrixAnimation.customColor);
+    expect(state.dotMatrixAnimation.customColorPeak).toBe(state.dotMatrixAnimation.customColor);
   });
 
   it("clamps dot matrix animation updates to supported ranges", () => {
@@ -178,6 +181,9 @@ describe("qr studio state helpers", () => {
       animated: true,
       colorPreset: "theme",
       customColor: "#f4f4f5",
+      customColorBase: "#22d3ee",
+      customColorMid: "#22d3ee",
+      customColorPeak: "#22d3ee",
       dotShape: "diamond",
       enabled: true,
       exportAnimatedSvg: true,
@@ -211,7 +217,7 @@ describe("qr studio state helpers", () => {
         hoverAnimated: true,
         muted: true,
       },
-    } as typeof state;
+    } as unknown as typeof state;
 
     const cleaned = setDotMatrixAnimationOptions(legacyState, {});
     const animationRecord = cleaned.dotMatrixAnimation as Record<string, unknown>;
@@ -228,6 +234,9 @@ describe("qr studio state helpers", () => {
     const custom = setDotMatrixAnimationOptions(state, {
       colorPreset: "mint",
       customColor: "#abcdef",
+      customColorBase: "#111111",
+      customColorMid: "#555555",
+      customColorPeak: "#eeeeee",
       opacityBase: 0.14,
       opacityMid: 0.48,
       opacityPeak: 0.92,
@@ -235,6 +244,9 @@ describe("qr studio state helpers", () => {
 
     expect(custom.dotMatrixAnimation.colorPreset).toBe("mint");
     expect(custom.dotMatrixAnimation.customColor).toBe("#abcdef");
+    expect(custom.dotMatrixAnimation.customColorBase).toBe("#111111");
+    expect(custom.dotMatrixAnimation.customColorMid).toBe("#555555");
+    expect(custom.dotMatrixAnimation.customColorPeak).toBe("#eeeeee");
     expect(custom.dotMatrixAnimation.opacityBase).toBe(0.14);
     expect(custom.dotMatrixAnimation.opacityMid).toBe(0.48);
     expect(custom.dotMatrixAnimation.opacityPeak).toBe(0.92);
@@ -249,6 +261,30 @@ describe("qr studio state helpers", () => {
 
     expect(styleColorChanged.dotMatrixAnimation.colorPreset).toBe("mint");
     expect(styleColorChanged.dotMatrixAnimation.customColor).toBe("#abcdef");
+    expect(styleColorChanged.dotMatrixAnimation.customColorBase).toBe("#111111");
+    expect(styleColorChanged.dotMatrixAnimation.customColorMid).toBe("#555555");
+    expect(styleColorChanged.dotMatrixAnimation.customColorPeak).toBe("#eeeeee");
+  });
+
+  it("seeds missing loader anchor colors from the legacy custom color", () => {
+    const state = createDefaultQrStudioState();
+    const legacyState = {
+      ...state,
+      dotMatrixAnimation: {
+        ...state.dotMatrixAnimation,
+        customColor: "#123abc",
+        customColorBase: undefined,
+        customColorMid: undefined,
+        customColorPeak: undefined,
+      },
+    } as unknown as typeof state;
+
+    const migrated = setDotMatrixAnimationOptions(legacyState, {});
+
+    expect(migrated.dotMatrixAnimation.customColor).toBe("#123abc");
+    expect(migrated.dotMatrixAnimation.customColorBase).toBe("#123abc");
+    expect(migrated.dotMatrixAnimation.customColorMid).toBe("#123abc");
+    expect(migrated.dotMatrixAnimation.customColorPeak).toBe("#123abc");
   });
 
   it("persists zero opacity anchors as literal zero values", () => {

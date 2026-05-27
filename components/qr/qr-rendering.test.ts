@@ -775,6 +775,9 @@ describe("qr rendering helpers", () => {
 
   it("remaps generated loader keyframes through base mid and peak opacity anchors", () => {
     const { animationLayer } = renderDotMatrixTracks("sound-bars", "full", {
+      customColorBase: "#111111",
+      customColorMid: "#555555",
+      customColorPeak: "#eeeeee",
       opacityBase: 0.12,
       opacityMid: 0.46,
       opacityPeak: 0.9,
@@ -784,9 +787,15 @@ describe("qr rendering helpers", () => {
     expect(animationLayer?.getAttribute("style")).toContain("--qr-dot-matrix-opacity-base:0.12")
     expect(animationLayer?.getAttribute("style")).toContain("--qr-dot-matrix-opacity-mid:0.46")
     expect(animationLayer?.getAttribute("style")).toContain("--qr-dot-matrix-opacity-peak:0.9")
+    expect(animationLayer?.getAttribute("style")).toContain("--qr-dot-matrix-color-base:#111111")
+    expect(animationLayer?.getAttribute("style")).toContain("--qr-dot-matrix-color-mid:#555555")
+    expect(animationLayer?.getAttribute("style")).toContain("--qr-dot-matrix-color-peak:#eeeeee")
     expect(styleText).toContain("var(--qr-dot-matrix-opacity-base)")
     expect(styleText).toContain("var(--qr-dot-matrix-opacity-mid)")
     expect(styleText).toContain("var(--qr-dot-matrix-opacity-peak)")
+    expect(styleText).toContain("fill: var(--qr-dot-matrix-color-base)")
+    expect(styleText).toContain("fill: var(--qr-dot-matrix-color-mid)")
+    expect(styleText).toContain("fill: var(--qr-dot-matrix-color-peak)")
     expect(styleText).not.toContain("opacity: 0.08")
     expect(styleText).not.toContain("opacity: 1;")
   })

@@ -1128,7 +1128,6 @@ describe("DraftingSurface", () => {
     expect(surface.container.textContent).toContain("Mobius Run")
     expect(surface.container.textContent).not.toContain("Honey Gate")
     expect(surface.container.textContent).toContain("Loader color")
-    expect(surface.container.textContent).toContain("Custom loader color")
     expect(surface.container.textContent).toContain("Overlay scale")
     expect(surface.container.textContent).toContain("Bloom")
     expect(surface.container.textContent).toContain("Base")
@@ -1151,6 +1150,30 @@ describe("DraftingSurface", () => {
       expect.objectContaining({
         dotMatrixAnimation: expect.objectContaining({
           loader: "mobius-run",
+        }),
+      }),
+      { animationMode: "preview" },
+    )
+
+    const loaderPanel = getRequiredElement(
+      surface.container,
+      '[data-slot="drafting-loader-playground-tab"]',
+    )
+    const baseColorInput = getRequiredElement(
+      loaderPanel,
+      'input[aria-label="Loader base color"]',
+    ) as HTMLInputElement
+
+    await act(async () => {
+      changeInputValue(baseColorInput, "#111111")
+      await flushPromises()
+      await flushPromises()
+    })
+
+    expect(buildDashboardQrNodePayloadSpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        dotMatrixAnimation: expect.objectContaining({
+          customColorBase: "#111111",
         }),
       }),
       { animationMode: "preview" },

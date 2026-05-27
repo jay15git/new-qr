@@ -67,6 +67,9 @@ export type QrDotMatrixAnimationOptions = {
   animated: boolean;
   colorPreset: QrDotMatrixColorPreset;
   customColor: string;
+  customColorBase: string;
+  customColorMid: string;
+  customColorPeak: string;
   dotShape: QrDotMatrixDotShape;
   enabled: boolean;
   exportAnimatedSvg: boolean;
@@ -267,6 +270,9 @@ export const DEFAULT_DOT_MATRIX_ANIMATION: QrDotMatrixAnimationOptions = {
   animated: true,
   colorPreset: "theme",
   customColor: "#22d3ee",
+  customColorBase: "#22d3ee",
+  customColorMid: "#22d3ee",
+  customColorPeak: "#22d3ee",
   dotShape: "circle",
   enabled: false,
   exportAnimatedSvg: false,
@@ -419,6 +425,10 @@ function coerceDotMatrixSquareLoader(value: string | undefined) {
     : DEFAULT_DOT_MATRIX_ANIMATION.loader;
 }
 
+function coerceDotMatrixAnimationColor(value: unknown, fallback: string) {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
 export function clampBackgroundShapePaddingPx(value: number) {
   return coerceNumber(
     value,
@@ -507,10 +517,26 @@ export function setDotMatrixAnimationOptions(
     Object.prototype.hasOwnProperty.call(state.dotMatrixAnimation, "halo") ||
     Object.prototype.hasOwnProperty.call(state.dotMatrixAnimation, "hoverAnimated") ||
     Object.prototype.hasOwnProperty.call(state.dotMatrixAnimation, "muted");
+  const nextCustomColor = coerceDotMatrixAnimationColor(
+    patch.customColor ?? state.dotMatrixAnimation.customColor,
+    DEFAULT_DOT_MATRIX_ANIMATION.customColor,
+  );
   const nextAnimation: QrDotMatrixAnimationOptions = {
     animated: patch.animated ?? state.dotMatrixAnimation.animated,
     colorPreset: patch.colorPreset ?? state.dotMatrixAnimation.colorPreset,
-    customColor: patch.customColor ?? state.dotMatrixAnimation.customColor,
+    customColor: nextCustomColor,
+    customColorBase: coerceDotMatrixAnimationColor(
+      patch.customColorBase ?? state.dotMatrixAnimation.customColorBase,
+      nextCustomColor,
+    ),
+    customColorMid: coerceDotMatrixAnimationColor(
+      patch.customColorMid ?? state.dotMatrixAnimation.customColorMid,
+      nextCustomColor,
+    ),
+    customColorPeak: coerceDotMatrixAnimationColor(
+      patch.customColorPeak ?? state.dotMatrixAnimation.customColorPeak,
+      nextCustomColor,
+    ),
     dotShape: patch.dotShape ?? state.dotMatrixAnimation.dotShape,
     enabled: patch.enabled ?? state.dotMatrixAnimation.enabled,
     exportAnimatedSvg:
@@ -545,6 +571,9 @@ export function setDotMatrixAnimationOptions(
     state.dotMatrixAnimation.animated === nextAnimation.animated &&
     state.dotMatrixAnimation.colorPreset === nextAnimation.colorPreset &&
     state.dotMatrixAnimation.customColor === nextAnimation.customColor &&
+    state.dotMatrixAnimation.customColorBase === nextAnimation.customColorBase &&
+    state.dotMatrixAnimation.customColorMid === nextAnimation.customColorMid &&
+    state.dotMatrixAnimation.customColorPeak === nextAnimation.customColorPeak &&
     state.dotMatrixAnimation.dotShape === nextAnimation.dotShape &&
     state.dotMatrixAnimation.loader === nextAnimation.loader &&
     state.dotMatrixAnimation.opacityBase === nextAnimation.opacityBase &&

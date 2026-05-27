@@ -163,7 +163,7 @@ export function createDotMatrixAnimationExtension(
       return
     }
 
-    const animationColor = resolveDotMatrixColor(state)
+    const animationColors = resolveDotMatrixColors(state)
     const modules: DotMatrixModule[] = []
 
     for (const layer of dotLayers) {
@@ -211,7 +211,10 @@ export function createDotMatrixAnimationExtension(
     group.setAttribute(
       "style",
       [
-        `--qr-dot-matrix-color:${animationColor}`,
+        `--qr-dot-matrix-color:${animationColors.base}`,
+        `--qr-dot-matrix-color-base:${animationColors.base}`,
+        `--qr-dot-matrix-color-mid:${animationColors.mid}`,
+        `--qr-dot-matrix-color-peak:${animationColors.peak}`,
         `--qr-dot-matrix-duration:${getDotMatrixAnimationDuration(state.dotMatrixAnimation)}s`,
         `--qr-dot-matrix-opacity-base:${formatSvgOpacity(getDotMatrixBaseOpacity(state.dotMatrixAnimation))}`,
         `--qr-dot-matrix-opacity-mid:${formatSvgOpacity(state.dotMatrixAnimation.opacityMid)}`,
@@ -252,7 +255,7 @@ export function createDotMatrixAnimationExtension(
       animatedLayer.setAttribute("width", formatSvgNumber(coverRect.width))
       animatedLayer.setAttribute("height", formatSvgNumber(coverRect.height))
       animatedLayer.setAttribute("clip-path", `url('#${clipPathId}')`)
-      animatedLayer.setAttribute("fill", animationColor)
+      animatedLayer.setAttribute("fill", animationColors.base)
       animatedLayer.setAttribute("data-qr-dot-loader", state.dotMatrixAnimation.loader)
       animatedLayer.setAttribute("data-qr-dot-track", String(track.index))
       animatedLayer.setAttribute("data-qr-dot-keyframes", track.keyframes)
@@ -1200,12 +1203,18 @@ function applyDotMatrixOverlayScale(
   )
 }
 
-function resolveDotMatrixColor(state: QrStudioState) {
+function resolveDotMatrixColors(state: QrStudioState) {
   const animation = state.dotMatrixAnimation
   const defaultLoaderColor = DEFAULT_DOT_MATRIX_ANIMATION.customColor
 
   if (animation.colorPreset === "theme") {
-    return animation.customColor || defaultLoaderColor
+    const legacyCustomColor = animation.customColor || defaultLoaderColor
+
+    return {
+      base: animation.customColorBase || legacyCustomColor,
+      mid: animation.customColorMid || legacyCustomColor,
+      peak: animation.customColorPeak || legacyCustomColor,
+    }
   }
 
   const presetColors: Record<QrDotMatrixAnimationOptions["colorPreset"], string> = {
@@ -1219,7 +1228,13 @@ function resolveDotMatrixColor(state: QrStudioState) {
     theme: animation.customColor || defaultLoaderColor,
   }
 
-  return presetColors[animation.colorPreset]
+  const presetColor = presetColors[animation.colorPreset]
+
+  return {
+    base: presetColor,
+    mid: presetColor,
+    peak: presetColor,
+  }
 }
 
 function createGeneratedDotMatrixKeyframes(
@@ -1335,22 +1350,24 @@ function createDotMatrixOpacityKeyframes(name: string, samples: number[]) {
   const frames = samples.map((opacity, index) => {
     const percent = formatSvgNumber((index / last) * 100)
 
-    return `${percent}% { opacity: ${getDotMatrixOpacityAnchorValue(opacity)}; }`
+    const anchor = getDotMatrixAnchorValue(opacity)
+
+    return `${percent}% { opacity: var(--qr-dot-matrix-opacity-${anchor}); fill: var(--qr-dot-matrix-color-${anchor}); }`
   })
 
   return `@keyframes ${name} { ${frames.join(" ")} }`
 }
 
-function getDotMatrixOpacityAnchorValue(sourceOpacity: number) {
+function getDotMatrixAnchorValue(sourceOpacity: number) {
   if (!Number.isFinite(sourceOpacity) || sourceOpacity <= 0.08) {
-    return "var(--qr-dot-matrix-opacity-base)"
+    return "base"
   }
 
   if (sourceOpacity >= 0.94) {
-    return "var(--qr-dot-matrix-opacity-peak)"
+    return "peak"
   }
 
-  return "var(--qr-dot-matrix-opacity-mid)"
+  return "mid"
 }
 
 function createDotMatrixAnimationStyle(document: Document, tracks: DotMatrixTrack[]) {
@@ -1370,6 +1387,7 @@ function createDotMatrixAnimationStyle(document: Document, tracks: DotMatrixTrac
   animation-iteration-count: infinite;
   animation-name: var(--qr-dot-keyframes-name);
   animation-timing-function: var(--qr-dot-easing, ease-in-out);
+  fill: var(--qr-dot-matrix-color-base);
   filter: drop-shadow(0 0 3px var(--qr-dot-matrix-color));
   opacity: var(--qr-dot-matrix-opacity-base);
 }
@@ -1386,16 +1404,16 @@ function createDotMatrixAnimationStyle(document: Document, tracks: DotMatrixTrac
 .qr-dot-matrix-track[data-qr-dot-upstream-class="dmx-square6-col-snake"] { animation-delay: calc(var(--dmx-col-pos, 0) * -110ms); }
 .qr-dot-matrix-track[data-qr-dot-upstream-class="dmx-ripple-echo"] { animation-delay: calc(var(--dmx-ripple-ring, 0) * -120ms); }
 .qr-dot-matrix-track[data-qr-dot-upstream-class="dmx-center-origin-ripple"] { animation-delay: calc(var(--dmx-center-ripple-ring, 0) * -120ms); }
-@keyframes qr-dot-loader-legacy { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); } }
-@keyframes dmx-diagonal-alt-sweep { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 44% { opacity: var(--qr-dot-matrix-opacity-peak); } 68% { opacity: var(--qr-dot-matrix-opacity-mid); } }
-@keyframes dmx-spiral-snake { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 10% { opacity: var(--qr-dot-matrix-opacity-peak); } 34% { opacity: var(--qr-dot-matrix-opacity-mid); } }
-@keyframes dmx-diagonal-snake { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 12% { opacity: var(--qr-dot-matrix-opacity-peak); } 36% { opacity: var(--qr-dot-matrix-opacity-mid); } }
-@keyframes dmx-outer-snake { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 8% { opacity: var(--qr-dot-matrix-opacity-peak); } 30% { opacity: var(--qr-dot-matrix-opacity-mid); } }
-@keyframes dmx-middle-snake { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 8% { opacity: var(--qr-dot-matrix-opacity-peak); } 30% { opacity: var(--qr-dot-matrix-opacity-mid); } }
-@keyframes dmx-square6-col-snake { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 18% { opacity: var(--qr-dot-matrix-opacity-peak); } 42% { opacity: var(--qr-dot-matrix-opacity-mid); } }
-@keyframes dmx-ripple-echo { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 35% { opacity: var(--qr-dot-matrix-opacity-peak); } 60% { opacity: var(--qr-dot-matrix-opacity-mid); } }
-@keyframes dmx-center-origin-ripple { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 32% { opacity: var(--qr-dot-matrix-opacity-peak); } 62% { opacity: var(--qr-dot-matrix-opacity-mid); } }
-@keyframes dmx-square9-bit { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); } 8%, 22%, 38%, 56% { opacity: var(--qr-dot-matrix-opacity-peak); } 14%, 30%, 48%, 68% { opacity: var(--qr-dot-matrix-opacity-mid); } }
+@keyframes qr-dot-loader-legacy { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); fill: var(--qr-dot-matrix-color-base); } 50% { opacity: var(--qr-dot-matrix-opacity-peak); fill: var(--qr-dot-matrix-color-peak); } }
+@keyframes dmx-diagonal-alt-sweep { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); fill: var(--qr-dot-matrix-color-base); } 44% { opacity: var(--qr-dot-matrix-opacity-peak); fill: var(--qr-dot-matrix-color-peak); } 68% { opacity: var(--qr-dot-matrix-opacity-mid); fill: var(--qr-dot-matrix-color-mid); } }
+@keyframes dmx-spiral-snake { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); fill: var(--qr-dot-matrix-color-base); } 10% { opacity: var(--qr-dot-matrix-opacity-peak); fill: var(--qr-dot-matrix-color-peak); } 34% { opacity: var(--qr-dot-matrix-opacity-mid); fill: var(--qr-dot-matrix-color-mid); } }
+@keyframes dmx-diagonal-snake { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); fill: var(--qr-dot-matrix-color-base); } 12% { opacity: var(--qr-dot-matrix-opacity-peak); fill: var(--qr-dot-matrix-color-peak); } 36% { opacity: var(--qr-dot-matrix-opacity-mid); fill: var(--qr-dot-matrix-color-mid); } }
+@keyframes dmx-outer-snake { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); fill: var(--qr-dot-matrix-color-base); } 8% { opacity: var(--qr-dot-matrix-opacity-peak); fill: var(--qr-dot-matrix-color-peak); } 30% { opacity: var(--qr-dot-matrix-opacity-mid); fill: var(--qr-dot-matrix-color-mid); } }
+@keyframes dmx-middle-snake { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); fill: var(--qr-dot-matrix-color-base); } 8% { opacity: var(--qr-dot-matrix-opacity-peak); fill: var(--qr-dot-matrix-color-peak); } 30% { opacity: var(--qr-dot-matrix-opacity-mid); fill: var(--qr-dot-matrix-color-mid); } }
+@keyframes dmx-square6-col-snake { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); fill: var(--qr-dot-matrix-color-base); } 18% { opacity: var(--qr-dot-matrix-opacity-peak); fill: var(--qr-dot-matrix-color-peak); } 42% { opacity: var(--qr-dot-matrix-opacity-mid); fill: var(--qr-dot-matrix-color-mid); } }
+@keyframes dmx-ripple-echo { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); fill: var(--qr-dot-matrix-color-base); } 35% { opacity: var(--qr-dot-matrix-opacity-peak); fill: var(--qr-dot-matrix-color-peak); } 60% { opacity: var(--qr-dot-matrix-opacity-mid); fill: var(--qr-dot-matrix-color-mid); } }
+@keyframes dmx-center-origin-ripple { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); fill: var(--qr-dot-matrix-color-base); } 32% { opacity: var(--qr-dot-matrix-opacity-peak); fill: var(--qr-dot-matrix-color-peak); } 62% { opacity: var(--qr-dot-matrix-opacity-mid); fill: var(--qr-dot-matrix-color-mid); } }
+@keyframes dmx-square9-bit { 0%, 100% { opacity: var(--qr-dot-matrix-opacity-base); fill: var(--qr-dot-matrix-color-base); } 8%, 22%, 38%, 56% { opacity: var(--qr-dot-matrix-opacity-peak); fill: var(--qr-dot-matrix-color-peak); } 14%, 30%, 48%, 68% { opacity: var(--qr-dot-matrix-opacity-mid); fill: var(--qr-dot-matrix-color-mid); } }
 ${generatedKeyframes}
 @media (prefers-reduced-motion: reduce) {
   .qr-dot-matrix-layer {

@@ -1023,18 +1023,33 @@ export function DraftingLoaderPlaygroundTab({
             </Button>
           ))}
         </div>
-        <label className="mt-3 flex min-w-0 items-center justify-between gap-3 rounded-[6px] bg-[var(--drafting-control-bg)] px-3 py-2">
-          <span className="drafting-type-control-label font-semibold text-[var(--drafting-ink-muted)]">
-            Custom loader color
-          </span>
-          <Input
-            aria-label="Custom loader color"
-            type="color"
-            value={animation.customColor}
-            onChange={(event) => onAnimationChange({ customColor: event.target.value })}
-            className="h-8 w-12 shrink-0 border-0 bg-transparent p-0"
-          />
-        </label>
+        {animation.colorPreset === "theme" ? (
+          <div className="mt-3 grid min-w-0 gap-2">
+            {[
+              ["Base", "customColorBase", animation.customColorBase, "Loader base color"],
+              ["Mid", "customColorMid", animation.customColorMid, "Loader mid color"],
+              ["Peak", "customColorPeak", animation.customColorPeak, "Loader peak color"],
+            ].map(([label, field, value, ariaLabel]) => (
+              <label
+                key={field}
+                className="flex min-w-0 items-center justify-between gap-3 rounded-[6px] bg-[var(--drafting-control-bg)] px-3 py-2"
+              >
+                <span className="drafting-type-control-label font-semibold text-[var(--drafting-ink-muted)]">
+                  {label}
+                </span>
+                <Input
+                  aria-label={ariaLabel}
+                  type="color"
+                  value={value}
+                  onChange={(event) =>
+                    onAnimationChange({ [field]: event.target.value } as QrDotMatrixAnimationPatch)
+                  }
+                  className="h-8 w-12 shrink-0 border-0 bg-transparent p-0"
+                />
+              </label>
+            ))}
+          </div>
+        ) : null}
       </section>
 
       <section className="min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 shadow-[var(--drafting-shadow-rest)]">
