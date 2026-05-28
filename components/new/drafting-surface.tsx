@@ -129,10 +129,6 @@ import {
   applyLogoPresetGradient,
   applyLogoPresetSelection,
 } from "@/components/qr/qr-control-sections"
-import {
-  DEFAULT_QR_EDITOR_SECTION,
-  type QrEditorSectionId,
-} from "@/components/qr/qr-sections"
 import { buildDashboardQrNodePayload } from "@/components/qr/dashboard-qr-svg"
 import {
   downloadDashboardQrBatchZipExport,
@@ -193,7 +189,6 @@ import {
   ScrollAreaViewport,
 } from "@/components/ui/scroll-area"
 import { Switch } from "@/components/ui/switch"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   DEFAULT_QR_INPUT_TYPE,
   type QrInputType,
@@ -221,13 +216,17 @@ type DraftingBinaryColorMode = "solid" | "gradient"
 type DraftingAssetSourceMode = Extract<AssetSourceMode, "upload" | "url">
 type DraftingBrandIconCategoryFilter = BrandIconCategory | "all"
 type DraftingCardToolId = "card-frame" | "card-surface" | "card-image" | "card-shaders"
-
-type DraftingPanelTab = {
-  id: string
-  label: string
-}
-
-type DraftingToolId = QrEditorSectionId | DraftingCardToolId | "layers" | "loader-playground" | "text"
+type DraftingToolId =
+  | "content"
+  | "style"
+  | "corners"
+  | "background"
+  | "logo"
+  | "text"
+  | "motion"
+  | "encoding"
+  | "layers"
+  | DraftingCardToolId
 
 type DraftingTool = {
   id: DraftingToolId
@@ -235,73 +234,8 @@ type DraftingTool = {
   renderIcon: () => ReactNode
 }
 
-const DRAFTING_PANEL_TABS: Record<DraftingToolId, DraftingPanelTab[]> = {
-  content: [{ id: "content", label: "Content" }],
-  "card-frame": [{ id: "frame", label: "Frame" }],
-  "card-surface": [{ id: "surface", label: "Surface" }],
-  "card-image": [
-    { id: "upload", label: "Upload" },
-    { id: "filters", label: "Filters" },
-  ],
-  "card-shaders": [
-    { id: "shaders", label: "Shaders" },
-    { id: "settings", label: "Settings" },
-  ],
-  style: [
-    { id: "style", label: "Style" },
-    { id: "color", label: "Color" },
-    { id: "size", label: "Size" },
-    { id: "motion", label: "Motion" },
-  ],
-  "loader-playground": [{ id: "playground", label: "Playground" }],
-  text: [{ id: "text", label: "Text" }],
-  "corner-square": [
-    { id: "style", label: "Style" },
-    { id: "color", label: "Color" },
-  ],
-  "corner-dot": [
-    { id: "style", label: "Style" },
-    { id: "color", label: "Color" },
-  ],
-  background: [
-    { id: "colors", label: "Colors" },
-    { id: "shape", label: "Shape" },
-    { id: "upload", label: "Upload" },
-  ],
-  logo: [
-    { id: "brand-icons", label: "Brands" },
-    { id: "colors", label: "Colors" },
-    { id: "upload", label: "Upload" },
-    { id: "size", label: "Size" },
-  ],
-  encoding: [{ id: "encoding", label: "Encoding" }],
-  layers: [{ id: "layers", label: "Layers" }],
-}
-
-const DEFAULT_DRAFTING_PANEL_TABS: Record<DraftingToolId, string> = {
-  content: "content",
-  "card-frame": "frame",
-  "card-surface": "surface",
-  "card-image": "upload",
-  "card-shaders": "shaders",
-  style: "style",
-  "loader-playground": "playground",
-  text: "text",
-  "corner-square": "style",
-  "corner-dot": "style",
-  background: "colors",
-  logo: "brand-icons",
-  encoding: "encoding",
-  layers: "layers",
-}
-
-const DRAFTING_PANEL_TAB_TRAY_CLASS_NAME =
-  "grid h-auto w-full min-w-0 max-w-full auto-cols-fr grid-flow-col items-stretch gap-1 overflow-hidden rounded-[4px] bg-[var(--drafting-control-bg)] p-1 shadow-none dark:bg-[var(--drafting-panel-tab-tray-bg)] sm:gap-2"
-
-const DRAFTING_PANEL_TAB_TRIGGER_CLASS_NAME =
-  "drafting-type-panel-tab min-w-0 rounded-[4px] border border-transparent bg-transparent px-2 py-2 font-medium text-[var(--drafting-ink-muted)] shadow-none transition-[color,box-shadow,background-color,transform] duration-150 ease-out hover:-translate-y-px hover:bg-[var(--drafting-panel-bg-hover)] hover:text-[var(--drafting-ink-strong-muted)] hover:shadow-[var(--drafting-shadow-hover)] active:translate-y-0 active:bg-[var(--drafting-panel-bg-hover)] active:font-medium active:text-[var(--drafting-ink)] active:shadow-[var(--drafting-shadow-active)] data-[state=active]:bg-[var(--drafting-panel-bg-active)] data-[state=active]:font-semibold data-[state=active]:text-[var(--drafting-ink)] data-[state=active]:shadow-[var(--drafting-shadow-active)] data-[state=active]:hover:-translate-y-px data-[state=active]:hover:bg-[var(--drafting-panel-bg-active)] data-[state=active]:hover:text-[var(--drafting-ink)] data-[state=active]:hover:shadow-[var(--drafting-shadow-hover)] data-[state=active]:active:translate-y-0 dark:bg-[var(--drafting-panel-tab-bg)] dark:text-[var(--drafting-panel-tab-label)] dark:hover:bg-[var(--drafting-panel-tab-bg-hover)] dark:hover:text-[var(--drafting-panel-tab-label-hover)] dark:hover:shadow-[var(--drafting-panel-tab-shadow-hover)] dark:active:bg-[var(--drafting-panel-tab-bg-active)] dark:active:text-[var(--drafting-panel-tab-label-selected)] dark:active:shadow-[var(--drafting-panel-tab-shadow-active)] dark:data-[state=active]:bg-[var(--drafting-panel-tab-bg-selected)] dark:data-[state=active]:text-[var(--drafting-panel-tab-label-selected)] dark:data-[state=active]:shadow-[var(--drafting-panel-tab-shadow-selected)] dark:data-[state=active]:hover:bg-[var(--drafting-panel-tab-bg-selected)] dark:data-[state=active]:hover:text-[var(--drafting-panel-tab-label-selected)] dark:data-[state=active]:hover:shadow-[var(--drafting-panel-tab-shadow-selected-hover)] sm:px-3"
-
 const DEFAULT_DRAFTING_STUDIO_STATE = createDefaultQrStudioState()
+const DEFAULT_DRAFTING_TOOL_ID = "content" satisfies DraftingToolId
 const DEFAULT_DRAFTING_PANE_QR_SIZE = 240
 const DRAFTING_LAYER_CLIPBOARD_TYPE = "new-qr/drafting-layers"
 const DRAFTING_LAYER_CLIPBOARD_VERSION = 1
@@ -448,30 +382,15 @@ const DRAFTING_TOOLS: DraftingTool[] = [
   },
   {
     id: "style",
-    title: "Style",
+    title: "QR Body",
     renderIcon: () => <Sparkles className="size-4 shrink-0" />,
   },
   {
-    id: "loader-playground",
-    title: "Loader Playground",
-    renderIcon: () => <SlidersHorizontal className="size-4 shrink-0" />,
-  },
-  {
-    id: "text",
-    title: "Text",
-    renderIcon: () => <TypeIcon className="size-4 shrink-0" />,
-  },
-  {
-    id: "corner-square",
-    title: "Corner frame",
+    id: "corners",
+    title: "Corners",
     renderIcon: () => (
       <HugeiconsIcon icon={SquareIcon} size={16} color="currentColor" strokeWidth={1.8} />
     ),
-  },
-  {
-    id: "corner-dot",
-    title: "Corner dot",
-    renderIcon: () => <PieChart className="size-4 shrink-0" />,
   },
   {
     id: "background",
@@ -486,6 +405,16 @@ const DRAFTING_TOOLS: DraftingTool[] = [
     renderIcon: () => (
       <HugeiconsIcon icon={SignalIcon} size={16} color="currentColor" strokeWidth={1.8} />
     ),
+  },
+  {
+    id: "text",
+    title: "Text",
+    renderIcon: () => <TypeIcon className="size-4 shrink-0" />,
+  },
+  {
+    id: "motion",
+    title: "Motion",
+    renderIcon: () => <SlidersHorizontal className="size-4 shrink-0" />,
   },
   {
     id: "encoding",
@@ -535,7 +464,7 @@ type DraftingSurfaceProps = {
 
 export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const [activeTool, setActiveTool] = useState<DraftingToolId>(
-    DEFAULT_QR_EDITOR_SECTION,
+    DEFAULT_DRAFTING_TOOL_ID,
   )
   const [isCardOnlyMode, setIsCardOnlyMode] = useState(false)
   const [selectedContentType, setSelectedContentType] = useState<QrInputType>(
@@ -733,9 +662,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     useState<DraftingExportSizePreview>({
       status: "idle",
     })
-  const [activePanelTabs, setActivePanelTabs] = useState<Record<DraftingToolId, string>>(
-    DEFAULT_DRAFTING_PANEL_TABS,
-  )
   const [isDraftingWorkspaceReady, setIsDraftingWorkspaceReady] = useState(false)
   const [draftingHistoryRevision, setDraftingHistoryRevision] = useState(0)
   const draftingExportPreviewRequestRef = useRef(0)
@@ -755,10 +681,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const visibleDraftingTools = isCardOnlyMode
     ? DRAFTING_TOOLS.filter((tool) => isCardTool(tool.id))
     : DRAFTING_TOOLS.filter((tool) => !isCardTool(tool.id))
-  const activeToolTabs = DRAFTING_PANEL_TABS[activeTool]
-  const activePanelTab = activeToolTabs.some((tab) => tab.id === activePanelTabs[activeTool])
-    ? activePanelTabs[activeTool]
-    : (activeToolTabs[0]?.id ?? activePanelTabs[activeTool])
   const filteredBrandIcons = filterBrandIcons(brandIconQuery, brandIconCategory)
   const selectedContentValues =
     contentValuesByType[selectedContentType] ?? getDefaultStaticQrValues(selectedContentType)
@@ -1424,7 +1346,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   function resetDraftingWorkspace() {
     const nextState = createDefaultDraftingWorkspaceQrState()
 
-    setActiveTool(DEFAULT_QR_EDITOR_SECTION)
+    setActiveTool(DEFAULT_DRAFTING_TOOL_ID)
     applyDraftingQrStateToControls(nextState)
     setBrandIconQuery("")
     setBrandIconCategory("all")
@@ -1452,7 +1374,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     setDraftingExportSizePreview({
       status: "idle",
     })
-    setActivePanelTabs({ ...DEFAULT_DRAFTING_PANEL_TABS })
     setSelectedBackgroundTransparent(false)
     setSelectedBackgroundShapeId(nextState.backgroundShapeId)
   }
@@ -1934,7 +1855,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     }))
     selectSingleLayer(textLayer.id)
     setActiveTool("text")
-    setActivePanelTabs((current) => ({ ...current, text: "text" }))
     draftingSurfaceRef.current?.focus({ preventScroll: true })
   }
 
@@ -2019,7 +1939,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       return
     }
 
-    setActiveTool(DEFAULT_QR_EDITOR_SECTION)
+    setActiveTool(DEFAULT_DRAFTING_TOOL_ID)
   }
 
   function handleLayerSelectionChange(
@@ -2491,9 +2411,8 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
 
     if (checked) {
       setActiveTool("card-frame")
-      setActivePanelTabs((current) => ({ ...current, "card-frame": "frame" }))
     } else {
-      setActiveTool(DEFAULT_QR_EDITOR_SECTION)
+      setActiveTool(DEFAULT_DRAFTING_TOOL_ID)
     }
   }
 
@@ -2506,7 +2425,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const selectedTextLayer =
     selectedLayerId ? findDraftingLayerById(activeCanvasLayers, selectedLayerId) : null
 
-  const renderPanelContent = (toolId: DraftingToolId, tabId: string) => {
+  const renderPanelContent = (toolId: string, tabId: string) => {
     if (toolId === "text" && tabId === "text") {
       return (
         <DraftingTextLayerTab
@@ -2722,10 +2641,10 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       )
     }
 
-    if (toolId === "card-shaders" && (tabId === "shaders" || tabId === "settings")) {
+    if (toolId === "card-shaders" && (tabId === "shaders" || tabId === "settings" || tabId === "all")) {
       return (
         <DraftingCardShadersTab
-          activeTab={tabId}
+          activeTab={tabId === "all" ? undefined : tabId}
           paperShader={selectedCardState.paperShader}
           styleMode={selectedCardState.styleMode}
           onPaperShaderChange={(paperShader) =>
@@ -3013,6 +2932,101 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     return null
   }
 
+  const renderStackedInspectorContent = (toolId: DraftingToolId) => {
+    if (toolId === "content") {
+      return (
+        <div className="min-w-0 space-y-4" data-slot="drafting-stacked-inspector">
+          <DraftingQrTypeDropdown
+            activeContentType={selectedContentType}
+            onContentTypeChange={handleDraftingContentTypeChange}
+          />
+          {renderPanelContent("content", "content")}
+        </div>
+      )
+    }
+
+    if (toolId === "style") {
+      return (
+        <div className="min-w-0 space-y-6" data-slot="drafting-stacked-inspector">
+          {renderPanelContent("style", "style")}
+          {renderPanelContent("style", "color")}
+          {renderPanelContent("style", "size")}
+        </div>
+      )
+    }
+
+    if (toolId === "corners") {
+      return (
+        <div className="min-w-0 space-y-7" data-slot="drafting-stacked-inspector">
+          <section className="min-w-0 space-y-4" data-slot="drafting-corner-frame-section">
+            <h3 className="text-sm font-semibold text-[var(--drafting-ink)]">Corner frame</h3>
+            {renderPanelContent("corner-square", "style")}
+            {renderPanelContent("corner-square", "color")}
+          </section>
+          <section className="min-w-0 space-y-4" data-slot="drafting-corner-dot-section">
+            <h3 className="text-sm font-semibold text-[var(--drafting-ink)]">Corner dot</h3>
+            {renderPanelContent("corner-dot", "style")}
+            {renderPanelContent("corner-dot", "color")}
+          </section>
+        </div>
+      )
+    }
+
+    if (toolId === "background") {
+      return (
+        <div className="min-w-0 space-y-6" data-slot="drafting-stacked-inspector">
+          {renderPanelContent("background", "colors")}
+          {renderPanelContent("background", "shape")}
+          {renderPanelContent("background", "upload")}
+        </div>
+      )
+    }
+
+    if (toolId === "logo") {
+      return (
+        <div className="min-w-0 space-y-6" data-slot="drafting-stacked-inspector">
+          {renderPanelContent("logo", "brand-icons")}
+          {renderPanelContent("logo", "colors")}
+          {renderPanelContent("logo", "upload")}
+          {renderPanelContent("logo", "size")}
+        </div>
+      )
+    }
+
+    if (toolId === "motion") {
+      return (
+        <div className="min-w-0 space-y-6" data-slot="drafting-stacked-inspector">
+          {renderPanelContent("style", "motion")}
+          {renderPanelContent("loader-playground", "playground")}
+        </div>
+      )
+    }
+
+    if (toolId === "card-image") {
+      return (
+        <div className="min-w-0 space-y-6" data-slot="drafting-stacked-inspector">
+          {renderPanelContent("card-image", "upload")}
+          {renderPanelContent("card-image", "filters")}
+        </div>
+      )
+    }
+
+    if (toolId === "card-shaders") {
+      return renderPanelContent("card-shaders", "all")
+    }
+
+    const defaultPanelByTool: Partial<Record<DraftingToolId, string>> = {
+      "card-frame": "frame",
+      "card-surface": "surface",
+      text: "text",
+      encoding: "encoding",
+      layers: "layers",
+    }
+    const tabId = defaultPanelByTool[toolId]
+
+    return tabId ? renderPanelContent(toolId, tabId) : null
+  }
+
   const panes = useMemo(
     () =>
       qrNodeIds.map((id) => ({
@@ -3121,11 +3135,11 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
                 )}
                 style={{
                   backgroundColor:
-                    "var(--drafting-dropdown-menu-surface-open, var(--popover, #ffffff))",
+                    "var(--drafting-dropdown-menu-surface-open, var(--popover))",
                 }}
               >
                 <div className="border-b border-[var(--drafting-dropdown-border)] px-4 py-3">
-                  <div className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-[var(--drafting-ink-muted)]">
+                  <div className="text-[0.72rem] font-semibold text-[var(--drafting-ink-muted)]">
                     Keyboard
                   </div>
                   <h2 className="mt-1 text-sm font-semibold text-[var(--drafting-ink)]">
@@ -3135,7 +3149,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
                 <div className="grid gap-3 p-3">
                   {DRAFTING_KEYBOARD_SHORTCUT_GROUPS.map((group) => (
                     <section key={group.title} aria-label={`${group.title} shortcuts`}>
-                      <h3 className="px-1 pb-1 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-[var(--drafting-ink-muted)]">
+                      <h3 className="px-1 pb-1 text-[0.68rem] font-semibold text-[var(--drafting-ink-muted)]">
                         {group.title}
                       </h3>
                       <div className="grid gap-1">
@@ -3518,78 +3532,30 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
           data-slot="drafting-scroll-area"
           className="hidden min-h-0 min-w-0 overflow-hidden bg-[var(--drafting-panel-bg)] lg:order-none lg:block lg:bg-transparent"
         >
-          <Tabs
-            className="h-full min-h-0 min-w-0 gap-0 overflow-hidden"
-            value={activePanelTab}
-            onValueChange={(value) =>
-              setActivePanelTabs((current) => ({ ...current, [activeTool]: value }))
-            }
+          <ScrollArea
+            data-scrollbar-visibility="while-scrolling"
+            data-slot="drafting-tab-panel-scroll-area"
+            scrollHideDelay={500}
+            type="scroll"
+            className="h-full min-h-0 min-w-0 overflow-hidden"
           >
-            <div
-              data-slot="drafting-tabs-sticky"
-              className="sticky top-0 z-10 min-w-0 px-3 py-3 sm:px-4 sm:py-4"
+            <ScrollAreaViewport
+              aria-label={`${activeToolConfig.title} inspector panel`}
+              data-active-tool={activeTool}
+              data-slot="drafting-tab-panel-scroll"
+              className="h-full w-full overflow-x-hidden scroll-fade-effect-y"
             >
-              {activeTool === "content" ? (
-                <div className={DRAFTING_PANEL_TAB_TRAY_CLASS_NAME}>
-                  <DraftingQrTypeDropdown
-                    activeContentType={selectedContentType}
-                    onContentTypeChange={handleDraftingContentTypeChange}
-                  />
-                </div>
-              ) : activeToolTabs.length > 1 || !isCardTool(activeTool) ? (
-                <TabsList
-                  aria-label={`${activeToolConfig.title} settings groups`}
-                  className={DRAFTING_PANEL_TAB_TRAY_CLASS_NAME}
-                >
-                  {activeToolTabs.map((tab) => (
-                    <TabsTrigger
-                      key={tab.id}
-                      value={tab.id}
-                      className={DRAFTING_PANEL_TAB_TRIGGER_CLASS_NAME}
-                    >
-                      {tab.label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              ) : null}
-            </div>
-
-            <div data-slot="drafting-tab-panels" className="min-h-0 min-w-0 flex-1 overflow-hidden">
-              {activeToolTabs.map((tab) => (
-                <TabsContent
-                  key={tab.id}
-                  value={tab.id}
-                  className="mt-0 h-full min-h-0 min-w-0 data-[state=inactive]:hidden"
-                >
-                  <ScrollArea
-                    data-scrollbar-visibility="while-scrolling"
-                    data-slot="drafting-tab-panel-scroll-area"
-                    scrollHideDelay={500}
-                    type="scroll"
-                    className="h-full min-h-0 min-w-0 overflow-hidden"
-                  >
-                    <ScrollAreaViewport
-                      aria-label={`${activeToolConfig.title} ${tab.label} panel`}
-                      data-active-tab={tab.id}
-                      data-active-tool={activeTool}
-                      data-slot="drafting-tab-panel-scroll"
-                      className="h-full w-full overflow-x-hidden scroll-fade-effect-y"
-                    >
-                      <div className="min-w-0 max-w-full overflow-x-hidden px-3 pb-4 sm:px-4">
-                        {renderPanelContent(activeTool, tab.id)}
-                      </div>
-                    </ScrollAreaViewport>
-                    <ScrollAreaScrollbar
-                      data-slot="drafting-tab-panel-scrollbar"
-                      className="w-2 border-none p-[1px]"
-                    >
-                      <ScrollAreaThumb className="bg-[var(--drafting-line-hover)] hover:bg-[var(--drafting-line-strong)]" />
-                    </ScrollAreaScrollbar>
-                  </ScrollArea>
-                </TabsContent>
-              ))}
-            </div>
-          </Tabs>
+              <div className="min-w-0 max-w-full overflow-x-hidden px-3 py-4 sm:px-4">
+                {renderStackedInspectorContent(activeTool)}
+              </div>
+            </ScrollAreaViewport>
+            <ScrollAreaScrollbar
+              data-slot="drafting-tab-panel-scrollbar"
+              className="w-2 border-none p-[1px]"
+            >
+              <ScrollAreaThumb className="bg-[var(--drafting-line-hover)] hover:bg-[var(--drafting-line-strong)]" />
+            </ScrollAreaScrollbar>
+          </ScrollArea>
         </aside>
         <section
           aria-label="Workspace frame"
@@ -3735,7 +3701,7 @@ function DraftingTextLayerTab({
               {groupedFonts.map(({ fonts, source }) =>
                 fonts.length > 0 ? (
                   <div key={source} className="min-w-0 space-y-1">
-                    <p className="drafting-type-meta px-1 font-semibold uppercase text-[var(--drafting-ink-muted)]">
+                    <p className="drafting-type-meta px-1 font-semibold text-[var(--drafting-ink-muted)]">
                       {getDraftingFontSourceLabel(source)}
                     </p>
                     {fonts.map((font) => {

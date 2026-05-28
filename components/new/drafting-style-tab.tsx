@@ -1550,7 +1550,7 @@ export function DraftingCardShadersTab({
         heading="Shaders"
         paperShader={paperShader}
         selectedStyleModes={["paper-shader"]}
-        panelTab={activeTab ?? "shaders"}
+        panelTab={activeTab}
         styleMode={styleMode}
         onPaperShaderChange={onPaperShaderChange}
       />
@@ -1879,13 +1879,20 @@ function DraftingCardPaperShaderPanel({
       data-slot={dataSlot}
       className="min-w-0 space-y-6"
     >
-      {(panelTab ?? "shaders") === "shaders" ? (
+      {panelTab === "shaders" ? (
         <>
           {filterContent}
           {presetContent}
         </>
+      ) : panelTab === "settings" ? (
+        <>
+          {motionContent}
+          {settingsContent}
+        </>
       ) : (
         <>
+          {filterContent}
+          {presetContent}
           {motionContent}
           {settingsContent}
         </>

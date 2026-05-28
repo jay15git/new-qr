@@ -234,7 +234,7 @@ describe("DraftingSurface", () => {
     )
   })
 
-  it("renders the framed layout with dashboard-style tool buttons and middle tabs", () => {
+  it("renders the framed layout with compact QR anatomy tools and stacked inspector", () => {
     const surface = renderSurface()
     const header = getRequiredElement(surface.container, '[data-slot="drafting-header"]')
     const headerContent = getRequiredElement(header, "div")
@@ -317,21 +317,24 @@ describe("DraftingSurface", () => {
     expect(
       surface.container.querySelector('[data-slot="drafting-plus-marker"]')?.getAttribute("class"),
     ).not.toContain("text-black/")
-    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(10)
-    expect(surface.container.querySelector('[data-slot="tabs"]')).not.toBeNull()
+    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(9)
+    expect(surface.container.querySelector('[data-slot="tabs"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="tabs-list"]')).toBeNull()
     expect(
       surface.container.querySelector('button[aria-label="Open QR type options"]'),
     ).not.toBeNull()
     expect(surface.container.textContent).toContain("QR Type:")
     expect(surface.container.textContent).toContain("Content")
     expect(surface.container.querySelector('button[aria-label="Open Card"]')).toBeNull()
-    expect(surface.container.textContent).toContain("Style")
-    expect(surface.container.textContent).toContain("Corner frame")
-    expect(surface.container.textContent).toContain("Corner dot")
+    expect(surface.container.textContent).toContain("QR Body")
+    expect(surface.container.textContent).toContain("Corners")
     expect(surface.container.textContent).toContain("Background")
     expect(surface.container.textContent).toContain("Logo")
+    expect(surface.container.textContent).toContain("Text")
+    expect(surface.container.textContent).toContain("Motion")
     expect(surface.container.textContent).toContain("Encoding")
     expect(surface.container.textContent).toContain("Layers")
+    expect(surface.container.querySelector('button[aria-label="Open Export"]')).toBeNull()
     expect(headerContent.className).toContain("justify-end")
     expect(header.innerHTML).toContain('data-slot="switch"')
     expect(header.innerHTML).toContain('data-slot="drafting-download-trigger"')
@@ -456,7 +459,7 @@ describe("DraftingSurface", () => {
     ).toBe("true")
     expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(4)
     expect(surface.container.querySelector('button[aria-label="Open Content"]')).toBeNull()
-    expect(surface.container.querySelector('button[aria-label="Open Style"]')).toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open QR Body"]')).toBeNull()
 
     const frameButton = getRequiredElement(surface.container, 'button[aria-label="Open Frame"]')
 
@@ -468,7 +471,7 @@ describe("DraftingSurface", () => {
     expect(
       getRequiredElement(
         surface.container,
-        '[data-active-tool="card-frame"][data-active-tab="frame"]',
+        '[data-active-tool="card-frame"]',
       ).textContent,
     ).toContain("Show card")
 
@@ -479,7 +482,7 @@ describe("DraftingSurface", () => {
     })
 
     expect(surface.container.querySelector('button[aria-label="Open Frame"]')).toBeNull()
-    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(10)
+    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(9)
     expect(
       getRequiredElement(surface.container, 'button[aria-label="Open Content"]').getAttribute(
         "aria-pressed",
@@ -865,9 +868,6 @@ describe("DraftingSurface", () => {
     act(() => {
       activateElement(backgroundButton)
     })
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Shape"))
-    })
     await act(async () => {
       activateElement(getRadioInputByAriaLabel(surface.container, "Flower"))
       await flushPromises()
@@ -947,53 +947,52 @@ describe("DraftingSurface", () => {
     expect(downloadDashboardRasterExportSpy).not.toHaveBeenCalled()
   })
 
-  it("switches tool button state and updates the tab tray for each dashboard section", () => {
+  it("switches tool button state and renders stacked inspector content for compact tools", () => {
     const surface = renderSurface()
     const contentButton = getRequiredElement(surface.container, 'button[aria-label="Open Content"]')
-    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Style"]')
+    const qrBodyButton = getRequiredElement(surface.container, 'button[aria-label="Open QR Body"]')
     const logoButton = getRequiredElement(surface.container, 'button[aria-label="Open Logo"]')
-    const cornerSquareButton = getRequiredElement(
+    const cornersButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Corner frame"]',
+      'button[aria-label="Open Corners"]',
     )
 
     expect(contentButton.getAttribute("aria-pressed")).toBe("true")
-    expect(styleButton.getAttribute("aria-pressed")).toBe("false")
-    expect(cornerSquareButton.getAttribute("aria-pressed")).toBe("false")
+    expect(qrBodyButton.getAttribute("aria-pressed")).toBe("false")
+    expect(cornersButton.getAttribute("aria-pressed")).toBe("false")
     expect(
       surface.container.querySelector('button[aria-label="Open QR type options"]'),
     ).not.toBeNull()
 
     act(() => {
-      styleButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+      qrBodyButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
     expect(contentButton.getAttribute("aria-pressed")).toBe("false")
-    expect(styleButton.getAttribute("aria-pressed")).toBe("true")
-    expect(getTabLabels(surface.container)).toEqual([
-      "Style",
-      "Color",
-      "Size",
-      "Motion",
-    ])
+    expect(qrBodyButton.getAttribute("aria-pressed")).toBe("true")
+    expect(surface.container.querySelector('[data-slot="tabs-list"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="drafting-style-option-grid"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="drafting-dots-color-accordion"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="drafting-style-size-tab"]')).not.toBeNull()
 
     act(() => {
-      cornerSquareButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+      cornersButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
-    expect(cornerSquareButton.getAttribute("aria-pressed")).toBe("true")
-    expect(getTabLabels(surface.container)).toEqual(["Style", "Color"])
+    expect(cornersButton.getAttribute("aria-pressed")).toBe("true")
+    expect(surface.container.querySelector('[data-slot="drafting-corner-square-option-grid"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="drafting-corner-square-color-accordion"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="drafting-corner-dot-option-grid"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="drafting-corner-dot-color-accordion"]')).not.toBeNull()
 
     act(() => {
       logoButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
-    expect(getTabLabels(surface.container)).toEqual([
-      "Brands",
-      "Colors",
-      "Upload",
-      "Size",
-    ])
+    expect(surface.container.querySelector('[data-slot="drafting-brand-icon-tab"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="drafting-logo-color-accordion"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="drafting-logo-upload-accordion"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="drafting-logo-size-tab"]')).not.toBeNull()
   })
 
   it("opens the non-document layers tool with a dedicated layers panel", () => {
@@ -1005,7 +1004,7 @@ describe("DraftingSurface", () => {
     })
 
     expect(layersButton.getAttribute("aria-pressed")).toBe("true")
-    expect(getTabLabels(surface.container)).toEqual(["Layers"])
+    expect(surface.container.querySelector('[data-slot="tabs-list"]')).toBeNull()
     expect(surface.container.querySelector('[data-slot="drafting-layers-tab"]')).not.toBeNull()
   })
 
@@ -1109,21 +1108,24 @@ describe("DraftingSurface", () => {
     expect(nodeMarkup).toContain('fill="#123456"')
   })
 
-  it("opens the loader playground tool with square loader controls", async () => {
+  it("renders dot matrix motion and loader playground controls in the Motion panel", async () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface()
-    const loaderButton = getRequiredElement(
+    const motionButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Loader Playground"]',
+      'button[aria-label="Open Motion"]',
     )
 
     act(() => {
-      activateElement(loaderButton)
+      activateElement(motionButton)
     })
 
-    expect(loaderButton.getAttribute("aria-pressed")).toBe("true")
-    expect(getTabLabels(surface.container)).toEqual(["Playground"])
+    expect(motionButton.getAttribute("aria-pressed")).toBe("true")
+    expect(surface.container.querySelector('[data-slot="tabs-list"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="drafting-motion-tab"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="drafting-loader-playground-tab"]')).not.toBeNull()
+    expect(surface.container.textContent).toContain("Dot matrix motion")
+    expect(surface.container.textContent).toContain("Animated SVG export")
     expect(surface.container.textContent).toContain("Neon Drift")
     expect(surface.container.textContent).toContain("Mobius Run")
     expect(surface.container.textContent).not.toContain("Honey Gate")
@@ -1180,15 +1182,12 @@ describe("DraftingSurface", () => {
     )
   })
 
-  it("renders dot matrix motion controls in the active style panel", async () => {
+  it("updates dot matrix motion from the Motion panel", async () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface()
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Style"]'))
-    })
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Motion"))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Motion"]'))
     })
 
     expect(surface.container.textContent).toContain("Dot matrix motion")
@@ -1405,7 +1404,7 @@ describe("DraftingSurface", () => {
 
   it("renders a selectable option-card grid for the style tab", () => {
     const surface = renderSurface()
-    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Style"]')
+    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open QR Body"]')
 
     act(() => {
       styleButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -1452,16 +1451,10 @@ describe("DraftingSurface", () => {
 
   it("renders a drafting color accordion for the style color tab with solid, gradient, and palette", () => {
     const surface = renderSurface()
-    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Style"]')
+    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open QR Body"]')
 
     act(() => {
       styleButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    const colorTab = getTabTriggerByText(surface.container, "Color")
-
-    act(() => {
-      activateElement(colorTab)
     })
 
     const accordion = getRequiredElement(
@@ -1492,14 +1485,10 @@ describe("DraftingSurface", () => {
 
   it("renders a drafting size tab for style with the qr margin and size sliders", () => {
     const surface = renderSurface()
-    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Style"]')
+    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open QR Body"]')
 
     act(() => {
       styleButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Size"))
     })
 
     const sizeTab = getRequiredElement(
@@ -1520,14 +1509,10 @@ describe("DraftingSurface", () => {
 
   it("updates the drafting qr background radius from the style size tab", () => {
     const surface = renderSurface()
-    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Style"]')
+    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open QR Body"]')
 
     act(() => {
       styleButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Size"))
     })
 
     const radiusInput = getRequiredElement(
@@ -1681,7 +1666,7 @@ describe("DraftingSurface", () => {
     expect(card.style.getPropertyValue("--p1")).toBe("#111111")
   })
 
-  it("splits card image controls into upload and filters tabs", async () => {
+  it("stacks card image upload and filters controls", async () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface()
 
@@ -1696,8 +1681,7 @@ describe("DraftingSurface", () => {
       activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Image"]'))
     })
 
-    expect(getButtonByExactText(surface.container, "Upload")).not.toBeNull()
-    expect(getButtonByExactText(surface.container, "Filters")).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="tabs-list"]')).toBeNull()
 
     const imagePanel = getRequiredElement(surface.container, '[data-slot="drafting-card-image-upload-tab"]')
     const imageUrlInput = getRequiredElement(
@@ -1716,10 +1700,6 @@ describe("DraftingSurface", () => {
 
     expect(card.getAttribute("data-card-style-mode")).toBe("image")
     expect(card.style.backgroundImage).toContain("https://example.com/card.png")
-
-    act(() => {
-      activateElement(getButtonByExactText(surface.container, "Filters"))
-    })
 
     const filtersPanel = getRequiredElement(
       surface.container,
@@ -1779,10 +1759,6 @@ describe("DraftingSurface", () => {
       activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Image"]'))
     })
 
-    act(() => {
-      activateElement(getButtonByExactText(surface.container, "Filters"))
-    })
-
     const filtersPanel = getRequiredElement(
       surface.container,
       '[data-slot="drafting-card-image-filters-tab"]',
@@ -1829,8 +1805,8 @@ describe("DraftingSurface", () => {
     expect(
       shadersPanel.querySelectorAll('[data-slot="drafting-card-paper-shader-preview-fallback"]'),
     ).toHaveLength(20)
-    expect(shadersPanel.textContent).not.toContain("Motion")
-    expect(shadersPanel.textContent).not.toContain("Settings")
+    expect(shadersPanel.textContent).toContain("Motion")
+    expect(shadersPanel.textContent).toContain("Settings")
     expect(shadersPanel.textContent).not.toContain("Image dithering")
 
     act(() => {
@@ -1843,10 +1819,6 @@ describe("DraftingSurface", () => {
     expect(card.getAttribute("data-card-paper-shader")).toBe("mesh-gradient")
     expect(card.querySelector('[data-slot="dashboard-compose-card-mesh-gradient"]')).toBeNull()
 
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Settings"))
-    })
-
     const shaderSettingsPanel = getRequiredElement(
       surface.container,
       '[data-slot="drafting-card-shaders-tab"]',
@@ -1855,8 +1827,8 @@ describe("DraftingSurface", () => {
     expect(shaderSettingsPanel.textContent).toContain("Motion")
     expect(shaderSettingsPanel.textContent).toContain("Settings")
     expect(shaderSettingsPanel.textContent).toContain("Pause")
-    expect(shaderSettingsPanel.textContent).not.toContain("Preset")
-    expect(shaderSettingsPanel.textContent).not.toContain("Warp")
+    expect(shaderSettingsPanel.textContent).toContain("Preset")
+    expect(shaderSettingsPanel.textContent).toContain("Warp")
   })
 
   it("preserves card settings separately for each drafting qr layer", async () => {
@@ -2057,14 +2029,10 @@ describe("DraftingSurface", () => {
 
   it("preserves qr background radius separately for each drafting qr layer", async () => {
     const surface = renderSurface()
-    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Style"]')
+    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open QR Body"]')
 
     act(() => {
       styleButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Size"))
     })
 
     const getRadiusInput = () =>
@@ -2119,10 +2087,6 @@ describe("DraftingSurface", () => {
     })
 
     act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Shape"))
-    })
-
-    act(() => {
       activateElement(
         getRadioInputByAriaLabel(surface.container, "Circle"),
       )
@@ -2162,16 +2126,10 @@ describe("DraftingSurface", () => {
 
   it("expands style color modes without selecting them from the accordion header", () => {
     const surface = renderSurface()
-    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Style"]')
+    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open QR Body"]')
 
     act(() => {
       styleButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    const colorTab = getTabTriggerByText(surface.container, "Color")
-
-    act(() => {
-      activateElement(colorTab)
     })
 
     const solidItem = getRequiredElement(
@@ -2268,17 +2226,11 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const cornerFrameButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Corner frame"]',
+      'button[aria-label="Open Corners"]',
     )
 
     act(() => {
       cornerFrameButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    const colorTab = getTabTriggerByText(surface.container, "Color")
-
-    act(() => {
-      activateElement(colorTab)
     })
 
     const accordion = getRequiredElement(
@@ -2295,15 +2247,11 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const cornerFrameButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Corner frame"]',
+      'button[aria-label="Open Corners"]',
     )
 
     act(() => {
       cornerFrameButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Color"))
     })
 
     const accordion = getRequiredElement(
@@ -2335,7 +2283,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const cornerFrameButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Corner frame"]',
+      'button[aria-label="Open Corners"]',
     )
 
     act(() => {
@@ -2375,7 +2323,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const cornerDotButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Corner dot"]',
+      'button[aria-label="Open Corners"]',
     )
 
     act(() => {
@@ -2387,11 +2335,11 @@ describe("DraftingSurface", () => {
       '[data-slot="drafting-corner-dot-option-grid"]',
     )
     const dotInput = getRequiredElement(
-      surface.container,
+      cornerDotGrid,
       'input[type="radio"][aria-label="Dot"]',
     ) as HTMLInputElement
     const roundedInput = getRequiredElement(
-      surface.container,
+      cornerDotGrid,
       'input[type="radio"][aria-label="Rounded"]',
     ) as HTMLInputElement
 
@@ -2412,15 +2360,11 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const cornerDotButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Corner dot"]',
+      'button[aria-label="Open Corners"]',
     )
 
     act(() => {
       cornerDotButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Color"))
     })
 
     const accordion = getRequiredElement(
@@ -2437,15 +2381,11 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const cornerDotButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Corner dot"]',
+      'button[aria-label="Open Corners"]',
     )
 
     act(() => {
       cornerDotButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Color"))
     })
 
     const accordion = getRequiredElement(
@@ -2505,7 +2445,10 @@ describe("DraftingSurface", () => {
       backgroundButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
-    expect(getTabLabels(surface.container)).toEqual(["Colors", "Shape", "Upload"])
+    expect(surface.container.querySelector('[data-slot="tabs-list"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="drafting-background-color-accordion"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="drafting-background-shape-tab"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="drafting-background-upload-accordion"]')).not.toBeNull()
   })
 
   it("renders background shape option cards and updates the active qr payload", async () => {
@@ -2523,10 +2466,6 @@ describe("DraftingSurface", () => {
 
     act(() => {
       backgroundButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Shape"))
     })
 
     const shapeGrid = getRequiredElement(
@@ -2655,10 +2594,6 @@ describe("DraftingSurface", () => {
       backgroundButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Shape"))
-    })
-
     const shapeSettings = getRequiredElement(
       surface.container,
       '[data-slot="drafting-background-shape-settings"]',
@@ -2706,10 +2641,6 @@ describe("DraftingSurface", () => {
 
     act(() => {
       backgroundButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Shape"))
     })
 
     act(() => {
@@ -2781,10 +2712,6 @@ describe("DraftingSurface", () => {
       logoButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Colors"))
-    })
-
     const accordion = getRequiredElement(
       surface.container,
       '[data-slot="drafting-logo-color-accordion"]',
@@ -2801,10 +2728,6 @@ describe("DraftingSurface", () => {
 
     act(() => {
       logoButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Colors"))
     })
 
     const accordion = getRequiredElement(
@@ -2926,7 +2849,6 @@ describe("DraftingSurface", () => {
           'input[data-slot="option-card-input"][aria-label="Instagram"]',
         ),
       )
-      activateElement(getTabTriggerByText(surface.container, "Colors"))
     })
 
     const previousPresetValue =
@@ -2967,10 +2889,6 @@ describe("DraftingSurface", () => {
           'input[data-slot="option-card-input"][aria-label="Instagram"]',
         ),
       )
-    })
-
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Colors"))
     })
 
     const logoColorAccordion = getRequiredElement(
@@ -3017,10 +2935,6 @@ describe("DraftingSurface", () => {
       backgroundButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Upload"))
-    })
-
     const accordion = getRequiredElement(
       surface.container,
       '[data-slot="drafting-background-upload-accordion"]',
@@ -3046,10 +2960,6 @@ describe("DraftingSurface", () => {
 
     act(() => {
       logoButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Upload"))
     })
 
     const accordion = getRequiredElement(
@@ -3094,10 +3004,6 @@ describe("DraftingSurface", () => {
       )
     })
 
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Upload"))
-    })
-
     const remoteUrlTrigger = getAccordionTriggerByText(
       getRequiredElement(surface.container, '[data-slot="drafting-logo-upload-accordion"]'),
       "Remote URL",
@@ -3140,10 +3046,6 @@ describe("DraftingSurface", () => {
       )
     })
 
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Upload"))
-    })
-
     const fileInput = getRequiredElement(
       surface.container,
       'input[aria-label="File input"]',
@@ -3178,10 +3080,6 @@ describe("DraftingSurface", () => {
       logoButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Size"))
-    })
-
     const sizeTab = getRequiredElement(
       surface.container,
       '[data-slot="drafting-logo-size-tab"]',
@@ -3204,10 +3102,6 @@ describe("DraftingSurface", () => {
 
     act(() => {
       logoButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Size"))
     })
 
     const sizeTab = getRequiredElement(
@@ -3237,10 +3131,6 @@ describe("DraftingSurface", () => {
 
     act(() => {
       logoButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    act(() => {
-      activateElement(getTabTriggerByText(surface.container, "Size"))
     })
 
     const hideBackgroundDotsSwitch = getRequiredElement(
@@ -3372,7 +3262,8 @@ describe("DraftingSurface", () => {
 
     expect(surface.container.querySelector('button[aria-label="Toggle edit mode"]')).toBeNull()
     expect(surface.container.querySelector('[data-slot="dashboard-edit-rail"]')).toBeNull()
-    expect(getTabLabels(surface.container)).toEqual(["Layers"])
+    expect(surface.container.querySelector('[data-slot="tabs-list"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="drafting-layers-tab"]')).not.toBeNull()
     expect(getRequiredElement(surface.container, 'button[aria-label="Open Layers"]').getAttribute("aria-pressed")).toBe("true")
   })
 
@@ -3542,9 +3433,8 @@ describe("DraftingSurface", () => {
     )
   })
 
-  it("keeps the tab tray sticky and the active middle panel as the dedicated scroll area", () => {
+  it("keeps the stacked inspector as the dedicated middle scroll area", () => {
     const surface = renderSurface()
-    const stickyTabs = getRequiredElement(surface.container, '[data-slot="drafting-tabs-sticky"]')
     const navFrame = getRequiredElement(surface.container, '[data-slot="drafting-nav"]')
     const navScrollArea = getRequiredElement(
       surface.container,
@@ -3568,7 +3458,8 @@ describe("DraftingSurface", () => {
       '[data-slot="drafting-tab-panel-scroll"]',
     )
 
-    expect(stickyTabs.className).toContain("sticky")
+    expect(surface.container.querySelector('[data-slot="drafting-tabs-sticky"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="tabs-list"]')).toBeNull()
     expect(navFrame.className).toContain("isolate")
     expect(navFrame.className).toContain("order-2")
     expect(navFrame.className).toContain("border-t")
@@ -3632,7 +3523,7 @@ describe("DraftingSurface", () => {
       surface.container.querySelector('[data-slot="drafting-tab-panel-scrollbar"]'),
     ).toBeNull()
     expect(panelScroll.getAttribute("data-active-tool")).toBe("content")
-    expect(panelScroll.getAttribute("data-active-tab")).toBe("content")
+    expect(panelScroll.getAttribute("data-active-tab")).toBeNull()
 
     const globalsSource = readFileSync("app/globals.css", "utf8")
 
@@ -4406,26 +4297,10 @@ function createDragEvent(type: string, dataTransfer: ReturnType<typeof createDat
   return event
 }
 
-function getTabLabels(parent: ParentNode) {
-  return Array.from(parent.querySelectorAll('[data-slot="tabs-trigger"]')).map(
-    (element) => element.textContent?.trim() ?? "",
-  )
-}
-
 function openCardOnlyMode(parent: ParentNode) {
   act(() => {
     activateElement(getRequiredElement(parent, 'button[aria-label="Show only card controls"]'))
   })
-}
-
-function getTabTriggerByText(parent: ParentNode, text: string) {
-  const trigger = Array.from(parent.querySelectorAll('[data-slot="tabs-trigger"]')).find(
-    (element) => element.textContent?.trim() === text,
-  )
-
-  expect(trigger).not.toBeNull()
-
-  return trigger as HTMLElement
 }
 
 function getSelectedPreviewCard(parent: ParentNode) {
