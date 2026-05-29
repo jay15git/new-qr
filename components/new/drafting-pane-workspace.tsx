@@ -12,6 +12,7 @@ import {
 } from "react"
 import {
   CopyPlusIcon,
+  CrosshairIcon,
   MagnetIcon,
   Maximize2Icon,
   Minimize2Icon,
@@ -486,6 +487,17 @@ export function DraftingPaneWorkspace({
     }))
   }, [])
 
+  const handleResetView = useCallback(() => {
+    setZoomLevels((current) => ({
+      ...current,
+      [activePaneId]: 1,
+    }))
+    setPanOffsets((current) => ({
+      ...current,
+      [activePaneId]: { x: 0, y: 0 },
+    }))
+  }, [activePaneId])
+
   const handlePanePan = useCallback((paneId: string, nextPan: { x: number; y: number }) => {
     setPanOffsets((current) => ({
       ...current,
@@ -775,6 +787,22 @@ export function DraftingPaneWorkspace({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Zoom in</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  aria-label="Reset view"
+                  className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                  onClick={handleResetView}
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+                >
+                  <CrosshairIcon />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Reset view</TooltipContent>
             </Tooltip>
 
             <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" />

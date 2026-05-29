@@ -793,6 +793,141 @@ describe("QrPane", () => {
     expect(onLayerChange).toHaveBeenCalledWith("preview:text", { text: "Table 12" })
   })
 
+  it("shows floating layer actions for a selected unlocked text layer", async () => {
+    const onLayerAction = vi.fn()
+    const onLayerCopy = vi.fn()
+    const textLayer = createDraftingTextLayer("preview", {
+      id: "preview:text",
+      text: "Scan here",
+      zIndex: 2,
+    })
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers: [...createDefaultDraftingLayers("preview", createDefaultQrStudioState(), createDefaultDraftingCardState()), textLayer],
+      onLayerAction,
+      onLayerCopy,
+      selectedLayerId: "preview:text",
+    })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    const toolbar = getRequiredElement(container, '[data-slot="drafting-layer-floating-toolbar"]')
+
+    expect(toolbar).not.toBeNull()
+    expect(toolbar.getAttribute("role")).toBe("toolbar")
+    expect((toolbar as HTMLElement).style.transform).toContain("translate3d")
+
+    act(() => {
+      clickElement(getRequiredElement(toolbar, 'button[aria-label="Copy selection"]'))
+    })
+
+    expect(onLayerCopy).toHaveBeenCalledWith(["preview:text"])
+
+    act(() => {
+      clickElement(getRequiredElement(toolbar, 'button[aria-label="Lock selection"]'))
+    })
+
+    expect(onLayerAction).toHaveBeenCalledWith(["preview:text"], "lock")
+
+    act(() => {
+      clickElement(getRequiredElement(toolbar, 'button[aria-label="Delete selection"]'))
+    })
+
+    expect(onLayerAction).toHaveBeenCalledWith(["preview:text"], "delete")
+  })
+
+  it("shows unlock action for locked selected layers without resize handles", async () => {
+    const onLayerAction = vi.fn()
+    const lockedTextLayer = createDraftingTextLayer("preview", {
+      id: "preview:text",
+      isLocked: true,
+      zIndex: 2,
+    })
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers: [...createDefaultDraftingLayers("preview", createDefaultQrStudioState(), createDefaultDraftingCardState()), lockedTextLayer],
+      onLayerAction,
+      selectedLayerId: "preview:text",
+    })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    const toolbar = getRequiredElement(container, '[data-slot="drafting-layer-floating-toolbar"]')
+
+    expect(container.querySelector('[data-slot="drafting-layer-resize-frame"]')).toBeNull()
+
+    act(() => {
+      clickElement(getRequiredElement(toolbar, 'button[aria-label="Unlock selection"]'))
+    })
+
+    expect(onLayerAction).toHaveBeenCalledWith(["preview:text"], "unlock")
+  })
+
+  it("opens the existing context menu from the floating more button", async () => {
+    const onLayerAction = vi.fn()
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      onLayerAction,
+      selectedLayerId: "preview:qr",
+    })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    const moreButton = getRequiredElement(
+      container,
+      '[data-slot="drafting-layer-floating-toolbar"] button[aria-label="More layer actions"]',
+    )
+    setElementRect(moreButton, { height: 28, left: 120, top: 80, width: 28 })
+
+    act(() => {
+      clickElement(moreButton)
+    })
+
+    const menu = document.body.querySelector('[data-slot="drafting-layer-context-menu"]') as HTMLElement
+
+    expect(menu).not.toBeNull()
+    expect(menu.style.left).toBe("120px")
+    expect(menu.style.top).toBe("116px")
+
+    act(() => {
+      clickElement(getRequiredElement(document.body, 'button[aria-label="Bring to front"]'))
+    })
+
+    expect(onLayerAction).toHaveBeenCalledWith(["preview:qr"], "front")
+  })
+
+  it("uses all selected layer ids for multi-selection floating actions", async () => {
+    const onLayerAction = vi.fn()
+    const onLayerCopy = vi.fn()
+    const selectedLayerIds = [getDraftingCardLayerId("preview"), getDraftingQrLayerId("preview")]
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      onLayerAction,
+      onLayerCopy,
+      selectedLayerIds,
+    })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    const toolbar = getRequiredElement(container, '[data-slot="drafting-layer-floating-toolbar"]')
+
+    act(() => {
+      clickElement(getRequiredElement(toolbar, 'button[aria-label="Copy selection"]'))
+    })
+
+    expect(onLayerCopy).toHaveBeenCalledWith(selectedLayerIds)
+
+    act(() => {
+      clickElement(getRequiredElement(toolbar, 'button[aria-label="Lock selection"]'))
+    })
+
+    expect(onLayerAction).toHaveBeenCalledWith(selectedLayerIds, "lock")
+  })
+
   it("opens a selected layer context menu and emits layer actions", async () => {
     const onLayerAction = vi.fn()
     const onLayerCopy = vi.fn()

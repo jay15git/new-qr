@@ -9,9 +9,17 @@ import {
   type CSSProperties,
   type MouseEvent,
   type PointerEvent,
+  type ReactNode,
 } from "react"
 import { createPortal } from "react-dom"
-import { RotateCwIcon } from "lucide-react"
+import {
+  CopyIcon,
+  LockIcon,
+  MoreHorizontalIcon,
+  RotateCwIcon,
+  Trash2Icon,
+  UnlockIcon,
+} from "lucide-react"
 
 import {
   DEFAULT_DRAFTING_CARD_STATE,
@@ -66,6 +74,7 @@ export type DraftingLayerMenuAction =
   | DraftingLayerAlignAction
   | DraftingLayerDistributeAction
   | DraftingLayerReorderAction
+  | "delete"
   | "group"
   | "hide"
   | "lock"
@@ -84,6 +93,8 @@ const ROTATE_HANDLE_OFFSET_PX = 34
 const ROTATE_HANDLE_RADIUS_PX = 10
 const ROTATE_LABEL_GAP_PX = 8
 const SIZE_LABEL_GAP_PX = 10
+const FLOATING_TOOLBAR_GAP_PX = 14
+const FLOATING_TOOLBAR_HEIGHT_PX = 38
 const ROTATION_LABEL_HIDE_DELAY_MS = 2000
 const SNAP_THRESHOLD_PX = 6
 const RESIZE_SNAP_THRESHOLD_PX = 3
@@ -714,6 +725,7 @@ function LayerContextMenu({
             onClick={() => onAction(hasHiddenLayer ? "show" : "hide")}
           />
           <LayerContextMenuButton label="Reset rotation" onClick={() => onAction("reset-rotation")} />
+          <LayerContextMenuButton label="Delete" onClick={() => onAction("delete")} />
           <div className="my-1 h-px bg-[var(--drafting-dropdown-border)]" />
           <LayerContextMenuButton label="Align left" onClick={() => onAction("left")} />
           <LayerContextMenuButton label="Align center" onClick={() => onAction("center-x")} />
@@ -755,6 +767,88 @@ function LayerContextMenuButton({
       onClick={onClick}
     >
       {label}
+    </button>
+  )
+}
+
+function LayerFloatingToolbar({
+  layers,
+  onAction,
+  onCopy,
+  onMore,
+  style,
+}: {
+  layers: DraftingCanvasLayer[]
+  onAction?: (action: DraftingLayerMenuAction) => void
+  onCopy?: () => void
+  onMore: (event: MouseEvent<HTMLButtonElement>) => void
+  style: CSSProperties
+}) {
+  const hasUnlockedLayer = layers.some((layer) => !layer.isLocked)
+  const hasRemovableLayer = layers.some((layer) => layer.kind !== "qr")
+  const lockAction = hasUnlockedLayer ? "lock" : "unlock"
+  const lockLabel = hasUnlockedLayer ? "Lock selection" : "Unlock selection"
+  const LockActionIcon = hasUnlockedLayer ? LockIcon : UnlockIcon
+
+  return (
+    <div
+      className="absolute left-1/2 top-1/2 z-[10001] inline-flex h-[38px] items-center gap-1 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-active)] px-1.5 text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-hover)]"
+      data-slot="drafting-layer-floating-toolbar"
+      role="toolbar"
+      style={style}
+      onClick={(event) => event.stopPropagation()}
+      onContextMenu={(event) => event.preventDefault()}
+      onPointerDown={(event) => event.stopPropagation()}
+    >
+      <LayerFloatingToolbarButton
+        label="Copy selection"
+        disabled={!onCopy}
+        onClick={() => onCopy?.()}
+      >
+        <CopyIcon aria-hidden="true" className="size-4" strokeWidth={2} />
+      </LayerFloatingToolbarButton>
+      <LayerFloatingToolbarButton
+        label={lockLabel}
+        disabled={!onAction}
+        onClick={() => onAction?.(lockAction)}
+      >
+        <LockActionIcon aria-hidden="true" className="size-4" strokeWidth={2} />
+      </LayerFloatingToolbarButton>
+      <LayerFloatingToolbarButton
+        label="Delete selection"
+        disabled={!onAction || !hasRemovableLayer}
+        onClick={() => onAction?.("delete")}
+      >
+        <Trash2Icon aria-hidden="true" className="size-4" strokeWidth={2} />
+      </LayerFloatingToolbarButton>
+      <div className="mx-0.5 h-4 w-px bg-[var(--drafting-line)]" />
+      <LayerFloatingToolbarButton label="More layer actions" onClick={onMore}>
+        <MoreHorizontalIcon aria-hidden="true" className="size-4" strokeWidth={2} />
+      </LayerFloatingToolbarButton>
+    </div>
+  )
+}
+
+function LayerFloatingToolbarButton({
+  children,
+  disabled = false,
+  label,
+  onClick,
+}: {
+  children: ReactNode
+  disabled?: boolean
+  label: string
+  onClick: (event: MouseEvent<HTMLButtonElement>) => void
+}) {
+  return (
+    <button
+      aria-label={label}
+      className="flex size-7 items-center justify-center rounded-[5px] text-[var(--drafting-ink-muted)] transition-colors duration-150 hover:bg-[var(--drafting-control-bg-hover)] hover:text-[var(--drafting-ink)] disabled:pointer-events-none disabled:opacity-35"
+      disabled={disabled}
+      type="button"
+      onClick={onClick}
+    >
+      {children}
     </button>
   )
 }
@@ -813,6 +907,8 @@ export const QrPane = memo(function QrPane({
   const [markup, setMarkup] = useState<string | null>(null)
   const [hasError, setHasError] = useState(false)
   const [rotatingLayerId, setRotatingLayerId] = useState<string | null>(null)
+  const [isLayerInteracting, setIsLayerInteracting] = useState(false)
+  const [canvasHeight, setCanvasHeight] = useState(0)
   const [rotationPreviewDegrees, setRotationPreviewDegrees] = useState<number | null>(null)
   const [multiSelectionPreview, setMultiSelectionPreview] = useState<{
     bounds: Pick<DraftingCanvasLayer, "height" | "width" | "x" | "y"> & { rotation?: number }
@@ -895,6 +991,30 @@ export const QrPane = memo(function QrPane({
   )
 
   useEffect(() => {
+    const canvas = canvasRef.current
+
+    if (!canvas) {
+      return
+    }
+
+    const updateCanvasHeight = () => {
+      setCanvasHeight(canvas.getBoundingClientRect().height)
+    }
+
+    updateCanvasHeight()
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateCanvasHeight)
+      return () => window.removeEventListener("resize", updateCanvasHeight)
+    }
+
+    const observer = new ResizeObserver(updateCanvasHeight)
+    observer.observe(canvas)
+
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
     if (!contextMenu) {
       return
     }
@@ -938,6 +1058,7 @@ export const QrPane = memo(function QrPane({
   const activeSelectedLayerIds = selectedLayerIds ?? (selectedLayerId ? [selectedLayerId] : [])
   const activeSelectedLayerIdSet = new Set(activeSelectedLayerIds)
   const selectedVisibleLayers = visibleLayers.filter((layer) => activeSelectedLayerIdSet.has(layer.id))
+  const selectedVisibleLayerIds = selectedVisibleLayers.map((layer) => layer.id)
   const contextMenuLayers = contextMenu
     ? resolvedLayers.filter((layer) => contextMenu.layerIds.includes(layer.id))
     : []
@@ -1018,6 +1139,7 @@ export const QrPane = memo(function QrPane({
       startX: event.clientX,
       startY: event.clientY,
     }
+    setIsLayerInteracting(true)
     if (mode === "rotate") {
       if (rotationLabelTimeoutRef.current !== null) {
         window.clearTimeout(rotationLabelTimeoutRef.current)
@@ -1044,6 +1166,29 @@ export const QrPane = memo(function QrPane({
       scenePoint: getScenePointFromClientPoint(event.clientX, event.clientY),
       x: event.clientX,
       y: event.clientY + CONTEXT_MENU_POINTER_OFFSET_PX,
+    })
+    onLayerSelect?.(layerIds.at(-1) ?? null)
+  }
+
+  function openFloatingLayerContextMenu(
+    event: MouseEvent<HTMLButtonElement>,
+    layerIds: string[],
+  ) {
+    if (layerIds.length === 0) {
+      return
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect()
+    const x = rect.left
+    const y = rect.bottom + CONTEXT_MENU_POINTER_OFFSET_PX
+
+    event.preventDefault()
+    event.stopPropagation()
+    setContextMenu({
+      layerIds,
+      scenePoint: getScenePointFromClientPoint(rect.left + rect.width / 2, rect.bottom),
+      x,
+      y,
     })
     onLayerSelect?.(layerIds.at(-1) ?? null)
   }
@@ -1079,6 +1224,22 @@ export const QrPane = memo(function QrPane({
 
     onLayerCopy?.(contextMenu.layerIds)
     setContextMenu(null)
+  }
+
+  function runSelectedLayerAction(action: DraftingLayerMenuAction) {
+    if (selectedVisibleLayerIds.length === 0) {
+      return
+    }
+
+    onLayerAction?.(selectedVisibleLayerIds, action)
+  }
+
+  function runSelectedLayerCopy() {
+    if (selectedVisibleLayerIds.length === 0) {
+      return
+    }
+
+    onLayerCopy?.(selectedVisibleLayerIds)
   }
 
   function runLayerPaste() {
@@ -1209,6 +1370,7 @@ export const QrPane = memo(function QrPane({
       startX: event.clientX,
       startY: event.clientY,
     }
+    setIsLayerInteracting(true)
     if (mode === "rotate") {
       if (rotationLabelTimeoutRef.current !== null) {
         window.clearTimeout(rotationLabelTimeoutRef.current)
@@ -1407,6 +1569,7 @@ export const QrPane = memo(function QrPane({
           rotationLabelTimeoutRef.current = null
         }, ROTATION_LABEL_HIDE_DELAY_MS)
       }
+      setIsLayerInteracting(false)
       interactionRef.current = null
     }
   }
@@ -1469,6 +1632,43 @@ export const QrPane = memo(function QrPane({
           height: bounds.height,
           transform: `translate3d(${bounds.x}px, ${bounds.y}px, 0)`,
           width: bounds.width,
+        }}
+      />
+    )
+  }
+
+  function renderFloatingToolbar() {
+    const bounds = combinedLayerBounds
+
+    if (
+      !bounds ||
+      selectedVisibleLayers.length === 0 ||
+      isLayerInteracting ||
+      marquee ||
+      rotatingLayerId !== null
+    ) {
+      return null
+    }
+
+    const x = bounds.x + bounds.width / 2
+    const rawY =
+      bounds.y -
+      RESIZE_CONTROL_PADDING_PX -
+      ROTATE_HANDLE_OFFSET_PX -
+      ROTATE_HANDLE_RADIUS_PX -
+      FLOATING_TOOLBAR_GAP_PX -
+      FLOATING_TOOLBAR_HEIGHT_PX
+    const minY = canvasHeight > 0 ? -canvasHeight / 2 + FLOATING_TOOLBAR_GAP_PX : rawY
+    const y = Math.max(rawY, minY)
+
+    return (
+      <LayerFloatingToolbar
+        layers={selectedVisibleLayers}
+        onAction={onLayerAction ? runSelectedLayerAction : undefined}
+        onCopy={onLayerCopy ? runSelectedLayerCopy : undefined}
+        onMore={(event) => openFloatingLayerContextMenu(event, selectedVisibleLayerIds)}
+        style={{
+          transform: `translate3d(${x}px, ${y}px, 0) translateX(-50%)`,
         }}
       />
     )
@@ -1953,6 +2153,7 @@ export const QrPane = memo(function QrPane({
               ? visibleLayers.map((layer) => renderLayerControls(layer))
               : null}
             {createMultiLayerControls()}
+            {renderFloatingToolbar()}
             {contextMenu && typeof document !== "undefined"
               ? createPortal(
                   <LayerContextMenu
