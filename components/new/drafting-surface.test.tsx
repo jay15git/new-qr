@@ -326,16 +326,18 @@ describe("DraftingSurface", () => {
     expect(surface.container.textContent).toContain("QR Type:")
     expect(surface.container.textContent).toContain("Content")
     expect(surface.container.querySelector('button[aria-label="Open Card"]')).toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open Elements"]')).not.toBeNull()
     expect(surface.container.textContent).toContain("QR Body")
     expect(surface.container.textContent).toContain("Corners")
     expect(surface.container.textContent).toContain("Background")
     expect(surface.container.textContent).toContain("Logo")
-    expect(surface.container.textContent).toContain("Text")
+    expect(surface.container.querySelector('button[aria-label="Open Text"]')).toBeNull()
     expect(surface.container.textContent).toContain("Motion")
     expect(surface.container.textContent).toContain("Encoding")
     expect(surface.container.textContent).toContain("Layers")
     expect(surface.container.querySelector('button[aria-label="Open Export"]')).toBeNull()
     expect(headerContent.className).toContain("justify-end")
+    expect(header.querySelector('[data-slot="drafting-card-only-toggle"]')).toBeNull()
     expect(header.innerHTML).toContain('data-slot="switch"')
     expect(header.innerHTML).toContain('data-slot="drafting-download-trigger"')
     expect(getRequiredElement(header, '[data-slot="switch"]').className).not.toContain(
@@ -344,7 +346,6 @@ describe("DraftingSurface", () => {
     expect(getRequiredElement(header, '[data-slot="switch"]').className).not.toContain(
       "shadow-[var(--drafting-shadow-rest)]",
     )
-    expect(header.innerHTML).toContain("bg-[var(--drafting-control-bg)]")
     expect(surface.container.textContent).not.toContain("Appearance")
     expect(surface.container.innerHTML).toContain('aria-label="Toggle dark mode"')
     expect(surface.container.innerHTML).not.toMatch(
@@ -378,8 +379,7 @@ describe("DraftingSurface", () => {
     ) as HTMLInputElement
 
     expect(actions.firstElementChild?.getAttribute("data-slot")).toBe("popover")
-    expect(actions.children.item(1)?.getAttribute("data-slot")).toBe("drafting-card-only-toggle")
-    expect(actions.children.item(2)?.getAttribute("data-slot")).toBe("switch")
+    expect(actions.children.item(1)?.getAttribute("data-slot")).toBe("switch")
     expect(actions.querySelector('[data-slot="drafting-shortcuts-trigger"]')).not.toBeNull()
     expect(actions.querySelector('[data-slot="drafting-download-trigger"]')).not.toBeNull()
     expect(
@@ -400,21 +400,20 @@ describe("DraftingSurface", () => {
     15000,
   )
 
-  it("opens a header keyboard shortcuts popover next to the card toggle", () => {
+  it("opens a header keyboard shortcuts popover before the theme toggle", () => {
     const surface = renderSurface({ openDownloadPopover: false })
     const actions = getRequiredElement(
       surface.container,
       '[data-slot="drafting-header-actions"]',
     )
     const shortcutsWrapper = actions.children.item(0)
-    const cardToggle = getRequiredElement(actions, '[data-slot="drafting-card-only-toggle"]')
     const shortcutsTrigger = getRequiredElement(
       actions,
       'button[aria-label="Open keyboard shortcuts"]',
     )
 
     expect(shortcutsWrapper?.contains(shortcutsTrigger)).toBe(true)
-    expect(actions.children.item(1)).toBe(cardToggle)
+    expect(actions.children.item(1)?.getAttribute("data-slot")).toBe("switch")
     expect(surface.container.querySelector('[data-slot="drafting-shortcuts-popover"]')).toBeNull()
 
     act(() => {
@@ -443,30 +442,42 @@ describe("DraftingSurface", () => {
     expect(popover.textContent).toContain("Hide/show selected layers")
   })
 
-  it("shows card frame, surface, image, and shaders tools when card-only mode is enabled", () => {
+  it("keeps the rail stable and exposes frame/card through Elements", () => {
     const surface = renderSurface()
 
-    act(() => {
-      activateElement(
-        getRequiredElement(surface.container, 'button[aria-label="Show only card controls"]'),
-      )
-    })
-
+    expect(surface.container.querySelector('[data-slot="drafting-card-only-toggle"]')).toBeNull()
     expect(
       getRequiredElement(surface.container, '[data-slot="drafting-surface"]').getAttribute(
         "data-card-only-mode",
       ),
+    ).toBeNull()
+    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(9)
+    expect(surface.container.querySelector('button[aria-label="Open Content"]')).not.toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open QR Body"]')).not.toBeNull()
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Elements"]'))
+    })
+
+    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(9)
+    expect(
+      getRequiredElement(surface.container, 'button[aria-label="Open Elements"]').getAttribute(
+        "aria-pressed",
+      ),
     ).toBe("true")
-    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(4)
-    expect(surface.container.querySelector('button[aria-label="Open Content"]')).toBeNull()
-    expect(surface.container.querySelector('button[aria-label="Open QR Body"]')).toBeNull()
+    expect(surface.container.textContent).toContain("Frame / Card")
+    expect(surface.container.textContent).toContain("Rectangle")
+    expect(surface.container.textContent).toContain("Circle")
+    expect(surface.container.textContent).toContain("Text")
+    expect(surface.container.querySelector('button[aria-label="Open Frame"]')).toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open Surface"]')).toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open Image"]')).toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open Shaders"]')).toBeNull()
 
-    const frameButton = getRequiredElement(surface.container, 'button[aria-label="Open Frame"]')
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add Frame / Card"]'))
+    })
 
-    expect(frameButton.getAttribute("aria-pressed")).toBe("true")
-    expect(surface.container.querySelector('button[aria-label="Open Surface"]')).not.toBeNull()
-    expect(surface.container.querySelector('button[aria-label="Open Image"]')).not.toBeNull()
-    expect(surface.container.querySelector('button[aria-label="Open Shaders"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="tabs-list"]')).toBeNull()
     expect(
       getRequiredElement(
@@ -474,20 +485,7 @@ describe("DraftingSurface", () => {
         '[data-active-tool="card-frame"]',
       ).textContent,
     ).toContain("Show card")
-
-    act(() => {
-      activateElement(
-        getRequiredElement(surface.container, 'button[aria-label="Show only card controls"]'),
-      )
-    })
-
-    expect(surface.container.querySelector('button[aria-label="Open Frame"]')).toBeNull()
-    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(9)
-    expect(
-      getRequiredElement(surface.container, 'button[aria-label="Open Content"]').getAttribute(
-        "aria-pressed",
-      ),
-    ).toBe("true")
+    expect(surface.container.textContent).toContain("Frame/Card")
   })
 
   it(
@@ -1018,7 +1016,10 @@ describe("DraftingSurface", () => {
     })
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Text"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Elements"]'))
+    })
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add Text"]'))
     })
 
     await act(async () => {
@@ -1106,6 +1107,45 @@ describe("DraftingSurface", () => {
     expect(nodeMarkup).toContain('font-size="42"')
     expect(nodeMarkup).toContain('font-weight="700"')
     expect(nodeMarkup).toContain('fill="#123456"')
+  })
+
+  it("deletes removable selected layers from the floating canvas toolbar", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
+    const surface = renderSurface({ openDownloadPopover: false })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Elements"]'))
+    })
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add Text"]'))
+    })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    expect(surface.container.querySelector('[data-slot="drafting-text-layer"]')).not.toBeNull()
+    expect(
+      surface.container.querySelector('[data-slot="drafting-text-layer"]')?.getAttribute("data-selected"),
+    ).toBe("true")
+
+    act(() => {
+      activateElement(
+        getRequiredElement(surface.container, 'button[aria-label="Delete selection"]'),
+      )
+    })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    expect(surface.container.querySelector('[data-slot="drafting-text-layer"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="dashboard-compose-node"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="drafting-layer-floating-toolbar"]')).toBeNull()
   })
 
   it("renders dot matrix motion and loader playground controls in the Motion panel", async () => {
@@ -4299,7 +4339,10 @@ function createDragEvent(type: string, dataTransfer: ReturnType<typeof createDat
 
 function openCardOnlyMode(parent: ParentNode) {
   act(() => {
-    activateElement(getRequiredElement(parent, 'button[aria-label="Show only card controls"]'))
+    activateElement(getRequiredElement(parent, 'button[aria-label="Open Elements"]'))
+  })
+  act(() => {
+    activateElement(getRequiredElement(parent, 'button[aria-label="Add Frame / Card"]'))
   })
 }
 

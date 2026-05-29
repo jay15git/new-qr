@@ -163,12 +163,15 @@ import {
   type StaticQrContentValue,
 } from "@/components/qr/qr-static-content"
 import {
-  CreditCardIcon,
+  CircleIcon,
   DownloadIcon,
+  FrameIcon,
   KeyboardIcon,
   LinkIcon,
   PieChart,
+  RectangleHorizontalIcon,
   Settings,
+  ShapesIcon,
   SlidersHorizontal,
   Sparkles,
   TypeIcon,
@@ -188,7 +191,6 @@ import {
   ScrollAreaThumb,
   ScrollAreaViewport,
 } from "@/components/ui/scroll-area"
-import { Switch } from "@/components/ui/switch"
 import {
   DEFAULT_QR_INPUT_TYPE,
   type QrInputType,
@@ -218,6 +220,7 @@ type DraftingBrandIconCategoryFilter = BrandIconCategory | "all"
 type DraftingCardToolId = "card-frame" | "card-surface" | "card-image" | "card-shaders"
 type DraftingToolId =
   | "content"
+  | "elements"
   | "style"
   | "corners"
   | "background"
@@ -359,9 +362,14 @@ const DRAFTING_TOOLS: DraftingTool[] = [
     renderIcon: () => <LinkIcon className="size-4 shrink-0" />,
   },
   {
+    id: "elements",
+    title: "Elements",
+    renderIcon: () => <ShapesIcon className="size-4 shrink-0" />,
+  },
+  {
     id: "card-frame",
-    title: "Frame",
-    renderIcon: () => <CreditCardIcon className="size-4 shrink-0" />,
+    title: "Frame / Card",
+    renderIcon: () => <FrameIcon className="size-4 shrink-0" />,
   },
   {
     id: "card-surface",
@@ -428,6 +436,18 @@ const DRAFTING_TOOLS: DraftingTool[] = [
   },
 ]
 
+const DRAFTING_RAIL_TOOLS = DRAFTING_TOOLS.filter(
+  (tool) => !tool.id.startsWith("card-") && tool.id !== "text",
+)
+
+function getDraftingRailToolId(toolId: DraftingToolId) {
+  if (toolId === "text" || toolId.startsWith("card-")) {
+    return "elements" satisfies DraftingToolId
+  }
+
+  return toolId
+}
+
 type DraftingDownloadExtension = (typeof DRAFTING_DOWNLOAD_EXTENSIONS)[number]
 type DraftingDownloadTarget = "all-qr" | "current" | `qr:${string}`
 type DraftingExportSizePreview =
@@ -458,6 +478,120 @@ function PlusMarker({ className }: { className: string }) {
   )
 }
 
+function DraftingElementsTab({
+  onAddFrameCard,
+  onAddText,
+}: {
+  onAddFrameCard: () => void
+  onAddText: () => void
+}) {
+  return (
+    <section data-slot="drafting-elements-tab" className="min-w-0 space-y-4">
+      <div>
+        <p className="drafting-type-section-title font-bold text-[var(--drafting-ink)]">
+          Add elements
+        </p>
+        <p className="drafting-type-body mt-1 text-[var(--drafting-ink-muted)]">
+          Add canvas objects, then use selection controls to edit them.
+        </p>
+      </div>
+      <div className="grid gap-2">
+        <ElementAddButton
+          icon={<FrameIcon data-icon="inline-start" />}
+          label="Frame / Card"
+          onClick={onAddFrameCard}
+        />
+        <ElementAddButton
+          disabled
+          icon={<RectangleHorizontalIcon data-icon="inline-start" />}
+          label="Rectangle"
+        />
+        <ElementAddButton disabled icon={<CircleIcon data-icon="inline-start" />} label="Circle" />
+        <ElementAddButton icon={<TypeIcon data-icon="inline-start" />} label="Text" onClick={onAddText} />
+      </div>
+    </section>
+  )
+}
+
+function ElementAddButton({
+  disabled = false,
+  icon,
+  label,
+  onClick,
+}: {
+  disabled?: boolean
+  icon: ReactNode
+  label: string
+  onClick?: () => void
+}) {
+  return (
+    <SecondaryButton
+      aria-label={`Add ${label}`}
+      className="h-10 w-full justify-start"
+      data-slot="drafting-element-add-button"
+      disabled={disabled}
+      type="button"
+      onClick={onClick}
+    >
+      {icon}
+      <span className="min-w-0 truncate">{label}</span>
+      {disabled ? (
+        <span className="drafting-type-caption ml-auto text-[var(--drafting-ink-muted)]">
+          Soon
+        </span>
+      ) : null}
+    </SecondaryButton>
+  )
+}
+
+function DraftingCardObjectInspectorNav({
+  activeTool,
+  onToolChange,
+}: {
+  activeTool: DraftingCardToolId
+  onToolChange: (toolId: DraftingCardToolId) => void
+}) {
+  const items: Array<{ id: DraftingCardToolId; label: string; icon: ReactNode }> = [
+    { id: "card-frame", label: "Frame/Card", icon: <FrameIcon data-icon="inline-start" /> },
+    { id: "card-surface", label: "Surface", icon: <PieChart data-icon="inline-start" /> },
+    {
+      id: "card-image",
+      label: "Image",
+      icon: <HugeiconsIcon icon={Image02Icon} size={14} color="currentColor" strokeWidth={1.8} />,
+    },
+    { id: "card-shaders", label: "Shaders", icon: <Sparkles data-icon="inline-start" /> },
+  ]
+
+  return (
+    <div
+      aria-label="Frame / Card inspector sections"
+      data-slot="drafting-card-object-nav"
+      className="grid grid-cols-2 gap-1 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] p-1 shadow-[var(--drafting-shadow-rest)]"
+    >
+      {items.map((item) => {
+        const isActive = item.id === activeTool
+
+        return (
+          <button
+            key={item.id}
+            aria-label={`Open ${item.label}`}
+            aria-pressed={isActive}
+            className={cn(
+              "drafting-type-meta flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-[5px] px-2 font-semibold text-[var(--drafting-ink-muted)] transition-colors hover:bg-[var(--drafting-control-bg-hover)] hover:text-[var(--drafting-ink)]",
+              isActive && "bg-[var(--drafting-ink)] text-[var(--drafting-ink-inverse)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-ink-inverse)]",
+            )}
+            type="button"
+            onClick={() => onToolChange(item.id)}
+          >
+            {item.icon}
+            <span className="truncate">{item.label}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 type DraftingSurfaceProps = {
   fontClassName?: string
 }
@@ -466,7 +600,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const [activeTool, setActiveTool] = useState<DraftingToolId>(
     DEFAULT_DRAFTING_TOOL_ID,
   )
-  const [isCardOnlyMode, setIsCardOnlyMode] = useState(false)
   const [selectedContentType, setSelectedContentType] = useState<QrInputType>(
     DEFAULT_QR_INPUT_TYPE,
   )
@@ -676,11 +809,8 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const draftingLayerClipboardRef = useRef<string>("")
   const activeToolConfig =
     DRAFTING_TOOLS.find((section) => section.id === activeTool) ?? DRAFTING_TOOLS[0]
-  const isCardTool = (toolId: DraftingToolId): toolId is DraftingCardToolId =>
-    toolId.startsWith("card-")
-  const visibleDraftingTools = isCardOnlyMode
-    ? DRAFTING_TOOLS.filter((tool) => isCardTool(tool.id))
-    : DRAFTING_TOOLS.filter((tool) => !isCardTool(tool.id))
+  const activeRailToolId = getDraftingRailToolId(activeTool)
+  const visibleDraftingTools = DRAFTING_RAIL_TOOLS
   const filteredBrandIcons = filterBrandIcons(brandIconQuery, brandIconCategory)
   const selectedContentValues =
     contentValuesByType[selectedContentType] ?? getDefaultStaticQrValues(selectedContentType)
@@ -1858,6 +1988,32 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     draftingSurfaceRef.current?.focus({ preventScroll: true })
   }
 
+  function handleAddFrameCardLayer() {
+    const cardLayerId = getDraftingCardLayerId(activeQrNodeId)
+    const layers =
+      layerStateByNodeId[activeQrNodeId] ??
+      createDefaultDraftingLayers(activeQrNodeId, draftingStudioState, selectedCardState)
+
+    setSelectedCardState((current) => ({
+      ...current,
+      enabled: true,
+    }))
+    setLayerStateByNodeId((current) => ({
+      ...current,
+      [activeQrNodeId]: layers.map((layer) =>
+        layer.id === cardLayerId
+          ? patchDraftingCanvasLayer(layer, {
+              isVisible: true,
+              shadow: selectedCardState.shadow,
+            })
+          : cloneDraftingCanvasLayer(layer),
+      ),
+    }))
+    selectSingleLayer(cardLayerId)
+    setActiveTool("card-frame")
+    draftingSurfaceRef.current?.focus({ preventScroll: true })
+  }
+
   function handleRemoveQrCode(paneId: string) {
     setQrStateByNodeId((current) => {
       const next = { ...current }
@@ -2289,6 +2445,24 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
           layerIds,
           action as DraftingLayerDistributeAction,
         )
+      } else if (action === "delete") {
+        const removableLayerIds = new Set(
+          layerIds.filter((layerId) => !isDraftingQrLayerId(layerId)),
+        )
+
+        if (removableLayerIds.size > 0) {
+          nextLayers = nextLayers
+            .filter((layer) => !removableLayerIds.has(layer.id))
+            .map(cloneDraftingCanvasLayer)
+          setSelectedLayerIds((currentSelectedLayerIds) => {
+            const nextSelectedLayerIds = currentSelectedLayerIds.filter(
+              (layerId) => !removableLayerIds.has(layerId),
+            )
+
+            setSelectedLayerId(nextSelectedLayerIds.at(-1) ?? null)
+            return nextSelectedLayerIds
+          })
+        }
       } else {
         nextLayers = nextLayers.map((layer) => {
           if (!layerIds.includes(layer.id)) {
@@ -2403,16 +2577,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   
     } catch {
       // Export failed silently
-    }
-  }
-
-  function handleCardOnlyModeChange(checked: boolean) {
-    setIsCardOnlyMode(checked)
-
-    if (checked) {
-      setActiveTool("card-frame")
-    } else {
-      setActiveTool(DEFAULT_DRAFTING_TOOL_ID)
     }
   }
 
@@ -2945,6 +3109,15 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       )
     }
 
+    if (toolId === "elements") {
+      return (
+        <DraftingElementsTab
+          onAddFrameCard={handleAddFrameCardLayer}
+          onAddText={handleAddTextLayer}
+        />
+      )
+    }
+
     if (toolId === "style") {
       return (
         <div className="min-w-0 space-y-6" data-slot="drafting-stacked-inspector">
@@ -3002,9 +3175,28 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       )
     }
 
+    if (toolId === "card-frame") {
+      return (
+        <div className="min-w-0 space-y-4" data-slot="drafting-stacked-inspector">
+          <DraftingCardObjectInspectorNav activeTool={toolId} onToolChange={setActiveTool} />
+          {renderPanelContent("card-frame", "frame")}
+        </div>
+      )
+    }
+
+    if (toolId === "card-surface") {
+      return (
+        <div className="min-w-0 space-y-4" data-slot="drafting-stacked-inspector">
+          <DraftingCardObjectInspectorNav activeTool={toolId} onToolChange={setActiveTool} />
+          {renderPanelContent("card-surface", "surface")}
+        </div>
+      )
+    }
+
     if (toolId === "card-image") {
       return (
         <div className="min-w-0 space-y-6" data-slot="drafting-stacked-inspector">
+          <DraftingCardObjectInspectorNav activeTool={toolId} onToolChange={setActiveTool} />
           {renderPanelContent("card-image", "upload")}
           {renderPanelContent("card-image", "filters")}
         </div>
@@ -3012,12 +3204,15 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     }
 
     if (toolId === "card-shaders") {
-      return renderPanelContent("card-shaders", "all")
+      return (
+        <div className="min-w-0 space-y-4" data-slot="drafting-stacked-inspector">
+          <DraftingCardObjectInspectorNav activeTool={toolId} onToolChange={setActiveTool} />
+          {renderPanelContent("card-shaders", "all")}
+        </div>
+      )
     }
 
     const defaultPanelByTool: Partial<Record<DraftingToolId, string>> = {
-      "card-frame": "frame",
-      "card-surface": "surface",
       text: "text",
       encoding: "encoding",
       layers: "layers",
@@ -3080,7 +3275,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       data-slot="drafting-surface"
       tabIndex={-1}
       className="relative grid h-dvh w-full grid-rows-[var(--new-header-height)_minmax(0,1fr)] overflow-visible bg-[var(--drafting-surface-bg)] sm:h-[calc(100dvh-4rem)] lg:shadow-[var(--drafting-shadow-shell)] [--new-header-height:3.875rem] [--new-left-rail-width:clamp(6.25rem,10vw,7.5rem)] [--new-middle-rail-width:clamp(15rem,24vw,18.5rem)] [--new-mobile-rail-height:5.75rem]"
-      data-card-only-mode={isCardOnlyMode ? "true" : "false"}
       data-compose-edit-mode="false"
       data-compose-selected-node-id={activeQrNodeId ?? ""}
     >
@@ -3172,20 +3366,6 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
                 </div>
               </PopoverContent>
             </Popover>
-            <div
-              aria-label="Card-only controls"
-              data-slot="drafting-card-only-toggle"
-              className="flex h-8 shrink-0 items-center gap-2 rounded-[6px] bg-[var(--drafting-control-bg)] px-2 text-[var(--drafting-ink)]"
-            >
-              <CreditCardIcon aria-hidden="true" className="size-4 shrink-0" />
-              <Switch
-                aria-label="Show only card controls"
-                checked={isCardOnlyMode}
-                className="dark:data-checked:bg-foreground dark:[&_[data-slot=switch-thumb]]:data-checked:bg-background"
-                size="sm"
-                onCheckedChange={handleCardOnlyModeChange}
-              />
-            </div>
             <ModeToggle appearance="drafting" className="shrink-0 text-[var(--drafting-ink)]" />
             <Popover open={isDownloadPopoverOpen} onOpenChange={setIsDownloadPopoverOpen}>
               <PopoverTrigger asChild>
@@ -3463,7 +3643,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
                 className="flex h-full min-w-max flex-row items-center gap-2 px-3 py-2 lg:min-h-full lg:min-w-0 lg:flex-col lg:items-center lg:gap-4 lg:px-0 lg:py-4"
               >
                 {visibleDraftingTools.map((tool) => {
-                  const isActive = tool.id === activeTool
+                  const isActive = tool.id === activeRailToolId
 
                   return (
                     <Button
@@ -3479,14 +3659,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
                       size="default"
                       type="button"
                       variant="ghost"
-                      onClick={() => {
-                        if (tool.id === "text") {
-                          handleAddTextLayer()
-                          return
-                        }
-
-                        setActiveTool(tool.id)
-                      }}
+                      onClick={() => setActiveTool(tool.id)}
                     >
                       <span
                         data-slot="drafting-tool-button-icon"
