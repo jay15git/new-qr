@@ -317,7 +317,7 @@ describe("DraftingSurface", () => {
     expect(
       surface.container.querySelector('[data-slot="drafting-plus-marker"]')?.getAttribute("class"),
     ).not.toContain("text-black/")
-    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(9)
+    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(13)
     expect(surface.container.querySelector('[data-slot="tabs"]')).toBeNull()
     expect(surface.container.querySelector('[data-slot="tabs-list"]')).toBeNull()
     expect(
@@ -326,16 +326,16 @@ describe("DraftingSurface", () => {
     expect(surface.container.textContent).toContain("QR Type:")
     expect(surface.container.textContent).toContain("Content")
     expect(surface.container.querySelector('button[aria-label="Open Card"]')).toBeNull()
-    expect(surface.container.querySelector('button[aria-label="Open Elements"]')).not.toBeNull()
-    expect(surface.container.textContent).toContain("QR Body")
+    expect(surface.container.querySelector('button[aria-label="Open Text"]')).not.toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open Image"]')).not.toBeNull()
+    expect(surface.container.textContent).toContain("Pattern")
     expect(surface.container.textContent).toContain("Corners")
-    expect(surface.container.textContent).toContain("Background")
+    expect(surface.container.textContent).toContain("Shape")
     expect(surface.container.textContent).toContain("Logo")
-    expect(surface.container.querySelector('button[aria-label="Open Text"]')).toBeNull()
     expect(surface.container.textContent).toContain("Motion")
     expect(surface.container.textContent).toContain("Encoding")
     expect(surface.container.textContent).toContain("Layers")
-    expect(surface.container.querySelector('button[aria-label="Open Export"]')).toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open Export"]')).not.toBeNull()
     expect(headerContent.className).toContain("justify-end")
     expect(header.querySelector('[data-slot="drafting-card-only-toggle"]')).toBeNull()
     expect(header.innerHTML).toContain('data-slot="switch"')
@@ -442,7 +442,7 @@ describe("DraftingSurface", () => {
     expect(popover.textContent).toContain("Hide/show selected layers")
   })
 
-  it("keeps the rail stable and exposes frame/card through Elements", () => {
+  it("keeps the rail QR-first and exposes Add tools without legacy frame/card labels", () => {
     const surface = renderSurface()
 
     expect(surface.container.querySelector('[data-slot="drafting-card-only-toggle"]')).toBeNull()
@@ -451,41 +451,44 @@ describe("DraftingSurface", () => {
         "data-card-only-mode",
       ),
     ).toBeNull()
-    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(9)
+    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(13)
     expect(surface.container.querySelector('button[aria-label="Open Content"]')).not.toBeNull()
-    expect(surface.container.querySelector('button[aria-label="Open QR Body"]')).not.toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open Pattern"]')).not.toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open Shape"]')).not.toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open Text"]')).not.toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open Image"]')).not.toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open Decorations"]')).not.toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Open Effects"]')).not.toBeNull()
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Elements"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Image"]'))
     })
 
-    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(9)
+    expect(surface.container.querySelectorAll('[data-drafting-tool-button="true"]')).toHaveLength(13)
     expect(
-      getRequiredElement(surface.container, 'button[aria-label="Open Elements"]').getAttribute(
+      getRequiredElement(surface.container, 'button[aria-label="Open Image"]').getAttribute(
         "aria-pressed",
       ),
     ).toBe("true")
-    expect(surface.container.textContent).toContain("Frame / Card")
-    expect(surface.container.textContent).toContain("Rectangle")
-    expect(surface.container.textContent).toContain("Circle")
-    expect(surface.container.textContent).toContain("Text")
-    expect(surface.container.querySelector('button[aria-label="Open Frame"]')).toBeNull()
-    expect(surface.container.querySelector('button[aria-label="Open Surface"]')).toBeNull()
-    expect(surface.container.querySelector('button[aria-label="Open Image"]')).toBeNull()
+    expect(surface.container.textContent).toContain("Logo inside QR")
+    expect(surface.container.textContent).toContain("Shape fill behind QR")
+    expect(surface.container.textContent).toContain("Image object on canvas")
+    expect(surface.container.textContent).not.toContain("Frame / Card")
+    expect(surface.container.textContent).not.toContain("Frame/Card")
     expect(surface.container.querySelector('button[aria-label="Open Shaders"]')).toBeNull()
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add Frame / Card"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Shape"]'))
     })
 
     expect(surface.container.querySelector('[data-slot="tabs-list"]')).toBeNull()
     expect(
       getRequiredElement(
         surface.container,
-        '[data-active-tool="card-frame"]',
+        '[data-active-tool="shape"]',
       ).textContent,
-    ).toContain("Show card")
-    expect(surface.container.textContent).toContain("Frame/Card")
+    ).toContain("Show shape")
+    expect(surface.container.textContent).not.toContain("Frame/Card")
   })
 
   it(
@@ -856,7 +859,7 @@ describe("DraftingSurface", () => {
       naturalWidth: 320,
     })
     const surface = renderSurface()
-    const backgroundButton = getRequiredElement(surface.container, 'button[aria-label="Open Background"]')
+    const backgroundButton = getRequiredElement(surface.container, 'button[aria-label="Open Shape"]')
 
     await act(async () => {
       await flushPromises()
@@ -948,7 +951,7 @@ describe("DraftingSurface", () => {
   it("switches tool button state and renders stacked inspector content for compact tools", () => {
     const surface = renderSurface()
     const contentButton = getRequiredElement(surface.container, 'button[aria-label="Open Content"]')
-    const qrBodyButton = getRequiredElement(surface.container, 'button[aria-label="Open QR Body"]')
+    const qrBodyButton = getRequiredElement(surface.container, 'button[aria-label="Open Pattern"]')
     const logoButton = getRequiredElement(surface.container, 'button[aria-label="Open Logo"]')
     const cornersButton = getRequiredElement(
       surface.container,
@@ -1016,7 +1019,7 @@ describe("DraftingSurface", () => {
     })
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Elements"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Text"]'))
     })
     act(() => {
       activateElement(getRequiredElement(surface.container, 'button[aria-label="Add Text"]'))
@@ -1118,7 +1121,7 @@ describe("DraftingSurface", () => {
     })
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Elements"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Text"]'))
     })
     act(() => {
       activateElement(getRequiredElement(surface.container, 'button[aria-label="Add Text"]'))
@@ -1444,7 +1447,7 @@ describe("DraftingSurface", () => {
 
   it("renders a selectable option-card grid for the style tab", () => {
     const surface = renderSurface()
-    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open QR Body"]')
+    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Pattern"]')
 
     act(() => {
       styleButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -1491,7 +1494,7 @@ describe("DraftingSurface", () => {
 
   it("renders a drafting color accordion for the style color tab with solid, gradient, and palette", () => {
     const surface = renderSurface()
-    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open QR Body"]')
+    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Pattern"]')
 
     act(() => {
       styleButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -1525,7 +1528,7 @@ describe("DraftingSurface", () => {
 
   it("renders a drafting size tab for style with the qr margin and size sliders", () => {
     const surface = renderSurface()
-    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open QR Body"]')
+    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Pattern"]')
 
     act(() => {
       styleButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -1549,7 +1552,7 @@ describe("DraftingSurface", () => {
 
   it("updates the drafting qr background radius from the style size tab", () => {
     const surface = renderSurface()
-    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open QR Body"]')
+    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Pattern"]')
 
     act(() => {
       styleButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -1661,7 +1664,7 @@ describe("DraftingSurface", () => {
     openCardOnlyMode(surface.container)
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Surface"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Decorations"]'))
     })
 
     const surfacePanel = getRequiredElement(
@@ -1718,7 +1721,7 @@ describe("DraftingSurface", () => {
     openCardOnlyMode(surface.container)
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Image"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Shape"]'))
     })
 
     expect(surface.container.querySelector('[data-slot="tabs-list"]')).toBeNull()
@@ -1726,7 +1729,7 @@ describe("DraftingSurface", () => {
     const imagePanel = getRequiredElement(surface.container, '[data-slot="drafting-card-image-upload-tab"]')
     const imageUrlInput = getRequiredElement(
       imagePanel,
-      'input[aria-label="Card image URL"]',
+      'input[aria-label="Shape image URL"]',
     ) as HTMLInputElement
 
     expect(imagePanel.textContent).toContain("Image source")
@@ -1740,6 +1743,10 @@ describe("DraftingSurface", () => {
 
     expect(card.getAttribute("data-card-style-mode")).toBe("image")
     expect(card.style.backgroundImage).toContain("https://example.com/card.png")
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Effects"]'))
+    })
 
     const filtersPanel = getRequiredElement(
       surface.container,
@@ -1796,7 +1803,7 @@ describe("DraftingSurface", () => {
     openCardOnlyMode(surface.container)
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Image"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Effects"]'))
     })
 
     const filtersPanel = getRequiredElement(
@@ -1804,7 +1811,7 @@ describe("DraftingSurface", () => {
       '[data-slot="drafting-card-image-filters-tab"]',
     )
 
-    expect(filtersPanel.textContent).toContain("Add an image in Upload")
+    expect(filtersPanel.textContent).toContain("Add an image in Shape")
 
     act(() => {
       activateElement(getRadioInputByAriaLabel(filtersPanel, "Paper texture"))
@@ -1828,7 +1835,7 @@ describe("DraftingSurface", () => {
     openCardOnlyMode(surface.container)
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Shaders"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Effects"]'))
     })
 
     const shadersPanel = getRequiredElement(
@@ -1883,7 +1890,7 @@ describe("DraftingSurface", () => {
     openCardOnlyMode(surface.container)
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Surface"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Decorations"]'))
     })
 
     const getFillInput = () =>
@@ -1938,7 +1945,7 @@ describe("DraftingSurface", () => {
     openCardOnlyMode(surface.container)
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Surface"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Decorations"]'))
     })
 
     act(() => {
@@ -1994,7 +2001,7 @@ describe("DraftingSurface", () => {
     openCardOnlyMode(surface.container)
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Surface"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Decorations"]'))
     })
 
     act(() => {
@@ -2018,7 +2025,7 @@ describe("DraftingSurface", () => {
     })
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Surface"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Decorations"]'))
     })
 
     act(() => {
@@ -2069,7 +2076,7 @@ describe("DraftingSurface", () => {
 
   it("preserves qr background radius separately for each drafting qr layer", async () => {
     const surface = renderSurface()
-    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open QR Body"]')
+    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Pattern"]')
 
     act(() => {
       styleButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -2119,7 +2126,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const backgroundButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Background"]',
+      'button[aria-label="Open Shape"]',
     )
 
     act(() => {
@@ -2140,7 +2147,7 @@ describe("DraftingSurface", () => {
 
     act(() => {
       activateElement(
-        getRadioInputByAriaLabel(surface.container, "Hexagon"),
+        getRadioInputByAriaLabel(surface.container, "Badge"),
       )
     })
 
@@ -2166,7 +2173,7 @@ describe("DraftingSurface", () => {
 
   it("expands style color modes without selecting them from the accordion header", () => {
     const surface = renderSurface()
-    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open QR Body"]')
+    const styleButton = getRequiredElement(surface.container, 'button[aria-label="Open Pattern"]')
 
     act(() => {
       styleButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -2347,7 +2354,7 @@ describe("DraftingSurface", () => {
     expect(
       cornerFrameGrid.querySelectorAll('[data-slot="option-card"]').length,
     ).toBe(7)
-    expect(cornerFrameGrid.innerHTML).toContain("size-[6.5rem]")
+    expect(cornerFrameGrid.innerHTML).toContain("size-[4.5rem]")
     expect(extraRoundedInput.checked).toBe(true)
     expect(squareInput.checked).toBe(false)
 
@@ -2457,7 +2464,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const backgroundButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Background"]',
+      'button[aria-label="Open Shape"]',
     )
 
     act(() => {
@@ -2478,7 +2485,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const backgroundButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Background"]',
+      'button[aria-label="Open Shape"]',
     )
 
     act(() => {
@@ -2496,7 +2503,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const backgroundButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Background"]',
+      'button[aria-label="Open Shape"]',
     )
 
     await act(async () => {
@@ -2513,7 +2520,7 @@ describe("DraftingSurface", () => {
       '[data-slot="drafting-background-shape-grid"]',
     )
 
-    expect(shapeGrid.querySelectorAll('[data-slot="option-card"]')).toHaveLength(22)
+    expect(shapeGrid.querySelectorAll('[data-slot="option-card"]')).toHaveLength(23)
 
     await act(async () => {
       activateElement(getRadioInputByAriaLabel(shapeGrid, "Circle"))
@@ -2622,7 +2629,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const backgroundButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Background"]',
+      'button[aria-label="Open Shape"]',
     )
 
     await act(async () => {
@@ -2676,7 +2683,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const backgroundButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Background"]',
+      'button[aria-label="Open Shape"]',
     )
 
     act(() => {
@@ -2712,7 +2719,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const backgroundButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Background"]',
+      'button[aria-label="Open Shape"]',
     )
 
     act(() => {
@@ -2968,7 +2975,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const backgroundButton = getRequiredElement(
       surface.container,
-      'button[aria-label="Open Background"]',
+      'button[aria-label="Open Shape"]',
     )
 
     act(() => {
@@ -2990,7 +2997,7 @@ describe("DraftingSurface", () => {
     })
 
     expect(
-      surface.container.querySelector('input[aria-label="Background image URL"]'),
+      surface.container.querySelector('input[aria-label="Shape image URL"]'),
     ).not.toBeNull()
   })
 
@@ -3436,8 +3443,8 @@ describe("DraftingSurface", () => {
     )
 
     expect(layerRows.map((row) => row.textContent)).toEqual([
-      expect.stringContaining("QR code"),
-      expect.stringContaining("Card"),
+      expect.stringContaining("QR Code"),
+      expect.stringContaining("QR Shape"),
     ])
 
     await act(async () => {
@@ -4339,11 +4346,15 @@ function createDragEvent(type: string, dataTransfer: ReturnType<typeof createDat
 
 function openCardOnlyMode(parent: ParentNode) {
   act(() => {
-    activateElement(getRequiredElement(parent, 'button[aria-label="Open Elements"]'))
+    activateElement(getRequiredElement(parent, 'button[aria-label="Open Shape"]'))
   })
-  act(() => {
-    activateElement(getRequiredElement(parent, 'button[aria-label="Add Frame / Card"]'))
-  })
+
+  const shapeSwitch = getRequiredElement(parent, "#drafting-card-enabled")
+  if (shapeSwitch.getAttribute("aria-checked") !== "true") {
+    act(() => {
+      activateElement(shapeSwitch)
+    })
+  }
 }
 
 function getSelectedPreviewCard(parent: ParentNode) {

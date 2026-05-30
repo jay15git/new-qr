@@ -43,6 +43,11 @@ import {
   type DraftingCardState,
 } from "@/components/new/drafting-card-state"
 import {
+  DraftingInspectorPanel,
+  DraftingInspectorSection,
+  DraftingInspectorSegmentedControl,
+} from "@/components/new/drafting-inspector"
+import {
   alignDraftingCanvasLayers,
   cloneDraftingCanvasLayer,
   cloneDraftingCanvasLayersForPaste,
@@ -220,18 +225,23 @@ type DraftingBrandIconCategoryFilter = BrandIconCategory | "all"
 type DraftingCardToolId = "card-frame" | "card-surface" | "card-image" | "card-shaders"
 type DraftingToolId =
   | "content"
-  | "elements"
   | "style"
   | "corners"
-  | "background"
   | "logo"
+  | "shape"
   | "text"
+  | "image"
+  | "decorations"
+  | "effects"
   | "motion"
   | "encoding"
   | "layers"
+  | "export"
   | DraftingCardToolId
+type DraftingToolGroup = "QR" | "Add" | "Manage"
 
 type DraftingTool = {
+  group?: DraftingToolGroup
   id: DraftingToolId
   title: string
   renderIcon: () => ReactNode
@@ -357,43 +367,19 @@ function swapDraftingQrNodeOrder(
 
 const DRAFTING_TOOLS: DraftingTool[] = [
   {
+    group: "QR",
     id: "content",
     title: "Content",
     renderIcon: () => <LinkIcon className="size-4 shrink-0" />,
   },
   {
-    id: "elements",
-    title: "Elements",
-    renderIcon: () => <ShapesIcon className="size-4 shrink-0" />,
-  },
-  {
-    id: "card-frame",
-    title: "Frame / Card",
-    renderIcon: () => <FrameIcon className="size-4 shrink-0" />,
-  },
-  {
-    id: "card-surface",
-    title: "Surface",
-    renderIcon: () => <PieChart className="size-4 shrink-0" />,
-  },
-  {
-    id: "card-image",
-    title: "Image",
-    renderIcon: () => (
-      <HugeiconsIcon icon={Image02Icon} size={16} color="currentColor" strokeWidth={1.8} />
-    ),
-  },
-  {
-    id: "card-shaders",
-    title: "Shaders",
-    renderIcon: () => <Sparkles className="size-4 shrink-0" />,
-  },
-  {
+    group: "QR",
     id: "style",
-    title: "QR Body",
+    title: "Pattern",
     renderIcon: () => <Sparkles className="size-4 shrink-0" />,
   },
   {
+    group: "QR",
     id: "corners",
     title: "Corners",
     renderIcon: () => (
@@ -401,13 +387,7 @@ const DRAFTING_TOOLS: DraftingTool[] = [
     ),
   },
   {
-    id: "background",
-    title: "Background",
-    renderIcon: () => (
-      <HugeiconsIcon icon={Image02Icon} size={16} color="currentColor" strokeWidth={1.8} />
-    ),
-  },
-  {
+    group: "QR",
     id: "logo",
     title: "Logo",
     renderIcon: () => (
@@ -415,34 +395,100 @@ const DRAFTING_TOOLS: DraftingTool[] = [
     ),
   },
   {
-    id: "text",
-    title: "Text",
-    renderIcon: () => <TypeIcon className="size-4 shrink-0" />,
+    group: "QR",
+    id: "shape",
+    title: "Shape",
+    renderIcon: () => (
+      <HugeiconsIcon icon={Image02Icon} size={16} color="currentColor" strokeWidth={1.8} />
+    ),
   },
   {
+    group: "QR",
     id: "motion",
     title: "Motion",
     renderIcon: () => <SlidersHorizontal className="size-4 shrink-0" />,
   },
   {
+    group: "QR",
     id: "encoding",
     title: "Encoding",
     renderIcon: () => <Settings className="size-4 shrink-0" />,
   },
   {
+    group: "Add",
+    id: "text",
+    title: "Text",
+    renderIcon: () => <TypeIcon className="size-4 shrink-0" />,
+  },
+  {
+    group: "Add",
+    id: "image",
+    title: "Image",
+    renderIcon: () => (
+      <HugeiconsIcon icon={Image02Icon} size={16} color="currentColor" strokeWidth={1.8} />
+    ),
+  },
+  {
+    group: "Add",
+    id: "decorations",
+    title: "Decorations",
+    renderIcon: () => <ShapesIcon className="size-4 shrink-0" />,
+  },
+  {
+    group: "Add",
+    id: "effects",
+    title: "Effects",
+    renderIcon: () => <Sparkles className="size-4 shrink-0" />,
+  },
+  {
+    group: "Manage",
     id: "layers",
     title: "Layers",
     renderIcon: () => <DRAFTING_LAYERS_TAB_ICON className="size-4 shrink-0" />,
   },
+  {
+    group: "Manage",
+    id: "export",
+    title: "Export",
+    renderIcon: () => <DownloadIcon className="size-4 shrink-0" />,
+  },
+  {
+    id: "card-frame",
+    title: "Shape",
+    renderIcon: () => <FrameIcon className="size-4 shrink-0" />,
+  },
+  {
+    id: "card-surface",
+    title: "Decorations",
+    renderIcon: () => <PieChart className="size-4 shrink-0" />,
+  },
+  {
+    id: "card-image",
+    title: "Shape Image",
+    renderIcon: () => (
+      <HugeiconsIcon icon={Image02Icon} size={16} color="currentColor" strokeWidth={1.8} />
+    ),
+  },
+  {
+    id: "card-shaders",
+    title: "Effects",
+    renderIcon: () => <Sparkles className="size-4 shrink-0" />,
+  },
 ]
 
-const DRAFTING_RAIL_TOOLS = DRAFTING_TOOLS.filter(
-  (tool) => !tool.id.startsWith("card-") && tool.id !== "text",
-)
+const DRAFTING_RAIL_TOOLS = DRAFTING_TOOLS.filter((tool) => tool.group)
 
 function getDraftingRailToolId(toolId: DraftingToolId) {
-  if (toolId === "text" || toolId.startsWith("card-")) {
-    return "elements" satisfies DraftingToolId
+  if (toolId === "card-frame" || toolId === "card-image") {
+    return "shape" satisfies DraftingToolId
+  }
+
+  if (toolId === "card-surface") {
+    return "decorations" satisfies DraftingToolId
+  }
+
+  if (toolId === "card-shaders") {
+    return "effects" satisfies DraftingToolId
   }
 
   return toolId
@@ -478,36 +524,61 @@ function PlusMarker({ className }: { className: string }) {
   )
 }
 
-function DraftingElementsTab({
-  onAddFrameCard,
-  onAddText,
+function DraftingImageIntentTab({
+  onUseAsImageObject,
+  onUseAsLogo,
+  onUseAsShapeFill,
 }: {
-  onAddFrameCard: () => void
-  onAddText: () => void
+  onUseAsImageObject: () => void
+  onUseAsLogo: () => void
+  onUseAsShapeFill: () => void
 }) {
   return (
-    <section data-slot="drafting-elements-tab" className="min-w-0 space-y-4">
+    <section data-slot="drafting-image-intent-tab" className="min-w-0 space-y-4">
       <div>
         <p className="drafting-type-section-title font-bold text-[var(--drafting-ink)]">
-          Add elements
+          Use image as
         </p>
         <p className="drafting-type-body mt-1 text-[var(--drafting-ink-muted)]">
-          Add canvas objects, then use selection controls to edit them.
+          Pick the image role first so it is clear what will change.
         </p>
       </div>
       <div className="grid gap-2">
         <ElementAddButton
+          icon={<HugeiconsIcon icon={SignalIcon} size={15} color="currentColor" strokeWidth={1.8} />}
+          label="Logo inside QR"
+          onClick={onUseAsLogo}
+        />
+        <ElementAddButton
           icon={<FrameIcon data-icon="inline-start" />}
-          label="Frame / Card"
-          onClick={onAddFrameCard}
+          label="Shape fill behind QR"
+          onClick={onUseAsShapeFill}
         />
         <ElementAddButton
           disabled
           icon={<RectangleHorizontalIcon data-icon="inline-start" />}
-          label="Rectangle"
+          label="Image object on canvas"
+          onClick={onUseAsImageObject}
         />
-        <ElementAddButton disabled icon={<CircleIcon data-icon="inline-start" />} label="Circle" />
-        <ElementAddButton icon={<TypeIcon data-icon="inline-start" />} label="Text" onClick={onAddText} />
+      </div>
+    </section>
+  )
+}
+
+function DraftingDecorationsIntro({ onAddShape }: { onAddShape: () => void }) {
+  return (
+    <section data-slot="drafting-decorations-intro" className="min-w-0 space-y-4">
+      <div>
+        <p className="drafting-type-section-title font-bold text-[var(--drafting-ink)]">
+          Decorations
+        </p>
+        <p className="drafting-type-body mt-1 text-[var(--drafting-ink-muted)]">
+          Add supporting patterns and simple visual objects around the QR.
+        </p>
+      </div>
+      <div className="grid gap-2">
+        <ElementAddButton icon={<FrameIcon data-icon="inline-start" />} label="Shape" onClick={onAddShape} />
+        <ElementAddButton disabled icon={<CircleIcon data-icon="inline-start" />} label="Icon or sticker" />
       </div>
     </section>
   )
@@ -552,43 +623,28 @@ function DraftingCardObjectInspectorNav({
   onToolChange: (toolId: DraftingCardToolId) => void
 }) {
   const items: Array<{ id: DraftingCardToolId; label: string; icon: ReactNode }> = [
-    { id: "card-frame", label: "Frame/Card", icon: <FrameIcon data-icon="inline-start" /> },
-    { id: "card-surface", label: "Surface", icon: <PieChart data-icon="inline-start" /> },
+    { id: "card-frame", label: "Shape", icon: <FrameIcon data-icon="inline-start" /> },
+    { id: "card-surface", label: "Fill", icon: <PieChart data-icon="inline-start" /> },
     {
       id: "card-image",
-      label: "Image",
+      label: "Image fill",
       icon: <HugeiconsIcon icon={Image02Icon} size={14} color="currentColor" strokeWidth={1.8} />,
     },
-    { id: "card-shaders", label: "Shaders", icon: <Sparkles data-icon="inline-start" /> },
+    { id: "card-shaders", label: "Effects", icon: <Sparkles data-icon="inline-start" /> },
   ]
 
   return (
-    <div
-      aria-label="Frame / Card inspector sections"
-      data-slot="drafting-card-object-nav"
-      className="grid grid-cols-2 gap-1 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] p-1 shadow-[var(--drafting-shadow-rest)]"
-    >
-      {items.map((item) => {
-        const isActive = item.id === activeTool
-
-        return (
-          <button
-            key={item.id}
-            aria-label={`Open ${item.label}`}
-            aria-pressed={isActive}
-            className={cn(
-              "drafting-type-meta flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-[5px] px-2 font-semibold text-[var(--drafting-ink-muted)] transition-colors hover:bg-[var(--drafting-control-bg-hover)] hover:text-[var(--drafting-ink)]",
-              isActive && "bg-[var(--drafting-ink)] text-[var(--drafting-ink-inverse)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-ink-inverse)]",
-            )}
-            type="button"
-            onClick={() => onToolChange(item.id)}
-          >
-            {item.icon}
-            <span className="truncate">{item.label}</span>
-          </button>
-        )
-      })}
-    </div>
+    <DraftingInspectorSegmentedControl
+      ariaLabel="Shape inspector sections"
+      className="grid-cols-2"
+      items={items.map((item) => ({
+        icon: item.icon,
+        label: item.label,
+        value: item.id,
+      }))}
+      value={activeTool}
+      onValueChange={onToolChange}
+    />
   )
 }
 
@@ -1038,14 +1094,22 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       : {
           status: "idle",
         }
+  const isDraftingExportInspectorActive = activeTool === "export"
   const activeDraftingExportPreviewEnabled =
-    isDownloadPopoverOpen && canDownload && isDraftingRasterExport && shouldMeasureActiveQrExport
-  const activeDraftingExportPreviewState = isDownloadPopoverOpen ? draftingStudioState : null
+    (isDownloadPopoverOpen || isDraftingExportInspectorActive) &&
+    canDownload &&
+    isDraftingRasterExport &&
+    shouldMeasureActiveQrExport
+  const activeDraftingExportPreviewState =
+    isDownloadPopoverOpen || isDraftingExportInspectorActive ? draftingStudioState : null
   const activeDraftingExportPreviewExtension: DashboardRasterExtension | null =
-    isDownloadPopoverOpen ? (selectedDownloadExtension as DashboardRasterExtension) : null
-  const activeDraftingExportPreviewTargetSizePx = isDownloadPopoverOpen
-    ? selectedRasterExportTargetSizePx
-    : undefined
+    isDownloadPopoverOpen || isDraftingExportInspectorActive
+      ? (selectedDownloadExtension as DashboardRasterExtension)
+      : null
+  const activeDraftingExportPreviewTargetSizePx =
+    isDownloadPopoverOpen || isDraftingExportInspectorActive
+      ? selectedRasterExportTargetSizePx
+      : undefined
   const draftingWorkspaceDocument = useMemo(
     () => buildDraftingWorkspaceDocument(),
     // buildDraftingWorkspaceDocument reads exactly the state listed here.
@@ -2010,7 +2074,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       ),
     }))
     selectSingleLayer(cardLayerId)
-    setActiveTool("card-frame")
+    setActiveTool("shape")
     draftingSurfaceRef.current?.focus({ preventScroll: true })
   }
 
@@ -2091,7 +2155,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     }
 
     if (isDraftingCardLayerId(layerId)) {
-      setActiveTool("card-frame")
+      setActiveTool("shape")
       return
     }
 
@@ -3076,6 +3140,165 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       )
     }
 
+    if (toolId === "export" && tabId === "export") {
+      return (
+        <section data-slot="drafting-export-tab" className="min-w-0 space-y-4">
+          <div>
+            <p className="drafting-type-section-title font-bold text-[var(--drafting-ink)]">
+              Export
+            </p>
+            <p className="drafting-type-body mt-1 text-[var(--drafting-ink-muted)]">
+              Choose the QR target, file type, and raster quality.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-2.5">
+            <p className="drafting-type-section-title font-bold text-[var(--drafting-ink)]">
+              Target
+            </p>
+            <div
+              data-slot="drafting-export-target-list"
+              role="radiogroup"
+              aria-label="Export target"
+              className="grid grid-cols-1 gap-1"
+            >
+              {draftingDownloadTargetOptions.map((target) => {
+                const isSelected = target.id === selectedDownloadTarget
+
+                return (
+                  <OptionCard
+                    appearance="drafting"
+                    darkShadowTone="ink"
+                    key={target.id}
+                    checked={isSelected}
+                    className="w-full gap-0 [&_[data-slot=option-card]]:h-9 [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:rounded-[7px] [&_[data-slot=option-card-label]]:sr-only"
+                    label={`Export ${target.label}`}
+                    motifClassName="size-full px-2 py-1"
+                    name="drafting-export-target"
+                    onSelect={() => setSelectedDownloadTarget(target.id)}
+                    value={target.id}
+                  >
+                    <span
+                      className={cn(
+                        "drafting-type-meta flex min-w-0 items-center justify-center text-center font-semibold",
+                        isSelected ? "text-[var(--drafting-ink)]" : "text-[var(--drafting-ink-muted)]",
+                      )}
+                    >
+                      {target.label}
+                    </span>
+                  </OptionCard>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2.5">
+            <p className="drafting-type-section-title font-bold text-[var(--drafting-ink)]">
+              Format
+            </p>
+            <div
+              data-slot="drafting-export-format-grid"
+              role="radiogroup"
+              aria-label="Export format"
+              className="grid grid-cols-4 gap-1"
+            >
+              {DRAFTING_DOWNLOAD_EXTENSIONS.map((extension) => {
+                const isSelected = extension === selectedDownloadExtension
+
+                return (
+                  <OptionCard
+                    appearance="drafting"
+                    darkShadowTone="ink"
+                    key={extension}
+                    checked={isSelected}
+                    className="w-full gap-0 [&_[data-slot=option-card]]:h-9 [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:rounded-[7px] [&_[data-slot=option-card-label]]:sr-only"
+                    label={`Export ${extension.toUpperCase()}`}
+                    motifClassName="size-full px-1.5 py-1"
+                    name="drafting-export-format"
+                    onSelect={() => setSelectedDownloadExtension(extension)}
+                    value={extension}
+                  >
+                    <span
+                      className={cn(
+                        "drafting-type-meta font-semibold",
+                        isSelected ? "text-[var(--drafting-ink)]" : "text-[var(--drafting-ink-muted)]",
+                      )}
+                    >
+                      {extension.toUpperCase()}
+                    </span>
+                  </OptionCard>
+                )
+              })}
+            </div>
+          </div>
+
+          {isDraftingRasterExport ? (
+            <div className="flex flex-col gap-2.5">
+              <p className="drafting-type-section-title font-bold text-[var(--drafting-ink)]">
+                Quality
+              </p>
+              <div
+                data-slot="drafting-export-quality-grid"
+                role="radiogroup"
+                aria-label="Export quality"
+                className="grid grid-cols-1 gap-1"
+              >
+                {DRAFTING_RASTER_EXPORT_PRESETS.map((preset) => {
+                  const isSelected = preset.id === selectedRasterExportPresetId
+                  const selectedPresetExportSizeLabel =
+                    isSelected && effectiveDraftingExportSizePreview.status === "pending"
+                      ? "Calculating size"
+                      : isSelected && effectiveDraftingExportSizePreview.status === "ready"
+                        ? formatDashboardExportFileSize(effectiveDraftingExportSizePreview.blobSizeBytes)
+                        : isSelected && effectiveDraftingExportSizePreview.status === "error"
+                          ? "Size unavailable"
+                          : null
+
+                  return (
+                    <OptionCard
+                      appearance="drafting"
+                      darkShadowTone="ink"
+                      key={preset.id}
+                      checked={isSelected}
+                      className="w-full items-stretch gap-0 text-left [&_[data-slot=option-card]]:min-h-[56px] [&_[data-slot=option-card]]:w-full [&_[data-slot=option-card]]:justify-start [&_[data-slot=option-card]]:rounded-[7px] [&_[data-slot=option-card-label]]:sr-only"
+                      label={`Use ${preset.label} export quality`}
+                      motifClassName="size-full px-2 py-1.5"
+                      name="drafting-export-quality"
+                      onSelect={() => setSelectedRasterExportPresetId(preset.id)}
+                      value={preset.id}
+                    >
+                      <span className="flex min-w-0 flex-col gap-0.5 text-left">
+                        <span className="drafting-type-meta font-semibold text-[var(--drafting-ink)]">
+                          {preset.label}
+                        </span>
+                        <span className="drafting-type-data font-semibold text-[var(--drafting-ink-muted)]">
+                          {preset.sizePx} x {preset.sizePx} px
+                          {selectedPresetExportSizeLabel ? ` · ${selectedPresetExportSizeLabel}` : ""}
+                        </span>
+                      </span>
+                    </OptionCard>
+                  )
+                })}
+              </div>
+            </div>
+          ) : null}
+
+          <SecondaryButton
+            className="h-9 w-full"
+            data-slot="drafting-export-submit"
+            disabled={!canDownload}
+            type="button"
+            onClick={() => {
+              void handleDownload()
+            }}
+          >
+            <DownloadIcon data-icon="inline-start" />
+            Download {selectedDownloadExtension.toUpperCase()}
+          </SecondaryButton>
+        </section>
+      )
+    }
+
     if (toolId === "layers" && tabId === "layers") {
       return (
         <DraftingLayersTab
@@ -3099,116 +3322,191 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const renderStackedInspectorContent = (toolId: DraftingToolId) => {
     if (toolId === "content") {
       return (
-        <div className="min-w-0 space-y-4" data-slot="drafting-stacked-inspector">
+        <DraftingInspectorPanel
+          dataSlot="drafting-stacked-inspector"
+          description="Choose the QR payload and edit the fields that feed the code."
+          eyebrow="QR"
+          title="Content"
+        >
           <DraftingQrTypeDropdown
             activeContentType={selectedContentType}
             onContentTypeChange={handleDraftingContentTypeChange}
           />
           {renderPanelContent("content", "content")}
-        </div>
-      )
-    }
-
-    if (toolId === "elements") {
-      return (
-        <DraftingElementsTab
-          onAddFrameCard={handleAddFrameCardLayer}
-          onAddText={handleAddTextLayer}
-        />
+        </DraftingInspectorPanel>
       )
     }
 
     if (toolId === "style") {
       return (
-        <div className="min-w-0 space-y-6" data-slot="drafting-stacked-inspector">
-          {renderPanelContent("style", "style")}
-          {renderPanelContent("style", "color")}
-          {renderPanelContent("style", "size")}
-        </div>
+        <DraftingInspectorPanel
+          dataSlot="drafting-stacked-inspector"
+          description="Control QR module shape, color, and spacing."
+          eyebrow="QR"
+          title="Pattern"
+        >
+          <DraftingInspectorSection title="Modules">
+            {renderPanelContent("style", "style")}
+          </DraftingInspectorSection>
+          <DraftingInspectorSection title="Color">
+            {renderPanelContent("style", "color")}
+          </DraftingInspectorSection>
+          <DraftingInspectorSection title="Size">
+            {renderPanelContent("style", "size")}
+          </DraftingInspectorSection>
+        </DraftingInspectorPanel>
       )
     }
 
     if (toolId === "corners") {
       return (
-        <div className="min-w-0 space-y-7" data-slot="drafting-stacked-inspector">
-          <section className="min-w-0 space-y-4" data-slot="drafting-corner-frame-section">
-            <h3 className="text-sm font-semibold text-[var(--drafting-ink)]">Corner frame</h3>
+        <DraftingInspectorPanel
+          dataSlot="drafting-stacked-inspector"
+          description="Tune finder shapes independently from the body modules."
+          eyebrow="QR"
+          title="Corners"
+        >
+          <DraftingInspectorSection dataSlot="drafting-corner-frame-section" title="Corner frame">
             {renderPanelContent("corner-square", "style")}
             {renderPanelContent("corner-square", "color")}
-          </section>
-          <section className="min-w-0 space-y-4" data-slot="drafting-corner-dot-section">
-            <h3 className="text-sm font-semibold text-[var(--drafting-ink)]">Corner dot</h3>
+          </DraftingInspectorSection>
+          <DraftingInspectorSection dataSlot="drafting-corner-dot-section" title="Corner dot">
             {renderPanelContent("corner-dot", "style")}
             {renderPanelContent("corner-dot", "color")}
-          </section>
-        </div>
+          </DraftingInspectorSection>
+        </DraftingInspectorPanel>
       )
     }
 
-    if (toolId === "background") {
+    if (toolId === "shape") {
       return (
-        <div className="min-w-0 space-y-6" data-slot="drafting-stacked-inspector">
-          {renderPanelContent("background", "colors")}
-          {renderPanelContent("background", "shape")}
-          {renderPanelContent("background", "upload")}
-        </div>
+        <DraftingInspectorPanel
+          dataSlot="drafting-stacked-inspector"
+          description="Build the container and background behind the QR."
+          eyebrow="Add"
+          title="Shape"
+        >
+          <DraftingInspectorSection title="Frame">
+            {renderPanelContent("card-frame", "frame")}
+          </DraftingInspectorSection>
+          <DraftingInspectorSection title="Fill">
+            {renderPanelContent("card-surface", "surface")}
+            {renderPanelContent("card-image", "upload")}
+          </DraftingInspectorSection>
+          <DraftingInspectorSection title="Background">
+            {renderPanelContent("background", "colors")}
+            {renderPanelContent("background", "shape")}
+            {renderPanelContent("background", "upload")}
+          </DraftingInspectorSection>
+        </DraftingInspectorPanel>
       )
     }
 
     if (toolId === "logo") {
       return (
-        <div className="min-w-0 space-y-6" data-slot="drafting-stacked-inspector">
-          {renderPanelContent("logo", "brand-icons")}
-          {renderPanelContent("logo", "colors")}
-          {renderPanelContent("logo", "upload")}
-          {renderPanelContent("logo", "size")}
-        </div>
+        <DraftingInspectorPanel
+          dataSlot="drafting-stacked-inspector"
+          description="Place a brand mark in the QR without changing scan geometry."
+          eyebrow="QR"
+          title="Logo"
+        >
+          <DraftingInspectorSection title="Source">
+            {renderPanelContent("logo", "brand-icons")}
+            {renderPanelContent("logo", "upload")}
+          </DraftingInspectorSection>
+          <DraftingInspectorSection title="Color and size">
+            {renderPanelContent("logo", "colors")}
+            {renderPanelContent("logo", "size")}
+          </DraftingInspectorSection>
+        </DraftingInspectorPanel>
       )
     }
 
     if (toolId === "motion") {
       return (
-        <div className="min-w-0 space-y-6" data-slot="drafting-stacked-inspector">
-          {renderPanelContent("style", "motion")}
-          {renderPanelContent("loader-playground", "playground")}
-        </div>
+        <DraftingInspectorPanel
+          dataSlot="drafting-stacked-inspector"
+          description="Preview animation settings for live QR surfaces."
+          eyebrow="QR"
+          title="Motion"
+        >
+          <DraftingInspectorSection title="Animation">
+            {renderPanelContent("style", "motion")}
+          </DraftingInspectorSection>
+          <DraftingInspectorSection title="Loader playground">
+            {renderPanelContent("loader-playground", "playground")}
+          </DraftingInspectorSection>
+        </DraftingInspectorPanel>
       )
     }
 
-    if (toolId === "card-frame") {
+    if (toolId === "image") {
       return (
-        <div className="min-w-0 space-y-4" data-slot="drafting-stacked-inspector">
-          <DraftingCardObjectInspectorNav activeTool={toolId} onToolChange={setActiveTool} />
-          {renderPanelContent("card-frame", "frame")}
-        </div>
+        <DraftingInspectorPanel
+          dataSlot="drafting-stacked-inspector"
+          description="Choose where an imported image should apply."
+          eyebrow="Add"
+          title="Image"
+        >
+          <DraftingImageIntentTab
+            onUseAsImageObject={() => undefined}
+            onUseAsLogo={() => setActiveTool("logo")}
+            onUseAsShapeFill={() => setActiveTool("shape")}
+          />
+        </DraftingInspectorPanel>
       )
     }
 
-    if (toolId === "card-surface") {
+    if (toolId === "decorations") {
       return (
-        <div className="min-w-0 space-y-4" data-slot="drafting-stacked-inspector">
-          <DraftingCardObjectInspectorNav activeTool={toolId} onToolChange={setActiveTool} />
-          {renderPanelContent("card-surface", "surface")}
-        </div>
+        <DraftingInspectorPanel
+          dataSlot="drafting-stacked-inspector"
+          description="Add and tune support objects around the QR."
+          eyebrow="Add"
+          title="Decorations"
+        >
+          <DraftingInspectorSection title="Add">
+            <DraftingDecorationsIntro onAddShape={handleAddFrameCardLayer} />
+          </DraftingInspectorSection>
+          <DraftingInspectorSection title="Fill">
+            {renderPanelContent("card-surface", "surface")}
+          </DraftingInspectorSection>
+        </DraftingInspectorPanel>
       )
     }
 
-    if (toolId === "card-image") {
+    if (toolId === "effects") {
       return (
-        <div className="min-w-0 space-y-6" data-slot="drafting-stacked-inspector">
-          <DraftingCardObjectInspectorNav activeTool={toolId} onToolChange={setActiveTool} />
-          {renderPanelContent("card-image", "upload")}
-          {renderPanelContent("card-image", "filters")}
-        </div>
+        <DraftingInspectorPanel
+          dataSlot="drafting-stacked-inspector"
+          description="Apply generated effects and image filters to the active shape."
+          eyebrow="Add"
+          title="Effects"
+        >
+          <DraftingInspectorSection title="Generated effects">
+            {renderPanelContent("card-shaders", "all")}
+          </DraftingInspectorSection>
+          <DraftingInspectorSection title="Image filters">
+            {renderPanelContent("card-image", "filters")}
+          </DraftingInspectorSection>
+        </DraftingInspectorPanel>
       )
     }
 
-    if (toolId === "card-shaders") {
+    if (toolId === "card-frame" || toolId === "card-surface" || toolId === "card-image" || toolId === "card-shaders") {
       return (
-        <div className="min-w-0 space-y-4" data-slot="drafting-stacked-inspector">
+        <DraftingInspectorPanel
+          dataSlot="drafting-stacked-inspector"
+          description="Switch between shape object inspector groups."
+          eyebrow="Object"
+          title="Shape inspector"
+        >
           <DraftingCardObjectInspectorNav activeTool={toolId} onToolChange={setActiveTool} />
-          {renderPanelContent("card-shaders", "all")}
-        </div>
+          {toolId === "card-frame" ? renderPanelContent("card-frame", "frame") : null}
+          {toolId === "card-surface" ? renderPanelContent("card-surface", "surface") : null}
+          {toolId === "card-image" ? renderPanelContent("card-image", "upload") : null}
+          {toolId === "card-shaders" ? renderPanelContent("card-shaders", "all") : null}
+        </DraftingInspectorPanel>
       )
     }
 
@@ -3216,10 +3514,30 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       text: "text",
       encoding: "encoding",
       layers: "layers",
+      export: "export",
     }
     const tabId = defaultPanelByTool[toolId]
 
-    return tabId ? renderPanelContent(toolId, tabId) : null
+    if (!tabId) {
+      return null
+    }
+
+    const defaultTitleByTool: Partial<Record<DraftingToolId, string>> = {
+      encoding: "Encoding",
+      export: "Export",
+      layers: "Layers",
+      text: "Text",
+    }
+
+    return (
+      <DraftingInspectorPanel
+        dataSlot="drafting-stacked-inspector"
+        eyebrow={toolId === "text" ? "Add" : "Manage"}
+        title={defaultTitleByTool[toolId] ?? activeToolConfig.title}
+      >
+        {renderPanelContent(toolId, tabId)}
+      </DraftingInspectorPanel>
+    )
   }
 
   const panes = useMemo(
@@ -3642,45 +3960,59 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
                 data-slot="drafting-nav-scroll-content"
                 className="flex h-full min-w-max flex-row items-center gap-2 px-3 py-2 lg:min-h-full lg:min-w-0 lg:flex-col lg:items-center lg:gap-4 lg:px-0 lg:py-4"
               >
-                {visibleDraftingTools.map((tool) => {
+                {visibleDraftingTools.map((tool, index) => {
                   const isActive = tool.id === activeRailToolId
+                  const previousGroup = visibleDraftingTools[index - 1]?.group
+                  const shouldRenderGroupLabel = tool.group && tool.group !== previousGroup
 
                   return (
-                    <Button
+                    <div
                       key={tool.id}
-                      aria-label={`Open ${tool.title}`}
-                      aria-pressed={isActive}
-                      data-drafting-tool-button="true"
-                      className={cn(
-                        "group flex h-16 w-20 min-w-20 flex-col items-center justify-center gap-2 rounded-none border-0 bg-transparent px-2 py-1.5 text-center text-[var(--drafting-ink-muted)] shadow-none transition-[background-color,box-shadow,color,transform] duration-150 ease-out hover:-translate-y-px hover:bg-transparent hover:text-[var(--drafting-ink-strong-muted)] hover:shadow-none active:translate-y-0 active:bg-transparent active:shadow-none dark:bg-transparent dark:text-[var(--drafting-button-label)] dark:shadow-none dark:hover:bg-transparent dark:hover:text-[var(--drafting-button-label-hover)] dark:hover:shadow-none dark:active:bg-transparent dark:active:shadow-none lg:h-auto lg:w-20 lg:min-w-0 lg:justify-center lg:gap-3 lg:px-2 lg:py-2.5",
-                        isActive &&
-                          "text-[var(--drafting-ink)] hover:text-[var(--drafting-ink)] active:text-[var(--drafting-ink)] dark:text-[var(--drafting-button-label-selected)] dark:hover:text-[var(--drafting-button-label-selected)] dark:active:text-[var(--drafting-button-label-selected)]",
-                      )}
-                      size="default"
-                      type="button"
-                      variant="ghost"
-                      onClick={() => setActiveTool(tool.id)}
+                      className="flex min-w-20 flex-col items-center gap-1 lg:min-w-0 lg:gap-2"
                     >
-                      <span
-                        data-slot="drafting-tool-button-icon"
+                      {shouldRenderGroupLabel ? (
+                        <span
+                          data-slot="drafting-tool-group-label"
+                          className="drafting-type-caption w-full px-2 text-left font-bold tracking-[0.04em] text-[var(--drafting-ink-subtle)] lg:text-center"
+                        >
+                          {tool.group}
+                        </span>
+                      ) : null}
+                      <Button
+                        aria-label={`Open ${tool.title}`}
+                        aria-pressed={isActive}
+                        data-drafting-tool-button="true"
                         className={cn(
-                          "flex size-8 shrink-0 items-center justify-center rounded-[5px] bg-[var(--drafting-control-bg)] text-current shadow-[var(--drafting-shadow-rest)] transition-[background-color,box-shadow,transform,color] duration-150 ease-out group-hover:-translate-y-px group-hover:bg-[var(--drafting-control-bg-hover)] group-hover:shadow-[var(--drafting-shadow-hover)] group-active:translate-y-0 group-active:bg-[var(--drafting-control-bg-active)] group-active:shadow-[var(--drafting-shadow-active)] dark:bg-[var(--drafting-button-bg)] dark:text-[var(--drafting-button-icon)] dark:shadow-[var(--drafting-button-shadow-rest)] dark:group-hover:bg-[var(--drafting-button-bg-hover)] dark:group-hover:shadow-[var(--drafting-button-shadow-hover)] dark:group-active:bg-[var(--drafting-button-bg-active)] dark:group-active:shadow-[var(--drafting-button-shadow-active)] lg:size-10 lg:rounded-[6px]",
+                          "group flex h-16 w-20 min-w-20 flex-col items-center justify-center gap-2 rounded-none border-0 bg-transparent px-2 py-1.5 text-center text-[var(--drafting-ink-muted)] shadow-none transition-[background-color,box-shadow,color,transform] duration-150 ease-out hover:-translate-y-px hover:bg-transparent hover:text-[var(--drafting-ink-strong-muted)] hover:shadow-none active:translate-y-0 active:bg-transparent active:shadow-none dark:bg-transparent dark:text-[var(--drafting-button-label)] dark:shadow-none dark:hover:bg-transparent dark:hover:text-[var(--drafting-button-label-hover)] dark:hover:shadow-none dark:active:bg-transparent dark:active:shadow-none lg:h-auto lg:w-20 lg:min-w-0 lg:justify-center lg:gap-3 lg:px-2 lg:py-2.5",
                           isActive &&
-                            "bg-[var(--drafting-ink)] text-[var(--drafting-ink-inverse)] shadow-[var(--drafting-shadow-rest)] group-hover:bg-[var(--drafting-ink)] group-hover:text-[var(--drafting-ink-inverse)] group-hover:shadow-[var(--drafting-shadow-hover)] group-active:translate-y-0 group-active:bg-[var(--drafting-ink)] group-active:text-[var(--drafting-ink-inverse)] group-active:shadow-[var(--drafting-shadow-active)] dark:bg-[var(--drafting-button-bg-selected)] dark:text-[var(--drafting-button-icon-selected)] dark:shadow-[var(--drafting-button-shadow-selected)] dark:group-hover:bg-[var(--drafting-button-bg-selected)] dark:group-hover:text-[var(--drafting-button-icon-selected)] dark:group-hover:shadow-[var(--drafting-button-shadow-selected-hover)] dark:group-active:bg-[var(--drafting-button-bg-selected)] dark:group-active:text-[var(--drafting-button-icon-selected)] dark:group-active:shadow-[var(--drafting-button-shadow-active)]",
+                            "text-[var(--drafting-ink)] hover:text-[var(--drafting-ink)] active:text-[var(--drafting-ink)] dark:text-[var(--drafting-button-label-selected)] dark:hover:text-[var(--drafting-button-label-selected)] dark:active:text-[var(--drafting-button-label-selected)]",
                         )}
+                        size="default"
+                        type="button"
+                        variant="ghost"
+                        onClick={() => setActiveTool(tool.id)}
                       >
-                        {tool.renderIcon()}
-                      </span>
-                      <span
-                        data-slot="drafting-tool-button-label"
-                        className={cn(
-                          "drafting-type-nav-label font-medium text-[var(--drafting-ink-muted)] transition-colors duration-150 group-hover:text-[var(--drafting-ink-strong-muted)] dark:text-[var(--drafting-button-label)] dark:group-hover:text-[var(--drafting-button-label-hover)]",
-                          isActive && "font-semibold text-current dark:text-[var(--drafting-button-label-selected)]",
-                        )}
-                      >
-                        {tool.title}
-                      </span>
-                    </Button>
+                        <span
+                          data-slot="drafting-tool-button-icon"
+                          className={cn(
+                            "flex size-8 shrink-0 items-center justify-center rounded-[5px] bg-[var(--drafting-control-bg)] text-current shadow-[var(--drafting-shadow-rest)] transition-[background-color,box-shadow,transform,color] duration-150 ease-out group-hover:-translate-y-px group-hover:bg-[var(--drafting-control-bg-hover)] group-hover:shadow-[var(--drafting-shadow-hover)] group-active:translate-y-0 group-active:bg-[var(--drafting-control-bg-active)] group-active:shadow-[var(--drafting-shadow-active)] dark:bg-[var(--drafting-button-bg)] dark:text-[var(--drafting-button-icon)] dark:shadow-[var(--drafting-button-shadow-rest)] dark:group-hover:bg-[var(--drafting-button-bg-hover)] dark:group-hover:shadow-[var(--drafting-button-shadow-hover)] dark:group-active:bg-[var(--drafting-button-bg-active)] dark:group-active:shadow-[var(--drafting-button-shadow-active)] lg:size-10 lg:rounded-[6px]",
+                            isActive &&
+                              "bg-[var(--drafting-ink)] text-[var(--drafting-ink-inverse)] shadow-[var(--drafting-shadow-rest)] group-hover:bg-[var(--drafting-ink)] group-hover:text-[var(--drafting-ink-inverse)] group-hover:shadow-[var(--drafting-shadow-hover)] group-active:translate-y-0 group-active:bg-[var(--drafting-ink)] group-active:text-[var(--drafting-ink-inverse)] group-active:shadow-[var(--drafting-shadow-active)] dark:bg-[var(--drafting-button-bg-selected)] dark:text-[var(--drafting-button-icon-selected)] dark:shadow-[var(--drafting-button-shadow-selected)] dark:group-hover:bg-[var(--drafting-button-bg-selected)] dark:group-hover:text-[var(--drafting-button-icon-selected)] dark:group-hover:shadow-[var(--drafting-button-shadow-selected-hover)] dark:group-active:bg-[var(--drafting-button-bg-selected)] dark:group-active:text-[var(--drafting-button-icon-selected)] dark:group-active:shadow-[var(--drafting-shadow-active)]",
+                          )}
+                        >
+                          {tool.renderIcon()}
+                        </span>
+                        <span
+                          data-slot="drafting-tool-button-label"
+                          className={cn(
+                            "drafting-type-nav-label font-medium text-[var(--drafting-ink-muted)] transition-colors duration-150 group-hover:text-[var(--drafting-ink-strong-muted)] dark:text-[var(--drafting-button-label)] dark:group-hover:text-[var(--drafting-button-label-hover)]",
+                            isActive && "font-semibold text-current dark:text-[var(--drafting-button-label-selected)]",
+                          )}
+                        >
+                          {tool.title}
+                        </span>
+                      </Button>
+                    </div>
                   )
                 })}
               </div>
@@ -3835,6 +4167,7 @@ function DraftingTextLayerTab({
   return (
     <section data-slot="drafting-text-tab" className="min-w-0 space-y-4">
       <SecondaryButton
+        aria-label="Add Text"
         className="h-9 w-full"
         data-slot="drafting-add-text-layer"
         type="button"

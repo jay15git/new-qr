@@ -7,6 +7,12 @@ import {
   DASHBOARD_QR_NODE_ID,
   isDashboardQrNodeId,
 } from "@/components/qr/dashboard-compose-scene"
+import {
+  DraftingInspectorControlRow,
+  DraftingInspectorIconButton,
+  DraftingInspectorSection,
+  DraftingInspectorValueGrid,
+} from "@/components/new/drafting-inspector"
 import type { DraftingCanvasLayer } from "@/components/new/drafting-layer-state"
 import type { DraftingLayerMenuAction } from "@/components/new/qr-pane"
 import {
@@ -14,7 +20,6 @@ import {
   DraggableListHandle,
   DraggableListItem,
 } from "@/components/ui/draggable-list"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 type DraftingLayerPane = {
@@ -97,6 +102,7 @@ export function DraftingLayersTab({
             const isQrPaneRow = node.kind === undefined
             const isRemovable =
               isQrPaneRow && (!isDashboardQrNodeId(node.id) || qrNodeCount > 1)
+            const displayName = getLayerDisplayName(node)
 
             return (
               <DraggableListItem
@@ -120,7 +126,7 @@ export function DraftingLayersTab({
                     <div className="shrink-0">
                       <DraggableListHandle
                         className="rounded-[6px] border-transparent bg-[var(--drafting-control-bg)] text-[var(--drafting-ink-subtle)] hover:bg-[var(--drafting-panel-bg-hover)] hover:text-[var(--drafting-ink)]"
-                        label={`Reorder ${node.name}`}
+                        label={`Reorder ${displayName}`}
                       />
                     </div>
 
@@ -129,8 +135,8 @@ export function DraftingLayersTab({
                       onClick={() => onSelectedNodeChange(node.id)}
                       type="button"
                     >
-                      <p className="drafting-type-control-label truncate font-semibold text-[var(--drafting-ink)]">
-                        {node.name}
+                        <p className="drafting-type-control-label truncate font-semibold text-[var(--drafting-ink)]">
+                        {displayName}
                       </p>
                       <p className="drafting-type-meta mt-1 truncate text-[var(--drafting-ink-muted)]">
                         {getLayerRowMeta(node, index, layerNodes.length, isSelected)}
@@ -139,8 +145,8 @@ export function DraftingLayersTab({
 
                     <div className="flex shrink-0 items-center gap-1">
                       {isRemovable && onRemoveNode ? (
-                        <IconActionButton
-                          ariaLabel={`Delete ${node.name}`}
+                          <IconActionButton
+                          ariaLabel={`Delete ${displayName}`}
                           className="border-[var(--drafting-line-strong)] text-[var(--drafting-ink)] hover:bg-[var(--drafting-control-bg-active)] hover:text-[var(--drafting-ink)]"
                           onClick={() => {
                             const fallbackNodeId =
@@ -162,13 +168,13 @@ export function DraftingLayersTab({
                       {node.kind ? (
                         <>
                           <IconActionButton
-                            ariaLabel={`Send ${node.name} backward`}
+                            ariaLabel={`Send ${displayName} backward`}
                             onClick={() => onLayerAction?.([node.id], "backward")}
                           >
                             <ArrowDownIcon className="size-3.5" />
                           </IconActionButton>
                           <IconActionButton
-                            ariaLabel={`Bring ${node.name} forward`}
+                            ariaLabel={`Bring ${displayName} forward`}
                             onClick={() => onLayerAction?.([node.id], "forward")}
                           >
                             <ArrowUpIcon className="size-3.5" />
@@ -192,7 +198,7 @@ export function DraftingLayersTab({
                           onClick={() => onSelectedNodeChange(child.id)}
                         >
                           <span className="drafting-type-meta block truncate font-semibold">
-                            {child.name}
+                            {getLayerDisplayName(child)}
                           </span>
                         </button>
                       ))}
@@ -232,6 +238,22 @@ function findLayerPane(layers: DraftingLayerPane[], layerId: string | null): Dra
   return undefined
 }
 
+function getLayerDisplayName(layer: DraftingLayerPane) {
+  if (layer.kind === "card" && layer.name.trim().toLowerCase() === "card") {
+    return "QR Shape"
+  }
+
+  if (layer.kind === "qr" && layer.name.trim().toLowerCase() === "qr code") {
+    return "QR Code"
+  }
+
+  if (layer.kind === "text") {
+    return layer.name.startsWith("Text:") ? layer.name : `Text: ${layer.name}`
+  }
+
+  return layer.name
+}
+
 function LayerInspector({
   layer,
   onLayerPatch,
@@ -248,48 +270,53 @@ function LayerInspector({
   }
 
   return (
-    <section
-      data-slot="drafting-layer-inspector"
-      className="min-w-0 space-y-3 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3 shadow-[var(--drafting-shadow-rest)]"
+    <DraftingInspectorSection
+      dataSlot="drafting-layer-inspector"
+      description="Position, size, and layer effects."
+      title="Inspector"
     >
-      <div>
-        <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
-          Inspector
-        </p>
-        <p className="drafting-type-body mt-1 text-[var(--drafting-ink-muted)]">
-          Position, size, and layer effects.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        <LayerNumberInput label="X" value={layer.x ?? 0} onChange={(x) => onLayerPatch(layer.id, { x })} />
-        <LayerNumberInput label="Y" value={layer.y ?? 0} onChange={(y) => onLayerPatch(layer.id, { y })} />
-        <LayerNumberInput label="W" min={1} value={layer.width ?? 1} onChange={(width) => onLayerPatch(layer.id, { width, ...(layer.kind === "qr" ? { height: width } : {}) })} />
-        <LayerNumberInput label="H" min={1} value={layer.height ?? 1} disabled={layer.kind === "qr"} onChange={(height) => onLayerPatch(layer.id, { height })} />
-        <LayerNumberInput label="Opacity" max={100} min={0} value={Math.round((layer.opacity ?? 1) * 100)} onChange={(opacity) => onLayerPatch(layer.id, { opacity: opacity / 100 })} />
-        <LayerNumberInput label="Blur" max={96} min={0} value={layer.blur ?? 0} onChange={(blur) => onLayerPatch(layer.id, { blur })} />
-      </div>
-
-      <label className="block min-w-0">
-        <span className="drafting-type-meta mb-1 block font-semibold text-[var(--drafting-ink-muted)]">
-          Name
-        </span>
+      <DraftingInspectorControlRow label="Name">
         <input
           aria-label="Layer name"
-          className="drafting-type-input h-9 w-full min-w-0 rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-2 text-[var(--drafting-ink)] shadow-none"
-          value={layer.name}
+          className="drafting-type-input h-8 w-full min-w-0 rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-2 text-[var(--drafting-ink)] shadow-none"
+          value={getLayerDisplayName(layer)}
           onChange={(event) => onLayerPatch(layer.id, { name: event.currentTarget.value })}
         />
-      </label>
+      </DraftingInspectorControlRow>
 
-      <div className="space-y-2">
-        <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
-          Shadow
-        </p>
-        <label className="grid min-w-0 grid-cols-[2.25rem_minmax(0,1fr)] items-center gap-2">
+      <DraftingInspectorSection className="bg-[var(--drafting-control-bg)] shadow-none" title="Geometry">
+        <DraftingInspectorValueGrid>
+          <LayerNumberInput label="X" value={layer.x ?? 0} onChange={(x) => onLayerPatch(layer.id, { x })} />
+          <LayerNumberInput label="Y" value={layer.y ?? 0} onChange={(y) => onLayerPatch(layer.id, { y })} />
+          <LayerNumberInput label="W" min={1} value={layer.width ?? 1} onChange={(width) => onLayerPatch(layer.id, { width, ...(layer.kind === "qr" ? { height: width } : {}) })} />
+          <LayerNumberInput label="H" min={1} value={layer.height ?? 1} disabled={layer.kind === "qr"} onChange={(height) => onLayerPatch(layer.id, { height })} />
+        </DraftingInspectorValueGrid>
+      </DraftingInspectorSection>
+
+      <DraftingInspectorSection className="bg-[var(--drafting-control-bg)] shadow-none" title="Appearance">
+        <DraftingInspectorValueGrid>
+          <LayerNumberInput label="Opacity" max={100} min={0} value={Math.round((layer.opacity ?? 1) * 100)} onChange={(opacity) => onLayerPatch(layer.id, { opacity: opacity / 100 })} />
+          <LayerNumberInput label="Blur" max={96} min={0} value={layer.blur ?? 0} onChange={(blur) => onLayerPatch(layer.id, { blur })} />
+        </DraftingInspectorValueGrid>
+        <div className="grid grid-cols-2 gap-2">
+          <LayerToggle
+            checked={layer.isVisible ?? true}
+            label="Visible"
+            onChange={(isVisible) => onLayerPatch(layer.id, { isVisible })}
+          />
+          <LayerToggle
+            checked={layer.isLocked ?? false}
+            label="Locked"
+            onChange={(isLocked) => onLayerPatch(layer.id, { isLocked })}
+          />
+        </div>
+      </DraftingInspectorSection>
+
+      <DraftingInspectorSection className="bg-[var(--drafting-control-bg)] shadow-none" title="Shadow">
+        <label className="grid min-w-0 grid-cols-[2rem_minmax(0,1fr)] items-center gap-2">
           <input
             aria-label="Layer shadow color swatch"
-            className="h-9 w-9 rounded-[6px] border border-[var(--drafting-line)] bg-transparent p-1"
+            className="size-8 rounded-[6px] border border-[var(--drafting-line)] bg-transparent p-1"
             type="color"
             value={shadow.color}
             onChange={(event) =>
@@ -300,7 +327,7 @@ function LayerInspector({
           />
           <input
             aria-label="Layer shadow color"
-            className="drafting-type-input h-9 min-w-0 rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-2 text-[var(--drafting-ink)] shadow-none"
+            className="drafting-type-input h-8 min-w-0 rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-2 text-[var(--drafting-ink)] shadow-none"
             value={shadow.color}
             onChange={(event) =>
               onLayerPatch(layer.id, {
@@ -309,27 +336,14 @@ function LayerInspector({
             }
           />
         </label>
-        <div className="grid grid-cols-2 gap-2">
+        <DraftingInspectorValueGrid>
           <LayerNumberInput label="Shadow blur" max={128} min={0} value={shadow.blur} onChange={(blur) => onLayerPatch(layer.id, { shadow: { ...shadow, blur } })} />
           <LayerNumberInput label="Shadow %" max={100} min={0} value={shadow.opacity} onChange={(opacity) => onLayerPatch(layer.id, { shadow: { ...shadow, opacity } })} />
           <LayerNumberInput label="Offset X" max={256} min={-256} value={shadow.offsetX} onChange={(offsetX) => onLayerPatch(layer.id, { shadow: { ...shadow, offsetX } })} />
           <LayerNumberInput label="Offset Y" max={256} min={-256} value={shadow.offsetY} onChange={(offsetY) => onLayerPatch(layer.id, { shadow: { ...shadow, offsetY } })} />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        <LayerToggle
-          checked={layer.isVisible ?? true}
-          label="Visible"
-          onChange={(isVisible) => onLayerPatch(layer.id, { isVisible })}
-        />
-        <LayerToggle
-          checked={layer.isLocked ?? false}
-          label="Locked"
-          onChange={(isLocked) => onLayerPatch(layer.id, { isLocked })}
-        />
-      </div>
-    </section>
+        </DraftingInspectorValueGrid>
+      </DraftingInspectorSection>
+    </DraftingInspectorSection>
   )
 }
 
@@ -406,19 +420,13 @@ function IconActionButton({
   onClick: () => void
 }) {
   return (
-    <Button
-      aria-label={ariaLabel}
-      className={cn(
-        "rounded-[6px] border border-transparent bg-[var(--drafting-control-bg)] text-[var(--drafting-ink-muted)] shadow-none transition-[color,box-shadow,background-color,transform] duration-150 ease-out hover:-translate-y-px hover:bg-[var(--drafting-panel-bg-hover)] hover:text-[var(--drafting-ink)] hover:shadow-[var(--drafting-shadow-hover)] active:translate-y-0 active:bg-[var(--drafting-panel-bg-hover)]",
-        className,
-      )}
+    <DraftingInspectorIconButton
+      ariaLabel={ariaLabel}
+      className={className}
       onClick={onClick}
-      size="icon-sm"
-      type="button"
-      variant="ghost"
     >
       {children}
-    </Button>
+    </DraftingInspectorIconButton>
   )
 }
 
@@ -430,7 +438,7 @@ function getLayerRowMeta(
 ) {
   const labels = [
     getLayerOrderLabel(index, totalLayers),
-    node.kind === "card" ? "Card" : "QR",
+    getLayerRoleLabel(node),
   ]
 
   if (isSelected) {
@@ -438,6 +446,22 @@ function getLayerRowMeta(
   }
 
   return labels.join(" · ")
+}
+
+function getLayerRoleLabel(node: DraftingLayerPane) {
+  if (node.kind === "card") {
+    return "Shape"
+  }
+
+  if (node.kind === "text") {
+    return "Text"
+  }
+
+  if (node.kind === "group") {
+    return "Group"
+  }
+
+  return "QR Code"
 }
 
 function getLayerOrderLabel(index: number, totalLayers: number) {

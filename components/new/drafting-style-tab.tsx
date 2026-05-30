@@ -19,6 +19,10 @@ import type {
 
 import FileUpload from "@/components/kokonutui/file-upload"
 import {
+  DraftingInspectorControlRow,
+  DraftingInspectorSection,
+} from "@/components/new/drafting-inspector"
+import {
   applyDraftingCardPaperShaderPreset,
   DEFAULT_DRAFTING_PAPER_SHADER_IMAGE,
   createDefaultDraftingCardPaperShader,
@@ -1168,15 +1172,15 @@ export function DraftingCardSettingsTab({
       <DraftingToggleField
         checked={value.enabled}
         dataSlot="drafting-card-enabled"
-        description="Shows the physical card layer behind the active QR preview."
+        description="Shows the presentation shape behind the active QR."
         id="drafting-card-enabled"
-        label="Show card"
+        label="Show shape"
         onCheckedChange={(enabled) => updateCard({ enabled })}
       />
 
       <DraftingSliderField
         dataSlot="drafting-card-radius-slider"
-        description="Rounds the card body behind the QR."
+        description="Rounds the shape behind the QR."
         formatValue={(nextValue) => `${Math.round(nextValue)} px`}
         id="drafting-card-radius"
         label="Corner radius"
@@ -1188,7 +1192,7 @@ export function DraftingCardSettingsTab({
       />
       <DraftingSliderField
         dataSlot="drafting-card-padding-slider"
-        description="Controls the inset between the QR and the card edge."
+        description="Controls the inset between the QR and the shape edge."
         formatValue={(nextValue) => `${Math.round(nextValue)} px`}
         id="drafting-card-padding"
         label="Padding"
@@ -1200,7 +1204,7 @@ export function DraftingCardSettingsTab({
       />
       <DraftingSliderField
         dataSlot="drafting-card-bottom-space-slider"
-        description="Adds room below the QR so the card reads as a taller layout."
+        description="Adds room below the QR so the shape reads as a taller layout."
         formatValue={(nextValue) => `${Math.round(nextValue)} px`}
         id="drafting-card-bottom-space"
         label="Bottom space"
@@ -1220,7 +1224,7 @@ export function DraftingCardSettingsTab({
             Border
           </p>
           <p className="drafting-type-body text-[var(--drafting-ink-muted)]">
-            Adds a sharp stroke around the card.
+            Adds a sharp stroke around the shape.
           </p>
         </div>
         <label
@@ -1229,7 +1233,7 @@ export function DraftingCardSettingsTab({
           className="flex min-w-0 items-center gap-2"
         >
           <input
-            aria-label="Card border color swatch"
+            aria-label="Shape border color swatch"
             className="size-9 shrink-0 cursor-pointer rounded-[6px] border border-[var(--drafting-line)] bg-transparent p-1"
             type="color"
             value={value.border.color}
@@ -1275,7 +1279,7 @@ export function DraftingCardSettingsTab({
             Shadow
           </p>
           <p className="drafting-type-body text-[var(--drafting-ink-muted)]">
-            Controls the card drop shadow independently from its border.
+            Controls the shape drop shadow independently from its border.
           </p>
         </div>
         <label
@@ -1284,7 +1288,7 @@ export function DraftingCardSettingsTab({
           className="flex min-w-0 items-center gap-2"
         >
           <input
-            aria-label="Card shadow color swatch"
+            aria-label="Shape shadow color swatch"
             className="size-9 shrink-0 cursor-pointer rounded-[6px] border border-[var(--drafting-line)] bg-transparent p-1"
             type="color"
             value={value.shadow.color}
@@ -1381,7 +1385,7 @@ export function DraftingCardSurfaceTab({
         </span>
         <span className="mt-3 flex min-w-0 items-center gap-2">
           <input
-            aria-label="Card fill swatch"
+            aria-label="Shape fill swatch"
             className="size-10 shrink-0 cursor-pointer rounded-[6px] border border-[var(--drafting-line)] bg-transparent p-1"
             type="color"
             value={fill}
@@ -1400,7 +1404,7 @@ export function DraftingCardSurfaceTab({
         <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
           Generated patterns
         </p>
-        <div aria-label="Card pattern" role="radiogroup" className="grid grid-cols-2 gap-2">
+        <div aria-label="Shape pattern" role="radiogroup" className="grid grid-cols-2 gap-2">
           <OptionCard
             appearance="drafting"
             darkShadowTone="ink"
@@ -1513,7 +1517,7 @@ export function DraftingCardImageTab({
       </p>
       {cardImage.source === "none" ? (
         <div className="rounded-[7px] border border-dashed border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] p-3 text-[12px] font-medium leading-5 text-[var(--drafting-ink-muted)]">
-          Add an image in Upload to apply these filters to your card surface.
+          Add an image in Shape to apply these filters to your shape fill.
         </div>
       ) : null}
       <DraftingCardPaperShaderPanel
@@ -1547,7 +1551,7 @@ export function DraftingCardShadersTab({
       <DraftingCardPaperShaderPanel
         dataSlot="drafting-card-generated-shader-panel"
         definitions={getCardGeneratedShaderDefinitions()}
-        heading="Shaders"
+        heading="Effects"
         paperShader={paperShader}
         selectedStyleModes={["paper-shader"]}
         panelTab={activeTab}
@@ -1572,9 +1576,9 @@ function DraftingCardImageSourceControl({
   return (
     <div className="min-w-0 space-y-3 rounded-[7px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] p-3">
       <Input
-        aria-label="Card image URL"
+        aria-label="Shape image URL"
         className="drafting-type-input h-10 min-w-0 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3 text-[var(--drafting-ink)] shadow-none focus-visible:border-[var(--drafting-line-strong)] focus-visible:ring-0"
-        placeholder="https://example.com/card.png"
+        placeholder="https://example.com/shape.png"
         value={cardImage.source === "url" ? (cardImage.value ?? "") : ""}
         onChange={(event) =>
           updateCardImage({
@@ -2790,7 +2794,7 @@ export function DraftingBackgroundColorTab({
       items={buildDraftingSolidGradientItems({
         gradient,
         gradientIdPrefix: "drafting-background-gradient",
-        gradientTitle: "Background gradient",
+        gradientTitle: "Shape gradient",
         onGradientChange,
         onModeChange,
         onSolidColorChange,
@@ -2828,11 +2832,29 @@ export function DraftingBackgroundShapeTab({
   return (
     <div className="min-w-0 space-y-4" data-slot="drafting-background-shape-tab">
       <div
-        aria-label="Background shape options"
+        aria-label="Shape options"
         className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(108px,1fr))] justify-items-center gap-x-3 gap-y-5"
         data-slot="drafting-background-shape-grid"
         role="radiogroup"
       >
+        <OptionCard
+          appearance="drafting"
+          darkShadowTone="ink"
+          checked={value === "none"}
+          label="None"
+          labelClassName="drafting-type-option-label"
+          name="drafting-background-shape"
+          onSelect={() => onValueChange("none")}
+          size="compact"
+          value="none"
+        >
+          <span
+            aria-hidden="true"
+            className="flex size-full items-center justify-center rounded-[7px] border border-dashed border-[var(--drafting-line)] text-[var(--drafting-ink-muted)]"
+          >
+            None
+          </span>
+        </OptionCard>
         {QR_BACKGROUND_SHAPES.map((shape) => {
           const gradientId = `drafting-background-shape-${shape.id}-gradient`
           const gradientFill = ["url(", String.fromCharCode(35), gradientId, ")"].join("")
@@ -2843,7 +2865,7 @@ export function DraftingBackgroundShapeTab({
               darkShadowTone="ink"
               key={shape.id}
               checked={shape.id === value}
-              label={shape.label}
+              label={getDraftingShapeLabel(shape.id, shape.label)}
               labelClassName="drafting-type-option-label"
               name="drafting-background-shape"
               onSelect={() => onValueChange(shape.id)}
@@ -3307,14 +3329,27 @@ export function DraftingBackgroundUploadTab({
         onUploadError,
         onUploadSuccess,
         remoteUrl,
-        remoteUrlAriaLabel: "Background image URL",
-        remoteUrlPlaceholder: "https://example.com/background.png",
+        remoteUrlAriaLabel: "Shape image URL",
+        remoteUrlPlaceholder: "https://example.com/shape.png",
       })}
       selectedId={mode}
       openItemIds={openItemIds}
       onOpenItemIdsChange={onOpenItemIdsChange}
     />
   )
+}
+
+function getDraftingShapeLabel(shapeId: QrBackgroundShapeId, fallbackLabel: string) {
+  const labelById: Partial<Record<QrBackgroundShapeId, string>> = {
+    circle: "Circle",
+    "rounded-square": "Rounded",
+    "skew-card": "Ticket",
+    "notched-badge": "Badge",
+    "diagonal-pill": "Label",
+    hexagon: "Badge",
+  }
+
+  return labelById[shapeId] ?? fallbackLabel
 }
 
 export function DraftingLogoUploadTab({
@@ -3730,7 +3765,7 @@ function DraftingAccordion({
   openItemIds: string[]
 }) {
   return (
-    <div data-slot="drafting-style-color-tab" className="min-w-0 space-y-3">
+    <div data-slot="drafting-style-color-tab" className="min-w-0 space-y-2">
       <Accordion
         data-slot={dataSlot}
         className="min-w-0 w-full max-w-full"
@@ -3749,9 +3784,9 @@ function DraftingAccordion({
               data-selected={isSelected ? "true" : "false"}
               value={item.id}
               className={cn(
-                "mb-3 min-w-0 w-full overflow-hidden rounded-[8px] last:mb-0 last:border-b",
-                "bg-[var(--drafting-panel-bg)] shadow-[var(--drafting-shadow-rest)] transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
-                "hover:-translate-y-px hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)]",
+                "mb-2 min-w-0 w-full overflow-hidden rounded-[8px] last:mb-0 last:border-b",
+                "bg-[var(--drafting-panel-bg)] shadow-[var(--drafting-shadow-rest)] transition-[border-color,box-shadow,background-color] duration-150 ease-out",
+                "hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)]",
                 "active:translate-y-0 active:bg-[var(--drafting-panel-bg-active)] active:shadow-[var(--drafting-shadow-active)]",
                 "data-[state=open]:bg-[var(--drafting-panel-bg-hover)]",
                 isSelected
@@ -3763,7 +3798,7 @@ function DraftingAccordion({
                 data-item-id={item.id}
                 data-slot="drafting-color-trigger"
                 className={cn(
-                  "px-4 py-3 no-underline hover:no-underline focus-visible:ring-0",
+                  "px-3 py-2.5 no-underline hover:no-underline focus-visible:ring-0",
                   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-[var(--drafting-line-strong)]",
                   "text-[var(--drafting-ink-muted)] hover:text-[var(--drafting-ink-strong-muted)] data-[state=open]:text-[var(--drafting-ink)]",
                   "[&_[data-slot=accordion-chevron]]:text-[var(--drafting-ink-muted)] hover:[&_[data-slot=accordion-chevron]]:text-[var(--drafting-ink-strong-muted)] data-[state=open]:[&_[data-slot=accordion-chevron]]:text-[var(--drafting-ink)]",
@@ -3825,16 +3860,9 @@ function DraftingSliderField({
   value: number
 }) {
   return (
-    <div
-      data-slot={`${dataSlot}-field`}
-      className={cn(
-        "min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] px-4 py-3",
-        "shadow-[var(--drafting-shadow-rest)]",
-        "transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
-        "hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)]",
-        "active:translate-y-0 active:border-[var(--drafting-line-hover)] active:shadow-[var(--drafting-shadow-active)]",
-        "focus-within:border-[var(--drafting-line-strong)] focus-within:bg-[var(--drafting-panel-bg-active)] focus-within:shadow-[var(--drafting-shadow-rest)]",
-      )}
+    <DraftingInspectorSection
+      dataSlot={`${dataSlot}-field`}
+      className="transition-[border-color,box-shadow,background-color] duration-150 ease-out hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)] focus-within:border-[var(--drafting-line-strong)] focus-within:bg-[var(--drafting-panel-bg-active)]"
     >
       <UnlumenSlider
         appearance="drafting"
@@ -3855,9 +3883,9 @@ function DraftingSliderField({
         onChange={(nextValue) => onChange(Array.isArray(nextValue) ? nextValue[0] ?? value : nextValue)}
       />
       {description ? (
-        <p className="drafting-type-body mt-2 text-[var(--drafting-ink-muted)]">{description}</p>
+        <p className="drafting-type-caption mt-2 text-[var(--drafting-ink-muted)]">{description}</p>
       ) : null}
-    </div>
+    </DraftingInspectorSection>
   )
 }
 
@@ -3877,39 +3905,34 @@ function DraftingToggleField({
   onCheckedChange: (value: boolean) => void
 }) {
   return (
-    <label
-      data-slot={dataSlot}
-      htmlFor={id}
+    <DraftingInspectorSection
+      dataSlot={dataSlot}
       className={cn(
-        "flex min-w-0 cursor-pointer items-start justify-between gap-4 rounded-[8px] border px-4 py-3",
-        "border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] shadow-[var(--drafting-shadow-rest)]",
-        "transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out",
-        "hover:-translate-y-px hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)]",
-        "active:translate-y-0 active:border-[var(--drafting-line-hover)] active:shadow-[var(--drafting-shadow-active)]",
-        "focus-within:border-[var(--drafting-line-strong)] focus-within:bg-[var(--drafting-panel-bg-active)] focus-within:shadow-[var(--drafting-shadow-rest)]",
+        "cursor-pointer transition-[border-color,box-shadow,background-color] duration-150 ease-out hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)] hover:shadow-[var(--drafting-shadow-hover)] focus-within:border-[var(--drafting-line-strong)] focus-within:bg-[var(--drafting-panel-bg-active)]",
         checked && "border-[var(--drafting-line-strong)] bg-[var(--drafting-panel-bg-active)]",
       )}
     >
-      <span className="min-w-0 space-y-1">
-        <span className="drafting-type-control-label block font-semibold text-[var(--drafting-ink)]">
-          {label}
-        </span>
-        <span className="drafting-type-body block text-[var(--drafting-ink-muted)]">{description}</span>
-      </span>
-      <Switch
-        checked={checked}
-        className={cn(
-          "mt-0.5 h-[20px] w-[36px] shrink-0 border border-[var(--drafting-line)] bg-[var(--drafting-control-bg)]",
-          "shadow-[var(--drafting-shadow-rest)] transition-[background-color,border-color,box-shadow] duration-150",
-          "hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-control-bg-hover)]",
-          "data-[state=checked]:border-[var(--drafting-ink)] data-[state=checked]:bg-[var(--drafting-ink)]",
-          "focus-visible:ring-2 focus-visible:ring-[var(--drafting-line-hover)] focus-visible:ring-offset-0",
-        )}
-        data-slot={`${dataSlot}-switch`}
-        id={id}
-        onCheckedChange={onCheckedChange}
+      <DraftingInspectorControlRow
+        description={description}
+        htmlFor={id}
+        label={label}
+        value={
+          <Switch
+            checked={checked}
+            className={cn(
+              "ml-auto h-[20px] w-[36px] shrink-0 border border-[var(--drafting-line)] bg-[var(--drafting-control-bg)]",
+              "shadow-[var(--drafting-shadow-rest)] transition-[background-color,border-color,box-shadow] duration-150",
+              "hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-control-bg-hover)]",
+              "data-[state=checked]:border-[var(--drafting-ink)] data-[state=checked]:bg-[var(--drafting-ink)]",
+              "focus-visible:ring-2 focus-visible:ring-[var(--drafting-line-hover)] focus-visible:ring-offset-0",
+            )}
+            data-slot={`${dataSlot}-switch`}
+            id={id}
+            onCheckedChange={onCheckedChange}
+          />
+        }
       />
-    </label>
+    </DraftingInspectorSection>
   )
 }
 
@@ -3931,10 +3954,13 @@ function DraftingOptionCardGrid<TValue extends string>({
   value: TValue
 }) {
   return (
-    <div className="min-w-0 space-y-4" data-slot="drafting-style-tab">
+    <DraftingInspectorSection
+      className="bg-transparent shadow-none"
+      dataSlot="drafting-style-tab"
+    >
       <div
         aria-label={ariaLabel}
-        className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(108px,1fr))] justify-items-center gap-x-3 gap-y-5"
+        className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(76px,1fr))] justify-items-center gap-x-2 gap-y-4"
         data-slot={dataSlot}
         role="radiogroup"
       >
@@ -3948,14 +3974,15 @@ function DraftingOptionCardGrid<TValue extends string>({
             label={option.label}
             name={name}
             onSelect={() => onValueChange(option.value)}
+            size="compact"
             value={option.value}
           >
-            <span className="flex items-center justify-center [&_svg]:size-[6.5rem]">
+            <span className="flex items-center justify-center [&_svg]:size-[4.5rem]">
               <StylePreview previewKind={previewKind} value={option.value} />
             </span>
           </OptionCard>
         ))}
       </div>
-    </div>
+    </DraftingInspectorSection>
   )
 }
