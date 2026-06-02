@@ -15,7 +15,6 @@ import {
   AlignLeftIcon,
   AlignRightIcon,
   BoldIcon,
-  CheckIcon,
   ChevronDownIcon,
   ItalicIcon,
   MoonIcon,
@@ -1608,7 +1607,6 @@ function DesktopBrandIconButton({
       type="button"
       onClick={onClick}
     >
-      {selected ? <CheckIcon className="absolute right-1.5 top-1.5 size-3 text-white" /> : null}
       <Icon className="size-4" />
     </button>
   )
@@ -2186,21 +2184,6 @@ function DesktopShapeInspector({
         </section>
 
         <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
-          <p className="mb-3 truncate text-[12px] font-semibold text-white">Shadow</p>
-          <div className="grid gap-2">
-            <DesktopColorInputRow
-              label="Shape shadow color"
-              value={settings.shadowColor}
-              onChange={(shadowColor) => onShapeSettingsChange({ shadowColor })}
-            />
-            <DesktopNumberRow label="Shadow blur" max={96} min={0} value={settings.shadowBlur} onChange={(shadowBlur) => onShapeSettingsChange({ shadowBlur })} />
-            <DesktopNumberRow label="Shadow opacity" max={100} min={0} value={settings.shadowOpacity} onChange={(shadowOpacity) => onShapeSettingsChange({ shadowOpacity })} />
-            <DesktopNumberRow label="Offset X" max={64} min={-64} value={settings.shadowOffsetX} onChange={(shadowOffsetX) => onShapeSettingsChange({ shadowOffsetX })} />
-            <DesktopNumberRow label="Offset Y" max={64} min={-64} value={settings.shadowOffsetY} onChange={(shadowOffsetY) => onShapeSettingsChange({ shadowOffsetY })} />
-          </div>
-        </section>
-
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
           <p className="mb-3 truncate text-[12px] font-semibold text-white">Shape Details</p>
           <div className="grid gap-2">
             <DesktopNumberRow label="Shape padding" max={192} min={0} value={settings.shapePadding} onChange={(shapePadding) => onShapeSettingsChange({ shapePadding })} />
@@ -2612,7 +2595,6 @@ function DesktopMotionColorPresetButton({
       <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-white/78">
         {label}
       </span>
-      {selected ? <CheckIcon className="size-3.5 shrink-0 text-white" /> : null}
     </button>
   )
 }
@@ -2717,9 +2699,6 @@ function DesktopContentInspector({
                 type="button"
                 onClick={() => onContentTypeChange(type)}
               >
-                {isSelected ? (
-                  <CheckIcon className="absolute right-1.5 top-1.5 size-3 text-white" />
-                ) : null}
                 <Icon className="size-4 shrink-0" />
                 <span className="max-w-full truncate">{option.label}</span>
               </button>
@@ -3159,7 +3138,6 @@ function DesktopTextPresetButton({
       <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-white/78">
         {label}
       </span>
-      {selected ? <CheckIcon className="size-3.5 shrink-0 text-white" /> : null}
     </button>
   )
 }
@@ -3574,9 +3552,6 @@ function DesktopEncodingInspector({
                   <span className="truncate text-[12px] font-semibold text-white">
                     {option.title} ({option.label})
                   </span>
-                  {settings.errorCorrectionLevel === option.value ? (
-                    <CheckIcon className="size-3.5 shrink-0 text-white" />
-                  ) : null}
                 </span>
                 <span className="mt-1 block text-[10px] font-semibold leading-4 text-white/48">
                   {option.summary}
@@ -3984,49 +3959,6 @@ function DesktopLayersInspector({
                 <DesktopNumberRow label="Y" value={selectedLayer.y} onChange={(y) => patchSelectedLayer({ y })} />
                 <DesktopNumberRow label="W" min={1} value={selectedLayer.width} onChange={(width) => patchSelectedLayer({ width })} />
                 <DesktopNumberRow label="H" min={1} value={selectedLayer.height} onChange={(height) => patchSelectedLayer({ height })} />
-              </div>
-            </section>
-            <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
-              <p className="mb-3 truncate text-[12px] font-semibold text-white">Appearance</p>
-              <div className="grid gap-2">
-                <DesktopNumberRow
-                  label="Layer opacity"
-                  max={100}
-                  min={0}
-                  value={selectedLayer.opacity}
-                  onChange={(opacity) => patchSelectedLayer({ opacity })}
-                />
-                <DesktopNumberRow
-                  label="Layer blur"
-                  max={96}
-                  min={0}
-                  value={selectedLayer.blur}
-                  onChange={(blur) => patchSelectedLayer({ blur })}
-                />
-                <DesktopMotionToggleRow
-                  checked={selectedLayer.isVisible}
-                  label="Visible"
-                  onChange={(isVisible) => patchSelectedLayer({ isVisible })}
-                />
-                <DesktopMotionToggleRow
-                  checked={selectedLayer.isLocked}
-                  label="Locked"
-                  onChange={(isLocked) => patchSelectedLayer({ isLocked })}
-                />
-              </div>
-            </section>
-            <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
-              <p className="mb-3 truncate text-[12px] font-semibold text-white">Shadow</p>
-              <div className="grid gap-2">
-                <DesktopColorInputRow
-                  label="Layer shadow color"
-                  value={selectedLayer.shadowColor}
-                  onChange={(shadowColor) => patchSelectedLayer({ shadowColor })}
-                />
-                <DesktopNumberRow label="Shadow blur" max={128} min={0} value={selectedLayer.shadowBlur} onChange={(shadowBlur) => patchSelectedLayer({ shadowBlur })} />
-                <DesktopNumberRow label="Shadow opacity" max={100} min={0} value={selectedLayer.shadowOpacity} onChange={(shadowOpacity) => patchSelectedLayer({ shadowOpacity })} />
-                <DesktopNumberRow label="Offset X" value={selectedLayer.shadowOffsetX} onChange={(shadowOffsetX) => patchSelectedLayer({ shadowOffsetX })} />
-                <DesktopNumberRow label="Offset Y" value={selectedLayer.shadowOffsetY} onChange={(shadowOffsetY) => patchSelectedLayer({ shadowOffsetY })} />
               </div>
             </section>
           </>

@@ -155,6 +155,37 @@ function DesktopWorkspaceStyles() {
       body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="drafting-layer-context-menu-separator"] {
         background: rgba(15, 23, 42, 0.12) !important;
       }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"] {
+        background: rgba(255, 255, 255, 0.86) !important;
+        border-color: rgba(15, 23, 42, 0.12) !important;
+        color: rgba(15, 23, 42, 0.82) !important;
+        box-shadow: 0 24px 64px rgba(15, 23, 42, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"] p,
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"] span,
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"] label {
+        color: rgba(15, 23, 42, 0.72) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"] p:first-child {
+        color: rgba(15, 23, 42, 0.92) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"] label,
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"] span.rounded-full {
+        background: rgba(15, 23, 42, 0.06) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"] input[type="number"] {
+        background: rgba(15, 23, 42, 0.07) !important;
+        color: rgba(15, 23, 42, 0.9) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"] input[type="color"] {
+        background: rgba(255, 255, 255, 0.72) !important;
+      }
     `}</style>
   )
 }

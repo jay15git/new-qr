@@ -3753,6 +3753,10 @@ export function DraftingSurface({
     layers: activeCanvasLayerRows.map(toDesktopLayerRow),
     selectedLayerId: selectedLayerId ?? activeCanvasLayerRows[0]?.id ?? "",
   }
+  const selectedDesktopLayer =
+    desktopLayersSettings.layers.find((layer) => layer.id === desktopLayersSettings.selectedLayerId) ??
+    desktopLayersSettings.layers[0] ??
+    null
   const desktopExportSettings: DesktopExportSettings = {
     extension: selectedDownloadExtension,
     qualityPresetId: selectedRasterExportPresetId,
@@ -4048,6 +4052,18 @@ export function DraftingSurface({
         [activeQrNodeId]: nextLayers,
       }))
     }
+  }
+
+  function patchSelectedDesktopLayer(patch: Partial<DesktopLayerRow>) {
+    if (!selectedDesktopLayer) {
+      return
+    }
+
+    updateDesktopLayersSettings({
+      layers: desktopLayersSettings.layers.map((layer) =>
+        layer.id === selectedDesktopLayer.id ? { ...layer, ...patch } : layer,
+      ),
+    })
   }
 
   function updateDesktopExportSettings(patch: Partial<DesktopExportSettings>) {
@@ -4680,6 +4696,14 @@ export function DraftingSurface({
               }}
               onLayerSelect={handleLayerSelect}
               onLayerSelectionChange={handleLayerSelectionChange}
+              desktopLayerToolbarControls={
+                paneToolbarVariant === "desktop-zoom"
+                  ? {
+                      layer: selectedDesktopLayer,
+                      onLayerChange: patchSelectedDesktopLayer,
+                    }
+                  : undefined
+              }
               onPaneQrClick={handlePaneQrClick}
               onPaneSelect={handlePaneSelection}
               onRedo={handleRedoDraftingWorkspace}

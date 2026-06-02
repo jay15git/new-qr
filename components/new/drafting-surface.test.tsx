@@ -1397,6 +1397,120 @@ describe("DraftingSurface", () => {
     expect(resizeToolbar.textContent).toContain("100%")
   })
 
+  it("wires desktop bottom toolbar layer controls into the active drafting layer state", () => {
+    const surface = renderDesktopOverlaySurface({ paneToolbarVariant: "desktop-zoom" })
+    const toolbar = getRequiredElement(surface.container, '[data-slot="desktop-layer-settings-toolbar"]')
+
+    expect(toolbar).not.toBeNull()
+    expect(getRequiredElement(toolbar, 'button[aria-label="Layer appearance"]')).not.toBeNull()
+    expect(getRequiredElement(toolbar, 'button[aria-label="Hide layer"]')).not.toBeNull()
+    expect(getRequiredElement(toolbar, 'button[aria-label="Lock layer"]')).not.toBeNull()
+    expect(toolbar.querySelector('input[aria-label="Layer opacity"]')).toBeNull()
+
+    act(() => {
+      activateElement(getRequiredElement(toolbar, 'button[aria-label="Layer appearance"]'))
+    })
+
+    const popover = getRequiredElement(
+      surface.container,
+      '[data-slot="desktop-layer-appearance-popover"]',
+    )
+
+    act(() => {
+      changeInputValue(
+        getRequiredElement(popover, 'input[aria-label="Layer opacity"]') as HTMLInputElement,
+        "44",
+      )
+      changeInputValue(
+        getRequiredElement(popover, 'input[aria-label="Layer blur"]') as HTMLInputElement,
+        "12",
+      )
+      changeInputValue(
+        getRequiredElement(popover, 'input[aria-label="Layer shadow color"]') as HTMLInputElement,
+        "#ff0000",
+      )
+      changeInputValue(
+        getRequiredElement(popover, 'input[aria-label="Shadow blur"]') as HTMLInputElement,
+        "24",
+      )
+      changeInputValue(
+        getRequiredElement(popover, 'input[aria-label="Shadow opacity"]') as HTMLInputElement,
+        "55",
+      )
+      changeInputValue(
+        getRequiredElement(popover, 'input[aria-label="Shadow X"]') as HTMLInputElement,
+        "6",
+      )
+      changeInputValue(
+        getRequiredElement(popover, 'input[aria-label="Shadow Y"]') as HTMLInputElement,
+        "8",
+      )
+    })
+
+    const updatedPopover = getRequiredElement(
+      surface.container,
+      '[data-slot="desktop-layer-appearance-popover"]',
+    )
+
+    expect(
+      (getRequiredElement(updatedPopover, 'input[aria-label="Layer opacity"]') as HTMLInputElement)
+        .value,
+    ).toBe("44")
+    expect(
+      (getRequiredElement(updatedPopover, 'input[aria-label="Layer blur"]') as HTMLInputElement)
+        .value,
+    ).toBe("12")
+    expect(
+      (
+        getRequiredElement(
+          updatedPopover,
+          'input[aria-label="Layer shadow color"]',
+        ) as HTMLInputElement
+      ).value,
+    ).toBe("#ff0000")
+    expect(
+      (getRequiredElement(updatedPopover, 'input[aria-label="Shadow blur"]') as HTMLInputElement)
+        .value,
+    ).toBe("24")
+    expect(
+      (getRequiredElement(updatedPopover, 'input[aria-label="Shadow opacity"]') as HTMLInputElement)
+        .value,
+    ).toBe("55")
+    expect(
+      (getRequiredElement(updatedPopover, 'input[aria-label="Shadow X"]') as HTMLInputElement).value,
+    ).toBe("6")
+    expect(
+      (getRequiredElement(updatedPopover, 'input[aria-label="Shadow Y"]') as HTMLInputElement).value,
+    ).toBe("8")
+
+    const updatedToolbar = getRequiredElement(
+      surface.container,
+      '[data-slot="desktop-layer-settings-toolbar"]',
+    )
+
+    act(() => {
+      activateElement(getRequiredElement(updatedToolbar, 'button[aria-label="Hide layer"]'))
+    })
+
+    const hiddenToolbar = getRequiredElement(
+      surface.container,
+      '[data-slot="desktop-layer-settings-toolbar"]',
+    )
+
+    expect(getRequiredElement(hiddenToolbar, 'button[aria-label="Show layer"]')).not.toBeNull()
+
+    act(() => {
+      activateElement(getRequiredElement(hiddenToolbar, 'button[aria-label="Lock layer"]'))
+    })
+
+    const toggledToolbar = getRequiredElement(
+      surface.container,
+      '[data-slot="desktop-layer-settings-toolbar"]',
+    )
+
+    expect(getRequiredElement(toggledToolbar, 'button[aria-label="Unlock layer"]')).not.toBeNull()
+  })
+
   it("builds Wi-Fi payloads from the content type selector and preserves per-type drafts", () => {
     const surface = renderSurface()
 

@@ -8,12 +8,16 @@ import {
   useSyncExternalStore,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
+  type ReactNode,
   type TouchEvent,
   type WheelEvent,
 } from "react"
 import {
   CopyPlusIcon,
   CrosshairIcon,
+  EyeIcon,
+  EyeOffIcon,
+  LockIcon,
   MagnetIcon,
   Maximize2Icon,
   Minimize2Icon,
@@ -21,9 +25,11 @@ import {
   PlusIcon,
   Redo2Icon,
   RefreshCcwIcon,
+  SlidersHorizontalIcon,
   Trash2Icon,
   TypeIcon,
   Undo2Icon,
+  UnlockIcon,
   ZoomInIcon,
   ZoomOutIcon,
 } from "lucide-react"
@@ -34,6 +40,11 @@ import { QrPane, type DraftingLayerMenuAction } from "@/components/new/qr-pane"
 import { getQrLayout } from "@/components/new/qr-layout-engine"
 import type { QrStudioState } from "@/components/qr/qr-studio-state"
 import { Button } from "@/components/ui/button"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import {
   ResizableHandle,
   ResizablePanel,
@@ -59,6 +70,25 @@ type DraftingPanelLayouts = Record<string, Record<string, number>>
 type DraftingPanePanOffsets = Record<string, { x: number; y: number }>
 export type DraftingPaneToolbarVariant = "default" | "desktop-zoom"
 export type DraftingPaneCanvasTool = "text"
+
+type DesktopLayerToolbarLayer = {
+  blur: number
+  id: string
+  isLocked: boolean
+  isVisible: boolean
+  name: string
+  opacity: number
+  shadowBlur: number
+  shadowColor: string
+  shadowOffsetX: number
+  shadowOffsetY: number
+  shadowOpacity: number
+}
+
+export type DesktopLayerToolbarControls = {
+  layer: DesktopLayerToolbarLayer | null
+  onLayerChange: (patch: Partial<DesktopLayerToolbarLayer>) => void
+}
 
 const MIN_PREVIEW_ZOOM = 0.5
 const MAX_PREVIEW_ZOOM = 2
@@ -101,6 +131,7 @@ type DraftingPaneWorkspaceProps = {
     layerIds: string[],
     options?: { additive?: boolean },
   ) => void
+  desktopLayerToolbarControls?: DesktopLayerToolbarControls
   activeCanvasTool?: DraftingPaneCanvasTool | null
   onAddTextLayerAt?: (paneId: string, point: { x: number; y: number }) => void
   onCanvasToolChange?: (tool: DraftingPaneCanvasTool | null) => void
@@ -159,6 +190,220 @@ function getTouchDistance(touches: React.TouchList) {
   }
 
   return Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY)
+}
+
+function DesktopLayerSettingsToolbar({ controls }: { controls: DesktopLayerToolbarControls }) {
+  const { layer, onLayerChange } = controls
+
+  if (!layer) {
+    return null
+  }
+
+  return (
+    <div
+      aria-label={`${layer.name} layer appearance controls`}
+      className="flex max-w-full items-center gap-1"
+      data-slot="desktop-layer-settings-toolbar"
+    >
+      <Popover>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
+              <button
+                aria-label="Layer appearance"
+                className="flex h-8 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-current transition-[background-color,color,transform] duration-150 hover:bg-white/[0.11] hover:text-white active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                type="button"
+              >
+                <SlidersHorizontalIcon aria-hidden="true" className="size-4" />
+                <span className="max-w-24 truncate text-xs font-semibold tabular-nums">
+                  {layer.opacity}%
+                </span>
+              </button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent>Layer appearance</TooltipContent>
+        </Tooltip>
+        <PopoverContent
+          align="center"
+          side="top"
+          sideOffset={12}
+          className="w-72 rounded-2xl border-white/[0.12] bg-neutral-950/95 p-3 text-white shadow-[0_18px_48px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl"
+          data-slot="desktop-layer-appearance-popover"
+        >
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-white">{layer.name}</p>
+              <p className="text-[11px] font-medium text-white/45">Layer appearance</p>
+            </div>
+            <span className="rounded-full bg-white/[0.08] px-2 py-1 text-xs font-semibold tabular-nums text-white/70">
+              {layer.opacity}%
+            </span>
+          </div>
+          <div className="space-y-2">
+            <p className="px-1 text-[10px] font-bold uppercase tracking-normal text-white/45">
+              Appearance
+            </p>
+            <DesktopLayerToolbarNumberInput
+              label="Layer opacity"
+              max={100}
+              min={0}
+              value={layer.opacity}
+              onChange={(opacity) => onLayerChange({ opacity })}
+            />
+            <DesktopLayerToolbarNumberInput
+              label="Layer blur"
+              max={96}
+              min={0}
+              value={layer.blur}
+              onChange={(blur) => onLayerChange({ blur })}
+            />
+          </div>
+          <div className="mt-4 space-y-2">
+            <p className="px-1 text-[10px] font-bold uppercase tracking-normal text-white/45">
+              Shadow
+            </p>
+            <DesktopLayerToolbarColorInput
+              label="Layer shadow color"
+              value={layer.shadowColor}
+              onChange={(shadowColor) => onLayerChange({ shadowColor })}
+            />
+            <DesktopLayerToolbarNumberInput
+              label="Shadow blur"
+              max={128}
+              min={0}
+              value={layer.shadowBlur}
+              onChange={(shadowBlur) => onLayerChange({ shadowBlur })}
+            />
+            <DesktopLayerToolbarNumberInput
+              label="Shadow opacity"
+              max={100}
+              min={0}
+              value={layer.shadowOpacity}
+              onChange={(shadowOpacity) => onLayerChange({ shadowOpacity })}
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <DesktopLayerToolbarNumberInput
+                label="Shadow X"
+                value={layer.shadowOffsetX}
+                onChange={(shadowOffsetX) => onLayerChange({ shadowOffsetX })}
+              />
+              <DesktopLayerToolbarNumberInput
+                label="Shadow Y"
+                value={layer.shadowOffsetY}
+                onChange={(shadowOffsetY) => onLayerChange({ shadowOffsetY })}
+              />
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+      <DesktopLayerToolbarToggle
+        active={layer.isVisible}
+        label={layer.isVisible ? "Hide layer" : "Show layer"}
+        onClick={() => onLayerChange({ isVisible: !layer.isVisible })}
+      >
+        {layer.isVisible ? (
+          <EyeIcon aria-hidden="true" className="size-4" />
+        ) : (
+          <EyeOffIcon aria-hidden="true" className="size-4" />
+        )}
+      </DesktopLayerToolbarToggle>
+      <DesktopLayerToolbarToggle
+        active={layer.isLocked}
+        label={layer.isLocked ? "Unlock layer" : "Lock layer"}
+        onClick={() => onLayerChange({ isLocked: !layer.isLocked })}
+      >
+        {layer.isLocked ? (
+          <LockIcon aria-hidden="true" className="size-4" />
+        ) : (
+          <UnlockIcon aria-hidden="true" className="size-4" />
+        )}
+      </DesktopLayerToolbarToggle>
+    </div>
+  )
+}
+
+function DesktopLayerToolbarNumberInput({
+  label,
+  max,
+  min,
+  onChange,
+  value,
+}: {
+  label: string
+  max?: number
+  min?: number
+  onChange: (value: number) => void
+  value: number
+}) {
+  return (
+    <label className="flex h-8 min-w-0 items-center justify-between gap-2 rounded-full bg-white/[0.08] pl-3 pr-1 text-[10px] font-bold uppercase tracking-normal text-current">
+      <span className="min-w-0 truncate text-white/52">{label.replace(/^Layer |^Shadow /, "")}</span>
+      <input
+        aria-label={label}
+        className="h-6 w-14 shrink-0 rounded-full border-0 bg-black/20 px-1 text-center text-xs font-semibold text-current outline-none"
+        max={max}
+        min={min}
+        type="number"
+        value={value}
+        onChange={(event) => {
+          const nextValue = Number(event.currentTarget.value)
+          if (Number.isFinite(nextValue)) {
+            onChange(nextValue)
+          }
+        }}
+      />
+    </label>
+  )
+}
+
+function DesktopLayerToolbarColorInput({
+  label,
+  onChange,
+  value,
+}: {
+  label: string
+  onChange: (value: string) => void
+  value: string
+}) {
+  return (
+    <label className="flex h-8 items-center justify-between gap-2 rounded-full bg-white/[0.08] pl-3 pr-1 text-[10px] font-bold uppercase tracking-normal text-current">
+      <span className="whitespace-nowrap text-white/52">Color</span>
+      <input
+        aria-label={label}
+        className="size-6 rounded-full border-0 bg-transparent p-0"
+        type="color"
+        value={value}
+        onChange={(event) => onChange(event.currentTarget.value)}
+      />
+    </label>
+  )
+}
+
+function DesktopLayerToolbarToggle({
+  active,
+  children,
+  label,
+  onClick,
+}: {
+  active: boolean
+  children: ReactNode
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      aria-label={label}
+      aria-pressed={active}
+      className={cn(
+        "flex size-8 shrink-0 items-center justify-center rounded-full text-current transition-[background-color,color,transform] duration-150 hover:bg-white/[0.11] hover:text-white active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45",
+        active && "bg-white/[0.12] text-white",
+      )}
+      type="button"
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  )
 }
 
 function DraftingPaneSurface({
@@ -519,6 +764,7 @@ export function DraftingPaneWorkspace({
   onLayerPaste,
   onLayerSelect,
   onLayerSelectionChange,
+  desktopLayerToolbarControls,
   activeCanvasTool,
   onAddTextLayerAt,
   onCanvasToolChange,
@@ -925,6 +1171,13 @@ export function DraftingPaneWorkspace({
                   <TooltipContent>Reset view</TooltipContent>
                 </Tooltip>
 
+                <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" />
+              </>
+            ) : null}
+
+            {isDesktopZoomToolbar && desktopLayerToolbarControls?.layer ? (
+              <>
+                <DesktopLayerSettingsToolbar controls={desktopLayerToolbarControls} />
                 <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" />
               </>
             ) : null}

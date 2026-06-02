@@ -102,6 +102,36 @@ describe("DesktopToolbarPrototype", () => {
     }
   })
 
+  it("keeps duplicated layer appearance settings out of floating inspectors", async () => {
+    const surface = await renderPrototype()
+
+    await act(async () => {
+      getRequiredToolButton(surface.container, "layers").dispatchEvent(
+        new MouseEvent("click", { bubbles: true }),
+      )
+    })
+
+    const layersInspector = surface.container.querySelector('[data-slot="desktop-layers-inspector"]')
+
+    expect(layersInspector?.textContent).toContain("Layer Stack")
+    expect(layersInspector?.textContent).toContain("Geometry")
+    expect(layersInspector?.querySelector('input[aria-label="Layer name"]')).not.toBeNull()
+    expect(layersInspector?.querySelector('input[aria-label="Layer opacity"]')).toBeNull()
+    expect(layersInspector?.querySelector('input[aria-label="Layer blur"]')).toBeNull()
+    expect(layersInspector?.querySelector('input[aria-label="Layer shadow color"]')).toBeNull()
+
+    await act(async () => {
+      getRequiredToolButton(surface.container, "shape").dispatchEvent(
+        new MouseEvent("click", { bubbles: true }),
+      )
+    })
+
+    const shapeInspector = surface.container.querySelector('[data-slot="desktop-shape-inspector"]')
+
+    expect(shapeInspector?.querySelector('input[aria-label="Shape shadow color"]')).toBeNull()
+    expect(shapeInspector?.querySelector('input[aria-label="Shape backing shadow color"]')).not.toBeNull()
+  })
+
   it("renders the /new content tab inside the floating inspector", async () => {
     const surface = await renderPrototype()
     const contentButton = getRequiredToolButton(surface.container, "content")

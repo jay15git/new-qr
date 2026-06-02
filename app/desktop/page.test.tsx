@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs"
 import { isValidElement } from "react"
 import { describe, expect, it, vi } from "vitest"
 
@@ -36,5 +37,15 @@ describe("desktop page", () => {
     expect(isValidElement(workspace)).toBe(true)
     expect(workspace.type).toBe(DesktopWorkspace)
     expect(workspace.props.fontClassName).toBe("mock-satoshi-font")
+  })
+
+  it("keeps portaled layer appearance popovers in sync with desktop light mode", () => {
+    const workspaceSource = readFileSync("components/desktop/desktop-workspace.tsx", "utf8")
+
+    expect(workspaceSource).toContain(
+      'body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"]',
+    )
+    expect(workspaceSource).toContain("rgba(255, 255, 255, 0.86)")
+    expect(workspaceSource).toContain('input[type="number"]')
   })
 })
