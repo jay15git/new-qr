@@ -114,7 +114,30 @@ import {
   type DraftingFontSource,
 } from "@/components/new/drafting-font-registry"
 import { layoutDraftingText } from "@/components/new/drafting-text-layout"
-import { DraftingPaneWorkspace } from "@/components/new/drafting-pane-workspace"
+import {
+  DraftingPaneWorkspace,
+  type DraftingPaneToolbarVariant,
+} from "@/components/new/drafting-pane-workspace"
+import type {
+  DesktopAssetSourceMode,
+  DesktopCornersSettings,
+  DesktopDecorationsSettings,
+  DesktopEncodingSettings,
+  DesktopEffectsSettings,
+  DesktopExportSettings,
+  DesktopExportTarget,
+  DesktopImageSettings,
+  DesktopLayerRow,
+  DesktopLayersSettings,
+  DesktopLogoSettings,
+  DesktopLogoSourceMode,
+  DesktopMotionSettings,
+  DesktopPatternSettings,
+  DesktopShapeSettings,
+  DesktopTextSettings,
+  DesktopToolbarController,
+  DesktopToolbarToolId,
+} from "@/components/desktop/desktop-toolbar-prototype"
 import type { DraftingLayerMenuAction } from "@/components/new/qr-pane"
 import {
   filterBrandIcons,
@@ -225,6 +248,16 @@ type DraftingBinaryColorMode = "solid" | "gradient"
 type DraftingAssetSourceMode = Extract<AssetSourceMode, "upload" | "url">
 type DraftingBrandIconCategoryFilter = BrandIconCategory | "all"
 type DraftingCardToolId = "card-frame" | "card-surface" | "card-image" | "card-shaders"
+type DraftingSurfaceChrome = "canvas-only" | "full"
+
+export type DraftingWorkspaceController = DesktopToolbarController
+
+type DraftingSurfaceProps = {
+  chrome?: DraftingSurfaceChrome
+  fontClassName?: string
+  paneToolbarVariant?: DraftingPaneToolbarVariant
+  renderOverlay?: (controller: DraftingWorkspaceController) => ReactNode
+}
 type DraftingToolId =
   | "content"
   | "style"
@@ -650,11 +683,12 @@ function DraftingCardObjectInspectorNav({
   )
 }
 
-type DraftingSurfaceProps = {
-  fontClassName?: string
-}
-
-export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
+export function DraftingSurface({
+  chrome = "full",
+  fontClassName,
+  paneToolbarVariant = "default",
+  renderOverlay,
+}: DraftingSurfaceProps = {}) {
   const [activeTool, setActiveTool] = useState<DraftingToolId>(
     DEFAULT_DRAFTING_TOOL_ID,
   )
@@ -689,7 +723,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const [selectedDotsGradient, setSelectedDotsGradient] = useState<StudioGradient>(
     structuredClone(DEFAULT_DRAFTING_STUDIO_STATE.dotsGradient),
   )
-  const [selectedDotsPalette] = useState<string[]>([
+  const [selectedDotsPalette, setSelectedDotsPalette] = useState<string[]>([
     ...DEFAULT_DRAFTING_STUDIO_STATE.dotsPalette,
   ])
   const [selectedDotMatrixAnimation, setSelectedDotMatrixAnimation] =
@@ -842,6 +876,7 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
   const [selectedLayerIds, setSelectedLayerIds] = useState<string[]>(() => [
     getDraftingQrLayerId(DASHBOARD_QR_NODE_ID),
   ])
+  const [desktopCanvasTool, setDesktopCanvasTool] = useState<"text" | null>(null)
   const [selectedDownloadExtension, setSelectedDownloadExtension] =
     useState<DraftingDownloadExtension>("png")
   const [selectedDownloadTarget, setSelectedDownloadTarget] =
@@ -2048,6 +2083,52 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     setLayerStateByNodeId((current) => ({
       ...current,
       [activeQrNodeId]: [...layers.map(cloneDraftingCanvasLayer), textLayer],
+    }))
+    selectSingleLayer(textLayer.id)
+    setActiveTool("text")
+    draftingSurfaceRef.current?.focus({ preventScroll: true })
+  }
+
+  function handleAddTextLayerAt(paneId: string, point: { x: number; y: number }) {
+    const targetQrState =
+      paneId === activeQrNodeId
+        ? draftingStudioState
+        : (qrStateByNodeId[paneId] ?? createDefaultDraftingWorkspaceQrState())
+    const targetCardState =
+      paneId === activeQrNodeId
+        ? selectedCardState
+        : (cardStateByNodeId[paneId] ?? createDefaultDraftingCardState())
+    const layers =
+      layerStateByNodeId[paneId] ??
+      createDefaultDraftingLayers(paneId, targetQrState, targetCardState)
+    const maxZIndex = layers.reduce((max, layer) => Math.max(max, layer.zIndex), -1)
+    const textLayer = createDraftingTextLayer(paneId, {
+      id: `${paneId}:text:${Date.now()}`,
+      x: Math.round(point.x - 120),
+      y: Math.round(point.y - 24),
+      zIndex: maxZIndex + 1,
+    })
+
+    if (paneId !== activeQrNodeId) {
+      shouldReplaceCurrentDraftingHistoryEntryRef.current = true
+      setQrStateByNodeId((current) => ({
+        ...current,
+        [activeQrNodeId]: cloneDraftingQrState(draftingStudioState),
+        [paneId]: cloneDraftingQrState(targetQrState),
+      }))
+      setCardStateByNodeId((current) => ({
+        ...current,
+        [activeQrNodeId]: cloneDraftingCardState(selectedCardState),
+        [paneId]: cloneDraftingCardState(targetCardState),
+      }))
+      setActiveQrNodeId(paneId)
+      applyDraftingQrStateToControls(targetQrState)
+      setSelectedCardState(cloneDraftingCardState(targetCardState))
+    }
+
+    setLayerStateByNodeId((current) => ({
+      ...current,
+      [paneId]: [...layers.map(cloneDraftingCanvasLayer), textLayer],
     }))
     selectSingleLayer(textLayer.id)
     setActiveTool("text")
@@ -3576,6 +3657,500 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
     ],
   )
 
+  const desktopActiveTool = getDesktopToolbarToolId(activeTool)
+  const desktopPatternSettings: DesktopPatternSettings = {
+    dotsColorMode: selectedDotsColorMode,
+    dotsGradient: selectedDotsGradient,
+    dotsPalette: selectedDotsPalette,
+    dotsSolidColor: selectedDotColor,
+    qrDotType: selectedDotType,
+  }
+  const desktopLogoSettings: DesktopLogoSettings = {
+    colorMode: selectedLogoColorMode,
+    gradient: selectedLogoGradient,
+    hideBackgroundDots: selectedHideBackgroundDots,
+    margin: selectedLogoMargin,
+    remoteUrl: selectedLogoRemoteUrl,
+    saveAsBlob: selectedSaveAsBlob,
+    selectedBrandIconId: selectedLogoPresetId ?? "",
+    size: selectedLogoSize,
+    solidColor: selectedLogoColor,
+    sourceMode: getDesktopLogoSourceMode(selectedLogoSourceMode),
+    uploadMode: selectedLogoAssetSourceMode,
+  }
+  const desktopCornersSettings: DesktopCornersSettings = {
+    cornerDotColorMode: selectedCornerDotColorMode,
+    cornerDotGradient: selectedCornerDotGradient,
+    cornerDotSolidColor: selectedCornerDotColor,
+    cornerDotType: selectedCornerDotType,
+    cornerSquareColorMode: selectedCornerSquareColorMode,
+    cornerSquareGradient: selectedCornerSquareGradient,
+    cornerSquareSolidColor: selectedCornerSquareColor,
+    cornerSquareType: selectedCornerSquareType,
+  }
+  const desktopShapeSettings: DesktopShapeSettings = {
+    backgroundShapeId: selectedBackgroundShapeId,
+    borderColor: selectedCardState.border.color,
+    borderOpacity: selectedCardState.border.opacity,
+    borderWidth: selectedCardState.border.width,
+    bottomSpace: selectedCardState.bottomSpace,
+    cardEnabled: selectedCardState.enabled,
+    cardFill: selectedCardState.fill,
+    cardImageFit: selectedCardState.cardImage.fit,
+    cardImageOpacity: selectedCardState.cardImage.opacity,
+    cardImageSourceMode: getDesktopAssetSourceMode(selectedCardState.cardImage.source),
+    cardImageUrl: selectedCardState.cardImage.value ?? "",
+    cardPatternId: selectedCardState.patternId,
+    cardRadius: selectedCardState.cornerRadius,
+    padding: selectedCardState.padding,
+    shapeColorMode: selectedBackgroundColorMode,
+    shapeGradient: selectedBackgroundGradient,
+    shapePadding: selectedBackgroundShapeOptions.paddingPx,
+    shapeShadowBlur: selectedBackgroundShapeOptions.edgeBlur,
+    shapeShadowColor: selectedBackgroundShapeOptions.shadowColor,
+    shapeShadowOffsetX: selectedBackgroundShapeOptions.shadowOffsetX,
+    shapeShadowOffsetY: selectedBackgroundShapeOptions.shadowOffsetY,
+    shapeShadowOpacity: selectedBackgroundShapeOptions.shadowOpacity,
+    shapeSolidColor: selectedBackgroundColor,
+    shapeStrokeColor: selectedBackgroundShapeOptions.strokeColor,
+    shapeStrokeOpacity: selectedBackgroundShapeOptions.strokeOpacity,
+    shapeStrokeWidth: selectedBackgroundShapeOptions.strokeWidth,
+    shadowBlur: selectedCardState.shadow.blur,
+    shadowColor: selectedCardState.shadow.color,
+    shadowOffsetX: selectedCardState.shadow.offsetX,
+    shadowOffsetY: selectedCardState.shadow.offsetY,
+    shadowOpacity: selectedCardState.shadow.opacity,
+  }
+  const desktopEncodingSettings: DesktopEncodingSettings = {
+    errorCorrectionLevel: selectedErrorCorrectionLevel,
+    typeNumber: selectedTypeNumber,
+  }
+  const desktopImageSettings: DesktopImageSettings = {
+    fit: selectedCardState.cardImage.fit,
+    intent: "shape-fill",
+    opacity: selectedCardState.cardImage.opacity,
+    remoteUrl: selectedCardState.cardImage.value ?? "",
+    sourceMode: getDesktopAssetSourceMode(selectedCardState.cardImage.source),
+  }
+  const desktopDecorationsSettings: DesktopDecorationsSettings = {
+    fill: selectedCardState.fill,
+    kind: "frame",
+    patternId: selectedCardState.patternId,
+    radius: selectedCardState.cornerRadius,
+    strokeColor: selectedCardState.border.color,
+    strokeWidth: selectedCardState.border.width,
+  }
+  const desktopEffectsSettings: DesktopEffectsSettings = {
+    filterId: selectedCardState.imageFilter.shaderId,
+    filterPresetName: selectedCardState.imageFilter.presetName,
+    frame: selectedCardState.paperShader.frame,
+    generatedShaderId: selectedCardState.paperShader.shaderId,
+    generatedShaderPresetName: selectedCardState.paperShader.presetName,
+    paused: selectedCardState.paperShader.paused,
+    speed: selectedCardState.paperShader.speed,
+  }
+  const desktopLayersSettings: DesktopLayersSettings = {
+    layers: activeCanvasLayerRows.map(toDesktopLayerRow),
+    selectedLayerId: selectedLayerId ?? activeCanvasLayerRows[0]?.id ?? "",
+  }
+  const desktopExportSettings: DesktopExportSettings = {
+    extension: selectedDownloadExtension,
+    qualityPresetId: selectedRasterExportPresetId,
+    target: getDesktopExportTarget(selectedDownloadTarget),
+  }
+  const desktopTextSettings: DesktopTextSettings = getDesktopTextSettings(selectedTextLayer)
+
+  function resetDesktopContent() {
+    setSelectedContentType(DEFAULT_QR_INPUT_TYPE)
+    setContentValuesByType((current) => ({
+      ...current,
+      [DEFAULT_QR_INPUT_TYPE]: {
+        ...getDefaultStaticQrValues(DEFAULT_QR_INPUT_TYPE),
+        text: DEFAULT_DRAFTING_STUDIO_STATE.data,
+      },
+    }))
+  }
+
+  function updateDesktopPatternSettings(patch: Partial<DesktopPatternSettings>) {
+    if (patch.qrDotType) setSelectedDotType(patch.qrDotType)
+    if (patch.dotsColorMode) {
+      ensureDotsColorItemExpanded(patch.dotsColorMode)
+      setSelectedDotsColorMode(patch.dotsColorMode)
+    }
+    if (patch.dotsSolidColor) {
+      ensureDotsColorItemExpanded("solid")
+      setSelectedDotsColorMode("solid")
+      setSelectedDotColor(patch.dotsSolidColor)
+    }
+    if (patch.dotsGradient) {
+      ensureDotsColorItemExpanded("gradient")
+      setSelectedDotsColorMode("gradient")
+      setSelectedDotsGradient({ ...patch.dotsGradient, enabled: true })
+    }
+    if (patch.dotsPalette) {
+      ensureDotsColorItemExpanded("palette")
+      setSelectedDotsColorMode("palette")
+      setSelectedDotsPalette([...patch.dotsPalette])
+    }
+  }
+
+  function resetDesktopPatternSettings() {
+    setSelectedDotType(DEFAULT_DRAFTING_STUDIO_STATE.dotsOptions.type)
+    setSelectedDotsColorMode(DEFAULT_DRAFTING_STUDIO_STATE.dotsColorMode)
+    setSelectedDotColor(DEFAULT_DRAFTING_STUDIO_STATE.dotsOptions.color)
+    setSelectedDotsGradient(structuredClone(DEFAULT_DRAFTING_STUDIO_STATE.dotsGradient))
+    setSelectedDotsPalette([...DEFAULT_DRAFTING_STUDIO_STATE.dotsPalette])
+  }
+
+  function updateDesktopLogoSettings(patch: Partial<DesktopLogoSettings>) {
+    if (patch.sourceMode) {
+      if (patch.sourceMode === "none") {
+        const nextState = applyAssetNoneSelection(buildDraftingLogoStateSnapshot({ logoSourceMode: "none" }), "logo")
+        syncDraftingLogoAsset(nextState)
+      } else if (patch.sourceMode === "brand") {
+        setSelectedLogoSourceMode("preset")
+      } else if (patch.sourceMode === "url") {
+        ensureLogoUploadItemExpanded("url")
+        const nextState = applyAssetUrlValue(
+          buildDraftingLogoStateSnapshot({
+            logoRemoteUrl: selectedLogoRemoteUrl,
+            logoSourceMode: "url",
+          }),
+          "logo",
+          selectedLogoRemoteUrl,
+        )
+        syncDraftingLogoAsset(nextState)
+      } else {
+        ensureLogoUploadItemExpanded("upload")
+        clearDraftingLogoPreset("upload")
+      }
+    }
+    if (patch.uploadMode) {
+      ensureLogoUploadItemExpanded(patch.uploadMode)
+      if (patch.uploadMode === "url") {
+        const nextState = applyAssetUrlValue(
+          buildDraftingLogoStateSnapshot({
+            logoRemoteUrl: selectedLogoRemoteUrl,
+            logoSourceMode: "url",
+          }),
+          "logo",
+          selectedLogoRemoteUrl,
+        )
+        syncDraftingLogoAsset(nextState)
+      } else {
+        clearDraftingLogoPreset("upload")
+      }
+    }
+    if (patch.remoteUrl !== undefined) {
+      ensureLogoUploadItemExpanded("url")
+      const nextState = applyAssetUrlValue(
+        buildDraftingLogoStateSnapshot({
+          logoRemoteUrl: patch.remoteUrl,
+          logoSourceMode: "url",
+        }),
+        "logo",
+        patch.remoteUrl,
+      )
+      syncDraftingLogoAsset(nextState)
+    }
+    if (patch.selectedBrandIconId) {
+      const brandIcon = findBrandIconById(patch.selectedBrandIconId as BrandIconId)
+      if (brandIcon) handleDraftingBrandIconSelection(brandIcon)
+    }
+    if (patch.colorMode) setSelectedLogoColorMode(patch.colorMode)
+    if (patch.solidColor) handleDraftingLogoColorChange(patch.solidColor)
+    if (patch.gradient) handleDraftingLogoGradientChange({ ...patch.gradient, enabled: true })
+    if (patch.size !== undefined) setSelectedLogoSize(patch.size)
+    if (patch.margin !== undefined) setSelectedLogoMargin(patch.margin)
+    if (patch.hideBackgroundDots !== undefined) setSelectedHideBackgroundDots(patch.hideBackgroundDots)
+    if (patch.saveAsBlob !== undefined) setSelectedSaveAsBlob(patch.saveAsBlob)
+  }
+
+  function resetDesktopLogoSettings() {
+    applyDraftingQrStateToControls(createDefaultDraftingWorkspaceQrState())
+  }
+
+  function updateDesktopCornersSettings(patch: Partial<DesktopCornersSettings>) {
+    if (patch.cornerSquareType) setSelectedCornerSquareType(patch.cornerSquareType)
+    if (patch.cornerSquareColorMode) setSelectedCornerSquareColorMode(patch.cornerSquareColorMode)
+    if (patch.cornerSquareSolidColor) {
+      setSelectedCornerSquareColorMode("solid")
+      setSelectedCornerSquareColor(patch.cornerSquareSolidColor)
+    }
+    if (patch.cornerSquareGradient) {
+      setSelectedCornerSquareColorMode("gradient")
+      setSelectedCornerSquareGradient({ ...patch.cornerSquareGradient, enabled: true })
+    }
+    if (patch.cornerDotType) setSelectedCornerDotType(patch.cornerDotType)
+    if (patch.cornerDotColorMode) setSelectedCornerDotColorMode(patch.cornerDotColorMode)
+    if (patch.cornerDotSolidColor) {
+      setSelectedCornerDotColorMode("solid")
+      setSelectedCornerDotColor(patch.cornerDotSolidColor)
+    }
+    if (patch.cornerDotGradient) {
+      setSelectedCornerDotColorMode("gradient")
+      setSelectedCornerDotGradient({ ...patch.cornerDotGradient, enabled: true })
+    }
+  }
+
+  function updateDesktopShapeSettings(patch: Partial<DesktopShapeSettings>) {
+    if (patch.backgroundShapeId !== undefined) setSelectedBackgroundShapeId(patch.backgroundShapeId)
+    if (patch.shapeColorMode) setSelectedBackgroundColorMode(patch.shapeColorMode)
+    if (patch.shapeSolidColor) {
+      setSelectedBackgroundColorMode("solid")
+      setSelectedBackgroundColor(patch.shapeSolidColor)
+      setSelectedBackgroundTransparent(false)
+    }
+    if (patch.shapeGradient) {
+      setSelectedBackgroundColorMode("gradient")
+      setSelectedBackgroundGradient({ ...patch.shapeGradient, enabled: true })
+      setSelectedBackgroundTransparent(false)
+    }
+    const shapeOptionsPatch: Partial<BackgroundShapeOptions> = {}
+    if (patch.shapePadding !== undefined) shapeOptionsPatch.paddingPx = patch.shapePadding
+    if (patch.shapeShadowBlur !== undefined) shapeOptionsPatch.edgeBlur = patch.shapeShadowBlur
+    if (patch.shapeShadowColor !== undefined) shapeOptionsPatch.shadowColor = patch.shapeShadowColor
+    if (patch.shapeShadowOffsetX !== undefined) shapeOptionsPatch.shadowOffsetX = patch.shapeShadowOffsetX
+    if (patch.shapeShadowOffsetY !== undefined) shapeOptionsPatch.shadowOffsetY = patch.shapeShadowOffsetY
+    if (patch.shapeShadowOpacity !== undefined) shapeOptionsPatch.shadowOpacity = patch.shapeShadowOpacity
+    if (patch.shapeStrokeColor !== undefined) shapeOptionsPatch.strokeColor = patch.shapeStrokeColor
+    if (patch.shapeStrokeOpacity !== undefined) shapeOptionsPatch.strokeOpacity = patch.shapeStrokeOpacity
+    if (patch.shapeStrokeWidth !== undefined) shapeOptionsPatch.strokeWidth = patch.shapeStrokeWidth
+    if (Object.keys(shapeOptionsPatch).length > 0) {
+      setSelectedBackgroundShapeOptions((current) => ({ ...current, ...shapeOptionsPatch }))
+    }
+    setSelectedCardState((current) => ({
+      ...current,
+      border: {
+        ...current.border,
+        color: patch.borderColor ?? current.border.color,
+        opacity: patch.borderOpacity ?? current.border.opacity,
+        width: patch.borderWidth ?? current.border.width,
+      },
+      bottomSpace: patch.bottomSpace ?? current.bottomSpace,
+      cardImage: {
+        ...current.cardImage,
+        fit: patch.cardImageFit ?? current.cardImage.fit,
+        opacity: patch.cardImageOpacity ?? current.cardImage.opacity,
+        source: patch.cardImageSourceMode ?? current.cardImage.source,
+        value: patch.cardImageUrl ?? current.cardImage.value,
+      },
+      cornerRadius: patch.cardRadius ?? current.cornerRadius,
+      enabled: patch.cardEnabled ?? current.enabled,
+      fill: patch.cardFill ?? current.fill,
+      padding: patch.padding ?? current.padding,
+      patternId: patch.cardPatternId ?? current.patternId,
+      shadow: {
+        ...current.shadow,
+        blur: patch.shadowBlur ?? current.shadow.blur,
+        color: patch.shadowColor ?? current.shadow.color,
+        offsetX: patch.shadowOffsetX ?? current.shadow.offsetX,
+        offsetY: patch.shadowOffsetY ?? current.shadow.offsetY,
+        opacity: patch.shadowOpacity ?? current.shadow.opacity,
+      },
+      styleMode:
+        patch.cardImageUrl || patch.cardImageSourceMode
+          ? "image"
+          : patch.cardPatternId
+            ? "pattern"
+            : current.styleMode,
+    }))
+    if (patch.cardEnabled !== undefined || patch.shadowBlur !== undefined || patch.shadowColor !== undefined || patch.shadowOffsetX !== undefined || patch.shadowOffsetY !== undefined || patch.shadowOpacity !== undefined) {
+      handleLayerChange(activeQrNodeId, getDraftingCardLayerId(activeQrNodeId), {
+        isVisible: patch.cardEnabled,
+        shadow: {
+          ...selectedCardState.shadow,
+          blur: patch.shadowBlur ?? selectedCardState.shadow.blur,
+          color: patch.shadowColor ?? selectedCardState.shadow.color,
+          offsetX: patch.shadowOffsetX ?? selectedCardState.shadow.offsetX,
+          offsetY: patch.shadowOffsetY ?? selectedCardState.shadow.offsetY,
+          opacity: patch.shadowOpacity ?? selectedCardState.shadow.opacity,
+        },
+      })
+    }
+  }
+
+  function resetDesktopShapeSettings() {
+    const defaultCard = createDefaultDraftingCardState()
+    setSelectedCardState(defaultCard)
+    setSelectedBackgroundColor(DEFAULT_DRAFTING_STUDIO_STATE.backgroundOptions.color)
+    setSelectedBackgroundColorMode(DEFAULT_DRAFTING_STUDIO_STATE.backgroundGradient.enabled ? "gradient" : "solid")
+    setSelectedBackgroundGradient(structuredClone(DEFAULT_DRAFTING_STUDIO_STATE.backgroundGradient))
+    setSelectedBackgroundShapeId(DEFAULT_DRAFTING_STUDIO_STATE.backgroundShapeId)
+    setSelectedBackgroundShapeOptions({ ...DEFAULT_DRAFTING_STUDIO_STATE.backgroundShapeOptions })
+  }
+
+  function updateDesktopMotionSettings(patch: Parameters<typeof setDotMatrixAnimationOptions>[1]) {
+    setSelectedDotMatrixAnimation((current) =>
+      setDotMatrixAnimationOptions(
+        { ...DEFAULT_DRAFTING_STUDIO_STATE, dotMatrixAnimation: current },
+        patch,
+      ).dotMatrixAnimation,
+    )
+  }
+
+  function updateDesktopEncodingSettings(patch: Partial<DesktopEncodingSettings>) {
+    if (patch.typeNumber !== undefined) setSelectedTypeNumber(patch.typeNumber)
+    if (patch.errorCorrectionLevel) setSelectedErrorCorrectionLevel(patch.errorCorrectionLevel)
+  }
+
+  function updateDesktopTextSettings(patch: Partial<DesktopTextSettings>) {
+    if (selectedTextLayer?.kind === "text") {
+      handleLayerChange(activeQrNodeId, selectedTextLayer.id, patch)
+      return
+    }
+    const layers =
+      layerStateByNodeId[activeQrNodeId] ??
+      createDefaultDraftingLayers(activeQrNodeId, draftingStudioState, selectedCardState)
+    const maxZIndex = layers.reduce((max, layer) => Math.max(max, layer.zIndex), -1)
+    const textLayer = createDraftingTextLayer(activeQrNodeId, {
+      ...patch,
+      id: `${activeQrNodeId}:text:${Date.now()}`,
+      zIndex: maxZIndex + 1,
+    })
+    setLayerStateByNodeId((current) => ({
+      ...current,
+      [activeQrNodeId]: [...layers.map(cloneDraftingCanvasLayer), textLayer],
+    }))
+    selectSingleLayer(textLayer.id)
+  }
+
+  function updateDesktopLayersSettings(patch: Partial<DesktopLayersSettings>) {
+    if (patch.selectedLayerId !== undefined) {
+      handleLayerSelect(activeQrNodeId, patch.selectedLayerId)
+    }
+    if (patch.layers) {
+      const currentLayersById = new Map(activeCanvasLayers.map((layer) => [layer.id, layer]))
+      const nextLayers = patch.layers.map((row) => {
+        const layer = currentLayersById.get(row.id) ?? createDraftingTextLayer(activeQrNodeId, { id: row.id })
+
+        return patchDraftingCanvasLayer(layer, {
+          blur: row.blur,
+          height: row.height,
+          isLocked: row.isLocked,
+          isVisible: row.isVisible,
+          name: row.name,
+          opacity: row.opacity / 100,
+          shadow: {
+            blur: row.shadowBlur,
+            color: row.shadowColor,
+            offsetX: row.shadowOffsetX,
+            offsetY: row.shadowOffsetY,
+            opacity: row.shadowOpacity,
+          },
+          width: row.width,
+          x: row.x,
+          y: row.y,
+        })
+      })
+      setLayerStateByNodeId((current) => ({
+        ...current,
+        [activeQrNodeId]: nextLayers,
+      }))
+    }
+  }
+
+  function updateDesktopExportSettings(patch: Partial<DesktopExportSettings>) {
+    if (patch.extension) setSelectedDownloadExtension(patch.extension as DraftingDownloadExtension)
+    if (patch.qualityPresetId) setSelectedRasterExportPresetId(patch.qualityPresetId)
+    if (patch.target) setSelectedDownloadTarget(getDraftingDownloadTarget(patch.target))
+  }
+
+  const desktopController: DraftingWorkspaceController = {
+    activeTool: desktopActiveTool,
+    contentType: selectedContentType,
+    contentValues: selectedContentValues,
+    contentValidation: selectedContentValidation,
+    cornersSettings: desktopCornersSettings,
+    decorationsSettings: desktopDecorationsSettings,
+    effectsSettings: desktopEffectsSettings,
+    encodedContentValue: selectedContentValue,
+    encodingSettings: desktopEncodingSettings,
+    exportSettings: desktopExportSettings,
+    imageSettings: desktopImageSettings,
+    layersSettings: desktopLayersSettings,
+    logoSettings: desktopLogoSettings,
+    motionSettings: selectedDotMatrixAnimation as DesktopMotionSettings,
+    patternSettings: desktopPatternSettings,
+    shapeSettings: desktopShapeSettings,
+    textSettings: desktopTextSettings,
+    onActiveToolChange: (toolId) => {
+      setDesktopCanvasTool(null)
+      setActiveTool(getDraftingToolIdFromDesktop(toolId))
+    },
+    onContentReset: resetDesktopContent,
+    onContentTypeChange: handleDraftingContentTypeChange,
+    onContentValueChange: handleDraftingContentValueChange,
+    onCornersReset: () => applyDraftingQrStateToControls(createDefaultDraftingWorkspaceQrState()),
+    onCornersSettingsChange: updateDesktopCornersSettings,
+    onDecorationsReset: resetDesktopShapeSettings,
+    onDecorationsSettingsChange: (patch) =>
+      updateDesktopShapeSettings({
+        borderColor: patch.strokeColor,
+        borderWidth: patch.strokeWidth,
+        cardFill: patch.fill,
+        cardPatternId: patch.patternId,
+        cardRadius: patch.radius,
+      }),
+    onEffectsReset: resetDesktopShapeSettings,
+    onEffectsSettingsChange: (patch) =>
+      setSelectedCardState((current) => ({
+        ...current,
+        imageFilter: {
+          ...current.imageFilter,
+          presetName: patch.filterPresetName ?? current.imageFilter.presetName,
+          shaderId: patch.filterId ?? current.imageFilter.shaderId,
+        },
+        paperShader: {
+          ...current.paperShader,
+          frame: patch.frame ?? current.paperShader.frame,
+          paused: patch.paused ?? current.paperShader.paused,
+          presetName: patch.generatedShaderPresetName ?? current.paperShader.presetName,
+          shaderId: patch.generatedShaderId ?? current.paperShader.shaderId,
+          speed: patch.speed ?? current.paperShader.speed,
+        },
+        styleMode: patch.generatedShaderId ? "paper-shader" : patch.filterId ? "image-filter" : current.styleMode,
+      })),
+    onEncodingReset: () => {
+      setSelectedTypeNumber(DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.typeNumber)
+      setSelectedErrorCorrectionLevel(DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.errorCorrectionLevel)
+    },
+    onEncodingSettingsChange: updateDesktopEncodingSettings,
+    onExportDownload: () => {
+      void handleDownload()
+    },
+    onExportReset: () => {
+      setSelectedDownloadExtension("png")
+      setSelectedDownloadTarget("current")
+      setSelectedRasterExportPresetId(DEFAULT_DRAFTING_RASTER_EXPORT_PRESET_ID)
+    },
+    onExportSettingsChange: updateDesktopExportSettings,
+    onImageReset: resetDesktopShapeSettings,
+    onImageSettingsChange: (patch) =>
+      updateDesktopShapeSettings({
+        cardImageFit: patch.fit,
+        cardImageOpacity: patch.opacity,
+        cardImageSourceMode: patch.sourceMode,
+        cardImageUrl: patch.remoteUrl,
+      }),
+    onLayersReset: () =>
+      setLayerStateByNodeId((current) => ({
+        ...current,
+        [activeQrNodeId]: createDefaultDraftingLayers(activeQrNodeId, draftingStudioState, selectedCardState),
+      })),
+    onLayersSettingsChange: updateDesktopLayersSettings,
+    onLogoReset: resetDesktopLogoSettings,
+    onLogoSettingsChange: updateDesktopLogoSettings,
+    onMotionReset: () => setSelectedDotMatrixAnimation({ ...DEFAULT_DRAFTING_STUDIO_STATE.dotMatrixAnimation }),
+    onMotionSettingsChange: updateDesktopMotionSettings,
+    onPatternReset: resetDesktopPatternSettings,
+    onPatternSettingsChange: updateDesktopPatternSettings,
+    onShapeReset: resetDesktopShapeSettings,
+    onShapeSettingsChange: updateDesktopShapeSettings,
+    onTextReset: () => updateDesktopTextSettings({ ...DEFAULT_DRAFTING_TEXT_LAYER }),
+    onTextSettingsChange: updateDesktopTextSettings,
+  }
+
   return (
     <section
       ref={draftingSurfaceRef}
@@ -3594,34 +4169,37 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
       data-qr-type-number={selectedTypeNumber}
       data-slot="drafting-surface"
       tabIndex={-1}
-      className="relative grid h-dvh w-full grid-rows-[var(--new-header-height)_minmax(0,1fr)] overflow-visible bg-[var(--drafting-surface-bg)] sm:h-[calc(100dvh-4rem)] lg:shadow-[var(--drafting-shadow-shell)] [--new-header-height:3.875rem] [--new-left-rail-width:clamp(6.25rem,10vw,7.5rem)] [--new-middle-rail-width:clamp(15rem,24vw,18.5rem)] [--new-mobile-rail-height:5.75rem]"
+      className={cn(
+        "relative grid h-dvh w-full overflow-visible bg-[var(--drafting-surface-bg)] sm:h-[calc(100dvh-4rem)] lg:shadow-[var(--drafting-shadow-shell)] [--new-header-height:3.875rem] [--new-left-rail-width:clamp(6.25rem,10vw,7.5rem)] [--new-middle-rail-width:clamp(15rem,24vw,18.5rem)] [--new-mobile-rail-height:5.75rem]",
+        chrome === "canvas-only" ? "grid-rows-1 sm:h-dvh" : "grid-rows-[var(--new-header-height)_minmax(0,1fr)]",
+      )}
       data-compose-edit-mode="false"
       data-compose-selected-node-id={activeQrNodeId ?? ""}
     >
-      {OUTER_MARKERS.map((marker) => (
+      {chrome === "full" ? OUTER_MARKERS.map((marker) => (
         <PlusMarker key={marker} className={marker} />
-      ))}
-      {JUNCTION_MARKERS.map((marker) => (
+      )) : null}
+      {chrome === "full" ? JUNCTION_MARKERS.map((marker) => (
         <PlusMarker key={marker} className={marker} />
-      ))}
+      )) : null}
 
-      <div
+      {chrome === "full" ? <div
         aria-hidden="true"
         data-slot="drafting-divider-horizontal"
         className="pointer-events-none absolute left-0 right-0 top-[var(--new-header-height)] z-20 h-0"
-      />
-      <div
+      /> : null}
+      {chrome === "full" ? <div
         aria-hidden="true"
         data-slot="drafting-divider-vertical"
         className="pointer-events-none absolute bottom-0 left-[var(--new-left-rail-width)] top-[var(--new-header-height)] z-20 hidden w-0 lg:block"
-      />
-      <div
+      /> : null}
+      {chrome === "full" ? <div
         aria-hidden="true"
         data-slot="drafting-divider-vertical"
         className="pointer-events-none absolute bottom-0 left-[calc(var(--new-left-rail-width)+var(--new-middle-rail-width))] top-[var(--new-header-height)] z-20 hidden w-0 lg:block"
-      />
+      /> : null}
 
-      <header
+      {chrome === "full" ? <header
         aria-label="Header frame"
         data-slot="drafting-header"
         className="min-h-0 min-w-0 px-3 py-2 sm:px-4"
@@ -3936,13 +4514,18 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
             </Popover>
           </div>
         </div>
-      </header>
+      </header> : null}
 
       <div
         data-slot="drafting-content-grid"
-        className="grid min-h-0 min-w-0 grid-rows-[minmax(0,1fr)_var(--new-mobile-rail-height)] lg:grid-cols-[var(--new-left-rail-width)_var(--new-middle-rail-width)_minmax(0,1fr)] lg:grid-rows-1"
+        className={cn(
+          "min-h-0 min-w-0",
+          chrome === "canvas-only"
+            ? "block h-full"
+            : "grid grid-rows-[minmax(0,1fr)_var(--new-mobile-rail-height)] lg:grid-cols-[var(--new-left-rail-width)_var(--new-middle-rail-width)_minmax(0,1fr)] lg:grid-rows-1",
+        )}
       >
-        <nav
+        {chrome === "full" ? <nav
           aria-label="Primary navigation frame"
           data-slot="drafting-nav"
           className="relative isolate order-2 min-h-0 min-w-0 overflow-hidden border-t border-transparent bg-[var(--drafting-panel-bg)] lg:order-none lg:border-t-0 lg:bg-transparent"
@@ -4033,8 +4616,8 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
               <ScrollAreaThumb className="bg-[var(--drafting-line-hover)] hover:bg-[var(--drafting-line-strong)]" />
             </ScrollAreaScrollbar>
           </ScrollArea>
-        </nav>
-        <aside
+        </nav> : null}
+        {chrome === "full" ? <aside
           aria-label="Middle scroll frame"
           data-slot="drafting-scroll-area"
           className="hidden min-h-0 min-w-0 overflow-hidden bg-[var(--drafting-panel-bg)] lg:order-none lg:block lg:bg-transparent"
@@ -4063,11 +4646,14 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
               <ScrollAreaThumb className="bg-[var(--drafting-line-hover)] hover:bg-[var(--drafting-line-strong)]" />
             </ScrollAreaScrollbar>
           </ScrollArea>
-        </aside>
+        </aside> : null}
         <section
           aria-label="Workspace frame"
           data-slot="drafting-workspace"
-          className="order-1 min-h-0 min-w-0 overflow-hidden lg:order-none"
+          className={cn(
+            "min-h-0 min-w-0 overflow-hidden",
+            chrome === "canvas-only" ? "h-full" : "order-1 lg:order-none",
+          )}
         >
           <div
             data-slot="drafting-workspace-inset"
@@ -4086,6 +4672,9 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
               onLayerCopy={(_paneId, layerIds) => {
                 void copySelectedDraftingLayers(layerIds, _paneId)
               }}
+              activeCanvasTool={desktopCanvasTool}
+              onAddTextLayerAt={handleAddTextLayerAt}
+              onCanvasToolChange={setDesktopCanvasTool}
               onLayerPaste={(_paneId, point) => {
                 void pasteDraftingLayers(point, undefined, _paneId)
               }}
@@ -4111,14 +4700,89 @@ export function DraftingSurface({ fontClassName }: DraftingSurfaceProps = {}) {
               }}
               onUndo={handleUndoDraftingWorkspace}
               panes={panes}
+              toolbarVariant={paneToolbarVariant}
               selectedLayerId={selectedLayerId}
               selectedLayerIds={selectedLayerIds}
             />
           </div>
         </section>
       </div>
+      {renderOverlay ? renderOverlay(desktopController) : null}
     </section>
   )
+}
+
+function getDesktopToolbarToolId(toolId: DraftingToolId): DesktopToolbarToolId | null {
+  if (toolId === "style") return "pattern"
+  if (toolId === "card-frame" || toolId === "card-image") return "shape"
+  if (toolId === "card-surface") return "decorations"
+  if (toolId === "card-shaders") return "effects"
+  return DRAFTING_RAIL_TOOLS.some((tool) => tool.id === toolId)
+    ? (toolId as DesktopToolbarToolId)
+    : null
+}
+
+function getDraftingToolIdFromDesktop(toolId: DesktopToolbarToolId): DraftingToolId {
+  return toolId === "pattern" ? "style" : toolId
+}
+
+function getDesktopLogoSourceMode(source: AssetSourceMode): DesktopLogoSourceMode {
+  if (source === "preset") return "brand"
+  if (source === "url") return "url"
+  if (source === "upload") return "upload"
+  return "none"
+}
+
+function getDesktopAssetSourceMode(source: "none" | "upload" | "url"): DesktopAssetSourceMode {
+  return source === "url" ? "url" : "upload"
+}
+
+function getDesktopExportTarget(target: DraftingDownloadTarget): DesktopExportTarget {
+  if (target === "all-qr") return "all-qr"
+  return target === "current" ? "current" : "surface"
+}
+
+function getDraftingDownloadTarget(target: DesktopExportTarget): DraftingDownloadTarget {
+  if (target === "all-qr") return "all-qr"
+  return "current"
+}
+
+function toDesktopLayerRow(layer: DraftingCanvasLayer): DesktopLayerRow {
+  return {
+    blur: layer.blur,
+    height: Math.round(layer.height),
+    id: layer.id,
+    isLocked: layer.isLocked,
+    isVisible: layer.isVisible,
+    kind: layer.kind === "text" ? "text" : layer.kind === "card" ? "card" : "qr",
+    name: layer.name,
+    opacity: Math.round(layer.opacity * 100),
+    shadowBlur: layer.shadow.blur,
+    shadowColor: layer.shadow.color,
+    shadowOffsetX: layer.shadow.offsetX,
+    shadowOffsetY: layer.shadow.offsetY,
+    shadowOpacity: layer.shadow.opacity,
+    width: Math.round(layer.width),
+    x: Math.round(layer.x),
+    y: Math.round(layer.y),
+  }
+}
+
+function getDesktopTextSettings(layer: DraftingCanvasLayer | null): DesktopTextSettings {
+  const textLayer = layer?.kind === "text" ? layer : null
+  return {
+    fill: textLayer?.fill ?? DEFAULT_DRAFTING_TEXT_LAYER.fill,
+    fontFamily: textLayer?.fontFamily ?? DEFAULT_DRAFTING_TEXT_LAYER.fontFamily,
+    fontId: textLayer?.fontId ?? DEFAULT_DRAFTING_TEXT_LAYER.fontId,
+    fontSize: textLayer?.fontSize ?? DEFAULT_DRAFTING_TEXT_LAYER.fontSize,
+    fontStyle: textLayer?.fontStyle ?? DEFAULT_DRAFTING_TEXT_LAYER.fontStyle,
+    fontWeight: textLayer?.fontWeight ?? DEFAULT_DRAFTING_TEXT_LAYER.fontWeight,
+    letterSpacing: textLayer?.letterSpacing ?? DEFAULT_DRAFTING_TEXT_LAYER.letterSpacing,
+    lineHeight: textLayer?.lineHeight ?? DEFAULT_DRAFTING_TEXT_LAYER.lineHeight,
+    text: textLayer?.text ?? DEFAULT_DRAFTING_TEXT_LAYER.text,
+    textAlign: textLayer?.textAlign ?? DEFAULT_DRAFTING_TEXT_LAYER.textAlign,
+    underline: textLayer?.underline ?? DEFAULT_DRAFTING_TEXT_LAYER.underline,
+  }
 }
 
 function DraftingTextLayerTab({

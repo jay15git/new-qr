@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
   type TouchEvent,
   type WheelEvent,
@@ -16,9 +17,12 @@ import {
   MagnetIcon,
   Maximize2Icon,
   Minimize2Icon,
+  MinusIcon,
+  PlusIcon,
   Redo2Icon,
   RefreshCcwIcon,
   Trash2Icon,
+  TypeIcon,
   Undo2Icon,
   ZoomInIcon,
   ZoomOutIcon,
@@ -53,6 +57,8 @@ type DraftingPane = {
 
 type DraftingPanelLayouts = Record<string, Record<string, number>>
 type DraftingPanePanOffsets = Record<string, { x: number; y: number }>
+export type DraftingPaneToolbarVariant = "default" | "desktop-zoom"
+export type DraftingPaneCanvasTool = "text"
 
 const MIN_PREVIEW_ZOOM = 0.5
 const MAX_PREVIEW_ZOOM = 2
@@ -95,8 +101,12 @@ type DraftingPaneWorkspaceProps = {
     layerIds: string[],
     options?: { additive?: boolean },
   ) => void
+  activeCanvasTool?: DraftingPaneCanvasTool | null
+  onAddTextLayerAt?: (paneId: string, point: { x: number; y: number }) => void
+  onCanvasToolChange?: (tool: DraftingPaneCanvasTool | null) => void
   selectedLayerId?: string | null
   selectedLayerIds?: string[]
+  toolbarVariant?: DraftingPaneToolbarVariant
 }
 
 function groupPanes<T>(panes: T[], groups: number[]) {
@@ -172,6 +182,9 @@ function DraftingPaneSurface({
   onLayerPaste,
   onLayerSelect,
   onLayerSelectionChange,
+  activeCanvasTool,
+  onAddTextLayerAt,
+  onCanvasToolChange,
   pane,
   panePan,
   paneZoom,
@@ -215,6 +228,9 @@ function DraftingPaneSurface({
     layerIds: string[],
     options?: { additive?: boolean },
   ) => void
+  activeCanvasTool?: DraftingPaneCanvasTool | null
+  onAddTextLayerAt?: (paneId: string, point: { x: number; y: number }) => void
+  onCanvasToolChange?: (tool: DraftingPaneCanvasTool | null) => void
   pane: DraftingPane
   panePan: { x: number; y: number }
   paneZoom: number
@@ -250,6 +266,51 @@ function DraftingPaneSurface({
     onPaneSelectRef.current(pane.id)
   }, [pane.id])
 
+  const getPlacementPoint = useCallback(
+    (event: ReactMouseEvent<HTMLDivElement> | ReactPointerEvent<HTMLDivElement>) => {
+      const rect = event.currentTarget.getBoundingClientRect()
+
+      return {
+        x: (event.clientX - rect.left - rect.width / 2 - panePan.x) / paneZoom,
+        y: (event.clientY - rect.top - rect.height / 2 - panePan.y) / paneZoom,
+      }
+    },
+    [panePan.x, panePan.y, paneZoom],
+  )
+
+  const isPlacementTarget = useCallback(
+    (event: ReactMouseEvent<HTMLDivElement> | ReactPointerEvent<HTMLDivElement>) =>
+      !(
+        event.target instanceof Element &&
+        event.target.closest("[data-layer-id], [data-slot='drafting-layer-resize-frame'], button")
+      ),
+    [],
+  )
+
+  const handleSurfaceClick = useCallback(
+    (event: ReactMouseEvent<HTMLDivElement>) => {
+      if (activeCanvasTool === "text" && onAddTextLayerAt && isPlacementTarget(event)) {
+        event.preventDefault()
+        event.stopPropagation()
+        onPaneSelectRef.current(pane.id)
+        onAddTextLayerAt(pane.id, getPlacementPoint(event))
+        onCanvasToolChange?.(null)
+        return
+      }
+
+      handleSelect()
+    },
+    [
+      activeCanvasTool,
+      getPlacementPoint,
+      handleSelect,
+      isPlacementTarget,
+      onAddTextLayerAt,
+      onCanvasToolChange,
+      pane.id,
+    ],
+  )
+
   const handleQrClick = useCallback(() => {
     onPaneQrClickRef.current(pane.id)
   }, [pane.id])
@@ -260,10 +321,13 @@ function DraftingPaneSurface({
         return
       }
 
-      if (
-        event.target instanceof Element &&
-        event.target.closest("[data-layer-id], [data-slot='drafting-layer-resize-frame'], button")
-      ) {
+      if (!isPlacementTarget(event)) {
+        return
+      }
+
+      if (activeCanvasTool === "text" && onAddTextLayerAt) {
+        event.preventDefault()
+        event.stopPropagation()
         return
       }
 
@@ -280,7 +344,15 @@ function DraftingPaneSurface({
         startPanY: panePan.y,
       }
     },
-    [onLayerSelect, pane.id, panePan.x, panePan.y],
+    [
+      activeCanvasTool,
+      isPlacementTarget,
+      onAddTextLayerAt,
+      onLayerSelect,
+      pane.id,
+      panePan.x,
+      panePan.y,
+    ],
   )
 
   const handlePanePointerMove = useCallback(
@@ -379,7 +451,7 @@ function DraftingPaneSurface({
         backgroundPosition: "0 0",
         backgroundSize: "30px 30px",
       }}
-      onClick={handleSelect}
+      onClick={handleSurfaceClick}
       onDragEnd={onPaneDragEnd}
       onDragLeave={(event) => onPaneDragLeave(pane.id, event)}
       onDragOver={(event) => onPaneDragOver(pane.id, event)}
@@ -447,8 +519,12 @@ export function DraftingPaneWorkspace({
   onLayerPaste,
   onLayerSelect,
   onLayerSelectionChange,
+  activeCanvasTool,
+  onAddTextLayerAt,
+  onCanvasToolChange,
   selectedLayerId,
   selectedLayerIds,
+  toolbarVariant = "default",
 }: DraftingPaneWorkspaceProps) {
   const [zoomLevels, setZoomLevels] = useState<Record<string, number>>({})
   const [panOffsets, setPanOffsets] = useState<DraftingPanePanOffsets>({})
@@ -506,6 +582,7 @@ export function DraftingPaneWorkspace({
   }, [])
 
   const zoomPercent = `${Math.round(activeZoom * 100)}%`
+  const isDesktopZoomToolbar = toolbarVariant === "desktop-zoom"
 
   const isMaximized = maximizedPaneId !== null
 
@@ -520,7 +597,6 @@ export function DraftingPaneWorkspace({
     : panes
 
   const canSwapPanes = panes.length > 1 && Boolean(onSwapPanes)
-
   const layout = panes.length > 0
     ? getQrLayout(isMaximized ? 1 : panes.length, isPortrait)
     : null
@@ -708,6 +784,9 @@ export function DraftingPaneWorkspace({
                                 onLayerPaste={onLayerPaste}
                                 onLayerSelect={onLayerSelect}
                                 onLayerSelectionChange={onLayerSelectionChange}
+                                activeCanvasTool={isSelected ? activeCanvasTool : null}
+                                onAddTextLayerAt={onAddTextLayerAt}
+                                onCanvasToolChange={onCanvasToolChange}
                                 onPaneQrClick={onPaneQrClick}
                                 onPaneSelect={onPaneSelect}
                                 pane={pane}
@@ -745,67 +824,110 @@ export function DraftingPaneWorkspace({
           )}
         </div>
 
+        {isDesktopZoomToolbar ? (
+          <div className="pointer-events-none absolute bottom-4 right-5 z-20 flex justify-end max-md:right-4">
+            <div
+              data-slot="desktop-resize-toolbar"
+              data-toolbar-appearance="desktop-glass"
+              className="pointer-events-auto inline-flex h-14 items-center overflow-hidden rounded-full border border-white/[0.12] bg-black/55 text-white/78 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
+            >
+              <button
+                aria-label="Decrease canvas size"
+                className="grid h-14 w-14 place-items-center text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
+                disabled={activeZoom <= MIN_PREVIEW_ZOOM}
+                type="button"
+                onClick={handleZoomOut}
+              >
+                <MinusIcon className="size-6" strokeWidth={2.6} />
+              </button>
+              <button
+                aria-label="Reset canvas size"
+                className="h-14 min-w-[5.75rem] border-x border-white/[0.12] px-4 text-center text-[1.35rem] font-semibold tracking-normal text-white transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                type="button"
+                onClick={handleResetView}
+              >
+                {zoomPercent}
+              </button>
+              <button
+                aria-label="Increase canvas size"
+                className="grid h-14 w-14 place-items-center text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
+                disabled={activeZoom >= MAX_PREVIEW_ZOOM}
+                type="button"
+                onClick={handleZoomIn}
+              >
+                <PlusIcon className="size-7" strokeWidth={2.3} />
+              </button>
+            </div>
+          </div>
+        ) : null}
+
         <div className="pointer-events-none absolute inset-x-5 bottom-4 z-20 flex justify-center px-2 sm:inset-x-6 lg:inset-x-8">
           <div
             data-slot="dashboard-compose-toolbar"
-            data-toolbar-appearance="neutral"
+            data-toolbar-appearance={isDesktopZoomToolbar ? "desktop-glass" : "neutral"}
             className={cn(
               "pointer-events-auto inline-flex max-w-full flex-wrap items-center justify-center gap-1 rounded-[10px] bg-[var(--drafting-panel-bg-active)] px-2 py-1.5",
+              isDesktopZoomToolbar &&
+                "min-h-14 rounded-full border border-white/[0.12] bg-black/55 px-3 text-white/78 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl",
             )}
           >
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  aria-label="Zoom out preview"
-                  className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
-                  onClick={handleZoomOut}
-                  size="icon"
-                  type="button"
-                  variant="ghost"
-                >
-                  <ZoomOutIcon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Zoom out</TooltipContent>
-            </Tooltip>
+            {!isDesktopZoomToolbar ? (
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Zoom out preview"
+                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                      onClick={handleZoomOut}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <ZoomOutIcon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Zoom out</TooltipContent>
+                </Tooltip>
 
-            <div className="min-w-12 px-1 text-center font-semibold drafting-type-data text-[var(--drafting-ink)]">
-              {zoomPercent}
-            </div>
+                <div className="min-w-12 px-1 text-center font-semibold drafting-type-data text-[var(--drafting-ink)]">
+                  {zoomPercent}
+                </div>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  aria-label="Zoom in preview"
-                  className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
-                  onClick={handleZoomIn}
-                  size="icon"
-                  type="button"
-                  variant="ghost"
-                >
-                  <ZoomInIcon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Zoom in</TooltipContent>
-            </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Zoom in preview"
+                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                      onClick={handleZoomIn}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <ZoomInIcon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Zoom in</TooltipContent>
+                </Tooltip>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  aria-label="Reset view"
-                  className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
-                  onClick={handleResetView}
-                  size="icon"
-                  type="button"
-                  variant="ghost"
-                >
-                  <CrosshairIcon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Reset view</TooltipContent>
-            </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Reset view"
+                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                      onClick={handleResetView}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <CrosshairIcon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Reset view</TooltipContent>
+                </Tooltip>
 
-            <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" />
+                <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" />
+              </>
+            ) : null}
 
             <Tooltip>
               <TooltipTrigger asChild>
@@ -859,6 +981,32 @@ export function DraftingPaneWorkspace({
 
             {onAddQrCode ? (
               <>
+                {isDesktopZoomToolbar ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        aria-label="Add text on canvas"
+                        aria-pressed={activeCanvasTool === "text"}
+                        className={cn(
+                          "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] disabled:opacity-40",
+                          activeCanvasTool === "text" &&
+                            "bg-[var(--drafting-ink)] text-[var(--drafting-paper)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-paper)]",
+                        )}
+                        disabled={!onAddTextLayerAt}
+                        onClick={() =>
+                          onCanvasToolChange?.(activeCanvasTool === "text" ? null : "text")
+                        }
+                        size="icon"
+                        type="button"
+                        variant="ghost"
+                      >
+                        <TypeIcon />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Click canvas to add text</TooltipContent>
+                  </Tooltip>
+                ) : null}
+
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button

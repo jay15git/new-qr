@@ -6,6 +6,7 @@ import {
   cloneElement,
   createContext,
   isValidElement,
+  type ComponentProps,
   type ReactElement,
   type ReactNode,
   useContext,
@@ -162,6 +163,7 @@ vi.mock("@/components/unlumen-ui/slider", () => ({
 }))
 
 import { DraftingSurface } from "@/components/new/drafting-surface"
+import { DesktopToolbarPrototype } from "@/components/desktop/desktop-toolbar-prototype"
 import { createDefaultDraftingCardPaperShader } from "@/components/new/drafting-card-state"
 import { createDraftingPaperShaderThumbnailCacheKey } from "@/components/new/drafting-style-tab"
 import { DASHBOARD_QR_NODE_ID } from "@/components/qr/dashboard-compose-scene"
@@ -1313,6 +1315,86 @@ describe("DraftingSurface", () => {
     expect(surface.container.textContent).not.toContain("Render type")
     expect(surface.container.querySelector('[data-slot="drafting-style-margin-slider"]')).toBeNull()
     expect(surface.container.querySelector('[data-slot="drafting-style-size-slider"]')).toBeNull()
+  })
+
+  it("wires the desktop overlay content inspector into the active drafting QR state", () => {
+    const surface = renderDesktopOverlaySurface()
+    const root = getRequiredElement(surface.container, '[data-slot="drafting-surface"]')
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, '[data-tool-id="content"]'))
+    })
+
+    const payload = getRequiredElement(
+      surface.container,
+      '#desktop-content-text',
+    ) as HTMLTextAreaElement
+
+    act(() => {
+      changeInputValue(payload, "https://example.com/desktop-live")
+    })
+
+    expect(root.getAttribute("data-qr-content-value")).toBe("https://example.com/desktop-live")
+  })
+
+  it("wires desktop pattern and logo inspectors into the active drafting QR state", () => {
+    const surface = renderDesktopOverlaySurface()
+    const root = getRequiredElement(surface.container, '[data-slot="drafting-surface"]')
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, '[data-tool-id="pattern"]'))
+    })
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Use Dots pattern"]'))
+      changeInputValue(
+        getRequiredElement(surface.container, 'input[aria-label="Solid color"]') as HTMLInputElement,
+        "#123456",
+      )
+    })
+
+    expect(root.getAttribute("data-qr-content-value")).toBe("https://new-qr-studio.local/launch")
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, '[data-tool-id="logo"]'))
+    })
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Use Brand logo source"]'))
+    })
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Use Instagram logo icon"]'))
+    })
+
+    expect(root.getAttribute("data-logo-source-mode")).toBe("preset")
+    expect(root.getAttribute("data-logo-preset-id")).toBe("instagram")
+  })
+
+  it("renders the desktop canvas resize toolbar and wires it to preview zoom", () => {
+    const surface = renderDesktopOverlaySurface({ paneToolbarVariant: "desktop-zoom" })
+    const composeToolbar = getRequiredElement(surface.container, '[data-slot="dashboard-compose-toolbar"]')
+
+    expect(composeToolbar.getAttribute("data-toolbar-appearance")).toBe("desktop-glass")
+    expect(composeToolbar.className).toContain("rounded-full")
+    expect(composeToolbar.className).toContain("bg-black/55")
+    expect(surface.container.querySelector('button[aria-label="Zoom out preview"]')).toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Zoom in preview"]')).toBeNull()
+    expect(surface.container.querySelector('button[aria-label="Reset view"]')).toBeNull()
+    const resizeToolbar = getRequiredElement(surface.container, '[data-slot="desktop-resize-toolbar"]')
+    expect(resizeToolbar.parentElement?.className).toContain("bottom-4")
+    expect(resizeToolbar.parentElement?.className).toContain("right-5")
+    expect(resizeToolbar.getAttribute("data-toolbar-appearance")).toBe("desktop-glass")
+    expect(resizeToolbar.textContent).toContain("100%")
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Increase canvas size"]'))
+    })
+
+    expect(resizeToolbar.textContent).toContain("110%")
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Reset canvas size"]'))
+    })
+
+    expect(resizeToolbar.textContent).toContain("100%")
   })
 
   it("builds Wi-Fi payloads from the content type selector and preserves per-type drafts", () => {
@@ -4229,6 +4311,41 @@ function renderSurface({ openDownloadPopover = true }: { openDownloadPopover?: b
       })
     }
   }
+
+  return {
+    container,
+    unmount: () => {
+      const index = cleanupCallbacks.indexOf(cleanup)
+      if (index >= 0) {
+        cleanupCallbacks.splice(index, 1)
+      }
+      cleanup()
+    },
+  }
+}
+
+function renderDesktopOverlaySurface(props: ComponentProps<typeof DraftingSurface> = {}) {
+  const container = document.createElement("div")
+  const root = createRoot(container)
+
+  act(() => {
+    root.render(
+      <DraftingSurface
+        chrome="canvas-only"
+        renderOverlay={(controller) => <DesktopToolbarPrototype controller={controller} />}
+        {...props}
+      />,
+    )
+  })
+
+  const cleanup = () => {
+    act(() => {
+      root.unmount()
+    })
+  }
+
+  cleanupCallbacks.push(cleanup)
+  document.body.appendChild(container)
 
   return {
     container,

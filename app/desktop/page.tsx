@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import localFont from "next/font/local"
 
-import { DesktopToolbarPrototype } from "@/components/desktop/desktop-toolbar-prototype"
+import { DesktopWorkspace } from "@/components/desktop/desktop-workspace"
 
 const satoshi = localFont({
   src: "../../public/Satoshi_Complete/Fonts/WEB/fonts/Satoshi-Variable.woff2",
@@ -12,7 +12,7 @@ const satoshi = localFont({
 
 export const metadata: Metadata = {
   title: "Desktop Workspace",
-  description: "A desktop QR workspace prototype with a floating toolbar.",
+  description: "A desktop QR workspace with the full drafting canvas and floating toolbar.",
 }
 
 export default function DesktopPage() {
@@ -21,7 +21,7 @@ export default function DesktopPage() {
       data-slot="desktop-page"
       className={`${satoshi.className} min-h-dvh overflow-hidden bg-[#07080a] text-white`}
     >
-      <DesktopToolbarPrototype />
+      <DesktopWorkspace fontClassName={satoshi.className} />
     </main>
   )
 }

@@ -125,7 +125,7 @@ import { ReceiptTextIcon } from "@/components/ui/receipt-text"
 import { cn } from "@/lib/utils"
 
 type DesktopToolbarGroup = "QR" | "Add" | "Manage"
-type DesktopToolbarToolId =
+export type DesktopToolbarToolId =
   | "content"
   | "pattern"
   | "corners"
@@ -147,7 +147,7 @@ type DesktopToolbarTool = {
   renderIcon: () => ReactNode
 }
 
-type DesktopThemeMode = "dark" | "light"
+export type DesktopThemeMode = "dark" | "light"
 
 const DESKTOP_TOOLBAR_TOOLS: DesktopToolbarTool[] = [
   {
@@ -286,7 +286,7 @@ const DESKTOP_ALL_CONTENT_TYPES = Array.from(
 
 type DesktopPatternCollectionId = "pattern" | "color"
 
-type DesktopPatternSettings = {
+export type DesktopPatternSettings = {
   dotsColorMode: DotsColorMode
   dotsGradient: StudioGradient
   dotsPalette: string[]
@@ -294,10 +294,10 @@ type DesktopPatternSettings = {
   qrDotType: StudioDotType
 }
 
-type DesktopLogoSourceMode = "brand" | "none" | "upload" | "url"
-type DesktopAssetSourceMode = "upload" | "url"
+export type DesktopLogoSourceMode = "brand" | "none" | "upload" | "url"
+export type DesktopAssetSourceMode = "upload" | "url"
 
-type DesktopLogoSettings = {
+export type DesktopLogoSettings = {
   colorMode: DesktopCornerColorMode
   gradient: StudioGradient
   hideBackgroundDots: boolean
@@ -311,7 +311,7 @@ type DesktopLogoSettings = {
   uploadMode: DesktopAssetSourceMode
 }
 
-type DesktopCornersSettings = {
+export type DesktopCornersSettings = {
   cornerDotColorMode: DesktopCornerColorMode
   cornerDotGradient: StudioGradient
   cornerDotSolidColor: string
@@ -326,7 +326,7 @@ type DesktopCornerColorMode = "solid" | "gradient"
 
 type DesktopShapeColorMode = "solid" | "gradient"
 
-type DesktopShapeSettings = {
+export type DesktopShapeSettings = {
   backgroundShapeId: QrBackgroundShapeId
   borderColor: string
   borderOpacity: number
@@ -360,16 +360,16 @@ type DesktopShapeSettings = {
   shadowOpacity: number
 }
 
-type DesktopMotionSettings = QrDotMatrixAnimationOptions
+export type DesktopMotionSettings = QrDotMatrixAnimationOptions
 
-type DesktopEncodingSettings = {
+export type DesktopEncodingSettings = {
   errorCorrectionLevel: ErrorCorrectionLevel
   typeNumber: TypeNumber
 }
 
 type DesktopImageIntent = "image-object" | "logo" | "shape-fill"
 
-type DesktopImageSettings = {
+export type DesktopImageSettings = {
   fit: "contain" | "cover"
   intent: DesktopImageIntent
   opacity: number
@@ -377,7 +377,7 @@ type DesktopImageSettings = {
   sourceMode: DesktopAssetSourceMode
 }
 
-type DesktopDecorationsSettings = {
+export type DesktopDecorationsSettings = {
   fill: string
   kind: "badge" | "frame" | "label" | "sticker"
   patternId: DraftingCardPatternSelectionId
@@ -386,7 +386,7 @@ type DesktopDecorationsSettings = {
   strokeWidth: number
 }
 
-type DesktopEffectsSettings = {
+export type DesktopEffectsSettings = {
   filterId: PaperShaderId
   filterPresetName: string
   generatedShaderId: PaperShaderId
@@ -396,8 +396,8 @@ type DesktopEffectsSettings = {
   frame: number
 }
 
-type DesktopLayerKind = "card" | "qr" | "text"
-type DesktopLayerRow = {
+export type DesktopLayerKind = "card" | "qr" | "text"
+export type DesktopLayerRow = {
   blur: number
   height: number
   id: string
@@ -416,13 +416,13 @@ type DesktopLayerRow = {
   y: number
 }
 
-type DesktopLayersSettings = {
+export type DesktopLayersSettings = {
   layers: DesktopLayerRow[]
   selectedLayerId: string
 }
 
-type DesktopExportTarget = "all-qr" | "current" | "surface"
-type DesktopRasterExportPresetId =
+export type DesktopExportTarget = "all-qr" | "current" | "surface"
+export type DesktopRasterExportPresetId =
   | "flyer-poster"
   | "large-format"
   | "max-quality"
@@ -430,13 +430,13 @@ type DesktopRasterExportPresetId =
   | "small-print"
   | "web-social"
 
-type DesktopExportSettings = {
+export type DesktopExportSettings = {
   extension: FileExtension
   qualityPresetId: DesktopRasterExportPresetId
   target: DesktopExportTarget
 }
 
-type DesktopTextSettings = {
+export type DesktopTextSettings = {
   fill: string
   fontFamily: string
   fontId: string
@@ -451,6 +451,55 @@ type DesktopTextSettings = {
 }
 
 type DesktopTextPresetId = "body" | "caption" | "title"
+
+export type DesktopToolbarController = {
+  activeTool: DesktopToolbarToolId | null
+  contentType: QrInputType
+  contentValues: StaticQrContentValues
+  contentValidation: ReturnType<typeof validateStaticQrContent>
+  encodedContentValue: string
+  patternSettings: DesktopPatternSettings
+  logoSettings: DesktopLogoSettings
+  cornersSettings: DesktopCornersSettings
+  shapeSettings: DesktopShapeSettings
+  motionSettings: DesktopMotionSettings
+  encodingSettings: DesktopEncodingSettings
+  imageSettings: DesktopImageSettings
+  decorationsSettings: DesktopDecorationsSettings
+  effectsSettings: DesktopEffectsSettings
+  layersSettings: DesktopLayersSettings
+  exportSettings: DesktopExportSettings
+  textSettings: DesktopTextSettings
+  onActiveToolChange: (toolId: DesktopToolbarToolId) => void
+  onContentReset: () => void
+  onContentTypeChange: (type: QrInputType) => void
+  onContentValueChange: (field: string, value: StaticQrContentValue) => void
+  onPatternReset: () => void
+  onPatternSettingsChange: (patch: Partial<DesktopPatternSettings>) => void
+  onLogoReset: () => void
+  onLogoSettingsChange: (patch: Partial<DesktopLogoSettings>) => void
+  onCornersReset: () => void
+  onCornersSettingsChange: (patch: Partial<DesktopCornersSettings>) => void
+  onShapeReset: () => void
+  onShapeSettingsChange: (patch: Partial<DesktopShapeSettings>) => void
+  onMotionReset: () => void
+  onMotionSettingsChange: (patch: QrDotMatrixAnimationPatch) => void
+  onEncodingReset: () => void
+  onEncodingSettingsChange: (patch: Partial<DesktopEncodingSettings>) => void
+  onImageReset: () => void
+  onImageSettingsChange: (patch: Partial<DesktopImageSettings>) => void
+  onDecorationsReset: () => void
+  onDecorationsSettingsChange: (patch: Partial<DesktopDecorationsSettings>) => void
+  onEffectsReset: () => void
+  onEffectsSettingsChange: (patch: Partial<DesktopEffectsSettings>) => void
+  onLayersReset: () => void
+  onLayersSettingsChange: (patch: Partial<DesktopLayersSettings>) => void
+  onExportReset: () => void
+  onExportSettingsChange: (patch: Partial<DesktopExportSettings>) => void
+  onExportDownload: () => void
+  onTextReset: () => void
+  onTextSettingsChange: (patch: Partial<DesktopTextSettings>) => void
+}
 
 const DESKTOP_PATTERN_COLLECTIONS: Array<{
   id: DesktopPatternCollectionId
@@ -784,7 +833,15 @@ const DESKTOP_MOTION_COLOR_SWATCHES: Record<DesktopMotionSettings["colorPreset"]
   theme: ["#22d3ee", "#22d3ee", "#22d3ee"],
 }
 
-export function DesktopToolbarPrototype() {
+export function DesktopToolbarPrototype({
+  controller,
+  theme,
+  onThemeChange,
+}: {
+  controller?: DesktopToolbarController
+  theme?: DesktopThemeMode
+  onThemeChange?: (theme: DesktopThemeMode) => void
+} = {}) {
   const [activeTool, setActiveTool] = useState<DesktopToolbarToolId | null>(null)
   const [desktopTheme, setDesktopTheme] = useState<DesktopThemeMode>("dark")
   const [patternSettings, setPatternSettings] = useState<DesktopPatternSettings>(
@@ -823,7 +880,9 @@ export function DesktopToolbarPrototype() {
   const [textSettings, setTextSettings] = useState<DesktopTextSettings>(
     DEFAULT_DESKTOP_TEXT_SETTINGS,
   )
-  const activeToolConfig = DESKTOP_TOOLBAR_TOOLS.find((tool) => tool.id === activeTool)
+  const actualActiveTool = controller?.activeTool ?? activeTool
+  const actualDesktopTheme = theme ?? desktopTheme
+  const activeToolConfig = DESKTOP_TOOLBAR_TOOLS.find((tool) => tool.id === actualActiveTool)
   const [selectedContentType, setSelectedContentType] =
     useState<QrInputType>(DEFAULT_QR_INPUT_TYPE)
   const [contentValuesByType, setContentValuesByType] = useState<
@@ -873,26 +932,109 @@ export function DesktopToolbarPrototype() {
     }))
   }
 
+  const actualPatternSettings = controller?.patternSettings ?? patternSettings
+  const actualLogoSettings = controller?.logoSettings ?? logoSettings
+  const actualCornersSettings = controller?.cornersSettings ?? cornersSettings
+  const actualShapeSettings = controller?.shapeSettings ?? shapeSettings
+  const actualMotionSettings = controller?.motionSettings ?? motionSettings
+  const actualEncodingSettings = controller?.encodingSettings ?? encodingSettings
+  const actualImageSettings = controller?.imageSettings ?? imageSettings
+  const actualDecorationsSettings = controller?.decorationsSettings ?? decorationsSettings
+  const actualEffectsSettings = controller?.effectsSettings ?? effectsSettings
+  const actualLayersSettings = controller?.layersSettings ?? layersSettings
+  const actualExportSettings = controller?.exportSettings ?? exportSettings
+  const actualTextSettings = controller?.textSettings ?? textSettings
+  const actualContentType = controller?.contentType ?? selectedContentType
+  const actualContentValues = controller?.contentValues ?? selectedContentValues
+  const actualEncodedContentValue = controller?.encodedContentValue ?? selectedContentValue
+  const actualContentValidation = controller?.contentValidation ?? selectedContentValidation
+  const onActiveToolChange = controller?.onActiveToolChange ?? setActiveTool
+  const onPatternSettingsChange =
+    controller?.onPatternSettingsChange ??
+    ((patch: Partial<DesktopPatternSettings>) =>
+      setPatternSettings((current) => ({ ...current, ...patch })))
+  const onLogoSettingsChange =
+    controller?.onLogoSettingsChange ??
+    ((patch: Partial<DesktopLogoSettings>) =>
+      setLogoSettings((current) => ({ ...current, ...patch })))
+  const onCornersSettingsChange =
+    controller?.onCornersSettingsChange ??
+    ((patch: Partial<DesktopCornersSettings>) =>
+      setCornersSettings((current) => ({ ...current, ...patch })))
+  const onShapeSettingsChange =
+    controller?.onShapeSettingsChange ??
+    ((patch: Partial<DesktopShapeSettings>) =>
+      setShapeSettings((current) => ({ ...current, ...patch })))
+  const onMotionSettingsChange =
+    controller?.onMotionSettingsChange ??
+    ((patch: QrDotMatrixAnimationPatch) =>
+      setMotionSettings((current) => ({
+        ...current,
+        ...patch,
+        loader: (patch.loader ?? current.loader) as DesktopMotionSettings["loader"],
+      })))
+  const onEncodingSettingsChange =
+    controller?.onEncodingSettingsChange ??
+    ((patch: Partial<DesktopEncodingSettings>) =>
+      setEncodingSettings((current) => ({ ...current, ...patch })))
+  const onImageSettingsChange =
+    controller?.onImageSettingsChange ??
+    ((patch: Partial<DesktopImageSettings>) =>
+      setImageSettings((current) => ({ ...current, ...patch })))
+  const onDecorationsSettingsChange =
+    controller?.onDecorationsSettingsChange ??
+    ((patch: Partial<DesktopDecorationsSettings>) =>
+      setDecorationsSettings((current) => ({ ...current, ...patch })))
+  const onEffectsSettingsChange =
+    controller?.onEffectsSettingsChange ??
+    ((patch: Partial<DesktopEffectsSettings>) =>
+      setEffectsSettings((current) => ({ ...current, ...patch })))
+  const onLayersSettingsChange =
+    controller?.onLayersSettingsChange ??
+    ((patch: Partial<DesktopLayersSettings>) =>
+      setLayersSettings((current) => ({ ...current, ...patch })))
+  const onExportSettingsChange =
+    controller?.onExportSettingsChange ??
+    ((patch: Partial<DesktopExportSettings>) =>
+      setExportSettings((current) => ({ ...current, ...patch })))
+  const onTextSettingsChange =
+    controller?.onTextSettingsChange ??
+    ((patch: Partial<DesktopTextSettings>) =>
+      setTextSettings((current) => ({ ...current, ...patch })))
+  const onDesktopThemeChange =
+    onThemeChange ??
+    ((nextTheme: DesktopThemeMode) => {
+      setDesktopTheme(nextTheme)
+    })
+
+  function handleDesktopThemeToggle() {
+    onDesktopThemeChange(actualDesktopTheme === "light" ? "dark" : "light")
+  }
+
   return (
     <TooltipProvider delayDuration={150}>
       <section
         aria-label="Desktop workspace prototype"
-        data-desktop-theme={desktopTheme}
+        data-desktop-theme={actualDesktopTheme}
         data-slot="desktop-toolbar-prototype"
         className={cn(
           "relative min-h-dvh overflow-hidden transition-colors duration-200",
-          desktopTheme === "light" ? "bg-[#f4f6f9]" : "bg-[#07080a]",
+          actualDesktopTheme === "light" ? "bg-[#f4f6f9]" : "bg-[#07080a]",
         )}
       >
         <DesktopThemeStyles />
         <button
-          aria-label={`Switch to ${desktopTheme === "light" ? "dark" : "light"} mode`}
+          aria-label={`Switch to ${actualDesktopTheme === "light" ? "dark" : "light"} mode`}
           data-slot="desktop-theme-toggle"
           className="fixed right-5 top-5 z-30 grid size-10 place-items-center rounded-full border border-white/[0.12] bg-black/55 text-white/72 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl transition hover:bg-white/[0.11] hover:text-white focus-visible:ring-2 focus-visible:ring-white/45 max-md:right-4 max-md:top-4"
           type="button"
-          onClick={() => setDesktopTheme((current) => (current === "light" ? "dark" : "light"))}
+          onClick={handleDesktopThemeToggle}
         >
-          {desktopTheme === "light" ? <MoonIcon className="size-4" /> : <SunIcon className="size-4" />}
+          {actualDesktopTheme === "light" ? (
+            <MoonIcon className="size-4" />
+          ) : (
+            <SunIcon className="size-4" />
+          )}
         </button>
         <nav
           aria-label="Desktop tools"
@@ -900,7 +1042,7 @@ export function DesktopToolbarPrototype() {
           className="fixed bottom-5 left-5 top-5 z-20 flex w-14 flex-col items-center justify-start gap-1.5 overflow-y-auto rounded-[24px] border border-white/[0.12] bg-black/55 p-1.5 text-white/72 shadow-[0_22px_55px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl max-md:bottom-4 max-md:left-3 max-md:top-4 max-md:w-12 max-md:p-1"
         >
           {DESKTOP_TOOLBAR_TOOLS.map((tool, index) => {
-            const isActive = activeTool === tool.id
+            const isActive = actualActiveTool === tool.id
             const previousGroup = DESKTOP_TOOLBAR_TOOLS[index - 1]?.group
             const startsGroup = index > 0 && tool.group !== previousGroup
 
@@ -926,7 +1068,7 @@ export function DesktopToolbarPrototype() {
                         isActive &&
                           "bg-white/[0.18] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_8px_22px_rgba(0,0,0,0.28)] hover:bg-white/[0.2]",
                       )}
-                      onClick={() => setActiveTool(tool.id)}
+                      onClick={() => onActiveToolChange(tool.id)}
                     >
                       {tool.renderIcon()}
                     </button>
@@ -950,115 +1092,88 @@ export function DesktopToolbarPrototype() {
             data-slot="desktop-floating-inspector"
             className="fixed bottom-5 left-[5.75rem] top-5 z-10 flex w-72 min-w-0 flex-col overflow-hidden rounded-[24px] border border-white/[0.1] bg-black/55 text-white shadow-[0_24px_65px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl max-md:bottom-4 max-md:left-[4.25rem] max-md:top-4 max-md:w-[min(16rem,calc(100vw-5rem))] max-md:rounded-[22px]"
           >
-            {activeTool === "content" ? (
+            {actualActiveTool === "content" ? (
               <DesktopContentInspector
-                contentType={selectedContentType}
-                contentValues={selectedContentValues}
-                encodedValue={selectedContentValue}
-                validation={selectedContentValidation}
-                onContentReset={handleContentReset}
-                onContentTypeChange={handleContentTypeChange}
-                onContentValueChange={handleContentValueChange}
+                contentType={actualContentType}
+                contentValues={actualContentValues}
+                encodedValue={actualEncodedContentValue}
+                validation={actualContentValidation}
+                onContentReset={controller?.onContentReset ?? handleContentReset}
+                onContentTypeChange={controller?.onContentTypeChange ?? handleContentTypeChange}
+                onContentValueChange={controller?.onContentValueChange ?? handleContentValueChange}
               />
-            ) : activeTool === "pattern" ? (
+            ) : actualActiveTool === "pattern" ? (
               <DesktopPatternInspector
-                settings={patternSettings}
-                onPatternReset={() => setPatternSettings(DEFAULT_DESKTOP_PATTERN_SETTINGS)}
-                onPatternSettingsChange={(patch) =>
-                  setPatternSettings((current) => ({ ...current, ...patch }))
-                }
+                settings={actualPatternSettings}
+                onPatternReset={controller?.onPatternReset ?? (() => setPatternSettings(DEFAULT_DESKTOP_PATTERN_SETTINGS))}
+                onPatternSettingsChange={onPatternSettingsChange}
               />
-            ) : activeTool === "corners" ? (
+            ) : actualActiveTool === "corners" ? (
               <DesktopCornersInspector
-                settings={cornersSettings}
-                onCornersReset={() => setCornersSettings(DEFAULT_DESKTOP_CORNERS_SETTINGS)}
-                onCornersSettingsChange={(patch) =>
-                  setCornersSettings((current) => ({ ...current, ...patch }))
-                }
+                settings={actualCornersSettings}
+                onCornersReset={controller?.onCornersReset ?? (() => setCornersSettings(DEFAULT_DESKTOP_CORNERS_SETTINGS))}
+                onCornersSettingsChange={onCornersSettingsChange}
               />
-            ) : activeTool === "logo" ? (
+            ) : actualActiveTool === "logo" ? (
               <DesktopLogoInspector
-                settings={logoSettings}
-                onLogoReset={() => setLogoSettings(DEFAULT_DESKTOP_LOGO_SETTINGS)}
-                onLogoSettingsChange={(patch) =>
-                  setLogoSettings((current) => ({ ...current, ...patch }))
-                }
+                settings={actualLogoSettings}
+                onLogoReset={controller?.onLogoReset ?? (() => setLogoSettings(DEFAULT_DESKTOP_LOGO_SETTINGS))}
+                onLogoSettingsChange={onLogoSettingsChange}
               />
-            ) : activeTool === "shape" ? (
+            ) : actualActiveTool === "shape" ? (
               <DesktopShapeInspector
-                settings={shapeSettings}
-                onShapeReset={() => setShapeSettings(DEFAULT_DESKTOP_SHAPE_SETTINGS)}
-                onShapeSettingsChange={(patch) =>
-                  setShapeSettings((current) => ({ ...current, ...patch }))
-                }
+                settings={actualShapeSettings}
+                onShapeReset={controller?.onShapeReset ?? (() => setShapeSettings(DEFAULT_DESKTOP_SHAPE_SETTINGS))}
+                onShapeSettingsChange={onShapeSettingsChange}
               />
-            ) : activeTool === "motion" ? (
+            ) : actualActiveTool === "motion" ? (
               <DesktopMotionInspector
-                settings={motionSettings}
-                onMotionReset={() => setMotionSettings(DEFAULT_DESKTOP_MOTION_SETTINGS)}
-                onMotionSettingsChange={(patch) =>
-                  setMotionSettings((current) => ({
-                    ...current,
-                    ...patch,
-                    loader: (patch.loader ?? current.loader) as DesktopMotionSettings["loader"],
-                  }))
-                }
+                settings={actualMotionSettings}
+                onMotionReset={controller?.onMotionReset ?? (() => setMotionSettings(DEFAULT_DESKTOP_MOTION_SETTINGS))}
+                onMotionSettingsChange={onMotionSettingsChange}
               />
-            ) : activeTool === "encoding" ? (
+            ) : actualActiveTool === "encoding" ? (
               <DesktopEncodingInspector
-                settings={encodingSettings}
-                onEncodingReset={() => setEncodingSettings(DEFAULT_DESKTOP_ENCODING_SETTINGS)}
-                onEncodingSettingsChange={(patch) =>
-                  setEncodingSettings((current) => ({ ...current, ...patch }))
-                }
+                settings={actualEncodingSettings}
+                onEncodingReset={controller?.onEncodingReset ?? (() => setEncodingSettings(DEFAULT_DESKTOP_ENCODING_SETTINGS))}
+                onEncodingSettingsChange={onEncodingSettingsChange}
               />
-            ) : activeTool === "text" ? (
+            ) : actualActiveTool === "text" ? (
               <DesktopTextInspector
-                settings={textSettings}
-                onTextReset={() => setTextSettings(DEFAULT_DESKTOP_TEXT_SETTINGS)}
-                onTextSettingsChange={(patch) =>
-                  setTextSettings((current) => ({ ...current, ...patch }))
-                }
+                settings={actualTextSettings}
+                onTextReset={controller?.onTextReset ?? (() => setTextSettings(DEFAULT_DESKTOP_TEXT_SETTINGS))}
+                onTextSettingsChange={onTextSettingsChange}
               />
-            ) : activeTool === "image" ? (
+            ) : actualActiveTool === "image" ? (
               <DesktopImageInspector
-                settings={imageSettings}
-                onImageReset={() => setImageSettings(DEFAULT_DESKTOP_IMAGE_SETTINGS)}
-                onImageSettingsChange={(patch) =>
-                  setImageSettings((current) => ({ ...current, ...patch }))
-                }
+                settings={actualImageSettings}
+                onImageReset={controller?.onImageReset ?? (() => setImageSettings(DEFAULT_DESKTOP_IMAGE_SETTINGS))}
+                onImageSettingsChange={onImageSettingsChange}
               />
-            ) : activeTool === "decorations" ? (
+            ) : actualActiveTool === "decorations" ? (
               <DesktopDecorationsInspector
-                settings={decorationsSettings}
-                onDecorationsReset={() => setDecorationsSettings(DEFAULT_DESKTOP_DECORATIONS_SETTINGS)}
-                onDecorationsSettingsChange={(patch) =>
-                  setDecorationsSettings((current) => ({ ...current, ...patch }))
-                }
+                settings={actualDecorationsSettings}
+                onDecorationsReset={controller?.onDecorationsReset ?? (() => setDecorationsSettings(DEFAULT_DESKTOP_DECORATIONS_SETTINGS))}
+                onDecorationsSettingsChange={onDecorationsSettingsChange}
               />
-            ) : activeTool === "effects" ? (
+            ) : actualActiveTool === "effects" ? (
               <DesktopEffectsInspector
-                settings={effectsSettings}
-                onEffectsReset={() => setEffectsSettings(DEFAULT_DESKTOP_EFFECTS_SETTINGS)}
-                onEffectsSettingsChange={(patch) =>
-                  setEffectsSettings((current) => ({ ...current, ...patch }))
-                }
+                settings={actualEffectsSettings}
+                onEffectsReset={controller?.onEffectsReset ?? (() => setEffectsSettings(DEFAULT_DESKTOP_EFFECTS_SETTINGS))}
+                onEffectsSettingsChange={onEffectsSettingsChange}
               />
-            ) : activeTool === "layers" ? (
+            ) : actualActiveTool === "layers" ? (
               <DesktopLayersInspector
-                settings={layersSettings}
-                onLayersReset={() => setLayersSettings(DEFAULT_DESKTOP_LAYERS_SETTINGS)}
-                onLayersSettingsChange={(patch) =>
-                  setLayersSettings((current) => ({ ...current, ...patch }))
-                }
+                settings={actualLayersSettings}
+                onLayersReset={controller?.onLayersReset ?? (() => setLayersSettings(DEFAULT_DESKTOP_LAYERS_SETTINGS))}
+                onLayersSettingsChange={onLayersSettingsChange}
               />
-            ) : activeTool === "export" ? (
+            ) : actualActiveTool === "export" ? (
               <DesktopExportInspector
-                settings={exportSettings}
-                onExportReset={() => setExportSettings(DEFAULT_DESKTOP_EXPORT_SETTINGS)}
-                onExportSettingsChange={(patch) =>
-                  setExportSettings((current) => ({ ...current, ...patch }))
-                }
+                settings={actualExportSettings}
+                onExportDownload={controller?.onExportDownload ?? (() => undefined)}
+                onExportReset={controller?.onExportReset ?? (() => setExportSettings(DEFAULT_DESKTOP_EXPORT_SETTINGS))}
+                onExportSettingsChange={onExportSettingsChange}
               />
             ) : (
               <DesktopPlaceholderInspector tool={activeToolConfig} />
@@ -1146,11 +1261,11 @@ function DesktopThemeStyles() {
       }
 
       [data-slot="desktop-floating-inspector"] {
-        background: #101114 !important;
-        border-color: rgba(255, 255, 255, 0.1) !important;
-        border-radius: 12px !important;
-        box-shadow: none !important;
-        backdrop-filter: none !important;
+        background: rgba(0, 0, 0, 0.55) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        border-radius: 24px !important;
+        box-shadow: 0 22px 55px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+        backdrop-filter: blur(40px) !important;
       }
 
       [data-slot="desktop-floating-inspector"] .scroll-fade-effect-y > section,
@@ -1171,9 +1286,9 @@ function DesktopThemeStyles() {
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] {
-        background: #f4f6f9 !important;
+        background: rgba(255, 255, 255, 0.72) !important;
         border-color: rgba(15, 23, 42, 0.12) !important;
-        box-shadow: none !important;
+        box-shadow: 0 24px 64px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.86) !important;
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] .scroll-fade-effect-y > section,
@@ -3973,10 +4088,12 @@ function DesktopLayersInspector({
 }
 
 function DesktopExportInspector({
+  onExportDownload,
   onExportReset,
   onExportSettingsChange,
   settings,
 }: {
+  onExportDownload: () => void
   onExportReset: () => void
   onExportSettingsChange: (patch: Partial<DesktopExportSettings>) => void
   settings: DesktopExportSettings
@@ -4060,6 +4177,7 @@ function DesktopExportInspector({
           aria-label={`Download ${settings.extension.toUpperCase()}`}
           className="mb-2 flex h-9 w-full items-center justify-center gap-2 rounded-full bg-[#ff3b68] px-3 text-[12px] font-semibold text-white transition hover:bg-[#ff4f78]"
           type="button"
+          onClick={onExportDownload}
         >
           <AnimatedDownloadIcon size={14} />
           Download {settings.extension.toUpperCase()}
