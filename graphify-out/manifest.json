@@ -1,0 +1,1432 @@
+{
+  "/Users/jayant/Documents/projects/new-qr/components/qr/brand-icon-catalog.test.ts": {
+    "mtime": 1776687591.4512203,
+    "ast_hash": "6386a0d14ac92e7f87881fb5002a6030",
+    "semantic_hash": "6386a0d14ac92e7f87881fb5002a6030"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/brand-icon-catalog.ts": {
+    "mtime": 1776622576.995112,
+    "ast_hash": "4218ed6c6f7870901bd0997a83ee9f88",
+    "semantic_hash": "4218ed6c6f7870901bd0997a83ee9f88"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/brand-icon-svg.ts": {
+    "mtime": 1776687644.804891,
+    "ast_hash": "59a30fb92c2e85efe5a1009a852a71fc",
+    "semantic_hash": "59a30fb92c2e85efe5a1009a852a71fc"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/custom-dot-shapes.test.ts": {
+    "mtime": 1776275278.7049131,
+    "ast_hash": "062919d73d223524151cea139dad52b0",
+    "semantic_hash": "062919d73d223524151cea139dad52b0"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/custom-dot-shapes.ts": {
+    "mtime": 1776275304.1697981,
+    "ast_hash": "a0af0ce7562bc1add3f55053e4f6cf8a",
+    "semantic_hash": "a0af0ce7562bc1add3f55053e4f6cf8a"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dashboard-compose-scene.test.ts": {
+    "mtime": 1776972326.675534,
+    "ast_hash": "f7d4a377ba64a936004cde727d2eca97",
+    "semantic_hash": "f7d4a377ba64a936004cde727d2eca97"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dashboard-compose-scene.ts": {
+    "mtime": 1776972116.2471464,
+    "ast_hash": "ffe70d8ea5dc501597b839bca32d9d4d",
+    "semantic_hash": "ffe70d8ea5dc501597b839bca32d9d4d"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dashboard-compose-surface.interaction.test.tsx": {
+    "mtime": 1777365306.0316002,
+    "ast_hash": "46774cf731ae2b1d5a1b58a5c120167f",
+    "semantic_hash": "46774cf731ae2b1d5a1b58a5c120167f"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dashboard-compose-surface.test.tsx": {
+    "mtime": 1777757051.3791955,
+    "ast_hash": "0f51e548643ccf7a7a94fb94b8a5f717",
+    "semantic_hash": "0f51e548643ccf7a7a94fb94b8a5f717"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dashboard-compose-surface.tsx": {
+    "mtime": 1777757033.250633,
+    "ast_hash": "8c71fd1fc5576a3fc9b7953f258e3b47",
+    "semantic_hash": "8c71fd1fc5576a3fc9b7953f258e3b47"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dashboard-document-export.test.ts": {
+    "mtime": 1776958423.0900438,
+    "ast_hash": "5eec32803e8f8680695105d479dd3f0a",
+    "semantic_hash": "5eec32803e8f8680695105d479dd3f0a"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dashboard-document-export.ts": {
+    "mtime": 1776972120.373206,
+    "ast_hash": "ed008fc2fd1fb6571073bafd9788a560",
+    "semantic_hash": "ed008fc2fd1fb6571073bafd9788a560"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dashboard-edit-controls.test.tsx": {
+    "mtime": 1776973308.2289076,
+    "ast_hash": "9aab5a0028f94490e6baef2f1bddf791",
+    "semantic_hash": "9aab5a0028f94490e6baef2f1bddf791"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dashboard-edit-controls.tsx": {
+    "mtime": 1776973296.9952714,
+    "ast_hash": "1b4c5b3cf08db1f27dc3372ba61c4884",
+    "semantic_hash": "1b4c5b3cf08db1f27dc3372ba61c4884"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dashboard-edit-rail.tsx": {
+    "mtime": 1776958048.4122267,
+    "ast_hash": "3b6e267340748ec9d93607e7b5fd1de4",
+    "semantic_hash": "3b6e267340748ec9d93607e7b5fd1de4"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dashboard-edit-sections.test.ts": {
+    "mtime": 1776973369.5780761,
+    "ast_hash": "5fc36b577b4da34dff207cfd93bf3589",
+    "semantic_hash": "5fc36b577b4da34dff207cfd93bf3589"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dashboard-edit-sections.ts": {
+    "mtime": 1776973290.5642889,
+    "ast_hash": "ac334ce7ad02e78b62ea9a933ee04931",
+    "semantic_hash": "ac334ce7ad02e78b62ea9a933ee04931"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dashboard-qr-batch-export.test.ts": {
+    "mtime": 1776975578.4405336,
+    "ast_hash": "79c63028f4d39eab72976b20d1c0c535",
+    "semantic_hash": "79c63028f4d39eab72976b20d1c0c535"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dashboard-qr-batch-export.ts": {
+    "mtime": 1777100592.2625463,
+    "ast_hash": "393565fa6535f68a617ced256bb0192b",
+    "semantic_hash": "393565fa6535f68a617ced256bb0192b"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dashboard-qr-svg.test.ts": {
+    "mtime": 1779421128.116882,
+    "ast_hash": "98c5b33da273031c714522d0055cfe44",
+    "semantic_hash": "98c5b33da273031c714522d0055cfe44"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dashboard-qr-svg.ts": {
+    "mtime": 1779445509.017486,
+    "ast_hash": "7c06ccd27d2642a20ee152517eab471b",
+    "semantic_hash": "7c06ccd27d2642a20ee152517eab471b"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dashboard-raster-export.test.ts": {
+    "mtime": 1779421128.1171753,
+    "ast_hash": "d812df9400d2c7865289837938364a8e",
+    "semantic_hash": "d812df9400d2c7865289837938364a8e"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dashboard-raster-export.ts": {
+    "mtime": 1779421128.1173525,
+    "ast_hash": "bec101af626010b2b7c4795db8e42cac",
+    "semantic_hash": "bec101af626010b2b7c4795db8e42cac"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/dots-palette-card.tsx": {
+    "mtime": 1776885900.3679678,
+    "ast_hash": "27fad17cb416a00f38e6b09ae428efd9",
+    "semantic_hash": "27fad17cb416a00f38e6b09ae428efd9"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-background-shapes.ts": {
+    "mtime": 1779209980.5528183,
+    "ast_hash": "e0c086e238c964eb0c516e81af374468",
+    "semantic_hash": "e0c086e238c964eb0c516e81af374468"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-code-styling-patch.test.ts": {
+    "mtime": 1776633255.9576688,
+    "ast_hash": "94f396cc18a9cb2fa62c8069f6160eb0",
+    "semantic_hash": "94f396cc18a9cb2fa62c8069f6160eb0"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-control-sections.drafting-fill-picker.test.tsx": {
+    "mtime": 1778260843.7729287,
+    "ast_hash": "aa1fa1e4c0e3c303fefed12f1dac81c7",
+    "semantic_hash": "aa1fa1e4c0e3c303fefed12f1dac81c7"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-control-sections.logo-tabs.test.tsx": {
+    "mtime": 1776687561.9659884,
+    "ast_hash": "289cdffefc6a469f882bd52cfa99b606",
+    "semantic_hash": "289cdffefc6a469f882bd52cfa99b606"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-control-sections.state.test.ts": {
+    "mtime": 1776687572.2419682,
+    "ast_hash": "eaf618b5609dc3e061dfffb0661e6c92",
+    "semantic_hash": "eaf618b5609dc3e061dfffb0661e6c92"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-control-sections.test.tsx": {
+    "mtime": 1778130014.709317,
+    "ast_hash": "491e2c436c573239bebc602da220cbea",
+    "semantic_hash": "491e2c436c573239bebc602da220cbea"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-control-sections.tsx": {
+    "mtime": 1779454057.7632055,
+    "ast_hash": "a368709fd73fc35e274dcdf95a5bfade",
+    "semantic_hash": "a368709fd73fc35e274dcdf95a5bfade"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-dots-palette.test.ts": {
+    "mtime": 1776416289.512197,
+    "ast_hash": "fd6046e88c50db5c951db32a5681b443",
+    "semantic_hash": "fd6046e88c50db5c951db32a5681b443"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-dots-palette.ts": {
+    "mtime": 1776416307.3269508,
+    "ast_hash": "46999d73c48543192556d68148fd4894",
+    "semantic_hash": "46999d73c48543192556d68148fd4894"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-encoding-options.ts": {
+    "mtime": 1776885900.3689904,
+    "ast_hash": "9deba5262902130f56979550af9f1086",
+    "semantic_hash": "9deba5262902130f56979550af9f1086"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-gradient-controls.test.ts": {
+    "mtime": 1776508467.4767,
+    "ast_hash": "d00d76b90389ef437835248a9a30e1e5",
+    "semantic_hash": "d00d76b90389ef437835248a9a30e1e5"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-gradient-controls.ts": {
+    "mtime": 1776530924.0498319,
+    "ast_hash": "379038e7b7f96dd29824601b0d517543",
+    "semantic_hash": "379038e7b7f96dd29824601b0d517543"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-preview-card.test.tsx": {
+    "mtime": 1776896548.6854997,
+    "ast_hash": "4659f6617f46c958df929e48461d8959",
+    "semantic_hash": "4659f6617f46c958df929e48461d8959"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-preview-card.tsx": {
+    "mtime": 1777756712.749723,
+    "ast_hash": "c4791593d7c49d0bbbdd1e92b1ffe141",
+    "semantic_hash": "c4791593d7c49d0bbbdd1e92b1ffe141"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-quality-decode.ts": {
+    "mtime": 1776960508.1704257,
+    "ast_hash": "9cd6134129a746d20e500a5fcad13f48",
+    "semantic_hash": "9cd6134129a746d20e500a5fcad13f48"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-quality-panel.test.tsx": {
+    "mtime": 1776780216.4518886,
+    "ast_hash": "1cad2cae7c641037dca567bf656facc8",
+    "semantic_hash": "1cad2cae7c641037dca567bf656facc8"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-quality-panel.tsx": {
+    "mtime": 1777268265.3769615,
+    "ast_hash": "353ec4c2911df61b0faff325265b6498",
+    "semantic_hash": "353ec4c2911df61b0faff325265b6498"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-quality.test.ts": {
+    "mtime": 1776780185.3199086,
+    "ast_hash": "09277e576b68340fbbc9376f7cca2f45",
+    "semantic_hash": "09277e576b68340fbbc9376f7cca2f45"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-quality.ts": {
+    "mtime": 1776780030.8182814,
+    "ast_hash": "b0bcb70112944919f82d33cf0b55fd32",
+    "semantic_hash": "b0bcb70112944919f82d33cf0b55fd32"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-rendering.test.ts": {
+    "mtime": 1779870617.5016522,
+    "ast_hash": "1b774584b3cb981e498e74d9afac68a4",
+    "semantic_hash": "1b774584b3cb981e498e74d9afac68a4"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-rendering.ts": {
+    "mtime": 1779870954.3464906,
+    "ast_hash": "768bf4768d7af5ede64dd139f137eec6",
+    "semantic_hash": "768bf4768d7af5ede64dd139f137eec6"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-section-rail.tsx": {
+    "mtime": 1776634570.0451434,
+    "ast_hash": "519db08b73c25cb66761f6c8c9a063ff",
+    "semantic_hash": "519db08b73c25cb66761f6c8c9a063ff"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-sections.ts": {
+    "mtime": 1776454713.2010152,
+    "ast_hash": "303f857a32be971dc205db3bea64c836",
+    "semantic_hash": "303f857a32be971dc205db3bea64c836"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-static-content.test.ts": {
+    "mtime": 1777211411.0825317,
+    "ast_hash": "ba7208ad9ee547da8fb3475e97b07440",
+    "semantic_hash": "ba7208ad9ee547da8fb3475e97b07440"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-static-content.ts": {
+    "mtime": 1777211411.0826297,
+    "ast_hash": "adcf4e1af1788b9cc6a705011cd918b9",
+    "semantic_hash": "adcf4e1af1788b9cc6a705011cd918b9"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-studio-state.test.ts": {
+    "mtime": 1779870850.844619,
+    "ast_hash": "f01f7c7238d9bb905b72311db233bb4f",
+    "semantic_hash": "f01f7c7238d9bb905b72311db233bb4f"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-studio-state.ts": {
+    "mtime": 1779870777.4196012,
+    "ast_hash": "870bd2326ad664e62e873f762ec92ef9",
+    "semantic_hash": "870bd2326ad664e62e873f762ec92ef9"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-studio.dashboard-download.test.tsx": {
+    "mtime": 1776810877.9345765,
+    "ast_hash": "7fa3aab6bae07c1c066cb7a2b3b02baf",
+    "semantic_hash": "7fa3aab6bae07c1c066cb7a2b3b02baf"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-studio.test.tsx": {
+    "mtime": 1777365313.3858485,
+    "ast_hash": "0f927cb0577eae6466353eb8801b5415",
+    "semantic_hash": "0f927cb0577eae6466353eb8801b5415"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-studio.tsx": {
+    "mtime": 1779445509.0192273,
+    "ast_hash": "002366ad71698d1e8013197eb0338a3c",
+    "semantic_hash": "002366ad71698d1e8013197eb0338a3c"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-style-options.ts": {
+    "mtime": 1776885900.3693547,
+    "ast_hash": "a657a05d127e43728fa0ab99c960db5f",
+    "semantic_hash": "a657a05d127e43728fa0ab99c960db5f"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-style-preview-renderer.test.tsx": {
+    "mtime": 1776886640.6733122,
+    "ast_hash": "6798588d8a4f490d917ba266faf3dd5d",
+    "semantic_hash": "6798588d8a4f490d917ba266faf3dd5d"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-style-preview-renderer.tsx": {
+    "mtime": 1778130014.7095134,
+    "ast_hash": "ff62b435b129db28d38b882951781ac2",
+    "semantic_hash": "ff62b435b129db28d38b882951781ac2"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-style-preview.test.ts": {
+    "mtime": 1776860813.5123646,
+    "ast_hash": "149214e9fe329c5815de6f80d29544ef",
+    "semantic_hash": "149214e9fe329c5815de6f80d29544ef"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-style-preview.ts": {
+    "mtime": 1776860803.5509908,
+    "ast_hash": "bd5840324289debf9d3f1e08265feb31",
+    "semantic_hash": "bd5840324289debf9d3f1e08265feb31"
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-svg-custom-shape-extension.ts": {
+    "mtime": 1776411606.1463695,
+    "ast_hash": "2ea73f651a0ca4e3fd3671854443949f",
+    "semantic_hash": "2ea73f651a0ca4e3fd3671854443949f"
+  },
+  "/Users/jayant/Documents/projects/new-qr/.codex/hooks.json": {
+    "mtime": 1780406177.7561476,
+    "ast_hash": "60faf48ff2b8e8938eeec559b44ebc68",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/.impeccable/live/config.json": {
+    "mtime": 1780219602.1744926,
+    "ast_hash": "40f52f76b1c6381420e0829605844fcd",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/.impeccable/live/server.json": {
+    "mtime": 1780219609.3334303,
+    "ast_hash": "35a025c35a59aef810813722d43fb577",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/.impeccable/live/sessions/a34b4748.snapshot.json": {
+    "mtime": 1780237124.6193113,
+    "ast_hash": "c343c254835f8c95a5ca5b25813603a8",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/.sc/last-chat-settings.json": {
+    "mtime": 1777966689.9407701,
+    "ast_hash": "31e0f3df87146b17f5f4a14042ff138b",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/.superset/config.json": {
+    "mtime": 1776590086.1640131,
+    "ast_hash": "7dbe7725a4bdc2748ca7bc1fa850207c",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/app/dashboard/page.test.tsx": {
+    "mtime": 1776527832.739741,
+    "ast_hash": "e6c35eb7220146c80d198f4c8f523fa5",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/app/dashboard/page.tsx": {
+    "mtime": 1776527832.818,
+    "ast_hash": "bf85df5512de533422c85bed24e9ed47",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/app/desktop/page.test.tsx": {
+    "mtime": 1780403503.4864624,
+    "ast_hash": "064cb242bf4241def40c9a4658296a18",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/app/desktop/page.tsx": {
+    "mtime": 1780403503.4866498,
+    "ast_hash": "b6538bb963d15733b90a73b39ce0d744",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/app/layout.tsx": {
+    "mtime": 1780235417.025263,
+    "ast_hash": "c014a4aa4b2307f0fbb28d14c0d608ae",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/app/mobile/page.tsx": {
+    "mtime": 1779297460.535134,
+    "ast_hash": "b76e55b136d97032bace474929068acf",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/app/new/page.test.tsx": {
+    "mtime": 1777185999.2718015,
+    "ast_hash": "5fc06b4d17c5d6b69d639d9270f3df0a",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/app/new/page.tsx": {
+    "mtime": 1777185999.272081,
+    "ast_hash": "a9501f16bcccb82be86ce0dd3b54b1a1",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/app/page.test.tsx": {
+    "mtime": 1776578831.3130963,
+    "ast_hash": "3adf994f4a68230f33dd8f06aa442aeb",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/app/page.tsx": {
+    "mtime": 1776578831.4922287,
+    "ast_hash": "d7216e19b2d5549a1b3d266a777388fd",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/app/settings/page.tsx": {
+    "mtime": 1776283915.838985,
+    "ast_hash": "6a3077696b4574bb0a4580cbe4aa332e",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/app/theme-contract.test.ts": {
+    "mtime": 1779897475.27848,
+    "ast_hash": "ecc6d951da23e51540333c8e55f4ad95",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components.json": {
+    "mtime": 1780403503.4872406,
+    "ast_hash": "388f70139715aea097a2b5ffc2af61f3",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/CircularGallery.jsx": {
+    "mtime": 1776523249.4118524,
+    "ast_hash": "a4706e04db7f9e34a95dc4f8973f6faf",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ElasticSlider.tsx": {
+    "mtime": 1776430052.292995,
+    "ast_hash": "aaf06d749ca480527bc0647a0e90aaf2",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ai-chat.tsx": {
+    "mtime": 1776320935.2502608,
+    "ast_hash": "09fe1422fd954de4a7b9733e083136e1",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/animate-ui/icons/blocks.tsx": {
+    "mtime": 1780403503.4875002,
+    "ast_hash": "63d85b620e8db089275c7438b4191215",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/animate-ui/icons/icon.tsx": {
+    "mtime": 1780403503.4877415,
+    "ast_hash": "0b36502f388018fd7b0b517f9ebb8054",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/animate-ui/primitives/animate/slot.tsx": {
+    "mtime": 1780403503.4883687,
+    "ast_hash": "e4646934bbf474a7106246b89c0568f2",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/cards/card-2.tsx": {
+    "mtime": 1776782745.1158671,
+    "ast_hash": "cb41f54611abcf42dc12d3566f18df15",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/cards/card-6.tsx": {
+    "mtime": 1776782745.1159701,
+    "ast_hash": "295f5a917ac6e5342821d35da7121eb2",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/desktop/desktop-toolbar-prototype.test.tsx": {
+    "mtime": 1780403503.4887395,
+    "ast_hash": "867cd1545c9c389c512f47d01b6a1dc7",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/desktop/desktop-toolbar-prototype.tsx": {
+    "mtime": 1780412613.7215128,
+    "ast_hash": "abb52876f8f57e5d417e93ddb9b0b83b",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/desktop/desktop-workspace.tsx": {
+    "mtime": 1780403503.489717,
+    "ast_hash": "8f01a91e1d878612ab9532b771754b49",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/home/home-prompt-shell.tsx": {
+    "mtime": 1776578831.5787334,
+    "ast_hash": "c9239b8498e80b806e4259dd477d23a9",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/kokonutui/ai-input-search.test.tsx": {
+    "mtime": 1776284444.969719,
+    "ast_hash": "73cec7e324da6906e3b8082c80564368",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/kokonutui/ai-input-search.tsx": {
+    "mtime": 1776284534.0247643,
+    "ast_hash": "59813062fa85865f164d82772b3e7fd4",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/kokonutui/file-upload.tsx": {
+    "mtime": 1776428531.876207,
+    "ast_hash": "31013d1c28643eae6ca5bbbb496e8f74",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/mode-toggle.test.tsx": {
+    "mtime": 1777311902.8382275,
+    "ast_hash": "47f535905fdef5bf8f6881a16304279c",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/mode-toggle.tsx": {
+    "mtime": 1777311891.189883,
+    "ast_hash": "dde2da6a156883d087c749ee6d6e1e3e",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-card-paper-shader-layer.tsx": {
+    "mtime": 1779209980.5512881,
+    "ast_hash": "9bbd5638aec4f4fe66edbdd03f7cdc2a",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-card-patterns.ts": {
+    "mtime": 1779209974.1727571,
+    "ast_hash": "da328f8cb4d154b3afcccd0028d0150d",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-card-state.test.ts": {
+    "mtime": 1779421128.1129477,
+    "ast_hash": "d965440e8eaa191b24f6b713a4b348eb",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-card-state.ts": {
+    "mtime": 1779421128.1131306,
+    "ast_hash": "a40144ff7637d7631ac888a623217b42",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-font-registry.test.ts": {
+    "mtime": 1779771756.024395,
+    "ast_hash": "2b6037896f9e57245023137488d7aed8",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-font-registry.ts": {
+    "mtime": 1779771756.0246248,
+    "ast_hash": "fb6e77e7b22f7dbd5c4a66540e514d67",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-inspector.tsx": {
+    "mtime": 1780142599.5725105,
+    "ast_hash": "948be068c70bd26698ac2afa7eea3766",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-layer-state.test.ts": {
+    "mtime": 1780403503.490074,
+    "ast_hash": "2d597fe2bb0bd3339c1ed9af13bb4f8f",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-layer-state.ts": {
+    "mtime": 1780403503.4903698,
+    "ast_hash": "55f96607508d30ce902284cd19e323bc",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-layers-tab.test.tsx": {
+    "mtime": 1777404096.447502,
+    "ast_hash": "745701a988fc3a20af1871c4854d40a7",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-layers-tab.tsx": {
+    "mtime": 1780142599.5738225,
+    "ast_hash": "907d55b99e39993073450a9809bff5bd",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-pane-workspace.test.tsx": {
+    "mtime": 1779430287.6939914,
+    "ast_hash": "92b5f4044d2e18d7f7e9f406c01a6975",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-pane-workspace.tsx": {
+    "mtime": 1780403503.4906979,
+    "ast_hash": "226be66cc73a913c71da184750a7382b",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-paper-shaders.test.ts": {
+    "mtime": 1779209980.551659,
+    "ast_hash": "e5f9d74e95b24acdc861790d55fa2d1c",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-paper-shaders.tsx": {
+    "mtime": 1779209980.5518115,
+    "ast_hash": "27418e401a5a7ca6ade5a957a573864c",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-qr-artwork.ts": {
+    "mtime": 1779421128.1142602,
+    "ast_hash": "0c1b1f20f0c6a33aa0f0129de7e7970c",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-qr-background.tsx": {
+    "mtime": 1779421128.114409,
+    "ast_hash": "e05de92a4efcc5cc5d3f2766febd55a3",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-qr-layer-shadow.ts": {
+    "mtime": 1779421128.1145034,
+    "ast_hash": "3d797b6d7be62b800d32bb0847a6fd78",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-split-workspace.tsx": {
+    "mtime": 1777400642.8820307,
+    "ast_hash": "cf4db9127e232eda0be932626846d954",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-style-tab.tsx": {
+    "mtime": 1780142599.5745428,
+    "ast_hash": "a367d4c858c640319be241486cb74b0e",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-surface.test.tsx": {
+    "mtime": 1780403503.4911535,
+    "ast_hash": "ec5c0675050cabffbaa0319f38d93716",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-surface.tsx": {
+    "mtime": 1780403503.4918196,
+    "ast_hash": "a954da260575f6745cf8c6c06b8026a3",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-text-layout.ts": {
+    "mtime": 1780403503.4921324,
+    "ast_hash": "1a17c8955e18bb23ed8ddb8d6019e335",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-workspace-document.test.ts": {
+    "mtime": 1779421128.1158874,
+    "ast_hash": "9bdbebbd6e73dd5ce53be11e5a929297",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-workspace-document.ts": {
+    "mtime": 1779454057.7628067,
+    "ast_hash": "2d5b9fe7763ca0b597ecb88763bc1eff",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/drafting-workspace-storage.ts": {
+    "mtime": 1779352126.3198853,
+    "ast_hash": "a283710a0d70fe66c4cca9b5f14a5785",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/qr-layout-engine.test.ts": {
+    "mtime": 1778093454.040011,
+    "ast_hash": "8539c883c330826f60b14358c482580e",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/qr-layout-engine.ts": {
+    "mtime": 1778093425.8951201,
+    "ast_hash": "7a10073090694de2e623a4f9bbd370be",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/qr-pane.test.tsx": {
+    "mtime": 1780403503.4924817,
+    "ast_hash": "01a2866bfe6dfda86e5ae6a70099bd56",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/new/qr-pane.tsx": {
+    "mtime": 1780403503.4929237,
+    "ast_hash": "806891fda1a680584a3d214c7eccf93a",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/sidebar-03/app-sidebar.test.tsx": {
+    "mtime": 1776528531.4626162,
+    "ast_hash": "b54b0a4d2e88915bb27b778295e68c11",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/sidebar-03/app-sidebar.tsx": {
+    "mtime": 1776430832.5262477,
+    "ast_hash": "060c0717bb83d6d9cde65a3352b02e40",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/sidebar-03/index.tsx": {
+    "mtime": 1776345816.336265,
+    "ast_hash": "d20a72275cba2d4d0ebf9a349ca539c6",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/sidebar-03/logo.tsx": {
+    "mtime": 1776339764.400899,
+    "ast_hash": "8fbd886ba4655d5dfcaa3be084fd0adf",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/sidebar-03/nav-main.tsx": {
+    "mtime": 1776339764.432457,
+    "ast_hash": "50a3eed1aa8cec22e2903d04c66ff4d5",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/sidebar-03/nav-notifications.tsx": {
+    "mtime": 1776339764.4579084,
+    "ast_hash": "54f996c8c6f1cc9c6bf94a29ff5084a7",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/sidebar-03/team-switcher.tsx": {
+    "mtime": 1776339764.4884183,
+    "ast_hash": "b8c9ab12bd135a32ac86b7c44bbc859f",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/theme-provider.tsx": {
+    "mtime": 1776609946.2268891,
+    "ast_hash": "82a422ef79edf5f8e46ec69d61065f91",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/accordion.tsx": {
+    "mtime": 1777187116.2164624,
+    "ast_hash": "a761f6b6cfd28c677882a55b1ca41217",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/adaptive-slider.test.tsx": {
+    "mtime": 1776512114.4104745,
+    "ast_hash": "ed47ef15859b7c21234d33bde57547ae",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/adaptive-slider.tsx": {
+    "mtime": 1776512311.0990632,
+    "ast_hash": "ccef0113f86cfa88b88e17073c4c846f",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/ai-prompt-box.test.tsx": {
+    "mtime": 1776375628.2110686,
+    "ast_hash": "5ddc130beed414cd0039d6a29a6b767d",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/ai-prompt-box.tsx": {
+    "mtime": 1776375628.2115028,
+    "ast_hash": "db18b2ca2d1dd0a52c291abe8f702f01",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/avatar.tsx": {
+    "mtime": 1776339763.9439301,
+    "ast_hash": "b48244919ef33575fecf5509063b7310",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/badge.tsx": {
+    "mtime": 1776431350.7020578,
+    "ast_hash": "ad01e5e94310fd0993007d22b338378b",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/button.tsx": {
+    "mtime": 1776268061.0749128,
+    "ast_hash": "daafd007acc8e344a1c557ae9287fe14",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/card.tsx": {
+    "mtime": 1776782745.1167023,
+    "ast_hash": "77a10bd948ca424972a28e704a3df604",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/collapsible.tsx": {
+    "mtime": 1776339764.0261798,
+    "ast_hash": "d3bc158594b1f19fd28d9868792d17f1",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/color-palette-card.tsx": {
+    "mtime": 1776489001.1383839,
+    "ast_hash": "4597ef5e0a0e3394a219097f1ee02c51",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/color-picker-utils.test.ts": {
+    "mtime": 1776540130.1651778,
+    "ast_hash": "a2960e3ff6bde0b76abfef5132fed639",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/color-picker-utils.ts": {
+    "mtime": 1776540130.165081,
+    "ast_hash": "8ae780fff326de2cfe096b0d3cff01b0",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/color-picker.test.tsx": {
+    "mtime": 1777268274.242077,
+    "ast_hash": "e6b9dcb7ef7f24592b91e2f858a041ae",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/color-picker.tsx": {
+    "mtime": 1777268274.553878,
+    "ast_hash": "54b95fe26438c893a85b293a8c216a35",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/demo.tsx": {
+    "mtime": 1776320068.3736985,
+    "ast_hash": "8a275cca4d59b91bee6636eb1379ebcb",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/dialog.tsx": {
+    "mtime": 1777268265.7576015,
+    "ast_hash": "0fe95a398c4750381ba952c9b2601d54",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/direction-aware-tabs.tsx": {
+    "mtime": 1776520766.6822019,
+    "ast_hash": "2c2e30c19e4c19e988df0b8eae2be94e",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/download.tsx": {
+    "mtime": 1780403503.493197,
+    "ast_hash": "e0adde93c623893b3379c1e97712ef62",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/draggable-list.tsx": {
+    "mtime": 1776720241.2232738,
+    "ast_hash": "f3600dce9dc974d64eeb960cc5233b39",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/dropdown-menu.tsx": {
+    "mtime": 1776280169.7742052,
+    "ast_hash": "63fc04368c0f92980d3ab4ae34f01a18",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/editable-chip.tsx": {
+    "mtime": 1776782745.116898,
+    "ast_hash": "9e914e3f5e9c569c257467dc6ade4145",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/field.tsx": {
+    "mtime": 1776269460.402758,
+    "ast_hash": "8a1b6d5c381e8a3e29c1f1e2d797d619",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/context.tsx": {
+    "mtime": 1778259704.4011378,
+    "ast_hash": "89c4cfc2eba2fa553d2c9484baec56f5",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/fill-picker.test.tsx": {
+    "mtime": 1778260354.4733634,
+    "ast_hash": "3b3f09038d3d0d73063057cd9229cce7",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/fill-picker.tsx": {
+    "mtime": 1778259704.4013295,
+    "ast_hash": "39acdab2d7a2f9a755246adbe0dd10e3",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/hooks/use-color-picker.ts": {
+    "mtime": 1778259704.4014716,
+    "ast_hash": "211011981b35009a3b4ac83ef3ce861c",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/lib/channels.ts": {
+    "mtime": 1778259704.4016132,
+    "ast_hash": "f6175f516ac57282f823ff576c9a0c3b",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/lib/color.ts": {
+    "mtime": 1778259704.4018083,
+    "ast_hash": "9c1eb80940165ec4956979ac8fe126af",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/lib/types.ts": {
+    "mtime": 1778259704.4019027,
+    "ast_hash": "98ac2d2f465c1fb6438df4a6bdd28035",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/alpha.tsx": {
+    "mtime": 1778259704.4020329,
+    "ast_hash": "30b4de22c921686d318ed597480bae0d",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/area.tsx": {
+    "mtime": 1778259704.4021523,
+    "ast_hash": "855715ef53f0adb974f47b784025ed97",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/channel-input.tsx": {
+    "mtime": 1778259704.4024532,
+    "ast_hash": "40c055eed863db78da1fa4589c8977b2",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/contrast-readout.tsx": {
+    "mtime": 1778259704.4025688,
+    "ast_hash": "6cae4b8d434f047de4b44fa11ff11f5c",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/css-input.tsx": {
+    "mtime": 1778260229.5108626,
+    "ast_hash": "21c304bf9b5fca8324707d344794fe89",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/eye-dropper.tsx": {
+    "mtime": 1778259704.4027636,
+    "ast_hash": "e3a84ffa62f5d5e369e24807b7aeb4c3",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/format-switcher.tsx": {
+    "mtime": 1778259704.402853,
+    "ast_hash": "87d797e0f67d70bb64464f9a56644e55",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/gamut-badge.tsx": {
+    "mtime": 1778259704.402954,
+    "ast_hash": "8ace51c24d29a0977e10882823da9d43",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/hue.tsx": {
+    "mtime": 1778259704.403053,
+    "ast_hash": "f5123d7ac4734c1ede4355d0843971b0",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/lightness.tsx": {
+    "mtime": 1778259704.4031532,
+    "ast_hash": "85afdc36cdf403899d9005f4c376d576",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/preview.tsx": {
+    "mtime": 1778259704.4032423,
+    "ast_hash": "27bf4204de3eb804d959912377b4ecdc",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/root.tsx": {
+    "mtime": 1778259704.4033303,
+    "ast_hash": "1b889888c946ce7aa669c441eb896962",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/swatches.tsx": {
+    "mtime": 1778259704.403476,
+    "ast_hash": "eb8a2ccd5f55beee2b161d315ae94072",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/fluid-tabs.tsx": {
+    "mtime": 1779297455.5161085,
+    "ast_hash": "68e7d6c5c915aa15091cb5dc36ca535c",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/gallery-vertical-end.tsx": {
+    "mtime": 1780403503.49344,
+    "ast_hash": "277c4d119263bc2ae19ca80e9453dc89",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/grip.tsx": {
+    "mtime": 1780403503.4936466,
+    "ast_hash": "e4583ee3c11d9952292b24b5d2e30df8",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/input-group.tsx": {
+    "mtime": 1776269460.430702,
+    "ast_hash": "750fe82601c39e80407e4b8d9f77a082",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/input.tsx": {
+    "mtime": 1776269459.7835493,
+    "ast_hash": "2b0e9e810580f227dd255d9b78a83835",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/knob-slider.tsx": {
+    "mtime": 1776487874.3729575,
+    "ast_hash": "55efab29a0af359998a199826c10bd4e",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/label.tsx": {
+    "mtime": 1776269460.3226702,
+    "ast_hash": "e7e0c4ad98f3485ecd3c0ca516d0a8bf",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/layers.tsx": {
+    "mtime": 1780403503.493838,
+    "ast_hash": "2a52878e2eb6cdaf369be5dbdab72eb6",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/letter-t-icon.tsx": {
+    "mtime": 1780403503.494033,
+    "ast_hash": "e6888fb7b32ba567d526bf9f8be1cdea",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/message-circle.tsx": {
+    "mtime": 1780403503.4942315,
+    "ast_hash": "3ab5d1e1c15fcd793068a0d67bf52fc8",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/option-card.tsx": {
+    "mtime": 1777268265.594265,
+    "ast_hash": "47964e41902a39c3fc52a5eba3ea2f66",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/play.tsx": {
+    "mtime": 1780403503.4943857,
+    "ast_hash": "7fc2720399f06fcda0ce0d9764deb5c0",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/popover.tsx": {
+    "mtime": 1776431355.6591737,
+    "ast_hash": "c8bf2474f9dd4584188af696af1fb0ad",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/qr-category-browser.test.tsx": {
+    "mtime": 1776578831.2557168,
+    "ast_hash": "f10fd07e0926b2f14ce08c9009797dc7",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/qr-category-browser.tsx": {
+    "mtime": 1776578831.6388147,
+    "ast_hash": "b8f2c13db33efd139c7ed3c247afd54a",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/qr-input-config.ts": {
+    "mtime": 1776375628.2131238,
+    "ast_hash": "cc0224260563398057c4373ea6395cc0",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/receipt-text.tsx": {
+    "mtime": 1780403503.4946792,
+    "ast_hash": "26d941e41836cb2443721ece1def6716",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/resizable.tsx": {
+    "mtime": 1777393464.7369454,
+    "ast_hash": "27fe487f7b5963bc4acce343dca92932",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/scroll-area.tsx": {
+    "mtime": 1776885900.3732798,
+    "ast_hash": "7aa988f82f8d1aa9f50a2e7c14db8289",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/secondary-button.test.tsx": {
+    "mtime": 1778249276.5239377,
+    "ast_hash": "33fbe1f218aa77fc182c1d6d43c143ea",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/secondary-button.tsx": {
+    "mtime": 1778249233.252802,
+    "ast_hash": "613ebf316d4bce32f76ba77acad1b479",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/select.tsx": {
+    "mtime": 1776269459.8375037,
+    "ast_hash": "611b5699ced6aad54c9a0e8cb865da7f",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/separator.tsx": {
+    "mtime": 1776269459.8867216,
+    "ast_hash": "f57449eae78fbd87d99e4edc45ab3c1e",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/sheet.tsx": {
+    "mtime": 1777268265.6955338,
+    "ast_hash": "136091919ca01aa135e9413cc05b2d23",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/sidebar.tsx": {
+    "mtime": 1776339764.3087544,
+    "ast_hash": "9661b2e84719f8a3b46e548dff806df5",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/skeleton.tsx": {
+    "mtime": 1776339764.214984,
+    "ast_hash": "0e6e825c43d858d98c9903f4da975382",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/slider.tsx": {
+    "mtime": 1777136768.1781695,
+    "ast_hash": "5ac3ad931af9082bc753401777ac6147",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/switch.test.tsx": {
+    "mtime": 1776885900.3734937,
+    "ast_hash": "846a82b5ff44b97597f97d45b360c091",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/switch.tsx": {
+    "mtime": 1777290877.2837296,
+    "ast_hash": "72b1bc5b8ee3e4ef335f1e1a61dbd417",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/tabs.tsx": {
+    "mtime": 1776885900.3746915,
+    "ast_hash": "70c0c7abe488b02aafdc0386bd8bb473",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/textarea.tsx": {
+    "mtime": 1777138163.1508307,
+    "ast_hash": "f888f302b5c104df8bcf8076acd7da93",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/tooltip.tsx": {
+    "mtime": 1780411626.3992002,
+    "ast_hash": "e083b6b3ca26dfb83630ccc551c23c98",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/ui/types.ts": {
+    "mtime": 1780403503.4948633,
+    "ast_hash": "c200d65efbc800a175558df666a83bba",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/unlumen-ui/motion-accordion.test.ts": {
+    "mtime": 1776535621.1598804,
+    "ast_hash": "b4fbc68d17cba36fadc13a5eeb7d43c1",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/unlumen-ui/motion-accordion.test.tsx": {
+    "mtime": 1776457720.2650328,
+    "ast_hash": "77a4b11cac44cf2cf7a13bb240f6be60",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/unlumen-ui/motion-accordion.tsx": {
+    "mtime": 1776535752.0848427,
+    "ast_hash": "36a434ff3f4934a5e3681588a2aca484",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/unlumen-ui/slider.test.tsx": {
+    "mtime": 1777187116.2169585,
+    "ast_hash": "f81a92a0ed11cad14cf8c6dfa8099c7e",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/unlumen-ui/slider.tsx": {
+    "mtime": 1777187116.2176647,
+    "ast_hash": "1c4ea7c18483cef21f95f570a78d5a6f",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/designs/scripts/new-page-shell.js": {
+    "mtime": 1776885900.3789806,
+    "ast_hash": "9879f067a068d303753e17d341acb3a9",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/index.json": {
+    "mtime": 1780220907.1446137,
+    "ast_hash": "aefcf009c89b88931081045999ba85d7",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/eslint.config.mjs": {
+    "mtime": 1779454057.7648888,
+    "ast_hash": "d2d8c865b2517fd83c478285245ed176",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/hooks/use-auto-resize-textarea.ts": {
+    "mtime": 1776283315.5442574,
+    "ast_hash": "5fb627e19f92d8af6d83dc81a0095d15",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/hooks/use-is-in-view.tsx": {
+    "mtime": 1780403503.495395,
+    "ast_hash": "a0fcc5ff8b3c98b9ad03412e03e83be4",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/hooks/use-mobile.ts": {
+    "mtime": 1776339764.1883438,
+    "ast_hash": "209b5193af16624cdd89d3591480dd48",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/lib/utils.ts": {
+    "mtime": 1776268061.1057956,
+    "ast_hash": "5a6fd53fdcf2be529e9cc0b718fde352",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/next.config.ts": {
+    "mtime": 1776451425.035337,
+    "ast_hash": "c876024de6db334e2ac08a3932961bc7",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/package.json": {
+    "mtime": 1779209974.174453,
+    "ast_hash": "3b77fee1e0c4560a19c8570bebbba94e",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/postcss.config.mjs": {
+    "mtime": 1776268011.8327034,
+    "ast_hash": "239f3ebf717465dc636818a1a619398d",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/scripts/pen/qr_pattern.js": {
+    "mtime": 1776442668.5043793,
+    "ast_hash": "19faaa64ddc19e59590989ed31ab6142",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/tsconfig.json": {
+    "mtime": 1776268011.8336232,
+    "ast_hash": "02fc19ad21338c2ab820a70136310db4",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/vitest.config.ts": {
+    "mtime": 1779454057.7651112,
+    "ast_hash": "020428a7e81354556cb4eb8857253528",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/.impeccable/critique/2026-06-02T14-11-06Z__app-desktop-page-tsx.md": {
+    "mtime": 1780409466.014217,
+    "ast_hash": "d892238cdb73bd08e47c916bde80e830",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/AGENTS.md": {
+    "mtime": 1780406333.7614086,
+    "ast_hash": "d6d6df5e116a36b092be81147bd7b1a0",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/CLAUDE.md": {
+    "mtime": 1780406333.7618315,
+    "ast_hash": "5c27369b226fcf2be8a6cfe52224e767",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/PRODUCT.md": {
+    "mtime": 1777141025.159877,
+    "ast_hash": "8155953c781ee31550a8e37ea1fd2c37",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/README.md": {
+    "mtime": 1776268011.832064,
+    "ast_hash": "f15aaa42d5d299d091b1171097ea56ad",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/docs/superpowers/plans/2026-04-15-qr-studio.md": {
+    "mtime": 1776269371.052256,
+    "ast_hash": "40251549eb12eda8992934a2277720d3",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/docs/superpowers/plans/2026-04-16-centered-prompt-box.md": {
+    "mtime": 1776321904.437391,
+    "ast_hash": "6c59706bf5d43d867578b29a79e4929d",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/docs/superpowers/plans/2026-04-16-homepage-search-settings.md": {
+    "mtime": 1776283782.5872672,
+    "ast_hash": "4faa623d2eda5dd1ec2ae3254777daf9",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/docs/superpowers/plans/2026-04-16-qr-settings-studio-pencil.md": {
+    "mtime": 1776328451.308761,
+    "ast_hash": "f610c5cb5d158208c6ad8e201b6777ed",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/docs/superpowers/plans/2026-04-17-dashboard-flexible-preview-layout.md": {
+    "mtime": 1776364551.0789118,
+    "ast_hash": "f8c24acb996e38bc11b81ae6856f002f",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/docs/superpowers/plans/2026-04-30-caveman-codex-install.md": {
+    "mtime": 1777494013.6906345,
+    "ast_hash": "069de149885078a40bd5a83ff2ed117d",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/docs/superpowers/specs/2026-04-16-centered-prompt-box-design.md": {
+    "mtime": 1776321825.5104804,
+    "ast_hash": "d25cb8a7ad01415c93e67c9dcbe55bf4",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/docs/superpowers/specs/2026-04-16-homepage-search-settings-design.md": {
+    "mtime": 1776283713.251782,
+    "ast_hash": "41e30c9eb98d6c7dd3129f130c479063",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/docs/superpowers/specs/2026-04-16-qr-settings-studio-design.md": {
+    "mtime": 1776334710.592396,
+    "ast_hash": "c34d4e384af2d82202b3c8ab5464c2c4",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/docs/superpowers/specs/2026-04-17-dashboard-flexible-preview-layout-design.md": {
+    "mtime": 1776364483.4646716,
+    "ast_hash": "5469ec21b31487af16e76851e96578dc",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/pnpm-workspace.yaml": {
+    "mtime": 1776629267.228344,
+    "ast_hash": "dda480320d216fcdc213fb055be103d6",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/public/Satoshi_Complete/Fonts/WEB/README.md": {
+    "mtime": 1777185999.284312,
+    "ast_hash": "2fe1c934fc9ab290480d95e260c26e20",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/public/Satoshi_Complete/License/FFL.txt": {
+    "mtime": 1777185999.3046355,
+    "ast_hash": "d7f311f2ab9c0160a9e4ed0921d1aefb",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/tmp/screenshots/compact-qr-anatomy-concept.html": {
+    "mtime": 1779986613.5463722,
+    "ast_hash": "c8669e299d2719f8dada2af52fa9f410",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/.codex-artifacts/pencil-dashboard/OsMXR.png": {
+    "mtime": 1776442121.5478067,
+    "ast_hash": "c26d2ef6b6d84730ae55eda179da7891",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/designs/exports/KIjRV.png": {
+    "mtime": 1776885900.3772657,
+    "ast_hash": "7a4bec1171220cf2851cbb55c815f0a5",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/designs/exports/ZDE0Q.png": {
+    "mtime": 1776885900.377816,
+    "ast_hash": "4ea21f164df99c43478a91dea45ae304",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/00-page-overview.png": {
+    "mtime": 1780220854.527894,
+    "ast_hash": "efd7fc1c1fbe58317201c2e9a6426aa3",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/01-content.png": {
+    "mtime": 1780220897.5475357,
+    "ast_hash": "efd7fc1c1fbe58317201c2e9a6426aa3",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/02-pattern.png": {
+    "mtime": 1780220898.3437176,
+    "ast_hash": "347e6bc9acafdcd1fcfddeeba6f0b3b0",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/03-corners.png": {
+    "mtime": 1780220899.1436093,
+    "ast_hash": "d3efeb630fd45eea88b6b0f79e7ce5fd",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/04-logo.png": {
+    "mtime": 1780220899.9127913,
+    "ast_hash": "b33a29afbd9aa1385ce9bc65112b081d",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/05-shape.png": {
+    "mtime": 1780220900.711571,
+    "ast_hash": "9a40f44898c7a8d5b924eb68245604c1",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/06-motion.png": {
+    "mtime": 1780220901.5100775,
+    "ast_hash": "38b8f8a05f696e1c49cc406c08555c7e",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/07-encoding.png": {
+    "mtime": 1780220902.309995,
+    "ast_hash": "67a2c8cb5aaf5c154b3f4f89a853ba88",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/08-text.png": {
+    "mtime": 1780220903.1104484,
+    "ast_hash": "306f60c7ddb0ed0d7ffd84d830503350",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/09-image.png": {
+    "mtime": 1780220903.89261,
+    "ast_hash": "4727f41fca446db34befe6af912b5f8d",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/10-decorations.png": {
+    "mtime": 1780220904.6703172,
+    "ast_hash": "6a6356e877243a41ddc048a616e29924",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/11-effects.png": {
+    "mtime": 1780220905.459098,
+    "ast_hash": "93a6237f7a9be9b2ebd8cc68f2b047cf",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/12-layers.png": {
+    "mtime": 1780220906.2977996,
+    "ast_hash": "983a2efe69ac92e53ff58f04d256594b",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/13-export.png": {
+    "mtime": 1780220907.1429093,
+    "ast_hash": "0703b8714fbd59b85745333b5a142efd",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/contact-sheet.png": {
+    "mtime": 1780220953.8637133,
+    "ast_hash": "66c1a1af20b8f6e41b99c3008e43f2ad",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/image.png": {
+    "mtime": 1776685721.6494648,
+    "ast_hash": "f91f7b9874560ed437ddbed08a14b1f5",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/public/diamond-mark-svgrepo-com.svg": {
+    "mtime": 1776272347.886014,
+    "ast_hash": "44b85610e997ec4356416ffaaf7b03ba",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/public/file.svg": {
+    "mtime": 1776268011.8320692,
+    "ast_hash": "d09f95206c3fa0bb9bd9fefabfd0ea71",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/public/globe.svg": {
+    "mtime": 1776268011.8330207,
+    "ast_hash": "2aaafa6a49b6563925fe440891e32717",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/public/heart-svgrepo-com.svg": {
+    "mtime": 1776272321.8977141,
+    "ast_hash": "eb45a7e1163ddb3fc413cd5a789311d2",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/public/next.svg": {
+    "mtime": 1776268011.8330255,
+    "ast_hash": "8e061864f388b47f33a1c3780831193e",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/public/vercel.svg": {
+    "mtime": 1776268011.8331182,
+    "ast_hash": "c0af2f507b369b085b35ef4bbe3bcf1e",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/public/window.svg": {
+    "mtime": 1776268011.8331213,
+    "ast_hash": "a2760511c65806022ad20adf74370ff3",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/screenshots/new-left-rail/01-content.png": {
+    "mtime": 1779246973.486889,
+    "ast_hash": "85aa2bfa9a6853d95c2fdf805569b3a7",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/screenshots/new-left-rail/02-style.png": {
+    "mtime": 1779246974.015899,
+    "ast_hash": "62862e7b58d269e8e026ad6c4c5c2b5e",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/screenshots/new-left-rail/03-corner-frame.png": {
+    "mtime": 1779246974.5345063,
+    "ast_hash": "174071d591c5090b95162701e378a656",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/screenshots/new-left-rail/04-corner-dot.png": {
+    "mtime": 1779246975.0189168,
+    "ast_hash": "243012616a15d87fb487927dd5d261c4",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/screenshots/new-left-rail/05-background.png": {
+    "mtime": 1779246975.529793,
+    "ast_hash": "066ce3b11b595155fe33a3cd93d46029",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/screenshots/new-left-rail/06-logo.png": {
+    "mtime": 1779246976.0966015,
+    "ast_hash": "0fe51534470f5193612f93de83408092",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/screenshots/new-left-rail/07-encoding.png": {
+    "mtime": 1779246976.6027343,
+    "ast_hash": "f1583c30eb6725fbf3170002bc2636a1",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/screenshots/new-left-rail/08-layers.png": {
+    "mtime": 1779246977.0837562,
+    "ast_hash": "802c662d0a1c43c03cf55a08cae4fbf1",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/tmp/screenshots/new-corner-frame.png": {
+    "mtime": 1779986267.4293869,
+    "ast_hash": "c6c31d839c64fcf844e9d006f0d772b7",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/tmp/screenshots/new-current.png": {
+    "mtime": 1779986253.398611,
+    "ast_hash": "6228845e70f74edff5dd1f3298925b54",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/tmp/screenshots/new-layers.png": {
+    "mtime": 1779986269.3017232,
+    "ast_hash": "692803a90da667af6245112226be38c3",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/tmp/screenshots/new-logo.png": {
+    "mtime": 1779986268.3494458,
+    "ast_hash": "2ab8a542150495ab0adaad518890f2d7",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/tmp/screenshots/new-style-body.png": {
+    "mtime": 1779986266.2712877,
+    "ast_hash": "fe1b4d6d180e9e9dc9196878adeda086",
+    "semantic_hash": ""
+  }
+}

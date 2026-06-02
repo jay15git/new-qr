@@ -18,7 +18,6 @@ import {
   CheckIcon,
   ChevronDownIcon,
   ItalicIcon,
-  MoreHorizontalIcon,
   MoonIcon,
   RotateCcwIcon,
   SearchIcon,
@@ -1039,7 +1038,7 @@ export function DesktopToolbarPrototype({
         <nav
           aria-label="Desktop tools"
           data-slot="desktop-floating-toolbar"
-          className="fixed bottom-5 left-5 top-5 z-20 flex w-14 flex-col items-center justify-start gap-1.5 overflow-y-auto rounded-[24px] border border-white/[0.12] bg-black/55 p-1.5 text-white/72 shadow-[0_22px_55px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl max-md:bottom-4 max-md:left-3 max-md:top-4 max-md:w-12 max-md:p-1"
+          className="fixed bottom-5 left-5 top-5 z-20 flex w-14 flex-col items-center justify-start gap-1.5 overflow-y-auto rounded-full border border-white/[0.12] bg-black/55 p-1.5 text-white/72 shadow-[0_22px_55px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl max-md:bottom-4 max-md:left-3 max-md:top-4 max-md:w-12 max-md:p-1"
         >
           {DESKTOP_TOOLBAR_TOOLS.map((tool, index) => {
             const isActive = actualActiveTool === tool.id
@@ -1066,7 +1065,7 @@ export function DesktopToolbarPrototype({
                       className={cn(
                         "grid size-11 place-items-center rounded-full text-current transition-[background-color,color,box-shadow,transform] duration-150 ease-out outline-none hover:bg-white/[0.11] hover:text-white focus-visible:ring-2 focus-visible:ring-white/45 active:scale-95 max-md:size-10",
                         isActive &&
-                          "bg-white/[0.18] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_8px_22px_rgba(0,0,0,0.28)] hover:bg-white/[0.2]",
+                          "bg-white/[0.18] text-white shadow-none hover:bg-white/[0.2]",
                       )}
                       onClick={() => onActiveToolChange(tool.id)}
                     >
@@ -1074,6 +1073,7 @@ export function DesktopToolbarPrototype({
                     </button>
                   </TooltipTrigger>
                   <TooltipContent
+                    hideArrow
                     side="right"
                     sideOffset={10}
                     className="border border-white/[0.12] bg-[#15161a] text-white shadow-xl"
@@ -1222,6 +1222,27 @@ function DesktopThemeStyles() {
         background-color: rgba(255, 255, 255, 0.48) !important;
       }
 
+      [data-slot="desktop-style-preview-surface"] {
+        background: rgba(255, 255, 255, 0.045) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+        box-shadow: none !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] button[data-desktop-preview-option="true"][aria-pressed="true"] {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+        border-color: #fff !important;
+        color: white !important;
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-style-preview-surface"] {
+        background: rgba(255, 255, 255, 0.48) !important;
+        border-color: rgba(15, 23, 42, 0.11) !important;
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-style-preview-surface"] svg {
+        color: rgba(15, 23, 42, 0.9) !important;
+      }
+
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [class*="text-white"] {
         color: rgba(15, 23, 42, 0.82) !important;
       }
@@ -1254,6 +1275,12 @@ function DesktopThemeStyles() {
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[aria-pressed="true"] {
         background-color: #ff3b68 !important;
         border-color: rgba(255, 59, 104, 0.72) !important;
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[data-desktop-preview-option="true"][aria-pressed="true"] {
+        background-color: rgba(255, 255, 255, 0.48) !important;
+        border-color: #000 !important;
+        color: rgba(15, 23, 42, 0.92) !important;
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-toolbar-separator"] {
@@ -1302,29 +1329,13 @@ function DesktopThemeStyles() {
 }
 
 function DesktopInspectorHeader({
-  eyebrow,
-  optionsLabel,
   title,
 }: {
-  eyebrow: string
-  optionsLabel: string
   title: string
 }) {
   return (
-    <div className="flex min-w-0 items-center justify-between gap-3 border-b border-white/[0.09] px-4 py-3.5">
-      <div className="min-w-0">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-white/45">
-          {eyebrow}
-        </p>
-        <h2 className="truncate text-[15px] font-semibold leading-5 text-white">{title}</h2>
-      </div>
-      <button
-        aria-label={optionsLabel}
-        className="grid size-7 shrink-0 place-items-center rounded-full text-white/58 transition hover:bg-white/[0.1] hover:text-white"
-        type="button"
-      >
-        <MoreHorizontalIcon className="size-4" />
-      </button>
+    <div className="flex min-w-0 items-center justify-center border-b border-white/[0.09] px-4 py-3.5 text-center">
+      <h2 className="truncate text-[15px] font-semibold leading-5 text-white">{title}</h2>
     </div>
   )
 }
@@ -1369,7 +1380,7 @@ function DesktopLogoInspector({
 
   return (
     <div data-slot="desktop-logo-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <DesktopInspectorHeader eyebrow="QR" title="Logo" optionsLabel="Open logo options" />
+      <DesktopInspectorHeader title="Logo" />
 
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
         <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
@@ -1614,35 +1625,21 @@ function DesktopCornersInspector({
 }) {
   return (
     <div data-slot="desktop-corners-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <div className="flex min-w-0 items-center justify-between gap-3 border-b border-white/[0.09] px-4 py-3.5">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-white/45">
-            QR
-          </p>
-          <h2 className="truncate text-[15px] font-semibold leading-5 text-white">Corners</h2>
-        </div>
-        <button
-          aria-label="Open corners options"
-          className="grid size-7 shrink-0 place-items-center rounded-full text-white/58 transition hover:bg-white/[0.1] hover:text-white"
-          type="button"
-        >
-          <MoreHorizontalIcon className="size-4" />
-        </button>
-      </div>
+      <DesktopInspectorHeader title="Corners" />
 
       <div data-impeccable-variants="a34b4748" data-impeccable-variant-count="3" style={{ display: "contents" }}>
         {/* impeccable-variants-start a34b4748 */}
         {/* Original */}
         <div data-impeccable-variant="original">
           <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
-            <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-2.5">
+            <section className="p-0">
               <div className="mb-2 min-w-0">
                 <p className="truncate text-[12px] font-semibold text-white">Corner Frame</p>
               </div>
               <div
                 aria-label="Corner frame presets"
                 data-slot="desktop-corner-frame-preset-shelf"
-                className="grid grid-cols-4 gap-1.5"
+                className="grid grid-cols-3 gap-2"
               >
                 {CORNER_SQUARE_STYLE_OPTIONS.map((option) => (
                   <DesktopCornerStyleButton
@@ -1676,14 +1673,14 @@ function DesktopCornersInspector({
               }
             />
 
-            <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-2.5">
+            <section className="mt-4 p-0">
               <div className="mb-2 min-w-0">
                 <p className="truncate text-[12px] font-semibold text-white">Corner Dot</p>
               </div>
               <div
                 aria-label="Corner dot presets"
                 data-slot="desktop-corner-dot-preset-shelf"
-                className="grid grid-cols-4 gap-1.5"
+                className="grid grid-cols-3 gap-2"
               >
                 {CORNER_DOT_STYLE_OPTIONS.map((option) => (
                   <DesktopCornerStyleButton
@@ -1857,6 +1854,7 @@ function DesktopCornerColorPreview({
   return (
     <span
       aria-hidden="true"
+      data-slot="desktop-style-preview-surface"
       className={cn(
         "block overflow-hidden border border-white/[0.1] bg-[#15161a] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]",
         className,
@@ -1885,16 +1883,19 @@ function DesktopCornerStyleButton({
     <button
       aria-label={`Use ${label} ${target}`}
       aria-pressed={selected}
+      data-desktop-preview-option="true"
       className={cn(
         "relative min-w-0 rounded-[7px] border border-white/[0.08] bg-white/[0.055] p-1.5 text-left transition hover:bg-white/[0.1]",
-        selected && "border-[#ff3b68]/75 bg-[#ff3b68]/18 shadow-[0_10px_24px_rgba(255,59,104,0.16)]",
+        selected && "border-black bg-white/[0.08] p-2",
       )}
       type="button"
       onClick={onClick}
     >
-      {selected ? <CheckIcon className="absolute right-2 top-2 z-10 size-3.5 text-white" /> : null}
-      <span className="grid h-10 w-full place-items-center overflow-hidden rounded-[6px] border border-white/[0.1] bg-[#15161a] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
-        <span className="grid size-10 place-items-center [&_svg]:size-10 [&_svg]:text-white">
+      <span
+        data-slot="desktop-style-preview-surface"
+        className="grid h-12 w-full place-items-center overflow-hidden rounded-[6px] border border-white/[0.1] bg-[#15161a] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
+      >
+        <span className="grid size-14 place-items-center [&_svg]:size-14 [&_svg]:text-white">
           <StylePreview previewKind={previewKind} value={value} />
         </span>
       </span>
@@ -1938,31 +1939,17 @@ function DesktopShapeInspector({
 
   return (
     <div data-slot="desktop-shape-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <div className="flex min-w-0 items-center justify-between gap-3 border-b border-white/[0.09] px-4 py-3.5">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-white/45">
-            QR
-          </p>
-          <h2 className="truncate text-[15px] font-semibold leading-5 text-white">Shape</h2>
-        </div>
-        <button
-          aria-label="Open shape options"
-          className="grid size-7 shrink-0 place-items-center rounded-full text-white/58 transition hover:bg-white/[0.1] hover:text-white"
-          type="button"
-        >
-          <MoreHorizontalIcon className="size-4" />
-        </button>
-      </div>
+      <DesktopInspectorHeader title="Shape" />
 
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
-        <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-2.5">
+        <section className="p-0">
           <div className="mb-2 min-w-0">
             <p className="truncate text-[12px] font-semibold text-white">Shape Options</p>
           </div>
           <div
             aria-label="Shape options"
             data-slot="desktop-shape-preset-shelf"
-            className="grid max-h-64 grid-cols-3 gap-1.5 overflow-y-auto pr-1"
+            className="grid max-h-64 grid-cols-2 gap-2 overflow-y-auto pr-1"
           >
             <DesktopShapePresetButton
               label="None"
@@ -2261,14 +2248,14 @@ function DesktopShapePresetButton({
     <button
       aria-label={`Use ${label} shape`}
       aria-pressed={selected}
+      data-desktop-preview-option="true"
       className={cn(
         "relative min-w-0 rounded-[7px] border border-white/[0.08] bg-white/[0.055] p-1.5 text-left transition hover:bg-white/[0.1]",
-        selected && "border-[#ff3b68]/75 bg-[#ff3b68]/18 shadow-[0_10px_24px_rgba(255,59,104,0.16)]",
+        selected && "border-black bg-white/[0.08] p-2",
       )}
       type="button"
       onClick={onClick}
     >
-      {selected ? <CheckIcon className="absolute right-2 top-2 z-10 size-3.5 text-white" /> : null}
       <DesktopShapePreview
         label={label}
         settings={settings}
@@ -2302,6 +2289,7 @@ function DesktopShapePreview({
   return (
     <span
       aria-hidden="true"
+      data-slot="desktop-style-preview-surface"
       className={cn(
         "grid place-items-center overflow-hidden border border-white/[0.1] bg-[#15161a] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]",
         className,
@@ -2309,7 +2297,7 @@ function DesktopShapePreview({
     >
       {shape ? (
         <svg
-          className="size-[82%]"
+          className="size-[96%]"
           fill="none"
           viewBox={`0 0 ${shape.viewBox.width} ${shape.viewBox.height}`}
           xmlns="http://www.w3.org/2000/svg"
@@ -2341,7 +2329,7 @@ function DesktopShapePreview({
           <path d={shape.path} fill={shapeFill} />
         </svg>
       ) : (
-        <span className="flex size-[82%] items-center justify-center rounded-[7px] border border-dashed border-white/[0.22] text-[10px] font-semibold text-white/42">
+        <span className="flex size-[96%] items-center justify-center rounded-[7px] border border-dashed border-white/[0.22] text-[10px] font-semibold text-white/42">
           {label}
         </span>
       )}
@@ -2360,21 +2348,7 @@ function DesktopMotionInspector({
 }) {
   return (
     <div data-slot="desktop-motion-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <div className="flex min-w-0 items-center justify-between gap-3 border-b border-white/[0.09] px-4 py-3.5">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-white/45">
-            QR
-          </p>
-          <h2 className="truncate text-[15px] font-semibold leading-5 text-white">Motion</h2>
-        </div>
-        <button
-          aria-label="Open motion options"
-          className="grid size-7 shrink-0 place-items-center rounded-full text-white/58 transition hover:bg-white/[0.1] hover:text-white"
-          type="button"
-        >
-          <MoreHorizontalIcon className="size-4" />
-        </button>
-      </div>
+      <DesktopInspectorHeader title="Motion" />
 
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
         <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
@@ -2587,14 +2561,14 @@ function DesktopMotionLoaderButton({
     <button
       aria-label={`Use ${label} motion loader`}
       aria-pressed={selected}
+      data-desktop-preview-option="true"
       className={cn(
         "relative h-10 min-w-0 rounded-[7px] border border-white/[0.08] bg-white/[0.055] px-2.5 text-left transition hover:bg-white/[0.1]",
-        selected && "border-[#ff3b68]/75 bg-[#ff3b68]/18 shadow-[0_10px_24px_rgba(255,59,104,0.16)]",
+        selected && "border-black bg-white/[0.08] ring-1 ring-black/70",
       )}
       type="button"
       onClick={onClick}
     >
-      {selected ? <CheckIcon className="absolute right-2 top-2 size-3.5 text-white" /> : null}
       <span className="block max-w-[calc(100%-1.25rem)] truncate text-[11px] font-semibold text-white/78">
         {label}
       </span>
@@ -2617,6 +2591,7 @@ function DesktopMotionColorPresetButton({
     <button
       aria-label={`Use ${label} motion colors`}
       aria-pressed={selected}
+      data-desktop-preview-option="true"
       className={cn(
         "relative flex h-9 min-w-0 items-center gap-2 rounded-[7px] border border-white/[0.08] bg-white/[0.055] px-2 text-left transition hover:bg-white/[0.1]",
         selected && "border-[#ff3b68]/75 bg-[#ff3b68]/18 shadow-[0_10px_24px_rgba(255,59,104,0.16)]",
@@ -2686,24 +2661,10 @@ function DesktopContentInspector({
 
   return (
     <div data-slot="desktop-content-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <div className="flex min-w-0 items-center justify-between gap-3 border-b border-white/[0.09] px-4 py-3.5">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-white/45">
-            QR
-          </p>
-          <h2 className="truncate text-[15px] font-semibold leading-5 text-white">Content</h2>
-        </div>
-        <button
-          aria-label="Open content options"
-          className="grid size-7 shrink-0 place-items-center rounded-full text-white/58 transition hover:bg-white/[0.1] hover:text-white"
-          type="button"
-        >
-          <MoreHorizontalIcon className="size-4" />
-        </button>
-      </div>
+      <DesktopInspectorHeader title="Content" />
 
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
-        <div className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-2.5">
+        <div>
           <div className="flex min-w-0 items-center gap-2">
             <label className="sr-only" htmlFor="desktop-content-collection">
               QR type collection
@@ -2832,21 +2793,7 @@ function DesktopPatternInspector({
 
   return (
     <div data-slot="desktop-pattern-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <div className="flex min-w-0 items-center justify-between gap-3 border-b border-white/[0.09] px-4 py-3.5">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-white/45">
-            QR
-          </p>
-          <h2 className="truncate text-[15px] font-semibold leading-5 text-white">Pattern</h2>
-        </div>
-        <button
-          aria-label="Open pattern options"
-          className="grid size-7 shrink-0 place-items-center rounded-full text-white/58 transition hover:bg-white/[0.1] hover:text-white"
-          type="button"
-        >
-          <MoreHorizontalIcon className="size-4" />
-        </button>
-      </div>
+      <DesktopInspectorHeader title="Pattern" />
 
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
         <div className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-2.5">
@@ -2874,7 +2821,7 @@ function DesktopPatternInspector({
           <div
             aria-label="Module pattern presets"
             data-slot="desktop-pattern-preset-shelf"
-            className="mt-2 grid grid-cols-4 gap-1.5"
+            className="mt-3 grid grid-cols-3 gap-2"
           >
             {DOT_STYLE_OPTIONS.map((option) => (
               <DesktopModulePatternButton
@@ -3024,17 +2971,17 @@ function DesktopModulePatternButton({
     <button
       aria-label={`Use ${label} pattern`}
       aria-pressed={selected}
+      data-desktop-preview-option="true"
       className={cn(
         "relative min-w-0 rounded-[7px] border border-white/[0.08] bg-white/[0.055] p-1.5 text-left transition hover:bg-white/[0.1]",
-        selected && "border-[#ff3b68]/75 bg-[#ff3b68]/18 shadow-[0_10px_24px_rgba(255,59,104,0.16)]",
+        selected && "border-black bg-white/[0.08] p-2",
       )}
       type="button"
       onClick={onClick}
     >
-      {selected ? <CheckIcon className="absolute right-2 top-2 z-10 size-3.5 text-white" /> : null}
       <DesktopQrDotPreview
         value={value}
-        className={cn("w-full rounded-[6px]", small ? "h-10" : "h-14")}
+        className={cn("w-full rounded-[6px]", small ? "h-11" : "h-14")}
       />
       {!small ? (
         <span className="mt-1.5 block truncate text-[11px] font-semibold text-white/78">
@@ -3049,12 +2996,13 @@ function DesktopQrDotPreview({ className, value }: { className?: string; value: 
   return (
     <span
       aria-hidden="true"
+      data-slot="desktop-style-preview-surface"
       className={cn(
         "grid place-items-center overflow-hidden border border-white/[0.1] bg-[#15161a] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]",
         className,
       )}
     >
-      <span className="grid size-10 place-items-center [&_svg]:size-10 [&_svg]:text-white">
+      <span className="grid size-16 place-items-center [&_svg]:size-16 [&_svg]:text-white">
         <StylePreview previewKind="dots" value={value} />
       </span>
     </span>
@@ -3073,6 +3021,7 @@ function DesktopDotsColorPreview({
   return (
     <span
       aria-hidden="true"
+      data-slot="desktop-style-preview-surface"
       className={cn(
         "block overflow-hidden border border-white/[0.1] bg-[#15161a] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]",
         className,
@@ -3166,16 +3115,17 @@ function DesktopPatternSwatchButton({
     <button
       aria-label={`Use ${label} decoration pattern`}
       aria-pressed={selected}
+      data-desktop-preview-option="true"
       className={cn(
         "relative min-w-0 rounded-[7px] border border-white/[0.08] bg-white/[0.055] p-1.5 text-left transition hover:bg-white/[0.1]",
-        selected && "border-[#ff3b68]/75 bg-[#ff3b68]/18 shadow-[0_10px_24px_rgba(255,59,104,0.16)]",
+        selected && "border-black bg-white/[0.08] p-2",
       )}
       type="button"
       onClick={onClick}
     >
-      {selected ? <CheckIcon className="absolute right-2 top-2 z-10 size-3.5 text-white" /> : null}
       <span
         aria-hidden="true"
+        data-slot="desktop-style-preview-surface"
         className="block h-12 w-full rounded-[6px] border border-white/[0.1] bg-[#15161a]"
         style={style}
       />
@@ -3591,7 +3541,7 @@ function DesktopEncodingInspector({
 }) {
   return (
     <div data-slot="desktop-encoding-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <DesktopInspectorHeader eyebrow="QR" title="Encoding" optionsLabel="Open encoding options" />
+      <DesktopInspectorHeader title="Encoding" />
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
         <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
           <DesktopMotionSliderRow
@@ -3652,7 +3602,7 @@ function DesktopImageInspector({
 }) {
   return (
     <div data-slot="desktop-image-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <DesktopInspectorHeader eyebrow="Add" title="Image" optionsLabel="Open image options" />
+      <DesktopInspectorHeader title="Image" />
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
         <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Intent</p>
@@ -3752,7 +3702,7 @@ function DesktopDecorationsInspector({
 }) {
   return (
     <div data-slot="desktop-decorations-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <DesktopInspectorHeader eyebrow="Add" title="Decorations" optionsLabel="Open decorations options" />
+      <DesktopInspectorHeader title="Decorations" />
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
         <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Add</p>
@@ -3848,7 +3798,7 @@ function DesktopEffectsInspector({
 
   return (
     <div data-slot="desktop-effects-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <DesktopInspectorHeader eyebrow="Add" title="Effects" optionsLabel="Open effects options" />
+      <DesktopInspectorHeader title="Effects" />
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
         <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-2.5">
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Generated Effects</p>
@@ -3976,7 +3926,7 @@ function DesktopLayersInspector({
 
   return (
     <div data-slot="desktop-layers-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <DesktopInspectorHeader eyebrow="Manage" title="Layers" optionsLabel="Open layers options" />
+      <DesktopInspectorHeader title="Layers" />
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
         <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-2.5">
           <div className="mb-2 flex min-w-0 items-center justify-between gap-3">
@@ -4105,7 +4055,7 @@ function DesktopExportInspector({
 
   return (
     <div data-slot="desktop-export-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <DesktopInspectorHeader eyebrow="Manage" title="Export" optionsLabel="Open export options" />
+      <DesktopInspectorHeader title="Export" />
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
         <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Target</p>
@@ -4224,21 +4174,7 @@ function DesktopTextInspector({
 
   return (
     <div data-slot="desktop-text-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <div className="flex min-w-0 items-center justify-between gap-3 border-b border-white/[0.09] px-4 py-3.5">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-white/45">
-            Add
-          </p>
-          <h2 className="truncate text-[15px] font-semibold leading-5 text-white">Text</h2>
-        </div>
-        <button
-          aria-label="Open text options"
-          className="grid size-7 shrink-0 place-items-center rounded-full text-white/58 transition hover:bg-white/[0.1] hover:text-white"
-          type="button"
-        >
-          <MoreHorizontalIcon className="size-4" />
-        </button>
-      </div>
+      <DesktopInspectorHeader title="Text" />
 
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
         <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-2.5">
@@ -4632,21 +4568,7 @@ function getDesktopFontWeightSliderStep(supportedWeights: readonly number[]) {
 function DesktopPlaceholderInspector({ tool }: { tool: DesktopToolbarTool }) {
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <div className="flex min-w-0 items-center justify-between gap-3 border-b border-white/[0.09] px-4 py-3.5">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-white/45">
-            {tool.group}
-          </p>
-          <h2 className="truncate text-[15px] font-semibold leading-5 text-white">{tool.title}</h2>
-        </div>
-        <button
-          aria-label={`Open ${tool.title} options`}
-          className="grid size-7 shrink-0 place-items-center rounded-full text-white/58 transition hover:bg-white/[0.1] hover:text-white"
-          type="button"
-        >
-          <MoreHorizontalIcon className="size-4" />
-        </button>
-      </div>
+      <DesktopInspectorHeader title={tool.title} />
     </div>
   )
 }
