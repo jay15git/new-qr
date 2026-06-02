@@ -68,6 +68,7 @@ import {
   type DraftingLayerDistributeAction,
   type DraftingLayerReorderAction,
   type DraftingLayerStateByNodeId,
+  type DraftingTextRun,
 } from "@/components/new/drafting-layer-state"
 import {
   applyDraftingQrForegroundShadow,
@@ -112,6 +113,7 @@ import {
   resolveDraftingFont,
   type DraftingFontSource,
 } from "@/components/new/drafting-font-registry"
+import { layoutDraftingText } from "@/components/new/drafting-text-layout"
 import { DraftingPaneWorkspace } from "@/components/new/drafting-pane-workspace"
 import type { DraftingLayerMenuAction } from "@/components/new/qr-pane"
 import {
@@ -4164,6 +4166,10 @@ function DraftingTextLayerTab({
     void loadDraftingFont(selectedFont.id)
   }, [selectedFont.id])
 
+  function patchTextLayer(patch: Partial<DraftingCanvasLayer>) {
+    onLayerPatch({ ...patch, textRuns: undefined })
+  }
+
   return (
     <section data-slot="drafting-text-tab" className="min-w-0 space-y-4">
       <SecondaryButton
@@ -4187,7 +4193,7 @@ function DraftingTextLayerTab({
               aria-label="Text layer content"
               className="drafting-type-input min-h-24 w-full resize-y rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3 py-2 text-[var(--drafting-ink)] shadow-none"
               value={textLayer.text ?? ""}
-              onChange={(event) => onLayerPatch({ text: event.currentTarget.value })}
+              onChange={(event) => patchTextLayer({ text: event.currentTarget.value })}
             />
           </label>
 
@@ -4227,7 +4233,7 @@ function DraftingTextLayerTab({
                           type="button"
                           onClick={() => {
                             void loadDraftingFont(font.id)
-                            onLayerPatch({ fontFamily: font.family, fontId: font.id })
+                            patchTextLayer({ fontFamily: font.family, fontId: font.id })
                           }}
                           onMouseEnter={() => {
                             void loadDraftingFont(font.id)
@@ -4257,14 +4263,14 @@ function DraftingTextLayerTab({
               max={300}
               min={6}
               value={textLayer.fontSize ?? DEFAULT_DRAFTING_TEXT_LAYER.fontSize}
-              onChange={(fontSize) => onLayerPatch({ fontSize })}
+              onChange={(fontSize) => patchTextLayer({ fontSize })}
             />
             <TextNumberInput
               label="Spacing"
               max={200}
               min={-50}
               value={textLayer.letterSpacing ?? DEFAULT_DRAFTING_TEXT_LAYER.letterSpacing}
-              onChange={(letterSpacing) => onLayerPatch({ letterSpacing })}
+              onChange={(letterSpacing) => patchTextLayer({ letterSpacing })}
             />
             <TextNumberInput
               label="Line"
@@ -4272,7 +4278,7 @@ function DraftingTextLayerTab({
               min={0.6}
               step={0.05}
               value={textLayer.lineHeight ?? DEFAULT_DRAFTING_TEXT_LAYER.lineHeight}
-              onChange={(lineHeight) => onLayerPatch({ lineHeight })}
+              onChange={(lineHeight) => patchTextLayer({ lineHeight })}
             />
             <label className="min-w-0">
               <span className="drafting-type-meta mb-1 block font-semibold text-[var(--drafting-ink-muted)]">
@@ -4283,7 +4289,7 @@ function DraftingTextLayerTab({
                 className="h-9 w-full rounded-[6px] border border-[var(--drafting-line)] bg-transparent p-1"
                 type="color"
                 value={textLayer.fill ?? DEFAULT_DRAFTING_TEXT_LAYER.fill}
-                onChange={(event) => onLayerPatch({ fill: event.currentTarget.value })}
+                onChange={(event) => patchTextLayer({ fill: event.currentTarget.value })}
               />
             </label>
           </div>
@@ -4292,7 +4298,7 @@ function DraftingTextLayerTab({
             supportedWeights={supportedFontWeights}
             value={fontWeight}
             onChange={(fontWeight) =>
-              onLayerPatch({ fontWeight: getNearestDraftingFontWeight(fontWeight, supportedFontWeights) })
+              patchTextLayer({ fontWeight: getNearestDraftingFontWeight(fontWeight, supportedFontWeights) })
             }
           />
 
@@ -4307,7 +4313,7 @@ function DraftingTextLayerTab({
                     "border-[var(--drafting-ink)] bg-[var(--drafting-control-bg-active)] text-[var(--drafting-ink)]",
                 )}
                 type="button"
-                onClick={() => onLayerPatch({ textAlign })}
+                onClick={() => patchTextLayer({ textAlign })}
               >
                 {textAlign}
               </button>
@@ -4319,7 +4325,7 @@ function DraftingTextLayerTab({
               active={fontWeight >= 700}
               label="Bold"
               onClick={() =>
-                onLayerPatch({
+                patchTextLayer({
                   fontWeight:
                     fontWeight >= 700
                       ? getNearestDraftingFontWeight(400, supportedFontWeights)
@@ -4331,7 +4337,7 @@ function DraftingTextLayerTab({
               active={(textLayer.fontStyle ?? DEFAULT_DRAFTING_TEXT_LAYER.fontStyle) === "italic"}
               label="Italic"
               onClick={() =>
-                onLayerPatch({
+                patchTextLayer({
                   fontStyle:
                     (textLayer.fontStyle ?? DEFAULT_DRAFTING_TEXT_LAYER.fontStyle) === "italic"
                       ? "normal"
@@ -4342,7 +4348,7 @@ function DraftingTextLayerTab({
             <TextToggleButton
               active={Boolean(textLayer.underline)}
               label="Underline"
-              onClick={() => onLayerPatch({ underline: !textLayer.underline })}
+              onClick={() => patchTextLayer({ underline: !textLayer.underline })}
             />
           </div>
         </div>
@@ -4728,71 +4734,72 @@ function getDraftingTextLayerSvg(layer: DraftingCanvasLayer) {
   const textAlign = layer.textAlign ?? DEFAULT_DRAFTING_TEXT_LAYER.textAlign
   const anchor = textAlign === "center" ? "middle" : textAlign === "right" ? "end" : "start"
   const x = textAlign === "center" ? layer.width / 2 : textAlign === "right" ? layer.width : 0
-  const lines = wrapDraftingTextForSvg(layer.text ?? "", {
-    fontSize,
-    letterSpacing: layer.letterSpacing ?? DEFAULT_DRAFTING_TEXT_LAYER.letterSpacing,
-    width: layer.width,
-  })
-  const tspans = lines
-    .map((line, index) => {
-      const dy = index === 0 ? fontSize : fontSize * lineHeight
+  const hasTextRuns =
+    Boolean(layer.textRuns?.length) &&
+    layer.textRuns?.map((run) => run.text).join("") === (layer.text ?? "")
 
-      return `<tspan x="${x}" dy="${dy}">${escapeXml(line)}</tspan>`
-    })
-    .join("")
-  const decoration = layer.underline ? ` text-decoration="underline"` : ""
+  if (!hasTextRuns) {
+    const lines = layoutDraftingText(layer).lines
+    const tspans = lines
+      .map((line, index) => {
+        const dy = index === 0 ? fontSize : fontSize * lineHeight
 
-  return `<g opacity="${layer.opacity}" transform="${getDraftingLayerSvgTransform(layer)}"${filter}><text fill="${escapeXml(layer.fill ?? DEFAULT_DRAFTING_TEXT_LAYER.fill)}" font-family="${escapeXml(getDraftingFontCssFamily({ fontFamily: layer.fontFamily, fontId: layer.fontId }))}" font-size="${fontSize}" font-style="${layer.fontStyle ?? DEFAULT_DRAFTING_TEXT_LAYER.fontStyle}" font-weight="${layer.fontWeight ?? DEFAULT_DRAFTING_TEXT_LAYER.fontWeight}" letter-spacing="${layer.letterSpacing ?? DEFAULT_DRAFTING_TEXT_LAYER.letterSpacing}" text-anchor="${anchor}"${decoration}>${tspans}</text></g>`
-}
+        return `<tspan x="${x}" dy="${dy}">${escapeXml(line)}</tspan>`
+      })
+      .join("")
+    const decoration = layer.underline ? ` text-decoration="underline"` : ""
 
-function wrapDraftingTextForSvg(
-  text: string,
-  options: { fontSize: number; letterSpacing: number; width: number },
-) {
-  const maxChars = Math.max(
-    1,
-    Math.floor(options.width / Math.max(1, options.fontSize * 0.58 + options.letterSpacing)),
-  )
-  const sourceLines = text.split(/\r?\n/)
-  const wrapped: string[] = []
-
-  for (const sourceLine of sourceLines) {
-    if (sourceLine.length === 0) {
-      wrapped.push("")
-      continue
-    }
-
-    let current = ""
-
-    for (const word of sourceLine.split(/\s+/)) {
-      if (!word) {
-        continue
-      }
-
-      if (!current) {
-        while (word.length > maxChars) {
-          wrapped.push(word.slice(0, maxChars))
-          current = word.slice(maxChars)
-          break
-        }
-        if (!current) {
-          current = word
-        }
-        continue
-      }
-
-      if (`${current} ${word}`.length <= maxChars) {
-        current = `${current} ${word}`
-      } else {
-        wrapped.push(current)
-        current = word
-      }
-    }
-
-    wrapped.push(current)
+    return `<g opacity="${layer.opacity}" transform="${getDraftingLayerSvgTransform(layer)}"${filter}><text fill="${escapeXml(layer.fill ?? DEFAULT_DRAFTING_TEXT_LAYER.fill)}" font-family="${escapeXml(getDraftingFontCssFamily({ fontFamily: layer.fontFamily, fontId: layer.fontId }))}" font-size="${fontSize}" font-style="${layer.fontStyle ?? DEFAULT_DRAFTING_TEXT_LAYER.fontStyle}" font-weight="${layer.fontWeight ?? DEFAULT_DRAFTING_TEXT_LAYER.fontWeight}" letter-spacing="${layer.letterSpacing ?? DEFAULT_DRAFTING_TEXT_LAYER.letterSpacing}" text-anchor="${anchor}"${decoration}>${tspans}</text></g>`
   }
 
-  return wrapped.length ? wrapped : [""]
+  const lineRuns = splitDraftingTextRunsByLine(layer)
+  const tspans = lineRuns
+    .map((runs, lineIndex) => {
+      const dy = lineIndex === 0 ? fontSize : fontSize * lineHeight
+      const content = runs.map((run) => getDraftingTextRunSvg(layer, run)).join("")
+
+      return `<tspan x="${x}" dy="${dy}">${content}</tspan>`
+    })
+    .join("")
+
+  return `<g opacity="${layer.opacity}" transform="${getDraftingLayerSvgTransform(layer)}"${filter}><text letter-spacing="${layer.letterSpacing ?? DEFAULT_DRAFTING_TEXT_LAYER.letterSpacing}" text-anchor="${anchor}">${tspans}</text></g>`
+}
+
+function splitDraftingTextRunsByLine(layer: DraftingCanvasLayer) {
+  const runs = getDraftingTextLayerRuns(layer)
+  const lines: DraftingTextRun[][] = [[]]
+
+  for (const run of runs) {
+    const parts = run.text.split(/\r?\n/)
+
+    parts.forEach((part, index) => {
+      if (index > 0) {
+        lines.push([])
+      }
+
+      if (part) {
+        lines.at(-1)?.push({ ...run, text: part })
+      }
+    })
+  }
+
+  return lines.length > 0 ? lines : [[{ text: "" }]]
+}
+
+function getDraftingTextLayerRuns(layer: DraftingCanvasLayer): DraftingTextRun[] {
+  const text = layer.text ?? ""
+
+  if (!layer.textRuns?.length || layer.textRuns.map((run) => run.text).join("") !== text) {
+    return text ? [{ text }] : []
+  }
+
+  return layer.textRuns
+}
+
+function getDraftingTextRunSvg(layer: DraftingCanvasLayer, run: DraftingTextRun) {
+  const decoration = (run.underline ?? layer.underline) ? ` text-decoration="underline"` : ""
+
+  return `<tspan fill="${escapeXml(run.fill ?? layer.fill ?? DEFAULT_DRAFTING_TEXT_LAYER.fill)}" font-family="${escapeXml(getDraftingFontCssFamily({ fontFamily: run.fontFamily ?? layer.fontFamily, fontId: run.fontId ?? layer.fontId }))}" font-size="${run.fontSize ?? layer.fontSize ?? DEFAULT_DRAFTING_TEXT_LAYER.fontSize}" font-style="${run.fontStyle ?? layer.fontStyle ?? DEFAULT_DRAFTING_TEXT_LAYER.fontStyle}" font-weight="${run.fontWeight ?? layer.fontWeight ?? DEFAULT_DRAFTING_TEXT_LAYER.fontWeight}"${decoration}>${escapeXml(run.text)}</tspan>`
 }
 
 function getDraftingLayerSvgTransform(layer: DraftingCanvasLayer) {

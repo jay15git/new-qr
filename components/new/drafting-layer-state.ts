@@ -15,6 +15,16 @@ export type DraftingCanvasLayerKind = "card" | "group" | "qr" | "text"
 export type DraftingTextAlign = "center" | "left" | "right"
 export type DraftingTextFontStyle = "italic" | "normal"
 export type DraftingTextFontWeight = "bold" | "normal" | number
+export type DraftingTextRun = {
+  fill?: string
+  fontFamily?: string
+  fontId?: string
+  fontSize?: number
+  fontStyle?: DraftingTextFontStyle
+  fontWeight?: DraftingTextFontWeight
+  text: string
+  underline?: boolean
+}
 
 export type DraftingCanvasLayer = {
   blur: number
@@ -38,6 +48,7 @@ export type DraftingCanvasLayer = {
   shadow: DraftingCardShadowState
   text?: string
   textAlign?: DraftingTextAlign
+  textRuns?: DraftingTextRun[]
   underline?: boolean
   width: number
   x: number
@@ -172,6 +183,7 @@ export function cloneDraftingCanvasLayer(layer: DraftingCanvasLayer): DraftingCa
     ...layer,
     children: layer.children?.map(cloneDraftingCanvasLayer),
     shadow: { ...layer.shadow },
+    textRuns: layer.textRuns?.map((run) => ({ ...run })),
   }
 }
 
@@ -503,6 +515,16 @@ function normalizeDraftingCanvasLayer(
           )
           .filter((child): child is DraftingCanvasLayer => Boolean(child))
       : undefined
+  const text =
+    kind === "text" && typeof value.text === "string"
+      ? value.text
+      : kind === "text"
+        ? (fallback.text ?? DEFAULT_DRAFTING_TEXT_LAYER.text)
+        : undefined
+  const textRuns =
+    kind === "text" && text !== undefined
+      ? normalizeTextRuns(value.textRuns, fallback.textRuns, text)
+      : undefined
 
   return {
     blur: clamp(readFiniteNumber(value.blur, fallback.blur), 0, 96),
@@ -544,16 +566,12 @@ function normalizeDraftingCanvasLayer(
     opacity: clamp(readFiniteNumber(value.opacity, fallback.opacity), 0, 1),
     rotation: readFiniteNumber(value.rotation, fallback.rotation),
     shadow: normalizeDraftingLayerShadow(value.shadow, fallback.shadow),
-    text:
-      kind === "text" && typeof value.text === "string"
-        ? value.text
-        : kind === "text"
-          ? (fallback.text ?? DEFAULT_DRAFTING_TEXT_LAYER.text)
-          : undefined,
+    text,
     textAlign:
       kind === "text"
         ? normalizeTextAlign(value.textAlign, fallback.textAlign)
         : undefined,
+    textRuns,
     underline:
       kind === "text"
         ? typeof value.underline === "boolean"
@@ -740,6 +758,92 @@ function normalizeTextFontWeight(value: unknown, fallback: unknown): DraftingTex
   return fallback === "bold" || fallback === "normal" || typeof fallback === "number"
     ? normalizeTextFontWeight(fallback, DEFAULT_DRAFTING_TEXT_LAYER.fontWeight)
     : DEFAULT_DRAFTING_TEXT_LAYER.fontWeight
+}
+
+function normalizeTextRuns(
+  value: unknown,
+  fallback: unknown,
+  text: string,
+): DraftingTextRun[] | undefined {
+  const normalized = normalizeTextRunArray(value, text)
+  if (normalized) {
+    return normalized
+  }
+
+  return normalizeTextRunArray(fallback, text)
+}
+
+function normalizeTextRunArray(value: unknown, text: string): DraftingTextRun[] | undefined {
+  if (!Array.isArray(value) || text.length === 0) {
+    return undefined
+  }
+
+  const runs = value
+    .map((run): DraftingTextRun | null => {
+      if (!isRecord(run) || typeof run.text !== "string" || run.text.length === 0) {
+        return null
+      }
+
+      const fontFamily =
+        typeof run.fontFamily === "string" && run.fontFamily.trim()
+          ? run.fontFamily.trim().slice(0, 80)
+          : undefined
+      const fontId = typeof run.fontId === "string" && getDraftingFontById(run.fontId)
+        ? run.fontId
+        : fontFamily
+          ? getDraftingFontByFamily(fontFamily)?.id
+          : undefined
+
+      return {
+        fill: typeof run.fill === "string" ? normalizeHexColor(run.fill, DEFAULT_DRAFTING_TEXT_LAYER.fill) : undefined,
+        fontFamily,
+        fontId,
+        fontSize:
+          typeof run.fontSize === "number" && Number.isFinite(run.fontSize)
+            ? clamp(run.fontSize, 6, 300)
+            : undefined,
+        fontStyle: run.fontStyle === "italic" ? "italic" : run.fontStyle === "normal" ? "normal" : undefined,
+        fontWeight:
+          run.fontWeight === undefined
+            ? undefined
+            : normalizeTextFontWeight(run.fontWeight, undefined),
+        text: run.text,
+        underline: typeof run.underline === "boolean" ? run.underline : undefined,
+      }
+    })
+    .filter((run): run is DraftingTextRun => Boolean(run))
+
+  if (runs.length === 0 || runs.map((run) => run.text).join("") !== text) {
+    return undefined
+  }
+
+  return mergeAdjacentTextRuns(runs)
+}
+
+function mergeAdjacentTextRuns(runs: DraftingTextRun[]) {
+  return runs.reduce<DraftingTextRun[]>((merged, run) => {
+    const previous = merged.at(-1)
+
+    if (previous && areTextRunStylesEqual(previous, run)) {
+      previous.text += run.text
+      return merged
+    }
+
+    merged.push({ ...run })
+    return merged
+  }, [])
+}
+
+function areTextRunStylesEqual(a: DraftingTextRun, b: DraftingTextRun) {
+  return (
+    a.fill === b.fill &&
+    a.fontFamily === b.fontFamily &&
+    a.fontId === b.fontId &&
+    a.fontSize === b.fontSize &&
+    a.fontStyle === b.fontStyle &&
+    a.fontWeight === b.fontWeight &&
+    a.underline === b.underline
+  )
 }
 
 function clamp(value: number, min: number, max: number) {

@@ -7,17 +7,26 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type FormEvent,
   type MouseEvent,
   type PointerEvent,
   type ReactNode,
 } from "react"
 import { createPortal } from "react-dom"
 import {
+  AlignCenterIcon,
+  AlignLeftIcon,
+  AlignRightIcon,
+  BoldIcon,
   CopyIcon,
+  ItalicIcon,
   LockIcon,
   MoreHorizontalIcon,
+  PaletteIcon,
   RotateCwIcon,
   Trash2Icon,
+  TypeIcon,
+  UnderlineIcon,
   UnlockIcon,
 } from "lucide-react"
 
@@ -34,11 +43,18 @@ import {
   type DraftingLayerDistributeAction,
   type DraftingLayerReorderAction,
   type DraftingCanvasLayer,
+  type DraftingTextRun,
 } from "@/components/new/drafting-layer-state"
 import {
+  DRAFTING_FONT_REGISTRY,
   ensureDraftingFontsForLayers,
   getDraftingFontCssFamily,
+  loadDraftingFont,
 } from "@/components/new/drafting-font-registry"
+import {
+  getDraftingTextFontFamily,
+  layoutDraftingText,
+} from "@/components/new/drafting-text-layout"
 import {
   createDraftingQrArtworkState,
   sanitizeDraftingQrArtworkMarkup,
@@ -87,6 +103,10 @@ type SnapGuides = {
   vertical: number[]
 }
 type LayerBounds = Pick<DraftingCanvasLayer, "height" | "id" | "width" | "x" | "y">
+type TextRunStylePatch = Pick<
+  DraftingTextRun,
+  "fill" | "fontFamily" | "fontId" | "fontSize" | "fontStyle" | "fontWeight" | "underline"
+>
 
 const RESIZE_CONTROL_PADDING_PX = 12
 const ROTATE_HANDLE_OFFSET_PX = 34
@@ -95,6 +115,7 @@ const ROTATE_LABEL_GAP_PX = 8
 const SIZE_LABEL_GAP_PX = 10
 const FLOATING_TOOLBAR_GAP_PX = 14
 const FLOATING_TOOLBAR_HEIGHT_PX = 38
+const TEXT_FORMAT_TOOLBAR_HEIGHT_PX = 44
 const ROTATION_LABEL_HIDE_DELAY_MS = 2000
 const SNAP_THRESHOLD_PX = 6
 const RESIZE_SNAP_THRESHOLD_PX = 3
@@ -698,24 +719,26 @@ function LayerContextMenu({
 
   return (
     <div
-      className="fixed z-[20000] min-w-48 rounded-[8px] border border-[var(--drafting-dropdown-border)] bg-[var(--drafting-dropdown-menu-surface-open)] p-1.5 text-[var(--drafting-dropdown-text)] shadow-[var(--drafting-dropdown-menu-shadow-open)]"
+      className="fixed z-[20000] min-w-52 rounded-[18px] border border-white/[0.12] bg-black/55 p-1.5 text-white/78 shadow-[0_22px_55px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
       data-drafting-dropdown-content="true"
       data-slot="drafting-layer-context-menu"
+      data-toolbar-appearance="desktop-glass"
       role="menu"
       style={style}
+      tabIndex={-1}
       onClick={(event) => event.stopPropagation()}
       onContextMenu={(event) => event.preventDefault()}
     >
       {onPaste ? <LayerContextMenuButton label="Paste" onClick={onPaste} /> : null}
       {hasSelection ? (
         <>
-          {onPaste ? <div className="my-1 h-px bg-[var(--drafting-dropdown-border)]" /> : null}
+          {onPaste ? <LayerContextMenuSeparator /> : null}
           {onCopy ? <LayerContextMenuButton label="Copy" onClick={onCopy} /> : null}
           <LayerContextMenuButton label="Bring to front" onClick={() => onAction("front")} />
           <LayerContextMenuButton label="Bring forward" onClick={() => onAction("forward")} />
           <LayerContextMenuButton label="Send backward" onClick={() => onAction("backward")} />
           <LayerContextMenuButton label="Send to back" onClick={() => onAction("back")} />
-          <div className="my-1 h-px bg-[var(--drafting-dropdown-border)]" />
+          <LayerContextMenuSeparator />
           <LayerContextMenuButton
             label={hasLockedLayer ? "Unlock" : "Lock"}
             onClick={() => onAction(hasLockedLayer ? "unlock" : "lock")}
@@ -726,14 +749,14 @@ function LayerContextMenu({
           />
           <LayerContextMenuButton label="Reset rotation" onClick={() => onAction("reset-rotation")} />
           <LayerContextMenuButton label="Delete" onClick={() => onAction("delete")} />
-          <div className="my-1 h-px bg-[var(--drafting-dropdown-border)]" />
+          <LayerContextMenuSeparator />
           <LayerContextMenuButton label="Align left" onClick={() => onAction("left")} />
           <LayerContextMenuButton label="Align center" onClick={() => onAction("center-x")} />
           <LayerContextMenuButton label="Align middle" onClick={() => onAction("center-y")} />
           <LayerContextMenuButton label="Align right" onClick={() => onAction("right")} />
           {isMultiLayer ? (
             <>
-              <div className="my-1 h-px bg-[var(--drafting-dropdown-border)]" />
+              <LayerContextMenuSeparator />
               <LayerContextMenuButton label="Group" onClick={() => onAction("group")} />
               <LayerContextMenuButton label="Distribute selection horizontally" onClick={() => onAction("horizontal")} />
               <LayerContextMenuButton label="Distribute selection vertically" onClick={() => onAction("vertical")} />
@@ -741,7 +764,7 @@ function LayerContextMenu({
           ) : null}
           {hasGroupLayer ? (
             <>
-              <div className="my-1 h-px bg-[var(--drafting-dropdown-border)]" />
+              <LayerContextMenuSeparator />
               <LayerContextMenuButton label="Ungroup" onClick={() => onAction("ungroup")} />
             </>
           ) : null}
@@ -761,13 +784,23 @@ function LayerContextMenuButton({
   return (
     <button
       aria-label={label}
-      className="block h-8 w-full rounded-[5px] px-2.5 text-left text-[12px] font-semibold text-[var(--drafting-dropdown-text)] hover:bg-[var(--drafting-dropdown-selected-fill)]"
+      className="block h-8 w-full rounded-full px-3 text-left text-[12px] font-semibold text-current transition-[background-color,color,transform] duration-150 hover:bg-white/[0.11] hover:text-white active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
       role="menuitem"
       type="button"
       onClick={onClick}
     >
       {label}
     </button>
+  )
+}
+
+function LayerContextMenuSeparator() {
+  return (
+    <div
+      aria-hidden="true"
+      className="my-1 h-px bg-white/[0.12]"
+      data-slot="drafting-layer-context-menu-separator"
+    />
   )
 }
 
@@ -792,10 +825,12 @@ function LayerFloatingToolbar({
 
   return (
     <div
-      className="absolute left-1/2 top-1/2 z-[10001] inline-flex h-[38px] items-center gap-1 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-active)] px-1.5 text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-hover)]"
+      className="absolute left-1/2 top-1/2 z-[10001] inline-flex h-11 items-center gap-1 rounded-full border border-white/[0.12] bg-black/55 px-2 text-white/78 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
       data-slot="drafting-layer-floating-toolbar"
+      data-toolbar-appearance="desktop-glass"
       role="toolbar"
       style={style}
+      tabIndex={-1}
       onClick={(event) => event.stopPropagation()}
       onContextMenu={(event) => event.preventDefault()}
       onPointerDown={(event) => event.stopPropagation()}
@@ -821,7 +856,7 @@ function LayerFloatingToolbar({
       >
         <Trash2Icon aria-hidden="true" className="size-4" strokeWidth={2} />
       </LayerFloatingToolbarButton>
-      <div className="mx-0.5 h-4 w-px bg-[var(--drafting-line)]" />
+      <div className="mx-0.5 h-4 w-px bg-white/[0.12]" data-slot="drafting-layer-toolbar-separator" />
       <LayerFloatingToolbarButton label="More layer actions" onClick={onMore}>
         <MoreHorizontalIcon aria-hidden="true" className="size-4" strokeWidth={2} />
       </LayerFloatingToolbarButton>
@@ -843,7 +878,7 @@ function LayerFloatingToolbarButton({
   return (
     <button
       aria-label={label}
-      className="flex size-7 items-center justify-center rounded-[5px] text-[var(--drafting-ink-muted)] transition-colors duration-150 hover:bg-[var(--drafting-control-bg-hover)] hover:text-[var(--drafting-ink)] disabled:pointer-events-none disabled:opacity-35"
+      className="flex size-8 items-center justify-center rounded-full text-current transition-[background-color,color,transform] duration-150 hover:bg-white/[0.11] hover:text-white active:scale-95 disabled:pointer-events-none disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
       disabled={disabled}
       type="button"
       onClick={onClick}
@@ -853,11 +888,204 @@ function LayerFloatingToolbarButton({
   )
 }
 
+function TextFormatFloatingToolbar({
+  layer,
+  onFormatSelection,
+  onPatch,
+  style,
+}: {
+  layer: DraftingCanvasLayer
+  onFormatSelection: (patch: TextRunStylePatch) => void
+  onPatch: (patch: Partial<DraftingCanvasLayer>) => void
+  style: CSSProperties
+}) {
+  const selectedStyle = getTextLayerFormat(layer)
+  const selectedFontWeight =
+    selectedStyle.fontWeight === "bold"
+      ? 700
+      : typeof selectedStyle.fontWeight === "number"
+        ? selectedStyle.fontWeight
+        : 400
+  const selectedFontId = selectedStyle.fontId ?? "local:satoshi"
+  const selectedTextAlign = layer.textAlign ?? "left"
+  const selectedTextColor = selectedStyle.fill ?? "#171717"
+  const selectedTextSize = selectedStyle.fontSize ?? 32
+  const fontOptions = DRAFTING_FONT_REGISTRY.slice(0, 8)
+  const visibleFontOptions = fontOptions.some((font) => font.id === selectedFontId)
+    ? fontOptions
+    : [
+        ...fontOptions,
+        DRAFTING_FONT_REGISTRY.find((font) => font.id === selectedFontId) ??
+          DRAFTING_FONT_REGISTRY[0],
+      ]
+  const fontInputId = `desktop-text-font-${layer.id}`
+  const sizeInputId = `desktop-text-size-${layer.id}`
+  const colorInputId = `desktop-text-color-${layer.id}`
+
+  function handleFontChange(fontId: string) {
+    const font = DRAFTING_FONT_REGISTRY.find((entry) => entry.id === fontId)
+    if (!font) return
+
+    void loadDraftingFont(font.id)
+    onFormatSelection({ fontFamily: font.family, fontId: font.id })
+  }
+
+  return (
+    <div
+      className="absolute left-1/2 top-1/2 z-[10002] inline-flex h-11 max-w-[min(560px,calc(100vw-2rem))] items-center gap-1 overflow-x-auto rounded-full border border-white/[0.12] bg-black/55 px-2 text-white/78 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
+      data-slot="desktop-text-format-toolbar"
+      data-toolbar-appearance="desktop-glass"
+      role="toolbar"
+      style={style}
+      tabIndex={-1}
+      onClick={(event) => event.stopPropagation()}
+      onContextMenu={(event) => event.preventDefault()}
+      onPointerDown={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+      }}
+    >
+      <label className="sr-only" htmlFor={fontInputId}>
+        Text font
+      </label>
+      <div className="flex h-8 items-center gap-1.5 rounded-full bg-white/[0.08] pl-2.5 pr-1.5">
+        <TypeIcon aria-hidden="true" className="size-3.5 shrink-0" />
+        <select
+          aria-label="Text font"
+          className="h-7 min-w-28 max-w-36 bg-transparent text-xs font-semibold text-current outline-none"
+          id={fontInputId}
+          value={selectedFontId}
+          onChange={(event) => handleFontChange(event.currentTarget.value)}
+        >
+          {visibleFontOptions.map((font) => (
+            <option key={font.id} value={font.id}>
+              {font.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <label className="sr-only" htmlFor={sizeInputId}>
+        Text size
+      </label>
+      <input
+        aria-label="Text size"
+        className="h-8 w-14 rounded-full border-0 bg-white/[0.08] px-2 text-center text-xs font-semibold text-current outline-none"
+        id={sizeInputId}
+        max={180}
+        min={8}
+        type="number"
+        value={selectedTextSize}
+        onChange={(event) => {
+          const fontSize = Number(event.currentTarget.value)
+          if (Number.isFinite(fontSize)) {
+            onFormatSelection({ fontSize })
+          }
+        }}
+      />
+
+      <TextFormatButton
+        active={selectedFontWeight >= 700}
+        label="Bold text"
+        onClick={() => onFormatSelection({ fontWeight: selectedFontWeight >= 700 ? "normal" : 700 })}
+      >
+        <BoldIcon aria-hidden="true" className="size-4" />
+      </TextFormatButton>
+      <TextFormatButton
+        active={selectedStyle.fontStyle === "italic"}
+        label="Italic text"
+        onClick={() => onFormatSelection({ fontStyle: selectedStyle.fontStyle === "italic" ? "normal" : "italic" })}
+      >
+        <ItalicIcon aria-hidden="true" className="size-4" />
+      </TextFormatButton>
+      <TextFormatButton
+        active={Boolean(selectedStyle.underline)}
+        label="Underline text"
+        onClick={() => onFormatSelection({ underline: !selectedStyle.underline })}
+      >
+        <UnderlineIcon aria-hidden="true" className="size-4" />
+      </TextFormatButton>
+
+      <div className="mx-1 h-5 w-px shrink-0 bg-white/[0.14]" />
+
+      {[
+        ["left", AlignLeftIcon, "Align text left"],
+        ["center", AlignCenterIcon, "Align text center"],
+        ["right", AlignRightIcon, "Align text right"],
+      ].map(([align, Icon, label]) => (
+        <TextFormatButton
+          active={selectedTextAlign === align}
+          key={align as string}
+          label={label as string}
+          onClick={() => onPatch({ textAlign: align as DraftingCanvasLayer["textAlign"] })}
+        >
+          <Icon aria-hidden="true" className="size-4" />
+        </TextFormatButton>
+      ))}
+
+      <label
+        className="grid size-8 shrink-0 cursor-pointer place-items-center rounded-full transition hover:bg-white/[0.11] hover:text-white"
+        htmlFor={colorInputId}
+      >
+        <span className="sr-only">Text color</span>
+        <PaletteIcon aria-hidden="true" className="size-4" />
+      </label>
+      <input
+        aria-label="Text color"
+        className="h-8 w-8 shrink-0 cursor-pointer rounded-full border-0 bg-transparent p-1"
+        id={colorInputId}
+        type="color"
+        value={selectedTextColor}
+        onChange={(event) => onFormatSelection({ fill: event.currentTarget.value })}
+      />
+    </div>
+  )
+}
+
+function TextFormatButton({
+  active,
+  children,
+  label,
+  onClick,
+}: {
+  active: boolean
+  children: ReactNode
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      aria-label={label}
+      aria-pressed={active}
+      className={cn(
+        "grid size-8 shrink-0 place-items-center rounded-full transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45",
+        active && "bg-white/[0.16] text-white",
+      )}
+      type="button"
+      onPointerDown={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        onClick()
+      }}
+      onClick={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        if (event.detail === 0) {
+          onClick()
+        }
+      }}
+    >
+      {children}
+    </button>
+  )
+}
+
 function LayerSizeValue({ height, width }: Pick<DraftingCanvasLayer, "height" | "width">) {
   return (
     <div
-      className="pointer-events-none absolute left-1/2 bottom-0 rounded-[4px] border border-[var(--drafting-line-hover)] bg-[var(--drafting-panel-bg-active)] px-2 py-0.5 text-[0.68rem] font-semibold text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)]"
+      className="pointer-events-none absolute bottom-0 left-1/2 rounded-full border border-white/[0.12] bg-black/55 px-2.5 py-1 text-[0.68rem] font-semibold text-white/82 shadow-[0_12px_30px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
       data-slot="drafting-layer-size-value"
+      data-toolbar-appearance="desktop-glass"
       style={{
         transform: `translate(-50%, calc(100% + ${SIZE_LABEL_GAP_PX}px))`,
       }}
@@ -870,10 +1098,7 @@ function LayerSizeValue({ height, width }: Pick<DraftingCanvasLayer, "height" | 
 function getTextLayerStyle(layer: DraftingCanvasLayer): CSSProperties {
   return {
     color: layer.fill ?? "#171717",
-    fontFamily: getDraftingFontCssFamily({
-      fontFamily: layer.fontFamily,
-      fontId: layer.fontId,
-    }),
+    fontFamily: getDraftingTextFontFamily(layer),
     fontSize: layer.fontSize ?? 32,
     fontStyle: layer.fontStyle ?? "normal",
     fontWeight: layer.fontWeight ?? "normal",
@@ -884,6 +1109,78 @@ function getTextLayerStyle(layer: DraftingCanvasLayer): CSSProperties {
     whiteSpace: "pre-wrap",
     wordBreak: "break-word",
   }
+}
+
+function getTextRunStyle(layer: DraftingCanvasLayer, run: DraftingTextRun): CSSProperties {
+  return {
+    color: run.fill ?? layer.fill ?? "#171717",
+    fontFamily: getDraftingFontCssFamily({
+      fontFamily: run.fontFamily ?? layer.fontFamily,
+      fontId: run.fontId ?? layer.fontId,
+    }),
+    fontSize: run.fontSize ?? layer.fontSize ?? 32,
+    fontStyle: run.fontStyle ?? layer.fontStyle ?? "normal",
+    fontWeight: run.fontWeight ?? layer.fontWeight ?? "normal",
+    textDecorationLine: (run.underline ?? layer.underline) ? "underline" : "none",
+  }
+}
+
+function getTextLayerRuns(layer: DraftingCanvasLayer): DraftingTextRun[] {
+  const text = layer.text ?? ""
+  const runs = layer.textRuns
+
+  if (!runs?.length || runs.map((run) => run.text).join("") !== text) {
+    return text ? [{ text }] : []
+  }
+
+  return runs
+}
+
+function hasValidTextRuns(layer: DraftingCanvasLayer) {
+  return Boolean(layer.textRuns?.length) && layer.textRuns?.map((run) => run.text).join("") === (layer.text ?? "")
+}
+
+function renderTextLayerContent(layer: DraftingCanvasLayer) {
+  if (hasValidTextRuns(layer)) {
+    return getTextLayerRuns(layer).map((run, index) => (
+      <span
+        data-slot="drafting-text-run"
+        key={getTextRunKey(layer.id, run, index)}
+        style={getTextRunStyle(layer, run)}
+      >
+        {run.text}
+      </span>
+    ))
+  }
+
+  const layout = layoutDraftingText(layer)
+
+  return layout.lines.map((line, index) => (
+    <div
+      data-slot="drafting-text-line"
+      key={`${layer.id}:line:${index}`}
+      style={{ minHeight: layout.lineHeight }}
+    >
+      {line || "\u00a0"}
+      {line && index < layout.lines.length - 1 ? " " : null}
+    </div>
+  ))
+}
+
+function getTextLayerFormat(layer: DraftingCanvasLayer): TextRunStylePatch {
+  return {
+    fill: layer.fill,
+    fontFamily: layer.fontFamily,
+    fontId: layer.fontId,
+    fontSize: layer.fontSize,
+    fontStyle: layer.fontStyle,
+    fontWeight: layer.fontWeight,
+    underline: layer.underline,
+  }
+}
+
+function getTextRunKey(layerId: string, run: DraftingTextRun, index: number) {
+  return `${layerId}:run:${index}:${run.text.length}`
 }
 
 export const QrPane = memo(function QrPane({
@@ -931,6 +1228,7 @@ export const QrPane = memo(function QrPane({
     start: { x: number; y: number }
   } | null>(null)
   const [editingTextLayerId, setEditingTextLayerId] = useState<string | null>(null)
+  const [editingTextDraft, setEditingTextDraft] = useState("")
   const interactionRef = useRef<{
     centerClientX?: number
     centerClientY?: number
@@ -948,6 +1246,7 @@ export const QrPane = memo(function QrPane({
   } | null>(null)
   const rotationLabelTimeoutRef = useRef<number | null>(null)
   const canvasRef = useRef<HTMLDivElement | null>(null)
+  const textEditorRefs = useRef<Record<string, HTMLTextAreaElement | null>>({})
   const marqueeRef = useRef<typeof marquee>(null)
   const suppressCanvasClickRef = useRef(false)
   const suppressLayerClickRef = useRef(false)
@@ -1052,6 +1351,16 @@ export const QrPane = memo(function QrPane({
     void ensureDraftingFontsForLayers(resolvedLayers)
   }, [resolvedLayers])
 
+  useEffect(() => {
+    if (!editingTextLayerId) {
+      return
+    }
+
+    const editor = textEditorRefs.current[editingTextLayerId]
+    editor?.focus()
+    editor?.setSelectionRange(editor.value.length, editor.value.length)
+  }, [editingTextLayerId])
+
   const visibleLayers = resolvedLayers
     .filter((layer) => layer.isVisible)
     .sort((a, b) => a.zIndex - b.zIndex)
@@ -1100,6 +1409,10 @@ export const QrPane = memo(function QrPane({
     mode: "move" | "resize" | "rotate",
     resizeDirection?: ResizeDirection,
   ) {
+    if (editingTextLayerId && editingTextLayerId !== layer.id) {
+      commitEditingTextDraft()
+    }
+
     if (event.metaKey || event.ctrlKey) {
       return
     }
@@ -1268,6 +1581,10 @@ export const QrPane = memo(function QrPane({
   function startMarqueeSelection(event: PointerEvent<HTMLElement>) {
     if (event.button !== 0 || event.target !== event.currentTarget) {
       return
+    }
+
+    if (editingTextLayerId) {
+      commitEditingTextDraft()
     }
 
     const point = getScenePointFromClientPoint(event.clientX, event.clientY)
@@ -1587,6 +1904,10 @@ export const QrPane = memo(function QrPane({
       return
     }
 
+    if (editingTextLayerId && editingTextLayerId !== layer.id) {
+      commitEditingTextDraft()
+    }
+
     onLayerSelect?.(layer.id, { additive: event.metaKey || event.ctrlKey })
     if (options?.qr) {
       onQrClick()
@@ -1602,6 +1923,35 @@ export const QrPane = memo(function QrPane({
     event.stopPropagation()
     onLayerSelect?.(layer.id)
     setEditingTextLayerId(layer.id)
+    setEditingTextDraft(layer.text ?? "")
+  }
+
+  function handleTextEditorInput(event: FormEvent<HTMLTextAreaElement>) {
+    setEditingTextDraft(event.currentTarget.value)
+  }
+
+  function commitEditingTextDraft() {
+    if (!editingTextLayerId) {
+      return
+    }
+
+    const layer = resolvedLayers.find((candidate) => candidate.id === editingTextLayerId)
+    const text = textEditorRefs.current[editingTextLayerId]?.value ?? editingTextDraft
+
+    if (layer?.kind === "text" && ((layer.text ?? "") !== text || layer.textRuns)) {
+      onLayerChange?.(layer.id, { text, textRuns: undefined })
+    }
+
+    setEditingTextDraft(text)
+    setEditingTextLayerId(null)
+  }
+
+  function patchSelectedTextLayer(layer: DraftingCanvasLayer, patch: TextRunStylePatch) {
+    onLayerChange?.(layer.id, { ...patch, textRuns: undefined })
+  }
+
+  function patchTextLayer(layer: DraftingCanvasLayer, patch: Partial<DraftingCanvasLayer>) {
+    onLayerChange?.(layer.id, { ...patch, textRuns: undefined })
   }
 
   function getLayerPlacementStyle(layer: DraftingCanvasLayer, nested = false): CSSProperties {
@@ -1639,6 +1989,10 @@ export const QrPane = memo(function QrPane({
 
   function renderFloatingToolbar() {
     const bounds = combinedLayerBounds
+    const selectedTextLayer =
+      selectedVisibleLayers.length === 1 && selectedVisibleLayers[0]?.kind === "text"
+        ? selectedVisibleLayers[0]
+        : null
 
     if (
       !bounds ||
@@ -1651,15 +2005,47 @@ export const QrPane = memo(function QrPane({
     }
 
     const x = bounds.x + bounds.width / 2
+    const showTextFormatToolbar = Boolean(selectedTextLayer && !selectedTextLayer.isLocked)
+    const toolbarStackHeight = showTextFormatToolbar
+      ? TEXT_FORMAT_TOOLBAR_HEIGHT_PX + FLOATING_TOOLBAR_GAP_PX + FLOATING_TOOLBAR_HEIGHT_PX
+      : FLOATING_TOOLBAR_HEIGHT_PX
     const rawY =
       bounds.y -
       RESIZE_CONTROL_PADDING_PX -
       ROTATE_HANDLE_OFFSET_PX -
       ROTATE_HANDLE_RADIUS_PX -
       FLOATING_TOOLBAR_GAP_PX -
-      FLOATING_TOOLBAR_HEIGHT_PX
+      toolbarStackHeight
     const minY = canvasHeight > 0 ? -canvasHeight / 2 + FLOATING_TOOLBAR_GAP_PX : rawY
     const y = Math.max(rawY, minY)
+    const textToolbarStyle = {
+      transform: `translate3d(${x}px, ${y}px, 0) translateX(-50%)`,
+    }
+    const layerToolbarStyle = {
+      transform: `translate3d(${x}px, ${
+        showTextFormatToolbar ? y + TEXT_FORMAT_TOOLBAR_HEIGHT_PX + FLOATING_TOOLBAR_GAP_PX : y
+      }px, 0) translateX(-50%)`,
+    }
+
+    if (showTextFormatToolbar && selectedTextLayer) {
+      return (
+        <>
+          <TextFormatFloatingToolbar
+            layer={selectedTextLayer}
+            onFormatSelection={(patch) => patchSelectedTextLayer(selectedTextLayer, patch)}
+            onPatch={(patch) => patchTextLayer(selectedTextLayer, patch)}
+            style={textToolbarStyle}
+          />
+          <LayerFloatingToolbar
+            layers={selectedVisibleLayers}
+            onAction={onLayerAction ? runSelectedLayerAction : undefined}
+            onCopy={onLayerCopy ? runSelectedLayerCopy : undefined}
+            onMore={(event) => openFloatingLayerContextMenu(event, selectedVisibleLayerIds)}
+            style={layerToolbarStyle}
+          />
+        </>
+      )
+    }
 
     return (
       <LayerFloatingToolbar
@@ -1667,15 +2053,17 @@ export const QrPane = memo(function QrPane({
         onAction={onLayerAction ? runSelectedLayerAction : undefined}
         onCopy={onLayerCopy ? runSelectedLayerCopy : undefined}
         onMore={(event) => openFloatingLayerContextMenu(event, selectedVisibleLayerIds)}
-        style={{
-          transform: `translate3d(${x}px, ${y}px, 0) translateX(-50%)`,
-        }}
+        style={layerToolbarStyle}
       />
     )
   }
 
   function renderLayerControls(layer: DraftingCanvasLayer) {
     if (activeSelectedLayerIds.length !== 1 || layer.isLocked || !activeSelectedLayerIdSet.has(layer.id)) {
+      return null
+    }
+
+    if (layer.kind === "text" && editingTextLayerId === layer.id) {
       return null
     }
 
@@ -1705,8 +2093,9 @@ export const QrPane = memo(function QrPane({
         />
         {isRotating ? (
           <div
-            className="pointer-events-none absolute left-1/2 top-0 rounded-[4px] border border-[var(--drafting-line-hover)] bg-[var(--drafting-panel-bg-active)] px-2 py-0.5 text-[0.68rem] font-semibold text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)]"
+            className="pointer-events-none absolute left-1/2 top-0 rounded-full border border-white/[0.12] bg-black/55 px-2.5 py-1 text-[0.68rem] font-semibold text-white/82 shadow-[0_12px_30px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
             data-slot="drafting-layer-rotation-value"
+            data-toolbar-appearance="desktop-glass"
             style={{
               transform: `translate(-50%, calc(-${ROTATE_HANDLE_OFFSET_PX}px - ${ROTATE_HANDLE_RADIUS_PX}px - ${ROTATE_LABEL_GAP_PX}px - 100%))`,
             }}
@@ -1787,8 +2176,9 @@ export const QrPane = memo(function QrPane({
         />
         {isRotating ? (
           <div
-            className="pointer-events-none absolute left-1/2 top-0 rounded-[4px] border border-[var(--drafting-line-hover)] bg-[var(--drafting-panel-bg-active)] px-2 py-0.5 text-[0.68rem] font-semibold text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)]"
+            className="pointer-events-none absolute left-1/2 top-0 rounded-full border border-white/[0.12] bg-black/55 px-2.5 py-1 text-[0.68rem] font-semibold text-white/82 shadow-[0_12px_30px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
             data-slot="drafting-layer-rotation-value"
+            data-toolbar-appearance="desktop-glass"
             style={{
               transform: `translate(-50%, calc(-${ROTATE_HANDLE_OFFSET_PX}px - ${ROTATE_HANDLE_RADIUS_PX}px - ${ROTATE_LABEL_GAP_PX}px - 100%))`,
             }}
@@ -1913,8 +2303,9 @@ export const QrPane = memo(function QrPane({
           data-layer-id={layer.id}
           data-selected={isLayerSelected ? "true" : "false"}
           className={cn(
-            "absolute max-h-none max-w-none cursor-move touch-none overflow-hidden",
-            layer.isLocked && "cursor-default",
+            "absolute max-h-none max-w-none touch-none overflow-hidden",
+            isEditing ? "cursor-text" : "cursor-move",
+            layer.isLocked && !isEditing && "cursor-default",
           )}
           style={{
             ...getLayerPlacementStyle(layer),
@@ -1931,28 +2322,30 @@ export const QrPane = memo(function QrPane({
           {isEditing ? (
             <textarea
               aria-label="Edit text layer"
-              autoFocus
-              className="h-full w-full resize-none border-0 bg-transparent p-0 outline-none"
+              className="h-full w-full resize-none cursor-text overflow-hidden border-0 bg-transparent p-0 outline-none"
               data-slot="drafting-text-editor"
+              ref={(element) => {
+                textEditorRefs.current[layer.id] = element
+              }}
               spellCheck={false}
               style={getTextLayerStyle(layer)}
-              value={layer.text ?? ""}
-              onBlur={() => setEditingTextLayerId(null)}
-              onChange={(event) => onLayerChange?.(layer.id, { text: event.currentTarget.value })}
+              value={editingTextDraft}
+              onBlur={commitEditingTextDraft}
               onClick={(event) => event.stopPropagation()}
               onDoubleClick={(event) => event.stopPropagation()}
+              onInput={handleTextEditorInput}
               onKeyDown={(event) => {
                 event.stopPropagation()
                 if (event.key === "Escape") {
                   event.preventDefault()
-                  setEditingTextLayerId(null)
+                  commitEditingTextDraft()
                 }
               }}
               onPointerDown={(event) => event.stopPropagation()}
             />
           ) : (
             <div className="h-full w-full" data-slot="drafting-text-content" style={getTextLayerStyle(layer)}>
-              {layer.text}
+              {renderTextLayerContent(layer)}
             </div>
           )}
         </div>
@@ -2081,7 +2474,7 @@ export const QrPane = memo(function QrPane({
           }}
         >
           <div className="h-full w-full" data-slot="drafting-text-content" style={getTextLayerStyle(layer)}>
-            {layer.text}
+            {renderTextLayerContent(layer)}
           </div>
         </div>
       )

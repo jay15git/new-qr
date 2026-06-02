@@ -255,6 +255,34 @@ describe("drafting layer state actions", () => {
     expect(normalized.at(-1)?.fontId).toBeUndefined()
   })
 
+  it("preserves valid legacy text runs during normalization", () => {
+    const normalized = normalizeDraftingCanvasLayers(
+      "preview",
+      [
+        createLayer("card", 0),
+        createLayer("qr", 1),
+        {
+          ...createDraftingTextLayer("preview", {
+            id: "text-legacy-runs",
+            text: "Scan here",
+            textRuns: [
+              { fontWeight: 700, text: "Scan" },
+              { fontStyle: "italic", text: " here" },
+            ],
+            zIndex: 2,
+          }),
+        },
+      ],
+      createDefaultQrStudioState(),
+      createDefaultDraftingCardState(),
+    )
+
+    expect(normalized.at(-1)?.textRuns).toEqual([
+      { fontWeight: 700, text: "Scan" },
+      { fontStyle: "italic", text: " here" },
+    ])
+  })
+
   it("preserves text fields through copy, paste, group, and ungroup", () => {
     const textLayer = createDraftingTextLayer("preview", {
       fill: "#123456",

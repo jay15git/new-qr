@@ -777,20 +777,202 @@ describe("QrPane", () => {
     const editor = getRequiredElement(text, '[data-slot="drafting-text-editor"]') as HTMLTextAreaElement
 
     expect(onLayerSelect).toHaveBeenCalledWith("preview:text")
+    expect(editor.tagName).toBe("TEXTAREA")
     expect(editor.value).toBe("Scan here")
 
     act(() => {
-      const valueSetter = Object.getOwnPropertyDescriptor(
-        window.HTMLTextAreaElement.prototype,
-        "value",
-      )?.set
-
-      valueSetter?.call(editor, "Table 12")
+      editor.value = "Table 12"
       editor.dispatchEvent(new Event("input", { bubbles: true }))
-      editor.dispatchEvent(new Event("change", { bubbles: true }))
     })
 
-    expect(onLayerChange).toHaveBeenCalledWith("preview:text", { text: "Table 12" })
+    expect(onLayerChange).not.toHaveBeenCalled()
+
+    act(() => {
+      editor.dispatchEvent(new FocusEvent("focusout", { bubbles: true }))
+    })
+
+    expect(onLayerChange).toHaveBeenCalledWith("preview:text", {
+      text: "Table 12",
+      textRuns: undefined,
+    })
+  })
+
+  it("applies text formatting to the whole selected text layer while keeping the editor active", async () => {
+    let textLayer = createDraftingTextLayer("preview", {
+      id: "preview:text",
+      text: "Scan here",
+      zIndex: 2,
+    })
+    const onLayerChange = vi.fn((layerId: string, patch: Partial<DraftingCanvasLayer>) => {
+      if (layerId === textLayer.id) {
+        textLayer = { ...textLayer, ...patch }
+      }
+    })
+    const defaultLayers = createDefaultDraftingLayers(
+      "preview",
+      createDefaultQrStudioState(),
+      createDefaultDraftingCardState(),
+    )
+    const { container, reactRoot } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers: [...defaultLayers, textLayer],
+      onLayerChange,
+      selectedLayerId: "preview:text",
+    })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    const text = getRequiredElement(container, '[data-slot="drafting-text-layer"]') as HTMLElement
+
+    act(() => {
+      text.dispatchEvent(new MouseEvent("dblclick", { bubbles: true, cancelable: true }))
+    })
+
+    const editor = getRequiredElement(text, '[data-slot="drafting-text-editor"]') as HTMLTextAreaElement
+
+    expect(text.className).toContain("cursor-text")
+    expect(text.className).not.toContain("cursor-move")
+    expect(editor.className).toContain("cursor-text")
+    expect(editor.value).toBe("Scan here")
+
+    const toolbar = getRequiredElement(container, '[data-slot="desktop-text-format-toolbar"]')
+
+    act(() => {
+      clickElement(getRequiredElement(toolbar, 'button[aria-label="Bold text"]'))
+    })
+
+    expect(onLayerChange).toHaveBeenLastCalledWith("preview:text", {
+      fontWeight: 700,
+      textRuns: undefined,
+    })
+
+    act(() => {
+      reactRoot.render(
+        <QrPane
+          cardState={createDefaultDraftingCardState()}
+          isSelected
+          layers={[...defaultLayers, textLayer]}
+          selectedLayerId="preview:text"
+          state={createDefaultQrStudioState()}
+          onLayerChange={onLayerChange}
+          onQrClick={() => undefined}
+          onSelect={() => undefined}
+        />,
+      )
+    })
+
+    const activeEditor = getRequiredElement(container, '[data-slot="drafting-text-editor"]') as HTMLTextAreaElement
+
+    expect(activeEditor.value).toBe("Scan here")
+    expect(activeEditor.style.fontWeight).toBe("700")
+  })
+
+  it("ignores stale DOM text selections when floating format buttons are pressed", async () => {
+    const textLayer = createDraftingTextLayer("preview", {
+      id: "preview:text",
+      text: "Scan here",
+      zIndex: 2,
+    })
+    const onLayerChange = vi.fn()
+    const defaultLayers = createDefaultDraftingLayers(
+      "preview",
+      createDefaultQrStudioState(),
+      createDefaultDraftingCardState(),
+    )
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers: [...defaultLayers, textLayer],
+      onLayerChange,
+      selectedLayerId: "preview:text",
+    })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    const text = getRequiredElement(container, '[data-slot="drafting-text-layer"]') as HTMLElement
+
+    act(() => {
+      text.dispatchEvent(new MouseEvent("dblclick", { bubbles: true, cancelable: true }))
+    })
+
+    const editor = getRequiredElement(text, '[data-slot="drafting-text-editor"]') as HTMLTextAreaElement
+
+    act(() => {
+      editor.setSelectionRange(0, 4)
+      const externalNode = document.createTextNode("outside selection")
+      document.body.appendChild(externalNode)
+      const externalRange = document.createRange()
+      externalRange.setStart(externalNode, 0)
+      externalRange.setEnd(externalNode, 7)
+      const selection = window.getSelection()
+      selection?.removeAllRanges()
+      selection?.addRange(externalRange)
+    })
+
+    const toolbar = getRequiredElement(container, '[data-slot="desktop-text-format-toolbar"]')
+
+    act(() => {
+      getRequiredElement(toolbar, 'button[aria-label="Italic text"]').dispatchEvent(
+        createPointerEvent("pointerdown", 0, 0),
+      )
+    })
+
+    expect(onLayerChange).toHaveBeenLastCalledWith("preview:text", {
+      fontStyle: "italic",
+      textRuns: undefined,
+    })
+  })
+
+  it("renders legacy text runs but clears them after object-level formatting", async () => {
+    let textLayer = createDraftingTextLayer("preview", {
+      id: "preview:text",
+      text: "Scan here",
+      textRuns: [
+        { fontWeight: 700, text: "Scan" },
+        { fontStyle: "italic", text: " here" },
+      ],
+      zIndex: 2,
+    })
+    const onLayerChange = vi.fn((layerId: string, patch: Partial<DraftingCanvasLayer>) => {
+      if (layerId === textLayer.id) {
+        textLayer = { ...textLayer, ...patch }
+      }
+    })
+    const defaultLayers = createDefaultDraftingLayers(
+      "preview",
+      createDefaultQrStudioState(),
+      createDefaultDraftingCardState(),
+    )
+    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
+      layers: [...defaultLayers, textLayer],
+      onLayerChange,
+      selectedLayerId: "preview:text",
+    })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    const text = getRequiredElement(container, '[data-slot="drafting-text-layer"]') as HTMLElement
+    const runs = Array.from(text.querySelectorAll('[data-slot="drafting-text-run"]')) as HTMLElement[]
+
+    expect(runs.map((run) => run.textContent)).toEqual(["Scan", " here"])
+    expect(runs[0].style.fontWeight).toBe("700")
+    expect(runs[1].style.fontStyle).toBe("italic")
+
+    const toolbar = getRequiredElement(container, '[data-slot="desktop-text-format-toolbar"]')
+
+    act(() => {
+      getRequiredElement(toolbar, 'button[aria-label="Italic text"]').dispatchEvent(
+        createPointerEvent("pointerdown", 0, 0),
+      )
+    })
+
+    expect(onLayerChange).toHaveBeenLastCalledWith("preview:text", {
+      fontStyle: "italic",
+      textRuns: undefined,
+    })
   })
 
   it("shows floating layer actions for a selected unlocked text layer", async () => {
