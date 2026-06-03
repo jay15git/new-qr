@@ -1382,6 +1382,8 @@ describe("DraftingSurface", () => {
     expect(resizeToolbar.parentElement?.className).toContain("bottom-4")
     expect(resizeToolbar.parentElement?.className).toContain("right-5")
     expect(resizeToolbar.getAttribute("data-toolbar-appearance")).toBe("desktop-glass")
+    expect(resizeToolbar.className).toContain("min-h-14")
+    expect(resizeToolbar.className).toContain("px-3")
     expect(resizeToolbar.textContent).toContain("100%")
 
     act(() => {
@@ -1391,10 +1393,26 @@ describe("DraftingSurface", () => {
     expect(resizeToolbar.textContent).toContain("110%")
 
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Reset canvas size"]'))
+      const zoomButton = getRequiredElement(surface.container, 'button[aria-label="Choose canvas size"]')
+      zoomButton.dispatchEvent(new MouseEvent("dblclick", { bubbles: true, button: 0 }))
     })
 
     expect(resizeToolbar.textContent).toContain("100%")
+
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Choose canvas size"]'))
+    })
+
+    const zoomPopover = getRequiredElement(surface.container, '[data-slot="desktop-zoom-popover"]')
+    expect(zoomPopover.textContent).toContain("10%")
+    expect(zoomPopover.textContent).toContain("400%")
+    expect(getRequiredElement(zoomPopover, 'button[aria-checked="true"]').textContent).toContain("100%")
+
+    act(() => {
+      activateElement(getRequiredElement(zoomPopover, 'button[aria-checked="false"]:last-of-type'))
+    })
+
+    expect(resizeToolbar.textContent).toContain("400%")
   })
 
   it("wires desktop bottom toolbar layer controls into the active drafting layer state", () => {

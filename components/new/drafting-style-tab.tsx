@@ -93,6 +93,9 @@ import {
   QR_DOT_MATRIX_ANIMATION_SPEED_MAX,
   QR_DOT_MATRIX_ANIMATION_SPEED_MIN,
   QR_DOT_MATRIX_COLOR_PRESET_OPTIONS,
+  QR_DOT_MATRIX_MATRIX_SIZE_MAX,
+  QR_DOT_MATRIX_MATRIX_SIZE_MIN,
+  QR_DOT_MATRIX_MATRIX_SIZE_STEP,
   QR_DOT_MATRIX_OPACITY_MAX,
   QR_DOT_MATRIX_OPACITY_MIN,
   QR_DOT_MATRIX_OVERLAY_SCALE_MAX,
@@ -990,6 +993,19 @@ export function DraftingLoaderPlaygroundTab({
         step={1}
         value={animation.speed}
         onChange={(speed) => onAnimationChange({ speed })}
+      />
+
+      <DraftingSliderField
+        dataSlot="drafting-dot-matrix-animation-density-slider"
+        description="Sets how many animation regions run across each QR axis."
+        formatValue={(value) => `${Math.round(value)}x${Math.round(value)}`}
+        id="drafting-dot-matrix-animation-density"
+        label="Matrix density"
+        max={QR_DOT_MATRIX_MATRIX_SIZE_MAX}
+        min={QR_DOT_MATRIX_MATRIX_SIZE_MIN}
+        step={QR_DOT_MATRIX_MATRIX_SIZE_STEP}
+        value={animation.matrixSize}
+        onChange={(matrixSize) => onAnimationChange({ matrixSize })}
       />
 
       <DraftingSliderField

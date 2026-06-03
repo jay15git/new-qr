@@ -86,6 +86,9 @@ import {
   QR_DOT_MATRIX_ANIMATION_SPEED_MAX,
   QR_DOT_MATRIX_ANIMATION_SPEED_MIN,
   QR_DOT_MATRIX_COLOR_PRESET_OPTIONS,
+  QR_DOT_MATRIX_MATRIX_SIZE_MAX,
+  QR_DOT_MATRIX_MATRIX_SIZE_MIN,
+  QR_DOT_MATRIX_MATRIX_SIZE_STEP,
   QR_DOT_MATRIX_OVERLAY_SCALE_MAX,
   QR_DOT_MATRIX_OVERLAY_SCALE_MIN,
   QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS,
@@ -1089,7 +1092,7 @@ export function DesktopToolbarPrototype({
           <aside
             aria-label={`${activeToolConfig.title} settings`}
             data-slot="desktop-floating-inspector"
-            className="fixed bottom-5 left-[5.75rem] top-5 z-10 flex w-72 min-w-0 flex-col overflow-hidden rounded-[24px] border border-white/[0.1] bg-black/55 text-white shadow-[0_24px_65px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl max-md:bottom-4 max-md:left-[4.25rem] max-md:top-4 max-md:w-[min(16rem,calc(100vw-5rem))] max-md:rounded-[22px]"
+            className="fixed bottom-5 left-[5.75rem] top-5 z-[25] flex w-72 min-w-0 flex-col overflow-hidden rounded-[24px] border border-white/[0.1] bg-black/55 text-white shadow-[0_24px_65px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl max-md:bottom-4 max-md:left-[4.25rem] max-md:top-4 max-md:w-[min(16rem,calc(100vw-5rem))] max-md:rounded-[22px]"
           >
             {actualActiveTool === "content" ? (
               <DesktopContentInspector
@@ -1279,6 +1282,22 @@ function DesktopThemeStyles() {
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[data-desktop-preview-option="true"][aria-pressed="true"] {
         background-color: rgba(255, 255, 255, 0.48) !important;
         border-color: #000 !important;
+        color: rgba(15, 23, 42, 0.92) !important;
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[data-desktop-content-type-option="true"] {
+        border-color: transparent !important;
+        color: rgba(15, 23, 42, 0.48) !important;
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[data-desktop-content-type-option="true"]:hover {
+        background-color: rgba(15, 23, 42, 0.06) !important;
+        color: rgba(15, 23, 42, 0.86) !important;
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[data-desktop-content-type-option="true"][aria-pressed="true"] {
+        background-color: rgba(255, 255, 255, 0.48) !important;
+        border-color: rgba(15, 23, 42, 0.46) !important;
         color: rgba(15, 23, 42, 0.92) !important;
       }
 
@@ -2374,6 +2393,15 @@ function DesktopMotionInspector({
               onChange={(speed) => onMotionSettingsChange({ speed })}
             />
             <DesktopMotionSliderRow
+              label="Matrix density"
+              max={QR_DOT_MATRIX_MATRIX_SIZE_MAX}
+              min={QR_DOT_MATRIX_MATRIX_SIZE_MIN}
+              step={QR_DOT_MATRIX_MATRIX_SIZE_STEP}
+              value={settings.matrixSize}
+              valueLabel={`${Math.round(settings.matrixSize)}x${Math.round(settings.matrixSize)}`}
+              onChange={(matrixSize) => onMotionSettingsChange({ matrixSize })}
+            />
+            <DesktopMotionSliderRow
               label="Overlay scale"
               max={QR_DOT_MATRIX_OVERLAY_SCALE_MAX}
               min={QR_DOT_MATRIX_OVERLAY_SCALE_MIN}
@@ -2500,6 +2528,7 @@ function DesktopMotionSliderRow({
   max,
   min,
   onChange,
+  step = 1,
   value,
   valueLabel,
 }: {
@@ -2507,6 +2536,7 @@ function DesktopMotionSliderRow({
   max: number
   min: number
   onChange: (value: number) => void
+  step?: number
   value: number
   valueLabel: string
 }) {
@@ -2523,6 +2553,7 @@ function DesktopMotionSliderRow({
         className="h-1.5 w-full accent-[#ff3b68]"
         max={max}
         min={min}
+        step={step}
         type="range"
         value={value}
         onChange={(event) => onChange(Number(event.currentTarget.value))}
@@ -2693,9 +2724,10 @@ function DesktopContentInspector({
                 aria-label={`Use ${option.label} content`}
                 aria-pressed={isSelected}
                 className={cn(
-                  "relative flex h-[54px] min-w-0 flex-col items-center justify-center gap-1 rounded-[7px] border border-white/[0.08] bg-white/[0.055] px-1 text-[10px] font-semibold text-white/62 transition hover:bg-white/[0.1] hover:text-white",
-                  isSelected && "border-[#ff3b68]/75 bg-[#ff3b68] text-white shadow-[0_10px_24px_rgba(255,59,104,0.22)]",
+                  "relative flex h-[54px] min-w-0 flex-col items-center justify-center gap-1 rounded-[7px] border-2 border-transparent bg-white/[0.055] px-1 text-[10px] font-semibold text-white/62 transition hover:bg-white/[0.1] hover:text-white",
+                  isSelected && "border-white/55 bg-white/[0.08] text-white",
                 )}
+                data-desktop-content-type-option="true"
                 type="button"
                 onClick={() => onContentTypeChange(type)}
               >

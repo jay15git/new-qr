@@ -100,6 +100,9 @@ import {
   hasBackgroundImage,
   QR_DOT_MATRIX_ANIMATION_SPEED_MAX,
   QR_DOT_MATRIX_ANIMATION_SPEED_MIN,
+  QR_DOT_MATRIX_MATRIX_SIZE_MAX,
+  QR_DOT_MATRIX_MATRIX_SIZE_MIN,
+  QR_DOT_MATRIX_MATRIX_SIZE_STEP,
   QR_DOT_MATRIX_OVERLAY_SCALE_MAX,
   QR_DOT_MATRIX_OVERLAY_SCALE_MIN,
   QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS,
@@ -1124,6 +1127,28 @@ export function QrControlSections({
           showValue
           step={1}
           value={state.dotMatrixAnimation.speed}
+        />
+      </Field>
+
+      <Field>
+        <UnlumenSlider
+          data-slot="dot-matrix-animation-density-slider"
+          id="dot-matrix-animation-density"
+          label="Matrix density"
+          disabled={!state.dotMatrixAnimation.enabled}
+          formatValue={(value) => `${Math.round(value)}x${Math.round(value)}`}
+          max={QR_DOT_MATRIX_MATRIX_SIZE_MAX}
+          min={QR_DOT_MATRIX_MATRIX_SIZE_MIN}
+          onChange={(value) =>
+            setState((current) =>
+              setDotMatrixAnimationOptions(current, {
+                matrixSize: Array.isArray(value) ? value[0] : value,
+              }),
+            )
+          }
+          showValue
+          step={QR_DOT_MATRIX_MATRIX_SIZE_STEP}
+          value={state.dotMatrixAnimation.matrixSize}
         />
       </Field>
 

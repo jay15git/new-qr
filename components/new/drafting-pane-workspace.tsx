@@ -13,6 +13,7 @@ import {
   type WheelEvent,
 } from "react"
 import {
+  CheckIcon,
   CopyPlusIcon,
   CrosshairIcon,
   EyeIcon,
@@ -90,10 +91,11 @@ export type DesktopLayerToolbarControls = {
   onLayerChange: (patch: Partial<DesktopLayerToolbarLayer>) => void
 }
 
-const MIN_PREVIEW_ZOOM = 0.5
-const MAX_PREVIEW_ZOOM = 2
+const MIN_PREVIEW_ZOOM = 0.1
+const MAX_PREVIEW_ZOOM = 4
 const PREVIEW_ZOOM_STEP = 0.1
 const WHEEL_ZOOM_SENSITIVITY = 0.001
+const DESKTOP_ZOOM_PRESETS = [0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4] as const
 
 type DraftingPaneWorkspaceProps = {
   panes: DraftingPane[]
@@ -779,6 +781,7 @@ export function DraftingPaneWorkspace({
   const [draggingPaneId, setDraggingPaneId] = useState<string | null>(null)
   const [snapTargetPaneId, setSnapTargetPaneId] = useState<string | null>(null)
   const [panelLayouts, setPanelLayouts] = useState<DraftingPanelLayouts>({})
+  const [desktopZoomPopoverOpen, setDesktopZoomPopoverOpen] = useState(false)
   const draggingPaneIdRef = useRef<string | null>(null)
   const isPortrait = useSyncExternalStore(
     subscribePortrait,
@@ -808,6 +811,13 @@ export function DraftingPaneWorkspace({
       [paneId]: clampPreviewZoom(nextZoom),
     }))
   }, [])
+
+  const handleActiveZoomChange = useCallback((nextZoom: number) => {
+    setZoomLevels((current) => ({
+      ...current,
+      [activePaneId]: clampPreviewZoom(nextZoom),
+    }))
+  }, [activePaneId])
 
   const handleResetView = useCallback(() => {
     setZoomLevels((current) => ({
@@ -1075,33 +1085,73 @@ export function DraftingPaneWorkspace({
             <div
               data-slot="desktop-resize-toolbar"
               data-toolbar-appearance="desktop-glass"
-              className="pointer-events-auto inline-flex h-14 items-center overflow-hidden rounded-full border border-white/[0.12] bg-black/55 text-white/78 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
+              className="pointer-events-auto inline-flex min-h-14 items-center gap-1 rounded-full border border-white/[0.12] bg-black/55 px-3 py-1.5 text-white/78 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
             >
               <button
                 aria-label="Decrease canvas size"
-                className="grid h-14 w-14 place-items-center text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
+                className="grid size-11 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
                 disabled={activeZoom <= MIN_PREVIEW_ZOOM}
                 type="button"
                 onClick={handleZoomOut}
               >
-                <MinusIcon className="size-6" strokeWidth={2.6} />
+                <MinusIcon className="size-5" strokeWidth={2.6} />
               </button>
-              <button
-                aria-label="Reset canvas size"
-                className="h-14 min-w-[5.75rem] border-x border-white/[0.12] px-4 text-center text-[1.35rem] font-semibold tracking-normal text-white transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
-                type="button"
-                onClick={handleResetView}
-              >
-                {zoomPercent}
-              </button>
+              <Popover open={desktopZoomPopoverOpen} onOpenChange={setDesktopZoomPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    aria-label="Choose canvas size"
+                    className="h-11 min-w-[5.75rem] rounded-full px-4 text-center text-[1.2rem] font-semibold tracking-normal text-white transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                    type="button"
+                    onClick={() => setDesktopZoomPopoverOpen((open) => !open)}
+                    onDoubleClick={() => {
+                      handleResetView()
+                      setDesktopZoomPopoverOpen(false)
+                    }}
+                  >
+                    {zoomPercent}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="center"
+                  side="top"
+                  sideOffset={10}
+                  data-slot="desktop-zoom-popover"
+                  className="w-48 rounded-[20px] border border-white/[0.12] bg-black/70 p-2 text-white/84 shadow-[0_24px_64px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
+                >
+                  <div className="grid gap-0.5" role="menu" aria-label="Canvas size presets">
+                    {DESKTOP_ZOOM_PRESETS.map((preset) => {
+                      const isSelected = Math.round(activeZoom * 100) === Math.round(preset * 100)
+
+                      return (
+                        <button
+                          key={preset}
+                          aria-checked={isSelected}
+                          className="grid h-10 grid-cols-[1.25rem_1fr] items-center rounded-[10px] px-2 text-left text-[1rem] font-semibold text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                          role="menuitemradio"
+                          type="button"
+                          onClick={() => {
+                            handleActiveZoomChange(preset)
+                            setDesktopZoomPopoverOpen(false)
+                          }}
+                        >
+                          <span className="grid place-items-center">
+                            {isSelected ? <CheckIcon className="size-4" strokeWidth={2.6} /> : null}
+                          </span>
+                          <span>{Math.round(preset * 100)}%</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </PopoverContent>
+              </Popover>
               <button
                 aria-label="Increase canvas size"
-                className="grid h-14 w-14 place-items-center text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
+                className="grid size-11 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
                 disabled={activeZoom >= MAX_PREVIEW_ZOOM}
                 type="button"
                 onClick={handleZoomIn}
               >
-                <PlusIcon className="size-7" strokeWidth={2.3} />
+                <PlusIcon className="size-5" strokeWidth={2.3} />
               </button>
             </div>
           </div>

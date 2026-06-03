@@ -156,7 +156,8 @@ function DesktopWorkspaceStyles() {
         background: rgba(15, 23, 42, 0.12) !important;
       }
 
-      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"] {
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"],
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-zoom-popover"] {
         background: rgba(255, 255, 255, 0.86) !important;
         border-color: rgba(15, 23, 42, 0.12) !important;
         color: rgba(15, 23, 42, 0.82) !important;
@@ -167,6 +168,15 @@ function DesktopWorkspaceStyles() {
       body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"] span,
       body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"] label {
         color: rgba(15, 23, 42, 0.72) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-zoom-popover"] button {
+        color: rgba(15, 23, 42, 0.82) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-zoom-popover"] button:hover {
+        background: rgba(15, 23, 42, 0.08) !important;
+        color: rgba(15, 23, 42, 0.95) !important;
       }
 
       body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"] p:first-child {

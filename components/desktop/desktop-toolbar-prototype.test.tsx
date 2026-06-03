@@ -146,6 +146,7 @@ describe("DesktopToolbarPrototype", () => {
 
     expect(inspector).not.toBeNull()
     expect(inspector?.getAttribute("aria-label")).toBe("Content settings")
+    expect(inspector?.className).toContain("z-[25]")
     expect(inspector?.querySelector('[data-slot="desktop-content-inspector"]')).not.toBeNull()
     expect(inspector?.querySelector('[data-slot="desktop-content-type-collection"]')).not.toBeNull()
     expect(inspector?.querySelector('[data-slot="desktop-content-fields"]')).not.toBeNull()
@@ -169,6 +170,14 @@ describe("DesktopToolbarPrototype", () => {
     })
 
     expect(linkPreset.getAttribute("aria-pressed")).toBe("true")
+    expect(linkPreset.getAttribute("data-desktop-content-type-option")).toBe("true")
+    expect(linkPreset.className).toContain("border-2")
+    expect(linkPreset.className).toContain("border-white/55")
+    expect(linkPreset.className).not.toContain("ff3b68")
+
+    const textPreset = getRequiredButton(surface.container, "Use Text content")
+    expect(textPreset.getAttribute("aria-pressed")).toBe("false")
+    expect(textPreset.className).toContain("border-transparent")
     expect(surface.container.textContent).toContain("Link")
     expect(surface.container.textContent).toContain("Needs input")
     expect(surface.container.querySelector('input[placeholder="https://example.com"]')).not.toBeNull()
@@ -574,7 +583,7 @@ describe("DesktopToolbarPrototype", () => {
     expect(getRequiredButton(surface.container, "Use Neon Drift motion loader").getAttribute("aria-pressed")).toBe("false")
   })
 
-  it("updates motion speed and overlay scale sliders", async () => {
+  it("updates motion speed, matrix density, and overlay scale sliders", async () => {
     const surface = await renderPrototype()
     const motionButton = getRequiredToolButton(surface.container, "motion")
 
@@ -583,11 +592,14 @@ describe("DesktopToolbarPrototype", () => {
     })
 
     await act(async () => {
-      setInputValue(getRequiredInput(surface.container, "Motion speed"), "5")
+      setInputValue(getRequiredInput(surface.container, "Motion speed"), "10")
+      setInputValue(getRequiredInput(surface.container, "Motion matrix density"), "25")
       setInputValue(getRequiredInput(surface.container, "Motion overlay scale"), "120")
     })
 
-    expect(getRequiredInput(surface.container, "Motion speed").value).toBe("5")
+    expect(getRequiredInput(surface.container, "Motion speed").value).toBe("10")
+    expect(getRequiredInput(surface.container, "Motion matrix density").value).toBe("25")
+    expect(surface.container.textContent).toContain("25x25")
     expect(getRequiredInput(surface.container, "Motion overlay scale").value).toBe("120")
   })
 
@@ -670,6 +682,7 @@ describe("DesktopToolbarPrototype", () => {
       getRequiredButton(surface.container, "Use Mint motion colors").dispatchEvent(new MouseEvent("click", { bubbles: true }))
       getRequiredButton(surface.container, "Animated SVG export").dispatchEvent(new MouseEvent("click", { bubbles: true }))
       setInputValue(getRequiredInput(surface.container, "Motion speed"), "5")
+      setInputValue(getRequiredInput(surface.container, "Motion matrix density"), "25")
     })
 
     await act(async () => {
@@ -682,6 +695,7 @@ describe("DesktopToolbarPrototype", () => {
     expect(getRequiredButton(surface.container, "Animated preview").getAttribute("aria-pressed")).toBe(String(DEFAULT_DOT_MATRIX_ANIMATION.animated))
     expect(getRequiredButton(surface.container, "Animated SVG export").getAttribute("aria-pressed")).toBe(String(DEFAULT_DOT_MATRIX_ANIMATION.exportAnimatedSvg))
     expect(getRequiredInput(surface.container, "Motion speed").value).toBe(String(DEFAULT_DOT_MATRIX_ANIMATION.speed))
+    expect(getRequiredInput(surface.container, "Motion matrix density").value).toBe(String(DEFAULT_DOT_MATRIX_ANIMATION.matrixSize))
   })
 
   it("renders a compact Pixelmator-style text inspector without placeholder copy", async () => {

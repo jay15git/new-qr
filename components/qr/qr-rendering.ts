@@ -16,6 +16,11 @@ import {
   clampBackgroundShapePaddingPx,
   DEFAULT_BACKGROUND_SHAPE_OPTIONS,
   DEFAULT_DOT_MATRIX_ANIMATION,
+  QR_DOT_MATRIX_ANIMATION_SPEED_MAX,
+  QR_DOT_MATRIX_ANIMATION_SPEED_MIN,
+  QR_DOT_MATRIX_MATRIX_SIZE_MAX,
+  QR_DOT_MATRIX_MATRIX_SIZE_MIN,
+  QR_DOT_MATRIX_MATRIX_SIZE_STEP,
   clampQrSize,
   getAssetValue,
   hasActiveBackgroundShapeOptions,
@@ -30,7 +35,7 @@ type QrAnimationRenderMode = "export" | "none" | "preview"
 const SVG_NS = "http://www.w3.org/2000/svg"
 const DOTS_CLIP_PATH_PREFIX = "clip-path-dot-color-"
 const QR_MODULE_CLIP_PATH_PREFIXES = [DOTS_CLIP_PATH_PREFIX]
-const DOT_MATRIX_TILE_SIZE = 5
+const DEFAULT_DOT_MATRIX_TILE_SIZE = 5
 const DOT_MATRIX_QUIET_TRACK_INDEX = -1
 
 export function buildQrExtension(
@@ -164,6 +169,7 @@ export function createDotMatrixAnimationExtension(
     }
 
     const animationColors = resolveDotMatrixColors(state)
+    const matrixSize = getDotMatrixTileSize(state.dotMatrixAnimation)
     const modules: DotMatrixModule[] = []
 
     for (const layer of dotLayers) {
@@ -174,7 +180,7 @@ export function createDotMatrixAnimationExtension(
           continue
         }
 
-        modules.push(createDotMatrixModule(shape, coordinates, metrics))
+        modules.push(createDotMatrixModule(shape, coordinates, metrics, matrixSize))
       }
     }
 
@@ -185,6 +191,7 @@ export function createDotMatrixAnimationExtension(
     const tracks = createDotMatrixLoaderTracks(
       modules,
       state.dotMatrixAnimation,
+      matrixSize,
     )
 
     if (tracks.size === 0) {
@@ -266,7 +273,7 @@ export function createDotMatrixAnimationExtension(
       if (track.upstreamClass) {
         animatedLayer.setAttribute("data-qr-dot-upstream-class", track.upstreamClass)
       }
-      animatedLayer.setAttribute("data-qr-dot-grid", "5x5")
+      animatedLayer.setAttribute("data-qr-dot-grid", `${matrixSize}x${matrixSize}`)
       animatedLayer.setAttribute("data-qr-dot-region", track.region)
       animatedLayer.setAttribute("data-qr-dot-state", track.state)
       animatedLayer.setAttribute(
@@ -342,6 +349,7 @@ type DotMatrixModule = DotMatrixCoordinates & {
   distanceN: number
   hash: number
   index: number
+  matrixSize: number
   outline: number
   outlineN: number
   perimeterIndex: number
@@ -377,6 +385,7 @@ type DotMatrixTrack = {
 type DotMatrixCell = {
   col: number
   index: number
+  matrixSize: number
   row: number
 }
 
@@ -586,11 +595,35 @@ function getSmallestPositiveDelta(values: number[]) {
 }
 
 function getDotMatrixAnimationDuration(animation: QrDotMatrixAnimationOptions) {
-  return formatSvgNumber(4.7 - Math.min(5, Math.max(1, animation.speed)) * 0.58)
+  const speed = Math.min(
+    QR_DOT_MATRIX_ANIMATION_SPEED_MAX,
+    Math.max(QR_DOT_MATRIX_ANIMATION_SPEED_MIN, animation.speed),
+  )
+  const densityFactor = getDotMatrixDensitySpeedFactor(animation)
+
+  return formatSvgNumber(Math.max(0.55, (4.7 - speed * 0.31) / densityFactor))
 }
 
 function getDotMatrixAnimationSpeedMultiplier(animation: QrDotMatrixAnimationOptions) {
-  return 2 ** ((3 - Math.min(5, Math.max(1, animation.speed))) / 2)
+  const speed = Math.min(
+    QR_DOT_MATRIX_ANIMATION_SPEED_MAX,
+    Math.max(QR_DOT_MATRIX_ANIMATION_SPEED_MIN, animation.speed),
+  )
+
+  return 2 ** ((3 - speed) / 2) / getDotMatrixDensitySpeedFactor(animation)
+}
+
+function getDotMatrixDensitySpeedFactor(animation: QrDotMatrixAnimationOptions) {
+  return Math.sqrt(getDotMatrixTileSize(animation) / DEFAULT_DOT_MATRIX_TILE_SIZE)
+}
+
+function getDotMatrixTileSize(animation: QrDotMatrixAnimationOptions) {
+  const matrixSize = Number(animation.matrixSize)
+  const clamped = Number.isFinite(matrixSize)
+    ? Math.min(QR_DOT_MATRIX_MATRIX_SIZE_MAX, Math.max(QR_DOT_MATRIX_MATRIX_SIZE_MIN, matrixSize))
+    : DEFAULT_DOT_MATRIX_ANIMATION.matrixSize
+
+  return Math.round(clamped / QR_DOT_MATRIX_MATRIX_SIZE_STEP) * QR_DOT_MATRIX_MATRIX_SIZE_STEP
 }
 
 function getDotMatrixBaseOpacity(animation: QrDotMatrixAnimationOptions) {
@@ -601,7 +634,6 @@ function getDotMatrixOverlayScale(animation: QrDotMatrixAnimationOptions) {
   return Math.max(DEFAULT_DOT_MATRIX_ANIMATION.overlayScale, animation.overlayScale)
 }
 
-const DOT_MATRIX_CENTER = (DOT_MATRIX_TILE_SIZE - 1) / 2
 type DotMatrixSquareLoaderId =
   | "dotm-square-1"
   | "dotm-square-2"
@@ -624,80 +656,24 @@ type DotMatrixSquareLoaderId =
   | "dotm-square-19"
   | "dotm-square-20"
 
-const DOT_MATRIX_SPIRAL_INWARD: ReadonlyArray<readonly [number, number]> = [
-  [0, 0],
-  [1, 0],
-  [2, 0],
-  [3, 0],
-  [4, 0],
-  [4, 1],
-  [4, 2],
-  [4, 3],
-  [4, 4],
-  [3, 4],
-  [2, 4],
-  [1, 4],
-  [0, 4],
-  [0, 3],
-  [0, 2],
-  [0, 1],
-  [1, 1],
-  [2, 1],
-  [3, 1],
-  [3, 2],
-  [3, 3],
-  [2, 3],
-  [1, 3],
-  [1, 2],
-  [2, 2],
-]
-const DOT_MATRIX_OUTER_RING_CW: ReadonlyArray<readonly [number, number]> = [
-  [0, 0],
-  [1, 0],
-  [2, 0],
-  [3, 0],
-  [4, 0],
-  [4, 1],
-  [4, 2],
-  [4, 3],
-  [4, 4],
-  [3, 4],
-  [2, 4],
-  [1, 4],
-  [0, 4],
-  [0, 3],
-  [0, 2],
-  [0, 1],
-]
-const DOT_MATRIX_MIDDLE_RING_CCW: ReadonlyArray<readonly [number, number]> = [
-  [1, 1],
-  [2, 1],
-  [3, 1],
-  [3, 2],
-  [3, 3],
-  [2, 3],
-  [1, 3],
-  [1, 2],
-]
-
 const DOT_MATRIX_LOADER_SPECS: Record<QrDotMatrixSquareLoader, DotMatrixLoaderSpec> = {
   "block-drop": createDotMatrixLoaderSpec("dotm-square-7", "frame-mask", createGeneratedCellAnimation),
   "core-rotor": createDotMatrixLoaderSpec("dotm-square-13", "frame-mask", createGeneratedCellAnimation),
   "core-spiral": createDotMatrixLoaderSpec("dotm-square-3", "spiral-inward", (cell) =>
     createClassCellAnimation("dotm-square-3", "spiral-inward", "dmx-spiral-snake", "dmx-spiral-snake", 1500, {
-      "--dmx-spiral-order": spiralInwardOrderValue(cell.index),
+      "--dmx-spiral-order": spiralInwardOrderValue(cell),
     }),
   ),
   "crt-glide": createDotMatrixLoaderSpec("dotm-square-10", "scan-line", createGeneratedCellAnimation),
   "echo-ring": createDotMatrixLoaderSpec("dotm-square-11", "ripple-echo", (cell) =>
     createClassCellAnimation("dotm-square-11", "ripple-echo", "dmx-ripple-echo", "dmx-ripple-echo", 1500, {
-      "--dmx-ripple-ring": Math.max(Math.abs(cell.col - DOT_MATRIX_CENTER), Math.abs(cell.row - DOT_MATRIX_CENTER)),
+      "--dmx-ripple-ring": Math.max(Math.abs(cell.col - getDotMatrixCenter(cell.matrixSize)), Math.abs(cell.row - getDotMatrixCenter(cell.matrixSize))),
       "--dmx-ripple-parity": (cell.row + cell.col) % 2,
     }),
   ),
   "flux-columns": createDotMatrixLoaderSpec("dotm-square-6", "column-snake", (cell) =>
     createClassCellAnimation("dotm-square-6", "column-snake", "dmx-square6-col-snake", "dmx-square6-col-snake", 1500, {
-      "--dmx-col-pos": cell.col % 2 === 0 ? DOT_MATRIX_TILE_SIZE - 1 - cell.row : cell.row,
+      "--dmx-col-pos": cell.col % 2 === 0 ? cell.matrixSize - 1 - cell.row : cell.row,
     }),
   ),
   "glyph-pulse": createDotMatrixLoaderSpec("dotm-square-9", "glyph-bits", (cell) => {
@@ -719,32 +695,32 @@ const DOT_MATRIX_LOADER_SPECS: Record<QrDotMatrixSquareLoader, DotMatrixLoaderSp
   "neon-drift": createDotMatrixLoaderSpec("dotm-square-1", "diagonal-alt-sweep", (cell) =>
     createClassCellAnimation("dotm-square-1", "diagonal-alt-sweep", "dmx-diagonal-alt-sweep", "dmx-diagonal-alt-sweep", 1500, {
       "--dmx-diagonal-parity": (cell.row + cell.col) % 2,
-      "--dmx-path": trBlPathNormFromIndex(cell.index),
+      "--dmx-path": trBlPathNormFromIndex(cell),
     }),
   ),
   "origin-wave": createDotMatrixLoaderSpec("dotm-square-12", "center-origin-ripple", (cell) =>
     createClassCellAnimation("dotm-square-12", "center-origin-ripple", "dmx-center-origin-ripple", "dmx-center-origin-ripple", 1500, {
-      "--dmx-center-ripple-ring": Math.abs(cell.row - 1) + Math.abs(cell.col - 1),
+      "--dmx-center-ripple-ring": Math.abs(cell.row - getDotMatrixCenter(cell.matrixSize)) + Math.abs(cell.col - getDotMatrixCenter(cell.matrixSize)),
     }),
   ),
   "prism-bloom": createDotMatrixLoaderSpec("dotm-square-14", "diamond-bloom", createGeneratedCellAnimation),
   "prism-sweep": createDotMatrixLoaderSpec("dotm-square-5", "diagonal-snake", (cell) =>
     createClassCellAnimation("dotm-square-5", "diagonal-snake", "dmx-diagonal-snake", "dmx-diagonal-snake", 1500, {
-      "--dmx-diagonal-snake-order": diagonalSnakeOrderValue(cell.index),
+      "--dmx-diagonal-snake-order": diagonalSnakeOrderValue(cell),
     }),
   ),
   "pulse-ladder": createDotMatrixLoaderSpec("dotm-square-2", "row-cycle-snake", createGeneratedCellAnimation),
   "sound-bars": createDotMatrixLoaderSpec("dotm-square-18", "sound-bars", createGeneratedCellAnimation),
   "strobe-stack": createDotMatrixLoaderSpec("dotm-square-8", "stack-drain", createGeneratedCellAnimation),
   "twin-orbit": createDotMatrixLoaderSpec("dotm-square-4", "twin-orbit", (cell) => {
-    const outerOrder = outerRingClockwiseOrderValue(cell.index)
+    const outerOrder = outerRingClockwiseOrderValue(cell)
     if (outerOrder >= 0) {
       return createClassCellAnimation("dotm-square-4", "twin-orbit", "dmx-outer-snake", "dmx-outer-snake", 1500, {
         "--dmx-outer-order": outerOrder,
       })
     }
 
-    const middleOrder = middleRingAntiClockwiseOrderValue(cell.index)
+    const middleOrder = middleRingAntiClockwiseOrderValue(cell)
     if (middleOrder >= 0) {
       return createClassCellAnimation("dotm-square-4", "twin-orbit", "dmx-middle-snake", "dmx-middle-snake", 1500, {
         "--dmx-middle-order": middleOrder,
@@ -844,6 +820,7 @@ function createDotMatrixModule(
   shape: SVGElement,
   coordinates: DotMatrixCoordinates,
   metrics: DotMatrixMetrics,
+  matrixSize: number,
 ): DotMatrixModule {
   const centerRow = metrics.maxRow / 2
   const centerCol = metrics.maxCol / 2
@@ -861,8 +838,8 @@ function createDotMatrixModule(
   const perimeterIndex = getDotMatrixPerimeterIndex(coordinates, metrics)
   const colN = metrics.maxCol > 0 ? coordinates.col / metrics.maxCol : 0
   const rowN = metrics.maxRow > 0 ? coordinates.row / metrics.maxRow : 0
-  const regionCol = getDotMatrixRegionCoordinate(colN)
-  const regionRow = getDotMatrixRegionCoordinate(rowN)
+  const regionCol = getDotMatrixRegionCoordinate(colN, matrixSize)
+  const regionRow = getDotMatrixRegionCoordinate(rowN, matrixSize)
 
   return {
     ...coordinates,
@@ -875,11 +852,12 @@ function createDotMatrixModule(
     distanceN: distance / maxDistance,
     hash: getDotMatrixHash01(index, coordinates.row + coordinates.col * 17),
     index,
+    matrixSize,
     outline: outlineDistance,
     outlineN: outlineDistance / maxOutlineDistance,
     perimeterIndex,
     regionCol,
-    regionIndex: regionRow * DOT_MATRIX_TILE_SIZE + regionCol,
+    regionIndex: regionRow * matrixSize + regionCol,
     regionRow,
     ring: getDotMatrixRing(coordinates, metrics),
     rowN,
@@ -890,11 +868,12 @@ function createDotMatrixModule(
 function createDotMatrixLoaderTracks(
   modules: DotMatrixModule[],
   animation: QrDotMatrixAnimationOptions,
+  matrixSize: number,
 ) {
   const spec = DOT_MATRIX_LOADER_SPECS[animation.loader] ?? DOT_MATRIX_LOADER_SPECS["neon-drift"]
   const tracks = new Map<string, DotMatrixTrack>()
   const speedMultiplier = getDotMatrixAnimationSpeedMultiplier(animation)
-  const activePatternIndexes = new Set(getDotMatrixPatternIndexes(animation.pattern))
+  const activePatternIndexes = new Set(getDotMatrixPatternIndexes(animation.pattern, matrixSize))
 
   for (const qrModule of modules) {
     const cell = getDotMatrixCell(qrModule)
@@ -949,10 +928,10 @@ function createDotMatrixLoaderTracks(
   return tracks
 }
 
-function getDotMatrixRegionCoordinate(value: number) {
+function getDotMatrixRegionCoordinate(value: number, matrixSize: number) {
   return Math.min(
-    DOT_MATRIX_TILE_SIZE - 1,
-    Math.max(0, Math.floor(clampDotMatrixUnit(value) * DOT_MATRIX_TILE_SIZE)),
+    matrixSize - 1,
+    Math.max(0, Math.floor(clampDotMatrixUnit(value) * matrixSize)),
   )
 }
 
@@ -960,19 +939,21 @@ function getDotMatrixCell(module: DotMatrixModule): DotMatrixCell {
   return {
     col: module.regionCol,
     index: module.regionIndex,
+    matrixSize: module.matrixSize,
     row: module.regionRow,
   }
 }
 
-function rowMajorIndex(row: number, col: number) {
-  return row * DOT_MATRIX_TILE_SIZE + col
+function rowMajorIndex(row: number, col: number, matrixSize = DEFAULT_DOT_MATRIX_TILE_SIZE) {
+  return row * matrixSize + col
 }
 
-function indexToCoord(index: number): DotMatrixCell {
+function indexToCoord(index: number, matrixSize = DEFAULT_DOT_MATRIX_TILE_SIZE): DotMatrixCell {
   return {
-    col: index % DOT_MATRIX_TILE_SIZE,
+    col: index % matrixSize,
     index,
-    row: Math.floor(index / DOT_MATRIX_TILE_SIZE),
+    matrixSize,
+    row: Math.floor(index / matrixSize),
   }
 }
 
@@ -984,42 +965,111 @@ function findDotMatrixCellIndex(
   return path.findIndex(([pathCol, pathRow]) => pathCol === col && pathRow === row)
 }
 
-function trBlPathNormFromIndex(index: number) {
-  const { col, row } = indexToCoord(index)
-
-  return (row + (DOT_MATRIX_TILE_SIZE - 1 - col)) / ((DOT_MATRIX_TILE_SIZE - 1) * 2)
+function getDotMatrixCenter(matrixSize: number) {
+  return (matrixSize - 1) / 2
 }
 
-function spiralInwardOrderValue(index: number) {
-  const { col, row } = indexToCoord(index)
+function createSpiralInwardPath(matrixSize: number) {
+  const path: Array<readonly [number, number]> = []
+  let left = 0
+  let right = matrixSize - 1
+  let top = 0
+  let bottom = matrixSize - 1
 
-  return findDotMatrixCellIndex(DOT_MATRIX_SPIRAL_INWARD, col, row)
+  while (left <= right && top <= bottom) {
+    for (let col = left; col <= right; col += 1) {
+      path.push([col, top])
+    }
+    for (let row = top + 1; row <= bottom; row += 1) {
+      path.push([right, row])
+    }
+    if (top < bottom) {
+      for (let col = right - 1; col >= left; col -= 1) {
+        path.push([col, bottom])
+      }
+    }
+    if (left < right) {
+      for (let row = bottom - 1; row > top; row -= 1) {
+        path.push([left, row])
+      }
+    }
+
+    left += 1
+    right -= 1
+    top += 1
+    bottom -= 1
+  }
+
+  return path
 }
 
-function outerRingClockwiseOrderValue(index: number) {
-  const { col, row } = indexToCoord(index)
-
-  return findDotMatrixCellIndex(DOT_MATRIX_OUTER_RING_CW, col, row)
+function createOuterRingClockwisePath(matrixSize: number) {
+  return createRingPathClockwise(matrixSize, 0)
 }
 
-function middleRingAntiClockwiseOrderValue(index: number) {
-  const { col, row } = indexToCoord(index)
+function createRingPathClockwise(matrixSize: number, inset: number) {
+  const path: Array<readonly [number, number]> = []
+  const min = inset
+  const max = matrixSize - 1 - inset
 
-  return findDotMatrixCellIndex(DOT_MATRIX_MIDDLE_RING_CCW, col, row)
+  if (min > max) {
+    return path
+  }
+
+  for (let col = min; col <= max; col += 1) {
+    path.push([col, min])
+  }
+  for (let row = min + 1; row <= max; row += 1) {
+    path.push([max, row])
+  }
+  if (min < max) {
+    for (let col = max - 1; col >= min; col -= 1) {
+      path.push([col, max])
+    }
+    for (let row = max - 1; row > min; row -= 1) {
+      path.push([min, row])
+    }
+  }
+
+  return path
 }
 
-function diagonalSnakeOrderValue(index: number) {
-  const { col, row } = indexToCoord(index)
+function trBlPathNormFromIndex(cell: DotMatrixCell) {
+  const { col, matrixSize, row } = cell
+
+  return (row + (matrixSize - 1 - col)) / ((matrixSize - 1) * 2)
+}
+
+function spiralInwardOrderValue(cell: DotMatrixCell) {
+  const { col, matrixSize, row } = cell
+
+  return findDotMatrixCellIndex(createSpiralInwardPath(matrixSize), col, row)
+}
+
+function outerRingClockwiseOrderValue(cell: DotMatrixCell) {
+  const { col, matrixSize, row } = cell
+
+  return findDotMatrixCellIndex(createOuterRingClockwisePath(matrixSize), col, row)
+}
+
+function middleRingAntiClockwiseOrderValue(cell: DotMatrixCell) {
+  const { col, matrixSize, row } = cell
+
+  return findDotMatrixCellIndex(createRingPathClockwise(matrixSize, 1), col, row)
+}
+
+function diagonalSnakeOrderValue(cell: DotMatrixCell) {
+  const { col, matrixSize, row } = cell
   let order = 0
 
-  for (let diagonal = 0; diagonal <= (DOT_MATRIX_TILE_SIZE - 1) * 2; diagonal += 1) {
+  for (let diagonal = 0; diagonal <= (matrixSize - 1) * 2; diagonal += 1) {
     const cells: DotMatrixCell[] = []
 
-    for (let candidateRow = 0; candidateRow < DOT_MATRIX_TILE_SIZE; candidateRow += 1) {
+    for (let candidateRow = 0; candidateRow < matrixSize; candidateRow += 1) {
       const candidateCol = diagonal - candidateRow
 
-      if (candidateCol >= 0 && candidateCol < DOT_MATRIX_TILE_SIZE) {
-        cells.push(indexToCoord(rowMajorIndex(candidateRow, candidateCol)))
+      if (candidateCol >= 0 && candidateCol < matrixSize) {
+        cells.push(indexToCoord(rowMajorIndex(candidateRow, candidateCol, matrixSize), matrixSize))
       }
     }
 
@@ -1037,22 +1087,24 @@ function diagonalSnakeOrderValue(index: number) {
   return 0
 }
 
-function getDotMatrixPatternIndexes(pattern: QrDotMatrixAnimationOptions["pattern"]) {
+function getDotMatrixPatternIndexes(pattern: QrDotMatrixAnimationOptions["pattern"], matrixSize: number) {
   const indexes: number[] = []
+  const center = getDotMatrixCenter(matrixSize)
+  const diamondRadius = Math.max(2, Math.floor(matrixSize / 2))
 
-  for (let row = 0; row < DOT_MATRIX_TILE_SIZE; row += 1) {
-    for (let col = 0; col < DOT_MATRIX_TILE_SIZE; col += 1) {
-      const index = rowMajorIndex(row, col)
-      const distance = Math.hypot(row - DOT_MATRIX_CENTER, col - DOT_MATRIX_CENTER)
-      const manhattan = Math.abs(row - DOT_MATRIX_CENTER) + Math.abs(col - DOT_MATRIX_CENTER)
-      const angle = Math.atan2(row - DOT_MATRIX_CENTER, col - DOT_MATRIX_CENTER)
+  for (let row = 0; row < matrixSize; row += 1) {
+    for (let col = 0; col < matrixSize; col += 1) {
+      const index = rowMajorIndex(row, col, matrixSize)
+      const distance = Math.hypot(row - center, col - center)
+      const manhattan = Math.abs(row - center) + Math.abs(col - center)
+      const angle = Math.atan2(row - center, col - center)
       const active =
         pattern === "full" ||
-        (pattern === "diamond" && manhattan <= 2) ||
+        (pattern === "diamond" && manhattan <= diamondRadius) ||
         (pattern === "outline" &&
-          (row === 0 || col === 0 || row === DOT_MATRIX_TILE_SIZE - 1 || col === DOT_MATRIX_TILE_SIZE - 1)) ||
-        (pattern === "cross" && (row === DOT_MATRIX_CENTER || col === DOT_MATRIX_CENTER)) ||
-        (pattern === "rings" && (distance >= 1 || row === 0 || col === 0 || row === 4 || col === 4)) ||
+          (row === 0 || col === 0 || row === matrixSize - 1 || col === matrixSize - 1)) ||
+        (pattern === "cross" && (Math.abs(row - center) < 0.5 || Math.abs(col - center) < 0.5)) ||
+        (pattern === "rings" && (distance >= 1 || row === 0 || col === 0 || row === matrixSize - 1 || col === matrixSize - 1)) ||
         (pattern === "rose" && Math.abs(Math.sin(3 * angle)) > 0.5 && distance >= 1)
 
       if (active) {
@@ -1243,13 +1295,23 @@ function createGeneratedDotMatrixKeyframes(
   region: string,
 ) {
   const [col = 0, row = 0] = region.split(" ")[0]?.split(",").map(Number) ?? []
+  const matrixSize = getMatrixSizeFromRegion(region)
   const samples = getGeneratedDotMatrixOpacitySamples(upstreamLoader, {
     col,
-    index: rowMajorIndex(row, col),
+    index: rowMajorIndex(row, col, matrixSize),
+    matrixSize,
     row,
   })
 
   return createDotMatrixOpacityKeyframes(name, samples)
+}
+
+function getMatrixSizeFromRegion(region: string) {
+  return region
+    .split(" ")
+    .flatMap((coordinate) => coordinate.split(",").map(Number))
+    .filter(Number.isFinite)
+    .reduce((max, value) => Math.max(max, value + 1), DEFAULT_DOT_MATRIX_TILE_SIZE)
 }
 
 function getGeneratedDotMatrixOpacitySamples(
@@ -1259,28 +1321,31 @@ function getGeneratedDotMatrixOpacitySamples(
   switch (upstreamLoader) {
     case "dotm-square-2":
       return Array.from({ length: 10 }, (_, frame) => {
-        const head = [4, 3, 2, 1, 0, 0, 1, 2, 3, 4][frame] ?? 0
+        const head = Math.round(((frame <= 4 ? 4 - frame : frame - 5) / 4) * (cell.matrixSize - 1))
         const distance = Math.abs(cell.row - head)
         const tail = [1, 0.82, 0.68, 0.54, 0.42, 0.31, 0.22, 0.14]
-        return tail[distance + Math.abs(cell.col - (frame % DOT_MATRIX_TILE_SIZE))] ?? 0.08
+        return tail[distance + Math.abs(cell.col - (frame % cell.matrixSize))] ?? 0.08
       })
     case "dotm-square-7":
       return Array.from({ length: 11 }, (_, frame) => {
-        const sequence = [0, 1, 2, 3, 4, 4, 5, 6, 7, 8, 9]
+        const sequence = [0, 1, 2, 3, 4, 4, 5, 6, 7, 8, 9].map((step) =>
+          Math.round((step / 9) * (cell.matrixSize * 2 - 1)),
+        )
         const step = sequence[frame] ?? 0
-        const filled = DOT_MATRIX_TILE_SIZE - 1 - cell.row < step
-        const cap = DOT_MATRIX_TILE_SIZE - 1 - cell.row === step
+        const filled = cell.matrixSize - 1 - cell.row < step
+        const cap = cell.matrixSize - 1 - cell.row === step
         return cap ? 1 : filled ? 0.42 : 0.08
       })
     case "dotm-square-8":
       return Array.from({ length: 24 }, (_, frame) => {
+        const scaledFrame = (frame / 23) * (cell.matrixSize - 1) * 2
         if (frame < 9) {
-          return DOT_MATRIX_TILE_SIZE - 1 - cell.row <= frame / 2 ? 0.52 : 0.08
+          return cell.matrixSize - 1 - cell.row <= scaledFrame ? 0.52 : 0.08
         }
         if (frame < 14) {
           return frame % 2 === 0 ? 1 : 0.38
         }
-        return cell.row <= (frame - 14) / 2 ? 0.08 : 0.52
+        return cell.row <= scaledFrame - cell.matrixSize ? 0.08 : 0.52
       })
     case "dotm-square-10":
       return Array.from({ length: 5 }, (_, frame) => {
@@ -1289,53 +1354,62 @@ function getGeneratedDotMatrixOpacitySamples(
       })
     case "dotm-square-13":
       return Array.from({ length: 16 }, (_, frame) => {
-        const order = outerRingClockwiseOrderValue(cell.index)
-        if (cell.row === DOT_MATRIX_CENTER && cell.col === DOT_MATRIX_CENTER) {
+        const order = outerRingClockwiseOrderValue(cell)
+        const center = getDotMatrixCenter(cell.matrixSize)
+        if (Math.abs(cell.row - center) < 0.5 && Math.abs(cell.col - center) < 0.5) {
           return frame % 4 === 0 ? 1 : 0.56
         }
         return order >= 0 && Math.abs(order - frame) <= 1 ? 1 : 0.08
       })
     case "dotm-square-14":
       return Array.from({ length: 6 }, (_, frame) => {
-        const sequence = [0, 1, 2, 3, 2, 1]
-        const distance = Math.abs(cell.row - DOT_MATRIX_CENTER) + Math.abs(cell.col - DOT_MATRIX_CENTER)
+        const center = getDotMatrixCenter(cell.matrixSize)
+        const sequence = [0, 1, 2, 3, 2, 1].map((step) =>
+          Math.round((step / 3) * center),
+        )
+        const distance = Math.abs(cell.row - center) + Math.abs(cell.col - center)
         return distance === sequence[frame] ? 1 : distance < sequence[frame] ? 0.52 : 0.08
       })
     case "dotm-square-15":
     case "dotm-square-16":
       return Array.from({ length: 20 }, (_, frame) => {
         const phase = (frame / 19) * Math.PI * 2 + cell.row * 1.24
-        const left = Math.round(1.5 + 0.5 * Math.sin(phase))
-        const right = DOT_MATRIX_TILE_SIZE - 1 - left
-        const bridge = Math.cos(phase * 2) > 0.82 && cell.col === 2
+        const center = getDotMatrixCenter(cell.matrixSize)
+        const left = Math.round(center - 0.5 + 0.5 * Math.sin(phase))
+        const right = cell.matrixSize - 1 - left
+        const bridge = Math.cos(phase * 2) > 0.82 && Math.abs(cell.col - center) < 0.5
         return cell.col === left || cell.col === right ? 1 : bridge ? 0.58 : Math.abs(cell.col - left) === 1 ? 0.24 : 0.08
       })
     case "dotm-square-17":
       return Array.from({ length: 20 }, (_, frame) => {
         const phase = (frame / 19) * Math.PI * 2 + cell.row * 1.24
-        const strandCol = Math.round(2 + 2 * Math.sin(phase))
+        const center = getDotMatrixCenter(cell.matrixSize)
+        const strandCol = Math.round(center + center * Math.sin(phase))
         return cell.col === strandCol ? 1 : Math.abs(cell.col - strandCol) === 1 ? 0.24 : 0.08
       })
     case "dotm-square-18":
       return Array.from({ length: 24 }, (_, frame) => {
         const colPhase = frame * 0.52 + cell.col * 1.15
-        const level = Math.round(1 + ((Math.sin(colPhase) + 1) / 2) * 4)
-        return DOT_MATRIX_TILE_SIZE - cell.row <= level ? 1 : 0.08
+        const level = Math.round(1 + ((Math.sin(colPhase) + 1) / 2) * (cell.matrixSize - 1))
+        return cell.matrixSize - cell.row <= level ? 1 : 0.08
       })
     case "dotm-square-19":
       return Array.from({ length: 48 }, (_, frame) => {
-        const a = (frame % DOT_MATRIX_OUTER_RING_CW.length)
-        const b = (a + DOT_MATRIX_OUTER_RING_CW.length / 2) % DOT_MATRIX_OUTER_RING_CW.length
-        const order = outerRingClockwiseOrderValue(cell.index)
-        if (cell.row === DOT_MATRIX_CENTER && cell.col === DOT_MATRIX_CENTER) {
+        const outerRingLength = createOuterRingClockwisePath(cell.matrixSize).length
+        const a = (frame % outerRingLength)
+        const b = (a + outerRingLength / 2) % outerRingLength
+        const order = outerRingClockwiseOrderValue(cell)
+        const center = getDotMatrixCenter(cell.matrixSize)
+        if (Math.abs(cell.row - center) < 0.5 && Math.abs(cell.col - center) < 0.5) {
           return 0.62
         }
         return order === a || order === b ? 1 : order >= 0 && Math.min(Math.abs(order - a), Math.abs(order - b)) <= 2 ? 0.32 : 0.08
       })
     case "dotm-square-20":
-      return Array.from({ length: DOT_MATRIX_OUTER_RING_CW.length }, (_, frame) => {
-        const order = outerRingClockwiseOrderValue(cell.index)
-        if (cell.row === DOT_MATRIX_CENTER && cell.col === DOT_MATRIX_CENTER) {
+      return Array.from({ length: createOuterRingClockwisePath(cell.matrixSize).length }, (_, frame) => {
+        const order = outerRingClockwiseOrderValue(cell)
+        const center = getDotMatrixCenter(cell.matrixSize)
+        if (Math.abs(cell.row - center) < 0.5 && Math.abs(cell.col - center) < 0.5) {
           return frame % 4 === 0 ? 0.62 : 0.08
         }
         return order === frame ? 1 : order >= 0 && Math.abs(order - frame) <= 2 ? 0.38 : 0.08

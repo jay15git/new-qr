@@ -191,7 +191,7 @@ function renderDotMatrixTracks(
     enabled: true,
     loader,
     pattern,
-    speed: 3,
+    speed: patch.speed ?? 3,
   }
   const extension = createDotMatrixAnimationExtension(state, "preview")
   expect(extension).toBeTypeOf("function")
@@ -232,6 +232,10 @@ function renderDotMatrixTracks(
     ) ?? []
 
   return { animationLayer, tracks }
+}
+
+function getTrackDuration(track: StubElement) {
+  return Number(track.getAttribute("data-qr-dot-duration-ms") ?? Number.NaN)
 }
 
 function getTrackForRegion(tracks: StubElement[], region: string) {
@@ -443,6 +447,29 @@ describe("qr rendering helpers", () => {
     expect(animatedTracks[0]?.getAttribute("style")).toContain(
       "--qr-dot-track:",
     )
+  })
+
+  it("uses selected dot matrix density for track assignment", () => {
+    const { tracks } = renderDotMatrixTracks("crt-glide", "full", {
+      matrixSize: 25,
+    })
+
+    expect(tracks.length).toBeGreaterThan(0)
+    expect(tracks.every((track) => track.getAttribute("data-qr-dot-grid") === "25x25")).toBe(true)
+    expect(new Set(tracks.map((track) => track.getAttribute("data-qr-dot-region"))).has("24,24")).toBe(true)
+  })
+
+  it("shortens dot matrix track duration when density and speed increase", () => {
+    const defaultTrack = renderDotMatrixTracks("crt-glide", "full", {
+      matrixSize: 5,
+      speed: 3,
+    }).tracks[0]
+    const denseFastTrack = renderDotMatrixTracks("crt-glide", "full", {
+      matrixSize: 25,
+      speed: 10,
+    }).tracks[0]
+
+    expect(getTrackDuration(defaultTrack!)).toBeGreaterThan(getTrackDuration(denseFastTrack!))
   })
 
   it("keeps loader color independent from the QR style color in preview and export", () => {

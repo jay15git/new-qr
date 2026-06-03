@@ -74,6 +74,7 @@ export type QrDotMatrixAnimationOptions = {
   enabled: boolean;
   exportAnimatedSvg: boolean;
   loader: QrDotMatrixSquareLoader;
+  matrixSize: number;
   opacityBase: number;
   opacityMid: number;
   opacityPeak: number;
@@ -171,7 +172,10 @@ export const RASTER_EXPORT_QUALITY_MIN = 25;
 export const RASTER_EXPORT_QUALITY_MAX = 100;
 export const DEFAULT_RASTER_EXPORT_QUALITY = 100;
 export const QR_DOT_MATRIX_ANIMATION_SPEED_MIN = 1;
-export const QR_DOT_MATRIX_ANIMATION_SPEED_MAX = 5;
+export const QR_DOT_MATRIX_ANIMATION_SPEED_MAX = 10;
+export const QR_DOT_MATRIX_MATRIX_SIZE_MIN = 5;
+export const QR_DOT_MATRIX_MATRIX_SIZE_MAX = 25;
+export const QR_DOT_MATRIX_MATRIX_SIZE_STEP = 5;
 export const QR_DOT_MATRIX_OVERLAY_SCALE_MIN = 100;
 export const QR_DOT_MATRIX_OVERLAY_SCALE_MAX = 140;
 export const QR_DOT_MATRIX_OPACITY_MIN = 0;
@@ -277,6 +281,7 @@ export const DEFAULT_DOT_MATRIX_ANIMATION: QrDotMatrixAnimationOptions = {
   enabled: false,
   exportAnimatedSvg: false,
   loader: "neon-drift",
+  matrixSize: QR_DOT_MATRIX_MATRIX_SIZE_MIN,
   opacityBase: 0.2,
   opacityMid: 0.55,
   opacityPeak: 1,
@@ -401,6 +406,21 @@ export function clampDotMatrixAnimationSpeed(value: number) {
   );
 }
 
+export function clampDotMatrixAnimationMatrixSize(value: number) {
+  if (!Number.isFinite(value)) {
+    return DEFAULT_DOT_MATRIX_ANIMATION.matrixSize;
+  }
+
+  const clamped = coerceNumber(
+    value,
+    QR_DOT_MATRIX_MATRIX_SIZE_MIN,
+    QR_DOT_MATRIX_MATRIX_SIZE_MAX,
+    DEFAULT_DOT_MATRIX_ANIMATION.matrixSize,
+  );
+
+  return Math.round(clamped / QR_DOT_MATRIX_MATRIX_SIZE_STEP) * QR_DOT_MATRIX_MATRIX_SIZE_STEP;
+}
+
 export function clampDotMatrixAnimationOverlayScale(value: number) {
   return coerceNumber(
     value,
@@ -517,6 +537,8 @@ export function setDotMatrixAnimationOptions(
     Object.prototype.hasOwnProperty.call(state.dotMatrixAnimation, "halo") ||
     Object.prototype.hasOwnProperty.call(state.dotMatrixAnimation, "hoverAnimated") ||
     Object.prototype.hasOwnProperty.call(state.dotMatrixAnimation, "muted");
+  const hasMissingMatrixSize =
+    !Object.prototype.hasOwnProperty.call(state.dotMatrixAnimation, "matrixSize");
   const nextCustomColor = coerceDotMatrixAnimationColor(
     patch.customColor ?? state.dotMatrixAnimation.customColor,
     DEFAULT_DOT_MATRIX_ANIMATION.customColor,
@@ -543,6 +565,9 @@ export function setDotMatrixAnimationOptions(
       patch.exportAnimatedSvg ?? state.dotMatrixAnimation.exportAnimatedSvg,
     loader: coerceDotMatrixSquareLoader(
       patch.loader ?? state.dotMatrixAnimation.loader,
+    ),
+    matrixSize: clampDotMatrixAnimationMatrixSize(
+      patch.matrixSize ?? state.dotMatrixAnimation.matrixSize,
     ),
     opacityBase: clampDotMatrixAnimationOpacity(
       patch.opacityBase ?? state.dotMatrixAnimation.opacityBase,
@@ -576,13 +601,15 @@ export function setDotMatrixAnimationOptions(
     state.dotMatrixAnimation.customColorPeak === nextAnimation.customColorPeak &&
     state.dotMatrixAnimation.dotShape === nextAnimation.dotShape &&
     state.dotMatrixAnimation.loader === nextAnimation.loader &&
+    state.dotMatrixAnimation.matrixSize === nextAnimation.matrixSize &&
     state.dotMatrixAnimation.opacityBase === nextAnimation.opacityBase &&
     state.dotMatrixAnimation.opacityMid === nextAnimation.opacityMid &&
     state.dotMatrixAnimation.opacityPeak === nextAnimation.opacityPeak &&
     state.dotMatrixAnimation.overlayScale === nextAnimation.overlayScale &&
     state.dotMatrixAnimation.pattern === nextAnimation.pattern &&
     state.dotMatrixAnimation.speed === nextAnimation.speed &&
-    !hasRemovedAnimationOptions
+    !hasRemovedAnimationOptions &&
+    !hasMissingMatrixSize
   ) {
     return state;
   }

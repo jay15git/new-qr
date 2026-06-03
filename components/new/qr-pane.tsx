@@ -719,7 +719,7 @@ function LayerContextMenu({
 
   return (
     <div
-      className="fixed z-[20000] min-w-52 rounded-[18px] border border-white/[0.12] bg-black/55 p-1.5 text-white/78 shadow-[0_22px_55px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
+      className="fixed z-[20000] min-w-52 rounded-[18px] border border-[var(--drafting-dropdown-border)] bg-[var(--drafting-dropdown-menu-surface-open)] p-1.5 text-[var(--drafting-dropdown-text)] shadow-[var(--drafting-dropdown-menu-shadow-open)] backdrop-blur-2xl"
       data-drafting-dropdown-content="true"
       data-slot="drafting-layer-context-menu"
       data-toolbar-appearance="desktop-glass"
