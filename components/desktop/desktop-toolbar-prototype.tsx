@@ -18,6 +18,7 @@ import {
   ChevronDownIcon,
   ItalicIcon,
   MoonIcon,
+  Redo2Icon,
   RotateCcwIcon,
   SearchIcon,
   ShieldCheckIcon,
@@ -27,6 +28,7 @@ import {
   SunIcon,
   TypeIcon,
   UnderlineIcon,
+  Undo2Icon,
 } from "lucide-react"
 
 import { BlocksIcon } from "@/components/animate-ui/icons/blocks"
@@ -285,8 +287,6 @@ const DESKTOP_ALL_CONTENT_TYPES = Array.from(
   ]),
 )
 
-type DesktopPatternCollectionId = "pattern" | "color"
-
 export type DesktopPatternSettings = {
   dotsColorMode: DotsColorMode
   dotsGradient: StudioGradient
@@ -455,6 +455,8 @@ type DesktopTextPresetId = "body" | "caption" | "title"
 
 export type DesktopToolbarController = {
   activeTool: DesktopToolbarToolId | null
+  canRedo?: boolean
+  canUndo?: boolean
   contentType: QrInputType
   contentValues: StaticQrContentValues
   contentValidation: ReturnType<typeof validateStaticQrContent>
@@ -472,6 +474,9 @@ export type DesktopToolbarController = {
   exportSettings: DesktopExportSettings
   textSettings: DesktopTextSettings
   onActiveToolChange: (toolId: DesktopToolbarToolId) => void
+  onRedo?: () => void
+  onUndo?: () => void
+  onResetDefaults?: () => void
   onContentReset: () => void
   onContentTypeChange: (type: QrInputType) => void
   onContentValueChange: (field: string, value: StaticQrContentValue) => void
@@ -501,14 +506,6 @@ export type DesktopToolbarController = {
   onTextReset: () => void
   onTextSettingsChange: (patch: Partial<DesktopTextSettings>) => void
 }
-
-const DESKTOP_PATTERN_COLLECTIONS: Array<{
-  id: DesktopPatternCollectionId
-  label: string
-}> = [
-  { id: "pattern", label: "Module Pattern" },
-  { id: "color", label: "Module Color" },
-]
 
 const DEFAULT_DESKTOP_DOTS_GRADIENT: StudioGradient = {
   enabled: true,
@@ -666,8 +663,8 @@ const DEFAULT_DESKTOP_SHAPE_SETTINGS: DesktopShapeSettings = {
     type: "linear",
     rotation: 0,
     colorStops: [
-      { offset: 0, color: "#f8fafc" },
-      { offset: 1, color: "#dbeafe" },
+      { offset: 0, color: "#18181b" },
+      { offset: 1, color: "#52525b" },
     ],
   },
   shapePadding: DEFAULT_BACKGROUND_SHAPE_OPTIONS.paddingPx,
@@ -676,7 +673,7 @@ const DEFAULT_DESKTOP_SHAPE_SETTINGS: DesktopShapeSettings = {
   shapeShadowOffsetX: DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetX,
   shapeShadowOffsetY: DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetY,
   shapeShadowOpacity: DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOpacity,
-  shapeSolidColor: "#f8fafc",
+  shapeSolidColor: "#18181b",
   shapeStrokeColor: DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeColor,
   shapeStrokeOpacity: DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeOpacity,
   shapeStrokeWidth: DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeWidth,
@@ -1024,23 +1021,59 @@ export function DesktopToolbarPrototype({
         )}
       >
         <DesktopThemeStyles />
-        <button
-          aria-label={`Switch to ${actualDesktopTheme === "light" ? "dark" : "light"} mode`}
-          data-slot="desktop-theme-toggle"
-          className="fixed right-5 top-5 z-30 grid size-10 place-items-center rounded-full border border-white/[0.12] bg-black/55 text-white/72 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl transition hover:bg-white/[0.11] hover:text-white focus-visible:ring-2 focus-visible:ring-white/45 max-md:right-4 max-md:top-4"
-          type="button"
-          onClick={handleDesktopThemeToggle}
-        >
-          {actualDesktopTheme === "light" ? (
-            <MoonIcon className="size-4" />
-          ) : (
-            <SunIcon className="size-4" />
-          )}
-        </button>
+        <div className="fixed right-5 top-5 z-30 inline-flex items-center gap-2 max-md:right-4 max-md:top-4">
+          <button
+            aria-label={`Switch to ${actualDesktopTheme === "light" ? "dark" : "light"} mode`}
+            data-slot="desktop-theme-toggle"
+            data-toolbar-appearance="desktop-glass"
+            className="grid size-14 place-items-center rounded-full border border-white/[0.12] bg-black/55 text-white/72 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+            type="button"
+            onClick={handleDesktopThemeToggle}
+          >
+            {actualDesktopTheme === "light" ? (
+              <MoonIcon className="size-4" />
+            ) : (
+              <SunIcon className="size-4" />
+            )}
+          </button>
+          <div
+            data-slot="desktop-action-toolbar"
+            data-toolbar-appearance="desktop-glass"
+            className="inline-flex min-h-14 items-center gap-1 rounded-full border border-white/[0.12] bg-black/55 px-3 py-1.5 text-white/72 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
+          >
+            <button
+              aria-label="Reset defaults"
+              className="grid size-8 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
+              disabled={!controller?.onResetDefaults}
+              type="button"
+              onClick={controller?.onResetDefaults}
+            >
+              <RotateCcwIcon className="size-4" />
+            </button>
+            <button
+              aria-label="Undo"
+              className="grid size-8 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
+              disabled={!controller?.canUndo || !controller.onUndo}
+              type="button"
+              onClick={controller?.onUndo}
+            >
+              <Undo2Icon className="size-4" />
+            </button>
+            <button
+              aria-label="Redo"
+              className="grid size-8 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
+              disabled={!controller?.canRedo || !controller.onRedo}
+              type="button"
+              onClick={controller?.onRedo}
+            >
+              <Redo2Icon className="size-4" />
+            </button>
+          </div>
+        </div>
         <nav
           aria-label="Desktop tools"
           data-slot="desktop-floating-toolbar"
-          className="fixed bottom-5 left-5 top-5 z-20 flex w-14 flex-col items-center justify-start gap-1.5 overflow-y-auto rounded-full border border-white/[0.12] bg-black/55 p-1.5 text-white/72 shadow-[0_22px_55px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl max-md:bottom-4 max-md:left-3 max-md:top-4 max-md:w-12 max-md:p-1"
+          className="fixed bottom-5 left-5 top-5 z-[25] flex w-14 flex-col items-center justify-start gap-1.5 overflow-y-auto rounded-full border border-white/[0.12] bg-black/55 p-1.5 text-white/72 shadow-[0_22px_55px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl max-md:bottom-4 max-md:left-3 max-md:top-4 max-md:w-12 max-md:p-1"
         >
           {DESKTOP_TOOLBAR_TOOLS.map((tool, index) => {
             const isActive = actualActiveTool === tool.id
@@ -1106,12 +1139,14 @@ export function DesktopToolbarPrototype({
               />
             ) : actualActiveTool === "pattern" ? (
               <DesktopPatternInspector
+                desktopTheme={actualDesktopTheme}
                 settings={actualPatternSettings}
                 onPatternReset={controller?.onPatternReset ?? (() => setPatternSettings(DEFAULT_DESKTOP_PATTERN_SETTINGS))}
                 onPatternSettingsChange={onPatternSettingsChange}
               />
             ) : actualActiveTool === "corners" ? (
               <DesktopCornersInspector
+                desktopTheme={actualDesktopTheme}
                 settings={actualCornersSettings}
                 onCornersReset={controller?.onCornersReset ?? (() => setCornersSettings(DEFAULT_DESKTOP_CORNERS_SETTINGS))}
                 onCornersSettingsChange={onCornersSettingsChange}
@@ -1124,6 +1159,7 @@ export function DesktopToolbarPrototype({
               />
             ) : actualActiveTool === "shape" ? (
               <DesktopShapeInspector
+                desktopTheme={actualDesktopTheme}
                 settings={actualShapeSettings}
                 onShapeReset={controller?.onShapeReset ?? (() => setShapeSettings(DEFAULT_DESKTOP_SHAPE_SETTINGS))}
                 onShapeSettingsChange={onShapeSettingsChange}
@@ -1196,7 +1232,8 @@ function DesktopThemeStyles() {
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"],
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"],
-      [data-desktop-theme="light"] [data-slot="desktop-theme-toggle"] {
+      [data-desktop-theme="light"] [data-slot="desktop-theme-toggle"],
+      [data-desktop-theme="light"] [data-slot="desktop-action-toolbar"] {
         background: rgba(255, 255, 255, 0.72) !important;
         border-color: rgba(15, 23, 42, 0.12) !important;
         color: rgba(15, 23, 42, 0.68) !important;
@@ -1204,8 +1241,9 @@ function DesktopThemeStyles() {
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] button:hover,
-      [data-desktop-theme="light"] [data-slot="desktop-theme-toggle"]:hover {
-        background: rgba(15, 23, 42, 0.07) !important;
+      [data-desktop-theme="light"] [data-slot="desktop-theme-toggle"]:hover,
+      [data-desktop-theme="light"] [data-slot="desktop-action-toolbar"] button:hover {
+        background: rgba(15, 23, 42, 0.08) !important;
         color: rgba(15, 23, 42, 0.92) !important;
       }
 
@@ -1236,9 +1274,21 @@ function DesktopThemeStyles() {
         color: white !important;
       }
 
+      [data-slot="desktop-floating-inspector"] [data-desktop-shape-option-preview="true"] {
+        background: rgba(0, 0, 0, 0.88) !important;
+        border-color: rgba(255, 255, 255, 0.18) !important;
+        color: #f8fafc !important;
+      }
+
       [data-desktop-theme="light"] [data-slot="desktop-style-preview-surface"] {
         background: rgba(255, 255, 255, 0.48) !important;
         border-color: rgba(15, 23, 42, 0.11) !important;
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [data-desktop-shape-option-preview="true"] {
+        background: rgba(255, 255, 255, 0.86) !important;
+        border-color: rgba(15, 23, 42, 0.14) !important;
+        color: #18181b !important;
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-style-preview-surface"] svg {
@@ -1342,6 +1392,36 @@ function DesktopThemeStyles() {
         background: transparent !important;
         border-top-color: rgba(15, 23, 42, 0.1) !important;
       }
+
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [data-desktop-shape-option-preview="true"] {
+        background: rgba(255, 255, 255, 0.86) !important;
+        border-color: rgba(15, 23, 42, 0.14) !important;
+        color: #18181b !important;
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [data-desktop-shape-option-preview="true"] svg {
+        color: #18181b !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] [data-desktop-adaptive-option-preview="true"] {
+        background: rgba(0, 0, 0, 0.88) !important;
+        border-color: rgba(255, 255, 255, 0.18) !important;
+        color: #f8fafc !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] [data-desktop-adaptive-option-preview="true"] svg {
+        color: #f8fafc !important;
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [data-desktop-adaptive-option-preview="true"] {
+        background: rgba(255, 255, 255, 0.86) !important;
+        border-color: rgba(15, 23, 42, 0.14) !important;
+        color: #18181b !important;
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [data-desktop-adaptive-option-preview="true"] svg {
+        color: #18181b !important;
+      }
     `}</style>
   )
 }
@@ -1378,6 +1458,14 @@ function DesktopInspectorFooter({
       </button>
     </div>
   )
+}
+
+function getDesktopAdaptiveOptionPreviewStyle(desktopTheme: DesktopThemeMode): CSSProperties {
+  return {
+    backgroundColor: desktopTheme === "light" ? "rgba(255, 255, 255, 0.86)" : "rgba(0, 0, 0, 0.88)",
+    borderColor: desktopTheme === "light" ? "rgba(15, 23, 42, 0.14)" : "rgba(255, 255, 255, 0.18)",
+    color: desktopTheme === "light" ? "#18181b" : "#f8fafc",
+  }
 }
 
 function DesktopLogoInspector({
@@ -1632,10 +1720,12 @@ function DesktopBrandIconButton({
 }
 
 function DesktopCornersInspector({
+  desktopTheme,
   onCornersReset,
   onCornersSettingsChange,
   settings,
 }: {
+  desktopTheme: DesktopThemeMode
   onCornersReset: () => void
   onCornersSettingsChange: (patch: Partial<DesktopCornersSettings>) => void
   settings: DesktopCornersSettings
@@ -1660,6 +1750,7 @@ function DesktopCornersInspector({
               >
                 {CORNER_SQUARE_STYLE_OPTIONS.map((option) => (
                   <DesktopCornerStyleButton
+                    desktopTheme={desktopTheme}
                     key={option.value}
                     label={option.label}
                     previewKind="corner-square"
@@ -1701,6 +1792,7 @@ function DesktopCornersInspector({
               >
                 {CORNER_DOT_STYLE_OPTIONS.map((option) => (
                   <DesktopCornerStyleButton
+                    desktopTheme={desktopTheme}
                     key={option.value}
                     label={option.label}
                     previewKind="corner-dot"
@@ -1882,6 +1974,7 @@ function DesktopCornerColorPreview({
 }
 
 function DesktopCornerStyleButton({
+  desktopTheme,
   label,
   onClick,
   previewKind,
@@ -1889,6 +1982,7 @@ function DesktopCornerStyleButton({
   target,
   value,
 }: {
+  desktopTheme: DesktopThemeMode
   label: string
   onClick: () => void
   previewKind: Extract<StylePreviewKind, "corner-dot" | "corner-square">
@@ -1897,26 +1991,34 @@ function DesktopCornerStyleButton({
   value: CornerDotType | CornerSquareType
 }) {
   return (
-    <button
-      aria-label={`Use ${label} ${target}`}
-      aria-pressed={selected}
-      data-desktop-preview-option="true"
-      className={cn(
-        "relative min-w-0 rounded-[7px] border border-white/[0.08] bg-white/[0.055] p-1.5 text-left transition hover:bg-white/[0.1]",
-        selected && "border-black bg-white/[0.08] p-2",
-      )}
-      type="button"
-      onClick={onClick}
-    >
-      <span
-        data-slot="desktop-style-preview-surface"
-        className="grid h-12 w-full place-items-center overflow-hidden rounded-[6px] border border-white/[0.1] bg-[#15161a] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
+    <div className="group flex min-w-0 flex-col gap-1.5">
+      <button
+        aria-label={`Use ${label} ${target}`}
+        aria-pressed={selected}
+        data-desktop-preview-option="true"
+        className="relative aspect-square w-full min-w-0 rounded-[7px] p-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
+        type="button"
+        onClick={onClick}
       >
-        <span className="grid size-14 place-items-center [&_svg]:size-14 [&_svg]:text-white">
-          <StylePreview previewKind={previewKind} value={value} />
+        <span
+          aria-hidden="true"
+          data-desktop-adaptive-option-preview="true"
+          data-slot="desktop-style-preview-surface"
+          className={cn(
+            "grid size-full place-items-center overflow-hidden rounded-[6px] border border-white/[0.1] bg-[#15161a] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition group-hover:brightness-110",
+            selected && "border-black",
+          )}
+          style={getDesktopAdaptiveOptionPreviewStyle(desktopTheme)}
+        >
+          <span className="grid size-[62%] place-items-center [&_svg]:size-full [&_svg]:text-current">
+            <StylePreview previewKind={previewKind} value={value} />
+          </span>
         </span>
+      </button>
+      <span className="block w-full truncate px-0.5 text-center text-[10px] font-semibold text-white/72">
+        {label}
       </span>
-    </button>
+    </div>
   )
 }
 
@@ -1940,10 +2042,12 @@ function getDesktopCornerColorPreviewBackground({
 }
 
 function DesktopShapeInspector({
+  desktopTheme,
   onShapeReset,
   onShapeSettingsChange,
   settings,
 }: {
+  desktopTheme: DesktopThemeMode
   onShapeReset: () => void
   onShapeSettingsChange: (patch: Partial<DesktopShapeSettings>) => void
   settings: DesktopShapeSettings
@@ -1966,17 +2070,19 @@ function DesktopShapeInspector({
           <div
             aria-label="Shape options"
             data-slot="desktop-shape-preset-shelf"
-            className="grid max-h-64 grid-cols-2 gap-2 overflow-y-auto pr-1"
+            className="grid max-h-64 grid-cols-3 gap-2 overflow-y-auto pr-1"
           >
-            <DesktopShapePresetButton
-              label="None"
-              selected={settings.backgroundShapeId === "none"}
-              settings={settings}
+              <DesktopShapePresetButton
+                desktopTheme={desktopTheme}
+                label="None"
+                selected={settings.backgroundShapeId === "none"}
+                settings={settings}
               shapeId="none"
               onClick={() => onShapeSettingsChange({ backgroundShapeId: "none" })}
             />
             {QR_BACKGROUND_SHAPES.map((shape) => (
               <DesktopShapePresetButton
+                desktopTheme={desktopTheme}
                 key={shape.id}
                 label={shape.label}
                 selected={settings.backgroundShapeId === shape.id}
@@ -2234,12 +2340,14 @@ function DesktopShapeInspector({
 }
 
 function DesktopShapePresetButton({
+  desktopTheme,
   label,
   onClick,
   selected,
   settings,
   shapeId,
 }: {
+  desktopTheme: DesktopThemeMode
   label: string
   onClick: () => void
   selected: boolean
@@ -2247,38 +2355,50 @@ function DesktopShapePresetButton({
   shapeId: QrBackgroundShapeId
 }) {
   return (
-    <button
-      aria-label={`Use ${label} shape`}
-      aria-pressed={selected}
-      data-desktop-preview-option="true"
-      className={cn(
-        "relative min-w-0 rounded-[7px] border border-white/[0.08] bg-white/[0.055] p-1.5 text-left transition hover:bg-white/[0.1]",
-        selected && "border-black bg-white/[0.08] p-2",
-      )}
-      type="button"
-      onClick={onClick}
-    >
-      <DesktopShapePreview
-        label={label}
-        settings={settings}
-        shapeId={shapeId}
-        className="h-12 w-full rounded-[6px]"
-      />
-      <span className="mt-1.5 block truncate text-[10px] font-semibold text-white/72">
+    <div className="group flex min-w-0 flex-col gap-1.5">
+      <button
+        aria-label={`Use ${label} shape`}
+        aria-pressed={selected}
+        data-desktop-preview-option="true"
+        className="relative aspect-square w-full min-w-0 rounded-[7px] p-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
+        type="button"
+        onClick={onClick}
+      >
+        <DesktopShapePreview
+          fillOverride="currentColor"
+          label={label}
+          previewStyle={{
+            backgroundColor: desktopTheme === "light" ? "rgba(255, 255, 255, 0.86)" : "rgba(0, 0, 0, 0.88)",
+            borderColor: desktopTheme === "light" ? "rgba(15, 23, 42, 0.14)" : "rgba(255, 255, 255, 0.18)",
+            color: desktopTheme === "light" ? "#18181b" : "#f8fafc",
+          }}
+          settings={settings}
+          shapeId={shapeId}
+          className={cn(
+            "size-full rounded-[6px] transition group-hover:bg-white/[0.1]",
+            selected && "border-black bg-white/[0.08]",
+          )}
+        />
+      </button>
+      <span className="block w-full truncate px-0.5 text-center text-[10px] font-semibold text-white/72">
         {label}
       </span>
-    </button>
+    </div>
   )
 }
 
 function DesktopShapePreview({
   className,
+  fillOverride,
   label,
+  previewStyle,
   settings,
   shapeId,
 }: {
   className?: string
+  fillOverride?: string
   label: string
+  previewStyle?: CSSProperties
   settings: DesktopShapeSettings
   shapeId: QrBackgroundShapeId
 }) {
@@ -2286,20 +2406,22 @@ function DesktopShapePreview({
   const shape = shapeId === "none" ? null : QR_BACKGROUND_SHAPES.find((item) => item.id === shapeId)
   const gradientId = shape ? `desktop-shape-preview-${shape.id}-${previewId}` : undefined
   const gradientFill = gradientId ? `url(#${gradientId})` : undefined
-  const shapeFill = settings.shapeColorMode === "gradient" ? gradientFill : settings.shapeSolidColor
+  const shapeFill = fillOverride ?? (settings.shapeColorMode === "gradient" ? gradientFill : settings.shapeSolidColor)
 
   return (
     <span
       aria-hidden="true"
+      data-desktop-shape-option-preview={fillOverride ? "true" : undefined}
       data-slot="desktop-style-preview-surface"
       className={cn(
         "grid place-items-center overflow-hidden border border-white/[0.1] bg-[#15161a] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]",
         className,
       )}
+      style={previewStyle}
     >
       {shape ? (
         <svg
-          className="size-[96%]"
+          className="size-[62%]"
           fill="none"
           viewBox={`0 0 ${shape.viewBox.width} ${shape.viewBox.height}`}
           xmlns="http://www.w3.org/2000/svg"
@@ -2678,41 +2800,47 @@ function DesktopContentInspector({
 
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
         <div>
-          <div className="flex min-w-0 items-center gap-2">
-            <label className="sr-only" htmlFor="desktop-content-collection">
-              QR type collection
-            </label>
-            <div className="relative min-w-0 flex-1">
-              <select
-                id="desktop-content-collection"
-                className="h-8 w-full appearance-none rounded-[6px] border border-white/[0.1] bg-white/[0.08] px-2.5 pr-7 text-[12px] font-semibold text-white outline-none transition focus:border-white/45"
-                value={collectionId}
-                onChange={(event) =>
-                  setCollectionId(event.currentTarget.value as DesktopContentCollectionId)
-                }
-              >
-                <option value="all">All QR Types</option>
-                {DESKTOP_CONTENT_COLLECTIONS.map((collection) => (
-                  <option key={collection.id} value={collection.id}>
-                    {collection.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDownIcon className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-white/55" />
-            </div>
-            <div className="relative h-8 w-24 shrink-0">
+          <div className="min-w-0">
+            <div className="relative h-9 w-full">
               <SearchIcon className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-white/45" />
               <input
                 aria-label="Search QR types"
-                className="h-full w-full rounded-[6px] border border-white/[0.1] bg-white/[0.08] pl-7 pr-2 text-[12px] text-white outline-none placeholder:text-white/35 focus:border-white/45"
+                className="h-full w-full rounded-[7px] border border-white/[0.1] bg-white/[0.08] pl-7 pr-3 text-[12px] text-white outline-none placeholder:text-white/35 focus:border-white/45"
                 placeholder="Search"
                 value={query}
                 onChange={(event) => setQuery(event.currentTarget.value)}
               />
             </div>
+
+            <div
+              aria-label="QR type filters"
+              className="mt-2 flex min-w-0 flex-wrap gap-1.5"
+              data-slot="desktop-content-type-filters"
+            >
+              {[{ id: "all" as DesktopContentCollectionId, label: "All QR Types" }, ...DESKTOP_CONTENT_COLLECTIONS].map(
+                (collection) => {
+                  const selected = collectionId === collection.id
+
+                  return (
+                    <button
+                      key={collection.id}
+                      aria-pressed={selected}
+                      className={cn(
+                        "h-7 rounded-full border border-white/[0.09] bg-black/22 px-2.5 text-[10px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
+                        selected && "border-[#ff3b68]/70 bg-[#ff3b68] text-white",
+                      )}
+                      type="button"
+                      onClick={() => setCollectionId(collection.id)}
+                    >
+                      {collection.label}
+                    </button>
+                  )
+                },
+              )}
+            </div>
           </div>
 
-          <div className="mt-2 grid max-h-36 grid-cols-3 gap-1.5 overflow-y-auto pr-1" data-slot="desktop-content-type-collection">
+          <div className="mt-4 grid max-h-36 grid-cols-3 gap-1.5 overflow-y-auto pr-1" data-slot="desktop-content-type-collection">
             {visibleTypes.map((type) => {
             const option = QR_INPUT_OPTIONS[type]
             const Icon = option.icon
@@ -2792,60 +2920,42 @@ function DesktopContentInspector({
 }
 
 function DesktopPatternInspector({
+  desktopTheme,
   onPatternReset,
   onPatternSettingsChange,
   settings,
 }: {
+  desktopTheme: DesktopThemeMode
   onPatternReset: () => void
   onPatternSettingsChange: (patch: Partial<DesktopPatternSettings>) => void
   settings: DesktopPatternSettings
 }) {
-  const [collectionId, setCollectionId] = useState<DesktopPatternCollectionId>("pattern")
-
   return (
     <div data-slot="desktop-pattern-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Pattern" />
 
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
-        <div className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-2.5">
-          <label className="sr-only" htmlFor="desktop-pattern-collection">
-            Pattern section
-          </label>
-          <div className="relative">
-            <select
-              id="desktop-pattern-collection"
-              className="h-8 w-full appearance-none rounded-[6px] border border-white/[0.1] bg-white/[0.08] px-2.5 pr-7 text-[12px] font-semibold text-white outline-none transition focus:border-white/45"
-              value={collectionId}
-              onChange={(event) =>
-                setCollectionId(event.currentTarget.value as DesktopPatternCollectionId)
-              }
-            >
-              {DESKTOP_PATTERN_COLLECTIONS.map((collection) => (
-                <option key={collection.id} value={collection.id}>
-                  {collection.label}
-                </option>
-              ))}
-            </select>
-            <ChevronDownIcon className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-white/55" />
+        <section className="p-0">
+          <div className="mb-2 min-w-0">
+            <p className="truncate text-[12px] font-semibold text-white">Module Pattern</p>
           </div>
-
           <div
             aria-label="Module pattern presets"
             data-slot="desktop-pattern-preset-shelf"
-            className="mt-3 grid grid-cols-3 gap-2"
+            className="grid grid-cols-3 gap-2"
           >
             {DOT_STYLE_OPTIONS.map((option) => (
               <DesktopModulePatternButton
+                desktopTheme={desktopTheme}
                 key={option.value}
                 label={option.label}
                 selected={settings.qrDotType === option.value}
-                small
                 value={option.value}
                 onClick={() => onPatternSettingsChange({ qrDotType: option.value })}
               />
             ))}
           </div>
-        </div>
+        </section>
 
         <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
           <div className="mb-3 flex min-w-0 items-center gap-3">
@@ -2966,54 +3076,65 @@ function DesktopPatternInspector({
 }
 
 function DesktopModulePatternButton({
+  desktopTheme,
   label,
   onClick,
   selected,
-  small = false,
   value,
 }: {
+  desktopTheme: DesktopThemeMode
   label: string
   onClick: () => void
   selected: boolean
-  small?: boolean
   value: StudioDotType
 }) {
   return (
-    <button
-      aria-label={`Use ${label} pattern`}
-      aria-pressed={selected}
-      data-desktop-preview-option="true"
-      className={cn(
-        "relative min-w-0 rounded-[7px] border border-white/[0.08] bg-white/[0.055] p-1.5 text-left transition hover:bg-white/[0.1]",
-        selected && "border-black bg-white/[0.08] p-2",
-      )}
-      type="button"
-      onClick={onClick}
-    >
-      <DesktopQrDotPreview
-        value={value}
-        className={cn("w-full rounded-[6px]", small ? "h-11" : "h-14")}
-      />
-      {!small ? (
-        <span className="mt-1.5 block truncate text-[11px] font-semibold text-white/78">
-          {label}
-        </span>
-      ) : null}
-    </button>
+    <div className="group flex min-w-0 flex-col gap-1.5">
+      <button
+        aria-label={`Use ${label} pattern`}
+        aria-pressed={selected}
+        data-desktop-preview-option="true"
+        className="relative aspect-square w-full min-w-0 rounded-[7px] p-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
+        type="button"
+        onClick={onClick}
+      >
+        <DesktopQrDotPreview
+          value={value}
+          className={cn(
+            "size-full rounded-[6px] transition group-hover:brightness-110",
+            selected && "border-black",
+          )}
+          style={getDesktopAdaptiveOptionPreviewStyle(desktopTheme)}
+        />
+      </button>
+      <span className="block w-full truncate px-0.5 text-center text-[10px] font-semibold text-white/72">
+        {label}
+      </span>
+    </div>
   )
 }
 
-function DesktopQrDotPreview({ className, value }: { className?: string; value: StudioDotType }) {
+function DesktopQrDotPreview({
+  className,
+  style,
+  value,
+}: {
+  className?: string
+  style?: CSSProperties
+  value: StudioDotType
+}) {
   return (
     <span
       aria-hidden="true"
+      data-desktop-adaptive-option-preview="true"
       data-slot="desktop-style-preview-surface"
       className={cn(
         "grid place-items-center overflow-hidden border border-white/[0.1] bg-[#15161a] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]",
         className,
       )}
+      style={style}
     >
-      <span className="grid size-16 place-items-center [&_svg]:size-16 [&_svg]:text-white">
+      <span className="grid size-[62%] place-items-center [&_svg]:size-full [&_svg]:text-current">
         <StylePreview previewKind="dots" value={value} />
       </span>
     </span>

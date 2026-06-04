@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 
+import { readFileSync } from "node:fs"
+import { resolve } from "node:path"
 import { createRoot } from "react-dom/client"
-import { act } from "react"
+import { act, type ComponentProps } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { createDefaultDraftingCardState } from "@/components/new/drafting-card-state"
@@ -271,8 +273,23 @@ describe("DraftingPaneWorkspace", () => {
     expect(disabledSnapButton?.getAttribute("aria-pressed")).toBe("false")
   })
 
-  it("pans the active preview by dragging empty canvas space", async () => {
-    const workspace = renderWorkspace({ paneCount: 1 })
+  it("does not pan empty canvas space while the select tool is active", async () => {
+    const workspace = renderWorkspace({ activeCanvasTool: "select", paneCount: 1 })
+    const [pane] = getPaneSurfaces(workspace.container, 1)
+    const viewport = pane.firstElementChild as HTMLElement
+
+    await act(async () => {
+      pane.dispatchEvent(createPointerEvent("pointerdown", 100, 120))
+      pane.dispatchEvent(createPointerEvent("pointermove", 140, 145))
+      pane.dispatchEvent(createPointerEvent("pointerup", 140, 145))
+      await flushPromises()
+    })
+
+    expect(viewport.style.transform).toBe("translate3d(0px, 0px, 0) scale(1)")
+  })
+
+  it("pans the active preview by dragging empty canvas space with the pan tool", async () => {
+    const workspace = renderWorkspace({ activeCanvasTool: "pan", paneCount: 1 })
     const [pane] = getPaneSurfaces(workspace.container, 1)
     const viewport = pane.firstElementChild as HTMLElement
 
@@ -315,6 +332,72 @@ describe("DraftingPaneWorkspace", () => {
     expect(viewport.style.transform).toBe("translate3d(0px, 0px, 0) scale(1)")
   })
 
+  it("pans when dragging a layer with the pan tool active", async () => {
+    const workspace = renderWorkspace({ activeCanvasTool: "pan", paneCount: 1 })
+    const [pane] = getPaneSurfaces(workspace.container, 1)
+    const viewport = pane.firstElementChild as HTMLElement
+    const panOverlay = pane.querySelector('[data-slot="drafting-pan-overlay"]')
+
+    await act(async () => {
+      panOverlay?.dispatchEvent(createPointerEvent("pointerdown", 100, 120))
+      panOverlay?.dispatchEvent(createPointerEvent("pointermove", 140, 145))
+      panOverlay?.dispatchEvent(createPointerEvent("pointerup", 140, 145))
+      await flushPromises()
+    })
+
+    expect(viewport.style.transform).toBe("translate3d(40px, 25px, 0) scale(1)")
+  })
+
+  it("shows a text cursor overlay above layer resize cursors while placing text", async () => {
+    const onAddTextLayerAt = vi.fn()
+    const onCanvasToolChange = vi.fn()
+    const panes = createPanes(1)
+    const workspace = renderWorkspace({
+      activeCanvasTool: "text",
+      onAddTextLayerAt,
+      onCanvasToolChange,
+      panes,
+      selectedLayerId: "preview:qr",
+      selectedLayerIds: ["preview:qr"],
+      toolbarVariant: "desktop-zoom",
+    })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    const pane = getPaneSurfaces(workspace.container, 1)[0]
+    const overlay = pane.querySelector('[data-slot="drafting-text-placement-overlay"]')
+
+    expect(overlay).not.toBeNull()
+    expect(overlay?.className).toContain("cursor-text")
+    expect(overlay?.className).toContain("z-[40]")
+    expect(
+      pane.querySelector('[data-slot="drafting-layer-resize-handle"]')?.className,
+    ).toContain("cursor-")
+    expect(
+      workspace.container.querySelector('[data-slot="dashboard-compose-toolbar"]')?.parentElement
+        ?.className,
+    ).toContain("z-[60]")
+    expect(
+      workspace.container.querySelector('[data-slot="desktop-resize-toolbar"]')?.parentElement
+        ?.className,
+    ).toContain("z-[60]")
+
+    await act(async () => {
+      overlay?.dispatchEvent(new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        clientX: 100,
+        clientY: 120,
+      }))
+      await flushPromises()
+    })
+
+    expect(onAddTextLayerAt).toHaveBeenCalledWith("pane-1", { x: 100, y: 120 })
+    expect(onCanvasToolChange).toHaveBeenCalledWith(null)
+  })
+
   it("renders disabled undo and redo controls when history is unavailable", () => {
     const workspace = renderWorkspace()
     const undoButton = workspace.container.querySelector(
@@ -352,26 +435,250 @@ describe("DraftingPaneWorkspace", () => {
     expect(onUndo).toHaveBeenCalledTimes(1)
     expect(onRedo).toHaveBeenCalledTimes(1)
   })
+
+  it("omits undo and redo from the bottom toolbar in desktop zoom mode", () => {
+    const workspace = renderWorkspace({
+      canRedo: true,
+      canUndo: true,
+      onRedo: vi.fn(),
+      onUndo: vi.fn(),
+      toolbarVariant: "desktop-zoom",
+    })
+    const bottomToolbar = workspace.container.querySelector('[data-slot="dashboard-compose-toolbar"]')
+
+    expect(bottomToolbar?.querySelector('button[aria-label="Undo"]')).toBeNull()
+    expect(bottomToolbar?.querySelector('button[aria-label="Redo"]')).toBeNull()
+  })
+
+  it("orders desktop bottom toolbar controls by interaction, view, creation, and layer details", () => {
+    const workspace = renderWorkspace({
+      desktopLayerToolbarControls: {
+        layer: {
+          blur: 0,
+          id: "pane-1:qr",
+          isLocked: false,
+          isVisible: true,
+          name: "QR code",
+          opacity: 1,
+          shadowBlur: 0,
+          shadowColor: "#000000",
+          shadowOffsetX: 0,
+          shadowOffsetY: 0,
+          shadowOpacity: 0,
+        },
+        onLayerChange: vi.fn(),
+      },
+      onAddQrCode: vi.fn(),
+      onAddTextLayerAt: vi.fn(),
+      paneCount: 1,
+      toolbarVariant: "desktop-zoom",
+    })
+    const bottomToolbar = workspace.container.querySelector('[data-slot="dashboard-compose-toolbar"]')
+
+    expect(bottomToolbar?.className).toContain("gap-1.5")
+    expect(bottomToolbar?.className).toContain("px-2.5")
+    expect(
+      Array.from(bottomToolbar?.children ?? []).filter((child) =>
+        String((child as HTMLElement).className).includes("w-px"),
+      ),
+    ).toHaveLength(0)
+    expect(
+      Array.from(bottomToolbar?.querySelectorAll("button") ?? []).every((button) =>
+        String(button.className).includes("w-8") || String(button.className).includes("size-8"),
+      ),
+    ).toBe(true)
+    expect(Array.from(bottomToolbar?.querySelectorAll("button") ?? []).map((button) => button.getAttribute("aria-label"))).toEqual([
+      "Select and move elements",
+      "Pan canvas",
+      "Disable snapping",
+      "Hide canvas grid",
+      "Add text on canvas",
+      "Add QR code",
+      "Layer appearance",
+    ])
+  })
+
+  it("renders desktop select and pan tool buttons and wires mode changes", () => {
+    const onCanvasToolChange = vi.fn()
+    const workspace = renderWorkspace({
+      activeCanvasTool: "pan",
+      onCanvasToolChange,
+      toolbarVariant: "desktop-zoom",
+    })
+    const selectButton = workspace.container.querySelector(
+      'button[aria-label="Select and move elements"]',
+    ) as HTMLButtonElement | null
+    const panButton = workspace.container.querySelector(
+      'button[aria-label="Pan canvas"]',
+    ) as HTMLButtonElement | null
+
+    expect(selectButton).not.toBeNull()
+    expect(panButton).not.toBeNull()
+    expect(
+      workspace.container.querySelector('[data-slot="dashboard-compose-toolbar"]')?.parentElement
+        ?.className,
+    ).toContain("z-[60]")
+    expect(selectButton?.getAttribute("aria-pressed")).toBe("false")
+    expect(panButton?.getAttribute("aria-pressed")).toBe("true")
+    expect(
+      workspace.container.querySelector('[data-slot="drafting-pan-overlay"]')?.className,
+    ).toContain("z-[1]")
+
+    act(() => {
+      selectButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+      panButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    expect(onCanvasToolChange).toHaveBeenNthCalledWith(1, "select")
+    expect(onCanvasToolChange).toHaveBeenNthCalledWith(2, "pan")
+  })
+
+  it("toggles the desktop canvas dot grid from the main toolbar", () => {
+    const onCanvasGridChange = vi.fn()
+    const workspace = renderWorkspace({
+      onCanvasGridChange,
+      showCanvasGrid: true,
+      toolbarVariant: "desktop-zoom",
+    })
+    const pane = getPaneSurfaces(workspace.container, 2)[0]
+    const gridButton = workspace.container.querySelector(
+      'button[aria-label="Hide canvas grid"]',
+    ) as HTMLButtonElement | null
+
+    expect(gridButton).not.toBeNull()
+    expect(gridButton?.getAttribute("aria-pressed")).toBe("true")
+    expect(pane?.getAttribute("data-grid-visible")).toBe("true")
+    expect(pane?.style.backgroundImage).toContain("radial-gradient(circle")
+    expect(pane?.style.backgroundImage).toContain("var(--drafting-canvas-dot-rgb)")
+
+    act(() => {
+      gridButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    expect(onCanvasGridChange).toHaveBeenCalledWith(false)
+  })
+
+  it("hides the canvas dot grid when the desktop grid setting is off", () => {
+    const workspace = renderWorkspace({
+      showCanvasGrid: false,
+      toolbarVariant: "desktop-zoom",
+    })
+    const pane = getPaneSurfaces(workspace.container, 2)[0]
+
+    expect(workspace.container.querySelector('button[aria-label="Show canvas grid"]')).not.toBeNull()
+    expect(pane?.getAttribute("data-grid-visible")).toBe("false")
+    expect(pane?.style.backgroundImage).toBe("none")
+  })
+
+  it("keeps the canvas grid toggle out of the non-desktop toolbar", () => {
+    const workspace = renderWorkspace()
+
+    expect(workspace.container.querySelector('button[aria-label="Hide canvas grid"]')).toBeNull()
+    expect(workspace.container.querySelector('button[aria-label="Show canvas grid"]')).toBeNull()
+  })
+
+  it("keeps the desktop layer appearance control free of active scale motion", () => {
+    const source = readFileSync(
+      resolve(process.cwd(), "components/new/drafting-pane-workspace.tsx"),
+      "utf8",
+    )
+
+    expect(source).toContain('aria-label="Layer appearance"')
+    expect(source).not.toContain("active:scale-95")
+  })
+
+  it("hides selected layer chrome while the pan tool is active", async () => {
+    const panes = createPanes(1)
+    const unselectedWorkspace = renderWorkspace({ activeCanvasTool: "select", panes })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    const selectedLayerId = getQrNodes(unselectedWorkspace.container)[0]?.getAttribute("data-layer-id")
+
+    expect(selectedLayerId).toBeTruthy()
+
+    const selectWorkspace = renderWorkspace({
+      activeCanvasTool: "select",
+      panes,
+      selectedLayerId,
+      selectedLayerIds: selectedLayerId ? [selectedLayerId] : [],
+    })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    expect(
+      selectWorkspace.container.querySelector('[data-slot="drafting-layer-resize-frame"]'),
+    ).not.toBeNull()
+    expect(
+      selectWorkspace.container.querySelector('[data-slot="drafting-layer-floating-toolbar"]'),
+    ).not.toBeNull()
+
+    const panWorkspace = renderWorkspace({
+      activeCanvasTool: "pan",
+      panes,
+      selectedLayerId,
+      selectedLayerIds: selectedLayerId ? [selectedLayerId] : [],
+    })
+
+    await act(async () => {
+      await flushPromises()
+    })
+
+    expect(
+      panWorkspace.container.querySelector('[data-slot="drafting-layer-resize-frame"]'),
+    ).toBeNull()
+    expect(
+      panWorkspace.container.querySelector('[data-slot="drafting-layer-floating-toolbar"]'),
+    ).toBeNull()
+    expect(
+      panWorkspace.container.querySelector('[data-slot="drafting-layer-size-value"]'),
+    ).toBeNull()
+    expect(panWorkspace.container.querySelector('[data-slot="drafting-pan-overlay"]')).not.toBeNull()
+  })
 })
 
 function renderWorkspace({
+  activeCanvasTool,
   canRedo,
   canUndo,
+  onCanvasToolChange,
+  onCanvasGridChange,
   onRedo,
+  onAddTextLayerAt,
+  onAddQrCode,
+  desktopLayerToolbarControls,
   onLayerSelect,
   onSwapPanes = vi.fn(),
   onUndo,
   paneCount = 2,
   panes = createPanes(paneCount),
+  selectedLayerId,
+  selectedLayerIds,
+  showCanvasGrid,
+  toolbarVariant,
 }: {
+  activeCanvasTool?: ComponentProps<typeof DraftingPaneWorkspace>["activeCanvasTool"]
   canRedo?: boolean
   canUndo?: boolean
+  onCanvasToolChange?: ComponentProps<typeof DraftingPaneWorkspace>["onCanvasToolChange"]
+  onCanvasGridChange?: ComponentProps<typeof DraftingPaneWorkspace>["onCanvasGridChange"]
   onRedo?: () => void
+  onAddTextLayerAt?: ComponentProps<typeof DraftingPaneWorkspace>["onAddTextLayerAt"]
+  onAddQrCode?: ComponentProps<typeof DraftingPaneWorkspace>["onAddQrCode"]
+  desktopLayerToolbarControls?: ComponentProps<typeof DraftingPaneWorkspace>["desktopLayerToolbarControls"]
   onLayerSelect?: (paneId: string, layerId: string | null) => void
   onSwapPanes?: (sourcePaneId: string, targetPaneId: string) => void
   onUndo?: () => void
   paneCount?: number
   panes?: ReturnType<typeof createPanes>
+  selectedLayerId?: ComponentProps<typeof DraftingPaneWorkspace>["selectedLayerId"]
+  selectedLayerIds?: ComponentProps<typeof DraftingPaneWorkspace>["selectedLayerIds"]
+  showCanvasGrid?: ComponentProps<typeof DraftingPaneWorkspace>["showCanvasGrid"]
+  toolbarVariant?: ComponentProps<typeof DraftingPaneWorkspace>["toolbarVariant"]
 } = {}) {
   const container = document.createElement("div")
   const root = createRoot(container)
@@ -380,16 +687,25 @@ function renderWorkspace({
     root.render(
       <DraftingPaneWorkspace
         activePaneId="pane-1"
+        activeCanvasTool={activeCanvasTool}
         canRedo={canRedo}
         canUndo={canUndo}
+        desktopLayerToolbarControls={desktopLayerToolbarControls}
         onRedo={onRedo}
         onPaneQrClick={() => undefined}
         onPaneSelect={() => undefined}
         onLayerSelect={onLayerSelect}
-        onReset={() => undefined}
+        onCanvasGridChange={onCanvasGridChange}
+        onCanvasToolChange={onCanvasToolChange}
+        onAddQrCode={onAddQrCode}
+        onAddTextLayerAt={onAddTextLayerAt}
         onSwapPanes={onSwapPanes}
         onUndo={onUndo}
         panes={nextPanes}
+        selectedLayerId={selectedLayerId}
+        selectedLayerIds={selectedLayerIds}
+        showCanvasGrid={showCanvasGrid}
+        toolbarVariant={toolbarVariant}
       />,
     )
   }

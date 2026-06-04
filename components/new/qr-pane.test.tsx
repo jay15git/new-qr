@@ -1071,8 +1071,14 @@ describe("QrPane", () => {
     const menu = document.body.querySelector('[data-slot="drafting-layer-context-menu"]') as HTMLElement
 
     expect(menu).not.toBeNull()
+    expect(menu.className).toContain("bg-[var(--drafting-dropdown-menu-surface-open)]")
+    expect(menu.className).not.toContain("backdrop-blur")
     expect(menu.style.left).toBe("120px")
     expect(menu.style.top).toBe("116px")
+
+    for (const label of ["Paste", "Copy", "Lock", "Delete", "Align left", "Align center", "Align middle", "Align right"]) {
+      expect(menu.querySelector(`button[aria-label="${label}"]`)).toBeNull()
+    }
 
     act(() => {
       clickElement(getRequiredElement(document.body, 'button[aria-label="Bring to front"]'))
@@ -1112,9 +1118,7 @@ describe("QrPane", () => {
 
   it("opens a selected layer context menu and emits layer actions", async () => {
     const onLayerAction = vi.fn()
-    const onLayerCopy = vi.fn()
     const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
-      onLayerCopy,
       onLayerAction,
       selectedLayerId: "preview:qr",
     })
@@ -1140,16 +1144,16 @@ describe("QrPane", () => {
     const menu = document.body.querySelector('[data-slot="drafting-layer-context-menu"]') as HTMLElement
 
     expect(menu).not.toBeNull()
+    expect(menu.className).toContain("bg-[var(--drafting-dropdown-menu-surface-open)]")
+    expect(menu.className).not.toContain("backdrop-blur")
     expect(menu.style.left).toBe("120px")
     expect(menu.style.top).toBe("148px")
     expect(menu.textContent).not.toContain("QR code")
     expect(menu.textContent).not.toContain("Card")
 
-    act(() => {
-      clickElement(getRequiredElement(document.body, 'button[aria-label="Copy"]'))
-    })
-
-    expect(onLayerCopy).toHaveBeenCalledWith(["preview:qr"])
+    for (const label of ["Paste", "Copy", "Lock", "Delete", "Align left", "Align center", "Align middle", "Align right"]) {
+      expect(menu.querySelector(`button[aria-label="${label}"]`)).toBeNull()
+    }
 
     act(() => {
       frame.dispatchEvent(
@@ -1205,7 +1209,7 @@ describe("QrPane", () => {
     expect(document.body.querySelector('[data-slot="drafting-layer-context-menu"]')).toBeNull()
   })
 
-  it("opens an empty canvas context menu and emits paste at the scene point", async () => {
+  it("opens an empty canvas context menu without paste actions", async () => {
     const onLayerPaste = vi.fn()
     const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
       onLayerPaste,
@@ -1231,11 +1235,11 @@ describe("QrPane", () => {
       )
     })
 
-    act(() => {
-      clickElement(getRequiredElement(document.body, 'button[aria-label="Paste"]'))
-    })
+    const menu = document.body.querySelector('[data-slot="drafting-layer-context-menu"]') as HTMLElement
 
-    expect(onLayerPaste).toHaveBeenCalledWith({ x: 20, y: 40 })
+    expect(menu).not.toBeNull()
+    expect(menu.querySelector('button[aria-label="Paste"]')).toBeNull()
+    expect(onLayerPaste).not.toHaveBeenCalled()
   })
 
   it("marquee selects visible unlocked layers intersecting the drag box", async () => {

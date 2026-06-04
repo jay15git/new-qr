@@ -8,7 +8,6 @@ import {
   useSyncExternalStore,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
-  type ReactNode,
   type TouchEvent,
   type WheelEvent,
 } from "react"
@@ -16,21 +15,19 @@ import {
   CheckIcon,
   CopyPlusIcon,
   CrosshairIcon,
-  EyeIcon,
-  EyeOffIcon,
-  LockIcon,
+  Grid3X3Icon,
+  HandIcon,
   MagnetIcon,
   Maximize2Icon,
   Minimize2Icon,
   MinusIcon,
+  MousePointer2Icon,
   PlusIcon,
   Redo2Icon,
-  RefreshCcwIcon,
   SlidersHorizontalIcon,
   Trash2Icon,
   TypeIcon,
   Undo2Icon,
-  UnlockIcon,
   ZoomInIcon,
   ZoomOutIcon,
 } from "lucide-react"
@@ -70,7 +67,7 @@ type DraftingPane = {
 type DraftingPanelLayouts = Record<string, Record<string, number>>
 type DraftingPanePanOffsets = Record<string, { x: number; y: number }>
 export type DraftingPaneToolbarVariant = "default" | "desktop-zoom"
-export type DraftingPaneCanvasTool = "text"
+export type DraftingPaneCanvasTool = "select" | "pan" | "text"
 
 type DesktopLayerToolbarLayer = {
   blur: number
@@ -106,7 +103,6 @@ type DraftingPaneWorkspaceProps = {
   onAddQrCode?: () => void
   onRedo?: () => void
   onRemoveQrCode?: (paneId: string) => void
-  onReset: () => void
   onUndo?: () => void
   onPaneSelect: (paneId: string) => void
   onPaneQrClick: (paneId: string) => void
@@ -137,6 +133,8 @@ type DraftingPaneWorkspaceProps = {
   activeCanvasTool?: DraftingPaneCanvasTool | null
   onAddTextLayerAt?: (paneId: string, point: { x: number; y: number }) => void
   onCanvasToolChange?: (tool: DraftingPaneCanvasTool | null) => void
+  onCanvasGridChange?: (showGrid: boolean) => void
+  showCanvasGrid?: boolean
   selectedLayerId?: string | null
   selectedLayerIds?: string[]
   toolbarVariant?: DraftingPaneToolbarVariant
@@ -213,13 +211,10 @@ function DesktopLayerSettingsToolbar({ controls }: { controls: DesktopLayerToolb
             <PopoverTrigger asChild>
               <button
                 aria-label="Layer appearance"
-                className="flex h-8 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-current transition-[background-color,color,transform] duration-150 hover:bg-white/[0.11] hover:text-white active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                className="flex size-8 shrink-0 items-center justify-center rounded-full text-current transition-[background-color,color] duration-150 hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
                 type="button"
               >
                 <SlidersHorizontalIcon aria-hidden="true" className="size-4" />
-                <span className="max-w-24 truncate text-xs font-semibold tabular-nums">
-                  {layer.opacity}%
-                </span>
               </button>
             </PopoverTrigger>
           </TooltipTrigger>
@@ -298,28 +293,6 @@ function DesktopLayerSettingsToolbar({ controls }: { controls: DesktopLayerToolb
           </div>
         </PopoverContent>
       </Popover>
-      <DesktopLayerToolbarToggle
-        active={layer.isVisible}
-        label={layer.isVisible ? "Hide layer" : "Show layer"}
-        onClick={() => onLayerChange({ isVisible: !layer.isVisible })}
-      >
-        {layer.isVisible ? (
-          <EyeIcon aria-hidden="true" className="size-4" />
-        ) : (
-          <EyeOffIcon aria-hidden="true" className="size-4" />
-        )}
-      </DesktopLayerToolbarToggle>
-      <DesktopLayerToolbarToggle
-        active={layer.isLocked}
-        label={layer.isLocked ? "Unlock layer" : "Lock layer"}
-        onClick={() => onLayerChange({ isLocked: !layer.isLocked })}
-      >
-        {layer.isLocked ? (
-          <LockIcon aria-hidden="true" className="size-4" />
-        ) : (
-          <UnlockIcon aria-hidden="true" className="size-4" />
-        )}
-      </DesktopLayerToolbarToggle>
     </div>
   )
 }
@@ -381,33 +354,6 @@ function DesktopLayerToolbarColorInput({
   )
 }
 
-function DesktopLayerToolbarToggle({
-  active,
-  children,
-  label,
-  onClick,
-}: {
-  active: boolean
-  children: ReactNode
-  label: string
-  onClick: () => void
-}) {
-  return (
-    <button
-      aria-label={label}
-      aria-pressed={active}
-      className={cn(
-        "flex size-8 shrink-0 items-center justify-center rounded-full text-current transition-[background-color,color,transform] duration-150 hover:bg-white/[0.11] hover:text-white active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45",
-        active && "bg-white/[0.12] text-white",
-      )}
-      type="button"
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  )
-}
-
 function DraftingPaneSurface({
   areaName,
   canSwap,
@@ -432,6 +378,7 @@ function DraftingPaneSurface({
   activeCanvasTool,
   onAddTextLayerAt,
   onCanvasToolChange,
+  showCanvasGrid = true,
   pane,
   panePan,
   paneZoom,
@@ -478,6 +425,7 @@ function DraftingPaneSurface({
   activeCanvasTool?: DraftingPaneCanvasTool | null
   onAddTextLayerAt?: (paneId: string, point: { x: number; y: number }) => void
   onCanvasToolChange?: (tool: DraftingPaneCanvasTool | null) => void
+  showCanvasGrid?: boolean
   pane: DraftingPane
   panePan: { x: number; y: number }
   paneZoom: number
@@ -485,6 +433,7 @@ function DraftingPaneSurface({
   selectedLayerIds?: string[]
   snapEnabled: boolean
 }) {
+  const hideLayerSelectionChrome = activeCanvasTool === "pan"
   const onPaneSelectRef = useRef(onPaneSelect)
   const onPaneQrClickRef = useRef(onPaneQrClick)
   const panInteractionRef = useRef<{
@@ -562,6 +511,50 @@ function DraftingPaneSurface({
     onPaneQrClickRef.current(pane.id)
   }, [pane.id])
 
+  const shouldIgnorePanToolTarget = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) =>
+      event.target instanceof Element &&
+      Boolean(
+        event.target.closest(
+          "button, input, textarea, select, [data-slot='drafting-layer-floating-toolbar'], [data-slot='drafting-layer-context-menu']",
+        ),
+      ),
+    [],
+  )
+
+  const beginPanePan = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      event.preventDefault()
+      event.stopPropagation()
+      event.currentTarget.setPointerCapture(event.pointerId)
+      onPaneSelectRef.current(pane.id)
+      panInteractionRef.current = {
+        pointerId: event.pointerId,
+        startClientX: event.clientX,
+        startClientY: event.clientY,
+        startPanX: panePan.x,
+        startPanY: panePan.y,
+      }
+    },
+    [pane.id, panePan.x, panePan.y],
+  )
+
+  const handlePanePointerDownCapture = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (
+        activeCanvasTool !== "pan" ||
+        event.button !== 0 ||
+        event.pointerType === "touch" ||
+        shouldIgnorePanToolTarget(event)
+      ) {
+        return
+      }
+
+      beginPanePan(event)
+    },
+    [activeCanvasTool, beginPanePan, shouldIgnorePanToolTarget],
+  )
+
   const handlePanePointerDown = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
       if (event.button !== 0 || event.pointerType === "touch") {
@@ -578,28 +571,17 @@ function DraftingPaneSurface({
         return
       }
 
-      event.preventDefault()
-      event.stopPropagation()
-      event.currentTarget.setPointerCapture(event.pointerId)
+      if (activeCanvasTool !== "pan") {
+        onPaneSelectRef.current(pane.id)
+        onLayerSelect?.(pane.id, null)
+        return
+      }
+
       onPaneSelectRef.current(pane.id)
       onLayerSelect?.(pane.id, null)
-      panInteractionRef.current = {
-        pointerId: event.pointerId,
-        startClientX: event.clientX,
-        startClientY: event.clientY,
-        startPanX: panePan.x,
-        startPanY: panePan.y,
-      }
+      beginPanePan(event)
     },
-    [
-      activeCanvasTool,
-      isPlacementTarget,
-      onAddTextLayerAt,
-      onLayerSelect,
-      pane.id,
-      panePan.x,
-      panePan.y,
-    ],
+    [activeCanvasTool, beginPanePan, isPlacementTarget, onAddTextLayerAt, onLayerSelect, pane.id],
   )
 
   const handlePanePointerMove = useCallback(
@@ -683,6 +665,7 @@ function DraftingPaneSurface({
       data-slot="dashboard-compose-surface"
       data-surface-appearance="neutral"
       data-dragging={draggingPaneId === pane.id ? "true" : "false"}
+      data-grid-visible={showCanvasGrid ? "true" : "false"}
       data-snap-target={isSnapTarget ? "true" : "false"}
       draggable={canSwap}
       className={cn(
@@ -693,8 +676,9 @@ function DraftingPaneSurface({
       )}
       style={{
         gridArea: areaName,
-        backgroundImage:
-          "radial-gradient(circle, rgb(var(--drafting-canvas-dot-rgb) / var(--drafting-canvas-dot-opacity)) 2.4px, transparent 3px)",
+        backgroundImage: showCanvasGrid
+          ? "radial-gradient(circle, rgb(var(--drafting-canvas-dot-rgb) / var(--drafting-canvas-dot-opacity)) 2.4px, transparent 3px)"
+          : "none",
         backgroundPosition: "0 0",
         backgroundSize: "30px 30px",
       }}
@@ -705,6 +689,7 @@ function DraftingPaneSurface({
       onDragStart={(event) => onPaneDragStart(pane.id, event)}
       onDrop={(event) => onPaneDrop(pane.id, event)}
       onPointerCancel={handlePanePointerEnd}
+      onPointerDownCapture={handlePanePointerDownCapture}
       onPointerDown={handlePanePointerDown}
       onPointerMove={handlePanePointerMove}
       onPointerUp={handlePanePointerEnd}
@@ -713,12 +698,12 @@ function DraftingPaneSurface({
       onTouchStart={handleTouchStart}
       onWheel={handleWheel}
     >
-        <div
-          style={{
-            transform: `translate3d(${panePan.x}px, ${panePan.y}px, 0) scale(${paneZoom})`,
-            transformOrigin: "center center",
-            transition: "transform 150ms ease-out",
-          }}
+      <div
+        style={{
+          transform: `translate3d(${panePan.x}px, ${panePan.y}px, 0) scale(${paneZoom})`,
+          transformOrigin: "center center",
+          transition: "transform 150ms ease-out",
+        }}
         className="flex h-full w-full items-center justify-center"
       >
         <QrPane
@@ -738,10 +723,28 @@ function DraftingPaneSurface({
           }
           onQrClick={handleQrClick}
           onSelect={handleSelect}
-          selectedLayerId={isSelected ? selectedLayerId : null}
-          selectedLayerIds={isSelected ? selectedLayerIds : undefined}
+          selectedLayerId={isSelected && !hideLayerSelectionChrome ? selectedLayerId : null}
+          selectedLayerIds={isSelected && !hideLayerSelectionChrome ? selectedLayerIds : undefined}
         />
       </div>
+      {activeCanvasTool === "pan" ? (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 z-[1] cursor-grab touch-none active:cursor-grabbing"
+          data-slot="drafting-pan-overlay"
+          onPointerCancel={handlePanePointerEnd}
+          onPointerDown={beginPanePan}
+          onPointerMove={handlePanePointerMove}
+          onPointerUp={handlePanePointerEnd}
+        />
+      ) : null}
+      {activeCanvasTool === "text" && onAddTextLayerAt ? (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 z-[40] cursor-text touch-none"
+          data-slot="drafting-text-placement-overlay"
+        />
+      ) : null}
     </div>
   )
 }
@@ -755,7 +758,6 @@ export function DraftingPaneWorkspace({
   onAddQrCode,
   onRedo,
   onRemoveQrCode,
-  onReset,
   onUndo,
   onPaneSelect,
   onPaneQrClick,
@@ -770,6 +772,8 @@ export function DraftingPaneWorkspace({
   activeCanvasTool,
   onAddTextLayerAt,
   onCanvasToolChange,
+  onCanvasGridChange,
+  showCanvasGrid = true,
   selectedLayerId,
   selectedLayerIds,
   toolbarVariant = "default",
@@ -839,6 +843,11 @@ export function DraftingPaneWorkspace({
 
   const zoomPercent = `${Math.round(activeZoom * 100)}%`
   const isDesktopZoomToolbar = toolbarVariant === "desktop-zoom"
+  const activeInteractionTool = activeCanvasTool === "pan"
+    ? "pan"
+    : activeCanvasTool === "text"
+      ? "text"
+      : "select"
 
   const isMaximized = maximizedPaneId !== null
 
@@ -1050,6 +1059,7 @@ export function DraftingPaneWorkspace({
                                 paneZoom={paneZoom}
                                 selectedLayerId={selectedLayerId}
                                 selectedLayerIds={selectedLayerIds}
+                                showCanvasGrid={showCanvasGrid}
                                 snapEnabled={snapEnabled}
                               />
                             </ResizablePanel>
@@ -1081,7 +1091,7 @@ export function DraftingPaneWorkspace({
         </div>
 
         {isDesktopZoomToolbar ? (
-          <div className="pointer-events-none absolute bottom-4 right-5 z-20 flex justify-end max-md:right-4">
+          <div className="pointer-events-none absolute bottom-4 right-5 z-[60] flex justify-end max-md:right-4">
             <div
               data-slot="desktop-resize-toolbar"
               data-toolbar-appearance="desktop-glass"
@@ -1089,18 +1099,18 @@ export function DraftingPaneWorkspace({
             >
               <button
                 aria-label="Decrease canvas size"
-                className="grid size-11 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
+                className="grid size-8 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
                 disabled={activeZoom <= MIN_PREVIEW_ZOOM}
                 type="button"
                 onClick={handleZoomOut}
               >
-                <MinusIcon className="size-5" strokeWidth={2.6} />
+                <MinusIcon className="size-4" strokeWidth={2.6} />
               </button>
               <Popover open={desktopZoomPopoverOpen} onOpenChange={setDesktopZoomPopoverOpen}>
                 <PopoverTrigger asChild>
                   <button
                     aria-label="Choose canvas size"
-                    className="h-11 min-w-[5.75rem] rounded-full px-4 text-center text-[1.2rem] font-semibold tracking-normal text-white transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                    className="h-8 min-w-[4.75rem] rounded-full px-3 text-center text-[1rem] font-semibold tracking-normal text-white transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
                     type="button"
                     onClick={() => setDesktopZoomPopoverOpen((open) => !open)}
                     onDoubleClick={() => {
@@ -1146,25 +1156,32 @@ export function DraftingPaneWorkspace({
               </Popover>
               <button
                 aria-label="Increase canvas size"
-                className="grid size-11 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
+                className="grid size-8 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
                 disabled={activeZoom >= MAX_PREVIEW_ZOOM}
                 type="button"
                 onClick={handleZoomIn}
               >
-                <PlusIcon className="size-5" strokeWidth={2.3} />
+                <PlusIcon className="size-4" strokeWidth={2.3} />
               </button>
             </div>
           </div>
         ) : null}
 
-        <div className="pointer-events-none absolute inset-x-5 bottom-4 z-20 flex justify-center px-2 sm:inset-x-6 lg:inset-x-8">
+        <div
+          className={cn(
+            "pointer-events-none absolute bottom-4 z-[60] flex justify-center",
+            isDesktopZoomToolbar
+              ? "inset-x-5 px-2 sm:inset-x-6 md:left-[23.75rem] md:right-0 md:px-0"
+              : "inset-x-5 px-2 sm:inset-x-6 lg:inset-x-8",
+          )}
+        >
           <div
             data-slot="dashboard-compose-toolbar"
             data-toolbar-appearance={isDesktopZoomToolbar ? "desktop-glass" : "neutral"}
             className={cn(
               "pointer-events-auto inline-flex max-w-full flex-wrap items-center justify-center gap-1 rounded-[10px] bg-[var(--drafting-panel-bg-active)] px-2 py-1.5",
               isDesktopZoomToolbar &&
-                "min-h-14 rounded-full border border-white/[0.12] bg-black/55 px-3 text-white/78 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl",
+                "min-h-14 gap-1.5 rounded-full border border-white/[0.12] bg-black/55 px-2.5 text-white/78 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl",
             )}
           >
             {!isDesktopZoomToolbar ? (
@@ -1225,10 +1242,49 @@ export function DraftingPaneWorkspace({
               </>
             ) : null}
 
-            {isDesktopZoomToolbar && desktopLayerToolbarControls?.layer ? (
+            {isDesktopZoomToolbar ? (
               <>
-                <DesktopLayerSettingsToolbar controls={desktopLayerToolbarControls} />
-                <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Select and move elements"
+                      aria-pressed={activeInteractionTool === "select"}
+                      className={cn(
+                        "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]",
+                        activeInteractionTool === "select" &&
+                          "bg-[var(--drafting-ink)] text-[var(--drafting-paper)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-paper)]",
+                      )}
+                      onClick={() => onCanvasToolChange?.("select")}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <MousePointer2Icon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Select and move elements</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Pan canvas"
+                      aria-pressed={activeInteractionTool === "pan"}
+                      className={cn(
+                        "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]",
+                        activeInteractionTool === "pan" &&
+                          "bg-[var(--drafting-ink)] text-[var(--drafting-paper)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-paper)]",
+                      )}
+                      onClick={() => onCanvasToolChange?.("pan")}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <HandIcon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Pan canvas</TooltipContent>
+                </Tooltip>
               </>
             ) : null}
 
@@ -1255,7 +1311,7 @@ export function DraftingPaneWorkspace({
 
             {panes.length > 1 && (
               <>
-                <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" />
+                {!isDesktopZoomToolbar ? <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" /> : null}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -1280,34 +1336,61 @@ export function DraftingPaneWorkspace({
               </>
             )}
 
-            <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" />
+            {!isDesktopZoomToolbar ? <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" /> : null}
+
+            {isDesktopZoomToolbar ? (
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label={showCanvasGrid ? "Hide canvas grid" : "Show canvas grid"}
+                      aria-pressed={showCanvasGrid}
+                      className={cn(
+                        "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]",
+                        showCanvasGrid &&
+                          "bg-[var(--drafting-ink)] text-[var(--drafting-paper)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-paper)]",
+                      )}
+                      onClick={() => onCanvasGridChange?.(!showCanvasGrid)}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <Grid3X3Icon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{showCanvasGrid ? "Grid on" : "Grid off"}</TooltipContent>
+                </Tooltip>
+              </>
+            ) : null}
 
             {onAddQrCode ? (
               <>
                 {isDesktopZoomToolbar ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        aria-label="Add text on canvas"
-                        aria-pressed={activeCanvasTool === "text"}
-                        className={cn(
-                          "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] disabled:opacity-40",
-                          activeCanvasTool === "text" &&
-                            "bg-[var(--drafting-ink)] text-[var(--drafting-paper)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-paper)]",
-                        )}
-                        disabled={!onAddTextLayerAt}
-                        onClick={() =>
-                          onCanvasToolChange?.(activeCanvasTool === "text" ? null : "text")
-                        }
-                        size="icon"
-                        type="button"
-                        variant="ghost"
-                      >
-                        <TypeIcon />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Click canvas to add text</TooltipContent>
-                  </Tooltip>
+                  <>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          aria-label="Add text on canvas"
+                          aria-pressed={activeCanvasTool === "text"}
+                          className={cn(
+                            "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] disabled:opacity-40",
+                            activeCanvasTool === "text" &&
+                              "bg-[var(--drafting-ink)] text-[var(--drafting-paper)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-paper)]",
+                          )}
+                          disabled={!onAddTextLayerAt}
+                          onClick={() =>
+                            onCanvasToolChange?.(activeCanvasTool === "text" ? "select" : "text")
+                          }
+                          size="icon"
+                          type="button"
+                          variant="ghost"
+                        >
+                          <TypeIcon />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Click canvas to add text</TooltipContent>
+                    </Tooltip>
+                  </>
                 ) : null}
 
                 <Tooltip>
@@ -1347,59 +1430,52 @@ export function DraftingPaneWorkspace({
                   </Tooltip>
                 ) : null}
 
-                <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" />
+                {!isDesktopZoomToolbar ? <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" /> : null}
               </>
             ) : null}
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  aria-label="Undo"
-                  className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] disabled:opacity-40"
-                  disabled={!canUndo || !onUndo}
-                  onClick={onUndo}
-                  size="icon"
-                  type="button"
-                  variant="ghost"
-                >
-                  <Undo2Icon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Undo</TooltipContent>
-            </Tooltip>
+            {!isDesktopZoomToolbar ? (
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Undo"
+                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] disabled:opacity-40"
+                      disabled={!canUndo || !onUndo}
+                      onClick={onUndo}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <Undo2Icon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Undo</TooltipContent>
+                </Tooltip>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  aria-label="Redo"
-                  className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] disabled:opacity-40"
-                  disabled={!canRedo || !onRedo}
-                  onClick={onRedo}
-                  size="icon"
-                  type="button"
-                  variant="ghost"
-                >
-                  <Redo2Icon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Redo</TooltipContent>
-            </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Redo"
+                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] disabled:opacity-40"
+                      disabled={!canRedo || !onRedo}
+                      onClick={onRedo}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <Redo2Icon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Redo</TooltipContent>
+                </Tooltip>
+              </>
+            ) : null}
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  aria-label="Reset defaults"
-                  className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
-                  onClick={onReset}
-                  size="icon"
-                  type="button"
-                  variant="ghost"
-                >
-                  <RefreshCcwIcon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Reset defaults</TooltipContent>
-            </Tooltip>
+            {isDesktopZoomToolbar && desktopLayerToolbarControls?.layer ? (
+              <DesktopLayerSettingsToolbar controls={desktopLayerToolbarControls} />
+            ) : null}
+
           </div>
         </div>
       </div>

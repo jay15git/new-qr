@@ -700,26 +700,21 @@ function LayerContextMenu({
   layerCount,
   layers,
   onAction,
-  onCopy,
-  onPaste,
   style,
 }: {
   layerCount: number
   layers: DraftingCanvasLayer[]
   onAction: (action: DraftingLayerMenuAction) => void
-  onCopy?: () => void
-  onPaste?: () => void
   style: CSSProperties
 }) {
   const isMultiLayer = layerCount > 1
   const hasSelection = layerCount > 0
   const hasHiddenLayer = layers.some((layer) => !layer.isVisible)
-  const hasLockedLayer = layers.some((layer) => layer.isLocked)
   const hasGroupLayer = layers.some((layer) => layer.kind === "group")
 
   return (
     <div
-      className="fixed z-[20000] min-w-52 rounded-[18px] border border-[var(--drafting-dropdown-border)] bg-[var(--drafting-dropdown-menu-surface-open)] p-1.5 text-[var(--drafting-dropdown-text)] shadow-[var(--drafting-dropdown-menu-shadow-open)] backdrop-blur-2xl"
+      className="fixed z-[20000] min-w-52 rounded-[18px] border border-[var(--drafting-dropdown-border)] bg-[var(--drafting-dropdown-menu-surface-open)] p-1.5 text-[var(--drafting-dropdown-text)] shadow-[var(--drafting-dropdown-menu-shadow-open)]"
       data-drafting-dropdown-content="true"
       data-slot="drafting-layer-context-menu"
       data-toolbar-appearance="desktop-glass"
@@ -729,31 +724,18 @@ function LayerContextMenu({
       onClick={(event) => event.stopPropagation()}
       onContextMenu={(event) => event.preventDefault()}
     >
-      {onPaste ? <LayerContextMenuButton label="Paste" onClick={onPaste} /> : null}
       {hasSelection ? (
         <>
-          {onPaste ? <LayerContextMenuSeparator /> : null}
-          {onCopy ? <LayerContextMenuButton label="Copy" onClick={onCopy} /> : null}
           <LayerContextMenuButton label="Bring to front" onClick={() => onAction("front")} />
           <LayerContextMenuButton label="Bring forward" onClick={() => onAction("forward")} />
           <LayerContextMenuButton label="Send backward" onClick={() => onAction("backward")} />
           <LayerContextMenuButton label="Send to back" onClick={() => onAction("back")} />
           <LayerContextMenuSeparator />
           <LayerContextMenuButton
-            label={hasLockedLayer ? "Unlock" : "Lock"}
-            onClick={() => onAction(hasLockedLayer ? "unlock" : "lock")}
-          />
-          <LayerContextMenuButton
             label={hasHiddenLayer ? "Show" : "Hide"}
             onClick={() => onAction(hasHiddenLayer ? "show" : "hide")}
           />
           <LayerContextMenuButton label="Reset rotation" onClick={() => onAction("reset-rotation")} />
-          <LayerContextMenuButton label="Delete" onClick={() => onAction("delete")} />
-          <LayerContextMenuSeparator />
-          <LayerContextMenuButton label="Align left" onClick={() => onAction("left")} />
-          <LayerContextMenuButton label="Align center" onClick={() => onAction("center-x")} />
-          <LayerContextMenuButton label="Align middle" onClick={() => onAction("center-y")} />
-          <LayerContextMenuButton label="Align right" onClick={() => onAction("right")} />
           {isMultiLayer ? (
             <>
               <LayerContextMenuSeparator />
@@ -784,7 +766,7 @@ function LayerContextMenuButton({
   return (
     <button
       aria-label={label}
-      className="block h-8 w-full rounded-full px-3 text-left text-[12px] font-semibold text-current transition-[background-color,color,transform] duration-150 hover:bg-white/[0.11] hover:text-white active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+      className="block h-8 w-full rounded-full px-3 text-left text-[12px] font-semibold text-current transition-[background-color,color] duration-150 hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
       role="menuitem"
       type="button"
       onClick={onClick}
@@ -878,7 +860,8 @@ function LayerFloatingToolbarButton({
   return (
     <button
       aria-label={label}
-      className="flex size-8 items-center justify-center rounded-full text-current transition-[background-color,color,transform] duration-150 hover:bg-white/[0.11] hover:text-white active:scale-95 disabled:pointer-events-none disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+      className="flex size-8 items-center justify-center rounded-full text-current transition-[background-color,color] duration-150 hover:bg-[var(--drafting-layer-toolbar-button-hover-bg,rgba(255,255,255,0.11))] hover:text-[var(--drafting-layer-toolbar-button-hover-text,white)] disabled:pointer-events-none disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+      data-slot="drafting-layer-floating-toolbar-button"
       disabled={disabled}
       type="button"
       onClick={onClick}
@@ -2553,8 +2536,6 @@ export const QrPane = memo(function QrPane({
                     layerCount={contextMenu.layerIds.length}
                     layers={contextMenuLayers}
                     onAction={runLayerAction}
-                    onCopy={onLayerCopy ? runLayerCopy : undefined}
-                    onPaste={onLayerPaste ? runLayerPaste : undefined}
                     style={{
                       left: contextMenu.x,
                       top: contextMenu.y,

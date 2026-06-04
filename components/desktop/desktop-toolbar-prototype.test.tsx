@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 
-import { act } from "react"
+import { readFileSync } from "node:fs"
+import { resolve } from "node:path"
+import { act, type ComponentProps } from "react"
 import { createRoot, type Root } from "react-dom/client"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
@@ -61,9 +63,18 @@ describe("DesktopToolbarPrototype", () => {
   it("toggles the desktop prototype between dark and light mode", async () => {
     const surface = await renderPrototype()
     const prototype = surface.container.querySelector('[data-slot="desktop-toolbar-prototype"]')
+    const actionToolbar = surface.container.querySelector('[data-slot="desktop-action-toolbar"]')
     const themeToggle = getRequiredButton(surface.container, "Switch to light mode")
 
     expect(prototype?.getAttribute("data-desktop-theme")).toBe("dark")
+    expect(actionToolbar).not.toBeNull()
+    expect(actionToolbar?.querySelector('button[aria-label="Switch to light mode"]')).toBeNull()
+    expect(Array.from(actionToolbar?.querySelectorAll("button") ?? []).map((button) => button.getAttribute("aria-label"))).toEqual([
+      "Reset defaults",
+      "Undo",
+      "Redo",
+    ])
+    expect(getRequiredButton(surface.container, "Switch to light mode").getAttribute("data-slot")).toBe("desktop-theme-toggle")
 
     await act(async () => {
       themeToggle.dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -71,6 +82,84 @@ describe("DesktopToolbarPrototype", () => {
 
     expect(prototype?.getAttribute("data-desktop-theme")).toBe("light")
     expect(getRequiredButton(surface.container, "Switch to dark mode")).not.toBeNull()
+  })
+
+  it("wires undo and redo through the top-right desktop action toolbar", async () => {
+    const onUndo = vi.fn()
+    const onRedo = vi.fn()
+    const onResetDefaults = vi.fn()
+    const surface = await renderPrototype({
+      controller: {
+        canRedo: true,
+        canUndo: true,
+        onRedo,
+        onResetDefaults,
+        onUndo,
+      },
+    })
+    const actionToolbar = surface.container.querySelector('[data-slot="desktop-action-toolbar"]')
+
+    expect(actionToolbar?.className).toContain("min-h-14")
+    expect(getRequiredButton(surface.container, "Switch to light mode").className).toContain("size-14")
+    expect(getRequiredButton(actionToolbar as HTMLElement, "Reset defaults").className).toContain("size-8")
+    expect(getRequiredButton(actionToolbar as HTMLElement, "Undo").className).toContain("size-8")
+    expect(getRequiredButton(actionToolbar as HTMLElement, "Redo").className).toContain("size-8")
+
+    await act(async () => {
+      getRequiredButton(actionToolbar as HTMLElement, "Reset defaults").dispatchEvent(new MouseEvent("click", { bubbles: true }))
+      getRequiredButton(actionToolbar as HTMLElement, "Undo").dispatchEvent(new MouseEvent("click", { bubbles: true }))
+      getRequiredButton(actionToolbar as HTMLElement, "Redo").dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    expect(onResetDefaults).toHaveBeenCalledTimes(1)
+    expect(onUndo).toHaveBeenCalledTimes(1)
+    expect(onRedo).toHaveBeenCalledTimes(1)
+  })
+
+  it("keeps the desktop workspace chrome contract for tool states and light tooltips", () => {
+    const source = readFileSync(
+      resolve(process.cwd(), "components/desktop/desktop-workspace.tsx"),
+      "utf8",
+    )
+
+    expect(source).toContain('[data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button')
+    expect(source).toContain('[data-toolbar-appearance="desktop-glass"] button svg')
+    expect(source).toContain('[data-toolbar-appearance="desktop-glass"] button:active svg')
+    expect(source).toContain('button[data-toolbar-appearance="desktop-glass"]:active svg')
+    expect(source).toContain('[data-slot="drafting-layer-context-menu"][data-toolbar-appearance="desktop-glass"] button:active svg')
+    expect(source).toContain('[data-slot="drafting-layer-floating-toolbar"][data-toolbar-appearance="desktop-glass"] button:active svg')
+    expect(source).toContain('body:has([data-slot="desktop-workspace"]) [data-slot="drafting-layer-context-menu"]')
+    expect(source).toContain("z-index: 60")
+    expect(source).toContain("--drafting-canvas-dot-rgb: 246 248 251")
+    expect(source).toContain("--drafting-canvas-dot-opacity: 0.035")
+    expect(source).toContain("--drafting-canvas-dot-rgb: 15 23 42")
+    expect(source).toContain("--drafting-canvas-dot-opacity: 0.08")
+    expect(source).toContain("background-color: transparent !important")
+    expect(source).toContain('[data-slot="dashboard-compose-surface"][data-grid-visible="false"]')
+    expect(source).toContain("background-image: none !important")
+    expect(source).toContain('[data-slot="desktop-resize-toolbar"] button:hover')
+    expect(source).toContain('[data-slot="desktop-action-toolbar"] button:hover')
+    expect(source).toContain('body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="drafting-layer-floating-toolbar"] button:hover')
+    expect(source).toContain("background: rgba(15, 23, 42, 0.08) !important")
+    expect(source).toContain("background: rgb(255, 255, 255) !important")
+    expect(source).toContain('body:has([data-slot="desktop-workspace"][data-desktop-theme="dark"]) [data-slot="drafting-layer-context-menu"]')
+    expect(source).toContain("background: rgb(23, 23, 23) !important")
+    expect(source).toContain("border-radius: 9999px !important")
+    expect(source).toContain("transform: none !important")
+    expect(source).toContain("translate: none !important")
+    expect(source).toContain("scale: none !important")
+    expect(source).toContain("rotate: none !important")
+    expect(source).toContain("button::before")
+    expect(source).toContain("transform: scale(1)")
+    expect(source).toContain("transition: none")
+    expect(source).toContain("transition:")
+    expect(source).toContain('button[aria-pressed="true"]')
+    expect(source).toContain('button[aria-pressed="true"]::before')
+    expect(source).toContain('[data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button:active')
+    expect(source).toContain('[data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button:active svg')
+    expect(source).toContain("transform: scale(0.84) !important")
+    expect(source).toContain('[data-slot="tooltip-content"]')
+    expect(source).toContain("background: rgba(15, 15, 15, 0.94) !important")
   })
 
   it("renders every remaining /new settings tool in the desktop inspector format", async () => {
@@ -498,7 +587,7 @@ describe("DesktopToolbarPrototype", () => {
 
     expect(getRequiredButton(surface.container, "Use None shape").getAttribute("aria-pressed")).toBe("true")
     expect(getRequiredButton(surface.container, "Use solid shape color").getAttribute("aria-pressed")).toBe("true")
-    expect(getRequiredInput(surface.container, "Shape solid color").value).toBe("#f8fafc")
+    expect(getRequiredInput(surface.container, "Shape solid color").value).toBe("#18181b")
   })
 
   it("renders a compact Pixelmator-style motion inspector without placeholder copy", async () => {
@@ -894,7 +983,11 @@ describe("DesktopToolbarPrototype", () => {
   })
 })
 
-async function renderPrototype() {
+async function renderPrototype({
+  controller,
+}: {
+  controller?: Partial<NonNullable<ComponentProps<typeof DesktopToolbarPrototype>>["controller"]>
+} = {}) {
   const container = document.createElement("div")
   document.body.append(container)
 
@@ -902,7 +995,7 @@ async function renderPrototype() {
 
   await act(async () => {
     root = createRoot(container)
-    root.render(<DesktopToolbarPrototype />)
+    root.render(<DesktopToolbarPrototype controller={controller as NonNullable<ComponentProps<typeof DesktopToolbarPrototype>>["controller"]} />)
   })
 
   cleanupCallbacks.push(() => {

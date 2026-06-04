@@ -47,6 +47,8 @@ function DesktopWorkspaceStyles() {
   return (
     <style>{`
       [data-slot="desktop-workspace"] [data-slot="drafting-surface"] {
+        --drafting-canvas-dot-rgb: 246 248 251;
+        --drafting-canvas-dot-opacity: 0.035;
         position: absolute;
         inset: 0;
         height: 100dvh;
@@ -57,11 +59,16 @@ function DesktopWorkspaceStyles() {
       }
 
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="drafting-surface"] {
+        --drafting-canvas-dot-rgb: 15 23 42;
+        --drafting-canvas-dot-opacity: 0.08;
         background: #e7e9ec;
       }
 
       [data-slot="desktop-workspace"] [data-slot="dashboard-compose-surface"] {
-        background: transparent !important;
+        background-color: transparent !important;
+      }
+
+      [data-slot="desktop-workspace"] [data-slot="dashboard-compose-surface"][data-grid-visible="false"] {
         background-image: none !important;
       }
 
@@ -72,7 +79,7 @@ function DesktopWorkspaceStyles() {
       [data-slot="desktop-workspace"] [data-slot="desktop-toolbar-prototype"] {
         position: absolute;
         inset: 0;
-        z-index: 5;
+        z-index: 60;
         min-height: 100dvh;
         background: transparent !important;
         pointer-events: none;
@@ -80,13 +87,143 @@ function DesktopWorkspaceStyles() {
 
       [data-slot="desktop-workspace"] [data-slot="desktop-floating-toolbar"],
       [data-slot="desktop-workspace"] [data-slot="desktop-floating-inspector"],
+      [data-slot="desktop-workspace"] [data-slot="desktop-action-toolbar"],
       [data-slot="desktop-workspace"] [data-slot="desktop-resize-toolbar"],
       [data-slot="desktop-workspace"] [data-slot="desktop-text-format-toolbar"],
       [data-slot="desktop-workspace"] [data-slot="desktop-theme-toggle"] {
         pointer-events: auto;
       }
 
+      [data-slot="desktop-workspace"] [data-toolbar-appearance="desktop-glass"] button,
+      [data-slot="desktop-workspace"] button[data-toolbar-appearance="desktop-glass"] {
+        transform: none !important;
+        translate: none !important;
+        scale: none !important;
+        rotate: none !important;
+      }
+
+      body:has([data-slot="desktop-workspace"]) [data-slot="drafting-layer-floating-toolbar"][data-toolbar-appearance="desktop-glass"] button,
+      body:has([data-slot="desktop-workspace"]) [data-slot="drafting-layer-context-menu"][data-toolbar-appearance="desktop-glass"] button {
+        transform: none !important;
+        translate: none !important;
+        scale: none !important;
+        rotate: none !important;
+      }
+
+      [data-slot="desktop-workspace"] [data-toolbar-appearance="desktop-glass"] button:hover,
+      [data-slot="desktop-workspace"] [data-toolbar-appearance="desktop-glass"] button:active,
+      [data-slot="desktop-workspace"] button[data-toolbar-appearance="desktop-glass"]:hover,
+      [data-slot="desktop-workspace"] button[data-toolbar-appearance="desktop-glass"]:active {
+        transform: none !important;
+        translate: none !important;
+        scale: none !important;
+        rotate: none !important;
+      }
+
+      body:has([data-slot="desktop-workspace"]) [data-slot="drafting-layer-floating-toolbar"][data-toolbar-appearance="desktop-glass"] button:hover,
+      body:has([data-slot="desktop-workspace"]) [data-slot="drafting-layer-floating-toolbar"][data-toolbar-appearance="desktop-glass"] button:active,
+      body:has([data-slot="desktop-workspace"]) [data-slot="drafting-layer-context-menu"][data-toolbar-appearance="desktop-glass"] button:hover,
+      body:has([data-slot="desktop-workspace"]) [data-slot="drafting-layer-context-menu"][data-toolbar-appearance="desktop-glass"] button:active {
+        transform: none !important;
+        translate: none !important;
+        scale: none !important;
+        rotate: none !important;
+      }
+
+      [data-slot="desktop-workspace"] [data-toolbar-appearance="desktop-glass"] button svg,
+      [data-slot="desktop-workspace"] button[data-toolbar-appearance="desktop-glass"] svg {
+        transform-origin: center;
+        transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), color 180ms ease, opacity 180ms ease;
+      }
+
+      body:has([data-slot="desktop-workspace"]) [data-slot="drafting-layer-floating-toolbar"][data-toolbar-appearance="desktop-glass"] button svg,
+      body:has([data-slot="desktop-workspace"]) [data-slot="drafting-layer-context-menu"][data-toolbar-appearance="desktop-glass"] button svg {
+        transform-origin: center;
+        transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), color 180ms ease, opacity 180ms ease;
+      }
+
+      [data-slot="desktop-workspace"] [data-toolbar-appearance="desktop-glass"] button:active svg,
+      [data-slot="desktop-workspace"] button[data-toolbar-appearance="desktop-glass"]:active svg {
+        transform: scale(0.84) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"]) [data-slot="drafting-layer-floating-toolbar"][data-toolbar-appearance="desktop-glass"] button:active svg,
+      body:has([data-slot="desktop-workspace"]) [data-slot="drafting-layer-context-menu"][data-toolbar-appearance="desktop-glass"] button:active svg {
+        transform: scale(0.84) !important;
+      }
+
+      [data-slot="desktop-workspace"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button {
+        position: relative !important;
+        border-radius: 9999px !important;
+        overflow: hidden !important;
+        transform: none !important;
+        translate: none !important;
+        scale: none !important;
+        rotate: none !important;
+        transition: color 180ms ease !important;
+      }
+
+      [data-slot="desktop-workspace"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button::before {
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: rgba(255, 255, 255, 0);
+        transform: scale(1);
+        opacity: 0;
+        transition: none;
+        content: "";
+      }
+
+      [data-slot="desktop-workspace"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button > svg {
+        position: relative;
+        z-index: 1;
+      }
+
+      [data-slot="desktop-workspace"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button svg {
+        transform-origin: center;
+        transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), color 180ms ease, opacity 180ms ease;
+      }
+
+      [data-slot="desktop-workspace"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button:active svg {
+        transform: scale(0.84) !important;
+      }
+
+      [data-slot="desktop-workspace"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button:hover {
+        background: transparent !important;
+        color: rgba(255, 255, 255, 0.96) !important;
+        transform: none !important;
+        translate: none !important;
+        scale: none !important;
+        rotate: none !important;
+      }
+
+      [data-slot="desktop-workspace"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button:active {
+        transform: none !important;
+        translate: none !important;
+        scale: none !important;
+        rotate: none !important;
+      }
+
+      [data-slot="desktop-workspace"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button:hover::before {
+        background: rgba(255, 255, 255, 0.11);
+        opacity: 1;
+      }
+
+      [data-slot="desktop-workspace"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button[aria-pressed="true"] {
+        background: transparent !important;
+        color: rgba(255, 255, 255, 0.96) !important;
+        box-shadow: none !important;
+      }
+
+      [data-slot="desktop-workspace"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button[aria-pressed="true"]::before {
+        background: rgba(255, 255, 255, 0.16);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+        opacity: 1;
+      }
+
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-resize-toolbar"],
+      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-theme-toggle"],
+      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-action-toolbar"],
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"],
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="drafting-layer-floating-toolbar"],
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="drafting-layer-context-menu"],
@@ -99,7 +236,19 @@ function DesktopWorkspaceStyles() {
         box-shadow: 0 24px 64px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.86) !important;
       }
 
+      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="drafting-layer-context-menu"] {
+        background: rgb(255, 255, 255) !important;
+      }
+
+      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="drafting-layer-floating-toolbar"],
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="drafting-layer-floating-toolbar"] {
+        --drafting-layer-toolbar-button-hover-bg: rgba(15, 23, 42, 0.08);
+        --drafting-layer-toolbar-button-hover-text: rgba(15, 23, 42, 0.95);
+      }
+
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-resize-toolbar"] button,
+      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-theme-toggle"],
+      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-action-toolbar"] button,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"] button,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"] label,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"] input,
@@ -112,19 +261,76 @@ function DesktopWorkspaceStyles() {
         color: rgba(15, 23, 42, 0.76) !important;
       }
 
-      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-resize-toolbar"] button:hover,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"] button:hover,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"] label:hover,
-      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="drafting-layer-floating-toolbar"] button:hover,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="drafting-layer-context-menu"] button:hover,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button:hover {
-        background: rgba(15, 23, 42, 0.08) !important;
+        background: transparent !important;
         color: rgba(15, 23, 42, 0.95) !important;
+      }
+
+      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-resize-toolbar"] button:hover,
+      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-theme-toggle"]:hover,
+      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-action-toolbar"] button:hover,
+      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="drafting-layer-floating-toolbar"] button:hover {
+        background-color: rgba(15, 23, 42, 0.08) !important;
+        color: rgba(15, 23, 42, 0.95) !important;
+      }
+
+      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button:hover::before {
+        background: rgba(15, 23, 42, 0.08);
+        opacity: 1;
+      }
+
+      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button[aria-pressed="true"] {
+        background: transparent !important;
+        color: rgba(15, 23, 42, 0.95) !important;
+        box-shadow: none !important;
+      }
+
+      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button[aria-pressed="true"]::before {
+        background: rgba(15, 23, 42, 0.12);
+        box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+        opacity: 1;
       }
 
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"] div,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"] input[type="number"] {
         background: rgba(15, 23, 42, 0.06) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="tooltip-content"] {
+        border-radius: 9999px !important;
+        background: rgba(15, 15, 15, 0.94) !important;
+        color: rgba(255, 255, 255, 0.96) !important;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="tooltip-content"] svg {
+        fill: rgba(15, 15, 15, 0.94) !important;
+        background: rgba(15, 15, 15, 0.94) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button:hover {
+        background: transparent !important;
+        color: rgba(15, 23, 42, 0.95) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button:hover::before {
+        background: rgba(15, 23, 42, 0.08);
+        opacity: 1;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button[aria-pressed="true"] {
+        background: transparent !important;
+        color: rgba(15, 23, 42, 0.95) !important;
+        box-shadow: none !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button[aria-pressed="true"]::before {
+        background: rgba(15, 23, 42, 0.12);
+        box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+        opacity: 1;
       }
 
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-resize-toolbar"] button[aria-label="Reset canvas size"] {
@@ -137,19 +343,45 @@ function DesktopWorkspaceStyles() {
       }
 
       body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="drafting-layer-context-menu"] {
-        background: rgba(255, 255, 255, 0.72) !important;
+        background: rgb(255, 255, 255) !important;
         border-color: rgba(15, 23, 42, 0.12) !important;
         color: rgba(15, 23, 42, 0.76) !important;
         box-shadow: 0 24px 64px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.86) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="dark"]) [data-slot="drafting-layer-context-menu"] {
+        background: rgb(23, 23, 23) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        color: rgba(255, 255, 255, 0.84) !important;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
       }
 
       body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="drafting-layer-context-menu"] button {
         color: rgba(15, 23, 42, 0.76) !important;
       }
 
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="dark"]) [data-slot="drafting-layer-context-menu"] button {
+        color: rgba(255, 255, 255, 0.84) !important;
+      }
+
       body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="drafting-layer-context-menu"] button:hover {
-        background: rgba(15, 23, 42, 0.08) !important;
+        background-color: rgba(15, 23, 42, 0.08) !important;
         color: rgba(15, 23, 42, 0.95) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="drafting-layer-floating-toolbar"] button:hover {
+        background-color: rgba(15, 23, 42, 0.08) !important;
+        color: rgba(15, 23, 42, 0.95) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="drafting-layer-floating-toolbar-button"]:hover {
+        background-color: rgba(15, 23, 42, 0.08) !important;
+        color: rgba(15, 23, 42, 0.95) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="dark"]) [data-slot="drafting-layer-context-menu"] button:hover {
+        background-color: rgba(255, 255, 255, 0.11) !important;
+        color: rgba(255, 255, 255, 0.96) !important;
       }
 
       body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="drafting-layer-context-menu-separator"] {
@@ -195,6 +427,15 @@ function DesktopWorkspaceStyles() {
 
       body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"] input[type="color"] {
         background: rgba(255, 255, 255, 0.72) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button:hover::before {
+        background: rgba(15, 23, 42, 0.08) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button[aria-pressed="true"]::before {
+        background: rgba(15, 23, 42, 0.12) !important;
+        box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08) !important;
       }
     `}</style>
   )

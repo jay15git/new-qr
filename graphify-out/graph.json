@@ -972,7 +972,7 @@
       "source_file": "app/dashboard/page.test.tsx",
       "source_location": "L1",
       "id": "dashboard_page_test",
-      "community": 61,
+      "community": 38,
       "norm_label": "page.test.tsx"
     },
     {
@@ -981,7 +981,7 @@
       "source_file": "app/dashboard/page.tsx",
       "source_location": "L1",
       "id": "dashboard_page",
-      "community": 61,
+      "community": 38,
       "norm_label": "page.tsx"
     },
     {
@@ -990,7 +990,7 @@
       "source_file": "app/dashboard/page.tsx",
       "source_location": "L6",
       "id": "dashboard_page_metadata",
-      "community": 61,
+      "community": 38,
       "norm_label": "metadata"
     },
     {
@@ -999,7 +999,7 @@
       "source_file": "app/dashboard/page.tsx",
       "source_location": "L12",
       "id": "dashboard_page_dashboardpage",
-      "community": 61,
+      "community": 38,
       "norm_label": "dashboardpage()"
     },
     {
@@ -1143,7 +1143,7 @@
       "source_file": "app/new/page.test.tsx",
       "source_location": "L1",
       "id": "new_page_test",
-      "community": 50,
+      "community": 1,
       "norm_label": "page.test.tsx"
     },
     {
@@ -1152,7 +1152,7 @@
       "source_file": "app/new/page.tsx",
       "source_location": "L1",
       "id": "new_page",
-      "community": 50,
+      "community": 1,
       "norm_label": "page.tsx"
     },
     {
@@ -1161,7 +1161,7 @@
       "source_file": "app/new/page.tsx",
       "source_location": "L5",
       "id": "new_page_satoshi",
-      "community": 50,
+      "community": 1,
       "norm_label": "satoshi"
     },
     {
@@ -1170,7 +1170,7 @@
       "source_file": "app/new/page.tsx",
       "source_location": "L12",
       "id": "new_page_metadata",
-      "community": 50,
+      "community": 1,
       "norm_label": "metadata"
     },
     {
@@ -1179,7 +1179,7 @@
       "source_file": "app/new/page.tsx",
       "source_location": "L18",
       "id": "new_page_newpage",
-      "community": 50,
+      "community": 1,
       "norm_label": "newpage()"
     },
     {
@@ -1188,7 +1188,7 @@
       "source_file": "app/page.test.tsx",
       "source_location": "L1",
       "id": "app_page_test",
-      "community": 118,
+      "community": 5,
       "norm_label": "page.test.tsx"
     },
     {
@@ -1197,7 +1197,7 @@
       "source_file": "app/page.tsx",
       "source_location": "L1",
       "id": "app_page",
-      "community": 118,
+      "community": 5,
       "norm_label": "page.tsx"
     },
     {
@@ -1206,7 +1206,7 @@
       "source_file": "app/page.tsx",
       "source_location": "L5",
       "id": "app_page_metadata",
-      "community": 118,
+      "community": 5,
       "norm_label": "metadata"
     },
     {
@@ -1215,7 +1215,7 @@
       "source_file": "app/page.tsx",
       "source_location": "L10",
       "id": "app_page_home",
-      "community": 118,
+      "community": 5,
       "norm_label": "home()"
     },
     {
@@ -1224,7 +1224,7 @@
       "source_file": "app/settings/page.tsx",
       "source_location": "L1",
       "id": "settings_page",
-      "community": 38,
+      "community": 133,
       "norm_label": "page.tsx"
     },
     {
@@ -1233,7 +1233,7 @@
       "source_file": "app/settings/page.tsx",
       "source_location": "L7",
       "id": "settings_page_metadata",
-      "community": 38,
+      "community": 133,
       "norm_label": "metadata"
     },
     {
@@ -1242,7 +1242,7 @@
       "source_file": "app/settings/page.tsx",
       "source_location": "L13",
       "id": "settings_page_settingspage",
-      "community": 38,
+      "community": 133,
       "norm_label": "settingspage()"
     },
     {
@@ -2230,7 +2230,7 @@
       "label": "cleanupCallbacks",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L13",
+      "source_location": "L15",
       "id": "desktop_desktop_toolbar_prototype_test_cleanupcallbacks",
       "community": 63,
       "norm_label": "cleanupcallbacks"
@@ -2239,7 +2239,7 @@
       "label": "renderPrototype()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L897",
+      "source_location": "L986",
       "id": "desktop_desktop_toolbar_prototype_test_renderprototype",
       "community": 63,
       "norm_label": "renderprototype()"
@@ -2248,7 +2248,7 @@
       "label": "getToolButtons()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L916",
+      "source_location": "L1009",
       "id": "desktop_desktop_toolbar_prototype_test_gettoolbuttons",
       "community": 63,
       "norm_label": "gettoolbuttons()"
@@ -2257,7 +2257,7 @@
       "label": "getRequiredToolButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L924",
+      "source_location": "L1017",
       "id": "desktop_desktop_toolbar_prototype_test_getrequiredtoolbutton",
       "community": 63,
       "norm_label": "getrequiredtoolbutton()"
@@ -2266,7 +2266,7 @@
       "label": "getRequiredButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L936",
+      "source_location": "L1029",
       "id": "desktop_desktop_toolbar_prototype_test_getrequiredbutton",
       "community": 63,
       "norm_label": "getrequiredbutton()"
@@ -2275,7 +2275,7 @@
       "label": "getRequiredInput()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L948",
+      "source_location": "L1041",
       "id": "desktop_desktop_toolbar_prototype_test_getrequiredinput",
       "community": 63,
       "norm_label": "getrequiredinput()"
@@ -2284,7 +2284,7 @@
       "label": "getRequiredSelect()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L958",
+      "source_location": "L1051",
       "id": "desktop_desktop_toolbar_prototype_test_getrequiredselect",
       "community": 63,
       "norm_label": "getrequiredselect()"
@@ -2293,7 +2293,7 @@
       "label": "getRequiredTextarea()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L968",
+      "source_location": "L1061",
       "id": "desktop_desktop_toolbar_prototype_test_getrequiredtextarea",
       "community": 63,
       "norm_label": "getrequiredtextarea()"
@@ -2302,7 +2302,7 @@
       "label": "setInputValue()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L978",
+      "source_location": "L1071",
       "id": "desktop_desktop_toolbar_prototype_test_setinputvalue",
       "community": 63,
       "norm_label": "setinputvalue()"
@@ -2311,7 +2311,7 @@
       "label": "setTextareaValue()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L984",
+      "source_location": "L1077",
       "id": "desktop_desktop_toolbar_prototype_test_settextareavalue",
       "community": 63,
       "norm_label": "settextareavalue()"
@@ -2320,7 +2320,7 @@
       "label": "setSelectValue()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L990",
+      "source_location": "L1083",
       "id": "desktop_desktop_toolbar_prototype_test_setselectvalue",
       "community": 63,
       "norm_label": "setselectvalue()"
@@ -2338,7 +2338,7 @@
       "label": "DesktopToolbarGroup",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L128",
+      "source_location": "L130",
       "id": "desktop_desktop_toolbar_prototype_desktoptoolbargroup",
       "community": 0,
       "norm_label": "desktoptoolbargroup"
@@ -2347,16 +2347,16 @@
       "label": "DesktopToolbarToolId",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L129",
+      "source_location": "L131",
       "id": "desktop_desktop_toolbar_prototype_desktoptoolbartoolid",
-      "community": 1,
+      "community": 0,
       "norm_label": "desktoptoolbartoolid"
     },
     {
       "label": "DesktopToolbarTool",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L144",
+      "source_location": "L146",
       "id": "desktop_desktop_toolbar_prototype_desktoptoolbartool",
       "community": 0,
       "norm_label": "desktoptoolbartool"
@@ -2365,7 +2365,7 @@
       "label": "DesktopThemeMode",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L151",
+      "source_location": "L153",
       "id": "desktop_desktop_toolbar_prototype_desktopthememode",
       "community": 76,
       "norm_label": "desktopthememode"
@@ -2374,7 +2374,7 @@
       "label": "DESKTOP_TOOLBAR_TOOLS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L153",
+      "source_location": "L155",
       "id": "desktop_desktop_toolbar_prototype_desktop_toolbar_tools",
       "community": 63,
       "norm_label": "desktop_toolbar_tools"
@@ -2383,7 +2383,7 @@
       "label": "DESKTOP_CONTENT_PRESET_TYPES",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L236",
+      "source_location": "L238",
       "id": "desktop_desktop_toolbar_prototype_desktop_content_preset_types",
       "community": 0,
       "norm_label": "desktop_content_preset_types"
@@ -2392,7 +2392,7 @@
       "label": "DesktopContentCollectionId",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L247",
+      "source_location": "L249",
       "id": "desktop_desktop_toolbar_prototype_desktopcontentcollectionid",
       "community": 0,
       "norm_label": "desktopcontentcollectionid"
@@ -2401,7 +2401,7 @@
       "label": "DESKTOP_CONTENT_COLLECTIONS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L249",
+      "source_location": "L251",
       "id": "desktop_desktop_toolbar_prototype_desktop_content_collections",
       "community": 0,
       "norm_label": "desktop_content_collections"
@@ -2410,19 +2410,10 @@
       "label": "DESKTOP_ALL_CONTENT_TYPES",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L281",
+      "source_location": "L283",
       "id": "desktop_desktop_toolbar_prototype_desktop_all_content_types",
       "community": 0,
       "norm_label": "desktop_all_content_types"
-    },
-    {
-      "label": "DesktopPatternCollectionId",
-      "file_type": "code",
-      "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L288",
-      "id": "desktop_desktop_toolbar_prototype_desktoppatterncollectionid",
-      "community": 0,
-      "norm_label": "desktoppatterncollectionid"
     },
     {
       "label": "DesktopPatternSettings",
@@ -2430,7 +2421,7 @@
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
       "source_location": "L290",
       "id": "desktop_desktop_toolbar_prototype_desktoppatternsettings",
-      "community": 1,
+      "community": 0,
       "norm_label": "desktoppatternsettings"
     },
     {
@@ -2439,7 +2430,7 @@
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
       "source_location": "L298",
       "id": "desktop_desktop_toolbar_prototype_desktoplogosourcemode",
-      "community": 1,
+      "community": 0,
       "norm_label": "desktoplogosourcemode"
     },
     {
@@ -2448,7 +2439,7 @@
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
       "source_location": "L299",
       "id": "desktop_desktop_toolbar_prototype_desktopassetsourcemode",
-      "community": 1,
+      "community": 0,
       "norm_label": "desktopassetsourcemode"
     },
     {
@@ -2457,7 +2448,7 @@
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
       "source_location": "L301",
       "id": "desktop_desktop_toolbar_prototype_desktoplogosettings",
-      "community": 1,
+      "community": 0,
       "norm_label": "desktoplogosettings"
     },
     {
@@ -2466,7 +2457,7 @@
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
       "source_location": "L315",
       "id": "desktop_desktop_toolbar_prototype_desktopcornerssettings",
-      "community": 1,
+      "community": 0,
       "norm_label": "desktopcornerssettings"
     },
     {
@@ -2511,7 +2502,7 @@
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
       "source_location": "L366",
       "id": "desktop_desktop_toolbar_prototype_desktopencodingsettings",
-      "community": 1,
+      "community": 0,
       "norm_label": "desktopencodingsettings"
     },
     {
@@ -2529,7 +2520,7 @@
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
       "source_location": "L373",
       "id": "desktop_desktop_toolbar_prototype_desktopimagesettings",
-      "community": 1,
+      "community": 0,
       "norm_label": "desktopimagesettings"
     },
     {
@@ -2565,7 +2556,7 @@
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
       "source_location": "L401",
       "id": "desktop_desktop_toolbar_prototype_desktoplayerrow",
-      "community": 1,
+      "community": 0,
       "norm_label": "desktoplayerrow"
     },
     {
@@ -2574,7 +2565,7 @@
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
       "source_location": "L420",
       "id": "desktop_desktop_toolbar_prototype_desktoplayerssettings",
-      "community": 1,
+      "community": 0,
       "norm_label": "desktoplayerssettings"
     },
     {
@@ -2610,7 +2601,7 @@
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
       "source_location": "L440",
       "id": "desktop_desktop_toolbar_prototype_desktoptextsettings",
-      "community": 1,
+      "community": 0,
       "norm_label": "desktoptextsettings"
     },
     {
@@ -2628,23 +2619,14 @@
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
       "source_location": "L456",
       "id": "desktop_desktop_toolbar_prototype_desktoptoolbarcontroller",
-      "community": 1,
-      "norm_label": "desktoptoolbarcontroller"
-    },
-    {
-      "label": "DESKTOP_PATTERN_COLLECTIONS",
-      "file_type": "code",
-      "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L505",
-      "id": "desktop_desktop_toolbar_prototype_desktop_pattern_collections",
       "community": 0,
-      "norm_label": "desktop_pattern_collections"
+      "norm_label": "desktoptoolbarcontroller"
     },
     {
       "label": "DEFAULT_DESKTOP_DOTS_GRADIENT",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L513",
+      "source_location": "L510",
       "id": "desktop_desktop_toolbar_prototype_default_desktop_dots_gradient",
       "community": 0,
       "norm_label": "default_desktop_dots_gradient"
@@ -2653,7 +2635,7 @@
       "label": "DEFAULT_DESKTOP_DOTS_PALETTE",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L523",
+      "source_location": "L520",
       "id": "desktop_desktop_toolbar_prototype_default_desktop_dots_palette",
       "community": 0,
       "norm_label": "default_desktop_dots_palette"
@@ -2662,7 +2644,7 @@
       "label": "DESKTOP_BRAND_ICON_CATEGORY_OPTIONS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L525",
+      "source_location": "L522",
       "id": "desktop_desktop_toolbar_prototype_desktop_brand_icon_category_options",
       "community": 0,
       "norm_label": "desktop_brand_icon_category_options"
@@ -2671,7 +2653,7 @@
       "label": "DESKTOP_DOTS_COLOR_MODES",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L538",
+      "source_location": "L535",
       "id": "desktop_desktop_toolbar_prototype_desktop_dots_color_modes",
       "community": 0,
       "norm_label": "desktop_dots_color_modes"
@@ -2680,7 +2662,7 @@
       "label": "DESKTOP_CORNER_COLOR_MODES",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L544",
+      "source_location": "L541",
       "id": "desktop_desktop_toolbar_prototype_desktop_corner_color_modes",
       "community": 0,
       "norm_label": "desktop_corner_color_modes"
@@ -2689,7 +2671,7 @@
       "label": "DESKTOP_SHAPE_COLOR_MODES",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L549",
+      "source_location": "L546",
       "id": "desktop_desktop_toolbar_prototype_desktop_shape_color_modes",
       "community": 0,
       "norm_label": "desktop_shape_color_modes"
@@ -2698,7 +2680,7 @@
       "label": "DESKTOP_GRADIENT_TYPE_OPTIONS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L554",
+      "source_location": "L551",
       "id": "desktop_desktop_toolbar_prototype_desktop_gradient_type_options",
       "community": 0,
       "norm_label": "desktop_gradient_type_options"
@@ -2707,7 +2689,7 @@
       "label": "DESKTOP_LOGO_SOURCE_OPTIONS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L559",
+      "source_location": "L556",
       "id": "desktop_desktop_toolbar_prototype_desktop_logo_source_options",
       "community": 0,
       "norm_label": "desktop_logo_source_options"
@@ -2716,7 +2698,7 @@
       "label": "DESKTOP_ASSET_SOURCE_OPTIONS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L566",
+      "source_location": "L563",
       "id": "desktop_desktop_toolbar_prototype_desktop_asset_source_options",
       "community": 0,
       "norm_label": "desktop_asset_source_options"
@@ -2725,7 +2707,7 @@
       "label": "DESKTOP_IMAGE_INTENT_OPTIONS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L571",
+      "source_location": "L568",
       "id": "desktop_desktop_toolbar_prototype_desktop_image_intent_options",
       "community": 0,
       "norm_label": "desktop_image_intent_options"
@@ -2734,7 +2716,7 @@
       "label": "DESKTOP_DECORATION_OPTIONS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L577",
+      "source_location": "L574",
       "id": "desktop_desktop_toolbar_prototype_desktop_decoration_options",
       "community": 0,
       "norm_label": "desktop_decoration_options"
@@ -2743,7 +2725,7 @@
       "label": "DESKTOP_EXPORT_TARGET_OPTIONS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L584",
+      "source_location": "L581",
       "id": "desktop_desktop_toolbar_prototype_desktop_export_target_options",
       "community": 0,
       "norm_label": "desktop_export_target_options"
@@ -2752,7 +2734,7 @@
       "label": "DESKTOP_RASTER_EXPORT_PRESETS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L594",
+      "source_location": "L591",
       "id": "desktop_desktop_toolbar_prototype_desktop_raster_export_presets",
       "community": 0,
       "norm_label": "desktop_raster_export_presets"
@@ -2761,7 +2743,7 @@
       "label": "DEFAULT_DESKTOP_PATTERN_SETTINGS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L603",
+      "source_location": "L600",
       "id": "desktop_desktop_toolbar_prototype_default_desktop_pattern_settings",
       "community": 0,
       "norm_label": "default_desktop_pattern_settings"
@@ -2770,7 +2752,7 @@
       "label": "DEFAULT_DESKTOP_LOGO_SETTINGS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L611",
+      "source_location": "L608",
       "id": "desktop_desktop_toolbar_prototype_default_desktop_logo_settings",
       "community": 0,
       "norm_label": "default_desktop_logo_settings"
@@ -2779,7 +2761,7 @@
       "label": "DEFAULT_DESKTOP_CORNERS_SETTINGS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L625",
+      "source_location": "L622",
       "id": "desktop_desktop_toolbar_prototype_default_desktop_corners_settings",
       "community": 0,
       "norm_label": "default_desktop_corners_settings"
@@ -2788,7 +2770,7 @@
       "label": "DEFAULT_DESKTOP_SHAPE_SETTINGS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L648",
+      "source_location": "L645",
       "id": "desktop_desktop_toolbar_prototype_default_desktop_shape_settings",
       "community": 0,
       "norm_label": "default_desktop_shape_settings"
@@ -2797,7 +2779,7 @@
       "label": "DEFAULT_DESKTOP_MOTION_SETTINGS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L690",
+      "source_location": "L687",
       "id": "desktop_desktop_toolbar_prototype_default_desktop_motion_settings",
       "community": 0,
       "norm_label": "default_desktop_motion_settings"
@@ -2806,7 +2788,7 @@
       "label": "DEFAULT_DESKTOP_ENCODING_SETTINGS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L694",
+      "source_location": "L691",
       "id": "desktop_desktop_toolbar_prototype_default_desktop_encoding_settings",
       "community": 0,
       "norm_label": "default_desktop_encoding_settings"
@@ -2815,7 +2797,7 @@
       "label": "DEFAULT_DESKTOP_IMAGE_SETTINGS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L699",
+      "source_location": "L696",
       "id": "desktop_desktop_toolbar_prototype_default_desktop_image_settings",
       "community": 0,
       "norm_label": "default_desktop_image_settings"
@@ -2824,7 +2806,7 @@
       "label": "DEFAULT_DESKTOP_DECORATIONS_SETTINGS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L707",
+      "source_location": "L704",
       "id": "desktop_desktop_toolbar_prototype_default_desktop_decorations_settings",
       "community": 0,
       "norm_label": "default_desktop_decorations_settings"
@@ -2833,7 +2815,7 @@
       "label": "DEFAULT_DESKTOP_EFFECTS_SETTINGS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L716",
+      "source_location": "L713",
       "id": "desktop_desktop_toolbar_prototype_default_desktop_effects_settings",
       "community": 0,
       "norm_label": "default_desktop_effects_settings"
@@ -2842,7 +2824,7 @@
       "label": "DEFAULT_DESKTOP_LAYERS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L726",
+      "source_location": "L723",
       "id": "desktop_desktop_toolbar_prototype_default_desktop_layers",
       "community": 0,
       "norm_label": "default_desktop_layers"
@@ -2851,7 +2833,7 @@
       "label": "DEFAULT_DESKTOP_LAYERS_SETTINGS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L783",
+      "source_location": "L780",
       "id": "desktop_desktop_toolbar_prototype_default_desktop_layers_settings",
       "community": 0,
       "norm_label": "default_desktop_layers_settings"
@@ -2860,7 +2842,7 @@
       "label": "DEFAULT_DESKTOP_EXPORT_SETTINGS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L788",
+      "source_location": "L785",
       "id": "desktop_desktop_toolbar_prototype_default_desktop_export_settings",
       "community": 0,
       "norm_label": "default_desktop_export_settings"
@@ -2869,7 +2851,7 @@
       "label": "DEFAULT_DESKTOP_TEXT_SETTINGS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L794",
+      "source_location": "L791",
       "id": "desktop_desktop_toolbar_prototype_default_desktop_text_settings",
       "community": 0,
       "norm_label": "default_desktop_text_settings"
@@ -2878,7 +2860,7 @@
       "label": "DESKTOP_TEXT_PRESETS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L808",
+      "source_location": "L805",
       "id": "desktop_desktop_toolbar_prototype_desktop_text_presets",
       "community": 0,
       "norm_label": "desktop_text_presets"
@@ -2887,7 +2869,7 @@
       "label": "DESKTOP_TEXT_ALIGN_OPTIONS",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L820",
+      "source_location": "L817",
       "id": "desktop_desktop_toolbar_prototype_desktop_text_align_options",
       "community": 0,
       "norm_label": "desktop_text_align_options"
@@ -2896,7 +2878,7 @@
       "label": "DESKTOP_MOTION_COLOR_SWATCHES",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L826",
+      "source_location": "L823",
       "id": "desktop_desktop_toolbar_prototype_desktop_motion_color_swatches",
       "community": 0,
       "norm_label": "desktop_motion_color_swatches"
@@ -2905,7 +2887,7 @@
       "label": "DesktopToolbarPrototype()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L837",
+      "source_location": "L834",
       "id": "desktop_desktop_toolbar_prototype_desktoptoolbarprototype",
       "community": 76,
       "norm_label": "desktoptoolbarprototype()"
@@ -2914,7 +2896,7 @@
       "label": "DesktopThemeStyles()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1190",
+      "source_location": "L1226",
       "id": "desktop_desktop_toolbar_prototype_desktopthemestyles",
       "community": 0,
       "norm_label": "desktopthemestyles()"
@@ -2923,7 +2905,7 @@
       "label": "DesktopInspectorHeader()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1349",
+      "source_location": "L1429",
       "id": "desktop_desktop_toolbar_prototype_desktopinspectorheader",
       "community": 0,
       "norm_label": "desktopinspectorheader()"
@@ -2932,16 +2914,25 @@
       "label": "DesktopInspectorFooter()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1361",
+      "source_location": "L1441",
       "id": "desktop_desktop_toolbar_prototype_desktopinspectorfooter",
       "community": 0,
       "norm_label": "desktopinspectorfooter()"
     },
     {
+      "label": "getDesktopAdaptiveOptionPreviewStyle()",
+      "file_type": "code",
+      "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
+      "source_location": "L1463",
+      "id": "desktop_desktop_toolbar_prototype_getdesktopadaptiveoptionpreviewstyle",
+      "community": 114,
+      "norm_label": "getdesktopadaptiveoptionpreviewstyle()"
+    },
+    {
       "label": "DesktopLogoInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1383",
+      "source_location": "L1471",
       "id": "desktop_desktop_toolbar_prototype_desktoplogoinspector",
       "community": 0,
       "norm_label": "desktoplogoinspector()"
@@ -2950,7 +2941,7 @@
       "label": "DesktopBrandIconButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1607",
+      "source_location": "L1695",
       "id": "desktop_desktop_toolbar_prototype_desktopbrandiconbutton",
       "community": 0,
       "norm_label": "desktopbrandiconbutton()"
@@ -2959,7 +2950,7 @@
       "label": "DesktopCornersInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1634",
+      "source_location": "L1722",
       "id": "desktop_desktop_toolbar_prototype_desktopcornersinspector",
       "community": 0,
       "norm_label": "desktopcornersinspector()"
@@ -2968,7 +2959,7 @@
       "label": "DesktopCornerColorSection()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1766",
+      "source_location": "L1858",
       "id": "desktop_desktop_toolbar_prototype_desktopcornercolorsection",
       "community": 0,
       "norm_label": "desktopcornercolorsection()"
@@ -2977,34 +2968,34 @@
       "label": "DesktopCornerColorPreview()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1858",
+      "source_location": "L1950",
       "id": "desktop_desktop_toolbar_prototype_desktopcornercolorpreview",
-      "community": 0,
+      "community": 117,
       "norm_label": "desktopcornercolorpreview()"
     },
     {
       "label": "DesktopCornerStyleButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1884",
+      "source_location": "L1976",
       "id": "desktop_desktop_toolbar_prototype_desktopcornerstylebutton",
-      "community": 0,
+      "community": 114,
       "norm_label": "desktopcornerstylebutton()"
     },
     {
       "label": "getDesktopCornerColorPreviewBackground()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1923",
+      "source_location": "L2025",
       "id": "desktop_desktop_toolbar_prototype_getdesktopcornercolorpreviewbackground",
-      "community": 0,
+      "community": 117,
       "norm_label": "getdesktopcornercolorpreviewbackground()"
     },
     {
       "label": "DesktopShapeInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1942",
+      "source_location": "L2044",
       "id": "desktop_desktop_toolbar_prototype_desktopshapeinspector",
       "community": 0,
       "norm_label": "desktopshapeinspector()"
@@ -3013,7 +3004,7 @@
       "label": "DesktopShapePresetButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2236",
+      "source_location": "L2342",
       "id": "desktop_desktop_toolbar_prototype_desktopshapepresetbutton",
       "community": 0,
       "norm_label": "desktopshapepresetbutton()"
@@ -3022,7 +3013,7 @@
       "label": "DesktopShapePreview()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2274",
+      "source_location": "L2390",
       "id": "desktop_desktop_toolbar_prototype_desktopshapepreview",
       "community": 0,
       "norm_label": "desktopshapepreview()"
@@ -3031,7 +3022,7 @@
       "label": "DesktopMotionInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2342",
+      "source_location": "L2464",
       "id": "desktop_desktop_toolbar_prototype_desktopmotioninspector",
       "community": 0,
       "norm_label": "desktopmotioninspector()"
@@ -3040,7 +3031,7 @@
       "label": "DesktopMotionToggleRow()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2488",
+      "source_location": "L2610",
       "id": "desktop_desktop_toolbar_prototype_desktopmotiontogglerow",
       "community": 0,
       "norm_label": "desktopmotiontogglerow()"
@@ -3049,7 +3040,7 @@
       "label": "DesktopMotionSliderRow()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2526",
+      "source_location": "L2648",
       "id": "desktop_desktop_toolbar_prototype_desktopmotionsliderrow",
       "community": 0,
       "norm_label": "desktopmotionsliderrow()"
@@ -3058,7 +3049,7 @@
       "label": "DesktopMotionLoaderButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2565",
+      "source_location": "L2687",
       "id": "desktop_desktop_toolbar_prototype_desktopmotionloaderbutton",
       "community": 0,
       "norm_label": "desktopmotionloaderbutton()"
@@ -3067,7 +3058,7 @@
       "label": "DesktopMotionColorPresetButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2593",
+      "source_location": "L2715",
       "id": "desktop_desktop_toolbar_prototype_desktopmotioncolorpresetbutton",
       "community": 0,
       "norm_label": "desktopmotioncolorpresetbutton()"
@@ -3076,7 +3067,7 @@
       "label": "DesktopContentInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2633",
+      "source_location": "L2755",
       "id": "desktop_desktop_toolbar_prototype_desktopcontentinspector",
       "community": 0,
       "norm_label": "desktopcontentinspector()"
@@ -3085,7 +3076,7 @@
       "label": "DesktopPatternInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2794",
+      "source_location": "L2922",
       "id": "desktop_desktop_toolbar_prototype_desktoppatterninspector",
       "community": 0,
       "norm_label": "desktoppatterninspector()"
@@ -3094,16 +3085,16 @@
       "label": "DesktopModulePatternButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2968",
+      "source_location": "L3078",
       "id": "desktop_desktop_toolbar_prototype_desktopmodulepatternbutton",
-      "community": 0,
+      "community": 114,
       "norm_label": "desktopmodulepatternbutton()"
     },
     {
       "label": "DesktopQrDotPreview()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3006",
+      "source_location": "L3117",
       "id": "desktop_desktop_toolbar_prototype_desktopqrdotpreview",
       "community": 0,
       "norm_label": "desktopqrdotpreview()"
@@ -3112,16 +3103,16 @@
       "label": "DesktopDotsColorPreview()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3023",
+      "source_location": "L3144",
       "id": "desktop_desktop_toolbar_prototype_desktopdotscolorpreview",
-      "community": 0,
+      "community": 118,
       "norm_label": "desktopdotscolorpreview()"
     },
     {
       "label": "DesktopColorInputRow()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3045",
+      "source_location": "L3166",
       "id": "desktop_desktop_toolbar_prototype_desktopcolorinputrow",
       "community": 0,
       "norm_label": "desktopcolorinputrow()"
@@ -3130,7 +3121,7 @@
       "label": "DesktopNumberRow()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3076",
+      "source_location": "L3197",
       "id": "desktop_desktop_toolbar_prototype_desktopnumberrow",
       "community": 0,
       "norm_label": "desktopnumberrow()"
@@ -3139,7 +3130,7 @@
       "label": "DesktopPatternSwatchButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3114",
+      "source_location": "L3235",
       "id": "desktop_desktop_toolbar_prototype_desktoppatternswatchbutton",
       "community": 0,
       "norm_label": "desktoppatternswatchbutton()"
@@ -3148,7 +3139,7 @@
       "label": "DesktopTextPresetButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3150",
+      "source_location": "L3271",
       "id": "desktop_desktop_toolbar_prototype_desktoptextpresetbutton",
       "community": 0,
       "norm_label": "desktoptextpresetbutton()"
@@ -3157,7 +3148,7 @@
       "label": "DesktopSegmentedRow()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3177",
+      "source_location": "L3298",
       "id": "desktop_desktop_toolbar_prototype_desktopsegmentedrow",
       "community": 0,
       "norm_label": "desktopsegmentedrow()"
@@ -3166,7 +3157,7 @@
       "label": "updateDesktopGradientColor()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3211",
+      "source_location": "L3332",
       "id": "desktop_desktop_toolbar_prototype_updatedesktopgradientcolor",
       "community": 0,
       "norm_label": "updatedesktopgradientcolor()"
@@ -3175,25 +3166,25 @@
       "label": "getDesktopDotsColorPreviewBackground()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3225",
+      "source_location": "L3346",
       "id": "desktop_desktop_toolbar_prototype_getdesktopdotscolorpreviewbackground",
-      "community": 0,
+      "community": 118,
       "norm_label": "getdesktopdotscolorpreviewbackground()"
     },
     {
       "label": "DesktopContentFields()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3240",
+      "source_location": "L3361",
       "id": "desktop_desktop_toolbar_prototype_desktopcontentfields",
-      "community": 0,
+      "community": 47,
       "norm_label": "desktopcontentfields()"
     },
     {
       "label": "DesktopContentField",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3266",
+      "source_location": "L3387",
       "id": "desktop_desktop_toolbar_prototype_desktopcontentfield",
       "community": 0,
       "norm_label": "desktopcontentfield"
@@ -3202,61 +3193,61 @@
       "label": "DesktopContentFieldRow()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3276",
+      "source_location": "L3397",
       "id": "desktop_desktop_toolbar_prototype_desktopcontentfieldrow",
-      "community": 0,
+      "community": 47,
       "norm_label": "desktopcontentfieldrow()"
     },
     {
       "label": "getDesktopContentFields()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3363",
+      "source_location": "L3484",
       "id": "desktop_desktop_toolbar_prototype_getdesktopcontentfields",
-      "community": 0,
+      "community": 47,
       "norm_label": "getdesktopcontentfields()"
     },
     {
       "label": "isUrlContentType()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3505",
+      "source_location": "L3626",
       "id": "desktop_desktop_toolbar_prototype_isurlcontenttype",
-      "community": 0,
+      "community": 47,
       "norm_label": "isurlcontenttype()"
     },
     {
       "label": "isUsernameContentType()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3526",
+      "source_location": "L3647",
       "id": "desktop_desktop_toolbar_prototype_isusernamecontenttype",
-      "community": 0,
+      "community": 47,
       "norm_label": "isusernamecontenttype()"
     },
     {
       "label": "stringContentValue()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3539",
+      "source_location": "L3660",
       "id": "desktop_desktop_toolbar_prototype_stringcontentvalue",
-      "community": 0,
+      "community": 47,
       "norm_label": "stringcontentvalue()"
     },
     {
       "label": "DesktopEncodingInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3543",
+      "source_location": "L3664",
       "id": "desktop_desktop_toolbar_prototype_desktopencodinginspector",
-      "community": 0,
+      "community": 124,
       "norm_label": "desktopencodinginspector()"
     },
     {
       "label": "DesktopImageInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3601",
+      "source_location": "L3722",
       "id": "desktop_desktop_toolbar_prototype_desktopimageinspector",
       "community": 0,
       "norm_label": "desktopimageinspector()"
@@ -3265,7 +3256,7 @@
       "label": "DesktopDecorationsInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3701",
+      "source_location": "L3822",
       "id": "desktop_desktop_toolbar_prototype_desktopdecorationsinspector",
       "community": 0,
       "norm_label": "desktopdecorationsinspector()"
@@ -3274,7 +3265,7 @@
       "label": "DesktopEffectsInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3792",
+      "source_location": "L3913",
       "id": "desktop_desktop_toolbar_prototype_desktopeffectsinspector",
       "community": 64,
       "norm_label": "desktopeffectsinspector()"
@@ -3283,7 +3274,7 @@
       "label": "DesktopLayersInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3910",
+      "source_location": "L4031",
       "id": "desktop_desktop_toolbar_prototype_desktoplayersinspector",
       "community": 0,
       "norm_label": "desktoplayersinspector()"
@@ -3292,7 +3283,7 @@
       "label": "DesktopExportInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4004",
+      "source_location": "L4125",
       "id": "desktop_desktop_toolbar_prototype_desktopexportinspector",
       "community": 0,
       "norm_label": "desktopexportinspector()"
@@ -3301,16 +3292,16 @@
       "label": "DesktopTextInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4118",
+      "source_location": "L4239",
       "id": "desktop_desktop_toolbar_prototype_desktoptextinspector",
-      "community": 0,
+      "community": 55,
       "norm_label": "desktoptextinspector()"
     },
     {
       "label": "DesktopTextToggleButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4365",
+      "source_location": "L4486",
       "id": "desktop_desktop_toolbar_prototype_desktoptexttogglebutton",
       "community": 0,
       "norm_label": "desktoptexttogglebutton()"
@@ -3319,7 +3310,7 @@
       "label": "DesktopTextAlignIcon()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4392",
+      "source_location": "L4513",
       "id": "desktop_desktop_toolbar_prototype_desktoptextalignicon",
       "community": 0,
       "norm_label": "desktoptextalignicon()"
@@ -3328,7 +3319,7 @@
       "label": "DesktopTextInlineSlider()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4404",
+      "source_location": "L4525",
       "id": "desktop_desktop_toolbar_prototype_desktoptextinlineslider",
       "community": 0,
       "norm_label": "desktoptextinlineslider()"
@@ -3337,7 +3328,7 @@
       "label": "DesktopTextNumberRow()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4443",
+      "source_location": "L4564",
       "id": "desktop_desktop_toolbar_prototype_desktoptextnumberrow",
       "community": 0,
       "norm_label": "desktoptextnumberrow()"
@@ -3346,43 +3337,43 @@
       "label": "getDesktopTextPresetId()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4481",
+      "source_location": "L4602",
       "id": "desktop_desktop_toolbar_prototype_getdesktoptextpresetid",
-      "community": 0,
+      "community": 55,
       "norm_label": "getdesktoptextpresetid()"
     },
     {
       "label": "getDesktopTextInspectorFontWeight()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4492",
+      "source_location": "L4613",
       "id": "desktop_desktop_toolbar_prototype_getdesktoptextinspectorfontweight",
-      "community": 0,
+      "community": 55,
       "norm_label": "getdesktoptextinspectorfontweight()"
     },
     {
       "label": "getNearestDesktopFontWeight()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4507",
+      "source_location": "L4628",
       "id": "desktop_desktop_toolbar_prototype_getnearestdesktopfontweight",
-      "community": 0,
+      "community": 55,
       "norm_label": "getnearestdesktopfontweight()"
     },
     {
       "label": "getDesktopFontWeightSliderStep()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4520",
+      "source_location": "L4641",
       "id": "desktop_desktop_toolbar_prototype_getdesktopfontweightsliderstep",
-      "community": 0,
+      "community": 55,
       "norm_label": "getdesktopfontweightsliderstep()"
     },
     {
       "label": "DesktopPlaceholderInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4532",
+      "source_location": "L4653",
       "id": "desktop_desktop_toolbar_prototype_desktopplaceholderinspector",
       "community": 0,
       "norm_label": "desktopplaceholderinspector()"
@@ -3429,7 +3420,7 @@
       "source_file": "components/home/home-prompt-shell.tsx",
       "source_location": "L1",
       "id": "home_home_prompt_shell",
-      "community": 118,
+      "community": 5,
       "norm_label": "home-prompt-shell.tsx"
     },
     {
@@ -3438,7 +3429,7 @@
       "source_file": "components/home/home-prompt-shell.tsx",
       "source_location": "L12",
       "id": "home_home_prompt_shell_homepromptshell",
-      "community": 118,
+      "community": 5,
       "norm_label": "homepromptshell()"
     },
     {
@@ -3663,7 +3654,7 @@
       "source_file": "components/new/drafting-card-paper-shader-layer.tsx",
       "source_location": "L25",
       "id": "new_drafting_card_paper_shader_layer_papershadererrorboundary",
-      "community": 64,
+      "community": 96,
       "norm_label": "papershadererrorboundary"
     },
     {
@@ -3672,7 +3663,7 @@
       "source_file": "components/new/drafting-card-paper-shader-layer.tsx",
       "source_location": "L31",
       "id": "new_drafting_card_paper_shader_layer_papershadererrorboundary_getderivedstatefromerror",
-      "community": 64,
+      "community": 96,
       "norm_label": ".getderivedstatefromerror()"
     },
     {
@@ -3681,7 +3672,7 @@
       "source_file": "components/new/drafting-card-paper-shader-layer.tsx",
       "source_location": "L35",
       "id": "new_drafting_card_paper_shader_layer_papershadererrorboundary_componentdidcatch",
-      "community": 64,
+      "community": 96,
       "norm_label": ".componentdidcatch()"
     },
     {
@@ -3690,7 +3681,7 @@
       "source_file": "components/new/drafting-card-paper-shader-layer.tsx",
       "source_location": "L39",
       "id": "new_drafting_card_paper_shader_layer_papershadererrorboundary_render",
-      "community": 64,
+      "community": 96,
       "norm_label": ".render()"
     },
     {
@@ -3924,7 +3915,7 @@
       "source_file": "components/new/drafting-card-state.ts",
       "source_location": "L103",
       "id": "new_drafting_card_state_clonedraftingcardstate",
-      "community": 55,
+      "community": 28,
       "norm_label": "clonedraftingcardstate()"
     },
     {
@@ -3951,7 +3942,7 @@
       "source_file": "components/new/drafting-card-state.ts",
       "source_location": "L168",
       "id": "new_drafting_card_state_createdefaultdraftingcardstate",
-      "community": 55,
+      "community": 22,
       "norm_label": "createdefaultdraftingcardstate()"
     },
     {
@@ -4113,7 +4104,7 @@
       "source_file": "components/new/drafting-font-registry.ts",
       "source_location": "L234",
       "id": "new_drafting_font_registry_ensuredraftingfontsforlayers",
-      "community": 1,
+      "community": 62,
       "norm_label": "ensuredraftingfontsforlayers()"
     },
     {
@@ -4347,7 +4338,7 @@
       "source_file": "components/new/drafting-layer-state.ts",
       "source_location": "L18",
       "id": "new_drafting_layer_state_draftingtextrun",
-      "community": 16,
+      "community": 9,
       "norm_label": "draftingtextrun"
     },
     {
@@ -4356,7 +4347,7 @@
       "source_file": "components/new/drafting-layer-state.ts",
       "source_location": "L29",
       "id": "new_drafting_layer_state_draftingcanvaslayer",
-      "community": 16,
+      "community": 66,
       "norm_label": "draftingcanvaslayer"
     },
     {
@@ -4365,7 +4356,7 @@
       "source_file": "components/new/drafting-layer-state.ts",
       "source_location": "L60",
       "id": "new_drafting_layer_state_draftinglayerstatebynodeid",
-      "community": 16,
+      "community": 22,
       "norm_label": "draftinglayerstatebynodeid"
     },
     {
@@ -4374,7 +4365,7 @@
       "source_file": "components/new/drafting-layer-state.ts",
       "source_location": "L61",
       "id": "new_drafting_layer_state_draftinglayerreorderaction",
-      "community": 16,
+      "community": 9,
       "norm_label": "draftinglayerreorderaction"
     },
     {
@@ -4383,7 +4374,7 @@
       "source_file": "components/new/drafting-layer-state.ts",
       "source_location": "L62",
       "id": "new_drafting_layer_state_draftinglayeralignaction",
-      "community": 16,
+      "community": 9,
       "norm_label": "draftinglayeralignaction"
     },
     {
@@ -4392,7 +4383,7 @@
       "source_file": "components/new/drafting-layer-state.ts",
       "source_location": "L69",
       "id": "new_drafting_layer_state_draftinglayerdistributeaction",
-      "community": 16,
+      "community": 9,
       "norm_label": "draftinglayerdistributeaction"
     },
     {
@@ -4419,7 +4410,7 @@
       "source_file": "components/new/drafting-layer-state.ts",
       "source_location": "L95",
       "id": "new_drafting_layer_state_getdraftingcardlayerid",
-      "community": 57,
+      "community": 16,
       "norm_label": "getdraftingcardlayerid()"
     },
     {
@@ -4428,7 +4419,7 @@
       "source_file": "components/new/drafting-layer-state.ts",
       "source_location": "L99",
       "id": "new_drafting_layer_state_getdraftingqrlayerid",
-      "community": 57,
+      "community": 16,
       "norm_label": "getdraftingqrlayerid()"
     },
     {
@@ -4455,7 +4446,7 @@
       "source_file": "components/new/drafting-layer-state.ts",
       "source_location": "L111",
       "id": "new_drafting_layer_state_createdefaultdraftinglayers",
-      "community": 55,
+      "community": 16,
       "norm_label": "createdefaultdraftinglayers()"
     },
     {
@@ -4464,7 +4455,7 @@
       "source_file": "components/new/drafting-layer-state.ts",
       "source_location": "L160",
       "id": "new_drafting_layer_state_createdraftingtextlayer",
-      "community": 57,
+      "community": 16,
       "norm_label": "createdraftingtextlayer()"
     },
     {
@@ -4473,7 +4464,7 @@
       "source_file": "components/new/drafting-layer-state.ts",
       "source_location": "L181",
       "id": "new_drafting_layer_state_clonedraftingcanvaslayer",
-      "community": 57,
+      "community": 16,
       "norm_label": "clonedraftingcanvaslayer()"
     },
     {
@@ -4482,7 +4473,7 @@
       "source_file": "components/new/drafting-layer-state.ts",
       "source_location": "L190",
       "id": "new_drafting_layer_state_clonedraftinglayerstatebynodeid",
-      "community": 47,
+      "community": 22,
       "norm_label": "clonedraftinglayerstatebynodeid()"
     },
     {
@@ -4491,7 +4482,7 @@
       "source_file": "components/new/drafting-layer-state.ts",
       "source_location": "L201",
       "id": "new_drafting_layer_state_normalizedraftingcanvaslayers",
-      "community": 55,
+      "community": 16,
       "norm_label": "normalizedraftingcanvaslayers()"
     },
     {
@@ -4500,7 +4491,7 @@
       "source_file": "components/new/drafting-layer-state.ts",
       "source_location": "L227",
       "id": "new_drafting_layer_state_patchdraftingcanvaslayer",
-      "community": 57,
+      "community": 16,
       "norm_label": "patchdraftingcanvaslayer()"
     },
     {
@@ -4617,7 +4608,7 @@
       "source_file": "components/new/drafting-layer-state.ts",
       "source_location": "L605",
       "id": "new_drafting_layer_state_createfallbacklayer",
-      "community": 57,
+      "community": 16,
       "norm_label": "createfallbacklayer()"
     },
     {
@@ -4626,7 +4617,7 @@
       "source_file": "components/new/drafting-layer-state.ts",
       "source_location": "L646",
       "id": "new_drafting_layer_state_remapdraftingcanvaslayerforpaste",
-      "community": 57,
+      "community": 16,
       "norm_label": "remapdraftingcanvaslayerforpaste()"
     },
     {
@@ -4635,7 +4626,7 @@
       "source_file": "components/new/drafting-layer-state.ts",
       "source_location": "L676",
       "id": "new_drafting_layer_state_createdraftinglayerinstanceid",
-      "community": 57,
+      "community": 16,
       "norm_label": "createdraftinglayerinstanceid()"
     },
     {
@@ -4957,7 +4948,7 @@
       "label": "cleanupCallbacks",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L21",
+      "source_location": "L23",
       "id": "new_drafting_pane_workspace_test_cleanupcallbacks",
       "community": 48,
       "norm_label": "cleanupcallbacks"
@@ -4966,7 +4957,7 @@
       "label": "disconnect()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L28",
+      "source_location": "L30",
       "id": "new_drafting_pane_workspace_test_disconnect",
       "community": 48,
       "norm_label": "disconnect()"
@@ -4975,7 +4966,7 @@
       "label": "observe()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L29",
+      "source_location": "L31",
       "id": "new_drafting_pane_workspace_test_observe",
       "community": 48,
       "norm_label": "observe()"
@@ -4984,7 +4975,7 @@
       "label": "unobserve()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L30",
+      "source_location": "L32",
       "id": "new_drafting_pane_workspace_test_unobserve",
       "community": 48,
       "norm_label": "unobserve()"
@@ -4993,7 +4984,7 @@
       "label": "renderWorkspace()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L357",
+      "source_location": "L644",
       "id": "new_drafting_pane_workspace_test_renderworkspace",
       "community": 48,
       "norm_label": "renderworkspace()"
@@ -5002,16 +4993,16 @@
       "label": "createPanes()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L412",
+      "source_location": "L728",
       "id": "new_drafting_pane_workspace_test_createpanes",
-      "community": 48,
+      "community": 22,
       "norm_label": "createpanes()"
     },
     {
       "label": "getPaneLayout()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L424",
+      "source_location": "L740",
       "id": "new_drafting_pane_workspace_test_getpanelayout",
       "community": 48,
       "norm_label": "getpanelayout()"
@@ -5020,7 +5011,7 @@
       "label": "getLayoutGroups()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L432",
+      "source_location": "L748",
       "id": "new_drafting_pane_workspace_test_getlayoutgroups",
       "community": 48,
       "norm_label": "getlayoutgroups()"
@@ -5029,7 +5020,7 @@
       "label": "getNestedPanelGroups()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L436",
+      "source_location": "L752",
       "id": "new_drafting_pane_workspace_test_getnestedpanelgroups",
       "community": 48,
       "norm_label": "getnestedpanelgroups()"
@@ -5038,7 +5029,7 @@
       "label": "getResizeHandles()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L443",
+      "source_location": "L759",
       "id": "new_drafting_pane_workspace_test_getresizehandles",
       "community": 48,
       "norm_label": "getresizehandles()"
@@ -5047,7 +5038,7 @@
       "label": "getResizablePanels()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L449",
+      "source_location": "L765",
       "id": "new_drafting_pane_workspace_test_getresizablepanels",
       "community": 48,
       "norm_label": "getresizablepanels()"
@@ -5056,7 +5047,7 @@
       "label": "getQrNodes()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L453",
+      "source_location": "L769",
       "id": "new_drafting_pane_workspace_test_getqrnodes",
       "community": 48,
       "norm_label": "getqrnodes()"
@@ -5065,7 +5056,7 @@
       "label": "getPaneSurfaces()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L459",
+      "source_location": "L775",
       "id": "new_drafting_pane_workspace_test_getpanesurfaces",
       "community": 48,
       "norm_label": "getpanesurfaces()"
@@ -5074,7 +5065,7 @@
       "label": "stubPortraitOrientation()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L469",
+      "source_location": "L785",
       "id": "new_drafting_pane_workspace_test_stubportraitorientation",
       "community": 48,
       "norm_label": "stubportraitorientation()"
@@ -5083,7 +5074,7 @@
       "label": "createDataTransfer()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L480",
+      "source_location": "L796",
       "id": "new_drafting_pane_workspace_test_createdatatransfer",
       "community": 48,
       "norm_label": "createdatatransfer()"
@@ -5092,7 +5083,7 @@
       "label": "createDragEvent()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L493",
+      "source_location": "L809",
       "id": "new_drafting_pane_workspace_test_createdragevent",
       "community": 48,
       "norm_label": "createdragevent()"
@@ -5101,7 +5092,7 @@
       "label": "createTouchEvent()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L506",
+      "source_location": "L822",
       "id": "new_drafting_pane_workspace_test_createtouchevent",
       "community": 48,
       "norm_label": "createtouchevent()"
@@ -5110,7 +5101,7 @@
       "label": "createPointerEvent()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L526",
+      "source_location": "L842",
       "id": "new_drafting_pane_workspace_test_createpointerevent",
       "community": 48,
       "norm_label": "createpointerevent()"
@@ -5119,7 +5110,7 @@
       "label": "flushPromises()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.test.tsx",
-      "source_location": "L540",
+      "source_location": "L856",
       "id": "new_drafting_pane_workspace_test_flushpromises",
       "community": 48,
       "norm_label": "flushpromises()"
@@ -5137,7 +5128,7 @@
       "label": "DraftingPane",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L62",
+      "source_location": "L59",
       "id": "new_drafting_pane_workspace_draftingpane",
       "community": 42,
       "norm_label": "draftingpane"
@@ -5146,7 +5137,7 @@
       "label": "DraftingPanelLayouts",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L70",
+      "source_location": "L67",
       "id": "new_drafting_pane_workspace_draftingpanellayouts",
       "community": 42,
       "norm_label": "draftingpanellayouts"
@@ -5155,7 +5146,7 @@
       "label": "DraftingPanePanOffsets",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L71",
+      "source_location": "L68",
       "id": "new_drafting_pane_workspace_draftingpanepanoffsets",
       "community": 42,
       "norm_label": "draftingpanepanoffsets"
@@ -5164,7 +5155,7 @@
       "label": "DraftingPaneToolbarVariant",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L72",
+      "source_location": "L69",
       "id": "new_drafting_pane_workspace_draftingpanetoolbarvariant",
       "community": 42,
       "norm_label": "draftingpanetoolbarvariant"
@@ -5173,7 +5164,7 @@
       "label": "DraftingPaneCanvasTool",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L73",
+      "source_location": "L70",
       "id": "new_drafting_pane_workspace_draftingpanecanvastool",
       "community": 42,
       "norm_label": "draftingpanecanvastool"
@@ -5182,7 +5173,7 @@
       "label": "DesktopLayerToolbarLayer",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L75",
+      "source_location": "L72",
       "id": "new_drafting_pane_workspace_desktoplayertoolbarlayer",
       "community": 42,
       "norm_label": "desktoplayertoolbarlayer"
@@ -5191,7 +5182,7 @@
       "label": "DesktopLayerToolbarControls",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L89",
+      "source_location": "L86",
       "id": "new_drafting_pane_workspace_desktoplayertoolbarcontrols",
       "community": 42,
       "norm_label": "desktoplayertoolbarcontrols"
@@ -5200,7 +5191,7 @@
       "label": "DESKTOP_ZOOM_PRESETS",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L98",
+      "source_location": "L95",
       "id": "new_drafting_pane_workspace_desktop_zoom_presets",
       "community": 42,
       "norm_label": "desktop_zoom_presets"
@@ -5209,7 +5200,7 @@
       "label": "DraftingPaneWorkspaceProps",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L100",
+      "source_location": "L97",
       "id": "new_drafting_pane_workspace_draftingpaneworkspaceprops",
       "community": 42,
       "norm_label": "draftingpaneworkspaceprops"
@@ -5218,7 +5209,7 @@
       "label": "groupPanes()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L145",
+      "source_location": "L143",
       "id": "new_drafting_pane_workspace_grouppanes",
       "community": 101,
       "norm_label": "grouppanes()"
@@ -5227,7 +5218,7 @@
       "label": "getPortraitSnapshot()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L155",
+      "source_location": "L153",
       "id": "new_drafting_pane_workspace_getportraitsnapshot",
       "community": 42,
       "norm_label": "getportraitsnapshot()"
@@ -5236,7 +5227,7 @@
       "label": "subscribePortrait()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L160",
+      "source_location": "L158",
       "id": "new_drafting_pane_workspace_subscribeportrait",
       "community": 42,
       "norm_label": "subscribeportrait()"
@@ -5245,7 +5236,7 @@
       "label": "DraftingResizeHandle()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L167",
+      "source_location": "L165",
       "id": "new_drafting_pane_workspace_draftingresizehandle",
       "community": 42,
       "norm_label": "draftingresizehandle()"
@@ -5254,7 +5245,7 @@
       "label": "clampPreviewZoom()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L182",
+      "source_location": "L180",
       "id": "new_drafting_pane_workspace_clamppreviewzoom",
       "community": 42,
       "norm_label": "clamppreviewzoom()"
@@ -5263,7 +5254,7 @@
       "label": "getTouchDistance()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L186",
+      "source_location": "L184",
       "id": "new_drafting_pane_workspace_gettouchdistance",
       "community": 42,
       "norm_label": "gettouchdistance()"
@@ -5272,7 +5263,7 @@
       "label": "DesktopLayerSettingsToolbar()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L197",
+      "source_location": "L195",
       "id": "new_drafting_pane_workspace_desktoplayersettingstoolbar",
       "community": 42,
       "norm_label": "desktoplayersettingstoolbar()"
@@ -5281,7 +5272,7 @@
       "label": "DesktopLayerToolbarNumberInput()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L327",
+      "source_location": "L300",
       "id": "new_drafting_pane_workspace_desktoplayertoolbarnumberinput",
       "community": 42,
       "norm_label": "desktoplayertoolbarnumberinput()"
@@ -5290,25 +5281,16 @@
       "label": "DesktopLayerToolbarColorInput()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L361",
+      "source_location": "L334",
       "id": "new_drafting_pane_workspace_desktoplayertoolbarcolorinput",
       "community": 42,
       "norm_label": "desktoplayertoolbarcolorinput()"
     },
     {
-      "label": "DesktopLayerToolbarToggle()",
-      "file_type": "code",
-      "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L384",
-      "id": "new_drafting_pane_workspace_desktoplayertoolbartoggle",
-      "community": 42,
-      "norm_label": "desktoplayertoolbartoggle()"
-    },
-    {
       "label": "DraftingPaneSurface()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L411",
+      "source_location": "L357",
       "id": "new_drafting_pane_workspace_draftingpanesurface",
       "community": 42,
       "norm_label": "draftingpanesurface()"
@@ -5317,7 +5299,7 @@
       "label": "DraftingPaneWorkspace()",
       "file_type": "code",
       "source_file": "components/new/drafting-pane-workspace.tsx",
-      "source_location": "L749",
+      "source_location": "L752",
       "id": "new_drafting_pane_workspace_draftingpaneworkspace",
       "community": 101,
       "norm_label": "draftingpaneworkspace()"
@@ -5688,7 +5670,7 @@
       "source_file": "components/new/drafting-qr-artwork.ts",
       "source_location": "L6",
       "id": "new_drafting_qr_artwork_createdraftingqrartworkstate",
-      "community": 1,
+      "community": 62,
       "norm_label": "createdraftingqrartworkstate()"
     },
     {
@@ -5913,7 +5895,7 @@
       "source_file": "components/new/drafting-qr-layer-shadow.ts",
       "source_location": "L1",
       "id": "new_drafting_qr_layer_shadow",
-      "community": 108,
+      "community": 66,
       "norm_label": "drafting-qr-layer-shadow.ts"
     },
     {
@@ -5922,7 +5904,7 @@
       "source_file": "components/new/drafting-qr-layer-shadow.ts",
       "source_location": "L5",
       "id": "new_drafting_qr_layer_shadow_hasdraftinglayershadow",
-      "community": 108,
+      "community": 66,
       "norm_label": "hasdraftinglayershadow()"
     },
     {
@@ -5931,7 +5913,7 @@
       "source_file": "components/new/drafting-qr-layer-shadow.ts",
       "source_location": "L12",
       "id": "new_drafting_qr_layer_shadow_applydraftingqrforegroundshadow",
-      "community": 108,
+      "community": 66,
       "norm_label": "applydraftingqrforegroundshadow()"
     },
     {
@@ -5940,7 +5922,7 @@
       "source_file": "components/new/drafting-qr-layer-shadow.ts",
       "source_location": "L58",
       "id": "new_drafting_qr_layer_shadow_getorcreatesvgdefs",
-      "community": 108,
+      "community": 66,
       "norm_label": "getorcreatesvgdefs()"
     },
     {
@@ -5949,7 +5931,7 @@
       "source_file": "components/new/drafting-qr-layer-shadow.ts",
       "source_location": "L72",
       "id": "new_drafting_qr_layer_shadow_createforegroundshadowfilter",
-      "community": 108,
+      "community": 66,
       "norm_label": "createforegroundshadowfilter()"
     },
     {
@@ -5958,7 +5940,7 @@
       "source_file": "components/new/drafting-qr-layer-shadow.ts",
       "source_location": "L95",
       "id": "new_drafting_qr_layer_shadow_isqrbackgroundlayer",
-      "community": 108,
+      "community": 66,
       "norm_label": "isqrbackgroundlayer()"
     },
     {
@@ -5967,7 +5949,7 @@
       "source_file": "components/new/drafting-qr-layer-shadow.ts",
       "source_location": "L108",
       "id": "new_drafting_qr_layer_shadow_getsvgid",
-      "community": 108,
+      "community": 66,
       "norm_label": "getsvgid()"
     },
     {
@@ -5976,7 +5958,7 @@
       "source_file": "components/new/drafting-split-workspace.tsx",
       "source_location": "L1",
       "id": "new_drafting_split_workspace",
-      "community": 84,
+      "community": 32,
       "norm_label": "drafting-split-workspace.tsx"
     },
     {
@@ -5985,7 +5967,7 @@
       "source_file": "components/new/drafting-split-workspace.tsx",
       "source_location": "L37",
       "id": "new_drafting_split_workspace_draftingsplitworkspaceprops",
-      "community": 84,
+      "community": 32,
       "norm_label": "draftingsplitworkspaceprops"
     },
     {
@@ -5994,7 +5976,7 @@
       "source_file": "components/new/drafting-split-workspace.tsx",
       "source_location": "L52",
       "id": "new_drafting_split_workspace_default_camera",
-      "community": 84,
+      "community": 32,
       "norm_label": "default_camera"
     },
     {
@@ -6003,7 +5985,7 @@
       "source_file": "components/new/drafting-split-workspace.tsx",
       "source_location": "L58",
       "id": "new_drafting_split_workspace_no_op_scene_change",
-      "community": 84,
+      "community": 32,
       "norm_label": "no_op_scene_change()"
     },
     {
@@ -6012,7 +5994,7 @@
       "source_file": "components/new/drafting-split-workspace.tsx",
       "source_location": "L61",
       "id": "new_drafting_split_workspace_draftingsplitworkspace",
-      "community": 84,
+      "community": 32,
       "norm_label": "draftingsplitworkspace()"
     },
     {
@@ -6748,7 +6730,7 @@
       "label": "renderSurface()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.test.tsx",
-      "source_location": "L4417",
+      "source_location": "L4419",
       "id": "new_drafting_surface_test_rendersurface",
       "community": 25,
       "norm_label": "rendersurface()"
@@ -6757,7 +6739,7 @@
       "label": "renderDesktopOverlaySurface()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.test.tsx",
-      "source_location": "L4459",
+      "source_location": "L4481",
       "id": "new_drafting_surface_test_renderdesktopoverlaysurface",
       "community": 25,
       "norm_label": "renderdesktopoverlaysurface()"
@@ -6766,7 +6748,7 @@
       "label": "getRequiredElement()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.test.tsx",
-      "source_location": "L4494",
+      "source_location": "L4516",
       "id": "new_drafting_surface_test_getrequiredelement",
       "community": 25,
       "norm_label": "getrequiredelement()"
@@ -6775,7 +6757,7 @@
       "label": "getRadioInputByAriaLabel()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.test.tsx",
-      "source_location": "L4502",
+      "source_location": "L4524",
       "id": "new_drafting_surface_test_getradioinputbyarialabel",
       "community": 25,
       "norm_label": "getradioinputbyarialabel()"
@@ -6784,7 +6766,7 @@
       "label": "activateElement()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.test.tsx",
-      "source_location": "L4512",
+      "source_location": "L4534",
       "id": "new_drafting_surface_test_activateelement",
       "community": 25,
       "norm_label": "activateelement()"
@@ -6793,7 +6775,7 @@
       "label": "dispatchBodyShortcut()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.test.tsx",
-      "source_location": "L4534",
+      "source_location": "L4556",
       "id": "new_drafting_surface_test_dispatchbodyshortcut",
       "community": 25,
       "norm_label": "dispatchbodyshortcut()"
@@ -6802,7 +6784,7 @@
       "label": "changeInputValue()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.test.tsx",
-      "source_location": "L4548",
+      "source_location": "L4570",
       "id": "new_drafting_surface_test_changeinputvalue",
       "community": 25,
       "norm_label": "changeinputvalue()"
@@ -6811,7 +6793,7 @@
       "label": "setInputFiles()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.test.tsx",
-      "source_location": "L4563",
+      "source_location": "L4585",
       "id": "new_drafting_surface_test_setinputfiles",
       "community": 25,
       "norm_label": "setinputfiles()"
@@ -6820,7 +6802,7 @@
       "label": "createDataTransfer()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.test.tsx",
-      "source_location": "L4570",
+      "source_location": "L4592",
       "id": "new_drafting_surface_test_createdatatransfer",
       "community": 25,
       "norm_label": "createdatatransfer()"
@@ -6829,7 +6811,7 @@
       "label": "createDragEvent()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.test.tsx",
-      "source_location": "L4583",
+      "source_location": "L4605",
       "id": "new_drafting_surface_test_createdragevent",
       "community": 25,
       "norm_label": "createdragevent()"
@@ -6838,7 +6820,7 @@
       "label": "openCardOnlyMode()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.test.tsx",
-      "source_location": "L4596",
+      "source_location": "L4618",
       "id": "new_drafting_surface_test_opencardonlymode",
       "community": 25,
       "norm_label": "opencardonlymode()"
@@ -6847,7 +6829,7 @@
       "label": "getSelectedPreviewCard()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.test.tsx",
-      "source_location": "L4609",
+      "source_location": "L4631",
       "id": "new_drafting_surface_test_getselectedpreviewcard",
       "community": 25,
       "norm_label": "getselectedpreviewcard()"
@@ -6856,7 +6838,7 @@
       "label": "getAccordionTriggerByText()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.test.tsx",
-      "source_location": "L4625",
+      "source_location": "L4647",
       "id": "new_drafting_surface_test_getaccordiontriggerbytext",
       "community": 25,
       "norm_label": "getaccordiontriggerbytext()"
@@ -6865,7 +6847,7 @@
       "label": "getButtonByExactText()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.test.tsx",
-      "source_location": "L4635",
+      "source_location": "L4657",
       "id": "new_drafting_surface_test_getbuttonbyexacttext",
       "community": 25,
       "norm_label": "getbuttonbyexacttext()"
@@ -6874,7 +6856,7 @@
       "label": "flushPromises()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.test.tsx",
-      "source_location": "L4645",
+      "source_location": "L4667",
       "id": "new_drafting_surface_test_flushpromises",
       "community": 25,
       "norm_label": "flushpromises()"
@@ -6883,7 +6865,7 @@
       "label": "advanceDraftingTimers()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.test.tsx",
-      "source_location": "L4649",
+      "source_location": "L4671",
       "id": "new_drafting_surface_test_advancedraftingtimers",
       "community": 25,
       "norm_label": "advancedraftingtimers()"
@@ -6892,7 +6874,7 @@
       "label": "createMemoryStorage()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.test.tsx",
-      "source_location": "L4658",
+      "source_location": "L4680",
       "id": "new_drafting_surface_test_creatememorystorage",
       "community": 25,
       "norm_label": "creatememorystorage()"
@@ -6910,7 +6892,7 @@
       "label": "OUTER_MARKERS",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L231",
+      "source_location": "L232",
       "id": "new_drafting_surface_outer_markers",
       "community": 1,
       "norm_label": "outer_markers"
@@ -6919,7 +6901,7 @@
       "label": "JUNCTION_MARKERS",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L238",
+      "source_location": "L239",
       "id": "new_drafting_surface_junction_markers",
       "community": 1,
       "norm_label": "junction_markers"
@@ -6928,7 +6910,7 @@
       "label": "DraftingBinaryColorMode",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L247",
+      "source_location": "L248",
       "id": "new_drafting_surface_draftingbinarycolormode",
       "community": 1,
       "norm_label": "draftingbinarycolormode"
@@ -6937,7 +6919,7 @@
       "label": "DraftingAssetSourceMode",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L248",
+      "source_location": "L249",
       "id": "new_drafting_surface_draftingassetsourcemode",
       "community": 1,
       "norm_label": "draftingassetsourcemode"
@@ -6946,7 +6928,7 @@
       "label": "DraftingBrandIconCategoryFilter",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L249",
+      "source_location": "L250",
       "id": "new_drafting_surface_draftingbrandiconcategoryfilter",
       "community": 1,
       "norm_label": "draftingbrandiconcategoryfilter"
@@ -6955,7 +6937,7 @@
       "label": "DraftingCardToolId",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L250",
+      "source_location": "L251",
       "id": "new_drafting_surface_draftingcardtoolid",
       "community": 1,
       "norm_label": "draftingcardtoolid"
@@ -6964,7 +6946,7 @@
       "label": "DraftingSurfaceChrome",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L251",
+      "source_location": "L252",
       "id": "new_drafting_surface_draftingsurfacechrome",
       "community": 1,
       "norm_label": "draftingsurfacechrome"
@@ -6973,7 +6955,7 @@
       "label": "DraftingWorkspaceController",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L253",
+      "source_location": "L254",
       "id": "new_drafting_surface_draftingworkspacecontroller",
       "community": 1,
       "norm_label": "draftingworkspacecontroller"
@@ -6982,7 +6964,7 @@
       "label": "DraftingSurfaceProps",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L255",
+      "source_location": "L256",
       "id": "new_drafting_surface_draftingsurfaceprops",
       "community": 1,
       "norm_label": "draftingsurfaceprops"
@@ -6991,7 +6973,7 @@
       "label": "DraftingToolId",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L261",
+      "source_location": "L262",
       "id": "new_drafting_surface_draftingtoolid",
       "community": 1,
       "norm_label": "draftingtoolid"
@@ -7000,7 +6982,7 @@
       "label": "DraftingToolGroup",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L276",
+      "source_location": "L277",
       "id": "new_drafting_surface_draftingtoolgroup",
       "community": 1,
       "norm_label": "draftingtoolgroup"
@@ -7009,7 +6991,7 @@
       "label": "DraftingTool",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L278",
+      "source_location": "L279",
       "id": "new_drafting_surface_draftingtool",
       "community": 1,
       "norm_label": "draftingtool"
@@ -7018,7 +7000,7 @@
       "label": "DEFAULT_DRAFTING_STUDIO_STATE",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L285",
+      "source_location": "L286",
       "id": "new_drafting_surface_default_drafting_studio_state",
       "community": 1,
       "norm_label": "default_drafting_studio_state"
@@ -7027,7 +7009,7 @@
       "label": "DRAFTING_KEYBOARD_SHORTCUT_GROUPS",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L291",
+      "source_location": "L292",
       "id": "new_drafting_surface_drafting_keyboard_shortcut_groups",
       "community": 1,
       "norm_label": "drafting_keyboard_shortcut_groups"
@@ -7036,7 +7018,7 @@
       "label": "IGNORE_DRAFTING_UPLOAD_ERROR()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L327",
+      "source_location": "L328",
       "id": "new_drafting_surface_ignore_drafting_upload_error",
       "community": 1,
       "norm_label": "ignore_drafting_upload_error()"
@@ -7045,7 +7027,7 @@
       "label": "DRAFTING_RASTER_EXPORT_PRESETS",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L332",
+      "source_location": "L333",
       "id": "new_drafting_surface_drafting_raster_export_presets",
       "community": 1,
       "norm_label": "drafting_raster_export_presets"
@@ -7054,7 +7036,7 @@
       "label": "DraftingRasterExportPresetId",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L370",
+      "source_location": "L371",
       "id": "new_drafting_surface_draftingrasterexportpresetid",
       "community": 1,
       "norm_label": "draftingrasterexportpresetid"
@@ -7063,7 +7045,7 @@
       "label": "swapDraftingQrNodeOrder()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L373",
+      "source_location": "L374",
       "id": "new_drafting_surface_swapdraftingqrnodeorder",
       "community": 1,
       "norm_label": "swapdraftingqrnodeorder()"
@@ -7072,7 +7054,7 @@
       "label": "DRAFTING_TOOLS",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L403",
+      "source_location": "L404",
       "id": "new_drafting_surface_drafting_tools",
       "community": 1,
       "norm_label": "drafting_tools"
@@ -7081,7 +7063,7 @@
       "label": "DRAFTING_RAIL_TOOLS",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L514",
+      "source_location": "L515",
       "id": "new_drafting_surface_drafting_rail_tools",
       "community": 1,
       "norm_label": "drafting_rail_tools"
@@ -7090,16 +7072,16 @@
       "label": "getDraftingRailToolId()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L516",
+      "source_location": "L517",
       "id": "new_drafting_surface_getdraftingrailtoolid",
-      "community": 50,
+      "community": 1,
       "norm_label": "getdraftingrailtoolid()"
     },
     {
       "label": "DraftingDownloadExtension",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L532",
+      "source_location": "L533",
       "id": "new_drafting_surface_draftingdownloadextension",
       "community": 1,
       "norm_label": "draftingdownloadextension"
@@ -7108,7 +7090,7 @@
       "label": "DraftingDownloadTarget",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L533",
+      "source_location": "L534",
       "id": "new_drafting_surface_draftingdownloadtarget",
       "community": 1,
       "norm_label": "draftingdownloadtarget"
@@ -7117,7 +7099,7 @@
       "label": "DraftingExportSizePreview",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L534",
+      "source_location": "L535",
       "id": "new_drafting_surface_draftingexportsizepreview",
       "community": 1,
       "norm_label": "draftingexportsizepreview"
@@ -7126,7 +7108,7 @@
       "label": "PlusMarker()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L548",
+      "source_location": "L549",
       "id": "new_drafting_surface_plusmarker",
       "community": 1,
       "norm_label": "plusmarker()"
@@ -7135,7 +7117,7 @@
       "label": "DraftingImageIntentTab()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L562",
+      "source_location": "L563",
       "id": "new_drafting_surface_draftingimageintenttab",
       "community": 1,
       "norm_label": "draftingimageintenttab()"
@@ -7144,7 +7126,7 @@
       "label": "DraftingDecorationsIntro()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L603",
+      "source_location": "L604",
       "id": "new_drafting_surface_draftingdecorationsintro",
       "community": 1,
       "norm_label": "draftingdecorationsintro()"
@@ -7153,7 +7135,7 @@
       "label": "ElementAddButton()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L622",
+      "source_location": "L623",
       "id": "new_drafting_surface_elementaddbutton",
       "community": 1,
       "norm_label": "elementaddbutton()"
@@ -7162,7 +7144,7 @@
       "label": "DraftingCardObjectInspectorNav()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L653",
+      "source_location": "L654",
       "id": "new_drafting_surface_draftingcardobjectinspectornav",
       "community": 1,
       "norm_label": "draftingcardobjectinspectornav()"
@@ -7171,25 +7153,25 @@
       "label": "DraftingSurface()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L686",
+      "source_location": "L687",
       "id": "new_drafting_surface_draftingsurface",
-      "community": 50,
+      "community": 1,
       "norm_label": "draftingsurface()"
     },
     {
       "label": "getDesktopToolbarToolId()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L4739",
+      "source_location": "L4747",
       "id": "new_drafting_surface_getdesktoptoolbartoolid",
-      "community": 50,
+      "community": 1,
       "norm_label": "getdesktoptoolbartoolid()"
     },
     {
       "label": "getDraftingToolIdFromDesktop()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L4749",
+      "source_location": "L4757",
       "id": "new_drafting_surface_getdraftingtoolidfromdesktop",
       "community": 1,
       "norm_label": "getdraftingtoolidfromdesktop()"
@@ -7198,34 +7180,34 @@
       "label": "getDesktopLogoSourceMode()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L4753",
+      "source_location": "L4761",
       "id": "new_drafting_surface_getdesktoplogosourcemode",
-      "community": 50,
+      "community": 1,
       "norm_label": "getdesktoplogosourcemode()"
     },
     {
       "label": "getDesktopAssetSourceMode()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L4760",
+      "source_location": "L4768",
       "id": "new_drafting_surface_getdesktopassetsourcemode",
-      "community": 50,
+      "community": 1,
       "norm_label": "getdesktopassetsourcemode()"
     },
     {
       "label": "getDesktopExportTarget()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L4764",
+      "source_location": "L4772",
       "id": "new_drafting_surface_getdesktopexporttarget",
-      "community": 50,
+      "community": 1,
       "norm_label": "getdesktopexporttarget()"
     },
     {
       "label": "getDraftingDownloadTarget()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L4769",
+      "source_location": "L4777",
       "id": "new_drafting_surface_getdraftingdownloadtarget",
       "community": 1,
       "norm_label": "getdraftingdownloadtarget()"
@@ -7234,7 +7216,7 @@
       "label": "toDesktopLayerRow()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L4774",
+      "source_location": "L4782",
       "id": "new_drafting_surface_todesktoplayerrow",
       "community": 1,
       "norm_label": "todesktoplayerrow()"
@@ -7243,25 +7225,25 @@
       "label": "getDesktopTextSettings()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L4795",
+      "source_location": "L4803",
       "id": "new_drafting_surface_getdesktoptextsettings",
-      "community": 50,
+      "community": 1,
       "norm_label": "getdesktoptextsettings()"
     },
     {
       "label": "DraftingTextLayerTab()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L4812",
+      "source_location": "L4820",
       "id": "new_drafting_surface_draftingtextlayertab",
-      "community": 57,
+      "community": 1,
       "norm_label": "draftingtextlayertab()"
     },
     {
       "label": "getDraftingFontSourceLabel()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5052",
+      "source_location": "L5060",
       "id": "new_drafting_surface_getdraftingfontsourcelabel",
       "community": 1,
       "norm_label": "getdraftingfontsourcelabel()"
@@ -7270,7 +7252,7 @@
       "label": "TextWeightSlider()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5064",
+      "source_location": "L5072",
       "id": "new_drafting_surface_textweightslider",
       "community": 1,
       "norm_label": "textweightslider()"
@@ -7279,25 +7261,25 @@
       "label": "getDraftingTextInspectorFontWeight()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5104",
+      "source_location": "L5112",
       "id": "new_drafting_surface_getdraftingtextinspectorfontweight",
-      "community": 57,
+      "community": 1,
       "norm_label": "getdraftingtextinspectorfontweight()"
     },
     {
       "label": "getNearestDraftingFontWeight()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5119",
+      "source_location": "L5127",
       "id": "new_drafting_surface_getnearestdraftingfontweight",
-      "community": 57,
+      "community": 1,
       "norm_label": "getnearestdraftingfontweight()"
     },
     {
       "label": "getDraftingFontWeightSliderStep()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5132",
+      "source_location": "L5140",
       "id": "new_drafting_surface_getdraftingfontweightsliderstep",
       "community": 1,
       "norm_label": "getdraftingfontweightsliderstep()"
@@ -7306,7 +7288,7 @@
       "label": "TextNumberInput()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5144",
+      "source_location": "L5152",
       "id": "new_drafting_surface_textnumberinput",
       "community": 1,
       "norm_label": "textnumberinput()"
@@ -7315,7 +7297,7 @@
       "label": "TextToggleButton()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5183",
+      "source_location": "L5191",
       "id": "new_drafting_surface_texttogglebutton",
       "community": 1,
       "norm_label": "texttogglebutton()"
@@ -7324,16 +7306,16 @@
       "label": "getDraftingQrNodeDownloadTarget()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5208",
+      "source_location": "L5216",
       "id": "new_drafting_surface_getdraftingqrnodedownloadtarget",
-      "community": 50,
+      "community": 1,
       "norm_label": "getdraftingqrnodedownloadtarget()"
     },
     {
       "label": "downloadDraftingSvgExport()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5212",
+      "source_location": "L5220",
       "id": "new_drafting_surface_downloaddraftingsvgexport",
       "community": 1,
       "norm_label": "downloaddraftingsvgexport()"
@@ -7342,25 +7324,25 @@
       "label": "buildDraftingLayeredNodePayload()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5225",
+      "source_location": "L5233",
       "id": "new_drafting_surface_builddraftinglayerednodepayload",
-      "community": 1,
+      "community": 62,
       "norm_label": "builddraftinglayerednodepayload()"
     },
     {
       "label": "buildDraftingLayeredSvgMarkup()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5264",
+      "source_location": "L5272",
       "id": "new_drafting_surface_builddraftinglayeredsvgmarkup",
-      "community": 1,
+      "community": 62,
       "norm_label": "builddraftinglayeredsvgmarkup()"
     },
     {
       "label": "DraftingLayerBounds",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5296",
+      "source_location": "L5304",
       "id": "new_drafting_surface_draftinglayerbounds",
       "community": 1,
       "norm_label": "draftinglayerbounds"
@@ -7369,16 +7351,16 @@
       "label": "getDraftingLayerBounds()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5303",
+      "source_location": "L5311",
       "id": "new_drafting_surface_getdraftinglayerbounds",
-      "community": 1,
+      "community": 62,
       "norm_label": "getdraftinglayerbounds()"
     },
     {
       "label": "getDraftingLayerFilterMarkup()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5341",
+      "source_location": "L5349",
       "id": "new_drafting_surface_getdraftinglayerfiltermarkup",
       "community": 66,
       "norm_label": "getdraftinglayerfiltermarkup()"
@@ -7387,7 +7369,7 @@
       "label": "getDraftingLayerFilterMarkups()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5355",
+      "source_location": "L5363",
       "id": "new_drafting_surface_getdraftinglayerfiltermarkups",
       "community": 66,
       "norm_label": "getdraftinglayerfiltermarkups()"
@@ -7396,7 +7378,7 @@
       "label": "getDraftingCardLayerSvg()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5362",
+      "source_location": "L5370",
       "id": "new_drafting_surface_getdraftingcardlayersvg",
       "community": 66,
       "norm_label": "getdraftingcardlayersvg()"
@@ -7405,7 +7387,7 @@
       "label": "getDraftingGroupLayerSvg()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5375",
+      "source_location": "L5383",
       "id": "new_drafting_surface_getdraftinggrouplayersvg",
       "community": 66,
       "norm_label": "getdraftinggrouplayersvg()"
@@ -7414,7 +7396,7 @@
       "label": "getDraftingQrLayerSvg()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5401",
+      "source_location": "L5409",
       "id": "new_drafting_surface_getdraftingqrlayersvg",
       "community": 66,
       "norm_label": "getdraftingqrlayersvg()"
@@ -7423,7 +7405,7 @@
       "label": "getDraftingTextLayerSvg()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5416",
+      "source_location": "L5424",
       "id": "new_drafting_surface_getdraftingtextlayersvg",
       "community": 66,
       "norm_label": "getdraftingtextlayersvg()"
@@ -7432,34 +7414,34 @@
       "label": "splitDraftingTextRunsByLine()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5456",
+      "source_location": "L5464",
       "id": "new_drafting_surface_splitdraftingtextrunsbyline",
-      "community": 66,
+      "community": 1,
       "norm_label": "splitdraftingtextrunsbyline()"
     },
     {
       "label": "getDraftingTextLayerRuns()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5477",
+      "source_location": "L5485",
       "id": "new_drafting_surface_getdraftingtextlayerruns",
-      "community": 66,
+      "community": 1,
       "norm_label": "getdraftingtextlayerruns()"
     },
     {
       "label": "getDraftingTextRunSvg()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5487",
+      "source_location": "L5495",
       "id": "new_drafting_surface_getdraftingtextrunsvg",
-      "community": 66,
+      "community": 36,
       "norm_label": "getdraftingtextrunsvg()"
     },
     {
       "label": "getDraftingLayerSvgTransform()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5493",
+      "source_location": "L5501",
       "id": "new_drafting_surface_getdraftinglayersvgtransform",
       "community": 66,
       "norm_label": "getdraftinglayersvgtransform()"
@@ -7468,25 +7450,25 @@
       "label": "patchDraftingLayerById()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5500",
+      "source_location": "L5508",
       "id": "new_drafting_surface_patchdraftinglayerbyid",
-      "community": 57,
+      "community": 16,
       "norm_label": "patchdraftinglayerbyid()"
     },
     {
       "label": "findDraftingLayerById()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5522",
+      "source_location": "L5530",
       "id": "new_drafting_surface_finddraftinglayerbyid",
-      "community": 50,
+      "community": 1,
       "norm_label": "finddraftinglayerbyid()"
     },
     {
       "label": "scaleNestedSvgMarkup()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5541",
+      "source_location": "L5549",
       "id": "new_drafting_surface_scalenestedsvgmarkup",
       "community": 66,
       "norm_label": "scalenestedsvgmarkup()"
@@ -7495,7 +7477,7 @@
       "label": "cleanNestedSvgAttributes()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5565",
+      "source_location": "L5573",
       "id": "new_drafting_surface_cleannestedsvgattributes",
       "community": 1,
       "norm_label": "cleannestedsvgattributes()"
@@ -7504,7 +7486,7 @@
       "label": "getSvgId()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5572",
+      "source_location": "L5580",
       "id": "new_drafting_surface_getsvgid",
       "community": 66,
       "norm_label": "getsvgid()"
@@ -7513,7 +7495,7 @@
       "label": "escapeXml()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5576",
+      "source_location": "L5584",
       "id": "new_drafting_surface_escapexml",
       "community": 66,
       "norm_label": "escapexml()"
@@ -7522,7 +7504,7 @@
       "label": "downloadBlob()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5584",
+      "source_location": "L5592",
       "id": "new_drafting_surface_downloadblob",
       "community": 1,
       "norm_label": "downloadblob()"
@@ -7531,7 +7513,7 @@
       "label": "isEditableShortcutTarget()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5596",
+      "source_location": "L5604",
       "id": "new_drafting_surface_iseditableshortcuttarget",
       "community": 1,
       "norm_label": "iseditableshortcuttarget()"
@@ -7540,7 +7522,7 @@
       "label": "getDraftingClipboardBounds()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5608",
+      "source_location": "L5616",
       "id": "new_drafting_surface_getdraftingclipboardbounds",
       "community": 1,
       "norm_label": "getdraftingclipboardbounds()"
@@ -7549,7 +7531,7 @@
       "label": "getDraftingLayerClipboardPayload()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5622",
+      "source_location": "L5630",
       "id": "new_drafting_surface_getdraftinglayerclipboardpayload",
       "community": 1,
       "norm_label": "getdraftinglayerclipboardpayload()"
@@ -7558,7 +7540,7 @@
       "label": "parseDraftingLayerClipboardPayload()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5647",
+      "source_location": "L5655",
       "id": "new_drafting_surface_parsedraftinglayerclipboardpayload",
       "community": 1,
       "norm_label": "parsedraftinglayerclipboardpayload()"
@@ -7567,7 +7549,7 @@
       "label": "readClipboardNumber()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5678",
+      "source_location": "L5686",
       "id": "new_drafting_surface_readclipboardnumber",
       "community": 1,
       "norm_label": "readclipboardnumber()"
@@ -7576,7 +7558,7 @@
       "label": "isRecord()",
       "file_type": "code",
       "source_file": "components/new/drafting-surface.tsx",
-      "source_location": "L5682",
+      "source_location": "L5690",
       "id": "new_drafting_surface_isrecord",
       "community": 1,
       "norm_label": "isrecord()"
@@ -7695,7 +7677,7 @@
       "source_file": "components/new/drafting-workspace-document.test.ts",
       "source_location": "L1",
       "id": "new_drafting_workspace_document_test",
-      "community": 47,
+      "community": 22,
       "norm_label": "drafting-workspace-document.test.ts"
     },
     {
@@ -7704,7 +7686,7 @@
       "source_file": "components/new/drafting-workspace-document.ts",
       "source_location": "L1",
       "id": "new_drafting_workspace_document",
-      "community": 55,
+      "community": 22,
       "norm_label": "drafting-workspace-document.ts"
     },
     {
@@ -7713,7 +7695,7 @@
       "source_file": "components/new/drafting-workspace-document.ts",
       "source_location": "L34",
       "id": "new_drafting_workspace_document_draftingqrstatebynodeid",
-      "community": 55,
+      "community": 22,
       "norm_label": "draftingqrstatebynodeid"
     },
     {
@@ -7722,7 +7704,7 @@
       "source_file": "components/new/drafting-workspace-document.ts",
       "source_location": "L35",
       "id": "new_drafting_workspace_document_draftingcardstatebynodeid",
-      "community": 55,
+      "community": 22,
       "norm_label": "draftingcardstatebynodeid"
     },
     {
@@ -7731,7 +7713,7 @@
       "source_file": "components/new/drafting-workspace-document.ts",
       "source_location": "L36",
       "id": "new_drafting_workspace_document_draftingcontentvaluesbytype",
-      "community": 55,
+      "community": 22,
       "norm_label": "draftingcontentvaluesbytype"
     },
     {
@@ -7740,7 +7722,7 @@
       "source_file": "components/new/drafting-workspace-document.ts",
       "source_location": "L38",
       "id": "new_drafting_workspace_document_draftingworkspacedocumentv1",
-      "community": 47,
+      "community": 22,
       "norm_label": "draftingworkspacedocumentv1"
     },
     {
@@ -7749,7 +7731,7 @@
       "source_file": "components/new/drafting-workspace-document.ts",
       "source_location": "L51",
       "id": "new_drafting_workspace_document_clonedraftingworkspacedocument",
-      "community": 47,
+      "community": 22,
       "norm_label": "clonedraftingworkspacedocument()"
     },
     {
@@ -7758,7 +7740,7 @@
       "source_file": "components/new/drafting-workspace-document.ts",
       "source_location": "L76",
       "id": "new_drafting_workspace_document_createdefaultdraftingworkspacedocument",
-      "community": 55,
+      "community": 22,
       "norm_label": "createdefaultdraftingworkspacedocument()"
     },
     {
@@ -7767,7 +7749,7 @@
       "source_file": "components/new/drafting-workspace-document.ts",
       "source_location": "L107",
       "id": "new_drafting_workspace_document_parsedraftingworkspacedocument",
-      "community": 55,
+      "community": 22,
       "norm_label": "parsedraftingworkspacedocument()"
     },
     {
@@ -7776,7 +7758,7 @@
       "source_file": "components/new/drafting-workspace-document.ts",
       "source_location": "L191",
       "id": "new_drafting_workspace_document_serializedraftingworkspacedocument",
-      "community": 47,
+      "community": 22,
       "norm_label": "serializedraftingworkspacedocument()"
     },
     {
@@ -7785,7 +7767,7 @@
       "source_file": "components/new/drafting-workspace-document.ts",
       "source_location": "L197",
       "id": "new_drafting_workspace_document_createdefaultdraftingworkspaceqrstate",
-      "community": 55,
+      "community": 22,
       "norm_label": "createdefaultdraftingworkspaceqrstate()"
     },
     {
@@ -7794,7 +7776,7 @@
       "source_file": "components/new/drafting-workspace-document.ts",
       "source_location": "L206",
       "id": "new_drafting_workspace_document_clonedraftingqrstate",
-      "community": 55,
+      "community": 22,
       "norm_label": "clonedraftingqrstate()"
     },
     {
@@ -7803,7 +7785,7 @@
       "source_file": "components/new/drafting-workspace-document.ts",
       "source_location": "L210",
       "id": "new_drafting_workspace_document_parseqrstate",
-      "community": 55,
+      "community": 22,
       "norm_label": "parseqrstate()"
     },
     {
@@ -7812,7 +7794,7 @@
       "source_file": "components/new/drafting-workspace-document.ts",
       "source_location": "L242",
       "id": "new_drafting_workspace_document_parsebackgroundshapeoptions",
-      "community": 55,
+      "community": 24,
       "norm_label": "parsebackgroundshapeoptions()"
     },
     {
@@ -7821,7 +7803,7 @@
       "source_file": "components/new/drafting-workspace-document.ts",
       "source_location": "L300",
       "id": "new_drafting_workspace_document_parsecardstate",
-      "community": 55,
+      "community": 22,
       "norm_label": "parsecardstate()"
     },
     {
@@ -7830,7 +7812,7 @@
       "source_file": "components/new/drafting-workspace-document.ts",
       "source_location": "L313",
       "id": "new_drafting_workspace_document_parsecontentvaluesbytype",
-      "community": 55,
+      "community": 22,
       "norm_label": "parsecontentvaluesbytype()"
     },
     {
@@ -7839,7 +7821,7 @@
       "source_file": "components/new/drafting-workspace-document.ts",
       "source_location": "L321",
       "id": "new_drafting_workspace_document_parseqrinputtype",
-      "community": 55,
+      "community": 22,
       "norm_label": "parseqrinputtype()"
     },
     {
@@ -7848,7 +7830,7 @@
       "source_file": "components/new/drafting-workspace-document.ts",
       "source_location": "L325",
       "id": "new_drafting_workspace_document_isrecord",
-      "community": 55,
+      "community": 22,
       "norm_label": "isrecord()"
     },
     {
@@ -7857,7 +7839,7 @@
       "source_file": "components/new/drafting-workspace-storage.ts",
       "source_location": "L1",
       "id": "new_drafting_workspace_storage",
-      "community": 47,
+      "community": 22,
       "norm_label": "drafting-workspace-storage.ts"
     },
     {
@@ -7866,7 +7848,7 @@
       "source_file": "components/new/drafting-workspace-storage.ts",
       "source_location": "L13",
       "id": "new_drafting_workspace_storage_storeddraftingworkspacerecord",
-      "community": 47,
+      "community": 22,
       "norm_label": "storeddraftingworkspacerecord"
     },
     {
@@ -7875,7 +7857,7 @@
       "source_file": "components/new/drafting-workspace-storage.ts",
       "source_location": "L19",
       "id": "new_drafting_workspace_storage_readdraftingworkspacedraft",
-      "community": 47,
+      "community": 22,
       "norm_label": "readdraftingworkspacedraft()"
     },
     {
@@ -7884,7 +7866,7 @@
       "source_file": "components/new/drafting-workspace-storage.ts",
       "source_location": "L34",
       "id": "new_drafting_workspace_storage_writedraftingworkspacedraft",
-      "community": 47,
+      "community": 22,
       "norm_label": "writedraftingworkspacedraft()"
     },
     {
@@ -7893,7 +7875,7 @@
       "source_file": "components/new/drafting-workspace-storage.ts",
       "source_location": "L51",
       "id": "new_drafting_workspace_storage_deletedraftingworkspacedraft",
-      "community": 47,
+      "community": 22,
       "norm_label": "deletedraftingworkspacedraft()"
     },
     {
@@ -7902,7 +7884,7 @@
       "source_file": "components/new/drafting-workspace-storage.ts",
       "source_location": "L61",
       "id": "new_drafting_workspace_storage_opendraftingworkspacedb",
-      "community": 47,
+      "community": 22,
       "norm_label": "opendraftingworkspacedb()"
     },
     {
@@ -7911,7 +7893,7 @@
       "source_file": "components/new/drafting-workspace-storage.ts",
       "source_location": "L82",
       "id": "new_drafting_workspace_storage_readindexeddbdraft",
-      "community": 47,
+      "community": 22,
       "norm_label": "readindexeddbdraft()"
     },
     {
@@ -7920,7 +7902,7 @@
       "source_file": "components/new/drafting-workspace-storage.ts",
       "source_location": "L99",
       "id": "new_drafting_workspace_storage_writeindexeddbdraft",
-      "community": 47,
+      "community": 22,
       "norm_label": "writeindexeddbdraft()"
     },
     {
@@ -7929,7 +7911,7 @@
       "source_file": "components/new/drafting-workspace-storage.ts",
       "source_location": "L119",
       "id": "new_drafting_workspace_storage_deleteindexeddbdraft",
-      "community": 47,
+      "community": 22,
       "norm_label": "deleteindexeddbdraft()"
     },
     {
@@ -7938,7 +7920,7 @@
       "source_file": "components/new/drafting-workspace-storage.ts",
       "source_location": "L136",
       "id": "new_drafting_workspace_storage_normalizestoredrecord",
-      "community": 47,
+      "community": 22,
       "norm_label": "normalizestoredrecord()"
     },
     {
@@ -8008,7 +7990,7 @@
       "label": "renderPane()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.test.tsx",
-      "source_location": "L1960",
+      "source_location": "L1964",
       "id": "new_qr_pane_test_renderpane",
       "community": 57,
       "norm_label": "renderpane()"
@@ -8017,7 +7999,7 @@
       "label": "flushPromises()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.test.tsx",
-      "source_location": "L2013",
+      "source_location": "L2017",
       "id": "new_qr_pane_test_flushpromises",
       "community": 57,
       "norm_label": "flushpromises()"
@@ -8026,7 +8008,7 @@
       "label": "getRequiredElement()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.test.tsx",
-      "source_location": "L2017",
+      "source_location": "L2021",
       "id": "new_qr_pane_test_getrequiredelement",
       "community": 57,
       "norm_label": "getrequiredelement()"
@@ -8035,7 +8017,7 @@
       "label": "clickElement()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.test.tsx",
-      "source_location": "L2025",
+      "source_location": "L2029",
       "id": "new_qr_pane_test_clickelement",
       "community": 57,
       "norm_label": "clickelement()"
@@ -8044,7 +8026,7 @@
       "label": "createPointerEvent()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.test.tsx",
-      "source_location": "L2029",
+      "source_location": "L2033",
       "id": "new_qr_pane_test_createpointerevent",
       "community": 57,
       "norm_label": "createpointerevent()"
@@ -8053,7 +8035,7 @@
       "label": "setElementRect()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.test.tsx",
-      "source_location": "L2041",
+      "source_location": "L2045",
       "id": "new_qr_pane_test_setelementrect",
       "community": 57,
       "norm_label": "setelementrect()"
@@ -8062,7 +8044,7 @@
       "label": "createLayer()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.test.tsx",
-      "source_location": "L2057",
+      "source_location": "L2061",
       "id": "new_qr_pane_test_createlayer",
       "community": 57,
       "norm_label": "createlayer()"
@@ -8386,7 +8368,7 @@
       "label": "LayerContextMenuButton()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.tsx",
-      "source_location": "L777",
+      "source_location": "L759",
       "id": "new_qr_pane_layercontextmenubutton",
       "community": 9,
       "norm_label": "layercontextmenubutton()"
@@ -8395,7 +8377,7 @@
       "label": "LayerContextMenuSeparator()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.tsx",
-      "source_location": "L797",
+      "source_location": "L779",
       "id": "new_qr_pane_layercontextmenuseparator",
       "community": 9,
       "norm_label": "layercontextmenuseparator()"
@@ -8404,7 +8386,7 @@
       "label": "LayerFloatingToolbar()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.tsx",
-      "source_location": "L807",
+      "source_location": "L789",
       "id": "new_qr_pane_layerfloatingtoolbar",
       "community": 9,
       "norm_label": "layerfloatingtoolbar()"
@@ -8413,7 +8395,7 @@
       "label": "LayerFloatingToolbarButton()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.tsx",
-      "source_location": "L867",
+      "source_location": "L849",
       "id": "new_qr_pane_layerfloatingtoolbarbutton",
       "community": 9,
       "norm_label": "layerfloatingtoolbarbutton()"
@@ -8422,7 +8404,7 @@
       "label": "TextFormatFloatingToolbar()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.tsx",
-      "source_location": "L891",
+      "source_location": "L874",
       "id": "new_qr_pane_textformatfloatingtoolbar",
       "community": 9,
       "norm_label": "textformatfloatingtoolbar()"
@@ -8431,7 +8413,7 @@
       "label": "TextFormatButton()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.tsx",
-      "source_location": "L1045",
+      "source_location": "L1028",
       "id": "new_qr_pane_textformatbutton",
       "community": 9,
       "norm_label": "textformatbutton()"
@@ -8440,7 +8422,7 @@
       "label": "LayerSizeValue()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.tsx",
-      "source_location": "L1083",
+      "source_location": "L1066",
       "id": "new_qr_pane_layersizevalue",
       "community": 9,
       "norm_label": "layersizevalue()"
@@ -8449,7 +8431,7 @@
       "label": "getTextLayerStyle()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.tsx",
-      "source_location": "L1098",
+      "source_location": "L1081",
       "id": "new_qr_pane_gettextlayerstyle",
       "community": 67,
       "norm_label": "gettextlayerstyle()"
@@ -8458,7 +8440,7 @@
       "label": "getTextRunStyle()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.tsx",
-      "source_location": "L1114",
+      "source_location": "L1097",
       "id": "new_qr_pane_gettextrunstyle",
       "community": 36,
       "norm_label": "gettextrunstyle()"
@@ -8467,7 +8449,7 @@
       "label": "getTextLayerRuns()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.tsx",
-      "source_location": "L1128",
+      "source_location": "L1111",
       "id": "new_qr_pane_gettextlayerruns",
       "community": 9,
       "norm_label": "gettextlayerruns()"
@@ -8476,7 +8458,7 @@
       "label": "hasValidTextRuns()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.tsx",
-      "source_location": "L1139",
+      "source_location": "L1122",
       "id": "new_qr_pane_hasvalidtextruns",
       "community": 9,
       "norm_label": "hasvalidtextruns()"
@@ -8485,7 +8467,7 @@
       "label": "renderTextLayerContent()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.tsx",
-      "source_location": "L1143",
+      "source_location": "L1126",
       "id": "new_qr_pane_rendertextlayercontent",
       "community": 9,
       "norm_label": "rendertextlayercontent()"
@@ -8494,7 +8476,7 @@
       "label": "getTextLayerFormat()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.tsx",
-      "source_location": "L1170",
+      "source_location": "L1153",
       "id": "new_qr_pane_gettextlayerformat",
       "community": 9,
       "norm_label": "gettextlayerformat()"
@@ -8503,7 +8485,7 @@
       "label": "getTextRunKey()",
       "file_type": "code",
       "source_file": "components/new/qr-pane.tsx",
-      "source_location": "L1182",
+      "source_location": "L1165",
       "id": "new_qr_pane_gettextrunkey",
       "community": 9,
       "norm_label": "gettextrunkey()"
@@ -8512,7 +8494,7 @@
       "label": "QrPane",
       "file_type": "code",
       "source_file": "components/new/qr-pane.tsx",
-      "source_location": "L1186",
+      "source_location": "L1169",
       "id": "new_qr_pane_qrpane",
       "community": 57,
       "norm_label": "qrpane"
@@ -8793,7 +8775,7 @@
       "source_file": "components/qr/dashboard-compose-scene.test.ts",
       "source_location": "L498",
       "id": "qr_dashboard_compose_scene_test_createlayeredscene",
-      "community": 77,
+      "community": 14,
       "norm_label": "createlayeredscene()"
     },
     {
@@ -8856,7 +8838,7 @@
       "source_file": "components/qr/dashboard-compose-scene.ts",
       "source_location": "L37",
       "id": "qr_dashboard_compose_scene_dashboardcomposecamera",
-      "community": 84,
+      "community": 32,
       "norm_label": "dashboardcomposecamera"
     },
     {
@@ -8892,7 +8874,7 @@
       "source_file": "components/qr/dashboard-compose-scene.ts",
       "source_location": "L69",
       "id": "qr_dashboard_compose_scene_dashboardcomposenode",
-      "community": 41,
+      "community": 70,
       "norm_label": "dashboardcomposenode"
     },
     {
@@ -8901,7 +8883,7 @@
       "source_file": "components/qr/dashboard-compose-scene.ts",
       "source_location": "L71",
       "id": "qr_dashboard_compose_scene_dashboardcomposescene",
-      "community": 41,
+      "community": 14,
       "norm_label": "dashboardcomposescene"
     },
     {
@@ -8964,7 +8946,7 @@
       "source_file": "components/qr/dashboard-compose-scene.ts",
       "source_location": "L145",
       "id": "qr_dashboard_compose_scene_createdashboardcomposescene",
-      "community": 77,
+      "community": 14,
       "norm_label": "createdashboardcomposescene()"
     },
     {
@@ -9045,7 +9027,7 @@
       "source_file": "components/qr/dashboard-compose-scene.ts",
       "source_location": "L276",
       "id": "qr_dashboard_compose_scene_centerdashboardcomposenode",
-      "community": 14,
+      "community": 41,
       "norm_label": "centerdashboardcomposenode()"
     },
     {
@@ -9054,7 +9036,7 @@
       "source_file": "components/qr/dashboard-compose-scene.ts",
       "source_location": "L295",
       "id": "qr_dashboard_compose_scene_fitdashboardqrnodetodocument",
-      "community": 14,
+      "community": 41,
       "norm_label": "fitdashboardqrnodetodocument()"
     },
     {
@@ -9063,7 +9045,7 @@
       "source_file": "components/qr/dashboard-compose-scene.ts",
       "source_location": "L319",
       "id": "qr_dashboard_compose_scene_updatedashboardcomposenode",
-      "community": 14,
+      "community": 41,
       "norm_label": "updatedashboardcomposenode()"
     },
     {
@@ -9072,7 +9054,7 @@
       "source_file": "components/qr/dashboard-compose-scene.ts",
       "source_location": "L354",
       "id": "qr_dashboard_compose_scene_adddashboardcomposeimagenode",
-      "community": 77,
+      "community": 14,
       "norm_label": "adddashboardcomposeimagenode()"
     },
     {
@@ -9099,7 +9081,7 @@
       "source_file": "components/qr/dashboard-compose-scene.ts",
       "source_location": "L452",
       "id": "qr_dashboard_compose_scene_getdashboardcomposenode",
-      "community": 70,
+      "community": 41,
       "norm_label": "getdashboardcomposenode()"
     },
     {
@@ -9108,7 +9090,7 @@
       "source_file": "components/qr/dashboard-compose-scene.ts",
       "source_location": "L459",
       "id": "qr_dashboard_compose_scene_isdashboardqrnodeid",
-      "community": 41,
+      "community": 51,
       "norm_label": "isdashboardqrnodeid()"
     },
     {
@@ -9126,7 +9108,7 @@
       "source_file": "components/qr/dashboard-compose-scene.ts",
       "source_location": "L473",
       "id": "qr_dashboard_compose_scene_upsertdashboardqrnode",
-      "community": 77,
+      "community": 14,
       "norm_label": "upsertdashboardqrnode()"
     },
     {
@@ -9135,7 +9117,7 @@
       "source_file": "components/qr/dashboard-compose-scene.ts",
       "source_location": "L512",
       "id": "qr_dashboard_compose_scene_resetdashboardcomposecamera",
-      "community": 14,
+      "community": 41,
       "norm_label": "resetdashboardcomposecamera()"
     },
     {
@@ -9342,7 +9324,7 @@
       "source_file": "components/qr/dashboard-compose-surface.test.tsx",
       "source_location": "L1",
       "id": "qr_dashboard_compose_surface_test",
-      "community": 41,
+      "community": 14,
       "norm_label": "dashboard-compose-surface.test.tsx"
     },
     {
@@ -9351,7 +9333,7 @@
       "source_file": "components/qr/dashboard-compose-surface.test.tsx",
       "source_location": "L19",
       "id": "qr_dashboard_compose_surface_test_qr_payload",
-      "community": 41,
+      "community": 14,
       "norm_label": "qr_payload"
     },
     {
@@ -9360,7 +9342,7 @@
       "source_file": "components/qr/dashboard-compose-surface.test.tsx",
       "source_location": "L629",
       "id": "qr_dashboard_compose_surface_test_createlayeredscene",
-      "community": 77,
+      "community": 14,
       "norm_label": "createlayeredscene()"
     },
     {
@@ -9369,7 +9351,7 @@
       "source_file": "components/qr/dashboard-compose-surface.test.tsx",
       "source_location": "L641",
       "id": "qr_dashboard_compose_surface_test_createqualityreport",
-      "community": 41,
+      "community": 14,
       "norm_label": "createqualityreport()"
     },
     {
@@ -9657,7 +9639,7 @@
       "source_file": "components/qr/dashboard-edit-controls.test.tsx",
       "source_location": "L1",
       "id": "qr_dashboard_edit_controls_test",
-      "community": 77,
+      "community": 14,
       "norm_label": "dashboard-edit-controls.test.tsx"
     },
     {
@@ -9666,7 +9648,7 @@
       "source_file": "components/qr/dashboard-edit-controls.test.tsx",
       "source_location": "L12",
       "id": "qr_dashboard_edit_controls_test_qr_payload",
-      "community": 77,
+      "community": 14,
       "norm_label": "qr_payload"
     },
     {
@@ -9675,7 +9657,7 @@
       "source_file": "components/qr/dashboard-edit-controls.test.tsx",
       "source_location": "L216",
       "id": "qr_dashboard_edit_controls_test_createlayeredscene",
-      "community": 77,
+      "community": 14,
       "norm_label": "createlayeredscene()"
     },
     {
@@ -9801,7 +9783,7 @@
       "source_file": "components/qr/dashboard-edit-controls.tsx",
       "source_location": "L732",
       "id": "qr_dashboard_edit_controls_aligndashboardcomposenode",
-      "community": 14,
+      "community": 41,
       "norm_label": "aligndashboardcomposenode()"
     },
     {
@@ -10251,7 +10233,7 @@
       "source_file": "components/qr/dashboard-raster-export.test.ts",
       "source_location": "L1",
       "id": "qr_dashboard_raster_export_test",
-      "community": 30,
+      "community": 54,
       "norm_label": "dashboard-raster-export.test.ts"
     },
     {
@@ -10260,7 +10242,7 @@
       "source_file": "components/qr/dashboard-raster-export.test.ts",
       "source_location": "L5",
       "id": "qr_dashboard_raster_export_test_qrcodeconstructorspy",
-      "community": 30,
+      "community": 54,
       "norm_label": "qrcodeconstructorspy"
     },
     {
@@ -10269,7 +10251,7 @@
       "source_file": "components/qr/dashboard-raster-export.test.ts",
       "source_location": "L9",
       "id": "qr_dashboard_raster_export_test_constructor",
-      "community": 30,
+      "community": 54,
       "norm_label": "constructor()"
     },
     {
@@ -10278,7 +10260,7 @@
       "source_file": "components/qr/dashboard-raster-export.test.ts",
       "source_location": "L13",
       "id": "qr_dashboard_raster_export_test_applyextension",
-      "community": 30,
+      "community": 54,
       "norm_label": "applyextension()"
     },
     {
@@ -10287,7 +10269,7 @@
       "source_file": "components/qr/dashboard-raster-export.test.ts",
       "source_location": "L15",
       "id": "qr_dashboard_raster_export_test_getrawdata",
-      "community": 30,
+      "community": 54,
       "norm_label": "getrawdata()"
     },
     {
@@ -10296,7 +10278,7 @@
       "source_file": "components/qr/dashboard-raster-export.test.ts",
       "source_location": "L105",
       "id": "qr_dashboard_raster_export_test_mockimage",
-      "community": 30,
+      "community": 54,
       "norm_label": "mockimage"
     },
     {
@@ -10305,7 +10287,7 @@
       "source_file": "components/qr/dashboard-raster-export.test.ts",
       "source_location": "L109",
       "id": "qr_dashboard_raster_export_test_mockimage_src",
-      "community": 30,
+      "community": 54,
       "norm_label": ".src()"
     },
     {
@@ -10314,7 +10296,7 @@
       "source_file": "components/qr/dashboard-raster-export.ts",
       "source_location": "L1",
       "id": "qr_dashboard_raster_export",
-      "community": 30,
+      "community": 54,
       "norm_label": "dashboard-raster-export.ts"
     },
     {
@@ -10323,7 +10305,7 @@
       "source_file": "components/qr/dashboard-raster-export.ts",
       "source_location": "L16",
       "id": "qr_dashboard_raster_export_dashboard_raster_export_quality_presets",
-      "community": 30,
+      "community": 54,
       "norm_label": "dashboard_raster_export_quality_presets"
     },
     {
@@ -10341,7 +10323,7 @@
       "source_file": "components/qr/dashboard-raster-export.ts",
       "source_location": "L26",
       "id": "qr_dashboard_raster_export_dashboardrasterexportoptions",
-      "community": 30,
+      "community": 54,
       "norm_label": "dashboardrasterexportoptions"
     },
     {
@@ -10359,7 +10341,7 @@
       "source_file": "components/qr/dashboard-raster-export.ts",
       "source_location": "L43",
       "id": "qr_dashboard_raster_export_israsterexportextension",
-      "community": 38,
+      "community": 54,
       "norm_label": "israsterexportextension()"
     },
     {
@@ -10395,7 +10377,7 @@
       "source_file": "components/qr/dashboard-raster-export.ts",
       "source_location": "L111",
       "id": "qr_dashboard_raster_export_getlossyrasterencoderquality",
-      "community": 51,
+      "community": 54,
       "norm_label": "getlossyrasterencoderquality()"
     },
     {
@@ -10404,7 +10386,7 @@
       "source_file": "components/qr/dashboard-raster-export.ts",
       "source_location": "L115",
       "id": "qr_dashboard_raster_export_downloaddashboardrasterexport",
-      "community": 30,
+      "community": 54,
       "norm_label": "downloaddashboardrasterexport()"
     },
     {
@@ -10413,7 +10395,7 @@
       "source_file": "components/qr/dashboard-raster-export.ts",
       "source_location": "L132",
       "id": "qr_dashboard_raster_export_measuredashboardrasterexport",
-      "community": 30,
+      "community": 54,
       "norm_label": "measuredashboardrasterexport()"
     },
     {
@@ -10422,7 +10404,7 @@
       "source_file": "components/qr/dashboard-raster-export.ts",
       "source_location": "L155",
       "id": "qr_dashboard_raster_export_formatdashboardexportfilesize",
-      "community": 38,
+      "community": 54,
       "norm_label": "formatdashboardexportfilesize()"
     },
     {
@@ -10431,7 +10413,7 @@
       "source_file": "components/qr/dashboard-raster-export.ts",
       "source_location": "L171",
       "id": "qr_dashboard_raster_export_renderdashboardrasterexport",
-      "community": 30,
+      "community": 54,
       "norm_label": "renderdashboardrasterexport()"
     },
     {
@@ -10440,7 +10422,7 @@
       "source_file": "components/qr/dashboard-raster-export.ts",
       "source_location": "L239",
       "id": "qr_dashboard_raster_export_getmimetypeforrasterextension",
-      "community": 30,
+      "community": 54,
       "norm_label": "getmimetypeforrasterextension()"
     },
     {
@@ -10449,7 +10431,7 @@
       "source_file": "components/qr/dashboard-raster-export.ts",
       "source_location": "L250",
       "id": "qr_dashboard_raster_export_toexportblob",
-      "community": 30,
+      "community": 54,
       "norm_label": "toexportblob()"
     },
     {
@@ -10458,7 +10440,7 @@
       "source_file": "components/qr/dashboard-raster-export.ts",
       "source_location": "L258",
       "id": "qr_dashboard_raster_export_loadsvgblobasimage",
-      "community": 30,
+      "community": 54,
       "norm_label": "loadsvgblobasimage()"
     },
     {
@@ -10467,7 +10449,7 @@
       "source_file": "components/qr/dashboard-raster-export.ts",
       "source_location": "L275",
       "id": "qr_dashboard_raster_export_canvastoblob",
-      "community": 30,
+      "community": 54,
       "norm_label": "canvastoblob()"
     },
     {
@@ -10476,7 +10458,7 @@
       "source_file": "components/qr/dashboard-raster-export.ts",
       "source_location": "L292",
       "id": "qr_dashboard_raster_export_downloadblob",
-      "community": 30,
+      "community": 54,
       "norm_label": "downloadblob()"
     },
     {
@@ -10503,7 +10485,7 @@
       "source_file": "components/qr/qr-background-shapes.ts",
       "source_location": "L1",
       "id": "qr_qr_background_shapes",
-      "community": 114,
+      "community": 37,
       "norm_label": "qr-background-shapes.ts"
     },
     {
@@ -10512,7 +10494,7 @@
       "source_file": "components/qr/qr-background-shapes.ts",
       "source_location": "L1",
       "id": "qr_qr_background_shapes_qrbackgroundshapeid",
-      "community": 114,
+      "community": 37,
       "norm_label": "qrbackgroundshapeid"
     },
     {
@@ -10521,7 +10503,7 @@
       "source_file": "components/qr/qr-background-shapes.ts",
       "source_location": "L26",
       "id": "qr_qr_background_shapes_qrbackgroundshapedefinition",
-      "community": 114,
+      "community": 37,
       "norm_label": "qrbackgroundshapedefinition"
     },
     {
@@ -10530,7 +10512,7 @@
       "source_file": "components/qr/qr-background-shapes.ts",
       "source_location": "L36",
       "id": "qr_qr_background_shapes_qr_background_shapes",
-      "community": 114,
+      "community": 37,
       "norm_label": "qr_background_shapes"
     },
     {
@@ -10656,7 +10638,7 @@
       "source_file": "components/qr/qr-control-sections.drafting-fill-picker.test.tsx",
       "source_location": "L1",
       "id": "qr_qr_control_sections_drafting_fill_picker_test",
-      "community": 117,
+      "community": 17,
       "norm_label": "qr-control-sections.drafting-fill-picker.test.tsx"
     },
     {
@@ -10665,7 +10647,7 @@
       "source_file": "components/qr/qr-control-sections.drafting-fill-picker.test.tsx",
       "source_location": "L29",
       "id": "qr_qr_control_sections_drafting_fill_picker_test_controlleddraftingfillpicker",
-      "community": 117,
+      "community": 17,
       "norm_label": "controlleddraftingfillpicker()"
     },
     {
@@ -11124,7 +11106,7 @@
       "source_file": "components/qr/qr-control-sections.tsx",
       "source_location": "L2633",
       "id": "qr_qr_control_sections_gradientoffsetrangefield",
-      "community": 100,
+      "community": 43,
       "norm_label": "gradientoffsetrangefield()"
     },
     {
@@ -11178,7 +11160,7 @@
       "source_file": "components/qr/qr-control-sections.tsx",
       "source_location": "L2929",
       "id": "qr_qr_control_sections_embeddedcolorpickerfield",
-      "community": 117,
+      "community": 17,
       "norm_label": "embeddedcolorpickerfield()"
     },
     {
@@ -11673,7 +11655,7 @@
       "source_file": "components/qr/qr-encoding-options.ts",
       "source_location": "L41",
       "id": "qr_qr_encoding_options_formattypenumberlabel",
-      "community": 0,
+      "community": 124,
       "norm_label": "formattypenumberlabel()"
     },
     {
@@ -11952,7 +11934,7 @@
       "source_file": "components/qr/qr-quality.test.ts",
       "source_location": "L1",
       "id": "qr_qr_quality_test",
-      "community": 77,
+      "community": 14,
       "norm_label": "qr-quality.test.ts"
     },
     {
@@ -11961,7 +11943,7 @@
       "source_file": "components/qr/qr-quality.test.ts",
       "source_location": "L17",
       "id": "qr_qr_quality_test_qr_payload",
-      "community": 77,
+      "community": 14,
       "norm_label": "qr_payload"
     },
     {
@@ -11970,7 +11952,7 @@
       "source_file": "components/qr/qr-quality.test.ts",
       "source_location": "L331",
       "id": "qr_qr_quality_test_createdashboardscene",
-      "community": 77,
+      "community": 14,
       "norm_label": "createdashboardscene()"
     },
     {
@@ -11979,7 +11961,7 @@
       "source_file": "components/qr/qr-quality.test.ts",
       "source_location": "L335",
       "id": "qr_qr_quality_test_createlayereddashboardscene",
-      "community": 77,
+      "community": 14,
       "norm_label": "createlayereddashboardscene()"
     },
     {
@@ -11988,7 +11970,7 @@
       "source_file": "components/qr/qr-quality.test.ts",
       "source_location": "L345",
       "id": "qr_qr_quality_test_createreadablestate",
-      "community": 77,
+      "community": 14,
       "norm_label": "createreadablestate()"
     },
     {
@@ -12123,7 +12105,7 @@
       "source_file": "components/qr/qr-quality.ts",
       "source_location": "L148",
       "id": "qr_qr_quality_qrqualityreport",
-      "community": 41,
+      "community": 39,
       "norm_label": "qrqualityreport"
     },
     {
@@ -12168,7 +12150,7 @@
       "source_file": "components/qr/qr-quality.ts",
       "source_location": "L382",
       "id": "qr_qr_quality_mergeqrqualityreportwithdecode",
-      "community": 38,
+      "community": 4,
       "norm_label": "mergeqrqualityreportwithdecode()"
     },
     {
@@ -12186,7 +12168,7 @@
       "source_file": "components/qr/qr-quality.ts",
       "source_location": "L538",
       "id": "qr_qr_quality_applyqrqualitysuggestionpath",
-      "community": 4,
+      "community": 14,
       "norm_label": "applyqrqualitysuggestionpath()"
     },
     {
@@ -12267,7 +12249,7 @@
       "source_file": "components/qr/qr-quality.ts",
       "source_location": "L697",
       "id": "qr_qr_quality_getquietzonemodules",
-      "community": 30,
+      "community": 4,
       "norm_label": "getquietzonemodules()"
     },
     {
@@ -12276,7 +12258,7 @@
       "source_file": "components/qr/qr-quality.ts",
       "source_location": "L707",
       "id": "qr_qr_quality_getqrmodulepixelsize",
-      "community": 30,
+      "community": 4,
       "norm_label": "getqrmodulepixelsize()"
     },
     {
@@ -12807,7 +12789,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L506",
       "id": "qr_qr_rendering_resolvedotmatrixcoordinates",
-      "community": 58,
+      "community": 8,
       "norm_label": "resolvedotmatrixcoordinates()"
     },
     {
@@ -12816,7 +12798,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L519",
       "id": "qr_qr_rendering_getdotmatrixanchor",
-      "community": 58,
+      "community": 8,
       "norm_label": "getdotmatrixanchor()"
     },
     {
@@ -12825,7 +12807,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L548",
       "id": "qr_qr_rendering_getpathanchor",
-      "community": 58,
+      "community": 8,
       "norm_label": "getpathanchor()"
     },
     {
@@ -12834,7 +12816,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L570",
       "id": "qr_qr_rendering_getdotnumericattribute",
-      "community": 58,
+      "community": 8,
       "norm_label": "getdotnumericattribute()"
     },
     {
@@ -12852,7 +12834,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L597",
       "id": "qr_qr_rendering_getdotmatrixanimationduration",
-      "community": 94,
+      "community": 8,
       "norm_label": "getdotmatrixanimationduration()"
     },
     {
@@ -12861,7 +12843,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L607",
       "id": "qr_qr_rendering_getdotmatrixanimationspeedmultiplier",
-      "community": 94,
+      "community": 8,
       "norm_label": "getdotmatrixanimationspeedmultiplier()"
     },
     {
@@ -12870,7 +12852,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L616",
       "id": "qr_qr_rendering_getdotmatrixdensityspeedfactor",
-      "community": 94,
+      "community": 8,
       "norm_label": "getdotmatrixdensityspeedfactor()"
     },
     {
@@ -12879,7 +12861,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L620",
       "id": "qr_qr_rendering_getdotmatrixtilesize",
-      "community": 94,
+      "community": 8,
       "norm_label": "getdotmatrixtilesize()"
     },
     {
@@ -12888,7 +12870,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L629",
       "id": "qr_qr_rendering_getdotmatrixbaseopacity",
-      "community": 58,
+      "community": 8,
       "norm_label": "getdotmatrixbaseopacity()"
     },
     {
@@ -12897,7 +12879,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L633",
       "id": "qr_qr_rendering_getdotmatrixoverlayscale",
-      "community": 58,
+      "community": 8,
       "norm_label": "getdotmatrixoverlayscale()"
     },
     {
@@ -12942,7 +12924,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L767",
       "id": "qr_qr_rendering_createquietcellanimation",
-      "community": 94,
+      "community": 8,
       "norm_label": "createquietcellanimation()"
     },
     {
@@ -12969,7 +12951,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L868",
       "id": "qr_qr_rendering_createdotmatrixloadertracks",
-      "community": 94,
+      "community": 8,
       "norm_label": "createdotmatrixloadertracks()"
     },
     {
@@ -12987,7 +12969,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L938",
       "id": "qr_qr_rendering_getdotmatrixcell",
-      "community": 94,
+      "community": 8,
       "norm_label": "getdotmatrixcell()"
     },
     {
@@ -12996,7 +12978,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L947",
       "id": "qr_qr_rendering_rowmajorindex",
-      "community": 74,
+      "community": 30,
       "norm_label": "rowmajorindex()"
     },
     {
@@ -13005,7 +12987,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L951",
       "id": "qr_qr_rendering_indextocoord",
-      "community": 74,
+      "community": 30,
       "norm_label": "indextocoord()"
     },
     {
@@ -13014,7 +12996,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L960",
       "id": "qr_qr_rendering_finddotmatrixcellindex",
-      "community": 74,
+      "community": 30,
       "norm_label": "finddotmatrixcellindex()"
     },
     {
@@ -13023,7 +13005,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L968",
       "id": "qr_qr_rendering_getdotmatrixcenter",
-      "community": 74,
+      "community": 8,
       "norm_label": "getdotmatrixcenter()"
     },
     {
@@ -13032,7 +13014,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L972",
       "id": "qr_qr_rendering_createspiralinwardpath",
-      "community": 74,
+      "community": 30,
       "norm_label": "createspiralinwardpath()"
     },
     {
@@ -13041,7 +13023,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1006",
       "id": "qr_qr_rendering_createouterringclockwisepath",
-      "community": 74,
+      "community": 30,
       "norm_label": "createouterringclockwisepath()"
     },
     {
@@ -13050,7 +13032,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1010",
       "id": "qr_qr_rendering_createringpathclockwise",
-      "community": 74,
+      "community": 30,
       "norm_label": "createringpathclockwise()"
     },
     {
@@ -13059,7 +13041,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1037",
       "id": "qr_qr_rendering_trblpathnormfromindex",
-      "community": 74,
+      "community": 30,
       "norm_label": "trblpathnormfromindex()"
     },
     {
@@ -13068,7 +13050,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1043",
       "id": "qr_qr_rendering_spiralinwardordervalue",
-      "community": 74,
+      "community": 30,
       "norm_label": "spiralinwardordervalue()"
     },
     {
@@ -13077,7 +13059,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1049",
       "id": "qr_qr_rendering_outerringclockwiseordervalue",
-      "community": 74,
+      "community": 30,
       "norm_label": "outerringclockwiseordervalue()"
     },
     {
@@ -13086,7 +13068,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1055",
       "id": "qr_qr_rendering_middleringanticlockwiseordervalue",
-      "community": 74,
+      "community": 30,
       "norm_label": "middleringanticlockwiseordervalue()"
     },
     {
@@ -13095,7 +13077,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1061",
       "id": "qr_qr_rendering_diagonalsnakeordervalue",
-      "community": 74,
+      "community": 30,
       "norm_label": "diagonalsnakeordervalue()"
     },
     {
@@ -13104,7 +13086,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1090",
       "id": "qr_qr_rendering_getdotmatrixpatternindexes",
-      "community": 74,
+      "community": 8,
       "norm_label": "getdotmatrixpatternindexes()"
     },
     {
@@ -13113,7 +13095,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1119",
       "id": "qr_qr_rendering_stabledotmatrixstylevarsignature",
-      "community": 94,
+      "community": 8,
       "norm_label": "stabledotmatrixstylevarsignature()"
     },
     {
@@ -13167,7 +13149,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1187",
       "id": "qr_qr_rendering_getdotmatrixtrackstyle",
-      "community": 82,
+      "community": 8,
       "norm_label": "getdotmatrixtrackstyle()"
     },
     {
@@ -13185,7 +13167,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1225",
       "id": "qr_qr_rendering_applydotmatrixoverlayscale",
-      "community": 58,
+      "community": 8,
       "norm_label": "applydotmatrixoverlayscale()"
     },
     {
@@ -13203,7 +13185,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1292",
       "id": "qr_qr_rendering_creategenerateddotmatrixkeyframes",
-      "community": 74,
+      "community": 30,
       "norm_label": "creategenerateddotmatrixkeyframes()"
     },
     {
@@ -13212,7 +13194,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1309",
       "id": "qr_qr_rendering_getmatrixsizefromregion",
-      "community": 74,
+      "community": 30,
       "norm_label": "getmatrixsizefromregion()"
     },
     {
@@ -13221,7 +13203,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1317",
       "id": "qr_qr_rendering_getgenerateddotmatrixopacitysamples",
-      "community": 74,
+      "community": 30,
       "norm_label": "getgenerateddotmatrixopacitysamples()"
     },
     {
@@ -13230,7 +13212,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1422",
       "id": "qr_qr_rendering_createdotmatrixopacitykeyframes",
-      "community": 74,
+      "community": 30,
       "norm_label": "createdotmatrixopacitykeyframes()"
     },
     {
@@ -13257,7 +13239,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1505",
       "id": "qr_qr_rendering_finddotmatrixlayeranchor",
-      "community": 58,
+      "community": 8,
       "norm_label": "finddotmatrixlayeranchor()"
     },
     {
@@ -13302,7 +13284,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1634",
       "id": "qr_qr_rendering_applybackgroundshapestroke",
-      "community": 82,
+      "community": 8,
       "norm_label": "applybackgroundshapestroke()"
     },
     {
@@ -13347,7 +13329,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1728",
       "id": "qr_qr_rendering_getqrrendereddimensions",
-      "community": 79,
+      "community": 54,
       "norm_label": "getqrrendereddimensions()"
     },
     {
@@ -13365,7 +13347,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1779",
       "id": "qr_qr_rendering_applysvgrenderbounds",
-      "community": 82,
+      "community": 8,
       "norm_label": "applysvgrenderbounds()"
     },
     {
@@ -13383,7 +13365,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1796",
       "id": "qr_qr_rendering_wrapqrcontent",
-      "community": 82,
+      "community": 8,
       "norm_label": "wrapqrcontent()"
     },
     {
@@ -13392,7 +13374,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1833",
       "id": "qr_qr_rendering_getfirstdrawablesvgchild",
-      "community": 82,
+      "community": 8,
       "norm_label": "getfirstdrawablesvgchild()"
     },
     {
@@ -13428,7 +13410,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1909",
       "id": "qr_qr_rendering_applybackgroundsurfacerect",
-      "community": 82,
+      "community": 8,
       "norm_label": "applybackgroundsurfacerect()"
     },
     {
@@ -13437,7 +13419,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1922",
       "id": "qr_qr_rendering_createbackgroundsurfaceblurrect",
-      "community": 82,
+      "community": 8,
       "norm_label": "createbackgroundsurfaceblurrect()"
     },
     {
@@ -13446,7 +13428,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1970",
       "id": "qr_qr_rendering_createbackgroundshapeblurpath",
-      "community": 82,
+      "community": 8,
       "norm_label": "createbackgroundshapeblurpath()"
     },
     {
@@ -13455,7 +13437,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2021",
       "id": "qr_qr_rendering_hasactivebackgroundshapeshadow",
-      "community": 82,
+      "community": 8,
       "norm_label": "hasactivebackgroundshapeshadow()"
     },
     {
@@ -13464,7 +13446,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2032",
       "id": "qr_qr_rendering_applybackgroundshapeshadowsourcestroke",
-      "community": 82,
+      "community": 8,
       "norm_label": "applybackgroundshapeshadowsourcestroke()"
     },
     {
@@ -13473,7 +13455,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2048",
       "id": "qr_qr_rendering_createbackgroundshapeshadowfilter",
-      "community": 82,
+      "community": 8,
       "norm_label": "createbackgroundshapeshadowfilter()"
     },
     {
@@ -13482,7 +13464,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2102",
       "id": "qr_qr_rendering_getbackgroundshapefill",
-      "community": 96,
+      "community": 8,
       "norm_label": "getbackgroundshapefill()"
     },
     {
@@ -13491,7 +13473,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2127",
       "id": "qr_qr_rendering_createbackgroundshapegradient",
-      "community": 96,
+      "community": 8,
       "norm_label": "createbackgroundshapegradient()"
     },
     {
@@ -13500,7 +13482,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2184",
       "id": "qr_qr_rendering_getbackgroundshapetransform",
-      "community": 82,
+      "community": 8,
       "norm_label": "getbackgroundshapetransform()"
     },
     {
@@ -13509,7 +13491,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2196",
       "id": "qr_qr_rendering_formatsvgnumber",
-      "community": 82,
+      "community": 8,
       "norm_label": "formatsvgnumber()"
     },
     {
@@ -13518,7 +13500,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2204",
       "id": "qr_qr_rendering_formatsvgopacity",
-      "community": 58,
+      "community": 8,
       "norm_label": "formatsvgopacity()"
     },
     {
@@ -13554,7 +13536,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2306",
       "id": "qr_qr_rendering_addroundedbackgroundimageclip",
-      "community": 82,
+      "community": 8,
       "norm_label": "addroundedbackgroundimageclip()"
     },
     {
@@ -13563,7 +13545,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2341",
       "id": "qr_qr_rendering_getorcreatesvgdefs",
-      "community": 82,
+      "community": 8,
       "norm_label": "getorcreatesvgdefs()"
     },
     {
@@ -13608,7 +13590,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2400",
       "id": "qr_qr_rendering_aligncornergradientdirection",
-      "community": 96,
+      "community": 8,
       "norm_label": "aligncornergradientdirection()"
     },
     {
@@ -13617,7 +13599,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2454",
       "id": "qr_qr_rendering_getdescendantelements",
-      "community": 96,
+      "community": 8,
       "norm_label": "getdescendantelements()"
     },
     {
@@ -13635,7 +13617,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2482",
       "id": "qr_qr_rendering_getelementregion",
-      "community": 96,
+      "community": 8,
       "norm_label": "getelementregion()"
     },
     {
@@ -13644,7 +13626,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2502",
       "id": "qr_qr_rendering_getnumericattribute",
-      "community": 96,
+      "community": 8,
       "norm_label": "getnumericattribute()"
     },
     {
@@ -13653,7 +13635,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2514",
       "id": "qr_qr_rendering_getlineargradientendpoints",
-      "community": 96,
+      "community": 8,
       "norm_label": "getlineargradientendpoints()"
     },
     {
@@ -13662,7 +13644,7 @@
       "source_file": "components/qr/qr-section-rail.tsx",
       "source_location": "L1",
       "id": "qr_qr_section_rail",
-      "community": 21,
+      "community": 38,
       "norm_label": "qr-section-rail.tsx"
     },
     {
@@ -13671,7 +13653,7 @@
       "source_file": "components/qr/qr-section-rail.tsx",
       "source_location": "L10",
       "id": "qr_qr_section_rail_qrsectionrailprops",
-      "community": 21,
+      "community": 38,
       "norm_label": "qrsectionrailprops"
     },
     {
@@ -13680,7 +13662,7 @@
       "source_file": "components/qr/qr-section-rail.tsx",
       "source_location": "L16",
       "id": "qr_qr_section_rail_qrsectionrail",
-      "community": 21,
+      "community": 38,
       "norm_label": "qrsectionrail()"
     },
     {
@@ -13689,7 +13671,7 @@
       "source_file": "components/qr/qr-sections.ts",
       "source_location": "L1",
       "id": "qr_qr_sections",
-      "community": 21,
+      "community": 38,
       "norm_label": "qr-sections.ts"
     },
     {
@@ -13698,7 +13680,7 @@
       "source_file": "components/qr/qr-sections.ts",
       "source_location": "L11",
       "id": "qr_qr_sections_qreditorsectionid",
-      "community": 21,
+      "community": 38,
       "norm_label": "qreditorsectionid"
     },
     {
@@ -13707,7 +13689,7 @@
       "source_file": "components/qr/qr-sections.ts",
       "source_location": "L20",
       "id": "qr_qr_sections_qreditorsection",
-      "community": 21,
+      "community": 38,
       "norm_label": "qreditorsection"
     },
     {
@@ -13716,7 +13698,7 @@
       "source_file": "components/qr/qr-sections.ts",
       "source_location": "L26",
       "id": "qr_qr_sections_qreditorsectiondirection",
-      "community": 21,
+      "community": 38,
       "norm_label": "qreditorsectiondirection"
     },
     {
@@ -13725,7 +13707,7 @@
       "source_file": "components/qr/qr-sections.ts",
       "source_location": "L30",
       "id": "qr_qr_sections_qr_editor_sections",
-      "community": 21,
+      "community": 38,
       "norm_label": "qr_editor_sections"
     },
     {
@@ -13734,7 +13716,7 @@
       "source_file": "components/qr/qr-sections.ts",
       "source_location": "L68",
       "id": "qr_qr_sections_getqreditorsection",
-      "community": 21,
+      "community": 38,
       "norm_label": "getqreditorsection()"
     },
     {
@@ -13743,7 +13725,7 @@
       "source_file": "components/qr/qr-sections.ts",
       "source_location": "L75",
       "id": "qr_qr_sections_getqreditorsectionindex",
-      "community": 21,
+      "community": 38,
       "norm_label": "getqreditorsectionindex()"
     },
     {
@@ -13752,7 +13734,7 @@
       "source_file": "components/qr/qr-sections.ts",
       "source_location": "L79",
       "id": "qr_qr_sections_getqreditorsectionchangedirection",
-      "community": 21,
+      "community": 38,
       "norm_label": "getqreditorsectionchangedirection()"
     },
     {
@@ -13851,7 +13833,7 @@
       "source_file": "components/qr/qr-static-content.ts",
       "source_location": "L232",
       "id": "qr_qr_static_content_getdefaultstaticqrvalues",
-      "community": 55,
+      "community": 22,
       "norm_label": "getdefaultstaticqrvalues()"
     },
     {
@@ -14094,7 +14076,7 @@
       "source_file": "components/qr/qr-studio-state.ts",
       "source_location": "L23",
       "id": "qr_qr_studio_state_studiogradient",
-      "community": 37,
+      "community": 44,
       "norm_label": "studiogradient"
     },
     {
@@ -14193,7 +14175,7 @@
       "source_file": "components/qr/qr-studio-state.ts",
       "source_location": "L98",
       "id": "qr_qr_studio_state_backgroundshapeoptions",
-      "community": 24,
+      "community": 22,
       "norm_label": "backgroundshapeoptions"
     },
     {
@@ -14211,7 +14193,7 @@
       "source_file": "components/qr/qr-studio-state.ts",
       "source_location": "L161",
       "id": "qr_qr_studio_state_download_extensions",
-      "community": 13,
+      "community": 38,
       "norm_label": "download_extensions"
     },
     {
@@ -14283,7 +14265,7 @@
       "source_file": "components/qr/qr-studio-state.ts",
       "source_location": "L273",
       "id": "qr_qr_studio_state_default_dot_matrix_animation",
-      "community": 63,
+      "community": 24,
       "norm_label": "default_dot_matrix_animation"
     },
     {
@@ -14301,7 +14283,7 @@
       "source_file": "components/qr/qr-studio-state.ts",
       "source_location": "L305",
       "id": "qr_qr_studio_state_createdefaultqrstudiostate",
-      "community": 90,
+      "community": 14,
       "norm_label": "createdefaultqrstudiostate()"
     },
     {
@@ -14310,7 +14292,7 @@
       "source_file": "components/qr/qr-studio-state.ts",
       "source_location": "L374",
       "id": "qr_qr_studio_state_coercenumber",
-      "community": 55,
+      "community": 24,
       "norm_label": "coercenumber()"
     },
     {
@@ -14319,7 +14301,7 @@
       "source_file": "components/qr/qr-studio-state.ts",
       "source_location": "L387",
       "id": "qr_qr_studio_state_clampqrsize",
-      "community": 30,
+      "community": 54,
       "norm_label": "clampqrsize()"
     },
     {
@@ -14328,7 +14310,7 @@
       "source_file": "components/qr/qr-studio-state.ts",
       "source_location": "L391",
       "id": "qr_qr_studio_state_clamprasterexportqualitypercent",
-      "community": 24,
+      "community": 54,
       "norm_label": "clamprasterexportqualitypercent()"
     },
     {
@@ -14391,7 +14373,7 @@
       "source_file": "components/qr/qr-studio-state.ts",
       "source_location": "L452",
       "id": "qr_qr_studio_state_clampbackgroundshapepaddingpx",
-      "community": 55,
+      "community": 24,
       "norm_label": "clampbackgroundshapepaddingpx()"
     },
     {
@@ -14400,7 +14382,7 @@
       "source_file": "components/qr/qr-studio-state.ts",
       "source_location": "L461",
       "id": "qr_qr_studio_state_clampbackgroundshapestrokewidth",
-      "community": 55,
+      "community": 24,
       "norm_label": "clampbackgroundshapestrokewidth()"
     },
     {
@@ -14409,7 +14391,7 @@
       "source_file": "components/qr/qr-studio-state.ts",
       "source_location": "L470",
       "id": "qr_qr_studio_state_clampbackgroundshapeopacity",
-      "community": 55,
+      "community": 24,
       "norm_label": "clampbackgroundshapeopacity()"
     },
     {
@@ -14418,7 +14400,7 @@
       "source_file": "components/qr/qr-studio-state.ts",
       "source_location": "L479",
       "id": "qr_qr_studio_state_clampbackgroundshapeoffset",
-      "community": 55,
+      "community": 24,
       "norm_label": "clampbackgroundshapeoffset()"
     },
     {
@@ -14427,7 +14409,7 @@
       "source_file": "components/qr/qr-studio-state.ts",
       "source_location": "L488",
       "id": "qr_qr_studio_state_clampbackgroundshapeedgeblur",
-      "community": 55,
+      "community": 24,
       "norm_label": "clampbackgroundshapeedgeblur()"
     },
     {
@@ -14445,7 +14427,7 @@
       "source_file": "components/qr/qr-studio-state.ts",
       "source_location": "L501",
       "id": "qr_qr_studio_state_setsquareqrsize",
-      "community": 30,
+      "community": 54,
       "norm_label": "setsquareqrsize()"
     },
     {
@@ -14508,7 +14490,7 @@
       "source_file": "components/qr/qr-studio-state.ts",
       "source_location": "L700",
       "id": "qr_qr_studio_state_hasactivebackgroundshapeoptions",
-      "community": 90,
+      "community": 24,
       "norm_label": "hasactivebackgroundshapeoptions()"
     },
     {
@@ -14841,7 +14823,7 @@
       "source_file": "components/qr/qr-style-options.ts",
       "source_location": "L1",
       "id": "qr_qr_style_options",
-      "community": 2,
+      "community": 108,
       "norm_label": "qr-style-options.ts"
     },
     {
@@ -14850,7 +14832,7 @@
       "source_file": "components/qr/qr-style-options.ts",
       "source_location": "L5",
       "id": "qr_qr_style_options_dot_style_options",
-      "community": 2,
+      "community": 108,
       "norm_label": "dot_style_options"
     },
     {
@@ -14859,7 +14841,7 @@
       "source_file": "components/qr/qr-style-options.ts",
       "source_location": "L16",
       "id": "qr_qr_style_options_corner_square_style_options",
-      "community": 2,
+      "community": 108,
       "norm_label": "corner_square_style_options"
     },
     {
@@ -14868,7 +14850,7 @@
       "source_file": "components/qr/qr-style-options.ts",
       "source_location": "L29",
       "id": "qr_qr_style_options_corner_dot_style_options",
-      "community": 2,
+      "community": 108,
       "norm_label": "corner_dot_style_options"
     },
     {
@@ -15129,7 +15111,7 @@
       "source_file": "components/sidebar-03/app-sidebar.test.tsx",
       "source_location": "L1",
       "id": "sidebar_03_app_sidebar_test",
-      "community": 21,
+      "community": 38,
       "norm_label": "app-sidebar.test.tsx"
     },
     {
@@ -15138,7 +15120,7 @@
       "source_file": "components/sidebar-03/app-sidebar.test.tsx",
       "source_location": "L8",
       "id": "sidebar_03_app_sidebar_test_tablabelelement",
-      "community": 21,
+      "community": 38,
       "norm_label": "tablabelelement"
     },
     {
@@ -15282,7 +15264,7 @@
       "source_file": "components/sidebar-03/team-switcher.tsx",
       "source_location": "L27",
       "id": "sidebar_03_team_switcher_teamswitcher",
-      "community": 7,
+      "community": 26,
       "norm_label": "teamswitcher()"
     },
     {
@@ -15534,7 +15516,7 @@
       "source_file": "components/ui/ai-prompt-box.test.tsx",
       "source_location": "L1",
       "id": "ui_ai_prompt_box_test",
-      "community": 118,
+      "community": 5,
       "norm_label": "ai-prompt-box.test.tsx"
     },
     {
@@ -15768,7 +15750,7 @@
       "source_file": "components/ui/ai-prompt-box.tsx",
       "source_location": "L451",
       "id": "ui_ai_prompt_box_promptinputboxprops",
-      "community": 6,
+      "community": 5,
       "norm_label": "promptinputboxprops"
     },
     {
@@ -15777,7 +15759,7 @@
       "source_file": "components/ui/ai-prompt-box.tsx",
       "source_location": "L459",
       "id": "ui_ai_prompt_box_promptinputbox",
-      "community": 118,
+      "community": 5,
       "norm_label": "promptinputbox"
     },
     {
@@ -15849,7 +15831,7 @@
       "source_file": "components/ui/badge.tsx",
       "source_location": "L1",
       "id": "ui_badge",
-      "community": 39,
+      "community": 133,
       "norm_label": "badge.tsx"
     },
     {
@@ -15858,7 +15840,7 @@
       "source_file": "components/ui/badge.tsx",
       "source_location": "L6",
       "id": "ui_badge_badgevariants",
-      "community": 39,
+      "community": 133,
       "norm_label": "badgevariants"
     },
     {
@@ -15867,7 +15849,7 @@
       "source_file": "components/ui/badge.tsx",
       "source_location": "L26",
       "id": "ui_badge_badgeprops",
-      "community": 39,
+      "community": 133,
       "norm_label": "badgeprops"
     },
     {
@@ -15876,7 +15858,7 @@
       "source_file": "components/ui/badge.tsx",
       "source_location": "L30",
       "id": "ui_badge_badge",
-      "community": 39,
+      "community": 133,
       "norm_label": "badge()"
     },
     {
@@ -15885,7 +15867,7 @@
       "source_file": "components/ui/button.tsx",
       "source_location": "L1",
       "id": "ui_button",
-      "community": 49,
+      "community": 6,
       "norm_label": "button.tsx"
     },
     {
@@ -15894,7 +15876,7 @@
       "source_file": "components/ui/button.tsx",
       "source_location": "L7",
       "id": "ui_button_buttonvariants",
-      "community": 49,
+      "community": 6,
       "norm_label": "buttonvariants"
     },
     {
@@ -15903,7 +15885,7 @@
       "source_file": "components/ui/button.tsx",
       "source_location": "L44",
       "id": "ui_button_button",
-      "community": 49,
+      "community": 6,
       "norm_label": "button()"
     },
     {
@@ -16200,7 +16182,7 @@
       "source_file": "components/ui/demo.tsx",
       "source_location": "L1",
       "id": "ui_demo",
-      "community": 118,
+      "community": 5,
       "norm_label": "demo.tsx"
     },
     {
@@ -16209,7 +16191,7 @@
       "source_file": "components/ui/demo.tsx",
       "source_location": "L5",
       "id": "ui_demo_demoone",
-      "community": 118,
+      "community": 5,
       "norm_label": "demoone()"
     },
     {
@@ -16389,7 +16371,7 @@
       "source_file": "components/ui/download.tsx",
       "source_location": "L1",
       "id": "ui_download",
-      "community": 91,
+      "community": 58,
       "norm_label": "download.tsx"
     },
     {
@@ -16398,7 +16380,7 @@
       "source_file": "components/ui/download.tsx",
       "source_location": "L10",
       "id": "ui_download_downloadiconhandle",
-      "community": 91,
+      "community": 58,
       "norm_label": "downloadiconhandle"
     },
     {
@@ -16407,7 +16389,7 @@
       "source_file": "components/ui/download.tsx",
       "source_location": "L15",
       "id": "ui_download_downloadiconprops",
-      "community": 91,
+      "community": 58,
       "norm_label": "downloadiconprops"
     },
     {
@@ -16416,7 +16398,7 @@
       "source_file": "components/ui/download.tsx",
       "source_location": "L19",
       "id": "ui_download_arrow_variants",
-      "community": 91,
+      "community": 58,
       "norm_label": "arrow_variants"
     },
     {
@@ -16425,7 +16407,7 @@
       "source_file": "components/ui/download.tsx",
       "source_location": "L32",
       "id": "ui_download_downloadicon",
-      "community": 91,
+      "community": 58,
       "norm_label": "downloadicon"
     },
     {
@@ -16587,7 +16569,7 @@
       "source_file": "components/ui/dropdown-menu.tsx",
       "source_location": "L84",
       "id": "ui_dropdown_menu_dropdownmenucheckboxitem",
-      "community": 56,
+      "community": 26,
       "norm_label": "dropdownmenucheckboxitem()"
     },
     {
@@ -17955,7 +17937,7 @@
       "source_file": "components/ui/fill-picker/parts/css-input.tsx",
       "source_location": "L1",
       "id": "parts_css_input",
-      "community": 65,
+      "community": 91,
       "norm_label": "css-input.tsx"
     },
     {
@@ -17964,7 +17946,7 @@
       "source_file": "components/ui/fill-picker/parts/css-input.tsx",
       "source_location": "L8",
       "id": "parts_css_input_cssinputprops",
-      "community": 65,
+      "community": 91,
       "norm_label": "cssinputprops"
     },
     {
@@ -17982,7 +17964,7 @@
       "source_file": "components/ui/fill-picker/parts/eye-dropper.tsx",
       "source_location": "L1",
       "id": "parts_eye_dropper",
-      "community": 49,
+      "community": 6,
       "norm_label": "eye-dropper.tsx"
     },
     {
@@ -17991,7 +17973,7 @@
       "source_file": "components/ui/fill-picker/parts/eye-dropper.tsx",
       "source_location": "L9",
       "id": "parts_eye_dropper_eyedropperlike",
-      "community": 49,
+      "community": 6,
       "norm_label": "eyedropperlike"
     },
     {
@@ -18000,7 +17982,7 @@
       "source_file": "components/ui/fill-picker/parts/eye-dropper.tsx",
       "source_location": "L13",
       "id": "parts_eye_dropper_eyedropperwindow",
-      "community": 49,
+      "community": 6,
       "norm_label": "eyedropperwindow"
     },
     {
@@ -18009,7 +17991,7 @@
       "source_file": "components/ui/fill-picker/parts/eye-dropper.tsx",
       "source_location": "L17",
       "id": "parts_eye_dropper_eyedropperprops",
-      "community": 49,
+      "community": 6,
       "norm_label": "eyedropperprops"
     },
     {
@@ -18018,7 +18000,7 @@
       "source_file": "components/ui/fill-picker/parts/eye-dropper.tsx",
       "source_location": "L19",
       "id": "parts_eye_dropper_eyedropper",
-      "community": 49,
+      "community": 6,
       "norm_label": "eyedropper"
     },
     {
@@ -18054,7 +18036,7 @@
       "source_file": "components/ui/fill-picker/parts/gamut-badge.tsx",
       "source_location": "L1",
       "id": "parts_gamut_badge",
-      "community": 61,
+      "community": 32,
       "norm_label": "gamut-badge.tsx"
     },
     {
@@ -18063,7 +18045,7 @@
       "source_file": "components/ui/fill-picker/parts/gamut-badge.tsx",
       "source_location": "L13",
       "id": "parts_gamut_badge_gamutbadgeprops",
-      "community": 61,
+      "community": 32,
       "norm_label": "gamutbadgeprops"
     },
     {
@@ -18072,7 +18054,7 @@
       "source_file": "components/ui/fill-picker/parts/gamut-badge.tsx",
       "source_location": "L18",
       "id": "parts_gamut_badge_gamutbadge",
-      "community": 61,
+      "community": 32,
       "norm_label": "gamutbadge"
     },
     {
@@ -18288,7 +18270,7 @@
       "source_file": "components/ui/gallery-vertical-end.tsx",
       "source_location": "L1",
       "id": "ui_gallery_vertical_end",
-      "community": 91,
+      "community": 61,
       "norm_label": "gallery-vertical-end.tsx"
     },
     {
@@ -18297,7 +18279,7 @@
       "source_file": "components/ui/gallery-vertical-end.tsx",
       "source_location": "L10",
       "id": "ui_gallery_vertical_end_galleryverticalendiconhandle",
-      "community": 91,
+      "community": 61,
       "norm_label": "galleryverticalendiconhandle"
     },
     {
@@ -18306,7 +18288,7 @@
       "source_file": "components/ui/gallery-vertical-end.tsx",
       "source_location": "L15",
       "id": "ui_gallery_vertical_end_galleryverticalendiconprops",
-      "community": 91,
+      "community": 61,
       "norm_label": "galleryverticalendiconprops"
     },
     {
@@ -18315,7 +18297,7 @@
       "source_file": "components/ui/gallery-vertical-end.tsx",
       "source_location": "L19",
       "id": "ui_gallery_vertical_end_path_variants",
-      "community": 91,
+      "community": 61,
       "norm_label": "path_variants"
     },
     {
@@ -18324,7 +18306,7 @@
       "source_file": "components/ui/gallery-vertical-end.tsx",
       "source_location": "L41",
       "id": "ui_gallery_vertical_end_galleryverticalendicon",
-      "community": 91,
+      "community": 61,
       "norm_label": "galleryverticalendicon"
     },
     {
@@ -18468,7 +18450,7 @@
       "source_file": "components/ui/input.tsx",
       "source_location": "L1",
       "id": "ui_input",
-      "community": 65,
+      "community": 91,
       "norm_label": "input.tsx"
     },
     {
@@ -18477,7 +18459,7 @@
       "source_file": "components/ui/input.tsx",
       "source_location": "L5",
       "id": "ui_input_input",
-      "community": 65,
+      "community": 91,
       "norm_label": "input()"
     },
     {
@@ -18567,7 +18549,7 @@
       "source_file": "components/ui/layers.tsx",
       "source_location": "L1",
       "id": "ui_layers",
-      "community": 91,
+      "community": 74,
       "norm_label": "layers.tsx"
     },
     {
@@ -18576,7 +18558,7 @@
       "source_file": "components/ui/layers.tsx",
       "source_location": "L10",
       "id": "ui_layers_layersiconhandle",
-      "community": 91,
+      "community": 74,
       "norm_label": "layersiconhandle"
     },
     {
@@ -18585,7 +18567,7 @@
       "source_file": "components/ui/layers.tsx",
       "source_location": "L15",
       "id": "ui_layers_layersiconprops",
-      "community": 91,
+      "community": 74,
       "norm_label": "layersiconprops"
     },
     {
@@ -18594,7 +18576,7 @@
       "source_file": "components/ui/layers.tsx",
       "source_location": "L19",
       "id": "ui_layers_default_transition",
-      "community": 91,
+      "community": 74,
       "norm_label": "default_transition"
     },
     {
@@ -18603,7 +18585,7 @@
       "source_file": "components/ui/layers.tsx",
       "source_location": "L26",
       "id": "ui_layers_layersicon",
-      "community": 91,
+      "community": 74,
       "norm_label": "layersicon"
     },
     {
@@ -18630,7 +18612,7 @@
       "source_file": "components/ui/message-circle.tsx",
       "source_location": "L1",
       "id": "ui_message_circle",
-      "community": 91,
+      "community": 82,
       "norm_label": "message-circle.tsx"
     },
     {
@@ -18639,7 +18621,7 @@
       "source_file": "components/ui/message-circle.tsx",
       "source_location": "L10",
       "id": "ui_message_circle_messagecircleiconhandle",
-      "community": 91,
+      "community": 82,
       "norm_label": "messagecircleiconhandle"
     },
     {
@@ -18648,7 +18630,7 @@
       "source_file": "components/ui/message-circle.tsx",
       "source_location": "L15",
       "id": "ui_message_circle_messagecircleiconprops",
-      "community": 91,
+      "community": 82,
       "norm_label": "messagecircleiconprops"
     },
     {
@@ -18657,7 +18639,7 @@
       "source_file": "components/ui/message-circle.tsx",
       "source_location": "L19",
       "id": "ui_message_circle_icon_variants",
-      "community": 91,
+      "community": 82,
       "norm_label": "icon_variants"
     },
     {
@@ -18666,7 +18648,7 @@
       "source_file": "components/ui/message-circle.tsx",
       "source_location": "L41",
       "id": "ui_message_circle_messagecircleicon",
-      "community": 91,
+      "community": 82,
       "norm_label": "messagecircleicon"
     },
     {
@@ -18702,7 +18684,7 @@
       "source_file": "components/ui/play.tsx",
       "source_location": "L1",
       "id": "ui_play",
-      "community": 91,
+      "community": 94,
       "norm_label": "play.tsx"
     },
     {
@@ -18711,7 +18693,7 @@
       "source_file": "components/ui/play.tsx",
       "source_location": "L10",
       "id": "ui_play_playiconhandle",
-      "community": 91,
+      "community": 94,
       "norm_label": "playiconhandle"
     },
     {
@@ -18720,7 +18702,7 @@
       "source_file": "components/ui/play.tsx",
       "source_location": "L15",
       "id": "ui_play_playiconprops",
-      "community": 91,
+      "community": 94,
       "norm_label": "playiconprops"
     },
     {
@@ -18729,7 +18711,7 @@
       "source_file": "components/ui/play.tsx",
       "source_location": "L19",
       "id": "ui_play_path_variants",
-      "community": 91,
+      "community": 94,
       "norm_label": "path_variants"
     },
     {
@@ -18738,7 +18720,7 @@
       "source_file": "components/ui/play.tsx",
       "source_location": "L36",
       "id": "ui_play_playicon",
-      "community": 91,
+      "community": 94,
       "norm_label": "playicon"
     },
     {
@@ -18765,7 +18747,7 @@
       "source_file": "components/ui/qr-category-browser.test.tsx",
       "source_location": "L1",
       "id": "ui_qr_category_browser_test",
-      "community": 6,
+      "community": 5,
       "norm_label": "qr-category-browser.test.tsx"
     },
     {
@@ -18774,7 +18756,7 @@
       "source_file": "components/ui/qr-category-browser.tsx",
       "source_location": "L1",
       "id": "ui_qr_category_browser",
-      "community": 6,
+      "community": 5,
       "norm_label": "qr-category-browser.tsx"
     },
     {
@@ -18783,7 +18765,7 @@
       "source_file": "components/ui/qr-category-browser.tsx",
       "source_location": "L22",
       "id": "ui_qr_category_browser_qrcategorybrowserprops",
-      "community": 6,
+      "community": 5,
       "norm_label": "qrcategorybrowserprops"
     },
     {
@@ -18792,7 +18774,7 @@
       "source_file": "components/ui/qr-category-browser.tsx",
       "source_location": "L29",
       "id": "ui_qr_category_browser_qrcategorybrowser",
-      "community": 6,
+      "community": 5,
       "norm_label": "qrcategorybrowser()"
     },
     {
@@ -18801,7 +18783,7 @@
       "source_file": "components/ui/qr-input-config.ts",
       "source_location": "L1",
       "id": "ui_qr_input_config",
-      "community": 6,
+      "community": 5,
       "norm_label": "qr-input-config.ts"
     },
     {
@@ -18810,7 +18792,7 @@
       "source_file": "components/ui/qr-input-config.ts",
       "source_location": "L39",
       "id": "ui_qr_input_config_qrinputtype",
-      "community": 6,
+      "community": 5,
       "norm_label": "qrinputtype"
     },
     {
@@ -18819,7 +18801,7 @@
       "source_file": "components/ui/qr-input-config.ts",
       "source_location": "L77",
       "id": "ui_qr_input_config_quickqrinputtype",
-      "community": 6,
+      "community": 5,
       "norm_label": "quickqrinputtype"
     },
     {
@@ -18828,7 +18810,7 @@
       "source_file": "components/ui/qr-input-config.ts",
       "source_location": "L86",
       "id": "ui_qr_input_config_qrcategorykey",
-      "community": 6,
+      "community": 5,
       "norm_label": "qrcategorykey"
     },
     {
@@ -18837,7 +18819,7 @@
       "source_file": "components/ui/qr-input-config.ts",
       "source_location": "L93",
       "id": "ui_qr_input_config_qrinputoption",
-      "community": 6,
+      "community": 5,
       "norm_label": "qrinputoption"
     },
     {
@@ -18846,7 +18828,7 @@
       "source_file": "components/ui/qr-input-config.ts",
       "source_location": "L99",
       "id": "ui_qr_input_config_quickqrinputoption",
-      "community": 6,
+      "community": 5,
       "norm_label": "quickqrinputoption"
     },
     {
@@ -18855,7 +18837,7 @@
       "source_file": "components/ui/qr-input-config.ts",
       "source_location": "L103",
       "id": "ui_qr_input_config_qrcategory",
-      "community": 6,
+      "community": 5,
       "norm_label": "qrcategory"
     },
     {
@@ -18864,7 +18846,7 @@
       "source_file": "components/ui/qr-input-config.ts",
       "source_location": "L112",
       "id": "ui_qr_input_config_qr_input_options",
-      "community": 6,
+      "community": 5,
       "norm_label": "qr_input_options"
     },
     {
@@ -18873,7 +18855,7 @@
       "source_file": "components/ui/qr-input-config.ts",
       "source_location": "L189",
       "id": "ui_qr_input_config_pickqrinputoptions",
-      "community": 6,
+      "community": 5,
       "norm_label": "pickqrinputoptions()"
     },
     {
@@ -18882,7 +18864,7 @@
       "source_file": "components/ui/qr-input-config.ts",
       "source_location": "L193",
       "id": "ui_qr_input_config_quick_input_options",
-      "community": 6,
+      "community": 5,
       "norm_label": "quick_input_options"
     },
     {
@@ -18891,7 +18873,7 @@
       "source_file": "components/ui/qr-input-config.ts",
       "source_location": "L197",
       "id": "ui_qr_input_config_qr_categories",
-      "community": 6,
+      "community": 5,
       "norm_label": "qr_categories"
     },
     {
@@ -18900,7 +18882,7 @@
       "source_file": "components/ui/qr-input-config.ts",
       "source_location": "L274",
       "id": "ui_qr_input_config_quick_input_value_set",
-      "community": 6,
+      "community": 5,
       "norm_label": "quick_input_value_set"
     },
     {
@@ -18909,7 +18891,7 @@
       "source_file": "components/ui/qr-input-config.ts",
       "source_location": "L276",
       "id": "ui_qr_input_config_getnextopenqrcategory",
-      "community": 6,
+      "community": 5,
       "norm_label": "getnextopenqrcategory()"
     },
     {
@@ -18918,7 +18900,7 @@
       "source_file": "components/ui/qr-input-config.ts",
       "source_location": "L283",
       "id": "ui_qr_input_config_togglequickinputtype",
-      "community": 6,
+      "community": 5,
       "norm_label": "togglequickinputtype()"
     },
     {
@@ -18927,7 +18909,7 @@
       "source_file": "components/ui/qr-input-config.ts",
       "source_location": "L290",
       "id": "ui_qr_input_config_isquickinputtype",
-      "community": 6,
+      "community": 5,
       "norm_label": "isquickinputtype()"
     },
     {
@@ -18936,7 +18918,7 @@
       "source_file": "components/ui/receipt-text.tsx",
       "source_location": "L1",
       "id": "ui_receipt_text",
-      "community": 91,
+      "community": 50,
       "norm_label": "receipt-text.tsx"
     },
     {
@@ -18945,7 +18927,7 @@
       "source_file": "components/ui/receipt-text.tsx",
       "source_location": "L8",
       "id": "ui_receipt_text_receipttexticonhandle",
-      "community": 91,
+      "community": 50,
       "norm_label": "receipttexticonhandle"
     },
     {
@@ -18954,7 +18936,7 @@
       "source_file": "components/ui/receipt-text.tsx",
       "source_location": "L13",
       "id": "ui_receipt_text_receipttexticonprops",
-      "community": 91,
+      "community": 50,
       "norm_label": "receipttexticonprops"
     },
     {
@@ -18963,7 +18945,7 @@
       "source_file": "components/ui/receipt-text.tsx",
       "source_location": "L17",
       "id": "ui_receipt_text_lines_container_variants",
-      "community": 91,
+      "community": 50,
       "norm_label": "lines_container_variants"
     },
     {
@@ -18972,7 +18954,7 @@
       "source_file": "components/ui/receipt-text.tsx",
       "source_location": "L26",
       "id": "ui_receipt_text_line_variants",
-      "community": 91,
+      "community": 50,
       "norm_label": "line_variants"
     },
     {
@@ -18981,7 +18963,7 @@
       "source_file": "components/ui/receipt-text.tsx",
       "source_location": "L39",
       "id": "ui_receipt_text_receipttexticon",
-      "community": 91,
+      "community": 50,
       "norm_label": "receipttexticon"
     },
     {
@@ -19233,7 +19215,7 @@
       "source_file": "components/ui/sheet.tsx",
       "source_location": "L1",
       "id": "ui_sheet",
-      "community": 7,
+      "community": 6,
       "norm_label": "sheet.tsx"
     },
     {
@@ -19242,7 +19224,7 @@
       "source_file": "components/ui/sheet.tsx",
       "source_location": "L10",
       "id": "ui_sheet_sheet",
-      "community": 7,
+      "community": 6,
       "norm_label": "sheet()"
     },
     {
@@ -19251,7 +19233,7 @@
       "source_file": "components/ui/sheet.tsx",
       "source_location": "L14",
       "id": "ui_sheet_sheettrigger",
-      "community": 7,
+      "community": 6,
       "norm_label": "sheettrigger()"
     },
     {
@@ -19260,7 +19242,7 @@
       "source_file": "components/ui/sheet.tsx",
       "source_location": "L20",
       "id": "ui_sheet_sheetclose",
-      "community": 7,
+      "community": 6,
       "norm_label": "sheetclose()"
     },
     {
@@ -19269,7 +19251,7 @@
       "source_file": "components/ui/sheet.tsx",
       "source_location": "L26",
       "id": "ui_sheet_sheetportal",
-      "community": 7,
+      "community": 6,
       "norm_label": "sheetportal()"
     },
     {
@@ -19278,7 +19260,7 @@
       "source_file": "components/ui/sheet.tsx",
       "source_location": "L32",
       "id": "ui_sheet_sheetoverlay",
-      "community": 7,
+      "community": 6,
       "norm_label": "sheetoverlay()"
     },
     {
@@ -19287,7 +19269,7 @@
       "source_file": "components/ui/sheet.tsx",
       "source_location": "L48",
       "id": "ui_sheet_sheetcontent",
-      "community": 7,
+      "community": 6,
       "norm_label": "sheetcontent()"
     },
     {
@@ -19296,7 +19278,7 @@
       "source_file": "components/ui/sheet.tsx",
       "source_location": "L89",
       "id": "ui_sheet_sheetheader",
-      "community": 7,
+      "community": 6,
       "norm_label": "sheetheader()"
     },
     {
@@ -19305,7 +19287,7 @@
       "source_file": "components/ui/sheet.tsx",
       "source_location": "L99",
       "id": "ui_sheet_sheetfooter",
-      "community": 7,
+      "community": 6,
       "norm_label": "sheetfooter()"
     },
     {
@@ -19314,7 +19296,7 @@
       "source_file": "components/ui/sheet.tsx",
       "source_location": "L109",
       "id": "ui_sheet_sheettitle",
-      "community": 7,
+      "community": 6,
       "norm_label": "sheettitle()"
     },
     {
@@ -19323,7 +19305,7 @@
       "source_file": "components/ui/sheet.tsx",
       "source_location": "L125",
       "id": "ui_sheet_sheetdescription",
-      "community": 7,
+      "community": 6,
       "norm_label": "sheetdescription()"
     },
     {
@@ -19584,7 +19566,7 @@
       "source_file": "components/ui/skeleton.tsx",
       "source_location": "L1",
       "id": "ui_skeleton",
-      "community": 7,
+      "community": 91,
       "norm_label": "skeleton.tsx"
     },
     {
@@ -19593,7 +19575,7 @@
       "source_file": "components/ui/skeleton.tsx",
       "source_location": "L3",
       "id": "ui_skeleton_skeleton",
-      "community": 7,
+      "community": 91,
       "norm_label": "skeleton()"
     },
     {
@@ -19710,7 +19692,7 @@
       "source_file": "components/ui/tooltip.tsx",
       "source_location": "L1",
       "id": "ui_tooltip",
-      "community": 61,
+      "community": 32,
       "norm_label": "tooltip.tsx"
     },
     {
@@ -19719,7 +19701,7 @@
       "source_file": "components/ui/tooltip.tsx",
       "source_location": "L8",
       "id": "ui_tooltip_tooltipprovider",
-      "community": 61,
+      "community": 32,
       "norm_label": "tooltipprovider()"
     },
     {
@@ -19728,7 +19710,7 @@
       "source_file": "components/ui/tooltip.tsx",
       "source_location": "L21",
       "id": "ui_tooltip_tooltip",
-      "community": 61,
+      "community": 32,
       "norm_label": "tooltip()"
     },
     {
@@ -19737,7 +19719,7 @@
       "source_file": "components/ui/tooltip.tsx",
       "source_location": "L27",
       "id": "ui_tooltip_tooltiptrigger",
-      "community": 61,
+      "community": 32,
       "norm_label": "tooltiptrigger()"
     },
     {
@@ -19746,7 +19728,7 @@
       "source_file": "components/ui/tooltip.tsx",
       "source_location": "L33",
       "id": "ui_tooltip_tooltipcontent",
-      "community": 61,
+      "community": 32,
       "norm_label": "tooltipcontent()"
     },
     {
@@ -22540,6 +22522,33 @@
       "norm_label": "6. (optional)"
     },
     {
+      "label": "DesktopPatternCollectionId",
+      "file_type": "code",
+      "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
+      "source_location": "L290",
+      "community": 0,
+      "norm_label": "desktoppatterncollectionid",
+      "id": "desktop_desktop_toolbar_prototype_desktoppatterncollectionid"
+    },
+    {
+      "label": "DESKTOP_PATTERN_COLLECTIONS",
+      "file_type": "code",
+      "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
+      "source_location": "L512",
+      "community": 0,
+      "norm_label": "desktop_pattern_collections",
+      "id": "desktop_desktop_toolbar_prototype_desktop_pattern_collections"
+    },
+    {
+      "label": "DesktopLayerToolbarToggle()",
+      "file_type": "code",
+      "source_file": "components/new/drafting-pane-workspace.tsx",
+      "source_location": "L384",
+      "community": 42,
+      "norm_label": "desktoplayertoolbartoggle()",
+      "id": "new_drafting_pane_workspace_desktoplayertoolbartoggle"
+    },
+    {
       "label": "DesktopMotionModeButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
@@ -22580,7 +22589,7 @@
       "file_type": "code",
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L762",
-      "community": 58,
+      "community": 8,
       "norm_label": "applyqrmovemodulefieldanimation()",
       "id": "qr_qr_rendering_applyqrmovemodulefieldanimation"
     },
@@ -22634,7 +22643,7 @@
       "file_type": "code",
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L908",
-      "community": 58,
+      "community": 8,
       "norm_label": "getqrmovemodulefield()",
       "id": "qr_qr_rendering_getqrmovemodulefield"
     },
@@ -22643,7 +22652,7 @@
       "file_type": "code",
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L960",
-      "community": 58,
+      "community": 8,
       "norm_label": "createqrmovemodulefieldstyle()",
       "id": "qr_qr_rendering_createqrmovemodulefieldstyle"
     },
@@ -22652,7 +22661,7 @@
       "file_type": "code",
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L989",
-      "community": 58,
+      "community": 8,
       "norm_label": "getqrmovekeyframebody()",
       "id": "qr_qr_rendering_getqrmovekeyframebody"
     },
@@ -22661,7 +22670,7 @@
       "file_type": "code",
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1013",
-      "community": 58,
+      "community": 8,
       "norm_label": "waveunit()",
       "id": "qr_qr_rendering_waveunit"
     },
@@ -22769,7 +22778,7 @@
       "file_type": "code",
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1530",
-      "community": 74,
+      "community": 30,
       "norm_label": "createqrmoveopacitysamples()",
       "id": "qr_qr_rendering_createqrmoveopacitysamples"
     },
@@ -22778,7 +22787,7 @@
       "file_type": "code",
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1547",
-      "community": 74,
+      "community": 8,
       "norm_label": "getqrmovecellmetrics()",
       "id": "qr_qr_rendering_getqrmovecellmetrics"
     },
@@ -27307,6 +27316,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
+      "source_location": "L1473",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "desktop_desktop_toolbar_prototype",
+      "target": "desktop_desktop_toolbar_prototype_getdesktopadaptiveoptionpreviewstyle"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
       "source_location": "L3316",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -28589,6 +28608,28 @@
       "confidence_score": 1.0,
       "source": "new_drafting_surface_test",
       "target": "desktop_desktop_toolbar_prototype_desktoptoolbarprototype"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
+      "source_location": "L2021",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "desktop_desktop_toolbar_prototype_desktopcornerstylebutton",
+      "target": "desktop_desktop_toolbar_prototype_getdesktopadaptiveoptionpreviewstyle"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
+      "source_location": "L3131",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "desktop_desktop_toolbar_prototype_desktopmodulepatternbutton",
+      "target": "desktop_desktop_toolbar_prototype_getdesktopadaptiveoptionpreviewstyle"
     },
     {
       "relation": "calls",
@@ -34543,6 +34584,17 @@
       "confidence_score": 1.0,
       "source": "new_drafting_surface",
       "target": "new_drafting_pane_workspace_draftingpanetoolbarvariant"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/new/drafting-surface.tsx",
+      "source_location": "L117",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "new_drafting_surface",
+      "target": "new_drafting_pane_workspace_draftingpanecanvastool"
     },
     {
       "relation": "calls",
@@ -75049,5 +75101,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "89371f61eebab6350e9516766036af53e345296b"
+  "built_at_commit": "8f308a7b0d9762ca352cd58a2bbf0fa1b8c04923"
 }

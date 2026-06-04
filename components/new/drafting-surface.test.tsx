@@ -305,7 +305,9 @@ describe("DraftingSurface", () => {
     expect(
       surface.container.querySelector('[data-slot="dashboard-compose-document-guides"]'),
     ).toBeNull()
-    expect(surface.container.querySelector('button[aria-label="Reset defaults"]')).not.toBeNull()
+    expect(
+      surface.container.querySelector('[data-slot="dashboard-compose-toolbar"] button[aria-label="Reset defaults"]'),
+    ).toBeNull()
     expect(surface.container.querySelectorAll('[data-slot="drafting-plus-marker"]')).toHaveLength(10)
     expect(
       surface.container.querySelector('[data-slot="drafting-plus-marker"]')?.getAttribute("class"),
@@ -1378,12 +1380,38 @@ describe("DraftingSurface", () => {
     expect(surface.container.querySelector('button[aria-label="Zoom out preview"]')).toBeNull()
     expect(surface.container.querySelector('button[aria-label="Zoom in preview"]')).toBeNull()
     expect(surface.container.querySelector('button[aria-label="Reset view"]')).toBeNull()
+    expect(composeToolbar.querySelector('button[aria-label="Undo"]')).toBeNull()
+    expect(composeToolbar.querySelector('button[aria-label="Redo"]')).toBeNull()
+    expect(composeToolbar.querySelector('button[aria-label="Select and move elements"]')).not.toBeNull()
+    expect(composeToolbar.querySelector('button[aria-label="Pan canvas"]')).not.toBeNull()
+    expect(composeToolbar.querySelector('button[aria-label="Add text on canvas"]')).not.toBeNull()
+    expect(Array.from(composeToolbar.querySelectorAll("button")).map((button) => button.getAttribute("aria-label"))).toEqual([
+      "Select and move elements",
+      "Pan canvas",
+      "Disable snapping",
+      "Hide canvas grid",
+      "Add text on canvas",
+      "Add QR code",
+      "Layer appearance",
+    ])
+	    const actionToolbar = getRequiredElement(surface.container, '[data-slot="desktop-action-toolbar"]')
+	    expect(actionToolbar.getAttribute("data-toolbar-appearance")).toBe("desktop-glass")
+	    expect(actionToolbar.querySelector('button[aria-label="Switch to light mode"]')).toBeNull()
+	    expect(Array.from(actionToolbar.querySelectorAll("button")).map((button) => button.getAttribute("aria-label"))).toEqual([
+	      "Reset defaults",
+	      "Undo",
+	      "Redo",
+	    ])
+	    expect(getRequiredElement(surface.container, 'button[aria-label="Switch to light mode"]').getAttribute("data-slot")).toBe("desktop-theme-toggle")
     const resizeToolbar = getRequiredElement(surface.container, '[data-slot="desktop-resize-toolbar"]')
     expect(resizeToolbar.parentElement?.className).toContain("bottom-4")
     expect(resizeToolbar.parentElement?.className).toContain("right-5")
     expect(resizeToolbar.getAttribute("data-toolbar-appearance")).toBe("desktop-glass")
     expect(resizeToolbar.className).toContain("min-h-14")
     expect(resizeToolbar.className).toContain("px-3")
+    expect(getRequiredElement(resizeToolbar, 'button[aria-label="Decrease canvas size"]').className).toContain("size-8")
+    expect(getRequiredElement(resizeToolbar, 'button[aria-label="Choose canvas size"]').className).toContain("h-8")
+    expect(getRequiredElement(resizeToolbar, 'button[aria-label="Increase canvas size"]').className).toContain("size-8")
     expect(resizeToolbar.textContent).toContain("100%")
 
     act(() => {
@@ -1421,8 +1449,8 @@ describe("DraftingSurface", () => {
 
     expect(toolbar).not.toBeNull()
     expect(getRequiredElement(toolbar, 'button[aria-label="Layer appearance"]')).not.toBeNull()
-    expect(getRequiredElement(toolbar, 'button[aria-label="Hide layer"]')).not.toBeNull()
-    expect(getRequiredElement(toolbar, 'button[aria-label="Lock layer"]')).not.toBeNull()
+    expect(toolbar.querySelector('button[aria-label="Hide layer"]')).toBeNull()
+    expect(toolbar.querySelector('button[aria-label="Lock layer"]')).toBeNull()
     expect(toolbar.querySelector('input[aria-label="Layer opacity"]')).toBeNull()
 
     act(() => {
@@ -1501,32 +1529,6 @@ describe("DraftingSurface", () => {
       (getRequiredElement(updatedPopover, 'input[aria-label="Shadow Y"]') as HTMLInputElement).value,
     ).toBe("8")
 
-    const updatedToolbar = getRequiredElement(
-      surface.container,
-      '[data-slot="desktop-layer-settings-toolbar"]',
-    )
-
-    act(() => {
-      activateElement(getRequiredElement(updatedToolbar, 'button[aria-label="Hide layer"]'))
-    })
-
-    const hiddenToolbar = getRequiredElement(
-      surface.container,
-      '[data-slot="desktop-layer-settings-toolbar"]',
-    )
-
-    expect(getRequiredElement(hiddenToolbar, 'button[aria-label="Show layer"]')).not.toBeNull()
-
-    act(() => {
-      activateElement(getRequiredElement(hiddenToolbar, 'button[aria-label="Lock layer"]'))
-    })
-
-    const toggledToolbar = getRequiredElement(
-      surface.container,
-      '[data-slot="desktop-layer-settings-toolbar"]',
-    )
-
-    expect(getRequiredElement(toggledToolbar, 'button[aria-label="Unlock layer"]')).not.toBeNull()
   })
 
   it("builds Wi-Fi payloads from the content type selector and preserves per-type drafts", () => {
@@ -2149,7 +2151,7 @@ describe("DraftingSurface", () => {
 
   it("preserves card pattern selection separately and resets it to none", async () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
-    const surface = renderSurface()
+    const surface = renderSurface({ includeResetOverlay: true })
 
     await act(async () => {
       await flushPromises()
@@ -2205,7 +2207,7 @@ describe("DraftingSurface", () => {
 
   it("preserves card pattern color overrides separately and clears them on reset", async () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
-    const surface = renderSurface()
+    const surface = renderSurface({ includeResetOverlay: true })
 
     await act(async () => {
       await flushPromises()
@@ -2894,7 +2896,7 @@ describe("DraftingSurface", () => {
 
   it("clears the selected background shape when reset defaults is used", async () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
-    const surface = renderSurface()
+    const surface = renderSurface({ includeResetOverlay: true })
     const backgroundButton = getRequiredElement(
       surface.container,
       'button[aria-label="Open Shape"]',
@@ -3794,7 +3796,7 @@ describe("DraftingSurface", () => {
 
   it("keeps the /new background preview solid on first render and after reset", async () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
-    const surface = renderSurface({ openDownloadPopover: false })
+    const surface = renderSurface({ includeResetOverlay: true, openDownloadPopover: false })
 
     await act(async () => {
       await flushPromises()
@@ -4335,7 +4337,7 @@ describe("DraftingSurface", () => {
 
   it("keeps add QR and reset changes undoable", async () => {
     vi.useFakeTimers()
-    const surface = renderSurface({ openDownloadPopover: false })
+    const surface = renderSurface({ includeResetOverlay: true, openDownloadPopover: false })
 
     await advanceDraftingTimers()
 
@@ -4414,12 +4416,32 @@ describe("DraftingSurface", () => {
   })
 })
 
-function renderSurface({ openDownloadPopover = true }: { openDownloadPopover?: boolean } = {}) {
+function renderSurface({
+  includeResetOverlay = false,
+  openDownloadPopover = true,
+}: {
+  includeResetOverlay?: boolean
+  openDownloadPopover?: boolean
+} = {}) {
   const container = document.createElement("div")
   const root = createRoot(container)
 
   act(() => {
-    root.render(<DraftingSurface />)
+    root.render(
+      <DraftingSurface
+        renderOverlay={
+          includeResetOverlay
+            ? (controller) => (
+                <button
+                  aria-label="Reset defaults"
+                  type="button"
+                  onClick={controller.onResetDefaults}
+                />
+              )
+            : undefined
+        }
+      />,
+    )
   })
 
   const cleanup = () => {

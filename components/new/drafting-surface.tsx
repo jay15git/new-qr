@@ -116,6 +116,7 @@ import {
 import { layoutDraftingText } from "@/components/new/drafting-text-layout"
 import {
   DraftingPaneWorkspace,
+  type DraftingPaneCanvasTool,
   type DraftingPaneToolbarVariant,
 } from "@/components/new/drafting-pane-workspace"
 import type {
@@ -876,7 +877,8 @@ export function DraftingSurface({
   const [selectedLayerIds, setSelectedLayerIds] = useState<string[]>(() => [
     getDraftingQrLayerId(DASHBOARD_QR_NODE_ID),
   ])
-  const [desktopCanvasTool, setDesktopCanvasTool] = useState<"text" | null>(null)
+  const [desktopCanvasTool, setDesktopCanvasTool] = useState<DraftingPaneCanvasTool | null>(null)
+  const [showDesktopCanvasGrid, setShowDesktopCanvasGrid] = useState(true)
   const [selectedDownloadExtension, setSelectedDownloadExtension] =
     useState<DraftingDownloadExtension>("png")
   const [selectedDownloadTarget, setSelectedDownloadTarget] =
@@ -4074,6 +4076,8 @@ export function DraftingSurface({
 
   const desktopController: DraftingWorkspaceController = {
     activeTool: desktopActiveTool,
+    canRedo: canRedoDraftingWorkspace,
+    canUndo: canUndoDraftingWorkspace,
     contentType: selectedContentType,
     contentValues: selectedContentValues,
     contentValidation: selectedContentValidation,
@@ -4094,6 +4098,9 @@ export function DraftingSurface({
       setDesktopCanvasTool(null)
       setActiveTool(getDraftingToolIdFromDesktop(toolId))
     },
+    onRedo: handleRedoDraftingWorkspace,
+    onResetDefaults: resetDraftingWorkspace,
+    onUndo: handleUndoDraftingWorkspace,
     onContentReset: resetDesktopContent,
     onContentTypeChange: handleDraftingContentTypeChange,
     onContentValueChange: handleDraftingContentValueChange,
@@ -4690,6 +4697,7 @@ export function DraftingSurface({
               }}
               activeCanvasTool={desktopCanvasTool}
               onAddTextLayerAt={handleAddTextLayerAt}
+              onCanvasGridChange={setShowDesktopCanvasGrid}
               onCanvasToolChange={setDesktopCanvasTool}
               onLayerPaste={(_paneId, point) => {
                 void pasteDraftingLayers(point, undefined, _paneId)
@@ -4708,7 +4716,6 @@ export function DraftingSurface({
               onPaneSelect={handlePaneSelection}
               onRedo={handleRedoDraftingWorkspace}
               onRemoveQrCode={handleRemoveQrCode}
-              onReset={resetDraftingWorkspace}
               onSwapPanes={(sourcePaneId, targetPaneId) => {
                 const activeState = cloneDraftingQrState(draftingStudioState)
 
@@ -4724,6 +4731,7 @@ export function DraftingSurface({
               }}
               onUndo={handleUndoDraftingWorkspace}
               panes={panes}
+              showCanvasGrid={paneToolbarVariant === "desktop-zoom" ? showDesktopCanvasGrid : true}
               toolbarVariant={paneToolbarVariant}
               selectedLayerId={selectedLayerId}
               selectedLayerIds={selectedLayerIds}
