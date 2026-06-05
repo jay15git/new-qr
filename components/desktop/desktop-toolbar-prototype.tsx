@@ -17,6 +17,7 @@ import {
   BoldIcon,
   ChevronDownIcon,
   ItalicIcon,
+  ListFilterIcon,
   MoonIcon,
   Redo2Icon,
   RotateCcwIcon,
@@ -106,6 +107,13 @@ import {
   TYPE_NUMBER_MIN,
   formatTypeNumberLabel,
 } from "@/components/qr/qr-encoding-options"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Tooltip,
   TooltipContent,
@@ -279,6 +287,11 @@ const DESKTOP_CONTENT_COLLECTIONS: Array<{
     types: ["pdf", "image", "video", "document", "form"],
   },
 ]
+
+const DESKTOP_CONTENT_FILTER_OPTIONS: Array<{
+  id: DesktopContentCollectionId
+  label: string
+}> = [{ id: "all", label: "All QR Types" }, ...DESKTOP_CONTENT_COLLECTIONS]
 
 const DESKTOP_ALL_CONTENT_TYPES = Array.from(
   new Set<QrInputType>([
@@ -2772,6 +2785,8 @@ function DesktopContentInspector({
   const activeOption = QR_INPUT_OPTIONS[contentType]
   const [collectionId, setCollectionId] = useState<DesktopContentCollectionId>("popular")
   const [query, setQuery] = useState("")
+  const activeCollectionLabel =
+    DESKTOP_CONTENT_FILTER_OPTIONS.find((collection) => collection.id === collectionId)?.label ?? "Popular"
   const visibleTypes = useMemo(() => {
     const collectionTypes =
       collectionId === "all"
@@ -2801,42 +2816,58 @@ function DesktopContentInspector({
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
         <div>
           <div className="min-w-0">
-            <div className="relative h-9 w-full">
-              <SearchIcon className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-white/45" />
-              <input
-                aria-label="Search QR types"
-                className="h-full w-full rounded-[7px] border border-white/[0.1] bg-white/[0.08] pl-7 pr-3 text-[12px] text-white outline-none placeholder:text-white/35 focus:border-white/45"
-                placeholder="Search"
-                value={query}
-                onChange={(event) => setQuery(event.currentTarget.value)}
-              />
-            </div>
-
             <div
-              aria-label="QR type filters"
-              className="mt-2 flex min-w-0 flex-wrap gap-1.5"
-              data-slot="desktop-content-type-filters"
+              className="flex h-9 w-full min-w-0 items-center overflow-hidden rounded-[7px] border border-white/[0.1] bg-white/[0.08] focus-within:border-white/45"
+              data-slot="desktop-content-filter-search-row"
             >
-              {[{ id: "all" as DesktopContentCollectionId, label: "All QR Types" }, ...DESKTOP_CONTENT_COLLECTIONS].map(
-                (collection) => {
-                  const selected = collectionId === collection.id
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    aria-label="Filter QR types"
+                    className="flex h-full min-w-[116px] max-w-[132px] shrink-0 items-center justify-between gap-2 border-r border-white/[0.09] bg-black/10 px-2.5 text-[12px] font-semibold text-white outline-none transition hover:bg-white/[0.08] focus-visible:bg-white/[0.1]"
+                    data-slot="desktop-content-type-filter-trigger"
+                    type="button"
+                  >
+                    <span className="flex min-w-0 items-center gap-1.5">
+                      <ListFilterIcon className="size-3.5 shrink-0 text-white/55" />
+                      <span className="truncate">{activeCollectionLabel}</span>
+                    </span>
+                    <ChevronDownIcon className="size-3.5 shrink-0 text-white/45" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-44 border border-white/[0.08] bg-[#111116] p-1.5 text-white shadow-[0_18px_42px_rgba(0,0,0,0.45)]"
+                  data-slot="desktop-content-type-filter-menu"
+                >
+                  <DropdownMenuRadioGroup
+                    aria-label="QR type filters"
+                    value={collectionId}
+                    onValueChange={(value) => setCollectionId(value as DesktopContentCollectionId)}
+                  >
+                    {DESKTOP_CONTENT_FILTER_OPTIONS.map((collection) => (
+                      <DropdownMenuRadioItem
+                        key={collection.id}
+                        className="h-8 rounded-[6px] px-2 text-[12px] font-semibold text-white/72 focus:bg-white/[0.1] focus:text-white data-[state=checked]:bg-[#ff3b68] data-[state=checked]:text-white"
+                        value={collection.id}
+                      >
+                        {collection.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-                  return (
-                    <button
-                      key={collection.id}
-                      aria-pressed={selected}
-                      className={cn(
-                        "h-7 rounded-full border border-white/[0.09] bg-black/22 px-2.5 text-[10px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
-                        selected && "border-[#ff3b68]/70 bg-[#ff3b68] text-white",
-                      )}
-                      type="button"
-                      onClick={() => setCollectionId(collection.id)}
-                    >
-                      {collection.label}
-                    </button>
-                  )
-                },
-              )}
+              <div className="relative min-w-0 flex-1 self-stretch">
+                <SearchIcon className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-white/45" />
+                <input
+                  aria-label="Search QR types"
+                  className="h-full w-full bg-transparent pl-7 pr-3 text-[12px] text-white outline-none placeholder:text-white/35"
+                  placeholder="Search"
+                  value={query}
+                  onChange={(event) => setQuery(event.currentTarget.value)}
+                />
+              </div>
             </div>
           </div>
 
@@ -2872,18 +2903,10 @@ function DesktopContentInspector({
           </div>
         </div>
 
-        <div className="mt-3 flex items-center justify-between gap-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] px-3 py-2.5">
+        <div className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] px-3 py-2.5">
           <div className="min-w-0">
             <p className="truncate text-[12px] font-semibold text-white">{activeOption.label}</p>
           </div>
-          <span
-            className={cn(
-              "shrink-0 rounded-full px-2 py-1 text-[10px] font-bold",
-              validation.isValid ? "bg-emerald-400/15 text-emerald-200" : "bg-[#ff3b68]/15 text-[#ff9ab1]",
-            )}
-          >
-            {validation.isValid ? "Valid" : "Needs input"}
-          </span>
         </div>
 
         <div className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045]">

@@ -435,17 +435,17 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/desktop/desktop-toolbar-prototype.test.tsx": {
-    "mtime": 1780578002.481221,
-    "ast_hash": "3cb63234d893cc74b2703ace891e7913",
+    "mtime": 1780632067.8739827,
+    "ast_hash": "2770338c763a32ab3b440b6891a909c1",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/desktop/desktop-toolbar-prototype.tsx": {
-    "mtime": 1780585219.9203148,
-    "ast_hash": "a8cb5a64a8694fa84ec793bcbd6ca60e",
+    "mtime": 1780632072.4576852,
+    "ast_hash": "06e76efd1b24394686b21d71d7e45857",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/desktop/desktop-workspace.tsx": {
-    "mtime": 1780555865.1331441,
+    "mtime": 1780594018.7537208,
     "ast_hash": "8a68008154b5c34961e3a2a723af2308",
     "semantic_hash": ""
   },
@@ -535,12 +535,12 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/new/drafting-pane-workspace.test.tsx": {
-    "mtime": 1780573680.4397557,
+    "mtime": 1780594018.754097,
     "ast_hash": "77fb9bf95ccf1170593efac45421cd9e",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/new/drafting-pane-workspace.tsx": {
-    "mtime": 1780573676.7578409,
+    "mtime": 1780594018.7544594,
     "ast_hash": "fa70691686538dbb1c359bda4c4abde9",
     "semantic_hash": ""
   },
@@ -580,12 +580,12 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/new/drafting-surface.test.tsx": {
-    "mtime": 1780572787.0674136,
+    "mtime": 1780594018.7549996,
     "ast_hash": "6fb85a61c9caaa77c7547b05b0412827",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/new/drafting-surface.tsx": {
-    "mtime": 1780569488.6616793,
+    "mtime": 1780594018.7555869,
     "ast_hash": "927b5357af5723ec99c5e7a107f2fee0",
     "semantic_hash": ""
   },
@@ -620,12 +620,12 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/new/qr-pane.test.tsx": {
-    "mtime": 1780556595.6415927,
+    "mtime": 1780594018.7566948,
     "ast_hash": "4796ec0606afe51ec4854f514120454b",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/new/qr-pane.tsx": {
-    "mtime": 1780556591.0224218,
+    "mtime": 1780594018.7573721,
     "ast_hash": "4b4e594e86fa47294b5ead8cccb9f75e",
     "semantic_hash": ""
   },
