@@ -2230,7 +2230,7 @@
       "label": "cleanupCallbacks",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L15",
+      "source_location": "L14",
       "id": "desktop_desktop_toolbar_prototype_test_cleanupcallbacks",
       "community": 63,
       "norm_label": "cleanupcallbacks"
@@ -2239,7 +2239,7 @@
       "label": "renderPrototype()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L1477",
+      "source_location": "L1327",
       "id": "desktop_desktop_toolbar_prototype_test_renderprototype",
       "community": 63,
       "norm_label": "renderprototype()"
@@ -2248,7 +2248,7 @@
       "label": "getToolButtons()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L1500",
+      "source_location": "L1350",
       "id": "desktop_desktop_toolbar_prototype_test_gettoolbuttons",
       "community": 63,
       "norm_label": "gettoolbuttons()"
@@ -2257,7 +2257,7 @@
       "label": "getRequiredToolButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L1508",
+      "source_location": "L1358",
       "id": "desktop_desktop_toolbar_prototype_test_getrequiredtoolbutton",
       "community": 63,
       "norm_label": "getrequiredtoolbutton()"
@@ -2266,7 +2266,7 @@
       "label": "getRequiredSlider()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L1520",
+      "source_location": "L1370",
       "id": "desktop_desktop_toolbar_prototype_test_getrequiredslider",
       "community": 63,
       "norm_label": "getrequiredslider()"
@@ -2275,7 +2275,7 @@
       "label": "getRequiredSliderRow()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L1530",
+      "source_location": "L1380",
       "id": "desktop_desktop_toolbar_prototype_test_getrequiredsliderrow",
       "community": 63,
       "norm_label": "getrequiredsliderrow()"
@@ -2284,7 +2284,7 @@
       "label": "getRequiredButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L1541",
+      "source_location": "L1391",
       "id": "desktop_desktop_toolbar_prototype_test_getrequiredbutton",
       "community": 63,
       "norm_label": "getrequiredbutton()"
@@ -2293,7 +2293,7 @@
       "label": "getRequiredInput()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L1553",
+      "source_location": "L1403",
       "id": "desktop_desktop_toolbar_prototype_test_getrequiredinput",
       "community": 63,
       "norm_label": "getrequiredinput()"
@@ -2302,7 +2302,7 @@
       "label": "getRequiredTextarea()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L1563",
+      "source_location": "L1413",
       "id": "desktop_desktop_toolbar_prototype_test_getrequiredtextarea",
       "community": 63,
       "norm_label": "getrequiredtextarea()"
@@ -2311,7 +2311,7 @@
       "label": "setInputValue()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L1573",
+      "source_location": "L1423",
       "id": "desktop_desktop_toolbar_prototype_test_setinputvalue",
       "community": 63,
       "norm_label": "setinputvalue()"
@@ -2320,7 +2320,7 @@
       "label": "setTextareaValue()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.test.tsx",
-      "source_location": "L1579",
+      "source_location": "L1429",
       "id": "desktop_desktop_toolbar_prototype_test_settextareavalue",
       "community": 63,
       "norm_label": "settextareavalue()"
@@ -2905,7 +2905,7 @@
       "label": "DesktopThemeStyles()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1260",
+      "source_location": "L1240",
       "id": "desktop_desktop_toolbar_prototype_desktopthemestyles",
       "community": 0,
       "norm_label": "desktopthemestyles()"
@@ -2914,25 +2914,16 @@
       "label": "DesktopInspectorHeader()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1556",
+      "source_location": "L1536",
       "id": "desktop_desktop_toolbar_prototype_desktopinspectorheader",
       "community": 0,
       "norm_label": "desktopinspectorheader()"
     },
     {
-      "label": "DesktopInspectorFooter()",
-      "file_type": "code",
-      "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1568",
-      "id": "desktop_desktop_toolbar_prototype_desktopinspectorfooter",
-      "community": 0,
-      "norm_label": "desktopinspectorfooter()"
-    },
-    {
       "label": "getDesktopAdaptiveOptionPreviewStyle()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1590",
+      "source_location": "L1548",
       "id": "desktop_desktop_toolbar_prototype_getdesktopadaptiveoptionpreviewstyle",
       "community": 134,
       "norm_label": "getdesktopadaptiveoptionpreviewstyle()"
@@ -2941,7 +2932,7 @@
       "label": "DesktopLogoInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1607",
+      "source_location": "L1565",
       "id": "desktop_desktop_toolbar_prototype_desktoplogoinspector",
       "community": 0,
       "norm_label": "desktoplogoinspector()"
@@ -2950,7 +2941,7 @@
       "label": "DesktopBrandIconButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1832",
+      "source_location": "L1787",
       "id": "desktop_desktop_toolbar_prototype_desktopbrandiconbutton",
       "community": 0,
       "norm_label": "desktopbrandiconbutton()"
@@ -2959,7 +2950,7 @@
       "label": "DesktopCornersInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1859",
+      "source_location": "L1814",
       "id": "desktop_desktop_toolbar_prototype_desktopcornersinspector",
       "community": 0,
       "norm_label": "desktopcornersinspector()"
@@ -2968,7 +2959,7 @@
       "label": "DesktopCornerColorSection()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L1985",
+      "source_location": "L1937",
       "id": "desktop_desktop_toolbar_prototype_desktopcornercolorsection",
       "community": 0,
       "norm_label": "desktopcornercolorsection()"
@@ -2977,7 +2968,7 @@
       "label": "DesktopCornerStyleButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2068",
+      "source_location": "L2020",
       "id": "desktop_desktop_toolbar_prototype_desktopcornerstylebutton",
       "community": 134,
       "norm_label": "desktopcornerstylebutton()"
@@ -2986,7 +2977,7 @@
       "label": "DesktopShapeInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2123",
+      "source_location": "L2075",
       "id": "desktop_desktop_toolbar_prototype_desktopshapeinspector",
       "community": 0,
       "norm_label": "desktopshapeinspector()"
@@ -2995,7 +2986,7 @@
       "label": "DesktopShapePresetButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2403",
+      "source_location": "L2352",
       "id": "desktop_desktop_toolbar_prototype_desktopshapepresetbutton",
       "community": 0,
       "norm_label": "desktopshapepresetbutton()"
@@ -3004,7 +2995,7 @@
       "label": "DesktopShapePreview()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2451",
+      "source_location": "L2400",
       "id": "desktop_desktop_toolbar_prototype_desktopshapepreview",
       "community": 0,
       "norm_label": "desktopshapepreview()"
@@ -3013,7 +3004,7 @@
       "label": "DesktopMotionInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2525",
+      "source_location": "L2474",
       "id": "desktop_desktop_toolbar_prototype_desktopmotioninspector",
       "community": 0,
       "norm_label": "desktopmotioninspector()"
@@ -3022,7 +3013,7 @@
       "label": "DesktopMotionToggleRow()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2661",
+      "source_location": "L2607",
       "id": "desktop_desktop_toolbar_prototype_desktopmotiontogglerow",
       "community": 0,
       "norm_label": "desktopmotiontogglerow()"
@@ -3031,7 +3022,7 @@
       "label": "DesktopMotionSliderRow()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2703",
+      "source_location": "L2649",
       "id": "desktop_desktop_toolbar_prototype_desktopmotionsliderrow",
       "community": 0,
       "norm_label": "desktopmotionsliderrow()"
@@ -3040,7 +3031,7 @@
       "label": "DesktopElasticSliderRow()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2734",
+      "source_location": "L2680",
       "id": "desktop_desktop_toolbar_prototype_desktopelasticsliderrow",
       "community": 0,
       "norm_label": "desktopelasticsliderrow()"
@@ -3049,7 +3040,7 @@
       "label": "DesktopMotionLoaderButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2775",
+      "source_location": "L2721",
       "id": "desktop_desktop_toolbar_prototype_desktopmotionloaderbutton",
       "community": 0,
       "norm_label": "desktopmotionloaderbutton()"
@@ -3058,7 +3049,7 @@
       "label": "DesktopMotionColorPresetButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2804",
+      "source_location": "L2750",
       "id": "desktop_desktop_toolbar_prototype_desktopmotioncolorpresetbutton",
       "community": 0,
       "norm_label": "desktopmotioncolorpresetbutton()"
@@ -3067,7 +3058,7 @@
       "label": "DesktopContentInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L2845",
+      "source_location": "L2791",
       "id": "desktop_desktop_toolbar_prototype_desktopcontentinspector",
       "community": 0,
       "norm_label": "desktopcontentinspector()"
@@ -3076,7 +3067,7 @@
       "label": "DesktopPatternInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3013",
+      "source_location": "L2956",
       "id": "desktop_desktop_toolbar_prototype_desktoppatterninspector",
       "community": 0,
       "norm_label": "desktoppatterninspector()"
@@ -3085,7 +3076,7 @@
       "label": "DesktopModulePatternButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3157",
+      "source_location": "L3097",
       "id": "desktop_desktop_toolbar_prototype_desktopmodulepatternbutton",
       "community": 134,
       "norm_label": "desktopmodulepatternbutton()"
@@ -3094,7 +3085,7 @@
       "label": "DesktopQrDotPreview()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3196",
+      "source_location": "L3136",
       "id": "desktop_desktop_toolbar_prototype_desktopqrdotpreview",
       "community": 0,
       "norm_label": "desktopqrdotpreview()"
@@ -3103,7 +3094,7 @@
       "label": "DesktopColorInputRow()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3223",
+      "source_location": "L3163",
       "id": "desktop_desktop_toolbar_prototype_desktopcolorinputrow",
       "community": 0,
       "norm_label": "desktopcolorinputrow()"
@@ -3112,7 +3103,7 @@
       "label": "DesktopNumberRow()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3255",
+      "source_location": "L3195",
       "id": "desktop_desktop_toolbar_prototype_desktopnumberrow",
       "community": 0,
       "norm_label": "desktopnumberrow()"
@@ -3121,7 +3112,7 @@
       "label": "DesktopPatternSwatchButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3293",
+      "source_location": "L3233",
       "id": "desktop_desktop_toolbar_prototype_desktoppatternswatchbutton",
       "community": 0,
       "norm_label": "desktoppatternswatchbutton()"
@@ -3130,7 +3121,7 @@
       "label": "DesktopTextPresetButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3329",
+      "source_location": "L3269",
       "id": "desktop_desktop_toolbar_prototype_desktoptextpresetbutton",
       "community": 0,
       "norm_label": "desktoptextpresetbutton()"
@@ -3139,7 +3130,7 @@
       "label": "DesktopSegmentedRow()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3357",
+      "source_location": "L3297",
       "id": "desktop_desktop_toolbar_prototype_desktopsegmentedrow",
       "community": 0,
       "norm_label": "desktopsegmentedrow()"
@@ -3148,7 +3139,7 @@
       "label": "updateDesktopGradientColor()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3392",
+      "source_location": "L3332",
       "id": "desktop_desktop_toolbar_prototype_updatedesktopgradientcolor",
       "community": 0,
       "norm_label": "updatedesktopgradientcolor()"
@@ -3157,7 +3148,7 @@
       "label": "DesktopContentFields()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3406",
+      "source_location": "L3346",
       "id": "desktop_desktop_toolbar_prototype_desktopcontentfields",
       "community": 74,
       "norm_label": "desktopcontentfields()"
@@ -3166,7 +3157,7 @@
       "label": "DesktopContentField",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3432",
+      "source_location": "L3372",
       "id": "desktop_desktop_toolbar_prototype_desktopcontentfield",
       "community": 0,
       "norm_label": "desktopcontentfield"
@@ -3175,7 +3166,7 @@
       "label": "DesktopContentFieldRow()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3442",
+      "source_location": "L3382",
       "id": "desktop_desktop_toolbar_prototype_desktopcontentfieldrow",
       "community": 74,
       "norm_label": "desktopcontentfieldrow()"
@@ -3184,7 +3175,7 @@
       "label": "getDesktopContentFields()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3534",
+      "source_location": "L3474",
       "id": "desktop_desktop_toolbar_prototype_getdesktopcontentfields",
       "community": 74,
       "norm_label": "getdesktopcontentfields()"
@@ -3193,7 +3184,7 @@
       "label": "isUrlContentType()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3676",
+      "source_location": "L3616",
       "id": "desktop_desktop_toolbar_prototype_isurlcontenttype",
       "community": 74,
       "norm_label": "isurlcontenttype()"
@@ -3202,7 +3193,7 @@
       "label": "isUsernameContentType()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3697",
+      "source_location": "L3637",
       "id": "desktop_desktop_toolbar_prototype_isusernamecontenttype",
       "community": 74,
       "norm_label": "isusernamecontenttype()"
@@ -3211,7 +3202,7 @@
       "label": "stringContentValue()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3710",
+      "source_location": "L3650",
       "id": "desktop_desktop_toolbar_prototype_stringcontentvalue",
       "community": 74,
       "norm_label": "stringcontentvalue()"
@@ -3220,7 +3211,7 @@
       "label": "DesktopEncodingInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3714",
+      "source_location": "L3654",
       "id": "desktop_desktop_toolbar_prototype_desktopencodinginspector",
       "community": 139,
       "norm_label": "desktopencodinginspector()"
@@ -3229,7 +3220,7 @@
       "label": "DesktopImageInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3773",
+      "source_location": "L3710",
       "id": "desktop_desktop_toolbar_prototype_desktopimageinspector",
       "community": 0,
       "norm_label": "desktopimageinspector()"
@@ -3238,7 +3229,7 @@
       "label": "DesktopDecorationsInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3876",
+      "source_location": "L3810",
       "id": "desktop_desktop_toolbar_prototype_desktopdecorationsinspector",
       "community": 0,
       "norm_label": "desktopdecorationsinspector()"
@@ -3247,7 +3238,7 @@
       "label": "DesktopEffectsInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L3967",
+      "source_location": "L3898",
       "id": "desktop_desktop_toolbar_prototype_desktopeffectsinspector",
       "community": 64,
       "norm_label": "desktopeffectsinspector()"
@@ -3256,7 +3247,7 @@
       "label": "DesktopLayersInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4091",
+      "source_location": "L4019",
       "id": "desktop_desktop_toolbar_prototype_desktoplayersinspector",
       "community": 0,
       "norm_label": "desktoplayersinspector()"
@@ -3265,7 +3256,7 @@
       "label": "DesktopExportInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4185",
+      "source_location": "L4110",
       "id": "desktop_desktop_toolbar_prototype_desktopexportinspector",
       "community": 0,
       "norm_label": "desktopexportinspector()"
@@ -3274,7 +3265,7 @@
       "label": "DesktopTextInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4301",
+      "source_location": "L4215",
       "id": "desktop_desktop_toolbar_prototype_desktoptextinspector",
       "community": 91,
       "norm_label": "desktoptextinspector()"
@@ -3283,7 +3274,7 @@
       "label": "DesktopTextToggleButton()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4568",
+      "source_location": "L4479",
       "id": "desktop_desktop_toolbar_prototype_desktoptexttogglebutton",
       "community": 0,
       "norm_label": "desktoptexttogglebutton()"
@@ -3292,7 +3283,7 @@
       "label": "DesktopTextAlignIcon()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4596",
+      "source_location": "L4507",
       "id": "desktop_desktop_toolbar_prototype_desktoptextalignicon",
       "community": 0,
       "norm_label": "desktoptextalignicon()"
@@ -3301,7 +3292,7 @@
       "label": "DesktopTextInlineSlider()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4608",
+      "source_location": "L4519",
       "id": "desktop_desktop_toolbar_prototype_desktoptextinlineslider",
       "community": 0,
       "norm_label": "desktoptextinlineslider()"
@@ -3310,7 +3301,7 @@
       "label": "getDesktopTextPresetId()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4647",
+      "source_location": "L4558",
       "id": "desktop_desktop_toolbar_prototype_getdesktoptextpresetid",
       "community": 91,
       "norm_label": "getdesktoptextpresetid()"
@@ -3319,7 +3310,7 @@
       "label": "getDesktopTextInspectorFontWeight()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4658",
+      "source_location": "L4569",
       "id": "desktop_desktop_toolbar_prototype_getdesktoptextinspectorfontweight",
       "community": 91,
       "norm_label": "getdesktoptextinspectorfontweight()"
@@ -3328,7 +3319,7 @@
       "label": "getNearestDesktopFontWeight()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4673",
+      "source_location": "L4584",
       "id": "desktop_desktop_toolbar_prototype_getnearestdesktopfontweight",
       "community": 91,
       "norm_label": "getnearestdesktopfontweight()"
@@ -3337,7 +3328,7 @@
       "label": "getDesktopFontWeightSliderStep()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4686",
+      "source_location": "L4597",
       "id": "desktop_desktop_toolbar_prototype_getdesktopfontweightsliderstep",
       "community": 91,
       "norm_label": "getdesktopfontweightsliderstep()"
@@ -3346,7 +3337,7 @@
       "label": "DesktopPlaceholderInspector()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
-      "source_location": "L4698",
+      "source_location": "L4609",
       "id": "desktop_desktop_toolbar_prototype_desktopplaceholderinspector",
       "community": 0,
       "norm_label": "desktopplaceholderinspector()"
@@ -12627,7 +12618,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L41",
       "id": "qr_qr_rendering_buildqrextension",
-      "community": 69,
+      "community": 47,
       "norm_label": "buildqrextension()"
     },
     {
@@ -12636,7 +12627,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L107",
       "id": "qr_qr_rendering_getqrextensionkey",
-      "community": 87,
+      "community": 47,
       "norm_label": "getqrextensionkey()"
     },
     {
@@ -12987,7 +12978,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L947",
       "id": "qr_qr_rendering_rowmajorindex",
-      "community": 133,
+      "community": 82,
       "norm_label": "rowmajorindex()"
     },
     {
@@ -13095,7 +13086,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1090",
       "id": "qr_qr_rendering_getdotmatrixpatternindexes",
-      "community": 133,
+      "community": 82,
       "norm_label": "getdotmatrixpatternindexes()"
     },
     {
@@ -13158,7 +13149,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1187",
       "id": "qr_qr_rendering_getdotmatrixtrackstyle",
-      "community": 108,
+      "community": 101,
       "norm_label": "getdotmatrixtrackstyle()"
     },
     {
@@ -13194,7 +13185,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1292",
       "id": "qr_qr_rendering_creategenerateddotmatrixkeyframes",
-      "community": 133,
+      "community": 82,
       "norm_label": "creategenerateddotmatrixkeyframes()"
     },
     {
@@ -13203,7 +13194,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1309",
       "id": "qr_qr_rendering_getmatrixsizefromregion",
-      "community": 133,
+      "community": 82,
       "norm_label": "getmatrixsizefromregion()"
     },
     {
@@ -13212,7 +13203,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1317",
       "id": "qr_qr_rendering_getgenerateddotmatrixopacitysamples",
-      "community": 133,
+      "community": 82,
       "norm_label": "getgenerateddotmatrixopacitysamples()"
     },
     {
@@ -13221,7 +13212,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1422",
       "id": "qr_qr_rendering_createdotmatrixopacitykeyframes",
-      "community": 133,
+      "community": 82,
       "norm_label": "createdotmatrixopacitykeyframes()"
     },
     {
@@ -13257,7 +13248,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1515",
       "id": "qr_qr_rendering_createbackgroundshapeextension",
-      "community": 69,
+      "community": 47,
       "norm_label": "createbackgroundshapeextension()"
     },
     {
@@ -13293,7 +13284,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1634",
       "id": "qr_qr_rendering_applybackgroundshapestroke",
-      "community": 108,
+      "community": 101,
       "norm_label": "applybackgroundshapestroke()"
     },
     {
@@ -13302,7 +13293,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1652",
       "id": "qr_qr_rendering_hasactivebackgroundsurfaceoptions",
-      "community": 87,
+      "community": 47,
       "norm_label": "hasactivebackgroundsurfaceoptions()"
     },
     {
@@ -13356,7 +13347,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1779",
       "id": "qr_qr_rendering_applysvgrenderbounds",
-      "community": 108,
+      "community": 101,
       "norm_label": "applysvgrenderbounds()"
     },
     {
@@ -13374,7 +13365,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1796",
       "id": "qr_qr_rendering_wrapqrcontent",
-      "community": 108,
+      "community": 101,
       "norm_label": "wrapqrcontent()"
     },
     {
@@ -13383,7 +13374,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1833",
       "id": "qr_qr_rendering_getfirstdrawablesvgchild",
-      "community": 108,
+      "community": 101,
       "norm_label": "getfirstdrawablesvgchild()"
     },
     {
@@ -13401,7 +13392,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1848",
       "id": "qr_qr_rendering_createbackgroundsurfaceextension",
-      "community": 69,
+      "community": 47,
       "norm_label": "createbackgroundsurfaceextension()"
     },
     {
@@ -13491,7 +13482,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2184",
       "id": "qr_qr_rendering_getbackgroundshapetransform",
-      "community": 108,
+      "community": 101,
       "norm_label": "getbackgroundshapetransform()"
     },
     {
@@ -13500,7 +13491,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2196",
       "id": "qr_qr_rendering_formatsvgnumber",
-      "community": 108,
+      "community": 101,
       "norm_label": "formatsvgnumber()"
     },
     {
@@ -13518,7 +13509,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2212",
       "id": "qr_qr_rendering_getbackgroundshapegradientkey",
-      "community": 87,
+      "community": 47,
       "norm_label": "getbackgroundshapegradientkey()"
     },
     {
@@ -13527,7 +13518,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2226",
       "id": "qr_qr_rendering_createalignedcornergradientextension",
-      "community": 69,
+      "community": 47,
       "norm_label": "createalignedcornergradientextension()"
     },
     {
@@ -13536,7 +13527,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2257",
       "id": "qr_qr_rendering_createbackgroundimageextension",
-      "community": 69,
+      "community": 47,
       "norm_label": "createbackgroundimageextension()"
     },
     {
@@ -13581,7 +13572,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2377",
       "id": "qr_qr_rendering_getalignedcornergradientkey",
-      "community": 87,
+      "community": 47,
       "norm_label": "getalignedcornergradientkey()"
     },
     {
@@ -13590,7 +13581,7 @@
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L2390",
       "id": "qr_qr_rendering_getalignedcornergradientrotation",
-      "community": 69,
+      "community": 47,
       "norm_label": "getalignedcornergradientrotation()"
     },
     {
@@ -14499,7 +14490,7 @@
       "source_file": "components/qr/qr-studio-state.ts",
       "source_location": "L700",
       "id": "qr_qr_studio_state_hasactivebackgroundshapeoptions",
-      "community": 87,
+      "community": 47,
       "norm_label": "hasactivebackgroundshapeoptions()"
     },
     {
@@ -14814,7 +14805,7 @@
       "source_file": "components/qr/qr-studio.tsx",
       "source_location": "L856",
       "id": "qr_qr_studio_createqrcodeinstance",
-      "community": 69,
+      "community": 47,
       "norm_label": "createqrcodeinstance()"
     },
     {
@@ -22693,6 +22684,15 @@
       "norm_label": "6. (optional)"
     },
     {
+      "label": "DesktopInspectorFooter()",
+      "file_type": "code",
+      "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
+      "source_location": "L1568",
+      "community": 0,
+      "norm_label": "desktopinspectorfooter()",
+      "id": "desktop_desktop_toolbar_prototype_desktopinspectorfooter"
+    },
+    {
       "label": "DesktopCornerColorPreview()",
       "file_type": "code",
       "source_file": "components/desktop/desktop-toolbar-prototype.tsx",
@@ -23012,7 +23012,7 @@
       "file_type": "code",
       "source_file": "components/qr/qr-rendering.ts",
       "source_location": "L1530",
-      "community": 133,
+      "community": 82,
       "norm_label": "createqrmoveopacitysamples()",
       "id": "qr_qr_rendering_createqrmoveopacitysamples"
     },
@@ -75851,5 +75851,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "0b08f97f8b0b443303d0f03924d4597f9d24c8d5"
+  "built_at_commit": "ecde7d03c49f6b3035685d68a87d21fb77a44e8a"
 }

@@ -957,13 +957,6 @@ export function DesktopToolbarPrototype({
     }))
   }
 
-  function handleContentReset() {
-    setContentValuesByType((current) => ({
-      ...current,
-      [selectedContentType]: getDefaultStaticQrValues(selectedContentType),
-    }))
-  }
-
   const actualPatternSettings = controller?.patternSettings ?? patternSettings
   const actualLogoSettings = controller?.logoSettings ?? logoSettings
   const actualCornersSettings = controller?.cornersSettings ?? cornersSettings
@@ -1167,7 +1160,6 @@ export function DesktopToolbarPrototype({
                 contentValues={actualContentValues}
                 encodedValue={actualEncodedContentValue}
                 validation={actualContentValidation}
-                onContentReset={controller?.onContentReset ?? handleContentReset}
                 onContentTypeChange={controller?.onContentTypeChange ?? handleContentTypeChange}
                 onContentValueChange={controller?.onContentValueChange ?? handleContentValueChange}
               />
@@ -1175,76 +1167,64 @@ export function DesktopToolbarPrototype({
               <DesktopPatternInspector
                 desktopTheme={actualDesktopTheme}
                 settings={actualPatternSettings}
-                onPatternReset={controller?.onPatternReset ?? (() => setPatternSettings(DEFAULT_DESKTOP_PATTERN_SETTINGS))}
                 onPatternSettingsChange={onPatternSettingsChange}
               />
             ) : actualActiveTool === "corners" ? (
               <DesktopCornersInspector
                 desktopTheme={actualDesktopTheme}
                 settings={actualCornersSettings}
-                onCornersReset={controller?.onCornersReset ?? (() => setCornersSettings(DEFAULT_DESKTOP_CORNERS_SETTINGS))}
                 onCornersSettingsChange={onCornersSettingsChange}
               />
             ) : actualActiveTool === "logo" ? (
               <DesktopLogoInspector
                 settings={actualLogoSettings}
-                onLogoReset={controller?.onLogoReset ?? (() => setLogoSettings(DEFAULT_DESKTOP_LOGO_SETTINGS))}
                 onLogoSettingsChange={onLogoSettingsChange}
               />
             ) : actualActiveTool === "shape" ? (
               <DesktopShapeInspector
                 desktopTheme={actualDesktopTheme}
                 settings={actualShapeSettings}
-                onShapeReset={controller?.onShapeReset ?? (() => setShapeSettings(DEFAULT_DESKTOP_SHAPE_SETTINGS))}
                 onShapeSettingsChange={onShapeSettingsChange}
               />
             ) : actualActiveTool === "motion" ? (
               <DesktopMotionInspector
                 settings={actualMotionSettings}
-                onMotionReset={controller?.onMotionReset ?? (() => setMotionSettings(DEFAULT_DESKTOP_MOTION_SETTINGS))}
                 onMotionSettingsChange={onMotionSettingsChange}
               />
             ) : actualActiveTool === "encoding" ? (
               <DesktopEncodingInspector
                 settings={actualEncodingSettings}
-                onEncodingReset={controller?.onEncodingReset ?? (() => setEncodingSettings(DEFAULT_DESKTOP_ENCODING_SETTINGS))}
                 onEncodingSettingsChange={onEncodingSettingsChange}
               />
             ) : actualActiveTool === "text" ? (
               <DesktopTextInspector
                 settings={actualTextSettings}
-                onTextReset={controller?.onTextReset ?? (() => setTextSettings(DEFAULT_DESKTOP_TEXT_SETTINGS))}
                 onTextSettingsChange={onTextSettingsChange}
               />
             ) : actualActiveTool === "image" ? (
               <DesktopImageInspector
                 settings={actualImageSettings}
-                onImageReset={controller?.onImageReset ?? (() => setImageSettings(DEFAULT_DESKTOP_IMAGE_SETTINGS))}
                 onImageSettingsChange={onImageSettingsChange}
               />
             ) : actualActiveTool === "decorations" ? (
               <DesktopDecorationsInspector
                 settings={actualDecorationsSettings}
-                onDecorationsReset={controller?.onDecorationsReset ?? (() => setDecorationsSettings(DEFAULT_DESKTOP_DECORATIONS_SETTINGS))}
                 onDecorationsSettingsChange={onDecorationsSettingsChange}
               />
             ) : actualActiveTool === "effects" ? (
               <DesktopEffectsInspector
                 settings={actualEffectsSettings}
-                onEffectsReset={controller?.onEffectsReset ?? (() => setEffectsSettings(DEFAULT_DESKTOP_EFFECTS_SETTINGS))}
                 onEffectsSettingsChange={onEffectsSettingsChange}
               />
             ) : actualActiveTool === "layers" ? (
               <DesktopLayersInspector
                 settings={actualLayersSettings}
-                onLayersReset={controller?.onLayersReset ?? (() => setLayersSettings(DEFAULT_DESKTOP_LAYERS_SETTINGS))}
                 onLayersSettingsChange={onLayersSettingsChange}
               />
             ) : actualActiveTool === "export" ? (
               <DesktopExportInspector
                 settings={actualExportSettings}
                 onExportDownload={controller?.onExportDownload ?? (() => undefined)}
-                onExportReset={controller?.onExportReset ?? (() => setExportSettings(DEFAULT_DESKTOP_EXPORT_SETTINGS))}
                 onExportSettingsChange={onExportSettingsChange}
               />
             ) : (
@@ -1565,28 +1545,6 @@ function DesktopInspectorHeader({
   )
 }
 
-function DesktopInspectorFooter({
-  label,
-  onReset,
-}: {
-  label: string
-  onReset: () => void
-}) {
-  return (
-    <div className={DESKTOP_INSPECTOR_FOOTER_CLASS}>
-      <button
-        aria-label={label}
-        className={DESKTOP_INSPECTOR_RESET_CLASS}
-        type="button"
-        onClick={onReset}
-      >
-        <RotateCcwIcon className="size-3.5" />
-        {label}
-      </button>
-    </div>
-  )
-}
-
 function getDesktopAdaptiveOptionPreviewStyle(
   desktopTheme: DesktopThemeMode,
   selected = false,
@@ -1605,11 +1563,9 @@ function getDesktopAdaptiveOptionPreviewStyle(
 }
 
 function DesktopLogoInspector({
-  onLogoReset,
   onLogoSettingsChange,
   settings,
 }: {
-  onLogoReset: () => void
   onLogoSettingsChange: (patch: Partial<DesktopLogoSettings>) => void
   settings: DesktopLogoSettings
 }) {
@@ -1824,7 +1780,6 @@ function DesktopLogoInspector({
         ) : null}
       </div>
 
-      <DesktopInspectorFooter label="Reset Logo" onReset={onLogoReset} />
     </div>
   )
 }
@@ -1858,12 +1813,10 @@ function DesktopBrandIconButton({
 
 function DesktopCornersInspector({
   desktopTheme,
-  onCornersReset,
   onCornersSettingsChange,
   settings,
 }: {
   desktopTheme: DesktopThemeMode
-  onCornersReset: () => void
   onCornersSettingsChange: (patch: Partial<DesktopCornersSettings>) => void
   settings: DesktopCornersSettings
 }) {
@@ -1977,7 +1930,6 @@ function DesktopCornersInspector({
         {/* impeccable-variants-end a34b4748 */}
       </div>
 
-      <DesktopInspectorFooter label="Reset Corners" onReset={onCornersReset} />
     </div>
   )
 }
@@ -2122,12 +2074,10 @@ function DesktopCornerStyleButton({
 
 function DesktopShapeInspector({
   desktopTheme,
-  onShapeReset,
   onShapeSettingsChange,
   settings,
 }: {
   desktopTheme: DesktopThemeMode
-  onShapeReset: () => void
   onShapeSettingsChange: (patch: Partial<DesktopShapeSettings>) => void
   settings: DesktopShapeSettings
 }) {
@@ -2395,7 +2345,6 @@ function DesktopShapeInspector({
         </section>
       </div>
 
-      <DesktopInspectorFooter label="Reset Shape" onReset={onShapeReset} />
     </div>
   )
 }
@@ -2523,11 +2472,9 @@ function DesktopShapePreview({
 }
 
 function DesktopMotionInspector({
-  onMotionReset,
   onMotionSettingsChange,
   settings,
 }: {
-  onMotionReset: () => void
   onMotionSettingsChange: (patch: QrDotMatrixAnimationPatch) => void
   settings: DesktopMotionSettings
 }) {
@@ -2653,7 +2600,6 @@ function DesktopMotionInspector({
         </section>
       </div>
 
-      <DesktopInspectorFooter label="Reset Motion" onReset={onMotionReset} />
     </div>
   )
 }
@@ -2846,7 +2792,6 @@ function DesktopContentInspector({
   contentType,
   contentValues,
   encodedValue,
-  onContentReset,
   onContentTypeChange,
   onContentValueChange,
   validation,
@@ -2854,7 +2799,6 @@ function DesktopContentInspector({
   contentType: QrInputType
   contentValues: StaticQrContentValues
   encodedValue: string
-  onContentReset: () => void
   onContentTypeChange: (type: QrInputType) => void
   onContentValueChange: (field: string, value: StaticQrContentValue) => void
   validation: ReturnType<typeof validateStaticQrContent>
@@ -3005,19 +2949,16 @@ function DesktopContentInspector({
         </details>
       </div>
 
-      <DesktopInspectorFooter label="Reset Content" onReset={onContentReset} />
     </div>
   )
 }
 
 function DesktopPatternInspector({
   desktopTheme,
-  onPatternReset,
   onPatternSettingsChange,
   settings,
 }: {
   desktopTheme: DesktopThemeMode
-  onPatternReset: () => void
   onPatternSettingsChange: (patch: Partial<DesktopPatternSettings>) => void
   settings: DesktopPatternSettings
 }) {
@@ -3149,7 +3090,6 @@ function DesktopPatternInspector({
         </div>
       </div>
 
-      <DesktopInspectorFooter label="Reset Pattern" onReset={onPatternReset} />
     </div>
   )
 }
@@ -3712,11 +3652,9 @@ function stringContentValue(value: StaticQrContentValue | undefined) {
 }
 
 function DesktopEncodingInspector({
-  onEncodingReset,
   onEncodingSettingsChange,
   settings,
 }: {
-  onEncodingReset: () => void
   onEncodingSettingsChange: (patch: Partial<DesktopEncodingSettings>) => void
   settings: DesktopEncodingSettings
 }) {
@@ -3765,17 +3703,14 @@ function DesktopEncodingInspector({
           </div>
         </section>
       </div>
-      <DesktopInspectorFooter label="Reset Encoding" onReset={onEncodingReset} />
     </div>
   )
 }
 
 function DesktopImageInspector({
-  onImageReset,
   onImageSettingsChange,
   settings,
 }: {
-  onImageReset: () => void
   onImageSettingsChange: (patch: Partial<DesktopImageSettings>) => void
   settings: DesktopImageSettings
 }) {
@@ -3868,17 +3803,14 @@ function DesktopImageInspector({
           </div>
         </section>
       </div>
-      <DesktopInspectorFooter label="Reset Image" onReset={onImageReset} />
     </div>
   )
 }
 
 function DesktopDecorationsInspector({
-  onDecorationsReset,
   onDecorationsSettingsChange,
   settings,
 }: {
-  onDecorationsReset: () => void
   onDecorationsSettingsChange: (patch: Partial<DesktopDecorationsSettings>) => void
   settings: DesktopDecorationsSettings
 }) {
@@ -3959,17 +3891,14 @@ function DesktopDecorationsInspector({
           </div>
         </section>
       </div>
-      <DesktopInspectorFooter label="Reset Decorations" onReset={onDecorationsReset} />
     </div>
   )
 }
 
 function DesktopEffectsInspector({
-  onEffectsReset,
   onEffectsSettingsChange,
   settings,
 }: {
-  onEffectsReset: () => void
   onEffectsSettingsChange: (patch: Partial<DesktopEffectsSettings>) => void
   settings: DesktopEffectsSettings
 }) {
@@ -4083,17 +4012,14 @@ function DesktopEffectsInspector({
           </select>
         </section>
       </div>
-      <DesktopInspectorFooter label="Reset Effects" onReset={onEffectsReset} />
     </div>
   )
 }
 
 function DesktopLayersInspector({
-  onLayersReset,
   onLayersSettingsChange,
   settings,
 }: {
-  onLayersReset: () => void
   onLayersSettingsChange: (patch: Partial<DesktopLayersSettings>) => void
   settings: DesktopLayersSettings
 }) {
@@ -4177,19 +4103,16 @@ function DesktopLayersInspector({
           </>
         ) : null}
       </div>
-      <DesktopInspectorFooter label="Reset Layers" onReset={onLayersReset} />
     </div>
   )
 }
 
 function DesktopExportInspector({
   onExportDownload,
-  onExportReset,
   onExportSettingsChange,
   settings,
 }: {
   onExportDownload: () => void
-  onExportReset: () => void
   onExportSettingsChange: (patch: Partial<DesktopExportSettings>) => void
   settings: DesktopExportSettings
 }) {
@@ -4279,15 +4202,6 @@ function DesktopExportInspector({
           <AnimatedDownloadIcon size={14} />
           Download {settings.extension.toUpperCase()}
         </button>
-        <button
-          aria-label="Reset Export"
-          className={cn("h-8", DESKTOP_INSPECTOR_RESET_CLASS)}
-          type="button"
-          onClick={onExportReset}
-        >
-          <RotateCcwIcon className="size-3.5" />
-          Reset Export
-        </button>
         {isRasterExport ? (
           <p className="mt-2 truncate text-center text-[10px] font-semibold text-white/42">
             {selectedQuality.sizePx}px raster preset
@@ -4299,11 +4213,9 @@ function DesktopExportInspector({
 }
 
 function DesktopTextInspector({
-  onTextReset,
   onTextSettingsChange,
   settings,
 }: {
-  onTextReset: () => void
   onTextSettingsChange: (patch: Partial<DesktopTextSettings>) => void
   settings: DesktopTextSettings
 }) {
@@ -4560,7 +4472,6 @@ function DesktopTextInspector({
         </section>
       </div>
 
-      <DesktopInspectorFooter label="Reset Text" onReset={onTextReset} />
     </div>
   )
 }

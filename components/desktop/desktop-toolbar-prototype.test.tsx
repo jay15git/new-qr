@@ -10,7 +10,6 @@ import {
   DESKTOP_TOOLBAR_TOOLS,
   DesktopToolbarPrototype,
 } from "@/components/desktop/desktop-toolbar-prototype"
-import { DEFAULT_DOT_MATRIX_ANIMATION } from "@/components/qr/qr-studio-state"
 
 const cleanupCallbacks: Array<() => void> = []
 
@@ -171,16 +170,16 @@ describe("DesktopToolbarPrototype", () => {
   it("renders every remaining /new settings tool in the desktop inspector format", async () => {
     const surface = await renderPrototype()
     const expectedSlots = [
-      ["logo", "desktop-logo-inspector", "Reset Logo"],
-      ["encoding", "desktop-encoding-inspector", "Reset Encoding"],
-      ["image", "desktop-image-inspector", "Reset Image"],
-      ["decorations", "desktop-decorations-inspector", "Reset Decorations"],
-      ["effects", "desktop-effects-inspector", "Reset Effects"],
-      ["layers", "desktop-layers-inspector", "Reset Layers"],
-      ["export", "desktop-export-inspector", "Reset Export"],
+      ["logo", "desktop-logo-inspector"],
+      ["encoding", "desktop-encoding-inspector"],
+      ["image", "desktop-image-inspector"],
+      ["decorations", "desktop-decorations-inspector"],
+      ["effects", "desktop-effects-inspector"],
+      ["layers", "desktop-layers-inspector"],
+      ["export", "desktop-export-inspector"],
     ] as const
 
-    for (const [toolId, slot, resetLabel] of expectedSlots) {
+    for (const [toolId, slot] of expectedSlots) {
       await act(async () => {
         getRequiredToolButton(surface.container, toolId).dispatchEvent(
           new MouseEvent("click", { bubbles: true }),
@@ -192,7 +191,7 @@ describe("DesktopToolbarPrototype", () => {
       )
 
       expect(inspector?.querySelector(`[data-slot="${slot}"]`)).not.toBeNull()
-      expect(inspector?.textContent).toContain(resetLabel)
+      expect(inspector?.textContent).not.toContain("Reset ")
       expect(inspector?.textContent).not.toContain("Coming soon")
     }
   })
@@ -259,7 +258,7 @@ describe("DesktopToolbarPrototype", () => {
     expect(inspector?.textContent).toContain("Content")
     expect(inspector?.textContent).toContain("Popular")
     expect(inspector?.textContent).toContain("Encoded value")
-    expect(inspector?.textContent).toContain("Reset Content")
+    expect(inspector?.textContent).not.toContain("Reset Content")
   })
 
   it("updates the content inspector when a Pixelmator-style preset is clicked", async () => {
@@ -333,7 +332,7 @@ describe("DesktopToolbarPrototype", () => {
     expect(inspector?.textContent).toContain("Module Color")
     expect(inspector?.textContent).toContain("Patterns")
     expect(inspector?.textContent).toContain("Scan Safety")
-    expect(inspector?.textContent).toContain("Reset Pattern")
+    expect(inspector?.textContent).not.toContain("Reset Pattern")
     expect(surface.container.querySelector('input[placeholder="Search patterns"]')).toBeNull()
   })
 
@@ -460,7 +459,7 @@ describe("DesktopToolbarPrototype", () => {
     expect(inspector?.querySelector('[data-slot="desktop-corner-frame-color"]')).not.toBeNull()
     expect(inspector?.querySelector('[data-slot="desktop-corner-dot-color"]')).not.toBeNull()
     expect(inspector?.textContent).toContain("Valid")
-    expect(inspector?.textContent).toContain("Reset Corners")
+    expect(inspector?.textContent).not.toContain("Reset Corners")
     expect(inspector?.textContent).not.toContain("Coming soon")
   })
 
@@ -608,37 +607,6 @@ describe("DesktopToolbarPrototype", () => {
     expect(dotShelf?.className).not.toContain("grid-cols-2")
   })
 
-  it("resets corner frame and dot presets to their defaults", async () => {
-    const surface = await renderPrototype()
-    const cornersButton = getRequiredToolButton(surface.container, "corners")
-
-    await act(async () => {
-      cornersButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    const squareFrame = getRequiredButton(surface.container, "Use Square corner frame")
-    const squareDot = getRequiredButton(surface.container, "Use Square corner dot")
-
-    await act(async () => {
-      squareFrame.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-      squareDot.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    expect(squareFrame.getAttribute("aria-pressed")).toBe("true")
-    expect(squareDot.getAttribute("aria-pressed")).toBe("true")
-
-    const resetButton = getRequiredButton(surface.container, "Reset Corners")
-
-    await act(async () => {
-      resetButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    expect(getRequiredButton(surface.container, "Use Extra rounded corner frame").getAttribute("aria-pressed")).toBe("true")
-    expect(getRequiredButton(surface.container, "Use Dot corner dot").getAttribute("aria-pressed")).toBe("true")
-    expect(squareFrame.getAttribute("aria-pressed")).toBe("false")
-    expect(squareDot.getAttribute("aria-pressed")).toBe("false")
-  })
-
   it("keeps corner frame and dot color controls independent", async () => {
     const surface = await renderPrototype()
     const cornersButton = getRequiredToolButton(surface.container, "corners")
@@ -658,29 +626,6 @@ describe("DesktopToolbarPrototype", () => {
     expect(dotSolid.getAttribute("aria-pressed")).toBe("true")
     expect(surface.container.querySelector('input[aria-label="Frame start color"]')).not.toBeNull()
     expect(surface.container.querySelector('input[aria-label="Dot solid color"]')).not.toBeNull()
-  })
-
-  it("resets corner frame and dot colors to their defaults", async () => {
-    const surface = await renderPrototype()
-    const cornersButton = getRequiredToolButton(surface.container, "corners")
-
-    await act(async () => {
-      cornersButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    await act(async () => {
-      getRequiredButton(surface.container, "Use gradient corner frame color").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-      getRequiredButton(surface.container, "Use gradient corner dot color").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    await act(async () => {
-      getRequiredButton(surface.container, "Reset Corners").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    expect(getRequiredButton(surface.container, "Use solid corner frame color").getAttribute("aria-pressed")).toBe("true")
-    expect(getRequiredButton(surface.container, "Use solid corner dot color").getAttribute("aria-pressed")).toBe("true")
-    expect(surface.container.querySelector<HTMLInputElement>('input[aria-label="Frame solid color"]')?.value).toBe("#18181b")
-    expect(surface.container.querySelector<HTMLInputElement>('input[aria-label="Dot solid color"]')?.value).toBe("#18181b")
   })
 
   it("renders color picker triggers as circular swatches with a dark mode border", async () => {
@@ -721,7 +666,7 @@ describe("DesktopToolbarPrototype", () => {
     expect(inspector?.textContent).not.toContain("Coming soon")
   })
 
-  it("renders shape options, color controls, preset shelf, and reset action", async () => {
+  it("renders shape options, color controls, and preset shelf", async () => {
     const surface = await renderPrototype()
     const shapeButton = getRequiredToolButton(surface.container, "shape")
 
@@ -737,7 +682,7 @@ describe("DesktopToolbarPrototype", () => {
     expect(inspector?.querySelector('[data-slot="desktop-shape-color-mode"]')).not.toBeNull()
     expect(inspector?.textContent).toContain("Shape Options")
     expect(inspector?.textContent).toContain("Shape Color")
-    expect(inspector?.textContent).toContain("Reset Shape")
+    expect(inspector?.textContent).not.toContain("Reset Shape")
   })
 
   it("selects a shape preset without changing shape color mode", async () => {
@@ -875,28 +820,6 @@ describe("DesktopToolbarPrototype", () => {
     expect(getRequiredSlider(surface.container, "Corner radius").getAttribute("aria-valuenow")).toBe("64")
   })
 
-  it("resets shape settings to the defaults", async () => {
-    const surface = await renderPrototype()
-    const shapeButton = getRequiredToolButton(surface.container, "shape")
-
-    await act(async () => {
-      shapeButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    await act(async () => {
-      getRequiredButton(surface.container, "Use Circle shape").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-      getRequiredButton(surface.container, "Use gradient shape color").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    await act(async () => {
-      getRequiredButton(surface.container, "Reset Shape").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    expect(getRequiredButton(surface.container, "Use None shape").getAttribute("aria-pressed")).toBe("true")
-    expect(getRequiredButton(surface.container, "Use solid shape color").getAttribute("aria-pressed")).toBe("true")
-    expect(getRequiredInput(surface.container, "Shape solid color").value).toBe("#18181b")
-  })
-
   it("renders a compact Pixelmator-style motion inspector without placeholder copy", async () => {
     const surface = await renderPrototype()
     const motionButton = getRequiredToolButton(surface.container, "motion")
@@ -915,7 +838,7 @@ describe("DesktopToolbarPrototype", () => {
     expect(inspector?.textContent).not.toContain("Coming soon")
   })
 
-  it("renders compact motion sections, loader shelf, and reset action", async () => {
+  it("renders compact motion sections and loader shelf", async () => {
     const surface = await renderPrototype()
     const motionButton = getRequiredToolButton(surface.container, "motion")
 
@@ -933,22 +856,19 @@ describe("DesktopToolbarPrototype", () => {
     expect(inspector?.textContent).toContain("Timing")
     expect(inspector?.textContent).toContain("Loader Color")
     expect(inspector?.textContent).toContain("Output")
-    expect(inspector?.textContent).toContain("Reset Motion")
+    expect(inspector?.textContent).not.toContain("Reset Motion")
     expect(inspector?.textContent).not.toContain("Pause")
     expect(inspector?.textContent).not.toContain("Frame")
     expect(inspector?.textContent).not.toContain("Opacity")
 
     const motionToggle = getRequiredButton(surface.container, "Dot matrix motion")
     const defaultLoader = getRequiredButton(surface.container, "Use Neon Drift motion loader")
-    const resetMotion = getRequiredButton(surface.container, "Reset Motion")
 
     expect(motionToggle.getAttribute("aria-pressed")).toBe("false")
     expect(motionToggle.className).not.toContain("desktop-inspector-control-bg")
     expect(defaultLoader.getAttribute("aria-pressed")).toBe("true")
     expect(defaultLoader.className).toContain("desktop-inspector-selected-bg")
     expect(defaultLoader.className).not.toContain("ring-black")
-    expect(resetMotion.className).not.toContain("desktop-inspector-control-bg")
-    expect(resetMotion.className).not.toContain("rounded-full")
   })
 
   it("toggles dot matrix motion without changing the default loader", async () => {
@@ -1111,40 +1031,6 @@ describe("DesktopToolbarPrototype", () => {
     expect(exportToggle.getAttribute("aria-pressed")).toBe("true")
   })
 
-  it("resets compact motion settings to defaults", async () => {
-    const surface = await renderPrototype()
-    const motionButton = getRequiredToolButton(surface.container, "motion")
-
-    await act(async () => {
-      motionButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    await act(async () => {
-      getRequiredButton(surface.container, "Dot matrix motion").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-      getRequiredButton(surface.container, "Use Prism Sweep motion loader").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-      getRequiredButton(surface.container, "Use Mint motion colors").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-      getRequiredButton(surface.container, "Animated SVG export").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-      getRequiredSlider(surface.container, "Motion speed").dispatchEvent(
-        new KeyboardEvent("keydown", { bubbles: true, key: "ArrowRight" }),
-      )
-      getRequiredSlider(surface.container, "Motion matrix density").dispatchEvent(
-        new KeyboardEvent("keydown", { bubbles: true, key: "End" }),
-      )
-    })
-
-    await act(async () => {
-      getRequiredButton(surface.container, "Reset Motion").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    expect(getRequiredButton(surface.container, "Dot matrix motion").getAttribute("aria-pressed")).toBe(String(DEFAULT_DOT_MATRIX_ANIMATION.enabled))
-    expect(getRequiredButton(surface.container, "Use Neon Drift motion loader").getAttribute("aria-pressed")).toBe("true")
-    expect(getRequiredButton(surface.container, "Use Theme motion colors").getAttribute("aria-pressed")).toBe("true")
-    expect(getRequiredButton(surface.container, "Animated preview").getAttribute("aria-pressed")).toBe(String(DEFAULT_DOT_MATRIX_ANIMATION.animated))
-    expect(getRequiredButton(surface.container, "Animated SVG export").getAttribute("aria-pressed")).toBe(String(DEFAULT_DOT_MATRIX_ANIMATION.exportAnimatedSvg))
-    expect(getRequiredSlider(surface.container, "Motion speed").getAttribute("aria-valuenow")).toBe(String(DEFAULT_DOT_MATRIX_ANIMATION.speed))
-    expect(getRequiredSlider(surface.container, "Motion matrix density").getAttribute("aria-valuenow")).toBe(String(DEFAULT_DOT_MATRIX_ANIMATION.matrixSize))
-  })
-
   it("renders a compact Pixelmator-style text inspector without placeholder copy", async () => {
     const surface = await renderPrototype()
     const textButton = getRequiredToolButton(surface.container, "text")
@@ -1163,7 +1049,7 @@ describe("DesktopToolbarPrototype", () => {
     expect(inspector?.textContent).not.toContain("Coming soon")
   })
 
-  it("renders compact text sections and reset action", async () => {
+  it("renders compact text sections", async () => {
     const surface = await renderPrototype()
     const textButton = getRequiredToolButton(surface.container, "text")
 
@@ -1199,9 +1085,7 @@ describe("DesktopToolbarPrototype", () => {
     expect(getRequiredButton(surface.container, "Bold text").className).not.toContain("desktop-inspector-control-bg")
     expect(getRequiredButton(surface.container, "Align text left").getAttribute("aria-pressed")).toBe("true")
     expect(getRequiredButton(surface.container, "Align text left").className).toContain("desktop-inspector-selected-bg")
-    expect(getRequiredButton(surface.container, "Reset Text").className).not.toContain("desktop-inspector-control-bg")
-    expect(getRequiredButton(surface.container, "Reset Text").className).not.toContain("rounded-full")
-    expect(inspector?.textContent).toContain("Reset Text")
+    expect(inspector?.textContent).not.toContain("Reset Text")
   })
 
   it("keeps desktop content picker defaults flat with border-only selection", async () => {
@@ -1438,40 +1322,6 @@ describe("DesktopToolbarPrototype", () => {
     expect(right.getAttribute("aria-pressed")).toBe("false")
   })
 
-  it("resets text settings to defaults", async () => {
-    const surface = await renderPrototype()
-    const textButton = getRequiredToolButton(surface.container, "text")
-
-    await act(async () => {
-      textButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    await act(async () => {
-      setTextareaValue(getRequiredTextarea(surface.container, "Text layer content"), "Changed")
-      getRequiredButton(surface.container, "Text font").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    await act(async () => {
-      getRequiredButton(surface.container, "Use General Sans text font").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-      getRequiredButton(surface.container, "Bold text").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-      getRequiredButton(surface.container, "Italic text").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-      getRequiredButton(surface.container, "Align text center").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-      setInputValue(getRequiredInput(surface.container, "Text font size"), "64")
-      setInputValue(getRequiredInput(surface.container, "Text fill color"), "#ff0000")
-    })
-
-    await act(async () => {
-      getRequiredButton(surface.container, "Reset Text").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    expect(getRequiredTextarea(surface.container, "Text layer content").value).toBe("Add text")
-    expect(getRequiredButton(surface.container, "Text font").textContent).toContain("Satoshi")
-    expect(getRequiredInput(surface.container, "Text font size").value).toBe("32")
-    expect(getRequiredButton(surface.container, "Bold text").getAttribute("aria-pressed")).toBe("false")
-    expect(getRequiredButton(surface.container, "Italic text").getAttribute("aria-pressed")).toBe("false")
-    expect(getRequiredButton(surface.container, "Align text left").getAttribute("aria-pressed")).toBe("true")
-    expect(getRequiredInput(surface.container, "Text fill color").value).toBe("#171717")
-  })
 })
 
 async function renderPrototype({

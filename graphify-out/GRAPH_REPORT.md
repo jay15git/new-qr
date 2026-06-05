@@ -1,16 +1,16 @@
 # Graph Report - new-qr  (2026-06-06)
 
 ## Corpus Check
-- 247 files · ~298,143 words
+- 247 files · ~297,284 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2561 nodes · 5010 edges · 140 communities (131 shown, 9 thin omitted)
+- 2561 nodes · 5010 edges · 141 communities (132 shown, 9 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0b08f97f`
+- Built from commit: `ecde7d03`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -62,6 +62,7 @@
 - [[_COMMUNITY_Community 44|Community 44]]
 - [[_COMMUNITY_Community 45|Community 45]]
 - [[_COMMUNITY_Community 46|Community 46]]
+- [[_COMMUNITY_Community 47|Community 47]]
 - [[_COMMUNITY_Community 48|Community 48]]
 - [[_COMMUNITY_Community 50|Community 50]]
 - [[_COMMUNITY_Community 51|Community 51]]
@@ -177,7 +178,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (140 total, 9 thin omitted)
+## Communities (141 total, 9 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.02
@@ -367,6 +368,10 @@ Nodes (19): 1. Width-only rebalance, 2. Fixed-height preview rail with internal 
 Cohesion: 0.10
 Nodes (19): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+11 more)
 
+### Community 47 - "Community 47"
+Cohesion: 0.17
+Nodes (12): buildQrExtension(), createAlignedCornerGradientExtension(), createBackgroundImageExtension(), createBackgroundShapeExtension(), createBackgroundSurfaceExtension(), getAlignedCornerGradientKey(), getAlignedCornerGradientRotation(), getBackgroundShapeGradientKey() (+4 more)
+
 ### Community 48 - "Community 48"
 Cohesion: 0.11
 Nodes (3): cleanupCallbacks, getNestedPanelGroups(), getPaneLayout()
@@ -448,8 +453,8 @@ Cohesion: 0.22
 Nodes (3): DraftingLayersTab(), findLayerPane(), cleanupCallbacks
 
 ### Community 69 - "Community 69"
-Cohesion: 0.13
-Nodes (17): CUSTOM_DOT_SHAPES, CustomDotShape, CustomDotShapeGeometry, getActiveCustomDotShape(), getCustomDotShapeGeometry(), isCustomDotShape(), ShapeDefinition, buildQrExtension() (+9 more)
+Cohesion: 0.22
+Nodes (10): CUSTOM_DOT_SHAPES, CustomDotShape, CustomDotShapeGeometry, getActiveCustomDotShape(), getCustomDotShapeGeometry(), isCustomDotShape(), ShapeDefinition, getSvgCustomDotShape() (+2 more)
 
 ### Community 70 - "Community 70"
 Cohesion: 0.31
@@ -500,8 +505,8 @@ Cohesion: 0.20
 Nodes (9): App Structure, Commands, graphify, MCP Tools, Repo Conventions, Search / Editing Gotchas, Stack, Testing Notes (+1 more)
 
 ### Community 82 - "Community 82"
-Cohesion: 0.25
-Nodes (8): clampDotMatrixUnit(), createDotMatrixModule(), getDotMatrixCenter(), getDotMatrixHash01(), getDotMatrixPerimeterIndex(), getDotMatrixRegionCoordinate(), getDotMatrixRing(), getQrMoveCellMetrics()
+Cohesion: 0.13
+Nodes (15): clampDotMatrixUnit(), createDotMatrixModule(), createDotMatrixOpacityKeyframes(), createGeneratedDotMatrixKeyframes(), createQrMoveOpacitySamples(), getDotMatrixCenter(), getDotMatrixHash01(), getDotMatrixPatternIndexes() (+7 more)
 
 ### Community 83 - "Community 83"
 Cohesion: 0.22
@@ -520,8 +525,8 @@ Cohesion: 0.27
 Nodes (9): cell, inFinder(), isFinderCenter(), isFinderEdge(), keepCell(), nodes, ox, oy (+1 more)
 
 ### Community 87 - "Community 87"
-Cohesion: 0.18
-Nodes (12): coerceNonNegativeSvgNumber(), coerceSvgNumber(), getAlignedCornerGradientKey(), getBackgroundRenderMetrics(), getBackgroundShapeGradientKey(), getLegacyBackgroundShapePaddingPx(), getQrBackgroundRenderMetrics(), getQrExtensionKey() (+4 more)
+Cohesion: 0.33
+Nodes (7): coerceNonNegativeSvgNumber(), coerceSvgNumber(), getBackgroundRenderMetrics(), getLegacyBackgroundShapePaddingPx(), getQrBackgroundRenderMetrics(), normalizeBackgroundShapeOptions(), scaleQrBackgroundShapeOptions()
 
 ### Community 88 - "Community 88"
 Cohesion: 0.20
@@ -576,8 +581,8 @@ Cohesion: 0.52
 Nodes (5): GradientEditor(), clampGradientOffset(), degreesToRadians(), normalizeGradientOffsetRange(), radiansToDegrees()
 
 ### Community 101 - "Community 101"
-Cohesion: 0.36
-Nodes (8): addRoundedBackgroundImageClip(), applyBackgroundShapeShadowSourceStroke(), applyBackgroundSurfaceRect(), createBackgroundShapeBlurPath(), createBackgroundShapeShadowFilter(), createBackgroundSurfaceBlurRect(), getOrCreateSvgDefs(), hasActiveBackgroundShapeShadow()
+Cohesion: 0.18
+Nodes (15): addRoundedBackgroundImageClip(), applyBackgroundShapeShadowSourceStroke(), applyBackgroundShapeStroke(), applyBackgroundSurfaceRect(), applySvgRenderBounds(), createBackgroundShapeBlurPath(), createBackgroundShapeShadowFilter(), createBackgroundSurfaceBlurRect() (+7 more)
 
 ### Community 102 - "Community 102"
 Cohesion: 0.38
@@ -600,8 +605,8 @@ Cohesion: 0.33
 Nodes (5): Aesthetic Direction, Brand Personality, Design Context, Design Principles, Users
 
 ### Community 108 - "Community 108"
-Cohesion: 0.10
-Nodes (21): applyBackgroundShapeStroke(), applyDotMatrixOverlayScale(), applyQrMoveModuleFieldAnimation(), applySvgRenderBounds(), createQrMoveModuleFieldStyle(), findDotMatrixLayerAnchor(), formatSvgNumber(), formatSvgOpacity() (+13 more)
+Cohesion: 0.14
+Nodes (14): applyDotMatrixOverlayScale(), applyQrMoveModuleFieldAnimation(), createQrMoveModuleFieldStyle(), findDotMatrixLayerAnchor(), formatSvgOpacity(), getDotMatrixAnchor(), getDotMatrixBaseOpacity(), getDotMatrixOverlayScale() (+6 more)
 
 ### Community 109 - "Community 109"
 Cohesion: 0.33
@@ -660,8 +665,8 @@ Cohesion: 0.50
 Nodes (3): CORNER_DOT_STYLE_OPTIONS, CORNER_SQUARE_STYLE_OPTIONS, DOT_STYLE_OPTIONS
 
 ### Community 133 - "Community 133"
-Cohesion: 0.15
-Nodes (17): createDotMatrixOpacityKeyframes(), createGeneratedDotMatrixKeyframes(), createOuterRingClockwisePath(), createQrMoveOpacitySamples(), createRingPathClockwise(), createSpiralInwardPath(), diagonalSnakeOrderValue(), findDotMatrixCellIndex() (+9 more)
+Cohesion: 0.27
+Nodes (10): createOuterRingClockwisePath(), createRingPathClockwise(), createSpiralInwardPath(), diagonalSnakeOrderValue(), findDotMatrixCellIndex(), indexToCoord(), middleRingAntiClockwiseOrderValue(), outerRingClockwiseOrderValue() (+2 more)
 
 ### Community 134 - "Community 134"
 Cohesion: 0.67
@@ -688,7 +693,7 @@ Nodes (5): ContrastMetric, ContrastReadout, ContrastReadoutProps, DEFAULT_METRIC
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `cn()` connect `Community 65` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 6`, `Community 7`, `Community 9`, `Community 10`, `Community 11`, `Community 140`, `Community 13`, `Community 17`, `Community 20`, `Community 21`, `Community 26`, `Community 33`, `Community 38`, `Community 39`, `Community 40`, `Community 41`, `Community 42`, `Community 43`, `Community 49`, `Community 50`, `Community 53`, `Community 56`, `Community 58`, `Community 60`, `Community 61`, `Community 75`, `Community 76`, `Community 83`, `Community 94`, `Community 95`, `Community 96`, `Community 109`, `Community 114`, `Community 118`, `Community 119`?**
-  _High betweenness centrality (0.080) - this node is a cross-community bridge._
+  _High betweenness centrality (0.078) - this node is a cross-community bridge._
 - **Why does `QrInputType` connect `Community 5` to `Community 0`, `Community 1`, `Community 3`, `Community 22`, `Community 26`?**
   _High betweenness centrality (0.016) - this node is a cross-community bridge._
 - **Why does `QrStudioState` connect `Community 62` to `Community 1`, `Community 2`, `Community 4`, `Community 37`, `Community 70`, `Community 38`, `Community 8`, `Community 9`, `Community 42`, `Community 13`, `Community 79`, `Community 16`, `Community 22`, `Community 54`, `Community 24`, `Community 25`?**
