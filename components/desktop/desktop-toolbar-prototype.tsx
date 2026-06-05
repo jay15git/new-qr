@@ -17,7 +17,6 @@ import {
   BoldIcon,
   ChevronDownIcon,
   ItalicIcon,
-  ListFilterIcon,
   MoonIcon,
   Redo2Icon,
   RotateCcwIcon,
@@ -126,6 +125,7 @@ import {
   type QrInputType,
 } from "@/components/ui/qr-input-config"
 import { DownloadIcon as AnimatedDownloadIcon } from "@/components/ui/download"
+import { ElasticSlider } from "@/components/ui/elastic-slider"
 import { GalleryVerticalEndIcon } from "@/components/ui/gallery-vertical-end"
 import { GripIcon } from "@/components/ui/grip"
 import { LayersIcon } from "@/components/ui/layers"
@@ -253,6 +253,9 @@ const DESKTOP_CONTENT_PRESET_TYPES: QrInputType[] = [
   "wifi",
   "vcard",
 ]
+
+const DESKTOP_ELASTIC_SLIDER_CLASS =
+  "desktop-elastic-slider [--elastic-slider-height:--spacing(8)] [--elastic-slider-radius:9999px] [--elastic-slider-bg:rgba(255,255,255,0.095)] [--elastic-slider-fill:rgba(255,255,255,0.13)] [--elastic-slider-fill-active:rgba(255,255,255,0.2)] [--elastic-slider-hash:rgba(255,255,255,0.24)] [--elastic-slider-handle:rgba(255,255,255,0.7)] [--elastic-slider-label:rgba(255,255,255,0.58)] [--elastic-slider-focus:rgba(255,255,255,0.82)]"
 
 type DesktopContentCollectionId = "all" | "popular" | "contact" | "social" | "business" | "files"
 
@@ -846,11 +849,13 @@ const DESKTOP_MOTION_COLOR_SWATCHES: Record<DesktopMotionSettings["colorPreset"]
 
 const DESKTOP_INSPECTOR_SECTION_CLASS = "rounded-[10px] bg-[var(--desktop-inspector-section-bg)] p-3"
 const DESKTOP_INSPECTOR_CONTROL_CLASS =
-  "rounded-[6px] bg-[var(--desktop-inspector-control-bg)] text-white/58 transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
+  "rounded-[6px] border border-transparent bg-transparent text-white/58 transition hover:border-[var(--desktop-inspector-control-border-hover)] hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-white active:bg-[var(--desktop-inspector-control-active-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
 const DESKTOP_INSPECTOR_SELECTED_CLASS =
   "bg-[var(--desktop-inspector-selected-bg)] text-[var(--desktop-inspector-selected-fg)] hover:bg-[var(--desktop-inspector-selected-bg)] hover:text-[var(--desktop-inspector-selected-fg)]"
+const DESKTOP_OPTION_CARD_SELECTED_CLASS =
+  "border-2 border-[var(--desktop-inspector-option-selected-border)] bg-transparent text-[var(--desktop-inspector-option-selected-fg)] hover:bg-transparent hover:text-[var(--desktop-inspector-option-selected-fg)]"
 const DESKTOP_INSPECTOR_INPUT_CLASS =
-  "bg-[var(--desktop-inspector-field-bg)] text-white outline-none placeholder:text-white/32 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
+  "desktop-inspector-input-bg bg-[var(--desktop-inspector-field-bg)] text-white outline-none placeholder:text-white/32 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
 const DESKTOP_INSPECTOR_FOCUS_CLASS =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
 const DESKTOP_INSPECTOR_HEADER_CLASS =
@@ -858,7 +863,7 @@ const DESKTOP_INSPECTOR_HEADER_CLASS =
 const DESKTOP_INSPECTOR_FOOTER_CLASS =
   "bg-[var(--desktop-inspector-footer-bg)] p-3"
 const DESKTOP_INSPECTOR_RESET_CLASS =
-  "flex h-9 w-full items-center justify-center gap-2 rounded-[6px] bg-[var(--desktop-inspector-control-bg)] px-3 text-[12px] font-semibold text-white/82 transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
+  "flex h-9 w-full items-center justify-center gap-2 rounded-[6px] border border-transparent bg-transparent px-3 text-[12px] font-semibold text-white/82 transition hover:border-[var(--desktop-inspector-control-border-hover)] hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-white active:bg-[var(--desktop-inspector-control-active-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
 
 export function DesktopToolbarPrototype({
   controller,
@@ -1327,10 +1332,14 @@ function DesktopThemeStyles() {
         --desktop-inspector-section-bg: rgba(255, 255, 255, 0.045);
         --desktop-inspector-header-bg: rgba(255, 255, 255, 0.025);
         --desktop-inspector-footer-bg: rgba(0, 0, 0, 0.18);
-        --desktop-inspector-control-bg: rgba(0, 0, 0, 0.22);
+        --desktop-inspector-control-bg: transparent;
         --desktop-inspector-control-hover-bg: rgba(255, 255, 255, 0.09);
+        --desktop-inspector-control-active-bg: rgba(255, 255, 255, 0.13);
+        --desktop-inspector-control-border-hover: rgba(255, 255, 255, 0.12);
         --desktop-inspector-selected-bg: #f8fafc;
         --desktop-inspector-selected-fg: #111827;
+        --desktop-inspector-option-selected-border: #f8fafc;
+        --desktop-inspector-option-selected-fg: #ffffff;
         --desktop-inspector-field-bg: rgba(0, 0, 0, 0.22);
         --desktop-inspector-focus: rgba(255, 255, 255, 0.36);
       }
@@ -1339,10 +1348,14 @@ function DesktopThemeStyles() {
         --desktop-inspector-section-bg: rgba(15, 23, 42, 0.055);
         --desktop-inspector-header-bg: rgba(15, 23, 42, 0.025);
         --desktop-inspector-footer-bg: rgba(15, 23, 42, 0.045);
-        --desktop-inspector-control-bg: rgba(15, 23, 42, 0.065);
+        --desktop-inspector-control-bg: transparent;
         --desktop-inspector-control-hover-bg: rgba(15, 23, 42, 0.1);
+        --desktop-inspector-control-active-bg: rgba(15, 23, 42, 0.14);
+        --desktop-inspector-control-border-hover: rgba(15, 23, 42, 0.16);
         --desktop-inspector-selected-bg: #111827;
         --desktop-inspector-selected-fg: #ffffff;
+        --desktop-inspector-option-selected-border: #111827;
+        --desktop-inspector-option-selected-fg: #111827;
         --desktop-inspector-field-bg: rgba(255, 255, 255, 0.62);
         --desktop-inspector-focus: rgba(15, 23, 42, 0.36);
       }
@@ -1375,15 +1388,27 @@ function DesktopThemeStyles() {
         border-color: transparent !important;
       }
 
-      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]) {
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-preview-option="true"]) {
         background-color: var(--desktop-inspector-selected-bg) !important;
         border-color: transparent !important;
         color: var(--desktop-inspector-selected-fg) !important;
         box-shadow: none !important;
       }
 
-      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]) :is(span, svg) {
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-preview-option="true"]) :is(span, svg) {
         color: var(--desktop-inspector-selected-fg) !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] button[data-desktop-content-type-option="true"][aria-pressed="true"] {
+        background-color: transparent !important;
+        border-color: var(--desktop-inspector-option-selected-border) !important;
+        color: var(--desktop-inspector-option-selected-fg) !important;
+        box-shadow: none !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] button[data-desktop-preview-option="true"][aria-pressed="true"] [data-desktop-adaptive-option-preview="true"] {
+        border-color: var(--desktop-inspector-option-selected-border) !important;
+        border-width: 2px !important;
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[data-desktop-content-type-option="true"] {
@@ -1397,9 +1422,9 @@ function DesktopThemeStyles() {
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[data-desktop-content-type-option="true"][aria-pressed="true"] {
-        background-color: var(--desktop-inspector-selected-bg) !important;
-        border-color: transparent !important;
-        color: var(--desktop-inspector-selected-fg) !important;
+        background-color: transparent !important;
+        border-color: var(--desktop-inspector-option-selected-border) !important;
+        color: var(--desktop-inspector-option-selected-fg) !important;
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-export-download"] {
@@ -1461,7 +1486,7 @@ function DesktopThemeStyles() {
 
       [data-slot="desktop-floating-inspector"] [data-desktop-adaptive-option-preview="true"] {
         background: rgba(0, 0, 0, 0.88) !important;
-        border-color: rgba(255, 255, 255, 0.18) !important;
+        border-color: transparent !important;
         color: #f8fafc !important;
       }
 
@@ -1471,12 +1496,50 @@ function DesktopThemeStyles() {
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [data-desktop-adaptive-option-preview="true"] {
         background: rgba(255, 255, 255, 0.86) !important;
-        border-color: rgba(15, 23, 42, 0.14) !important;
+        border-color: transparent !important;
         color: #18181b !important;
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [data-desktop-adaptive-option-preview="true"] svg {
         color: #18181b !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] button[data-desktop-content-type-option="true"][aria-pressed="true"] {
+        background-color: transparent !important;
+        border-color: var(--desktop-inspector-option-selected-border) !important;
+        color: var(--desktop-inspector-option-selected-fg) !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] button[data-desktop-preview-option="true"][aria-pressed="true"] [data-desktop-adaptive-option-preview="true"] {
+        border-color: var(--desktop-inspector-option-selected-border) !important;
+        border-width: 2px !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] .desktop-corner-dot-preview-glyph [data-preview-kind="corner-dot"] {
+        transform: scale(1.7) !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] [data-slot="desktop-color-picker"] {
+        background-color: transparent !important;
+        border-color: rgba(255, 255, 255, 0.18) !important;
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [data-slot="desktop-color-picker"] {
+        border-color: rgba(15, 23, 42, 0.14) !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] [data-slot="desktop-color-picker"]::-webkit-color-swatch-wrapper {
+        padding: 0;
+      }
+
+      [data-slot="desktop-floating-inspector"] [data-slot="desktop-color-picker"]::-webkit-color-swatch {
+        border: 0;
+        border-radius: 9999px;
+      }
+
+      [data-slot="desktop-floating-inspector"] [data-slot="desktop-color-picker"]::-moz-color-swatch {
+        border: 0;
+        border-radius: 9999px;
       }
     `}</style>
   )
@@ -1516,10 +1579,19 @@ function DesktopInspectorFooter({
   )
 }
 
-function getDesktopAdaptiveOptionPreviewStyle(desktopTheme: DesktopThemeMode): CSSProperties {
+function getDesktopAdaptiveOptionPreviewStyle(
+  desktopTheme: DesktopThemeMode,
+  selected = false,
+): CSSProperties {
+  if (selected) {
+    return {
+      backgroundColor: desktopTheme === "light" ? "rgba(255, 255, 255, 0.86)" : "rgba(0, 0, 0, 0.88)",
+      color: desktopTheme === "light" ? "#18181b" : "#f8fafc",
+    }
+  }
+
   return {
     backgroundColor: desktopTheme === "light" ? "rgba(255, 255, 255, 0.86)" : "rgba(0, 0, 0, 0.88)",
-    borderColor: desktopTheme === "light" ? "rgba(15, 23, 42, 0.14)" : "rgba(255, 255, 255, 0.18)",
     color: desktopTheme === "light" ? "#18181b" : "#f8fafc",
   }
 }
@@ -1654,18 +1726,10 @@ function DesktopLogoInspector({
         ) : null}
 
         {settings.sourceMode === "brand" ? (
-          <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
-            <div className="mb-3 flex min-w-0 items-center gap-3">
-              <DesktopCornerColorPreview
-                gradient={settings.gradient}
-                mode={settings.colorMode}
-                solidColor={settings.solidColor}
-                className="size-12 shrink-0 rounded-[8px]"
-              />
-              <p className="min-w-0 flex-1 truncate text-[12px] font-semibold text-white">
-                Icon Color
-              </p>
-            </div>
+          <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)} data-slot="desktop-logo-color">
+            <p className="mb-3 truncate text-[12px] font-semibold text-white">
+              Icon Color
+            </p>
             <div className="grid grid-cols-2 gap-1.5" data-slot="desktop-logo-color-mode">
               {DESKTOP_CORNER_COLOR_MODES.map((option) => (
                 <button
@@ -1673,7 +1737,8 @@ function DesktopLogoInspector({
                   aria-label={`Use ${option.value} logo color`}
                   aria-pressed={settings.colorMode === option.value}
                   className={cn(
-                    "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
+                    "h-8 px-2 text-[11px] font-semibold",
+                    DESKTOP_INSPECTOR_CONTROL_CLASS,
                     settings.colorMode === option.value &&
                       DESKTOP_INSPECTOR_SELECTED_CLASS,
                   )}
@@ -1772,7 +1837,7 @@ function DesktopBrandIconButton({
       aria-label={`Use ${brandIcon.label} logo icon`}
       aria-pressed={selected}
       className={cn(
-        "relative grid h-12 min-w-0 place-items-center rounded-[7px] border border-white/[0.08] bg-white/[0.055] text-white/70 transition hover:bg-white/[0.1] hover:text-white",
+        "relative grid h-12 min-w-0 place-items-center rounded-[7px] border border-transparent bg-transparent text-white/70 transition hover:border-[var(--desktop-inspector-control-border-hover)] hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-white",
         selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
       )}
       type="button"
@@ -1937,17 +2002,7 @@ function DesktopCornerColorSection({
       className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}
       data-slot={dataSlot}
     >
-      <div className="mb-3 flex min-w-0 items-center gap-3">
-        <DesktopCornerColorPreview
-          gradient={gradient}
-          mode={mode}
-          solidColor={solidColor}
-          className="size-12 shrink-0 rounded-[8px]"
-        />
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-[12px] font-semibold text-white">{title}</p>
-        </div>
-      </div>
+      <p className="mb-3 truncate text-[12px] font-semibold text-white">{title}</p>
 
       <div className="grid grid-cols-2 gap-1.5">
         {DESKTOP_CORNER_COLOR_MODES.map((option) => (
@@ -1956,7 +2011,8 @@ function DesktopCornerColorSection({
             aria-label={`Use ${option.value} ${target} color`}
             aria-pressed={mode === option.value}
             className={cn(
-              "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
+              "h-8 px-2 text-[11px] font-semibold",
+              DESKTOP_INSPECTOR_CONTROL_CLASS,
               mode === option.value && DESKTOP_INSPECTOR_SELECTED_CLASS,
             )}
             type="button"
@@ -2001,32 +2057,6 @@ function DesktopCornerColorSection({
   )
 }
 
-function DesktopCornerColorPreview({
-  className,
-  gradient,
-  mode,
-  solidColor,
-}: {
-  className?: string
-  gradient: StudioGradient
-  mode: DesktopCornerColorMode
-  solidColor: string
-}) {
-  const background = getDesktopCornerColorPreviewBackground({ gradient, mode, solidColor })
-
-  return (
-    <span
-      aria-hidden="true"
-      data-slot="desktop-style-preview-surface"
-      className={cn(
-        "block overflow-hidden border border-white/[0.1] bg-[#15161a] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]",
-        className,
-      )}
-      style={{ background }}
-    />
-  )
-}
-
 function DesktopCornerStyleButton({
   desktopTheme,
   label,
@@ -2050,7 +2080,7 @@ function DesktopCornerStyleButton({
         aria-label={`Use ${label} ${target}`}
         aria-pressed={selected}
         data-desktop-preview-option="true"
-        className="relative aspect-square w-full min-w-0 rounded-[7px] p-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
+        className="relative aspect-square w-full min-w-0 rounded-[7px] bg-transparent p-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
         type="button"
         onClick={onClick}
       >
@@ -2059,12 +2089,18 @@ function DesktopCornerStyleButton({
           data-desktop-adaptive-option-preview="true"
           data-slot="desktop-style-preview-surface"
           className={cn(
-            "grid size-full place-items-center overflow-hidden rounded-[6px] border border-white/[0.1] bg-[#15161a] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition group-hover:brightness-110",
-            selected && "border-black",
+            "grid size-full place-items-center overflow-hidden rounded-[6px] border-2 border-transparent bg-[#15161a] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition group-hover:brightness-110",
+            selected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
           )}
-          style={getDesktopAdaptiveOptionPreviewStyle(desktopTheme)}
+          style={getDesktopAdaptiveOptionPreviewStyle(desktopTheme, selected)}
         >
-          <span className="grid size-[62%] place-items-center [&_svg]:size-full [&_svg]:text-current">
+          <span
+            className={cn(
+              "grid size-[92%] place-items-center [&_svg]:size-full [&_svg]:text-current",
+              previewKind === "corner-dot" &&
+                "desktop-corner-dot-preview-glyph",
+            )}
+          >
             <StylePreview previewKind={previewKind} value={value} />
           </span>
         </span>
@@ -2074,25 +2110,6 @@ function DesktopCornerStyleButton({
       </span>
     </div>
   )
-}
-
-function getDesktopCornerColorPreviewBackground({
-  gradient,
-  mode,
-  solidColor,
-}: {
-  gradient: StudioGradient
-  mode: DesktopCornerColorMode
-  solidColor: string
-}) {
-  if (mode === "gradient") {
-    const [start, end] = gradient.colorStops
-    const gradientType = gradient.type === "radial" ? "radial-gradient(circle" : "linear-gradient(135deg"
-
-    return `${gradientType}, ${start.color}, ${end.color})`
-  }
-
-  return solidColor
 }
 
 function DesktopShapeInspector({
@@ -2106,12 +2123,6 @@ function DesktopShapeInspector({
   onShapeSettingsChange: (patch: Partial<DesktopShapeSettings>) => void
   settings: DesktopShapeSettings
 }) {
-  const selectedShapeLabel =
-    settings.backgroundShapeId === "none"
-      ? "None"
-      : (QR_BACKGROUND_SHAPES.find((shape) => shape.id === settings.backgroundShapeId)?.label ??
-        "Custom")
-
   return (
     <div data-slot="desktop-shape-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Shape" />
@@ -2148,18 +2159,8 @@ function DesktopShapeInspector({
           </div>
         </section>
 
-        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
-          <div className="mb-3 flex min-w-0 items-center gap-3">
-            <DesktopShapePreview
-              label={selectedShapeLabel}
-              settings={settings}
-              shapeId={settings.backgroundShapeId}
-              className="size-12 shrink-0 rounded-[8px]"
-            />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[12px] font-semibold text-white">Shape Color</p>
-            </div>
-          </div>
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)} data-slot="desktop-shape-color">
+          <p className="mb-3 truncate text-[12px] font-semibold text-white">Shape Color</p>
 
           <div className="grid grid-cols-2 gap-1.5" data-slot="desktop-shape-color-mode">
             {DESKTOP_SHAPE_COLOR_MODES.map((mode) => (
@@ -2168,7 +2169,8 @@ function DesktopShapeInspector({
                 aria-label={`Use ${mode.value} shape color`}
                 aria-pressed={settings.shapeColorMode === mode.value}
                 className={cn(
-                  "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
+                  "h-8 px-2 text-[11px] font-semibold",
+                  DESKTOP_INSPECTOR_CONTROL_CLASS,
                   settings.shapeColorMode === mode.value &&
                     DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
@@ -2703,24 +2705,24 @@ function DesktopMotionSliderRow({
   valueLabel: string
 }) {
   return (
-    <label className={cn("grid min-w-0 gap-2 px-3 py-2.5", DESKTOP_INSPECTOR_CONTROL_CLASS)}>
-      <span className="flex min-w-0 items-center justify-between gap-3">
-        <span className="truncate text-[12px] font-semibold text-white/74">{label}</span>
-        <span className="shrink-0 rounded-full bg-white/[0.08] px-2 py-0.5 text-[10px] font-bold text-white/62">
-          {valueLabel}
-        </span>
-      </span>
-      <input
-        aria-label={`Motion ${label.toLowerCase()}`}
-        className="h-1.5 w-full accent-white"
-        max={max}
-        min={min}
-        step={step}
-        type="range"
-        value={value}
-        onChange={(event) => onChange(Number(event.currentTarget.value))}
-      />
-    </label>
+    <div
+      data-slot="desktop-elastic-slider-row"
+      className="grid min-w-0 px-3 py-1.5"
+    >
+      <div data-slot="desktop-elastic-slider">
+        <ElasticSlider
+          aria-label={`Motion ${label.toLowerCase()}`}
+          className={DESKTOP_ELASTIC_SLIDER_CLASS}
+          formatValue={() => valueLabel}
+          label={label}
+          max={max}
+          min={min}
+          step={step}
+          value={value}
+          onValueChange={onChange}
+        />
+      </div>
+    </div>
   )
 }
 
@@ -2846,21 +2848,21 @@ function DesktopContentInspector({
         <div>
           <div className="min-w-0">
             <div
-              className="flex h-9 w-full min-w-0 items-center overflow-hidden rounded-[7px] border border-white/[0.1] bg-white/[0.08] focus-within:border-white/45"
+              className="flex h-9 w-full min-w-0 items-center gap-2"
               data-slot="desktop-content-filter-search-row"
             >
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
                     aria-label="Filter QR types"
-                    className="flex h-full min-w-[116px] max-w-[132px] shrink-0 items-center justify-between gap-2 bg-black/10 px-2.5 text-[12px] font-semibold text-white outline-none transition hover:bg-white/[0.08] focus-visible:bg-white/[0.1]"
+                    className={cn(
+                      "flex h-full min-w-[116px] max-w-[132px] shrink-0 items-center justify-between gap-2 rounded-[7px] px-2.5 text-[12px] font-semibold transition hover:bg-[var(--desktop-inspector-control-hover-bg)]",
+                      DESKTOP_INSPECTOR_INPUT_CLASS,
+                    )}
                     data-slot="desktop-content-type-filter-trigger"
                     type="button"
                   >
-                    <span className="flex min-w-0 items-center gap-1.5">
-                      <ListFilterIcon className="size-3.5 shrink-0 text-white/55" />
-                      <span className="truncate">{activeCollectionLabel}</span>
-                    </span>
+                    <span className="min-w-0 truncate">{activeCollectionLabel}</span>
                     <ChevronDownIcon className="size-3.5 shrink-0 text-white/45" />
                   </button>
                 </DropdownMenuTrigger>
@@ -2891,7 +2893,7 @@ function DesktopContentInspector({
                 <SearchIcon className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-white/45" />
                 <input
                   aria-label="Search QR types"
-                  className="h-full w-full bg-transparent pl-7 pr-3 text-[12px] text-white outline-none placeholder:text-white/35"
+                  className={cn("h-full w-full rounded-[7px] pl-7 pr-3 text-[12px]", DESKTOP_INSPECTOR_INPUT_CLASS)}
                   placeholder="Search"
                   value={query}
                   onChange={(event) => setQuery(event.currentTarget.value)}
@@ -2912,8 +2914,8 @@ function DesktopContentInspector({
                 aria-label={`Use ${option.label} content`}
                 aria-pressed={isSelected}
                 className={cn(
-                  "relative flex h-[54px] min-w-0 flex-col items-center justify-center gap-1 rounded-[7px] bg-white/[0.055] px-1 text-[10px] font-semibold text-white/62 transition hover:bg-white/[0.1] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35",
-                  isSelected && DESKTOP_INSPECTOR_SELECTED_CLASS,
+                  "relative flex h-[54px] min-w-0 flex-col items-center justify-center gap-1 rounded-[7px] border-2 border-transparent bg-transparent px-1 text-[10px] font-semibold text-white/62 transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35",
+                  isSelected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
                 )}
                 data-desktop-content-type-option="true"
                 type="button"
@@ -3000,21 +3002,18 @@ function DesktopPatternInspector({
           </div>
         </section>
 
-        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
-          <div className="mb-3 flex min-w-0 items-center gap-3">
-            <DesktopDotsColorPreview settings={settings} className="size-12 shrink-0 rounded-[8px]" />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[12px] font-semibold text-white">Module Color</p>
-            </div>
-          </div>
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)} data-slot="desktop-module-color">
+          <p className="mb-3 truncate text-[12px] font-semibold text-white">Module Color</p>
 
           <div className="grid grid-cols-3 gap-1.5" data-slot="desktop-pattern-color-mode">
             {DESKTOP_DOTS_COLOR_MODES.map((mode) => (
               <button
                 key={mode.value}
+                aria-label={`Use ${mode.label} module color`}
                 aria-pressed={settings.dotsColorMode === mode.value}
                 className={cn(
-                  "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
+                  "h-8 px-2 text-[11px] font-semibold",
+                  DESKTOP_INSPECTOR_CONTROL_CLASS,
                   settings.dotsColorMode === mode.value &&
                     DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
@@ -3069,7 +3068,7 @@ function DesktopPatternInspector({
 
           {settings.dotsColorMode === "palette" ? (
             <div className="mt-3 grid gap-2">
-              <div className="flex min-w-0 flex-wrap gap-2 rounded-[7px] bg-black/20 p-2.5">
+              <div className="flex min-w-0 flex-wrap gap-2 border-b border-white/[0.07] px-0 py-2.5 last:border-b-0">
                 {settings.dotsPalette.map((color, index) => (
                   <input
                     key={`${color}-${index}`}
@@ -3128,7 +3127,7 @@ function DesktopModulePatternButton({
         aria-label={`Use ${label} pattern`}
         aria-pressed={selected}
         data-desktop-preview-option="true"
-        className="relative aspect-square w-full min-w-0 rounded-[7px] p-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
+        className="relative aspect-square w-full min-w-0 rounded-[7px] bg-transparent p-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
         type="button"
         onClick={onClick}
       >
@@ -3136,9 +3135,9 @@ function DesktopModulePatternButton({
           value={value}
           className={cn(
             "size-full rounded-[6px] transition group-hover:brightness-110",
-            selected && "border-black",
+            selected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
           )}
-          style={getDesktopAdaptiveOptionPreviewStyle(desktopTheme)}
+          style={getDesktopAdaptiveOptionPreviewStyle(desktopTheme, selected)}
         />
       </button>
       <span className="block w-full truncate px-0.5 text-center text-[10px] font-semibold text-white/72">
@@ -3163,37 +3162,15 @@ function DesktopQrDotPreview({
       data-desktop-adaptive-option-preview="true"
       data-slot="desktop-style-preview-surface"
       className={cn(
-        "grid place-items-center overflow-hidden border border-white/[0.1] bg-[#15161a] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]",
+        "grid place-items-center overflow-hidden border-2 border-transparent bg-[#15161a] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]",
         className,
       )}
       style={style}
     >
-      <span className="grid size-[62%] place-items-center [&_svg]:size-full [&_svg]:text-current">
+      <span className="grid size-[78%] place-items-center [&_svg]:size-full [&_svg]:text-current">
         <StylePreview previewKind="dots" value={value} />
       </span>
     </span>
-  )
-}
-
-function DesktopDotsColorPreview({
-  className,
-  settings,
-}: {
-  className?: string
-  settings: DesktopPatternSettings
-}) {
-  const background = getDesktopDotsColorPreviewBackground(settings)
-
-  return (
-    <span
-      aria-hidden="true"
-      data-slot="desktop-style-preview-surface"
-      className={cn(
-        "block overflow-hidden border border-white/[0.1] bg-[#15161a] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]",
-        className,
-      )}
-      style={{ background }}
-    />
   )
 }
 
@@ -3207,12 +3184,13 @@ function DesktopColorInputRow({
   value: string
 }) {
   return (
-    <label className="flex min-w-0 items-center justify-between gap-3 rounded-[7px] bg-black/20 px-2.5 py-2">
+    <label className="flex min-w-0 items-center justify-between gap-3 border-b border-white/[0.07] px-0 py-2.5 last:border-b-0">
       <span className="truncate text-[12px] font-semibold text-white/74">{label}</span>
       <span className="flex items-center gap-2">
         <input
           aria-label={`${label} swatch`}
-          className="size-7 shrink-0 cursor-pointer rounded-[6px] border border-white/[0.12] bg-transparent p-0.5"
+          className="size-7 shrink-0 cursor-pointer overflow-hidden rounded-full border bg-transparent p-0"
+          data-slot="desktop-color-picker"
           type="color"
           value={value}
           onChange={(event) => onChange(event.currentTarget.value)}
@@ -3244,7 +3222,7 @@ function DesktopNumberRow({
   value: number
 }) {
   return (
-    <label className={cn("flex min-w-0 items-center justify-between gap-3 px-2.5 py-2", DESKTOP_INSPECTOR_CONTROL_CLASS)}>
+    <label className="flex min-w-0 items-center justify-between gap-3 border-b border-white/[0.07] px-0 py-2.5 last:border-b-0">
       <span className="truncate text-[12px] font-semibold text-white/74">{label}</span>
       <input
         aria-label={label}
@@ -3283,8 +3261,8 @@ function DesktopPatternSwatchButton({
       aria-pressed={selected}
       data-desktop-preview-option="true"
       className={cn(
-        "relative min-w-0 rounded-[7px] border border-white/[0.08] bg-white/[0.055] p-1.5 text-left transition hover:bg-white/[0.1]",
-        selected && "border-black bg-white/[0.08] p-2",
+        "relative min-w-0 rounded-[7px] border border-transparent bg-transparent p-1.5 text-left transition hover:border-[var(--desktop-inspector-control-border-hover)] hover:bg-[var(--desktop-inspector-control-hover-bg)]",
+        selected && "border-black bg-[var(--desktop-inspector-selected-bg)] p-2",
       )}
       type="button"
       onClick={onClick}
@@ -3316,7 +3294,8 @@ function DesktopTextPresetButton({
       aria-label={label}
       aria-pressed={selected}
       className={cn(
-        "flex h-9 min-w-0 items-center justify-between gap-2 rounded-[7px] border border-white/[0.08] bg-white/[0.055] px-2.5 text-left transition hover:bg-white/[0.1]",
+        "flex h-9 min-w-0 items-center justify-between gap-2 px-2.5 text-left",
+        DESKTOP_INSPECTOR_CONTROL_CLASS,
         selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
       )}
       type="button"
@@ -3349,7 +3328,8 @@ function DesktopSegmentedRow<TValue extends string>({
             key={option.value}
             aria-pressed={value === option.value}
             className={cn(
-              "h-8 truncate rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
+              "h-8 truncate px-2 text-[11px] font-semibold",
+              DESKTOP_INSPECTOR_CONTROL_CLASS,
               value === option.value && DESKTOP_INSPECTOR_SELECTED_CLASS,
             )}
             type="button"
@@ -3375,21 +3355,6 @@ function updateDesktopGradientColor(
       stopIndex === index ? { ...stop, color } : stop,
     ) as StudioGradient["colorStops"],
   }
-}
-
-function getDesktopDotsColorPreviewBackground(settings: DesktopPatternSettings) {
-  if (settings.dotsColorMode === "gradient") {
-    const [start, end] = settings.dotsGradient.colorStops
-    const gradientType = settings.dotsGradient.type === "radial" ? "radial-gradient(circle" : "linear-gradient(135deg"
-
-    return `${gradientType}, ${start.color}, ${end.color})`
-  }
-
-  if (settings.dotsColorMode === "palette") {
-    return `linear-gradient(135deg, ${settings.dotsPalette.join(", ")})`
-  }
-
-  return settings.dotsSolidColor
 }
 
 function DesktopContentFields({
@@ -3475,7 +3440,8 @@ function DesktopContentFieldRow({
           id={controlId}
           aria-pressed={Boolean(field.value)}
           className={cn(
-            "flex h-8 w-full items-center justify-between rounded-[7px] border border-white/[0.09] bg-black/22 px-2.5 text-[12px] font-semibold text-white/62 transition",
+            "flex h-8 w-full items-center justify-between px-2.5 text-[12px] font-semibold",
+            DESKTOP_INSPECTOR_CONTROL_CLASS,
             field.value && DESKTOP_INSPECTOR_SELECTED_CLASS,
           )}
           type="button"
@@ -3502,7 +3468,8 @@ function DesktopContentFieldRow({
                 key={option.value}
                 aria-pressed={selected}
                 className={cn(
-                  "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
+                  "h-8 px-2 text-[11px] font-semibold",
+                  DESKTOP_INSPECTOR_CONTROL_CLASS,
                   selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
@@ -3731,7 +3698,8 @@ function DesktopEncodingInspector({
                 aria-label={`Use ${option.title} error correction`}
                 aria-pressed={settings.errorCorrectionLevel === option.value}
                 className={cn(
-                  "min-w-0 rounded-[7px] border border-white/[0.08] bg-white/[0.055] px-3 py-2 text-left transition hover:bg-white/[0.1]",
+                  "min-w-0 px-3 py-2 text-left",
+                  DESKTOP_INSPECTOR_CONTROL_CLASS,
                   settings.errorCorrectionLevel === option.value &&
                     DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
@@ -3778,7 +3746,8 @@ function DesktopImageInspector({
                 aria-label={`Use image as ${option.label}`}
                 aria-pressed={settings.intent === option.value}
                 className={cn(
-                  "h-9 rounded-[6px] border border-white/[0.09] bg-black/22 px-1.5 text-[10px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
+                  "h-9 px-1.5 text-[10px] font-semibold",
+                  DESKTOP_INSPECTOR_CONTROL_CLASS,
                   settings.intent === option.value &&
                     DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
@@ -3800,7 +3769,8 @@ function DesktopImageInspector({
                 aria-label={`Use ${option.label} image source`}
                 aria-pressed={settings.sourceMode === option.value}
                 className={cn(
-                  "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
+                  "h-8 px-2 text-[11px] font-semibold",
+                  DESKTOP_INSPECTOR_CONTROL_CLASS,
                   settings.sourceMode === option.value &&
                     DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
@@ -3829,7 +3799,8 @@ function DesktopImageInspector({
                 aria-label={`Use ${fit} image fit`}
                 aria-pressed={settings.fit === fit}
                 className={cn(
-                  "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold capitalize text-white/58 transition hover:bg-white/[0.09] hover:text-white",
+                  "h-8 px-2 text-[11px] font-semibold capitalize",
+                  DESKTOP_INSPECTOR_CONTROL_CLASS,
                   settings.fit === fit && DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
@@ -3878,7 +3849,8 @@ function DesktopDecorationsInspector({
                 aria-label={`Add ${option.label} decoration`}
                 aria-pressed={settings.kind === option.value}
                 className={cn(
-                  "h-9 rounded-[7px] border border-white/[0.08] bg-white/[0.055] px-2 text-[11px] font-semibold text-white/62 transition hover:bg-white/[0.1] hover:text-white",
+                  "h-9 px-2 text-[11px] font-semibold",
+                  DESKTOP_INSPECTOR_CONTROL_CLASS,
                   settings.kind === option.value && DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
@@ -4112,7 +4084,8 @@ function DesktopLayersInspector({
                 aria-label={`Select ${layer.name}`}
                 aria-pressed={settings.selectedLayerId === layer.id}
                 className={cn(
-                  "flex min-w-0 items-center gap-2 rounded-[7px] border border-white/[0.08] bg-white/[0.055] px-2.5 py-2 text-left transition hover:bg-white/[0.1]",
+                  "flex min-w-0 items-center gap-2 px-2.5 py-2 text-left",
+                  DESKTOP_INSPECTOR_CONTROL_CLASS,
                   settings.selectedLayerId === layer.id && DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
@@ -4206,7 +4179,8 @@ function DesktopExportInspector({
                 aria-label={`Export ${extension.toUpperCase()}`}
                 aria-pressed={settings.extension === extension}
                 className={cn(
-                  "h-9 rounded-[7px] border border-white/[0.08] bg-white/[0.055] px-1.5 text-[11px] font-semibold text-white/62 transition hover:bg-white/[0.1] hover:text-white",
+                  "h-9 px-1.5 text-[11px] font-semibold",
+                  DESKTOP_INSPECTOR_CONTROL_CLASS,
                   settings.extension === extension && DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
@@ -4228,7 +4202,8 @@ function DesktopExportInspector({
                   aria-label={`Use ${preset.label} export quality`}
                   aria-pressed={settings.qualityPresetId === preset.id}
                   className={cn(
-                    "min-w-0 rounded-[7px] border border-white/[0.08] bg-white/[0.055] px-3 py-2 text-left transition hover:bg-white/[0.1]",
+                    "min-w-0 px-3 py-2 text-left",
+                    DESKTOP_INSPECTOR_CONTROL_CLASS,
                     settings.qualityPresetId === preset.id &&
                       DESKTOP_INSPECTOR_SELECTED_CLASS,
                   )}
@@ -4602,24 +4577,24 @@ function DesktopTextInlineSlider({
   valueLabel: string
 }) {
   return (
-    <label className={cn("mt-2 grid min-w-0 gap-1.5 px-3 py-2.5", DESKTOP_INSPECTOR_CONTROL_CLASS)}>
-      <span className="flex min-w-0 items-center justify-between gap-3">
-        <span className="truncate text-[12px] font-semibold text-white/74">{label}</span>
-        <span className="shrink-0 rounded-full bg-white/[0.08] px-2 py-0.5 text-[10px] font-bold text-white/62">
-          {valueLabel}
-        </span>
-      </span>
-      <input
-        aria-label={`Text font ${label.toLowerCase()}`}
-        className="h-1.5 w-full accent-white"
-        max={max}
-        min={min}
-        step={step}
-        type="range"
-        value={value}
-        onChange={(event) => onChange(Number(event.currentTarget.value))}
-      />
-    </label>
+    <div
+      data-slot="desktop-elastic-slider-row"
+      className="mt-2 grid min-w-0 px-3 py-1.5"
+    >
+      <div data-slot="desktop-elastic-slider">
+        <ElasticSlider
+          aria-label={`Text font ${label.toLowerCase()}`}
+          className={DESKTOP_ELASTIC_SLIDER_CLASS}
+          formatValue={() => valueLabel}
+          label={label}
+          max={max}
+          min={min}
+          step={step}
+          value={value}
+          onValueChange={onChange}
+        />
+      </div>
+    </div>
   )
 }
 

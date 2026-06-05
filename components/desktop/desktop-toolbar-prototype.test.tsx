@@ -158,8 +158,14 @@ describe("DesktopToolbarPrototype", () => {
     expect(source).toContain('[data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button:active')
     expect(source).toContain('[data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button:active svg')
     expect(source).toContain("transform: scale(0.84) !important")
+    expect(source).toContain('button[aria-pressed="true"]::before')
+    expect(source).toContain("background: rgba(255, 255, 255, 0.16)")
+    expect(source).not.toContain("box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12)")
+    expect(source).not.toContain("box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08)")
     expect(source).toContain('[data-slot="tooltip-content"]')
     expect(source).toContain("background: rgba(15, 15, 15, 0.94) !important")
+    expect(source).toContain('[data-slot="elastic-slider"]')
+    expect(source).toContain("--elastic-slider-bg: rgba(15, 23, 42, 0.08)")
   })
 
   it("renders every remaining /new settings tool in the desktop inspector format", async () => {
@@ -242,9 +248,13 @@ describe("DesktopToolbarPrototype", () => {
     expect(inspector?.querySelector('[data-slot="desktop-content-type-filter-trigger"]')).not.toBeNull()
     const filterSearchRow = inspector?.querySelector('[data-slot="desktop-content-filter-search-row"]')
     expect(filterSearchRow?.className).toContain("w-full")
-    expect(filterSearchRow?.className).toContain("overflow-hidden")
-    expect(filterSearchRow?.querySelector('[data-slot="desktop-content-type-filter-trigger"]')?.className).not.toContain("border-r")
-    expect(filterSearchRow?.querySelector('input[aria-label="Search QR types"]')).not.toBeNull()
+    expect(filterSearchRow?.className).not.toContain("bg-white/[0.08]")
+    const filterTrigger = filterSearchRow?.querySelector('[data-slot="desktop-content-type-filter-trigger"]')
+    expect(filterTrigger?.className).toContain("desktop-inspector-input-bg")
+    expect(filterTrigger?.querySelector("svg[data-slot='filter-icon']")).toBeNull()
+    const searchInput = filterSearchRow?.querySelector('input[aria-label="Search QR types"]')
+    expect(searchInput).not.toBeNull()
+    expect(searchInput?.className).toContain("desktop-inspector-input-bg")
     expect(inspector?.querySelector('[data-slot="desktop-content-fields"]')).not.toBeNull()
     expect(inspector?.textContent).toContain("Content")
     expect(inspector?.textContent).toContain("Popular")
@@ -268,15 +278,16 @@ describe("DesktopToolbarPrototype", () => {
 
     expect(linkPreset.getAttribute("aria-pressed")).toBe("true")
     expect(linkPreset.getAttribute("data-desktop-content-type-option")).toBe("true")
-    expect(linkPreset.className).not.toContain("border-2")
+    expect(linkPreset.className).toContain("border-2")
+    expect(linkPreset.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
     expect(linkPreset.className).not.toContain("border-white/55")
-    expect(linkPreset.className).toContain("desktop-inspector-selected-bg")
-    expect(linkPreset.className).toContain("desktop-inspector-selected-fg")
+    expect(linkPreset.className).not.toContain("desktop-inspector-selected-bg")
+    expect(linkPreset.className).not.toContain("desktop-inspector-selected-fg")
     expect(linkPreset.className).not.toContain("ff3b68")
 
     const textPreset = getRequiredButton(surface.container, "Use Text content")
     expect(textPreset.getAttribute("aria-pressed")).toBe("false")
-    expect(textPreset.className).not.toContain("border-transparent")
+    expect(textPreset.className).not.toContain("bg-white/[0.055]")
     expect(surface.container.textContent).toContain("Link")
     expect(surface.container.textContent).not.toContain("Needs input")
     expect(surface.container.querySelector('input[placeholder="https://example.com"]')).not.toBeNull()
@@ -296,6 +307,8 @@ describe("DesktopToolbarPrototype", () => {
     expect(source).toContain("DESKTOP_INSPECTOR_HEADER_CLASS")
     expect(source).toContain("DESKTOP_INSPECTOR_FOOTER_CLASS")
     expect(source).toContain("DESKTOP_INSPECTOR_RESET_CLASS")
+    expect(source).toContain(".desktop-corner-dot-preview-glyph")
+    expect(source).toContain("transform: scale(1.7) !important")
     expect(source).not.toContain('className="border-t border-white/[0.09] bg-black/20 p-3"')
     expect(source).not.toContain('className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3"')
     expect(source).not.toContain("[data-slot=\"desktop-floating-inspector\"] [class*=\"bg-white/\"]")
@@ -324,6 +337,26 @@ describe("DesktopToolbarPrototype", () => {
     expect(surface.container.querySelector('input[placeholder="Search patterns"]')).toBeNull()
   })
 
+  it("keeps module color mode controls flat until selected", async () => {
+    const surface = await renderPrototype()
+    const patternButton = getRequiredToolButton(surface.container, "pattern")
+
+    await act(async () => {
+      patternButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const colorMode = surface.container.querySelector('[data-slot="desktop-pattern-color-mode"]')
+    const solidMode = colorMode?.querySelector<HTMLButtonElement>('button[aria-pressed="true"]')
+    const gradientMode = getRequiredButton(surface.container, "Use Gradient module color")
+    const patternsMode = getRequiredButton(surface.container, "Use Patterns module color")
+
+    expect(solidMode?.className).toContain("desktop-inspector-selected-bg")
+    expect(gradientMode.className).not.toContain("bg-black/22")
+    expect(gradientMode.className).not.toContain("desktop-inspector-control-bg")
+    expect(patternsMode.className).not.toContain("bg-black/22")
+    expect(patternsMode.className).not.toContain("desktop-inspector-control-bg")
+  })
+
   it("updates the pattern inspector when a visual pattern is selected", async () => {
     const surface = await renderPrototype()
     const patternButton = getRequiredToolButton(surface.container, "pattern")
@@ -340,6 +373,68 @@ describe("DesktopToolbarPrototype", () => {
 
     expect(dotsPattern.getAttribute("aria-pressed")).toBe("true")
     expect(surface.container.textContent).toContain("Module Color")
+  })
+
+  it("uses a black selected border without filling module pattern options in light mode", async () => {
+    const surface = await renderPrototype()
+    const themeToggle = getRequiredButton(surface.container, "Switch to light mode")
+    const patternButton = getRequiredToolButton(surface.container, "pattern")
+
+    await act(async () => {
+      themeToggle.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+      patternButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const dotsPattern = getRequiredButton(surface.container, "Use Dots pattern")
+
+    await act(async () => {
+      dotsPattern.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const selectedSurface = dotsPattern.querySelector<HTMLElement>('[data-desktop-adaptive-option-preview="true"]')
+    expect(dotsPattern.getAttribute("aria-pressed")).toBe("true")
+    expect(dotsPattern.className).toContain("bg-transparent")
+    expect(selectedSurface?.className).toContain("border-2")
+    expect(selectedSurface?.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(selectedSurface?.style.backgroundColor).toBe("rgba(255, 255, 255, 0.86)")
+  })
+
+  it("uses a white selected border without filling module pattern options in dark mode", async () => {
+    const surface = await renderPrototype()
+    const patternButton = getRequiredToolButton(surface.container, "pattern")
+
+    await act(async () => {
+      patternButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const dotsPattern = getRequiredButton(surface.container, "Use Dots pattern")
+
+    await act(async () => {
+      dotsPattern.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const selectedSurface = dotsPattern.querySelector<HTMLElement>('[data-desktop-adaptive-option-preview="true"]')
+    expect(dotsPattern.getAttribute("aria-pressed")).toBe("true")
+    expect(dotsPattern.className).toContain("bg-transparent")
+    expect(selectedSurface?.className).toContain("border-2")
+    expect(selectedSurface?.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(selectedSurface?.style.backgroundColor).toBe("rgba(0, 0, 0, 0.88)")
+    expect(selectedSurface?.style.color).toBe("rgb(248, 250, 252)")
+  })
+
+  it("renders larger module pattern previews inside square options", async () => {
+    const surface = await renderPrototype()
+    const patternButton = getRequiredToolButton(surface.container, "pattern")
+
+    await act(async () => {
+      patternButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const dotsPattern = getRequiredButton(surface.container, "Use Dots pattern")
+    const previewGlyph = dotsPattern.querySelector<HTMLElement>(
+      '[data-desktop-adaptive-option-preview="true"] > span',
+    )
+    expect(previewGlyph?.className).toContain("size-[78%]")
   })
 
   it("renders a Pixelmator-style corners inspector with separate frame and dot shelves", async () => {
@@ -405,6 +500,112 @@ describe("DesktopToolbarPrototype", () => {
 
     expect(defaultCornerFrame.getAttribute("aria-pressed")).toBe("true")
     expect(squareDot.getAttribute("aria-pressed")).toBe("true")
+  })
+
+  it("uses a black selected border without filling corner frame and dot options in light mode", async () => {
+    const surface = await renderPrototype()
+    const themeToggle = getRequiredButton(surface.container, "Switch to light mode")
+    const cornersButton = getRequiredToolButton(surface.container, "corners")
+
+    await act(async () => {
+      themeToggle.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+      cornersButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const squareFrame = getRequiredButton(surface.container, "Use Square corner frame")
+    const squareDot = getRequiredButton(surface.container, "Use Square corner dot")
+
+    await act(async () => {
+      squareFrame.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+      squareDot.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const frameSurface = squareFrame.querySelector<HTMLElement>('[data-desktop-adaptive-option-preview="true"]')
+    const dotSurface = squareDot.querySelector<HTMLElement>('[data-desktop-adaptive-option-preview="true"]')
+    expect(squareFrame.getAttribute("aria-pressed")).toBe("true")
+    expect(squareDot.getAttribute("aria-pressed")).toBe("true")
+    expect(squareFrame.className).toContain("bg-transparent")
+    expect(squareDot.className).toContain("bg-transparent")
+    expect(frameSurface?.className).toContain("border-2")
+    expect(dotSurface?.className).toContain("border-2")
+    expect(frameSurface?.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(dotSurface?.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(frameSurface?.style.backgroundColor).toBe("rgba(255, 255, 255, 0.86)")
+    expect(dotSurface?.style.backgroundColor).toBe("rgba(255, 255, 255, 0.86)")
+  })
+
+  it("uses a white selected border without filling corner frame and dot options in dark mode", async () => {
+    const surface = await renderPrototype()
+    const cornersButton = getRequiredToolButton(surface.container, "corners")
+
+    await act(async () => {
+      cornersButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const squareFrame = getRequiredButton(surface.container, "Use Square corner frame")
+    const squareDot = getRequiredButton(surface.container, "Use Square corner dot")
+
+    await act(async () => {
+      squareFrame.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+      squareDot.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const frameSurface = squareFrame.querySelector<HTMLElement>('[data-desktop-adaptive-option-preview="true"]')
+    const dotSurface = squareDot.querySelector<HTMLElement>('[data-desktop-adaptive-option-preview="true"]')
+    expect(squareFrame.getAttribute("aria-pressed")).toBe("true")
+    expect(squareDot.getAttribute("aria-pressed")).toBe("true")
+    expect(squareFrame.className).toContain("bg-transparent")
+    expect(squareDot.className).toContain("bg-transparent")
+    expect(frameSurface?.className).toContain("border-2")
+    expect(dotSurface?.className).toContain("border-2")
+    expect(frameSurface?.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(dotSurface?.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(frameSurface?.style.backgroundColor).toBe("rgba(0, 0, 0, 0.88)")
+    expect(frameSurface?.style.color).toBe("rgb(248, 250, 252)")
+    expect(dotSurface?.style.backgroundColor).toBe("rgba(0, 0, 0, 0.88)")
+    expect(dotSurface?.style.color).toBe("rgb(248, 250, 252)")
+  })
+
+  it("renders larger corner previews inside square options", async () => {
+    const surface = await renderPrototype()
+    const cornersButton = getRequiredToolButton(surface.container, "corners")
+
+    await act(async () => {
+      cornersButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const squareFrame = getRequiredButton(surface.container, "Use Square corner frame")
+    const squareDot = getRequiredButton(surface.container, "Use Square corner dot")
+    const frameGlyph = squareFrame.querySelector<HTMLElement>(
+      '[data-desktop-adaptive-option-preview="true"] > span',
+    )
+    const dotGlyph = squareDot.querySelector<HTMLElement>(
+      '[data-desktop-adaptive-option-preview="true"] > span',
+    )
+    expect(frameGlyph?.className).toContain("size-[92%]")
+    expect(dotGlyph?.className).toContain("size-[92%]")
+    expect(frameGlyph?.className).not.toContain("desktop-corner-dot-preview-glyph")
+    expect(dotGlyph?.className).toContain("desktop-corner-dot-preview-glyph")
+  })
+
+  it("keeps corner frame and dot option cards on compact three-column shelves", async () => {
+    const surface = await renderPrototype()
+    const cornersButton = getRequiredToolButton(surface.container, "corners")
+
+    await act(async () => {
+      cornersButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const frameShelf = surface.container.querySelector<HTMLElement>(
+      '[data-slot="desktop-corner-frame-preset-shelf"]',
+    )
+    const dotShelf = surface.container.querySelector<HTMLElement>(
+      '[data-slot="desktop-corner-dot-preset-shelf"]',
+    )
+    expect(frameShelf?.className).toContain("grid-cols-3")
+    expect(frameShelf?.className).not.toContain("grid-cols-2")
+    expect(dotShelf?.className).toContain("grid-cols-3")
+    expect(dotShelf?.className).not.toContain("grid-cols-2")
   })
 
   it("resets corner frame and dot presets to their defaults", async () => {
@@ -480,6 +681,26 @@ describe("DesktopToolbarPrototype", () => {
     expect(getRequiredButton(surface.container, "Use solid corner dot color").getAttribute("aria-pressed")).toBe("true")
     expect(surface.container.querySelector<HTMLInputElement>('input[aria-label="Frame solid color"]')?.value).toBe("#18181b")
     expect(surface.container.querySelector<HTMLInputElement>('input[aria-label="Dot solid color"]')?.value).toBe("#18181b")
+  })
+
+  it("renders color picker triggers as circular swatches with a dark mode border", async () => {
+    const surface = await renderPrototype()
+    const patternButton = getRequiredToolButton(surface.container, "pattern")
+
+    await act(async () => {
+      patternButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const swatch = getRequiredInput(surface.container, "Solid color swatch")
+    const hexInput = getRequiredInput(surface.container, "Solid color")
+
+    expect(swatch.type).toBe("color")
+    expect(swatch.className).toContain("rounded-full")
+    expect(swatch.className).toContain("size-7")
+    expect(swatch.className).not.toContain("w-12")
+    expect(swatch.className).not.toContain("rounded-[6px]")
+    expect(swatch.getAttribute("data-slot")).toBe("desktop-color-picker")
+    expect(hexInput.className).toContain("w-20")
   })
 
   it("renders a Pixelmator-style shape inspector without placeholder copy", async () => {
@@ -665,11 +886,11 @@ describe("DesktopToolbarPrototype", () => {
     const resetMotion = getRequiredButton(surface.container, "Reset Motion")
 
     expect(motionToggle.getAttribute("aria-pressed")).toBe("false")
-    expect(motionToggle.className).toContain("desktop-inspector-control-bg")
+    expect(motionToggle.className).not.toContain("desktop-inspector-control-bg")
     expect(defaultLoader.getAttribute("aria-pressed")).toBe("true")
     expect(defaultLoader.className).toContain("desktop-inspector-selected-bg")
     expect(defaultLoader.className).not.toContain("ring-black")
-    expect(resetMotion.className).toContain("desktop-inspector-control-bg")
+    expect(resetMotion.className).not.toContain("desktop-inspector-control-bg")
     expect(resetMotion.className).not.toContain("rounded-full")
   })
 
@@ -722,15 +943,42 @@ describe("DesktopToolbarPrototype", () => {
     })
 
     await act(async () => {
-      setInputValue(getRequiredInput(surface.container, "Motion speed"), "10")
-      setInputValue(getRequiredInput(surface.container, "Motion matrix density"), "25")
-      setInputValue(getRequiredInput(surface.container, "Motion overlay scale"), "120")
+      getRequiredSlider(surface.container, "Motion speed").dispatchEvent(
+        new KeyboardEvent("keydown", { bubbles: true, key: "End" }),
+      )
+      getRequiredSlider(surface.container, "Motion matrix density").dispatchEvent(
+        new KeyboardEvent("keydown", { bubbles: true, key: "End" }),
+      )
+      getRequiredSlider(surface.container, "Motion overlay scale").dispatchEvent(
+        new KeyboardEvent("keydown", { bubbles: true, key: "End" }),
+      )
     })
 
-    expect(getRequiredInput(surface.container, "Motion speed").value).toBe("10")
-    expect(getRequiredInput(surface.container, "Motion matrix density").value).toBe("25")
+    expect(getRequiredSlider(surface.container, "Motion speed").getAttribute("aria-valuenow")).toBe("10")
+    expect(getRequiredSlider(surface.container, "Motion matrix density").getAttribute("aria-valuenow")).toBe("25")
     expect(surface.container.textContent).toContain("25x25")
-    expect(getRequiredInput(surface.container, "Motion overlay scale").value).toBe("120")
+    expect(getRequiredSlider(surface.container, "Motion overlay scale").getAttribute("aria-valuenow")).toBe("140")
+  })
+
+  it("renders compact motion sliders with the desktop elastic slider component", async () => {
+    const surface = await renderPrototype()
+    const motionButton = getRequiredToolButton(surface.container, "motion")
+
+    await act(async () => {
+      motionButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    expect(surface.container.querySelectorAll('[data-slot="desktop-elastic-slider"]')).toHaveLength(3)
+    expect(surface.container.querySelector('input[type="range"][aria-label^="Motion "]')).toBeNull()
+    expect(getRequiredSlider(surface.container, "Motion speed")).not.toBeNull()
+    expect(getRequiredSlider(surface.container, "Motion matrix density")).not.toBeNull()
+    expect(getRequiredSlider(surface.container, "Motion overlay scale")).not.toBeNull()
+    expect(getRequiredSliderRow(surface.container, "Motion speed").textContent).toBe("Speed3x")
+    expect(getRequiredSliderRow(surface.container, "Motion matrix density").textContent).toBe("Matrix density5x5")
+    expect(getRequiredSliderRow(surface.container, "Motion overlay scale").textContent).toBe("Overlay scale100%")
+    expect(getRequiredSliderRow(surface.container, "Motion speed").className).not.toContain("desktop-inspector-control-bg")
+    expect(getRequiredSliderRow(surface.container, "Motion matrix density").className).not.toContain("desktop-inspector-control-bg")
+    expect(getRequiredSliderRow(surface.container, "Motion overlay scale").className).not.toContain("desktop-inspector-control-bg")
   })
 
   it("hides custom motion color inputs for non-theme color presets", async () => {
@@ -811,8 +1059,12 @@ describe("DesktopToolbarPrototype", () => {
       getRequiredButton(surface.container, "Use Prism Sweep motion loader").dispatchEvent(new MouseEvent("click", { bubbles: true }))
       getRequiredButton(surface.container, "Use Mint motion colors").dispatchEvent(new MouseEvent("click", { bubbles: true }))
       getRequiredButton(surface.container, "Animated SVG export").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-      setInputValue(getRequiredInput(surface.container, "Motion speed"), "5")
-      setInputValue(getRequiredInput(surface.container, "Motion matrix density"), "25")
+      getRequiredSlider(surface.container, "Motion speed").dispatchEvent(
+        new KeyboardEvent("keydown", { bubbles: true, key: "ArrowRight" }),
+      )
+      getRequiredSlider(surface.container, "Motion matrix density").dispatchEvent(
+        new KeyboardEvent("keydown", { bubbles: true, key: "End" }),
+      )
     })
 
     await act(async () => {
@@ -824,8 +1076,8 @@ describe("DesktopToolbarPrototype", () => {
     expect(getRequiredButton(surface.container, "Use Theme motion colors").getAttribute("aria-pressed")).toBe("true")
     expect(getRequiredButton(surface.container, "Animated preview").getAttribute("aria-pressed")).toBe(String(DEFAULT_DOT_MATRIX_ANIMATION.animated))
     expect(getRequiredButton(surface.container, "Animated SVG export").getAttribute("aria-pressed")).toBe(String(DEFAULT_DOT_MATRIX_ANIMATION.exportAnimatedSvg))
-    expect(getRequiredInput(surface.container, "Motion speed").value).toBe(String(DEFAULT_DOT_MATRIX_ANIMATION.speed))
-    expect(getRequiredInput(surface.container, "Motion matrix density").value).toBe(String(DEFAULT_DOT_MATRIX_ANIMATION.matrixSize))
+    expect(getRequiredSlider(surface.container, "Motion speed").getAttribute("aria-valuenow")).toBe(String(DEFAULT_DOT_MATRIX_ANIMATION.speed))
+    expect(getRequiredSlider(surface.container, "Motion matrix density").getAttribute("aria-valuenow")).toBe(String(DEFAULT_DOT_MATRIX_ANIMATION.matrixSize))
   })
 
   it("renders a compact Pixelmator-style text inspector without placeholder copy", async () => {
@@ -873,17 +1125,99 @@ describe("DesktopToolbarPrototype", () => {
     expect(inspector?.textContent).toContain("Color")
     expect(inspector?.textContent).toContain("Alignment")
     expect(inspector?.textContent).toContain("Spacing")
-    expect(getRequiredInput(surface.container, "Text font letter spacing").type).toBe("range")
-    expect(getRequiredInput(surface.container, "Text font line height").type).toBe("range")
-    expect(getRequiredButton(surface.container, "Text font").className).toContain("desktop-inspector-control-bg")
+    expect(getRequiredSlider(surface.container, "Text font letter spacing")).not.toBeNull()
+    expect(getRequiredSlider(surface.container, "Text font line height")).not.toBeNull()
+    expect(inspector?.querySelector('input[type="range"][aria-label^="Text font"]')).toBeNull()
+    expect(getRequiredButton(surface.container, "Text font").className).not.toContain("desktop-inspector-control-bg")
     expect(getRequiredTextarea(surface.container, "Text layer content").className).toContain("desktop-inspector-field-bg")
     expect(getRequiredTextarea(surface.container, "Text layer content").className).not.toContain("border-white")
-    expect(getRequiredButton(surface.container, "Bold text").className).toContain("desktop-inspector-control-bg")
+    expect(getRequiredButton(surface.container, "Bold text").className).not.toContain("desktop-inspector-control-bg")
     expect(getRequiredButton(surface.container, "Align text left").getAttribute("aria-pressed")).toBe("true")
     expect(getRequiredButton(surface.container, "Align text left").className).toContain("desktop-inspector-selected-bg")
-    expect(getRequiredButton(surface.container, "Reset Text").className).toContain("desktop-inspector-control-bg")
+    expect(getRequiredButton(surface.container, "Reset Text").className).not.toContain("desktop-inspector-control-bg")
     expect(getRequiredButton(surface.container, "Reset Text").className).not.toContain("rounded-full")
     expect(inspector?.textContent).toContain("Reset Text")
+  })
+
+  it("keeps desktop content picker defaults flat with border-only selection", async () => {
+    const surface = await renderPrototype()
+    const contentButton = getRequiredToolButton(surface.container, "content")
+
+    await act(async () => {
+      contentButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const filterTrigger = getRequiredButton(surface.container, "Filter QR types")
+    const textOption = getRequiredButton(surface.container, "Use Text content")
+    const selectedOption = surface.container.querySelector<HTMLButtonElement>(
+      '[data-desktop-content-type-option="true"][aria-pressed="true"]',
+    )
+
+    expect(filterTrigger.className).not.toContain("bg-black/10")
+    expect(textOption.className).not.toContain("bg-white/[0.055]")
+    expect(textOption.className).not.toContain("desktop-inspector-control-bg")
+    expect(textOption.className).toContain("border-transparent")
+    expect(selectedOption?.className).not.toContain("desktop-inspector-selected-bg")
+    expect(selectedOption?.className).not.toContain("bg-[var(--desktop-inspector-selected-bg)]")
+    expect(selectedOption?.className).toContain("border-2")
+    expect(selectedOption?.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
+  })
+
+  it("keeps logo size rows flat instead of stacking grey controls", async () => {
+    const surface = await renderPrototype()
+    const logoButton = getRequiredToolButton(surface.container, "logo")
+
+    await act(async () => {
+      logoButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const logoMargin = getRequiredInput(surface.container, "Logo margin")
+    const logoMarginRow = logoMargin.closest("label")
+    const hideDots = getRequiredButton(surface.container, "Hide background dots")
+    const saveBlob = getRequiredButton(surface.container, "Save embedded image as blob")
+
+    expect(logoMarginRow?.className).not.toContain("desktop-inspector-control-bg")
+    expect(hideDots.className).not.toContain("desktop-inspector-control-bg")
+    expect(saveBlob.className).not.toContain("desktop-inspector-control-bg")
+  })
+
+  it("removes header preview tiles from desktop color selection sections", async () => {
+    const surface = await renderPrototype()
+
+    await act(async () => {
+      getRequiredToolButton(surface.container, "pattern").dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const moduleColor = surface.container.querySelector('[data-slot="desktop-module-color"]')
+    expect(moduleColor?.textContent).toContain("Module Color")
+    expect(moduleColor?.querySelector('[data-slot="desktop-style-preview-surface"]')).toBeNull()
+
+    await act(async () => {
+      getRequiredToolButton(surface.container, "corners").dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const frameColor = surface.container.querySelector('[data-slot="desktop-corner-frame-color"]')
+    const dotColor = surface.container.querySelector('[data-slot="desktop-corner-dot-color"]')
+    expect(frameColor?.textContent).toContain("Frame Color")
+    expect(dotColor?.textContent).toContain("Dot Color")
+    expect(frameColor?.querySelector('[data-slot="desktop-style-preview-surface"]')).toBeNull()
+    expect(dotColor?.querySelector('[data-slot="desktop-style-preview-surface"]')).toBeNull()
+
+    await act(async () => {
+      getRequiredToolButton(surface.container, "shape").dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const shapeColor = surface.container.querySelector('[data-slot="desktop-shape-color"]')
+    expect(shapeColor?.textContent).toContain("Shape Color")
+    expect(shapeColor?.querySelector('[data-slot="desktop-style-preview-surface"]')).toBeNull()
+
+    await act(async () => {
+      getRequiredToolButton(surface.container, "logo").dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const logoColor = surface.container.querySelector('[data-slot="desktop-logo-color"]')
+    expect(logoColor?.textContent).toContain("Icon Color")
+    expect(logoColor?.querySelector('[data-slot="desktop-style-preview-surface"]')).toBeNull()
   })
 
   it("updates text preset from neutral segmented buttons", async () => {
@@ -903,7 +1237,7 @@ describe("DesktopToolbarPrototype", () => {
     expect(getRequiredButton(surface.container, "Use Body text preset").getAttribute("aria-pressed")).toBe("false")
     expect(getRequiredButton(surface.container, "Use Title text preset").getAttribute("aria-pressed")).toBe("true")
     expect(getRequiredInput(surface.container, "Text font size").value).toBe("52")
-    expect(getRequiredInput(surface.container, "Text font line height").value).toBe("1.05")
+    expect(getRequiredSlider(surface.container, "Text font line height").getAttribute("aria-valuenow")).toBe("1.05")
   })
 
   it("updates text content locally", async () => {
@@ -966,11 +1300,13 @@ describe("DesktopToolbarPrototype", () => {
 
     await act(async () => {
       setInputValue(getRequiredInput(surface.container, "Text font size"), "64")
-      setInputValue(getRequiredInput(surface.container, "Text font weight"), "700")
+      getRequiredSlider(surface.container, "Text font weight").dispatchEvent(
+        new KeyboardEvent("keydown", { bubbles: true, key: "End" }),
+      )
     })
 
     expect(getRequiredInput(surface.container, "Text font size").value).toBe("64")
-    expect(getRequiredInput(surface.container, "Text font weight").value).toBe("700")
+    expect(getRequiredSlider(surface.container, "Text font weight").getAttribute("aria-valuenow")).toBe("900")
   })
 
   it("toggles text emphasis controls independently", async () => {
@@ -1114,6 +1450,27 @@ function getRequiredToolButton(container: HTMLElement, toolId: string) {
   }
 
   return button
+}
+
+function getRequiredSlider(container: HTMLElement, label: string) {
+  const slider = container.querySelector<HTMLElement>(`[role="slider"][aria-label="${label}"]`)
+
+  if (!slider) {
+    throw new Error(`Missing slider: ${label}`)
+  }
+
+  return slider
+}
+
+function getRequiredSliderRow(container: HTMLElement, label: string) {
+  const slider = getRequiredSlider(container, label)
+  const row = slider.closest('[data-slot="desktop-elastic-slider-row"]')
+
+  if (!row) {
+    throw new Error(`Missing slider row: ${label}`)
+  }
+
+  return row
 }
 
 function getRequiredButton(container: HTMLElement, label: string) {

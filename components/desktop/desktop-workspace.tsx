@@ -30,6 +30,7 @@ export function DesktopWorkspace({ fontClassName }: DesktopWorkspaceProps) {
         chrome="canvas-only"
         fontClassName={fontClassName}
         paneToolbarVariant="desktop-zoom"
+        sliderVariant="desktop-elastic"
         renderOverlay={(controller) => (
           <DesktopToolbarPrototype
             controller={controller}
@@ -70,6 +71,28 @@ function DesktopWorkspaceStyles() {
 
       [data-slot="desktop-workspace"] [data-slot="dashboard-compose-surface"][data-grid-visible="false"] {
         background-image: none !important;
+      }
+
+      [data-slot="desktop-workspace"] [data-slot="elastic-slider"],
+      body:has([data-slot="desktop-workspace"]) [data-slot="elastic-slider"] {
+        --elastic-slider-bg: rgba(255, 255, 255, 0.095);
+        --elastic-slider-fill: rgba(255, 255, 255, 0.13);
+        --elastic-slider-fill-active: rgba(255, 255, 255, 0.2);
+        --elastic-slider-hash: rgba(255, 255, 255, 0.24);
+        --elastic-slider-handle: rgba(255, 255, 255, 0.7);
+        --elastic-slider-label: rgba(255, 255, 255, 0.58);
+        --elastic-slider-focus: rgba(255, 255, 255, 0.82);
+      }
+
+      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="elastic-slider"],
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="elastic-slider"] {
+        --elastic-slider-bg: rgba(15, 23, 42, 0.08);
+        --elastic-slider-fill: rgba(15, 23, 42, 0.1);
+        --elastic-slider-fill-active: rgba(15, 23, 42, 0.16);
+        --elastic-slider-hash: rgba(15, 23, 42, 0.22);
+        --elastic-slider-handle: rgba(15, 23, 42, 0.58);
+        --elastic-slider-label: rgba(15, 23, 42, 0.56);
+        --elastic-slider-focus: rgba(15, 23, 42, 0.78);
       }
 
       [data-slot="desktop-workspace"] [data-slot="drafting-pane-layout"] [data-slot="resizable-panel"] {
@@ -217,7 +240,6 @@ function DesktopWorkspaceStyles() {
 
       [data-slot="desktop-workspace"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button[aria-pressed="true"]::before {
         background: rgba(255, 255, 255, 0.16);
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
         opacity: 1;
       }
 
@@ -290,7 +312,6 @@ function DesktopWorkspaceStyles() {
 
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button[aria-pressed="true"]::before {
         background: rgba(15, 23, 42, 0.12);
-        box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
         opacity: 1;
       }
 
@@ -329,7 +350,6 @@ function DesktopWorkspaceStyles() {
 
       body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button[aria-pressed="true"]::before {
         background: rgba(15, 23, 42, 0.12);
-        box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
         opacity: 1;
       }
 
@@ -435,7 +455,6 @@ function DesktopWorkspaceStyles() {
 
       body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button[aria-pressed="true"]::before {
         background: rgba(15, 23, 42, 0.12) !important;
-        box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08) !important;
       }
     `}</style>
   )

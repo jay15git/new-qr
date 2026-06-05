@@ -35,7 +35,9 @@ import {
   DraftingMotionTab,
   DraftingQrTypeDropdown,
   DraftingSizeTab,
+  DraftingSliderVariantProvider,
   DraftingStyleTab,
+  type DraftingSliderVariant,
 } from "@/components/new/drafting-style-tab"
 import {
   cloneDraftingCardState,
@@ -208,6 +210,7 @@ import {
   TypeIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ElasticSlider } from "@/components/ui/elastic-slider"
 import { SecondaryButton } from "@/components/ui/secondary-button"
 import {
   Popover,
@@ -258,6 +261,7 @@ type DraftingSurfaceProps = {
   fontClassName?: string
   paneToolbarVariant?: DraftingPaneToolbarVariant
   renderOverlay?: (controller: DraftingWorkspaceController) => ReactNode
+  sliderVariant?: DraftingSliderVariant
 }
 type DraftingToolId =
   | "content"
@@ -689,6 +693,7 @@ export function DraftingSurface({
   fontClassName,
   paneToolbarVariant = "default",
   renderOverlay,
+  sliderVariant = "default",
 }: DraftingSurfaceProps = {}) {
   const [activeTool, setActiveTool] = useState<DraftingToolId>(
     DEFAULT_DRAFTING_TOOL_ID,
@@ -2739,38 +2744,45 @@ export function DraftingSurface({
     selectedLayerId ? findDraftingLayerById(activeCanvasLayers, selectedLayerId) : null
 
   const renderPanelContent = (toolId: string, tabId: string) => {
+    const renderWithSliderVariant = (content: ReactNode) => (
+      <DraftingSliderVariantProvider value={sliderVariant}>
+        {content}
+      </DraftingSliderVariantProvider>
+    )
+
     if (toolId === "text" && tabId === "text") {
-      return (
+      return renderWithSliderVariant(
         <DraftingTextLayerTab
           layer={selectedTextLayer?.kind === "text" ? selectedTextLayer : null}
+          sliderVariant={sliderVariant}
           onAddText={handleAddTextLayer}
           onLayerPatch={(patch) => {
             if (selectedTextLayer?.kind === "text") {
               handleLayerChange(activeQrNodeId, selectedTextLayer.id, patch)
             }
           }}
-        />
+        />,
       )
     }
 
     if (toolId === "content" && tabId === "content") {
-      return (
+      return renderWithSliderVariant(
         <DraftingContentTab
           contentType={selectedContentType}
           contentValues={selectedContentValues}
           encodedValue={selectedContentValue}
           validation={selectedContentValidation}
           onContentValueChange={handleDraftingContentValueChange}
-        />
+        />,
       )
     }
 
     if (toolId === "style" && tabId === "style") {
-      return <DraftingStyleTab onValueChange={setSelectedDotType} value={selectedDotType} />
+      return renderWithSliderVariant(<DraftingStyleTab onValueChange={setSelectedDotType} value={selectedDotType} />)
     }
 
     if (toolId === "style" && tabId === "color") {
-      return (
+      return renderWithSliderVariant(
         <DraftingDotsColorTab
           gradient={selectedDotsGradient}
           mode={selectedDotsColorMode}
@@ -2792,23 +2804,23 @@ export function DraftingSurface({
             setSelectedDotsColorMode("solid")
             setSelectedDotColor(value)
           }}
-        />
+        />,
       )
     }
 
     if (toolId === "style" && tabId === "size") {
-      return (
+      return renderWithSliderVariant(
         <DraftingSizeTab
           margin={selectedQrMargin}
           radius={selectedQrRadius * 100}
           onMarginChange={setSelectedQrMargin}
           onRadiusChange={(value) => setSelectedQrRadius(clampQrBackgroundRound(value / 100))}
-        />
+        />,
       )
     }
 
     if (toolId === "style" && tabId === "motion") {
-      return (
+      return renderWithSliderVariant(
         <DraftingMotionTab
           animation={selectedDotMatrixAnimation}
           onAnimationChange={(patch) =>
@@ -2823,12 +2835,12 @@ export function DraftingSurface({
                 ).dotMatrixAnimation,
             )
           }
-        />
+        />,
       )
     }
 
     if (toolId === "loader-playground" && tabId === "playground") {
-      return (
+      return renderWithSliderVariant(
         <DraftingLoaderPlaygroundTab
           animation={selectedDotMatrixAnimation}
           onAnimationChange={(patch) =>
@@ -2843,12 +2855,12 @@ export function DraftingSurface({
                 ).dotMatrixAnimation,
             )
           }
-        />
+        />,
       )
     }
 
     if (toolId === "card-frame" && tabId === "frame") {
-      return (
+      return renderWithSliderVariant(
         <DraftingCardSettingsTab
           value={selectedCardState}
           onValueChange={(nextCardState) => {
@@ -2858,12 +2870,12 @@ export function DraftingSurface({
               shadow: nextCardState.shadow,
             })
           }}
-        />
+        />,
       )
     }
 
     if (toolId === "card-surface" && tabId === "surface") {
-      return (
+      return renderWithSliderVariant(
         <DraftingCardSurfaceTab
           fill={selectedCardState.fill}
           patternColors={selectedCardState.patternColors}
@@ -2909,7 +2921,7 @@ export function DraftingSurface({
               }
             })
           }
-        />
+        />,
       )
     }
 
@@ -3100,7 +3112,7 @@ export function DraftingSurface({
     }
 
     if (toolId === "background" && tabId === "shape") {
-      return (
+      return renderWithSliderVariant(
         <DraftingBackgroundShapeTab
           gradient={{
             ...structuredClone(selectedBackgroundGradient),
@@ -3115,7 +3127,7 @@ export function DraftingSurface({
             setSelectedBackgroundAssetSourceMode("upload")
             setSelectedBackgroundRemoteUrl("")
           }}
-        />
+        />,
       )
     }
 
@@ -3200,7 +3212,7 @@ export function DraftingSurface({
     }
 
     if (toolId === "logo" && tabId === "size") {
-      return (
+      return renderWithSliderVariant(
         <DraftingLogoSizeTab
           hideBackgroundDots={selectedHideBackgroundDots}
           logoMargin={selectedLogoMargin}
@@ -3210,18 +3222,18 @@ export function DraftingSurface({
           onLogoMarginChange={setSelectedLogoMargin}
           onLogoSizeChange={setSelectedLogoSize}
           onSaveAsBlobChange={setSelectedSaveAsBlob}
-        />
+        />,
       )
     }
 
     if (toolId === "encoding" && tabId === "encoding") {
-      return (
+      return renderWithSliderVariant(
         <DraftingEncodingTab
           errorCorrectionLevel={selectedErrorCorrectionLevel}
           typeNumber={selectedTypeNumber}
           onErrorCorrectionLevelChange={setSelectedErrorCorrectionLevel}
           onTypeNumberChange={setSelectedTypeNumber}
-        />
+        />,
       )
     }
 
@@ -4821,10 +4833,12 @@ function DraftingTextLayerTab({
   layer,
   onAddText,
   onLayerPatch,
+  sliderVariant,
 }: {
   layer: DraftingCanvasLayer | null
   onAddText: () => void
   onLayerPatch: (patch: Partial<DraftingCanvasLayer>) => void
+  sliderVariant: DraftingSliderVariant
 }) {
   const textLayer = layer ?? createDraftingTextLayer("preview")
   const selectedFont = resolveDraftingFont({
@@ -4991,6 +5005,7 @@ function DraftingTextLayerTab({
           </div>
 
           <TextWeightSlider
+            sliderVariant={sliderVariant}
             supportedWeights={supportedFontWeights}
             value={fontWeight}
             onChange={(fontWeight) =>
@@ -5071,40 +5086,68 @@ function getDraftingFontSourceLabel(source: DraftingFontSource) {
 
 function TextWeightSlider({
   onChange,
+  sliderVariant,
   supportedWeights,
   value,
 }: {
   onChange: (value: number) => void
+  sliderVariant: DraftingSliderVariant
   supportedWeights: readonly number[]
   value: number
 }) {
   const min = Math.min(...supportedWeights)
   const max = Math.max(...supportedWeights)
   const step = getDraftingFontWeightSliderStep(supportedWeights)
+  const isDesktopElastic = sliderVariant === "desktop-elastic"
 
   return (
-    <div className="min-w-0 rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3 py-2">
-      <UnlumenSlider
-        aria-label="Text font weight"
-        appearance="drafting"
-        className="w-full"
-        data-slot="drafting-text-font-weight"
-        formatValue={(fontWeight) => String(Math.round(fontWeight))}
-        label="Weight"
-        max={max}
-        min={min}
-        showValue
-        step={step}
-        value={value}
-        onChange={(nextValue) => {
-          onChange(
-            getNearestDraftingFontWeight(
-              Array.isArray(nextValue) ? (nextValue[0] ?? value) : nextValue,
-              supportedWeights,
-            ),
-          )
-        }}
-      />
+    <div
+      className={cn(
+        "min-w-0",
+        isDesktopElastic
+          ? "px-0 py-1"
+          : "rounded-[8px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3 py-2",
+      )}
+    >
+      {isDesktopElastic ? (
+        <div data-slot="drafting-text-font-weight" data-appearance="desktop-elastic">
+          <ElasticSlider
+            aria-label="Text font weight"
+            className="desktop-elastic-slider w-full"
+            formatValue={(fontWeight) => String(Math.round(fontWeight))}
+            label="Weight"
+            max={max}
+            min={min}
+            step={step}
+            value={value}
+            onValueChange={(nextValue) => {
+              onChange(getNearestDraftingFontWeight(nextValue, supportedWeights))
+            }}
+          />
+        </div>
+      ) : (
+        <UnlumenSlider
+          aria-label="Text font weight"
+          appearance="drafting"
+          className="w-full"
+          data-slot="drafting-text-font-weight"
+          formatValue={(fontWeight) => String(Math.round(fontWeight))}
+          label="Weight"
+          max={max}
+          min={min}
+          showValue
+          step={step}
+          value={value}
+          onChange={(nextValue) => {
+            onChange(
+              getNearestDraftingFontWeight(
+                Array.isArray(nextValue) ? (nextValue[0] ?? value) : nextValue,
+                supportedWeights,
+              ),
+            )
+          }}
+        />
+      )}
     </div>
   )
 }

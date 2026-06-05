@@ -3,6 +3,8 @@
 import {
   type CSSProperties,
   type ReactNode,
+  createContext,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -80,6 +82,7 @@ import {
   StylePreview,
   type StylePreviewKind,
 } from "@/components/qr/qr-style-preview-renderer"
+import { ElasticSlider } from "@/components/ui/elastic-slider"
 import { Slider as UnlumenSlider } from "@/components/unlumen-ui/slider"
 import type {
   BackgroundShapeOptions,
@@ -157,6 +160,28 @@ const DRAFTING_BRAND_ICON_CATEGORY_OPTIONS: Array<{
 
 const PAPER_SHADER_COLOR_INPUT_FALLBACK = ["#", "0", "0", "0", "0", "0", "0"].join("")
 const PAPER_SHADER_NEW_COLOR = ["#", "f", "f", "f", "f", "f", "f"].join("")
+
+export type DraftingSliderVariant = "default" | "desktop-elastic"
+
+const DraftingSliderVariantContext = createContext<DraftingSliderVariant>("default")
+
+export function DraftingSliderVariantProvider({
+  children,
+  value,
+}: {
+  children: ReactNode
+  value: DraftingSliderVariant
+}) {
+  return (
+    <DraftingSliderVariantContext.Provider value={value}>
+      {children}
+    </DraftingSliderVariantContext.Provider>
+  )
+}
+
+function useDraftingSliderVariant() {
+  return useContext(DraftingSliderVariantContext)
+}
 
 export function DraftingContentTab({
   contentType,
@@ -3875,6 +3900,31 @@ function DraftingSliderField({
   step: number
   value: number
 }) {
+  const sliderVariant = useDraftingSliderVariant()
+
+  if (sliderVariant === "desktop-elastic") {
+    return (
+      <div data-slot={`${dataSlot}-field`} className="min-w-0 px-0 py-1">
+        <div data-slot={dataSlot} data-appearance="desktop-elastic">
+          <ElasticSlider
+            aria-label={label}
+            className="desktop-elastic-slider w-full"
+            formatValue={formatValue}
+            label={label}
+            max={max}
+            min={min}
+            step={step}
+            value={value}
+            onValueChange={onChange}
+          />
+        </div>
+        {description ? (
+          <p className="drafting-type-caption mt-2 text-[var(--drafting-ink-muted)]">{description}</p>
+        ) : null}
+      </div>
+    )
+  }
+
   return (
     <DraftingInspectorSection
       dataSlot={`${dataSlot}-field`}
