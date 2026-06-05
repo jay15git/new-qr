@@ -1,16 +1,16 @@
-# Graph Report - new-qr  (2026-06-05)
+# Graph Report - new-qr  (2026-06-06)
 
 ## Corpus Check
-- 247 files · ~297,863 words
+- 247 files · ~298,143 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2560 nodes · 5009 edges · 135 communities (129 shown, 6 thin omitted)
+- 2561 nodes · 5010 edges · 140 communities (131 shown, 9 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3e3eca8b`
+- Built from commit: `0b08f97f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -62,7 +62,6 @@
 - [[_COMMUNITY_Community 44|Community 44]]
 - [[_COMMUNITY_Community 45|Community 45]]
 - [[_COMMUNITY_Community 46|Community 46]]
-- [[_COMMUNITY_Community 47|Community 47]]
 - [[_COMMUNITY_Community 48|Community 48]]
 - [[_COMMUNITY_Community 50|Community 50]]
 - [[_COMMUNITY_Community 51|Community 51]]
@@ -132,17 +131,23 @@
 - [[_COMMUNITY_Community 115|Community 115]]
 - [[_COMMUNITY_Community 116|Community 116]]
 - [[_COMMUNITY_Community 117|Community 117]]
+- [[_COMMUNITY_Community 118|Community 118]]
+- [[_COMMUNITY_Community 119|Community 119]]
 - [[_COMMUNITY_Community 120|Community 120]]
 - [[_COMMUNITY_Community 121|Community 121]]
 - [[_COMMUNITY_Community 122|Community 122]]
 - [[_COMMUNITY_Community 123|Community 123]]
+- [[_COMMUNITY_Community 124|Community 124]]
 - [[_COMMUNITY_Community 125|Community 125]]
 - [[_COMMUNITY_Community 126|Community 126]]
 - [[_COMMUNITY_Community 127|Community 127]]
 - [[_COMMUNITY_Community 133|Community 133]]
+- [[_COMMUNITY_Community 134|Community 134]]
 - [[_COMMUNITY_Community 135|Community 135]]
 - [[_COMMUNITY_Community 136|Community 136]]
 - [[_COMMUNITY_Community 137|Community 137]]
+- [[_COMMUNITY_Community 138|Community 138]]
+- [[_COMMUNITY_Community 139|Community 139]]
 - [[_COMMUNITY_Community 140|Community 140]]
 
 ## God Nodes (most connected - your core abstractions)
@@ -164,35 +169,35 @@
   components/animate-ui/icons/icon.tsx → hooks/use-is-in-view.tsx
 - `AI_Input_Search()` --calls--> `useAutoResizeTextarea()`  [EXTRACTED]
   components/kokonutui/ai-input-search.tsx → hooks/use-auto-resize-textarea.ts
+- `parseDraftingColor()` --calls--> `parseColor()`  [EXTRACTED]
+  components/qr/qr-control-sections.tsx → components/ui/fill-picker/lib/color.ts
 - `ElasticSlider()` --calls--> `useControllableState()`  [EXTRACTED]
   components/ui/elastic-slider.tsx → hooks/use-controllable-state.tsx
-- `ChannelInputProps` --references--> `ColorFormat`  [EXTRACTED]
-  components/ui/fill-picker/parts/channel-input.tsx → components/ui/fill-picker/lib/types.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (135 total, 6 thin omitted)
+## Communities (140 total, 9 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.02
-Nodes (70): DEFAULT_DESKTOP_CORNERS_SETTINGS, DEFAULT_DESKTOP_DECORATIONS_SETTINGS, DEFAULT_DESKTOP_DOTS_GRADIENT, DEFAULT_DESKTOP_DOTS_PALETTE, DEFAULT_DESKTOP_EFFECTS_SETTINGS, DEFAULT_DESKTOP_ENCODING_SETTINGS, DEFAULT_DESKTOP_EXPORT_SETTINGS, DEFAULT_DESKTOP_IMAGE_SETTINGS (+62 more)
+Nodes (56): DEFAULT_DESKTOP_CORNERS_SETTINGS, DEFAULT_DESKTOP_DECORATIONS_SETTINGS, DEFAULT_DESKTOP_DOTS_GRADIENT, DEFAULT_DESKTOP_DOTS_PALETTE, DEFAULT_DESKTOP_EFFECTS_SETTINGS, DEFAULT_DESKTOP_ENCODING_SETTINGS, DEFAULT_DESKTOP_EXPORT_SETTINGS, DEFAULT_DESKTOP_IMAGE_SETTINGS (+48 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.03
-Nodes (63): DesktopAssetSourceMode, DesktopCornersSettings, DesktopDecorationsSettings, DesktopEffectsSettings, DesktopEncodingSettings, DesktopExportSettings, DesktopExportTarget, DesktopImageSettings (+55 more)
+Nodes (60): DesktopDecorationsSettings, DesktopEffectsSettings, DesktopEncodingSettings, DesktopExportSettings, DesktopImageSettings, DesktopLayersSettings, DesktopPatternSettings, DesktopToolbarController (+52 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.04
-Nodes (41): DotsPaletteCard(), applyAssetNoneSelection(), applyAssetUrlValue(), applyBackgroundGradient(), applyBackgroundSolidColor(), applyBackgroundTransparentSelection(), applyCornerGradient(), applyCornerSolidColor() (+33 more)
+Nodes (45): DotsPaletteCard(), applyAssetNoneSelection(), applyAssetUrlValue(), applyBackgroundGradient(), applyBackgroundSolidColor(), applyBackgroundTransparentSelection(), applyCornerGradient(), applyCornerSolidColor() (+37 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.04
-Nodes (54): buildDraftingAssetSourceItems(), buildDraftingContentFieldItems(), DRAFTING_BRAND_ICON_CATEGORY_OPTIONS, DraftingAssetSourceMode, DraftingBackgroundColorMode, DraftingBackgroundShapeTab(), DraftingBackgroundUploadTab(), DraftingBinaryColorMode (+46 more)
+Cohesion: 0.03
+Nodes (66): buildDraftingAssetSourceItems(), buildDraftingBackgroundColorItems(), buildDraftingContentFieldItems(), buildDraftingSolidGradientItems(), DRAFTING_BRAND_ICON_CATEGORY_OPTIONS, DraftingAssetSourceMode, DraftingBackgroundColorMode, DraftingBackgroundColorTab() (+58 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.07
-Nodes (55): analyzeQrQuality(), buildContrastSuggestionPathCandidates(), buildQrModuleMatrix(), buildRankedContrastSuggestionPaths(), clampLogoSize(), ContrastSuggestionPathCandidate, createContrastIssue(), createQrQualityReport() (+47 more)
+Nodes (56): analyzeQrQuality(), applyQrQualityFix(), buildContrastSuggestionPathCandidates(), buildQrModuleMatrix(), buildRankedContrastSuggestionPaths(), clampLogoSize(), ContrastSuggestionPathCandidate, createContrastIssue() (+48 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.05
@@ -204,35 +209,35 @@ Nodes (10): ChangeHandler, SetStateFn, useControllableState(), UseControllableSt
 
 ### Community 7 - "Community 7"
 Cohesion: 0.07
-Nodes (31): useIsMobile(), DashboardSidebar(), DashboardSidebarProps, DashboardNavigation(), Route, TeamSwitcher(), Sheet(), SheetContent() (+23 more)
+Nodes (28): useIsMobile(), DashboardSidebar(), DashboardSidebarProps, DashboardNavigation(), TeamSwitcher(), Sheet(), SheetContent(), SheetDescription() (+20 more)
 
 ### Community 8 - "Community 8"
 Cohesion: 0.05
 Nodes (33): BackgroundRenderMetrics, collectDotMatrixMetrics(), createDotMatrixLoaderSpec(), createGeneratedCellAnimation(), createQrMoveLoaderSpec(), DOT_MATRIX_LOADER_SPECS, DOT_MATRIX_MIDDLE_RING_CCW, DOT_MATRIX_OUTER_RING_CW (+25 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.08
-Nodes (26): getCombinedLayerBounds(), getCommonLayerRotation(), getDraftingCardBorder(), getDraftingCardShadow(), getLayerRotationLabel(), getLayerSizeLabel(), getPointBounds(), getShortestAngleDistance() (+18 more)
+Cohesion: 0.07
+Nodes (35): anchorSquareLayerResize(), getBoundsSnapPoints(), getCombinedLayerBounds(), getCommonLayerRotation(), getDraftingCardBorder(), getDraftingCardShadow(), getLayerRotationLabel(), getLayerSizeLabel() (+27 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.11
-Nodes (28): ColorPickerContext, useColorPickerContext(), ColorPickerState, UseColorPickerProps, ColorFormat, ContrastResult, Gamut, GamutInfo (+20 more)
+Cohesion: 0.10
+Nodes (28): ColorPickerContext, ColorPicker, SameColorCommitter(), ALL_FORMATS, applyComponent(), BLACK, clamp(), coerce() (+20 more)
 
 ### Community 11 - "Community 11"
-Cohesion: 0.06
-Nodes (30): DraftingInspectorControlRow(), DraftingInspectorControlRowProps, DraftingInspectorIconButton(), DraftingInspectorPanel(), DraftingInspectorPanelProps, DraftingInspectorSection(), DraftingInspectorSectionProps, DraftingInspectorSegmentedControl() (+22 more)
+Cohesion: 0.19
+Nodes (9): DEFAULT_LAYER_SHADOW_COLOR, DraftingLayerPane, DraftingLayersTabProps, getLayerDisplayName(), getLayerOrderLabel(), getLayerRoleLabel(), getLayerRowMeta(), LayerInspector() (+1 more)
 
 ### Community 12 - "Community 12"
 Cohesion: 0.05
 Nodes (41): dependencies, @chakra-ui/react, class-variance-authority, clsx, culori, fflate, framer-motion, gsap (+33 more)
 
 ### Community 13 - "Community 13"
-Cohesion: 0.08
-Nodes (21): Placeholder, QrPreviewCard(), QrPreviewCardProps, DOWNLOAD_EXTENSIONS, Card(), CardContent(), CardDescription(), CardFooter() (+13 more)
+Cohesion: 0.10
+Nodes (18): Placeholder, QrPreviewCardProps, DOWNLOAD_EXTENSIONS, Card(), CardContent(), CardDescription(), CardFooter(), CardHeader() (+10 more)
 
 ### Community 14 - "Community 14"
-Cohesion: 0.12
-Nodes (32): applyDashboardDocumentPreset(), centerDashboardComposeNode(), clamp(), createDashboardDocumentComposeScene(), createDashboardQrNode(), DashboardComposeBackgroundMode, DashboardComposeImageNode, DashboardComposeImageNodePayload (+24 more)
+Cohesion: 0.11
+Nodes (27): applyDashboardDocumentPreset(), clamp(), createDashboardDocumentComposeScene(), createDashboardQrNode(), createDefaultDashboardComposeBackgroundGradient(), DASHBOARD_DOCUMENT_PRESETS, DashboardComposeBackgroundMode, DashboardComposeCamera (+19 more)
 
 ### Community 15 - "Community 15"
 Cohesion: 0.09
@@ -240,11 +245,11 @@ Nodes (22): BALANCED_TILE_ORDER, collectDotGridMetrics(), CORNER_CLIP_PATH_PREFI
 
 ### Community 16 - "Community 16"
 Cohesion: 0.08
-Nodes (38): alignDraftingCanvasLayers(), clamp(), cloneDraftingCanvasLayer(), cloneDraftingCanvasLayersForPaste(), createDraftingLayerInstanceId(), DEFAULT_DRAFTING_TEXT_LAYER, DEFAULT_LAYER_SHADOW, distributeDraftingCanvasLayers() (+30 more)
+Nodes (44): alignDraftingCanvasLayers(), clamp(), cloneDraftingCanvasLayer(), cloneDraftingCanvasLayersForPaste(), createDefaultDraftingLayers(), createDraftingLayerInstanceId(), createDraftingTextLayer(), createFallbackLayer() (+36 more)
 
 ### Community 17 - "Community 17"
 Cohesion: 0.08
-Nodes (18): DASHBOARD_DOCUMENT_PRESETS, BLEND_MODE_OPTIONS, DashboardBackgroundPanel(), DashboardEditAppearance, DashboardEditControlsProps, DashboardPositionPanel(), DraftingDashboardAssetsUpload(), formatFiniteNumber() (+10 more)
+Nodes (17): BLEND_MODE_OPTIONS, DashboardBackgroundPanel(), DashboardEditAppearance, DashboardEditControlsProps, DashboardPositionPanel(), DraftingDashboardAssetsUpload(), formatFiniteNumber(), getDashboardBackgroundControlMode() (+9 more)
 
 ### Community 18 - "Community 18"
 Cohesion: 0.06
@@ -259,12 +264,12 @@ Cohesion: 0.09
 Nodes (30): AnyProps, DOMMotionProps, getMotionComponent(), mergeProps(), mergeRefs(), motionComponentCache, Slot(), SlotProps (+22 more)
 
 ### Community 21 - "Community 21"
-Cohesion: 0.14
-Nodes (13): DashboardEditRailProps, DRAFTING_EDIT_SECTION_ICONS, DASHBOARD_EDIT_SECTIONS, DashboardEditSectionDirection, DashboardEditSectionId, getDashboardEditSectionChangeDirection(), getDashboardEditSectionIndex(), DirectionAwareTabs() (+5 more)
+Cohesion: 0.09
+Nodes (22): DashboardEditRailProps, DRAFTING_EDIT_SECTION_ICONS, DASHBOARD_EDIT_SECTIONS, DashboardEditSectionDirection, DashboardEditSectionId, getDashboardEditSectionChangeDirection(), getDashboardEditSectionIndex(), QrSectionRail() (+14 more)
 
 ### Community 22 - "Community 22"
-Cohesion: 0.15
-Nodes (31): appendCalendarLine(), appendVCardLine(), buildCouponPayload(), buildEventPayload(), buildMailtoPayload(), buildMapPayload(), buildSmsPayload(), buildStaticQrPayload() (+23 more)
+Cohesion: 0.07
+Nodes (58): cloneDraftingLayerStateByNodeId(), DraftingLayerStateByNodeId, cloneDraftingQrState(), cloneDraftingWorkspaceDocument(), createDefaultDraftingWorkspaceDocument(), createDefaultDraftingWorkspaceQrState(), DraftingCardStateByNodeId, DraftingContentValuesByType (+50 more)
 
 ### Community 23 - "Community 23"
 Cohesion: 0.10
@@ -272,43 +277,43 @@ Nodes (7): App, autoBind(), createTextTexture(), debounce(), lerp(), Media, Titl
 
 ### Community 24 - "Community 24"
 Cohesion: 0.08
-Nodes (46): parseBackgroundShapeOptions(), getLegacyBackgroundShapePaddingPx(), createQrCodeInstance(), buildGradient(), clampBackgroundShapeEdgeBlur(), clampBackgroundShapeOffset(), clampBackgroundShapePaddingPx(), clampBackgroundShapeStrokeWidth() (+38 more)
+Nodes (45): parseBackgroundShapeOptions(), buildGradient(), clampBackgroundShapeEdgeBlur(), clampBackgroundShapeOffset(), clampBackgroundShapeOpacity(), clampBackgroundShapePaddingPx(), clampBackgroundShapeStrokeWidth(), clampDotMatrixAnimationMatrixSize() (+37 more)
 
 ### Community 25 - "Community 25"
 Cohesion: 0.07
 Nodes (13): createDraftingPaperShaderThumbnailCacheKey(), buildDashboardQrNodePayloadSpy, cleanupCallbacks, downloadDashboardQrBatchZipExportSpy, downloadDashboardQrNodeExportSpy, downloadDashboardRasterExportSpy, getRequiredElement(), getSelectedPreviewCard() (+5 more)
 
 ### Community 26 - "Community 26"
-Cohesion: 0.16
-Nodes (15): Notification, Team, Avatar(), AvatarFallback(), AvatarImage(), Button(), buttonVariants, DropdownMenu() (+7 more)
+Cohesion: 0.13
+Nodes (18): EyeDropperLike, EyeDropperProps, EyeDropperWindow, Notification, Team, Avatar(), AvatarFallback(), AvatarImage() (+10 more)
 
 ### Community 27 - "Community 27"
-Cohesion: 0.18
-Nodes (24): ALL_FORMATS, apcaContrast(), channelsInRange(), clamp(), compositeOnBg(), contrast(), formatAll(), formatColor() (+16 more)
+Cohesion: 0.16
+Nodes (26): ALL_FORMATS, apcaContrast(), channelsInRange(), clamp(), compositeOnBg(), contrast(), formatAll(), formatColor() (+18 more)
 
 ### Community 28 - "Community 28"
-Cohesion: 0.10
-Nodes (28): DRAFTING_CARD_PATTERN_NONE_ID, DraftingCardPattern, DraftingCardPatternColorOverrides, DraftingCardPatternColorSlot, DraftingCardPatternColorSlotId, DraftingCardPatternId, DraftingCardPatternSelectionId, DraftingCardPatternStyle (+20 more)
+Cohesion: 0.09
+Nodes (30): DRAFTING_CARD_PATTERN_NONE_ID, DraftingCardPattern, DraftingCardPatternColorOverrides, DraftingCardPatternColorSlot, DraftingCardPatternColorSlotId, DraftingCardPatternId, DraftingCardPatternSelectionId, DraftingCardPatternStyle (+22 more)
 
 ### Community 29 - "Community 29"
 Cohesion: 0.07
 Nodes (22): CARD_IMAGE_FILTER_SHADER_IDS, COMMON_HIDDEN_PARAMS, controls(), IMAGE_SHADER_HIDDEN_PARAMS, PAPER_SHADER_CONTROL_CONFIG, PAPER_SHADER_DEFINITIONS, PaperShaderBooleanControl, PaperShaderColorArrayControl (+14 more)
 
 ### Community 30 - "Community 30"
-Cohesion: 0.19
-Nodes (19): createDefaultDraftingCardState(), cloneDraftingLayerStateByNodeId(), DraftingLayerStateByNodeId, createPanes(), cloneDraftingQrState(), cloneDraftingWorkspaceDocument(), createDefaultDraftingWorkspaceDocument(), createDefaultDraftingWorkspaceQrState() (+11 more)
+Cohesion: 0.30
+Nodes (12): escapeXml(), getDraftingCardLayerSvg(), getDraftingGroupLayerSvg(), getDraftingLayerFilterMarkup(), getDraftingLayerFilterMarkups(), getDraftingLayerSvgTransform(), getDraftingQrLayerSvg(), getDraftingTextLayerRuns() (+4 more)
 
 ### Community 31 - "Community 31"
 Cohesion: 0.07
 Nodes (27): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+19 more)
 
 ### Community 32 - "Community 32"
-Cohesion: 0.27
-Nodes (8): metadata, GamutBadge, GamutBadgeProps, QrStudio(), Tooltip(), TooltipContent(), TooltipProvider(), TooltipTrigger()
+Cohesion: 0.26
+Nodes (11): centerDashboardComposeNode(), fitDashboardQrNodeToDocument(), getDashboardComposeNode(), getDashboardQrNodes(), isDashboardQrNodeId(), removeDashboardComposeNode(), resetDashboardComposeCamera(), QR_PAYLOAD (+3 more)
 
 ### Community 33 - "Community 33"
-Cohesion: 0.25
-Nodes (16): ALPHA_DESCRIPTOR(), clamp(), colorChannels(), floatChannel(), fromCulori(), intChannel(), oklchObj(), setColorChannel() (+8 more)
+Cohesion: 0.15
+Nodes (20): ALPHA_DESCRIPTOR(), ChannelDescriptor, clamp(), colorChannels(), floatChannel(), fromCulori(), intChannel(), oklchObj() (+12 more)
 
 ### Community 34 - "Community 34"
 Cohesion: 0.13
@@ -320,31 +325,31 @@ Nodes (26): `/`, 1. Copy current homepage to `/settings` and replace `/`, 2. Ext
 
 ### Community 36 - "Community 36"
 Cohesion: 0.14
-Nodes (22): DraftingFontRegistryEntry, DraftingFontSource, FONT_BY_FAMILY, FONT_BY_ID, fontReadyPromises, getDraftingFontByFamily(), getDraftingFontById(), getDraftingFontCssFamily() (+14 more)
+Nodes (23): DraftingFontRegistryEntry, DraftingFontSource, FONT_BY_FAMILY, FONT_BY_ID, fontReadyPromises, getDraftingFontByFamily(), getDraftingFontById(), getDraftingFontCssFamily() (+15 more)
 
 ### Community 37 - "Community 37"
 Cohesion: 0.19
 Nodes (21): DraftingQrBackground(), DraftingQrBackgroundDefs(), DraftingQrBackgroundFrame, DraftingQrBackgroundIds, DraftingQrBackgroundOverflow, escapeXml(), getDraftingQrBackgroundBounds(), getDraftingQrBackgroundDefsMarkup() (+13 more)
 
 ### Community 38 - "Community 38"
-Cohesion: 0.12
-Nodes (14): DashboardRasterExportMeasurement, applyQrQualitySuggestionPath(), cleanupComposeImageUrls(), cleanupRemovedComposeImageUrls(), cleanupUploadedAsset(), cleanupUploadedAssets(), ComposeImageUrlRegistry, DASHBOARD_SECTION_PANE_VARIANTS (+6 more)
+Cohesion: 0.09
+Nodes (20): metadata, DashboardRasterExportMeasurement, formatDashboardExportFileSize(), isRasterExportExtension(), cleanupComposeImageUrls(), cleanupRemovedComposeImageUrls(), cleanupUploadedAsset(), cleanupUploadedAssets() (+12 more)
 
 ### Community 39 - "Community 39"
-Cohesion: 0.21
-Nodes (9): QrQualityPanelProps, STATUS_LABELS, metadata, Badge(), BadgeProps, badgeVariants, Collapsible(), CollapsibleContent() (+1 more)
+Cohesion: 0.10
+Nodes (16): QrQualityPanel(), QrQualityPanelProps, STATUS_LABELS, cleanupCallbacks, QrQualityReport, QrQualitySuggestionPath, metadata, Route (+8 more)
 
 ### Community 40 - "Community 40"
-Cohesion: 0.16
-Nodes (24): findCusp(), findMaxChroma(), gamutSignedDistance(), linSrgbToLinP3(), linSrgbToLinRec2020(), oklchToLinearSrgb(), AreaGamut, AreaMode (+16 more)
+Cohesion: 0.15
+Nodes (25): findCusp(), findMaxChroma(), gamutSignedDistance(), linSrgbToLinP3(), linSrgbToLinRec2020(), oklchToLinearSrgb(), Area, AreaGamut (+17 more)
 
 ### Community 41 - "Community 41"
-Cohesion: 0.08
-Nodes (24): DEFAULT_CAMERA, DraftingSplitWorkspaceProps, clampDashboardZoom(), computeDashboardZoomedCamera(), DashboardComposeBackground, DashboardComposeCamera, DashboardComposeDocument, DashboardComposeScene (+16 more)
+Cohesion: 0.16
+Nodes (15): clampDashboardZoom(), computeDashboardZoomedCamera(), DashboardComposeBackground, DashboardComposeDocument, updateDashboardComposeCamera(), clampDashboardLayerScale(), DashboardComposeSurface(), DashboardComposeSurfaceProps (+7 more)
 
 ### Community 42 - "Community 42"
-Cohesion: 0.09
-Nodes (13): DESKTOP_ZOOM_PRESETS, DesktopLayerToolbarControls, DesktopLayerToolbarLayer, DraftingPane, DraftingPaneCanvasTool, DraftingPanelLayouts, DraftingPanePanOffsets, DraftingPaneToolbarVariant (+5 more)
+Cohesion: 0.07
+Nodes (24): DESKTOP_ZOOM_PRESETS, DesktopLayerToolbarControls, DesktopLayerToolbarLayer, DraftingPane, DraftingPaneCanvasTool, DraftingPanelLayouts, DraftingPanePanOffsets, DraftingPaneToolbarVariant (+16 more)
 
 ### Community 43 - "Community 43"
 Cohesion: 0.14
@@ -362,10 +367,6 @@ Nodes (19): 1. Width-only rebalance, 2. Fixed-height preview rail with internal 
 Cohesion: 0.10
 Nodes (19): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+11 more)
 
-### Community 47 - "Community 47"
-Cohesion: 0.23
-Nodes (9): QrSectionRail(), QrSectionRailProps, getQrEditorSectionChangeDirection(), getQrEditorSectionIndex(), QR_EDITOR_SECTIONS, QrEditorSection, QrEditorSectionDirection, QrEditorSectionId (+1 more)
-
 ### Community 48 - "Community 48"
 Cohesion: 0.11
 Nodes (3): cleanupCallbacks, getNestedPanelGroups(), getPaneLayout()
@@ -375,8 +376,8 @@ Cohesion: 0.33
 Nodes (5): LINE_VARIANTS, LINES_CONTAINER_VARIANTS, ReceiptTextIcon, ReceiptTextIconHandle, ReceiptTextIconProps
 
 ### Community 51 - "Community 51"
-Cohesion: 0.18
-Nodes (14): buildDashboardDocumentSvgMarkup(), canvasToBlob(), DashboardDocumentExportMeasurement, DashboardDocumentExportOptions, downloadBlob(), downloadDashboardDocumentExport(), escapeAttribute(), getDashboardDocumentRasterDimensions() (+6 more)
+Cohesion: 0.17
+Nodes (16): buildDashboardDocumentSvgMarkup(), canvasToBlob(), DashboardDocumentExportMeasurement, DashboardDocumentExportOptions, downloadBlob(), downloadDashboardDocumentExport(), escapeAttribute(), getDashboardDocumentRasterDimensions() (+8 more)
 
 ### Community 52 - "Community 52"
 Cohesion: 0.11
@@ -384,11 +385,11 @@ Nodes (17): activeOwner, annotationArtifacts, arrivedVariants, checkpointRevisio
 
 ### Community 53 - "Community 53"
 Cohesion: 0.15
-Nodes (12): ALL_FORMATS, applyComponent(), BLACK, clamp(), ColorComponent, WHITE, wrapHue(), gamutFromFormat() (+4 more)
+Nodes (12): useColorPickerContext(), gamutFromFormat(), Alpha, AlphaProps, Hue, HueProps, toHsl, toHsv (+4 more)
 
 ### Community 54 - "Community 54"
-Cohesion: 0.14
-Nodes (24): getDashboardQrNodeRasterDimensions(), canvasToBlob(), clampDashboardRasterTargetSize(), DASHBOARD_RASTER_EXPORT_QUALITY_PRESETS, DashboardRasterExportOptions, downloadBlob(), downloadDashboardRasterExport(), formatDashboardExportFileSize() (+16 more)
+Cohesion: 0.16
+Nodes (18): canvasToBlob(), clampDashboardRasterTargetSize(), DASHBOARD_RASTER_EXPORT_QUALITY_PRESETS, DashboardRasterExportOptions, downloadBlob(), downloadDashboardRasterExport(), getDashboardRasterExportDimensions(), getMimeTypeForRasterExtension() (+10 more)
 
 ### Community 55 - "Community 55"
 Cohesion: 0.24
@@ -399,12 +400,12 @@ Cohesion: 0.19
 Nodes (11): ColorPicker(), ColorPickerProps, ColorType, PickerPointerProps, coerceHexColor(), DEFAULT_SWATCHES, getContrastRatios(), toHsvaColor() (+3 more)
 
 ### Community 57 - "Community 57"
-Cohesion: 0.12
-Nodes (12): createDefaultDraftingLayers(), createDraftingTextLayer(), createFallbackLayer(), getDraftingCardLayerId(), getDraftingQrLayerId(), normalizeDraftingCanvasLayers(), DraftingTextLayerTab(), getDraftingTextInspectorFontWeight() (+4 more)
+Cohesion: 0.18
+Nodes (3): QrPane, buildDashboardQrNodePayloadSpy, cleanupCallbacks
 
 ### Community 58 - "Community 58"
-Cohesion: 0.22
-Nodes (7): ColorPicker, SameColorCommitter(), coerce(), useColorPicker(), isValidColor(), parseColor(), parseDraftingColor()
+Cohesion: 0.20
+Nodes (9): DraftingInspectorControlRow(), DraftingInspectorControlRowProps, DraftingInspectorIconButton(), DraftingInspectorPanel(), DraftingInspectorPanelProps, DraftingInspectorSection(), DraftingInspectorSectionProps, DraftingInspectorSegmentedControl() (+1 more)
 
 ### Community 59 - "Community 59"
 Cohesion: 0.13
@@ -415,40 +416,40 @@ Cohesion: 0.14
 Nodes (8): fontWeights, Slider, SliderAppearance, SliderProps, SliderValue, springs, ValueDisplayProps, ValuePosition
 
 ### Community 61 - "Community 61"
-Cohesion: 0.29
-Nodes (9): DraftingWorkspaceDocumentV1, deleteDraftingWorkspaceDraft(), deleteIndexedDbDraft(), openDraftingWorkspaceDb(), readDraftingWorkspaceDraft(), readIndexedDbDraft(), StoredDraftingWorkspaceRecord, writeDraftingWorkspaceDraft() (+1 more)
+Cohesion: 0.20
+Nodes (9): DraggableList(), DraggableListContextValue, DraggableListHandle(), DraggableListHandleProps, DraggableListItem(), DraggableListItemContext, DraggableListItemProps, DraggableListProps (+1 more)
 
 ### Community 62 - "Community 62"
 Cohesion: 0.24
 Nodes (9): ensureDraftingFontsForLayers(), createDraftingQrArtworkState(), isLegacyQrBackingNode(), sanitizeDraftingQrArtworkMarkup(), buildDraftingLayeredNodePayload(), buildDraftingLayeredSvgMarkup(), getDraftingLayerBounds(), DEFAULT_BACKGROUND_SHAPE_OPTIONS (+1 more)
 
 ### Community 63 - "Community 63"
-Cohesion: 0.14
-Nodes (4): DESKTOP_TOOLBAR_TOOLS, cleanupCallbacks, getRequiredSlider(), getRequiredSliderRow()
+Cohesion: 0.13
+Nodes (5): DESKTOP_TOOLBAR_TOOLS, cleanupCallbacks, getRequiredSlider(), getRequiredSliderRow(), DEFAULT_DOT_MATRIX_ANIMATION
 
 ### Community 64 - "Community 64"
 Cohesion: 0.11
 Nodes (18): DesktopEffectsInspector(), buildDraftingPaperShaderRenderProps(), DraftingCardPaperShaderLayer(), DraftingCardPaperShaderLayerProps, DraftingCardPaperShaderRenderer(), DraftingCardPaperShaderRendererProps, hasDraftingPaperShaderWebGlSupport(), PaperShaderErrorBoundary (+10 more)
 
 ### Community 65 - "Community 65"
-Cohesion: 0.06
-Nodes (27): cn(), CssInputProps, ColorPaletteCard, ColorPaletteCardProps, ARROW_VARIANTS, DownloadIcon, DownloadIconHandle, DownloadIconProps (+19 more)
+Cohesion: 0.10
+Nodes (11): ModeToggle(), ModeToggleProps, cn(), CssInput, CssInputProps, ColorPaletteCard, ColorPaletteCardProps, EditableChipProps (+3 more)
 
 ### Community 66 - "Community 66"
-Cohesion: 0.31
-Nodes (8): DraftingCanvasLayer, applyDraftingQrForegroundShadow(), createForegroundShadowFilter(), getOrCreateSvgDefs(), getSvgId(), hasDraftingLayerShadow(), getDraftingQrLayerSvg(), scaleNestedSvgMarkup()
+Cohesion: 0.48
+Nodes (5): applyDraftingQrForegroundShadow(), createForegroundShadowFilter(), getOrCreateSvgDefs(), getSvgId(), hasDraftingLayerShadow()
 
 ### Community 67 - "Community 67"
 Cohesion: 0.32
 Nodes (12): DraftingTextLayout, getDraftingTextFont(), getDraftingTextFontFamily(), getDraftingTextLetterSpacing(), getDraftingTextLineHeight(), getMeasureContext(), layoutDraftingText(), measureDraftingTextLineWidth() (+4 more)
 
 ### Community 68 - "Community 68"
-Cohesion: 0.25
-Nodes (5): ChannelDescriptor, ChannelField(), ChannelInput, ChannelInputProps, formatNumber()
+Cohesion: 0.22
+Nodes (3): DraftingLayersTab(), findLayerPane(), cleanupCallbacks
 
 ### Community 69 - "Community 69"
-Cohesion: 0.15
-Nodes (15): CUSTOM_DOT_SHAPES, CustomDotShape, CustomDotShapeGeometry, getActiveCustomDotShape(), getCustomDotShapeGeometry(), isCustomDotShape(), ShapeDefinition, buildQrExtension() (+7 more)
+Cohesion: 0.13
+Nodes (17): CUSTOM_DOT_SHAPES, CustomDotShape, CustomDotShapeGeometry, getActiveCustomDotShape(), getCustomDotShapeGeometry(), isCustomDotShape(), ShapeDefinition, buildQrExtension() (+9 more)
 
 ### Community 70 - "Community 70"
 Cohesion: 0.31
@@ -467,20 +468,20 @@ Cohesion: 0.24
 Nodes (8): createStubWindow(), getDotRects(), getLogoImage(), renderLogoWidth(), renderSvgForOverlapCheck(), StubDocument, StubElement, walk()
 
 ### Community 74 - "Community 74"
-Cohesion: 0.25
-Nodes (9): anchorSquareLayerResize(), getBoundsSnapPoints(), getSnapTargets(), resizeDraftingLayer(), resizeSquareLayer(), SnapAxis, snapLayerMove(), snapLayerResize() (+1 more)
+Cohesion: 0.33
+Nodes (6): DesktopContentFieldRow(), DesktopContentFields(), getDesktopContentFields(), isUrlContentType(), isUsernameContentType(), stringContentValue()
 
 ### Community 75 - "Community 75"
 Cohesion: 0.27
 Nodes (6): getAccordionScrollAdjustment(), getNextOpenItemId(), getNextOpenItemIds(), MotionAccordion(), MotionAccordionItem, MotionAccordionProps
 
 ### Community 76 - "Community 76"
-Cohesion: 0.10
-Nodes (18): DesktopThemeMode, DesktopToolbarPrototype(), DesktopWorkspace(), DesktopWorkspaceProps, metadata, satoshi, DraftingSurface(), findDraftingLayerById() (+10 more)
+Cohesion: 0.25
+Nodes (6): DesktopThemeMode, DesktopToolbarPrototype(), DesktopWorkspace(), DesktopWorkspaceProps, metadata, satoshi
 
 ### Community 77 - "Community 77"
-Cohesion: 0.21
-Nodes (16): addDashboardComposeImageNode(), createDashboardComposeScene(), createDefaultDashboardComposeBackgroundGradient(), hasFiniteTransform(), normalizeDashboardComposeBackground(), createLayeredScene(), updateDashboardComposeBackground(), upsertDashboardQrNode() (+8 more)
+Cohesion: 0.25
+Nodes (12): addDashboardComposeImageNode(), createDashboardComposeScene(), DashboardComposeScene, hasFiniteTransform(), createLayeredScene(), upsertDashboardQrNode(), createLayeredScene(), QR_PAYLOAD (+4 more)
 
 ### Community 78 - "Community 78"
 Cohesion: 0.18
@@ -491,24 +492,24 @@ Cohesion: 0.31
 Nodes (7): DashboardQrNodePayload, buildDashboardQrNodePayload(), createDashboardSurfaceQrState(), readQrMarkup(), stripXmlDeclaration(), applyExtension(), applyExtensionSpy
 
 ### Community 80 - "Community 80"
-Cohesion: 0.20
-Nodes (8): getBackgroundColorMode(), baseProps, getCapturedLogoTabs(), getTabMarkup(), LogoTabConfig, QrControlSections(), baseProps, useExpandedDashboardAccordionIds()
+Cohesion: 0.50
+Nodes (4): baseProps, getCapturedLogoTabs(), getTabMarkup(), LogoTabConfig
 
 ### Community 81 - "Community 81"
 Cohesion: 0.20
 Nodes (9): App Structure, Commands, graphify, MCP Tools, Repo Conventions, Search / Editing Gotchas, Stack, Testing Notes (+1 more)
 
 ### Community 82 - "Community 82"
-Cohesion: 0.22
-Nodes (9): clampDotMatrixUnit(), createDotMatrixModule(), getDotMatrixCenter(), getDotMatrixHash01(), getDotMatrixPatternIndexes(), getDotMatrixPerimeterIndex(), getDotMatrixRegionCoordinate(), getDotMatrixRing() (+1 more)
+Cohesion: 0.25
+Nodes (8): clampDotMatrixUnit(), createDotMatrixModule(), getDotMatrixCenter(), getDotMatrixHash01(), getDotMatrixPerimeterIndex(), getDotMatrixRegionCoordinate(), getDotMatrixRing(), getQrMoveCellMetrics()
 
 ### Community 83 - "Community 83"
 Cohesion: 0.22
 Nodes (6): FILE_SIZES, FileError, FileStatus, FileUpload(), FileUploadProps, formatBytes()
 
 ### Community 84 - "Community 84"
-Cohesion: 0.19
-Nodes (15): DashboardComposeSvgNode, canvasToBlob(), DashboardQrBatchZipExportOptions, DashboardQrFileExportNode, DashboardQrNodeExportOptions, downloadBlob(), downloadDashboardQrBatchZipExport(), downloadDashboardQrNodeExport() (+7 more)
+Cohesion: 0.18
+Nodes (16): DashboardComposeSvgNode, canvasToBlob(), DashboardQrBatchZipExportOptions, DashboardQrFileExportNode, DashboardQrNodeExportOptions, downloadBlob(), downloadDashboardQrBatchZipExport(), downloadDashboardQrNodeExport() (+8 more)
 
 ### Community 85 - "Community 85"
 Cohesion: 0.20
@@ -520,7 +521,7 @@ Nodes (9): cell, inFinder(), isFinderCenter(), isFinderEdge(), keepCell(), nodes
 
 ### Community 87 - "Community 87"
 Cohesion: 0.18
-Nodes (12): coerceNonNegativeSvgNumber(), coerceSvgNumber(), getAlignedCornerGradientKey(), getBackgroundRenderMetrics(), getBackgroundShapeGradientKey(), getQrBackgroundRenderMetrics(), getQrExtensionKey(), hasActiveBackgroundSurfaceOptions() (+4 more)
+Nodes (12): coerceNonNegativeSvgNumber(), coerceSvgNumber(), getAlignedCornerGradientKey(), getBackgroundRenderMetrics(), getBackgroundShapeGradientKey(), getLegacyBackgroundShapePaddingPx(), getQrBackgroundRenderMetrics(), getQrExtensionKey() (+4 more)
 
 ### Community 88 - "Community 88"
 Cohesion: 0.20
@@ -531,12 +532,12 @@ Cohesion: 0.25
 Nodes (6): bodyFont, displayFont, metadata, monoFont, viewport, ThemeProvider()
 
 ### Community 90 - "Community 90"
-Cohesion: 0.20
-Nodes (11): createReadableState(), createDotMatrixAnimationExtension(), shouldApplyDotMatrixAnimation(), appendGradientRectPair(), createStubElement(), renderDotMatrixTracks(), renderQrMoveModuleField(), StubElement (+3 more)
+Cohesion: 0.12
+Nodes (15): baseProps, QrPreviewCard(), applyQrQualitySuggestionPath(), createReadableState(), QR_PAYLOAD, createDotMatrixAnimationExtension(), shouldApplyDotMatrixAnimation(), appendGradientRectPair() (+7 more)
 
 ### Community 91 - "Community 91"
-Cohesion: 0.36
-Nodes (3): ModeToggle(), ModeToggleProps, Switch()
+Cohesion: 0.40
+Nodes (5): DesktopTextInspector(), getDesktopFontWeightSliderStep(), getDesktopTextInspectorFontWeight(), getDesktopTextPresetId(), getNearestDesktopFontWeight()
 
 ### Community 92 - "Community 92"
 Cohesion: 0.29
@@ -548,7 +549,7 @@ Nodes (7): 1., 2., 3. (Optional), 4., 5., 6. (Optional), Installing Webfonts
 
 ### Community 94 - "Community 94"
 Cohesion: 0.40
-Nodes (4): DraftingPaneWorkspace(), groupPanes(), getQrLayout(), QrLayout
+Nodes (4): ARROW_VARIANTS, DownloadIcon, DownloadIconHandle, DownloadIconProps
 
 ### Community 95 - "Community 95"
 Cohesion: 0.14
@@ -556,7 +557,7 @@ Nodes (10): useAutoResizeTextarea(), UseAutoResizeTextareaProps, AI_Input_Search
 
 ### Community 96 - "Community 96"
 Cohesion: 0.40
-Nodes (4): Accordion(), AccordionContent(), AccordionItem(), AccordionTrigger()
+Nodes (4): GalleryVerticalEndIcon, GalleryVerticalEndIconHandle, GalleryVerticalEndIconProps, PATH_VARIANTS
 
 ### Community 97 - "Community 97"
 Cohesion: 0.29
@@ -623,8 +624,8 @@ Cohesion: 0.40
 Nodes (4): Dashboard Flexible Preview Layout Implementation Plan, Task 1: Lock In The Dashboard Preview Contract With Tests, Task 2: Make The Dashboard Columns Fluid, Task 3: Full Verification
 
 ### Community 114 - "Community 114"
-Cohesion: 0.67
-Nodes (4): finishPaperShaderThumbnail(), notifyPaperShaderThumbnailSubscribers(), processNextPaperShaderThumbnail(), requestPaperShaderThumbnail()
+Cohesion: 0.40
+Nodes (4): DEFAULT_TRANSITION, LayersIcon, LayersIconHandle, LayersIconProps
 
 ### Community 115 - "Community 115"
 Cohesion: 0.50
@@ -633,6 +634,14 @@ Nodes (3): hooks, PreToolUse, SessionStart
 ### Community 116 - "Community 116"
 Cohesion: 0.50
 Nodes (3): pid, port, token
+
+### Community 118 - "Community 118"
+Cohesion: 0.40
+Nodes (4): ICON_VARIANTS, MessageCircleIcon, MessageCircleIconHandle, MessageCircleIconProps
+
+### Community 119 - "Community 119"
+Cohesion: 0.40
+Nodes (4): PATH_VARIANTS, PlayIcon, PlayIconHandle, PlayIconProps
 
 ### Community 120 - "Community 120"
 Cohesion: 0.50
@@ -646,13 +655,17 @@ Nodes (3): model_id, provider_key, reasoning_effort
 Cohesion: 0.50
 Nodes (3): run, setup, teardown
 
-### Community 133 - "Community 133"
-Cohesion: 0.16
-Nodes (16): createDotMatrixOpacityKeyframes(), createGeneratedDotMatrixKeyframes(), createOuterRingClockwisePath(), createQrMoveOpacitySamples(), createRingPathClockwise(), createSpiralInwardPath(), diagonalSnakeOrderValue(), findDotMatrixCellIndex() (+8 more)
+### Community 124 - "Community 124"
+Cohesion: 0.50
+Nodes (3): CORNER_DOT_STYLE_OPTIONS, CORNER_SQUARE_STYLE_OPTIONS, DOT_STYLE_OPTIONS
 
-### Community 135 - "Community 135"
-Cohesion: 0.29
-Nodes (7): buildDraftingBackgroundColorItems(), buildDraftingSolidGradientItems(), DraftingBackgroundColorTab(), DraftingCornerDotColorTab(), DraftingCornerSquareColorTab(), DraftingEditBackgroundColorTab(), DraftingLogoColorTab()
+### Community 133 - "Community 133"
+Cohesion: 0.15
+Nodes (17): createDotMatrixOpacityKeyframes(), createGeneratedDotMatrixKeyframes(), createOuterRingClockwisePath(), createQrMoveOpacitySamples(), createRingPathClockwise(), createSpiralInwardPath(), diagonalSnakeOrderValue(), findDotMatrixCellIndex() (+9 more)
+
+### Community 134 - "Community 134"
+Cohesion: 0.67
+Nodes (3): DesktopCornerStyleButton(), DesktopModulePatternButton(), getDesktopAdaptiveOptionPreviewStyle()
 
 ### Community 136 - "Community 136"
 Cohesion: 0.25
@@ -669,22 +682,22 @@ Nodes (5): ContrastMetric, ContrastReadout, ContrastReadoutProps, DEFAULT_METRIC
 ## Knowledge Gaps
 - **781 isolated node(s):** `SessionStart`, `PreToolUse`, `files`, `insertBefore`, `commentSyntax` (+776 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `Community 65` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 6`, `Community 7`, `Community 9`, `Community 10`, `Community 11`, `Community 140`, `Community 13`, `Community 17`, `Community 20`, `Community 21`, `Community 26`, `Community 32`, `Community 38`, `Community 39`, `Community 40`, `Community 41`, `Community 42`, `Community 43`, `Community 47`, `Community 49`, `Community 50`, `Community 53`, `Community 56`, `Community 60`, `Community 68`, `Community 75`, `Community 76`, `Community 83`, `Community 91`, `Community 95`, `Community 96`, `Community 109`?**
-  _High betweenness centrality (0.078) - this node is a cross-community bridge._
-- **Why does `QrInputType` connect `Community 5` to `Community 0`, `Community 1`, `Community 3`, `Community 22`, `Community 26`, `Community 30`?**
+- **Why does `cn()` connect `Community 65` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 6`, `Community 7`, `Community 9`, `Community 10`, `Community 11`, `Community 140`, `Community 13`, `Community 17`, `Community 20`, `Community 21`, `Community 26`, `Community 33`, `Community 38`, `Community 39`, `Community 40`, `Community 41`, `Community 42`, `Community 43`, `Community 49`, `Community 50`, `Community 53`, `Community 56`, `Community 58`, `Community 60`, `Community 61`, `Community 75`, `Community 76`, `Community 83`, `Community 94`, `Community 95`, `Community 96`, `Community 109`, `Community 114`, `Community 118`, `Community 119`?**
+  _High betweenness centrality (0.080) - this node is a cross-community bridge._
+- **Why does `QrInputType` connect `Community 5` to `Community 0`, `Community 1`, `Community 3`, `Community 22`, `Community 26`?**
   _High betweenness centrality (0.016) - this node is a cross-community bridge._
-- **Why does `QrStudioState` connect `Community 62` to `Community 1`, `Community 2`, `Community 4`, `Community 37`, `Community 70`, `Community 38`, `Community 8`, `Community 9`, `Community 42`, `Community 13`, `Community 79`, `Community 16`, `Community 54`, `Community 24`, `Community 25`, `Community 30`?**
+- **Why does `QrStudioState` connect `Community 62` to `Community 1`, `Community 2`, `Community 4`, `Community 37`, `Community 70`, `Community 38`, `Community 8`, `Community 9`, `Community 42`, `Community 13`, `Community 79`, `Community 16`, `Community 22`, `Community 54`, `Community 24`, `Community 25`?**
   _High betweenness centrality (0.016) - this node is a cross-community bridge._
 - **What connects `SessionStart`, `PreToolUse`, `files` to the rest of the system?**
   _781 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.02174303683737646 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.021739130434782608 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.032407407407407406 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.031616982836495035 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.04441846873173583 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.04198668714797747 - nodes in this community are weakly interconnected._

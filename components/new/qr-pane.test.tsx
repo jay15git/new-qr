@@ -110,7 +110,11 @@ describe("QrPane", () => {
     const canvas = container.querySelector('[data-slot="dashboard-compose-canvas"]')
     const card = container.querySelector('[data-slot="dashboard-compose-card"]')
     const node = container.querySelector('[data-slot="dashboard-compose-node"]')
+    const pane = container.querySelector('[data-slot="qr-pane"]')
 
+    expect(pane).not.toBeNull()
+    expect(pane?.className).toContain("overflow-visible")
+    expect(pane?.className).not.toContain("overflow-hidden")
     expect(canvas).not.toBeNull()
     expect(canvas?.className).toContain("h-full")
     expect(canvas?.className).toContain("w-full")

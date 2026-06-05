@@ -2486,7 +2486,7 @@ export const QrPane = memo(function QrPane({
     <div
       data-slot="qr-pane"
       data-selected={isSelected ? "true" : "false"}
-      className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden"
+      className="relative flex h-full w-full flex-col items-center justify-center overflow-visible"
       onClick={(e) => {
         // Only select if clicking the pane background, not the QR itself
         if (e.target === e.currentTarget) {

@@ -818,6 +818,63 @@ describe("DesktopToolbarPrototype", () => {
     expect(getRequiredInput(surface.container, "Shape end color").value).toBe("#0000ff")
   })
 
+  it("renders shape numeric controls as desktop elastic sliders", async () => {
+    const surface = await renderPrototype()
+    const shapeButton = getRequiredToolButton(surface.container, "shape")
+
+    await act(async () => {
+      shapeButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const elasticLabels = [
+      "Corner radius",
+      "Padding",
+      "Bottom space",
+      "Border width",
+      "Border opacity",
+      "Shape padding",
+      "Shape stroke width",
+      "Shape stroke opacity",
+      "Shape shadow blur",
+      "Shape shadow opacity",
+      "Shape shadow X",
+      "Shape shadow Y",
+    ]
+
+    for (const label of elasticLabels) {
+      expect(getRequiredSlider(surface.container, label)).not.toBeNull()
+      expect(surface.container.querySelector(`input[type="number"][aria-label="${label}"]`)).toBeNull()
+    }
+
+    expect(getRequiredSliderRow(surface.container, "Corner radius").textContent).toBe("Corner radius28")
+    expect(getRequiredSliderRow(surface.container, "Padding").textContent).toBe("Padding24")
+    expect(getRequiredSliderRow(surface.container, "Bottom space").textContent).toBe("Bottom space128")
+    expect(getRequiredSliderRow(surface.container, "Border width").textContent).toBe("Border width0")
+    expect(getRequiredSliderRow(surface.container, "Border opacity").textContent).toBe("Border opacity100")
+    expect(getRequiredSliderRow(surface.container, "Shape padding").textContent).toBe("Shape padding0")
+    expect(getRequiredSliderRow(surface.container, "Shape stroke opacity").textContent).toBe("Shape stroke opacity100")
+
+    await act(async () => {
+      getRequiredSlider(surface.container, "Border width").dispatchEvent(
+        new KeyboardEvent("keydown", { bubbles: true, key: "End" }),
+      )
+      getRequiredSlider(surface.container, "Border opacity").dispatchEvent(
+        new KeyboardEvent("keydown", { bubbles: true, key: "Home" }),
+      )
+      getRequiredSlider(surface.container, "Shape shadow X").dispatchEvent(
+        new KeyboardEvent("keydown", { bubbles: true, key: "End" }),
+      )
+      getRequiredSlider(surface.container, "Corner radius").dispatchEvent(
+        new KeyboardEvent("keydown", { bubbles: true, key: "End" }),
+      )
+    })
+
+    expect(getRequiredSlider(surface.container, "Border width").getAttribute("aria-valuenow")).toBe("24")
+    expect(getRequiredSlider(surface.container, "Border opacity").getAttribute("aria-valuenow")).toBe("0")
+    expect(getRequiredSlider(surface.container, "Shape shadow X").getAttribute("aria-valuenow")).toBe("64")
+    expect(getRequiredSlider(surface.container, "Corner radius").getAttribute("aria-valuenow")).toBe("64")
+  })
+
   it("resets shape settings to the defaults", async () => {
     const surface = await renderPrototype()
     const shapeButton = getRequiredToolButton(surface.container, "shape")
@@ -976,6 +1033,14 @@ describe("DesktopToolbarPrototype", () => {
     expect(getRequiredSliderRow(surface.container, "Motion speed").textContent).toBe("Speed3x")
     expect(getRequiredSliderRow(surface.container, "Motion matrix density").textContent).toBe("Matrix density5x5")
     expect(getRequiredSliderRow(surface.container, "Motion overlay scale").textContent).toBe("Overlay scale100%")
+    expect(
+      getRequiredSlider(surface.container, "Motion speed")
+        .closest('[data-slot="elastic-slider"]')
+        ?.className,
+    ).toContain("[--elastic-slider-label:rgba(255,255,255,0.58)]")
+    expect(surface.container.innerHTML).toContain('[data-slot="elastic-slider-label"]')
+    expect(surface.container.innerHTML).toContain("color: rgba(255, 255, 255, 0.86) !important")
+    expect(surface.container.innerHTML).toContain('data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [data-slot="elastic-slider-label"]')
     expect(getRequiredSliderRow(surface.container, "Motion speed").className).not.toContain("desktop-inspector-control-bg")
     expect(getRequiredSliderRow(surface.container, "Motion matrix density").className).not.toContain("desktop-inspector-control-bg")
     expect(getRequiredSliderRow(surface.container, "Motion overlay scale").className).not.toContain("desktop-inspector-control-bg")

@@ -1329,7 +1329,7 @@ function DesktopThemeStyles() {
       }
 
       [data-slot="desktop-floating-inspector"] {
-        --desktop-inspector-section-bg: rgba(255, 255, 255, 0.045);
+        --desktop-inspector-section-bg: rgba(255, 255, 255, 0.026);
         --desktop-inspector-header-bg: rgba(255, 255, 255, 0.025);
         --desktop-inspector-footer-bg: rgba(0, 0, 0, 0.18);
         --desktop-inspector-control-bg: transparent;
@@ -1345,7 +1345,7 @@ function DesktopThemeStyles() {
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] {
-        --desktop-inspector-section-bg: rgba(15, 23, 42, 0.055);
+        --desktop-inspector-section-bg: rgba(15, 23, 42, 0.032);
         --desktop-inspector-header-bg: rgba(15, 23, 42, 0.025);
         --desktop-inspector-footer-bg: rgba(15, 23, 42, 0.045);
         --desktop-inspector-control-bg: transparent;
@@ -1365,6 +1365,14 @@ function DesktopThemeStyles() {
         border-color: transparent !important;
         color: currentColor !important;
         box-shadow: none !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] [data-slot="elastic-slider-label"] {
+        color: rgba(255, 255, 255, 0.86) !important;
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [data-slot="elastic-slider-label"] {
+        color: #111827 !important;
       }
 
       [data-slot="desktop-floating-inspector"] :is(input, textarea, select):focus,
@@ -2232,25 +2240,28 @@ function DesktopShapeInspector({
               label="Show shape"
               onChange={(cardEnabled) => onShapeSettingsChange({ cardEnabled })}
             />
-            <DesktopNumberRow
+            <DesktopElasticSliderRow
               label="Corner radius"
               max={64}
               min={0}
               value={settings.cardRadius}
+              valueLabel={`${Math.round(settings.cardRadius)}`}
               onChange={(cardRadius) => onShapeSettingsChange({ cardRadius })}
             />
-            <DesktopNumberRow
+            <DesktopElasticSliderRow
               label="Padding"
               max={72}
               min={8}
               value={settings.padding}
+              valueLabel={`${Math.round(settings.padding)}`}
               onChange={(padding) => onShapeSettingsChange({ padding })}
             />
-            <DesktopNumberRow
+            <DesktopElasticSliderRow
               label="Bottom space"
               max={240}
               min={0}
               value={settings.bottomSpace}
+              valueLabel={`${Math.round(settings.bottomSpace)}`}
               onChange={(bottomSpace) => onShapeSettingsChange({ bottomSpace })}
             />
           </div>
@@ -2349,18 +2360,20 @@ function DesktopShapeInspector({
               value={settings.borderColor}
               onChange={(borderColor) => onShapeSettingsChange({ borderColor })}
             />
-            <DesktopNumberRow
+            <DesktopElasticSliderRow
               label="Border width"
               max={24}
               min={0}
               value={settings.borderWidth}
+              valueLabel={`${Math.round(settings.borderWidth)}`}
               onChange={(borderWidth) => onShapeSettingsChange({ borderWidth })}
             />
-            <DesktopNumberRow
+            <DesktopElasticSliderRow
               label="Border opacity"
               max={100}
               min={0}
               value={settings.borderOpacity}
+              valueLabel={`${Math.round(settings.borderOpacity)}`}
               onChange={(borderOpacity) => onShapeSettingsChange({ borderOpacity })}
             />
           </div>
@@ -2369,15 +2382,15 @@ function DesktopShapeInspector({
         <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-3 truncate text-[12px] font-semibold text-white">Shape Details</p>
           <div className="grid gap-2">
-            <DesktopNumberRow label="Shape padding" max={192} min={0} value={settings.shapePadding} onChange={(shapePadding) => onShapeSettingsChange({ shapePadding })} />
+            <DesktopElasticSliderRow label="Shape padding" max={192} min={0} value={settings.shapePadding} valueLabel={`${Math.round(settings.shapePadding)}`} onChange={(shapePadding) => onShapeSettingsChange({ shapePadding })} />
             <DesktopColorInputRow label="Shape stroke color" value={settings.shapeStrokeColor} onChange={(shapeStrokeColor) => onShapeSettingsChange({ shapeStrokeColor })} />
-            <DesktopNumberRow label="Shape stroke width" max={24} min={0} value={settings.shapeStrokeWidth} onChange={(shapeStrokeWidth) => onShapeSettingsChange({ shapeStrokeWidth })} />
-            <DesktopNumberRow label="Shape stroke opacity" max={100} min={0} value={settings.shapeStrokeOpacity} onChange={(shapeStrokeOpacity) => onShapeSettingsChange({ shapeStrokeOpacity })} />
+            <DesktopElasticSliderRow label="Shape stroke width" max={24} min={0} value={settings.shapeStrokeWidth} valueLabel={`${Math.round(settings.shapeStrokeWidth)}`} onChange={(shapeStrokeWidth) => onShapeSettingsChange({ shapeStrokeWidth })} />
+            <DesktopElasticSliderRow label="Shape stroke opacity" max={100} min={0} value={settings.shapeStrokeOpacity} valueLabel={`${Math.round(settings.shapeStrokeOpacity)}`} onChange={(shapeStrokeOpacity) => onShapeSettingsChange({ shapeStrokeOpacity })} />
             <DesktopColorInputRow label="Shape backing shadow color" value={settings.shapeShadowColor} onChange={(shapeShadowColor) => onShapeSettingsChange({ shapeShadowColor })} />
-            <DesktopNumberRow label="Shape shadow blur" max={32} min={0} value={settings.shapeShadowBlur} onChange={(shapeShadowBlur) => onShapeSettingsChange({ shapeShadowBlur })} />
-            <DesktopNumberRow label="Shape shadow opacity" max={100} min={0} value={settings.shapeShadowOpacity} onChange={(shapeShadowOpacity) => onShapeSettingsChange({ shapeShadowOpacity })} />
-            <DesktopNumberRow label="Shape shadow X" max={64} min={-64} value={settings.shapeShadowOffsetX} onChange={(shapeShadowOffsetX) => onShapeSettingsChange({ shapeShadowOffsetX })} />
-            <DesktopNumberRow label="Shape shadow Y" max={64} min={-64} value={settings.shapeShadowOffsetY} onChange={(shapeShadowOffsetY) => onShapeSettingsChange({ shapeShadowOffsetY })} />
+            <DesktopElasticSliderRow label="Shape shadow blur" max={32} min={0} value={settings.shapeShadowBlur} valueLabel={`${Math.round(settings.shapeShadowBlur)}`} onChange={(shapeShadowBlur) => onShapeSettingsChange({ shapeShadowBlur })} />
+            <DesktopElasticSliderRow label="Shape shadow opacity" max={100} min={0} value={settings.shapeShadowOpacity} valueLabel={`${Math.round(settings.shapeShadowOpacity)}`} onChange={(shapeShadowOpacity) => onShapeSettingsChange({ shapeShadowOpacity })} />
+            <DesktopElasticSliderRow label="Shape shadow X" max={64} min={-64} value={settings.shapeShadowOffsetX} valueLabel={`${Math.round(settings.shapeShadowOffsetX)}`} onChange={(shapeShadowOffsetX) => onShapeSettingsChange({ shapeShadowOffsetX })} />
+            <DesktopElasticSliderRow label="Shape shadow Y" max={64} min={-64} value={settings.shapeShadowOffsetY} valueLabel={`${Math.round(settings.shapeShadowOffsetY)}`} onChange={(shapeShadowOffsetY) => onShapeSettingsChange({ shapeShadowOffsetY })} />
           </div>
         </section>
       </div>
@@ -2705,13 +2718,46 @@ function DesktopMotionSliderRow({
   valueLabel: string
 }) {
   return (
+    <DesktopElasticSliderRow
+      ariaLabel={`Motion ${label.toLowerCase()}`}
+      label={label}
+      max={max}
+      min={min}
+      step={step}
+      value={value}
+      valueLabel={valueLabel}
+      onChange={onChange}
+    />
+  )
+}
+
+function DesktopElasticSliderRow({
+  ariaLabel,
+  label,
+  max,
+  min,
+  onChange,
+  step = 1,
+  value,
+  valueLabel,
+}: {
+  ariaLabel?: string
+  label: string
+  max: number
+  min: number
+  onChange: (value: number) => void
+  step?: number
+  value: number
+  valueLabel: string
+}) {
+  return (
     <div
       data-slot="desktop-elastic-slider-row"
       className="grid min-w-0 px-3 py-1.5"
     >
       <div data-slot="desktop-elastic-slider">
         <ElasticSlider
-          aria-label={`Motion ${label.toLowerCase()}`}
+          aria-label={ariaLabel ?? label}
           className={DESKTOP_ELASTIC_SLIDER_CLASS}
           formatValue={() => valueLabel}
           label={label}
