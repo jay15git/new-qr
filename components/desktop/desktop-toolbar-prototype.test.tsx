@@ -243,7 +243,7 @@ describe("DesktopToolbarPrototype", () => {
     const filterSearchRow = inspector?.querySelector('[data-slot="desktop-content-filter-search-row"]')
     expect(filterSearchRow?.className).toContain("w-full")
     expect(filterSearchRow?.className).toContain("overflow-hidden")
-    expect(filterSearchRow?.querySelector('[data-slot="desktop-content-type-filter-trigger"]')?.className).toContain("border-r")
+    expect(filterSearchRow?.querySelector('[data-slot="desktop-content-type-filter-trigger"]')?.className).not.toContain("border-r")
     expect(filterSearchRow?.querySelector('input[aria-label="Search QR types"]')).not.toBeNull()
     expect(inspector?.querySelector('[data-slot="desktop-content-fields"]')).not.toBeNull()
     expect(inspector?.textContent).toContain("Content")
@@ -268,16 +268,37 @@ describe("DesktopToolbarPrototype", () => {
 
     expect(linkPreset.getAttribute("aria-pressed")).toBe("true")
     expect(linkPreset.getAttribute("data-desktop-content-type-option")).toBe("true")
-    expect(linkPreset.className).toContain("border-2")
-    expect(linkPreset.className).toContain("border-white/55")
+    expect(linkPreset.className).not.toContain("border-2")
+    expect(linkPreset.className).not.toContain("border-white/55")
+    expect(linkPreset.className).toContain("desktop-inspector-selected-bg")
+    expect(linkPreset.className).toContain("desktop-inspector-selected-fg")
     expect(linkPreset.className).not.toContain("ff3b68")
 
     const textPreset = getRequiredButton(surface.container, "Use Text content")
     expect(textPreset.getAttribute("aria-pressed")).toBe("false")
-    expect(textPreset.className).toContain("border-transparent")
+    expect(textPreset.className).not.toContain("border-transparent")
     expect(surface.container.textContent).toContain("Link")
     expect(surface.container.textContent).not.toContain("Needs input")
     expect(surface.container.querySelector('input[placeholder="https://example.com"]')).not.toBeNull()
+  })
+
+  it("keeps the desktop inspector free of pink accent tokens", () => {
+    const source = readFileSync(
+      resolve(process.cwd(), "components/desktop/desktop-toolbar-prototype.tsx"),
+      "utf8",
+    )
+
+    expect(source).not.toContain("ff3b68")
+    expect(source).not.toContain("ff4f78")
+    expect(source).not.toContain("ff9ab1")
+    expect(source).not.toContain('[class*="bg-[#ff3b68]"]')
+    expect(source).toContain("DESKTOP_INSPECTOR_SELECTED_CLASS")
+    expect(source).toContain("DESKTOP_INSPECTOR_HEADER_CLASS")
+    expect(source).toContain("DESKTOP_INSPECTOR_FOOTER_CLASS")
+    expect(source).toContain("DESKTOP_INSPECTOR_RESET_CLASS")
+    expect(source).not.toContain('className="border-t border-white/[0.09] bg-black/20 p-3"')
+    expect(source).not.toContain('className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3"')
+    expect(source).not.toContain("[data-slot=\"desktop-floating-inspector\"] [class*=\"bg-white/\"]")
   })
 
   it("renders a Pixelmator-style pattern inspector without a duplicate pattern card", async () => {
@@ -638,6 +659,18 @@ describe("DesktopToolbarPrototype", () => {
     expect(inspector?.textContent).not.toContain("Pause")
     expect(inspector?.textContent).not.toContain("Frame")
     expect(inspector?.textContent).not.toContain("Opacity")
+
+    const motionToggle = getRequiredButton(surface.container, "Dot matrix motion")
+    const defaultLoader = getRequiredButton(surface.container, "Use Neon Drift motion loader")
+    const resetMotion = getRequiredButton(surface.container, "Reset Motion")
+
+    expect(motionToggle.getAttribute("aria-pressed")).toBe("false")
+    expect(motionToggle.className).toContain("desktop-inspector-control-bg")
+    expect(defaultLoader.getAttribute("aria-pressed")).toBe("true")
+    expect(defaultLoader.className).toContain("desktop-inspector-selected-bg")
+    expect(defaultLoader.className).not.toContain("ring-black")
+    expect(resetMotion.className).toContain("desktop-inspector-control-bg")
+    expect(resetMotion.className).not.toContain("rounded-full")
   })
 
   it("toggles dot matrix motion without changing the default loader", async () => {
@@ -826,17 +859,51 @@ describe("DesktopToolbarPrototype", () => {
     )
 
     expect(inspector?.querySelector('[data-slot="desktop-text-font-selector"]')).not.toBeNull()
-    expect(inspector?.querySelector('[data-slot="desktop-text-font-list"]')).toBeNull()
+    expect(inspector?.querySelector('[data-slot="desktop-text-font-listbox"]')).toBeNull()
     expect(inspector?.querySelector('[data-slot="desktop-text-alignment"]')).not.toBeNull()
+    expect(inspector?.querySelector('select[aria-label="Text preset"]')).toBeNull()
+    expect(inspector?.querySelector('select[aria-label="Text font"]')).toBeNull()
     expect(inspector?.textContent).toContain("Text")
     expect(inspector?.textContent).toContain("Preset")
     expect(inspector?.textContent).toContain("Font")
+    expect(getRequiredButton(surface.container, "Use Body text preset").getAttribute("aria-pressed")).toBe("true")
+    expect(getRequiredButton(surface.container, "Use Title text preset").getAttribute("aria-pressed")).toBe("false")
     expect(inspector?.querySelector('[data-slot="desktop-text-emphasis"]')).not.toBeNull()
     expect(inspector?.textContent).not.toContain("Type")
     expect(inspector?.textContent).toContain("Color")
     expect(inspector?.textContent).toContain("Alignment")
     expect(inspector?.textContent).toContain("Spacing")
+    expect(getRequiredInput(surface.container, "Text font letter spacing").type).toBe("range")
+    expect(getRequiredInput(surface.container, "Text font line height").type).toBe("range")
+    expect(getRequiredButton(surface.container, "Text font").className).toContain("desktop-inspector-control-bg")
+    expect(getRequiredTextarea(surface.container, "Text layer content").className).toContain("desktop-inspector-field-bg")
+    expect(getRequiredTextarea(surface.container, "Text layer content").className).not.toContain("border-white")
+    expect(getRequiredButton(surface.container, "Bold text").className).toContain("desktop-inspector-control-bg")
+    expect(getRequiredButton(surface.container, "Align text left").getAttribute("aria-pressed")).toBe("true")
+    expect(getRequiredButton(surface.container, "Align text left").className).toContain("desktop-inspector-selected-bg")
+    expect(getRequiredButton(surface.container, "Reset Text").className).toContain("desktop-inspector-control-bg")
+    expect(getRequiredButton(surface.container, "Reset Text").className).not.toContain("rounded-full")
     expect(inspector?.textContent).toContain("Reset Text")
+  })
+
+  it("updates text preset from neutral segmented buttons", async () => {
+    const surface = await renderPrototype()
+    const textButton = getRequiredToolButton(surface.container, "text")
+
+    await act(async () => {
+      textButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const titlePreset = getRequiredButton(surface.container, "Use Title text preset")
+
+    await act(async () => {
+      titlePreset.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    expect(getRequiredButton(surface.container, "Use Body text preset").getAttribute("aria-pressed")).toBe("false")
+    expect(getRequiredButton(surface.container, "Use Title text preset").getAttribute("aria-pressed")).toBe("true")
+    expect(getRequiredInput(surface.container, "Text font size").value).toBe("52")
+    expect(getRequiredInput(surface.container, "Text font line height").value).toBe("1.05")
   })
 
   it("updates text content locally", async () => {
@@ -868,13 +935,24 @@ describe("DesktopToolbarPrototype", () => {
       setTextareaValue(getRequiredTextarea(surface.container, "Text layer content"), "Keep this copy")
     })
 
-    const fontSelect = getRequiredSelect(surface.container, "Text font")
+    const fontTrigger = getRequiredButton(surface.container, "Text font")
 
     await act(async () => {
-      setSelectValue(fontSelect, "fontshare:general-sans")
+      fontTrigger.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
-    expect(getRequiredSelect(surface.container, "Text font").value).toBe("fontshare:general-sans")
+    const fontListbox = surface.container.querySelector('[data-slot="desktop-text-font-listbox"]')
+    const generalSansOption = getRequiredButton(surface.container, "Use General Sans text font")
+
+    expect(fontListbox?.getAttribute("role")).toBe("listbox")
+    expect(generalSansOption.getAttribute("role")).toBe("option")
+
+    await act(async () => {
+      generalSansOption.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    expect(getRequiredButton(surface.container, "Text font").textContent).toContain("General Sans")
+    expect(surface.container.querySelector('[data-slot="desktop-text-font-listbox"]')).toBeNull()
     expect(getRequiredTextarea(surface.container, "Text layer content").value).toBe("Keep this copy")
   })
 
@@ -969,7 +1047,11 @@ describe("DesktopToolbarPrototype", () => {
 
     await act(async () => {
       setTextareaValue(getRequiredTextarea(surface.container, "Text layer content"), "Changed")
-      setSelectValue(getRequiredSelect(surface.container, "Text font"), "fontshare:general-sans")
+      getRequiredButton(surface.container, "Text font").dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    await act(async () => {
+      getRequiredButton(surface.container, "Use General Sans text font").dispatchEvent(new MouseEvent("click", { bubbles: true }))
       getRequiredButton(surface.container, "Bold text").dispatchEvent(new MouseEvent("click", { bubbles: true }))
       getRequiredButton(surface.container, "Italic text").dispatchEvent(new MouseEvent("click", { bubbles: true }))
       getRequiredButton(surface.container, "Align text center").dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -982,7 +1064,7 @@ describe("DesktopToolbarPrototype", () => {
     })
 
     expect(getRequiredTextarea(surface.container, "Text layer content").value).toBe("Add text")
-    expect(getRequiredSelect(surface.container, "Text font").value).toBe("local:satoshi")
+    expect(getRequiredButton(surface.container, "Text font").textContent).toContain("Satoshi")
     expect(getRequiredInput(surface.container, "Text font size").value).toBe("32")
     expect(getRequiredButton(surface.container, "Bold text").getAttribute("aria-pressed")).toBe("false")
     expect(getRequiredButton(surface.container, "Italic text").getAttribute("aria-pressed")).toBe("false")
@@ -1056,16 +1138,6 @@ function getRequiredInput(container: HTMLElement, label: string) {
   return input
 }
 
-function getRequiredSelect(container: HTMLElement, label: string) {
-  const select = container.querySelector<HTMLSelectElement>(`select[aria-label="${label}"]`)
-
-  if (!select) {
-    throw new Error(`Missing select: ${label}`)
-  }
-
-  return select
-}
-
 function getRequiredTextarea(container: HTMLElement, label: string) {
   const textarea = container.querySelector<HTMLTextAreaElement>(`textarea[aria-label="${label}"]`)
 
@@ -1086,10 +1158,4 @@ function setTextareaValue(textarea: HTMLTextAreaElement, value: string) {
   const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set
   setter?.call(textarea, value)
   textarea.dispatchEvent(new Event("input", { bubbles: true }))
-}
-
-function setSelectValue(select: HTMLSelectElement, value: string) {
-  const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value")?.set
-  setter?.call(select, value)
-  select.dispatchEvent(new Event("change", { bubbles: true }))
 }

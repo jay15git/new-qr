@@ -1,16 +1,16 @@
 # Graph Report - new-qr  (2026-06-05)
 
 ## Corpus Check
-- 244 files · ~295,064 words
+- 244 files · ~294,783 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2536 nodes · 4968 edges · 140 communities (129 shown, 11 thin omitted)
+- 2536 nodes · 4968 edges · 141 communities (130 shown, 11 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8e5b29bb`
+- Built from commit: `9292523d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -148,6 +148,7 @@
 - [[_COMMUNITY_Community 136|Community 136]]
 - [[_COMMUNITY_Community 137|Community 137]]
 - [[_COMMUNITY_Community 139|Community 139]]
+- [[_COMMUNITY_Community 140|Community 140]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 84 edges
@@ -176,7 +177,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (140 total, 11 thin omitted)
+## Communities (141 total, 11 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.02
@@ -219,8 +220,8 @@ Cohesion: 0.07
 Nodes (35): anchorSquareLayerResize(), getBoundsSnapPoints(), getCombinedLayerBounds(), getCommonLayerRotation(), getDraftingCardBorder(), getDraftingCardShadow(), getLayerRotationLabel(), getLayerSizeLabel() (+27 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.10
-Nodes (31): ColorPickerContext, ColorPicker, SameColorCommitter(), ALL_FORMATS, applyComponent(), BLACK, clamp(), coerce() (+23 more)
+Cohesion: 0.12
+Nodes (17): ColorPickerContext, ColorPicker, SameColorCommitter(), ALL_FORMATS, applyComponent(), BLACK, clamp(), coerce() (+9 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.06
@@ -307,12 +308,12 @@ Cohesion: 0.07
 Nodes (27): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+19 more)
 
 ### Community 32 - "Community 32"
-Cohesion: 0.33
-Nodes (5): gamutFromFormat(), Hue, HueProps, toHsl, toHsv
+Cohesion: 0.15
+Nodes (18): ColorPickerState, ChannelDescriptor, ColorFormat, ContrastResult, Gamut, GamutInfo, OklchColor, Area (+10 more)
 
 ### Community 33 - "Community 33"
-Cohesion: 0.15
-Nodes (20): ALPHA_DESCRIPTOR(), ChannelDescriptor, clamp(), colorChannels(), floatChannel(), fromCulori(), intChannel(), oklchObj() (+12 more)
+Cohesion: 0.25
+Nodes (16): ALPHA_DESCRIPTOR(), clamp(), colorChannels(), floatChannel(), fromCulori(), intChannel(), oklchObj(), setColorChannel() (+8 more)
 
 ### Community 34 - "Community 34"
 Cohesion: 0.13
@@ -387,8 +388,8 @@ Cohesion: 0.11
 Nodes (17): activeOwner, annotationArtifacts, arrivedVariants, checkpointRevision, deliveryLease, diagnostics, expectedVariants, fallbackMode (+9 more)
 
 ### Community 53 - "Community 53"
-Cohesion: 0.08
-Nodes (16): useColorPickerContext(), Alpha, AlphaProps, ContrastMetric, ContrastReadout, ContrastReadoutProps, DEFAULT_METRICS, PassRow (+8 more)
+Cohesion: 0.11
+Nodes (16): useColorPickerContext(), gamutFromFormat(), Alpha, AlphaProps, EyeDropper, EyeDropperLike, EyeDropperProps, EyeDropperWindow (+8 more)
 
 ### Community 54 - "Community 54"
 Cohesion: 0.15
@@ -666,6 +667,10 @@ Nodes (8): createDotMatrixLoaderTracks(), createQuietCellAnimation(), getDotMatr
 Cohesion: 0.29
 Nodes (7): alignCornerGradientDirection(), createBackgroundShapeGradient(), getBackgroundShapeFill(), getDescendantElements(), getElementRegion(), getLinearGradientEndpoints(), getNumericAttribute()
 
+### Community 140 - "Community 140"
+Cohesion: 0.15
+Nodes (5): ContrastMetric, ContrastReadout, ContrastReadoutProps, DEFAULT_METRICS, PassRow
+
 ## Knowledge Gaps
 - **775 isolated node(s):** `SessionStart`, `PreToolUse`, `files`, `insertBefore`, `commentSyntax` (+770 more)
   These have ≤1 connection - possible missing edges or undocumented components.
@@ -674,8 +679,8 @@ Nodes (7): alignCornerGradientDirection(), createBackgroundShapeGradient(), getB
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `Community 65` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 6`, `Community 7`, `Community 9`, `Community 10`, `Community 11`, `Community 138`, `Community 13`, `Community 17`, `Community 20`, `Community 21`, `Community 26`, `Community 32`, `Community 33`, `Community 38`, `Community 39`, `Community 40`, `Community 41`, `Community 42`, `Community 43`, `Community 49`, `Community 50`, `Community 53`, `Community 56`, `Community 58`, `Community 60`, `Community 61`, `Community 74`, `Community 75`, `Community 76`, `Community 82`, `Community 83`, `Community 91`, `Community 94`, `Community 109`, `Community 119`?**
-  _High betweenness centrality (0.078) - this node is a cross-community bridge._
+- **Why does `cn()` connect `Community 65` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 6`, `Community 7`, `Community 9`, `Community 10`, `Community 11`, `Community 140`, `Community 13`, `Community 138`, `Community 17`, `Community 20`, `Community 21`, `Community 26`, `Community 32`, `Community 38`, `Community 39`, `Community 40`, `Community 41`, `Community 42`, `Community 43`, `Community 49`, `Community 50`, `Community 53`, `Community 56`, `Community 58`, `Community 60`, `Community 61`, `Community 74`, `Community 75`, `Community 76`, `Community 82`, `Community 83`, `Community 91`, `Community 94`, `Community 109`, `Community 119`?**
+  _High betweenness centrality (0.076) - this node is a cross-community bridge._
 - **Why does `QrStudioState` connect `Community 62` to `Community 1`, `Community 2`, `Community 4`, `Community 37`, `Community 70`, `Community 38`, `Community 8`, `Community 9`, `Community 42`, `Community 13`, `Community 79`, `Community 16`, `Community 54`, `Community 24`, `Community 25`, `Community 30`?**
   _High betweenness centrality (0.017) - this node is a cross-community bridge._
 - **Why does `QrInputType` connect `Community 6` to `Community 0`, `Community 1`, `Community 3`, `Community 5`, `Community 22`, `Community 30`?**

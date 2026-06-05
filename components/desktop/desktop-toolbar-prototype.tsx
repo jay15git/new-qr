@@ -837,12 +837,28 @@ const DESKTOP_MOTION_COLOR_SWATCHES: Record<DesktopMotionSettings["colorPreset"]
   aurora: ["#67e8f9", "#a78bfa", "#f0abfc"],
   fire: ["#f97316", "#ef4444", "#facc15"],
   mint: ["#34d399", "#6ee7b7", "#d9f99d"],
-  neon: ["#22d3ee", "#a855f7", "#f472b6"],
+  neon: ["#22d3ee", "#a855f7", "#f8fafc"],
   ocean: ["#38bdf8", "#2563eb", "#0f172a"],
-  prism: ["#f43f5e", "#eab308", "#22c55e"],
-  sunset: ["#fb7185", "#f97316", "#fde047"],
+  prism: ["#64748b", "#eab308", "#22c55e"],
+  sunset: ["#f59e0b", "#f97316", "#fde047"],
   theme: ["#22d3ee", "#22d3ee", "#22d3ee"],
 }
+
+const DESKTOP_INSPECTOR_SECTION_CLASS = "rounded-[10px] bg-[var(--desktop-inspector-section-bg)] p-3"
+const DESKTOP_INSPECTOR_CONTROL_CLASS =
+  "rounded-[6px] bg-[var(--desktop-inspector-control-bg)] text-white/58 transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
+const DESKTOP_INSPECTOR_SELECTED_CLASS =
+  "bg-[var(--desktop-inspector-selected-bg)] text-[var(--desktop-inspector-selected-fg)] hover:bg-[var(--desktop-inspector-selected-bg)] hover:text-[var(--desktop-inspector-selected-fg)]"
+const DESKTOP_INSPECTOR_INPUT_CLASS =
+  "bg-[var(--desktop-inspector-field-bg)] text-white outline-none placeholder:text-white/32 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
+const DESKTOP_INSPECTOR_FOCUS_CLASS =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
+const DESKTOP_INSPECTOR_HEADER_CLASS =
+  "flex min-w-0 items-center justify-center bg-[var(--desktop-inspector-header-bg)] px-4 py-3.5 text-center"
+const DESKTOP_INSPECTOR_FOOTER_CLASS =
+  "bg-[var(--desktop-inspector-footer-bg)] p-3"
+const DESKTOP_INSPECTOR_RESET_CLASS =
+  "flex h-9 w-full items-center justify-center gap-2 rounded-[6px] bg-[var(--desktop-inspector-control-bg)] px-3 text-[12px] font-semibold text-white/82 transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
 
 export function DesktopToolbarPrototype({
   controller,
@@ -1265,26 +1281,14 @@ function DesktopThemeStyles() {
         color: rgba(15, 23, 42, 0.96) !important;
       }
 
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [class*="border-white"],
       [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] [class*="border-white"] {
         border-color: rgba(15, 23, 42, 0.11) !important;
-      }
-
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [class*="bg-white/"],
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [class*="bg-black/"] {
-        background-color: rgba(255, 255, 255, 0.48) !important;
       }
 
       [data-slot="desktop-style-preview-surface"] {
         background: rgba(255, 255, 255, 0.045) !important;
         border-color: rgba(255, 255, 255, 0.1) !important;
         box-shadow: none !important;
-      }
-
-      [data-slot="desktop-floating-inspector"] button[data-desktop-preview-option="true"][aria-pressed="true"] {
-        background-color: rgba(255, 255, 255, 0.08) !important;
-        border-color: #fff !important;
-        color: white !important;
       }
 
       [data-slot="desktop-floating-inspector"] [data-desktop-shape-option-preview="true"] {
@@ -1319,11 +1323,46 @@ function DesktopThemeStyles() {
         color: rgba(15, 23, 42, 0.92) !important;
       }
 
+      [data-slot="desktop-floating-inspector"] {
+        --desktop-inspector-section-bg: rgba(255, 255, 255, 0.045);
+        --desktop-inspector-header-bg: rgba(255, 255, 255, 0.025);
+        --desktop-inspector-footer-bg: rgba(0, 0, 0, 0.18);
+        --desktop-inspector-control-bg: rgba(0, 0, 0, 0.22);
+        --desktop-inspector-control-hover-bg: rgba(255, 255, 255, 0.09);
+        --desktop-inspector-selected-bg: #f8fafc;
+        --desktop-inspector-selected-fg: #111827;
+        --desktop-inspector-field-bg: rgba(0, 0, 0, 0.22);
+        --desktop-inspector-focus: rgba(255, 255, 255, 0.36);
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] {
+        --desktop-inspector-section-bg: rgba(15, 23, 42, 0.055);
+        --desktop-inspector-header-bg: rgba(15, 23, 42, 0.025);
+        --desktop-inspector-footer-bg: rgba(15, 23, 42, 0.045);
+        --desktop-inspector-control-bg: rgba(15, 23, 42, 0.065);
+        --desktop-inspector-control-hover-bg: rgba(15, 23, 42, 0.1);
+        --desktop-inspector-selected-bg: #111827;
+        --desktop-inspector-selected-fg: #ffffff;
+        --desktop-inspector-field-bg: rgba(255, 255, 255, 0.62);
+        --desktop-inspector-focus: rgba(15, 23, 42, 0.36);
+      }
+
+      [data-slot="desktop-floating-inspector"] :is(input, textarea, select) {
+        background-color: var(--desktop-inspector-field-bg) !important;
+        border-color: transparent !important;
+        color: currentColor !important;
+        box-shadow: none !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] :is(input, textarea, select):focus,
+      [data-slot="desktop-floating-inspector"] :is(input, textarea, select):focus-visible {
+        border-color: transparent !important;
+        box-shadow: inset 0 0 0 1px var(--desktop-inspector-focus) !important;
+      }
+
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] input,
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] textarea,
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] select {
-        background-color: rgba(255, 255, 255, 0.68) !important;
-        border-color: rgba(15, 23, 42, 0.12) !important;
         color: rgba(15, 23, 42, 0.92) !important;
       }
 
@@ -1332,20 +1371,19 @@ function DesktopThemeStyles() {
         color: rgba(15, 23, 42, 0.36) !important;
       }
 
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]) {
-        color: white !important;
+      [data-slot="desktop-floating-inspector"] button {
+        border-color: transparent !important;
       }
 
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [class*="bg-[#ff3b68]"],
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[aria-pressed="true"] {
-        background-color: #ff3b68 !important;
-        border-color: rgba(255, 59, 104, 0.72) !important;
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]) {
+        background-color: var(--desktop-inspector-selected-bg) !important;
+        border-color: transparent !important;
+        color: var(--desktop-inspector-selected-fg) !important;
+        box-shadow: none !important;
       }
 
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[data-desktop-preview-option="true"][aria-pressed="true"] {
-        background-color: rgba(255, 255, 255, 0.48) !important;
-        border-color: #000 !important;
-        color: rgba(15, 23, 42, 0.92) !important;
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]) :is(span, svg) {
+        color: var(--desktop-inspector-selected-fg) !important;
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[data-desktop-content-type-option="true"] {
@@ -1359,9 +1397,14 @@ function DesktopThemeStyles() {
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[data-desktop-content-type-option="true"][aria-pressed="true"] {
-        background-color: rgba(255, 255, 255, 0.48) !important;
-        border-color: rgba(15, 23, 42, 0.46) !important;
-        color: rgba(15, 23, 42, 0.92) !important;
+        background-color: var(--desktop-inspector-selected-bg) !important;
+        border-color: transparent !important;
+        color: var(--desktop-inspector-selected-fg) !important;
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-export-download"] {
+        background-color: #111827 !important;
+        color: #ffffff !important;
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-toolbar-separator"] {
@@ -1379,18 +1422,18 @@ function DesktopThemeStyles() {
       [data-slot="desktop-floating-inspector"] .scroll-fade-effect-y > section,
       [data-slot="desktop-floating-inspector"] .scroll-fade-effect-y > div,
       [data-slot="desktop-floating-inspector"] .scroll-fade-effect-y > details {
-        background: transparent !important;
+        background: var(--desktop-inspector-section-bg) !important;
         border-width: 0 !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-        border-radius: 0 !important;
+        border-top-width: 0 !important;
+        border-radius: 10px !important;
         box-shadow: none !important;
-        margin-top: 0 !important;
-        padding: 12px 0 !important;
+        margin-top: 12px !important;
+        padding: 12px !important;
       }
 
       [data-slot="desktop-floating-inspector"] .scroll-fade-effect-y > :first-child {
         border-top-width: 0 !important;
-        padding-top: 0 !important;
+        margin-top: 0 !important;
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] {
@@ -1402,7 +1445,7 @@ function DesktopThemeStyles() {
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] .scroll-fade-effect-y > section,
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] .scroll-fade-effect-y > div,
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] .scroll-fade-effect-y > details {
-        background: transparent !important;
+        background: var(--desktop-inspector-section-bg) !important;
         border-top-color: rgba(15, 23, 42, 0.1) !important;
       }
 
@@ -1445,7 +1488,7 @@ function DesktopInspectorHeader({
   title: string
 }) {
   return (
-    <div className="flex min-w-0 items-center justify-center border-b border-white/[0.09] px-4 py-3.5 text-center">
+    <div className={DESKTOP_INSPECTOR_HEADER_CLASS}>
       <h2 className="truncate text-[15px] font-semibold leading-5 text-white">{title}</h2>
     </div>
   )
@@ -1459,10 +1502,10 @@ function DesktopInspectorFooter({
   onReset: () => void
 }) {
   return (
-    <div className="border-t border-white/[0.09] bg-black/20 p-3">
+    <div className={DESKTOP_INSPECTOR_FOOTER_CLASS}>
       <button
         aria-label={label}
-        className="flex h-9 w-full items-center justify-center gap-2 rounded-full bg-white/[0.09] px-3 text-[12px] font-semibold text-white/82 transition hover:bg-white/[0.13] hover:text-white"
+        className={DESKTOP_INSPECTOR_RESET_CLASS}
         type="button"
         onClick={onReset}
       >
@@ -1502,7 +1545,7 @@ function DesktopLogoInspector({
       <DesktopInspectorHeader title="Logo" />
 
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
-        <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Source</p>
           <div className="grid grid-cols-4 gap-1.5" data-slot="desktop-logo-source-mode">
             {DESKTOP_LOGO_SOURCE_OPTIONS.map((option) => (
@@ -1511,9 +1554,10 @@ function DesktopLogoInspector({
                 aria-label={`Use ${option.label} logo source`}
                 aria-pressed={settings.sourceMode === option.value}
                 className={cn(
-                  "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-1.5 text-[10px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
+                  "h-8 px-1.5 text-[10px] font-semibold",
+                  DESKTOP_INSPECTOR_CONTROL_CLASS,
                   settings.sourceMode === option.value &&
-                    "border-[#ff3b68]/70 bg-[#ff3b68] text-white",
+                    DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
                 onClick={() => onLogoSettingsChange({ sourceMode: option.value })}
@@ -1525,12 +1569,15 @@ function DesktopLogoInspector({
         </section>
 
         {settings.sourceMode === "brand" ? (
-          <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-2.5">
+          <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
             <div className="flex min-w-0 items-center gap-2">
               <div className="relative min-w-0 flex-1">
                 <select
                   aria-label="Logo icon category"
-                  className="h-8 w-full appearance-none rounded-[6px] border border-white/[0.1] bg-white/[0.08] px-2.5 pr-7 text-[12px] font-semibold text-white outline-none transition focus:border-white/45"
+                  className={cn(
+                    "h-8 w-full appearance-none rounded-[6px] px-2.5 pr-7 text-[12px] font-semibold transition",
+                    DESKTOP_INSPECTOR_INPUT_CLASS,
+                  )}
                   value={category}
                   onChange={(event) => setCategory(event.currentTarget.value as BrandIconCategory | "all")}
                 >
@@ -1546,7 +1593,10 @@ function DesktopLogoInspector({
                 <SearchIcon className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-white/45" />
                 <input
                   aria-label="Search logo icons"
-                  className="h-full w-full rounded-[6px] border border-white/[0.1] bg-white/[0.08] pl-7 pr-2 text-[12px] text-white outline-none placeholder:text-white/35 focus:border-white/45"
+                  className={cn(
+                    "h-full w-full rounded-[6px] pl-7 pr-2 text-[12px]",
+                    DESKTOP_INSPECTOR_INPUT_CLASS,
+                  )}
                   placeholder="Search"
                   value={query}
                   onChange={(event) => setQuery(event.currentTarget.value)}
@@ -1572,7 +1622,7 @@ function DesktopLogoInspector({
         ) : null}
 
         {settings.sourceMode === "upload" || settings.sourceMode === "url" ? (
-          <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+          <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
             <p className="mb-2 truncate text-[12px] font-semibold text-white">Upload</p>
             <div className="grid grid-cols-2 gap-1.5" data-slot="desktop-logo-upload-mode">
               {DESKTOP_ASSET_SOURCE_OPTIONS.map((option) => (
@@ -1581,9 +1631,10 @@ function DesktopLogoInspector({
                   aria-label={`Use ${option.label} logo asset`}
                   aria-pressed={settings.uploadMode === option.value}
                   className={cn(
-                    "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
+                    "h-8 px-2 text-[11px] font-semibold",
+                    DESKTOP_INSPECTOR_CONTROL_CLASS,
                     settings.uploadMode === option.value &&
-                      "border-[#ff3b68]/70 bg-[#ff3b68] text-white",
+                      DESKTOP_INSPECTOR_SELECTED_CLASS,
                   )}
                   type="button"
                   onClick={() => onLogoSettingsChange({ uploadMode: option.value })}
@@ -1594,7 +1645,7 @@ function DesktopLogoInspector({
             </div>
             <input
               aria-label="Remote logo URL"
-              className="mt-2 h-9 w-full rounded-[7px] border border-white/[0.09] bg-black/22 px-3 text-[12px] text-white outline-none placeholder:text-white/32 focus:border-white/45"
+              className={cn("mt-2 h-9 w-full rounded-[7px] px-3 text-[12px]", DESKTOP_INSPECTOR_INPUT_CLASS)}
               placeholder="https://example.com/logo.png"
               value={settings.remoteUrl}
               onChange={(event) => onLogoSettingsChange({ remoteUrl: event.currentTarget.value })}
@@ -1603,7 +1654,7 @@ function DesktopLogoInspector({
         ) : null}
 
         {settings.sourceMode === "brand" ? (
-          <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+          <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
             <div className="mb-3 flex min-w-0 items-center gap-3">
               <DesktopCornerColorPreview
                 gradient={settings.gradient}
@@ -1624,7 +1675,7 @@ function DesktopLogoInspector({
                   className={cn(
                     "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
                     settings.colorMode === option.value &&
-                      "border-[#ff3b68]/70 bg-[#ff3b68] text-white",
+                      DESKTOP_INSPECTOR_SELECTED_CLASS,
                   )}
                   type="button"
                   onClick={() => onLogoSettingsChange({ colorMode: option.value })}
@@ -1667,7 +1718,7 @@ function DesktopLogoInspector({
         ) : null}
 
         {settings.sourceMode !== "none" ? (
-          <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+          <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
             <p className="mb-3 truncate text-[12px] font-semibold text-white">Size</p>
             <DesktopMotionSliderRow
               label="Logo size"
@@ -1722,7 +1773,7 @@ function DesktopBrandIconButton({
       aria-pressed={selected}
       className={cn(
         "relative grid h-12 min-w-0 place-items-center rounded-[7px] border border-white/[0.08] bg-white/[0.055] text-white/70 transition hover:bg-white/[0.1] hover:text-white",
-        selected && "border-[#ff3b68]/75 bg-[#ff3b68]/18 text-white shadow-[0_10px_24px_rgba(255,59,104,0.16)]",
+        selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
       )}
       type="button"
       onClick={onClick}
@@ -1836,7 +1887,7 @@ function DesktopCornersInspector({
               }
             />
 
-            <div className="mt-3 flex items-center justify-between gap-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] px-3 py-2.5">
+            <div className={cn("mt-3 flex items-center justify-between gap-3 px-3 py-2.5", DESKTOP_INSPECTOR_SECTION_CLASS)}>
               <div className="flex min-w-0 items-center gap-2">
                 <ShieldCheckIcon className="size-4 shrink-0 text-white/55" />
                 <div className="min-w-0">
@@ -1853,17 +1904,7 @@ function DesktopCornersInspector({
         {/* impeccable-variants-end a34b4748 */}
       </div>
 
-      <div className="border-t border-white/[0.09] bg-black/20 p-3">
-        <button
-          aria-label="Reset Corners"
-          className="flex h-9 w-full items-center justify-center gap-2 rounded-full bg-white/[0.09] px-3 text-[12px] font-semibold text-white/82 transition hover:bg-white/[0.13] hover:text-white"
-          type="button"
-          onClick={onCornersReset}
-        >
-          <RotateCcwIcon className="size-3.5" />
-          Reset Corners
-        </button>
-      </div>
+      <DesktopInspectorFooter label="Reset Corners" onReset={onCornersReset} />
     </div>
   )
 }
@@ -1893,7 +1934,7 @@ function DesktopCornerColorSection({
 
   return (
     <section
-      className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3"
+      className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}
       data-slot={dataSlot}
     >
       <div className="mb-3 flex min-w-0 items-center gap-3">
@@ -1916,7 +1957,7 @@ function DesktopCornerColorSection({
             aria-pressed={mode === option.value}
             className={cn(
               "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
-              mode === option.value && "border-[#ff3b68]/70 bg-[#ff3b68] text-white",
+              mode === option.value && DESKTOP_INSPECTOR_SELECTED_CLASS,
             )}
             type="button"
             onClick={() => onModeChange(option.value)}
@@ -2107,7 +2148,7 @@ function DesktopShapeInspector({
           </div>
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <div className="mb-3 flex min-w-0 items-center gap-3">
             <DesktopShapePreview
               label={selectedShapeLabel}
@@ -2129,7 +2170,7 @@ function DesktopShapeInspector({
                 className={cn(
                   "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
                   settings.shapeColorMode === mode.value &&
-                    "border-[#ff3b68]/70 bg-[#ff3b68] text-white",
+                    DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
                 onClick={() => onShapeSettingsChange({ shapeColorMode: mode.value })}
@@ -2181,7 +2222,7 @@ function DesktopShapeInspector({
           ) : null}
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-3 truncate text-[12px] font-semibold text-white">Frame</p>
           <div className="grid gap-2">
             <DesktopMotionToggleRow
@@ -2213,7 +2254,7 @@ function DesktopShapeInspector({
           </div>
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-3 truncate text-[12px] font-semibold text-white">Fill</p>
           <DesktopColorInputRow
             label="Shape fill color"
@@ -2239,7 +2280,7 @@ function DesktopShapeInspector({
           </div>
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-3 truncate text-[12px] font-semibold text-white">Image</p>
           <div className="grid grid-cols-2 gap-1.5" data-slot="desktop-shape-image-source">
             {DESKTOP_ASSET_SOURCE_OPTIONS.map((option) => (
@@ -2248,9 +2289,10 @@ function DesktopShapeInspector({
                 aria-label={`Use ${option.label} shape image source`}
                 aria-pressed={settings.cardImageSourceMode === option.value}
                 className={cn(
-                  "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
+                  "h-8 px-2 text-[11px] font-semibold",
+                  DESKTOP_INSPECTOR_CONTROL_CLASS,
                   settings.cardImageSourceMode === option.value &&
-                    "border-[#ff3b68]/70 bg-[#ff3b68] text-white",
+                    DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
                 onClick={() => onShapeSettingsChange({ cardImageSourceMode: option.value })}
@@ -2261,7 +2303,7 @@ function DesktopShapeInspector({
           </div>
           <input
             aria-label="Shape image URL"
-            className="mt-2 h-9 w-full rounded-[7px] border border-white/[0.09] bg-black/22 px-3 text-[12px] text-white outline-none placeholder:text-white/32 focus:border-white/45"
+            className={cn("mt-2 h-9 w-full rounded-[7px] px-3 text-[12px]", DESKTOP_INSPECTOR_INPUT_CLASS)}
             placeholder="https://example.com/shape.png"
             value={settings.cardImageUrl}
             onChange={(event) => onShapeSettingsChange({ cardImageUrl: event.currentTarget.value })}
@@ -2273,9 +2315,10 @@ function DesktopShapeInspector({
                 aria-label={`Use ${fit} shape image fit`}
                 aria-pressed={settings.cardImageFit === fit}
                 className={cn(
-                  "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold capitalize text-white/58 transition hover:bg-white/[0.09] hover:text-white",
+                  "h-8 px-2 text-[11px] font-semibold capitalize",
+                  DESKTOP_INSPECTOR_CONTROL_CLASS,
                   settings.cardImageFit === fit &&
-                    "border-[#ff3b68]/70 bg-[#ff3b68] text-white",
+                    DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
                 onClick={() => onShapeSettingsChange({ cardImageFit: fit })}
@@ -2296,7 +2339,7 @@ function DesktopShapeInspector({
           </div>
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-3 truncate text-[12px] font-semibold text-white">Border</p>
           <div className="grid gap-2">
             <DesktopColorInputRow
@@ -2321,7 +2364,7 @@ function DesktopShapeInspector({
           </div>
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-3 truncate text-[12px] font-semibold text-white">Shape Details</p>
           <div className="grid gap-2">
             <DesktopNumberRow label="Shape padding" max={192} min={0} value={settings.shapePadding} onChange={(shapePadding) => onShapeSettingsChange({ shapePadding })} />
@@ -2337,17 +2380,7 @@ function DesktopShapeInspector({
         </section>
       </div>
 
-      <div className="border-t border-white/[0.09] bg-black/20 p-3">
-        <button
-          aria-label="Reset Shape"
-          className="flex h-9 w-full items-center justify-center gap-2 rounded-full bg-white/[0.09] px-3 text-[12px] font-semibold text-white/82 transition hover:bg-white/[0.13] hover:text-white"
-          type="button"
-          onClick={onShapeReset}
-        >
-          <RotateCcwIcon className="size-3.5" />
-          Reset Shape
-        </button>
-      </div>
+      <DesktopInspectorFooter label="Reset Shape" onReset={onShapeReset} />
     </div>
   )
 }
@@ -2373,7 +2406,7 @@ function DesktopShapePresetButton({
         aria-label={`Use ${label} shape`}
         aria-pressed={selected}
         data-desktop-preview-option="true"
-        className="relative aspect-square w-full min-w-0 rounded-[7px] p-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
+        className={cn("relative aspect-square w-full min-w-0 rounded-[7px] p-0 transition", DESKTOP_INSPECTOR_FOCUS_CLASS)}
         type="button"
         onClick={onClick}
       >
@@ -2488,7 +2521,7 @@ function DesktopMotionInspector({
       <DesktopInspectorHeader title="Motion" />
 
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
-        <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <DesktopMotionToggleRow
             checked={settings.enabled}
             label="Dot matrix motion"
@@ -2496,7 +2529,7 @@ function DesktopMotionInspector({
           />
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-2.5">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <div className="mb-2 min-w-0">
             <p className="truncate text-[12px] font-semibold text-white">Loader</p>
           </div>
@@ -2516,7 +2549,7 @@ function DesktopMotionInspector({
           </div>
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-3 truncate text-[12px] font-semibold text-white">Timing</p>
           <div className="grid gap-3">
             <DesktopMotionSliderRow
@@ -2547,7 +2580,7 @@ function DesktopMotionInspector({
           </div>
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-3 truncate text-[12px] font-semibold text-white">Loader Color</p>
           <div className="grid grid-cols-2 gap-1.5" data-slot="desktop-motion-color-presets">
             {QR_DOT_MATRIX_COLOR_PRESET_OPTIONS.map((preset) => (
@@ -2588,7 +2621,7 @@ function DesktopMotionInspector({
           ) : null}
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-3 truncate text-[12px] font-semibold text-white">Output</p>
           <div className="grid gap-2">
             <DesktopMotionToggleRow
@@ -2605,17 +2638,7 @@ function DesktopMotionInspector({
         </section>
       </div>
 
-      <div className="border-t border-white/[0.09] bg-black/20 p-3">
-        <button
-          aria-label="Reset Motion"
-          className="flex h-9 w-full items-center justify-center gap-2 rounded-full bg-white/[0.09] px-3 text-[12px] font-semibold text-white/82 transition hover:bg-white/[0.13] hover:text-white"
-          type="button"
-          onClick={onMotionReset}
-        >
-          <RotateCcwIcon className="size-3.5" />
-          Reset Motion
-        </button>
-      </div>
+      <DesktopInspectorFooter label="Reset Motion" onReset={onMotionReset} />
     </div>
   )
 }
@@ -2633,7 +2656,11 @@ function DesktopMotionToggleRow({
     <button
       aria-label={label}
       aria-pressed={checked}
-      className="flex w-full min-w-0 items-center justify-between gap-3 rounded-[8px] bg-black/20 px-3 py-2.5 text-left transition hover:bg-white/[0.08]"
+      className={cn(
+        "flex w-full min-w-0 items-center justify-between gap-3 px-3 py-2.5 text-left",
+        DESKTOP_INSPECTOR_CONTROL_CLASS,
+        checked && DESKTOP_INSPECTOR_SELECTED_CLASS,
+      )}
       type="button"
       onClick={() => onChange(!checked)}
     >
@@ -2643,13 +2670,13 @@ function DesktopMotionToggleRow({
       <span
         aria-hidden="true"
         className={cn(
-          "relative h-5 w-9 shrink-0 rounded-full border border-white/[0.12] bg-white/[0.08] transition",
-          checked && "border-[#ff3b68]/75 bg-[#ff3b68]",
+          "relative h-5 w-9 shrink-0 rounded-full bg-white/[0.12] transition",
+          checked && "bg-black/18",
         )}
       >
         <span
           className={cn(
-            "absolute left-0.5 top-0.5 size-4 rounded-full bg-white shadow transition-transform",
+            "absolute left-0.5 top-0.5 size-4 rounded-full bg-white transition-transform",
             checked && "translate-x-4",
           )}
         />
@@ -2676,7 +2703,7 @@ function DesktopMotionSliderRow({
   valueLabel: string
 }) {
   return (
-    <label className="grid min-w-0 gap-2 rounded-[8px] bg-black/20 px-3 py-2.5">
+    <label className={cn("grid min-w-0 gap-2 px-3 py-2.5", DESKTOP_INSPECTOR_CONTROL_CLASS)}>
       <span className="flex min-w-0 items-center justify-between gap-3">
         <span className="truncate text-[12px] font-semibold text-white/74">{label}</span>
         <span className="shrink-0 rounded-full bg-white/[0.08] px-2 py-0.5 text-[10px] font-bold text-white/62">
@@ -2685,7 +2712,7 @@ function DesktopMotionSliderRow({
       </span>
       <input
         aria-label={`Motion ${label.toLowerCase()}`}
-        className="h-1.5 w-full accent-[#ff3b68]"
+        className="h-1.5 w-full accent-white"
         max={max}
         min={min}
         step={step}
@@ -2712,8 +2739,9 @@ function DesktopMotionLoaderButton({
       aria-pressed={selected}
       data-desktop-preview-option="true"
       className={cn(
-        "relative h-10 min-w-0 rounded-[7px] border border-white/[0.08] bg-white/[0.055] px-2.5 text-left transition hover:bg-white/[0.1]",
-        selected && "border-black bg-white/[0.08] ring-1 ring-black/70",
+        "relative h-10 min-w-0 px-2.5 text-left",
+        DESKTOP_INSPECTOR_CONTROL_CLASS,
+        selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
       )}
       type="button"
       onClick={onClick}
@@ -2742,8 +2770,9 @@ function DesktopMotionColorPresetButton({
       aria-pressed={selected}
       data-desktop-preview-option="true"
       className={cn(
-        "relative flex h-9 min-w-0 items-center gap-2 rounded-[7px] border border-white/[0.08] bg-white/[0.055] px-2 text-left transition hover:bg-white/[0.1]",
-        selected && "border-[#ff3b68]/75 bg-[#ff3b68]/18 shadow-[0_10px_24px_rgba(255,59,104,0.16)]",
+        "relative flex h-9 min-w-0 items-center gap-2 px-2 text-left",
+        DESKTOP_INSPECTOR_CONTROL_CLASS,
+        selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
       )}
       type="button"
       onClick={onClick}
@@ -2824,7 +2853,7 @@ function DesktopContentInspector({
                 <DropdownMenuTrigger asChild>
                   <button
                     aria-label="Filter QR types"
-                    className="flex h-full min-w-[116px] max-w-[132px] shrink-0 items-center justify-between gap-2 border-r border-white/[0.09] bg-black/10 px-2.5 text-[12px] font-semibold text-white outline-none transition hover:bg-white/[0.08] focus-visible:bg-white/[0.1]"
+                    className="flex h-full min-w-[116px] max-w-[132px] shrink-0 items-center justify-between gap-2 bg-black/10 px-2.5 text-[12px] font-semibold text-white outline-none transition hover:bg-white/[0.08] focus-visible:bg-white/[0.1]"
                     data-slot="desktop-content-type-filter-trigger"
                     type="button"
                   >
@@ -2848,7 +2877,7 @@ function DesktopContentInspector({
                     {DESKTOP_CONTENT_FILTER_OPTIONS.map((collection) => (
                       <DropdownMenuRadioItem
                         key={collection.id}
-                        className="h-8 rounded-[6px] px-2 text-[12px] font-semibold text-white/72 focus:bg-white/[0.1] focus:text-white data-[state=checked]:bg-[#ff3b68] data-[state=checked]:text-white"
+                        className="h-8 rounded-[6px] px-2 text-[12px] font-semibold text-white/72 focus:bg-white/[0.1] focus:text-white data-[state=checked]:bg-white data-[state=checked]:text-neutral-950"
                         value={collection.id}
                       >
                         {collection.label}
@@ -2883,8 +2912,8 @@ function DesktopContentInspector({
                 aria-label={`Use ${option.label} content`}
                 aria-pressed={isSelected}
                 className={cn(
-                  "relative flex h-[54px] min-w-0 flex-col items-center justify-center gap-1 rounded-[7px] border-2 border-transparent bg-white/[0.055] px-1 text-[10px] font-semibold text-white/62 transition hover:bg-white/[0.1] hover:text-white",
-                  isSelected && "border-white/55 bg-white/[0.08] text-white",
+                  "relative flex h-[54px] min-w-0 flex-col items-center justify-center gap-1 rounded-[7px] bg-white/[0.055] px-1 text-[10px] font-semibold text-white/62 transition hover:bg-white/[0.1] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35",
+                  isSelected && DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 data-desktop-content-type-option="true"
                 type="button"
@@ -2903,13 +2932,13 @@ function DesktopContentInspector({
           </div>
         </div>
 
-        <div className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] px-3 py-2.5">
+        <div className={cn("mt-3 px-3 py-2.5", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <div className="min-w-0">
             <p className="truncate text-[12px] font-semibold text-white">{activeOption.label}</p>
           </div>
         </div>
 
-        <div className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045]">
+        <div className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <DesktopContentFields
             contentType={contentType}
             contentValues={contentValues}
@@ -2918,7 +2947,7 @@ function DesktopContentInspector({
           />
         </div>
 
-        <details className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] px-3 py-2.5">
+        <details className={cn("mt-3 px-3 py-2.5", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <summary className="cursor-pointer select-none text-[12px] font-semibold text-white">
             Encoded value
           </summary>
@@ -2928,16 +2957,7 @@ function DesktopContentInspector({
         </details>
       </div>
 
-      <div className="border-t border-white/[0.09] bg-black/20 p-3">
-        <button
-          className="flex h-9 w-full items-center justify-center gap-2 rounded-full bg-white/[0.09] px-3 text-[12px] font-semibold text-white/82 transition hover:bg-white/[0.13] hover:text-white"
-          type="button"
-          onClick={onContentReset}
-        >
-          <RotateCcwIcon className="size-3.5" />
-          Reset Content
-        </button>
-      </div>
+      <DesktopInspectorFooter label="Reset Content" onReset={onContentReset} />
     </div>
   )
 }
@@ -2980,7 +3000,7 @@ function DesktopPatternInspector({
           </div>
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <div className="mb-3 flex min-w-0 items-center gap-3">
             <DesktopDotsColorPreview settings={settings} className="size-12 shrink-0 rounded-[8px]" />
             <div className="min-w-0 flex-1">
@@ -2996,7 +3016,7 @@ function DesktopPatternInspector({
                 className={cn(
                   "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
                   settings.dotsColorMode === mode.value &&
-                    "border-[#ff3b68]/70 bg-[#ff3b68] text-white",
+                    DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
                 onClick={() => onPatternSettingsChange({ dotsColorMode: mode.value })}
@@ -3071,7 +3091,7 @@ function DesktopPatternInspector({
           ) : null}
         </section>
 
-        <div className="mt-3 flex items-center justify-between gap-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] px-3 py-2.5">
+        <div className={cn("mt-3 flex items-center justify-between gap-3 px-3 py-2.5", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <div className="flex min-w-0 items-center gap-2">
             <ShieldCheckIcon className="size-4 shrink-0 text-white/55" />
             <div className="min-w-0">
@@ -3084,16 +3104,7 @@ function DesktopPatternInspector({
         </div>
       </div>
 
-      <div className="border-t border-white/[0.09] bg-black/20 p-3">
-        <button
-          className="flex h-9 w-full items-center justify-center gap-2 rounded-full bg-white/[0.09] px-3 text-[12px] font-semibold text-white/82 transition hover:bg-white/[0.13] hover:text-white"
-          type="button"
-          onClick={onPatternReset}
-        >
-          <RotateCcwIcon className="size-3.5" />
-          Reset Pattern
-        </button>
-      </div>
+      <DesktopInspectorFooter label="Reset Pattern" onReset={onPatternReset} />
     </div>
   )
 }
@@ -3208,7 +3219,7 @@ function DesktopColorInputRow({
         />
         <input
           aria-label={label}
-          className="h-7 w-20 rounded-[5px] border border-white/[0.08] bg-black/22 px-2 text-[11px] font-semibold text-white/70 outline-none focus:border-white/45"
+          className={cn("h-7 w-20 rounded-[5px] px-2 text-[11px] font-semibold", DESKTOP_INSPECTOR_INPUT_CLASS)}
           value={value}
           onChange={(event) => onChange(event.currentTarget.value)}
         />
@@ -3233,11 +3244,11 @@ function DesktopNumberRow({
   value: number
 }) {
   return (
-    <label className="flex min-w-0 items-center justify-between gap-3 rounded-[7px] bg-black/20 px-2.5 py-2">
+    <label className={cn("flex min-w-0 items-center justify-between gap-3 px-2.5 py-2", DESKTOP_INSPECTOR_CONTROL_CLASS)}>
       <span className="truncate text-[12px] font-semibold text-white/74">{label}</span>
       <input
         aria-label={label}
-        className="h-7 w-20 rounded-[5px] border border-white/[0.08] bg-black/22 px-2 text-[11px] font-semibold text-white/70 outline-none focus:border-white/45"
+        className={cn("h-7 w-20 rounded-[5px] px-2 text-[11px] font-semibold", DESKTOP_INSPECTOR_INPUT_CLASS)}
         max={max}
         min={min}
         step={step}
@@ -3306,7 +3317,7 @@ function DesktopTextPresetButton({
       aria-pressed={selected}
       className={cn(
         "flex h-9 min-w-0 items-center justify-between gap-2 rounded-[7px] border border-white/[0.08] bg-white/[0.055] px-2.5 text-left transition hover:bg-white/[0.1]",
-        selected && "border-[#ff3b68]/75 bg-[#ff3b68]/18 text-white shadow-[0_10px_24px_rgba(255,59,104,0.16)]",
+        selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
       )}
       type="button"
       onClick={onClick}
@@ -3339,7 +3350,7 @@ function DesktopSegmentedRow<TValue extends string>({
             aria-pressed={value === option.value}
             className={cn(
               "h-8 truncate rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
-              value === option.value && "border-[#ff3b68]/70 bg-[#ff3b68] text-white",
+              value === option.value && DESKTOP_INSPECTOR_SELECTED_CLASS,
             )}
             type="button"
             onClick={() => onChange(option.value)}
@@ -3433,14 +3444,17 @@ function DesktopContentFieldRow({
           {field.label}
         </label>
         {field.error ? (
-          <span className="shrink-0 text-[10px] font-semibold text-[#ff9ab1]">{field.error}</span>
+          <span className="shrink-0 text-[10px] font-semibold text-white/72">{field.error}</span>
         ) : null}
       </div>
       {field.type === "textarea" ? (
         <textarea
           id={controlId}
           aria-invalid={field.error ? true : undefined}
-          className="min-h-24 w-full resize-none rounded-[7px] border border-white/[0.09] bg-black/22 px-3 py-2.5 text-[12px] leading-5 text-white outline-none placeholder:text-white/32 focus:border-white/45"
+          className={cn(
+            "min-h-24 w-full resize-none rounded-[7px] px-3 py-2.5 text-[12px] leading-5",
+            DESKTOP_INSPECTOR_INPUT_CLASS,
+          )}
           placeholder={field.placeholder}
           value={stringContentValue(field.value)}
           onChange={(event) => onContentValueChange(field.id, event.currentTarget.value)}
@@ -3450,7 +3464,7 @@ function DesktopContentFieldRow({
         <input
           id={controlId}
           aria-invalid={field.error ? true : undefined}
-          className="h-9 w-full rounded-[7px] border border-white/[0.09] bg-black/22 px-3 text-[12px] text-white outline-none placeholder:text-white/32 focus:border-white/45"
+          className={cn("h-9 w-full rounded-[7px] px-3 text-[12px]", DESKTOP_INSPECTOR_INPUT_CLASS)}
           placeholder={field.placeholder}
           value={stringContentValue(field.value)}
           onChange={(event) => onContentValueChange(field.id, event.currentTarget.value)}
@@ -3462,13 +3476,13 @@ function DesktopContentFieldRow({
           aria-pressed={Boolean(field.value)}
           className={cn(
             "flex h-8 w-full items-center justify-between rounded-[7px] border border-white/[0.09] bg-black/22 px-2.5 text-[12px] font-semibold text-white/62 transition",
-            field.value && "border-[#ff3b68]/55 bg-[#ff3b68]/22 text-white",
+            field.value && DESKTOP_INSPECTOR_SELECTED_CLASS,
           )}
           type="button"
           onClick={() => onContentValueChange(field.id, !field.value)}
         >
           <span>{field.value ? "On" : "Off"}</span>
-          <span className={cn("h-4 w-7 rounded-full bg-white/18 p-0.5", field.value && "bg-[#ff3b68]")}>
+          <span className={cn("h-4 w-7 rounded-full bg-white/18 p-0.5", field.value && "bg-white")}>
             <span
               className={cn(
                 "block size-3 rounded-full bg-white transition-transform",
@@ -3489,7 +3503,7 @@ function DesktopContentFieldRow({
                 aria-pressed={selected}
                 className={cn(
                   "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
-                  selected && "border-[#ff3b68]/70 bg-[#ff3b68] text-white",
+                  selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
                 onClick={() => onContentValueChange(field.id, option.value)}
@@ -3697,7 +3711,7 @@ function DesktopEncodingInspector({
     <div data-slot="desktop-encoding-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Encoding" />
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
-        <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <DesktopMotionSliderRow
             label="Type number"
             max={TYPE_NUMBER_MAX}
@@ -3708,7 +3722,7 @@ function DesktopEncodingInspector({
           />
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-3 truncate text-[12px] font-semibold text-white">Error Correction</p>
           <div className="grid gap-1.5" data-slot="desktop-error-correction-grid">
             {ERROR_CORRECTION_LEVEL_OPTIONS.map((option) => (
@@ -3719,7 +3733,7 @@ function DesktopEncodingInspector({
                 className={cn(
                   "min-w-0 rounded-[7px] border border-white/[0.08] bg-white/[0.055] px-3 py-2 text-left transition hover:bg-white/[0.1]",
                   settings.errorCorrectionLevel === option.value &&
-                    "border-[#ff3b68]/75 bg-[#ff3b68]/18 shadow-[0_10px_24px_rgba(255,59,104,0.16)]",
+                    DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
                 onClick={() => onEncodingSettingsChange({ errorCorrectionLevel: option.value })}
@@ -3755,7 +3769,7 @@ function DesktopImageInspector({
     <div data-slot="desktop-image-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Image" />
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
-        <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Intent</p>
           <div className="grid grid-cols-3 gap-1.5" data-slot="desktop-image-intent">
             {DESKTOP_IMAGE_INTENT_OPTIONS.map((option) => (
@@ -3766,7 +3780,7 @@ function DesktopImageInspector({
                 className={cn(
                   "h-9 rounded-[6px] border border-white/[0.09] bg-black/22 px-1.5 text-[10px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
                   settings.intent === option.value &&
-                    "border-[#ff3b68]/70 bg-[#ff3b68] text-white",
+                    DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
                 onClick={() => onImageSettingsChange({ intent: option.value })}
@@ -3777,7 +3791,7 @@ function DesktopImageInspector({
           </div>
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Source</p>
           <div className="grid grid-cols-2 gap-1.5" data-slot="desktop-image-source-mode">
             {DESKTOP_ASSET_SOURCE_OPTIONS.map((option) => (
@@ -3788,7 +3802,7 @@ function DesktopImageInspector({
                 className={cn(
                   "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
                   settings.sourceMode === option.value &&
-                    "border-[#ff3b68]/70 bg-[#ff3b68] text-white",
+                    DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
                 onClick={() => onImageSettingsChange({ sourceMode: option.value })}
@@ -3799,14 +3813,14 @@ function DesktopImageInspector({
           </div>
           <input
             aria-label="Shape image URL"
-            className="mt-2 h-9 w-full rounded-[7px] border border-white/[0.09] bg-black/22 px-3 text-[12px] text-white outline-none placeholder:text-white/32 focus:border-white/45"
+            className={cn("mt-2 h-9 w-full rounded-[7px] px-3 text-[12px]", DESKTOP_INSPECTOR_INPUT_CLASS)}
             placeholder="https://example.com/shape.png"
             value={settings.remoteUrl}
             onChange={(event) => onImageSettingsChange({ remoteUrl: event.currentTarget.value })}
           />
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Image Fit</p>
           <div className="grid grid-cols-2 gap-1.5">
             {(["cover", "contain"] as const).map((fit) => (
@@ -3816,7 +3830,7 @@ function DesktopImageInspector({
                 aria-pressed={settings.fit === fit}
                 className={cn(
                   "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold capitalize text-white/58 transition hover:bg-white/[0.09] hover:text-white",
-                  settings.fit === fit && "border-[#ff3b68]/70 bg-[#ff3b68] text-white",
+                  settings.fit === fit && DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
                 onClick={() => onImageSettingsChange({ fit })}
@@ -3855,7 +3869,7 @@ function DesktopDecorationsInspector({
     <div data-slot="desktop-decorations-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Decorations" />
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
-        <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Add</p>
           <div className="grid grid-cols-2 gap-1.5" data-slot="desktop-decoration-kind">
             {DESKTOP_DECORATION_OPTIONS.map((option) => (
@@ -3865,8 +3879,7 @@ function DesktopDecorationsInspector({
                 aria-pressed={settings.kind === option.value}
                 className={cn(
                   "h-9 rounded-[7px] border border-white/[0.08] bg-white/[0.055] px-2 text-[11px] font-semibold text-white/62 transition hover:bg-white/[0.1] hover:text-white",
-                  settings.kind === option.value &&
-                    "border-[#ff3b68]/75 bg-[#ff3b68]/18 text-white",
+                  settings.kind === option.value && DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
                 onClick={() => onDecorationsSettingsChange({ kind: option.value })}
@@ -3877,7 +3890,7 @@ function DesktopDecorationsInspector({
           </div>
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-3 truncate text-[12px] font-semibold text-white">Fill</p>
           <DesktopColorInputRow
             label="Decoration fill color"
@@ -3903,7 +3916,7 @@ function DesktopDecorationsInspector({
           </div>
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-3 truncate text-[12px] font-semibold text-white">Frame</p>
           <div className="grid gap-2">
             <DesktopNumberRow
@@ -3951,7 +3964,7 @@ function DesktopEffectsInspector({
     <div data-slot="desktop-effects-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Effects" />
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
-        <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-2.5">
+        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Generated Effects</p>
           <div className="grid max-h-48 grid-cols-2 gap-1.5 overflow-y-auto pr-1" data-slot="desktop-generated-effects">
             {generatedShaders.slice(0, 12).map((shader) => (
@@ -3970,11 +3983,14 @@ function DesktopEffectsInspector({
           </div>
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Preset</p>
           <select
             aria-label="Generated effect preset"
-            className="h-8 w-full appearance-none rounded-[6px] border border-white/[0.1] bg-white/[0.08] px-2.5 text-[12px] font-semibold text-white outline-none transition focus:border-white/45"
+            className={cn(
+              "h-8 w-full appearance-none rounded-[6px] px-2.5 text-[12px] font-semibold transition",
+              DESKTOP_INSPECTOR_INPUT_CLASS,
+            )}
             value={settings.generatedShaderPresetName}
             onChange={(event) =>
               onEffectsSettingsChange({ generatedShaderPresetName: event.currentTarget.value })
@@ -3988,7 +4004,7 @@ function DesktopEffectsInspector({
           </select>
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-3 truncate text-[12px] font-semibold text-white">Motion</p>
           <div className="grid gap-2">
             <DesktopMotionToggleRow
@@ -4015,7 +4031,7 @@ function DesktopEffectsInspector({
           </div>
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-2.5">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Image Filters</p>
           <div className="grid grid-cols-2 gap-1.5" data-slot="desktop-image-filters">
             {imageFilters.map((filter) => (
@@ -4034,7 +4050,10 @@ function DesktopEffectsInspector({
           </div>
           <select
             aria-label="Image filter preset"
-            className="mt-2 h-8 w-full appearance-none rounded-[6px] border border-white/[0.1] bg-white/[0.08] px-2.5 text-[12px] font-semibold text-white outline-none transition focus:border-white/45"
+            className={cn(
+              "mt-2 h-8 w-full appearance-none rounded-[6px] px-2.5 text-[12px] font-semibold transition",
+              DESKTOP_INSPECTOR_INPUT_CLASS,
+            )}
             value={settings.filterPresetName}
             onChange={(event) => onEffectsSettingsChange({ filterPresetName: event.currentTarget.value })}
           >
@@ -4079,7 +4098,7 @@ function DesktopLayersInspector({
     <div data-slot="desktop-layers-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Layers" />
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
-        <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-2.5">
+        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <div className="mb-2 flex min-w-0 items-center justify-between gap-3">
             <p className="truncate text-[12px] font-semibold text-white">Layer Stack</p>
             <span className="shrink-0 text-[10px] font-bold text-white/45">
@@ -4094,8 +4113,7 @@ function DesktopLayersInspector({
                 aria-pressed={settings.selectedLayerId === layer.id}
                 className={cn(
                   "flex min-w-0 items-center gap-2 rounded-[7px] border border-white/[0.08] bg-white/[0.055] px-2.5 py-2 text-left transition hover:bg-white/[0.1]",
-                  settings.selectedLayerId === layer.id &&
-                    "border-[#ff3b68]/75 bg-[#ff3b68]/18 text-white",
+                  settings.selectedLayerId === layer.id && DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
                 onClick={() => onLayersSettingsChange({ selectedLayerId: layer.id })}
@@ -4119,16 +4137,16 @@ function DesktopLayersInspector({
 
         {selectedLayer ? (
           <>
-            <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+            <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
               <p className="mb-3 truncate text-[12px] font-semibold text-white">Inspector</p>
               <input
                 aria-label="Layer name"
-                className="h-9 w-full rounded-[7px] border border-white/[0.09] bg-black/22 px-3 text-[12px] text-white outline-none placeholder:text-white/32 focus:border-white/45"
+                className={cn("h-9 w-full rounded-[7px] px-3 text-[12px]", DESKTOP_INSPECTOR_INPUT_CLASS)}
                 value={selectedLayer.name}
                 onChange={(event) => patchSelectedLayer({ name: event.currentTarget.value })}
               />
             </section>
-            <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+            <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
               <p className="mb-3 truncate text-[12px] font-semibold text-white">Geometry</p>
               <div className="grid grid-cols-2 gap-2">
                 <DesktopNumberRow label="X" value={selectedLayer.x} onChange={(x) => patchSelectedLayer({ x })} />
@@ -4165,7 +4183,7 @@ function DesktopExportInspector({
     <div data-slot="desktop-export-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Export" />
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
-        <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Target</p>
           <div className="grid gap-1.5" data-slot="desktop-export-target-list">
             {DESKTOP_EXPORT_TARGET_OPTIONS.map((option) => (
@@ -4179,7 +4197,7 @@ function DesktopExportInspector({
           </div>
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Format</p>
           <div className="grid grid-cols-4 gap-1.5" data-slot="desktop-export-format-grid">
             {DESKTOP_DOWNLOAD_EXTENSIONS.map((extension) => (
@@ -4189,8 +4207,7 @@ function DesktopExportInspector({
                 aria-pressed={settings.extension === extension}
                 className={cn(
                   "h-9 rounded-[7px] border border-white/[0.08] bg-white/[0.055] px-1.5 text-[11px] font-semibold text-white/62 transition hover:bg-white/[0.1] hover:text-white",
-                  settings.extension === extension &&
-                    "border-[#ff3b68]/75 bg-[#ff3b68]/18 text-white",
+                  settings.extension === extension && DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
                 onClick={() => onExportSettingsChange({ extension })}
@@ -4202,7 +4219,7 @@ function DesktopExportInspector({
         </section>
 
         {isRasterExport ? (
-          <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+          <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
             <p className="mb-2 truncate text-[12px] font-semibold text-white">Quality</p>
             <div className="grid gap-1.5" data-slot="desktop-export-quality-grid">
               {DESKTOP_RASTER_EXPORT_PRESETS.map((preset) => (
@@ -4213,7 +4230,7 @@ function DesktopExportInspector({
                   className={cn(
                     "min-w-0 rounded-[7px] border border-white/[0.08] bg-white/[0.055] px-3 py-2 text-left transition hover:bg-white/[0.1]",
                     settings.qualityPresetId === preset.id &&
-                      "border-[#ff3b68]/75 bg-[#ff3b68]/18 shadow-[0_10px_24px_rgba(255,59,104,0.16)]",
+                      DESKTOP_INSPECTOR_SELECTED_CLASS,
                   )}
                   type="button"
                   onClick={() => onExportSettingsChange({ qualityPresetId: preset.id })}
@@ -4230,10 +4247,11 @@ function DesktopExportInspector({
           </section>
         ) : null}
       </div>
-      <div className="border-t border-white/[0.09] bg-black/20 p-3">
+      <div className={DESKTOP_INSPECTOR_FOOTER_CLASS}>
         <button
           aria-label={`Download ${settings.extension.toUpperCase()}`}
-          className="mb-2 flex h-9 w-full items-center justify-center gap-2 rounded-full bg-[#ff3b68] px-3 text-[12px] font-semibold text-white transition hover:bg-[#ff4f78]"
+          className={cn("mb-2", DESKTOP_INSPECTOR_RESET_CLASS, DESKTOP_INSPECTOR_SELECTED_CLASS)}
+          data-slot="desktop-export-download"
           type="button"
           onClick={onExportDownload}
         >
@@ -4242,7 +4260,7 @@ function DesktopExportInspector({
         </button>
         <button
           aria-label="Reset Export"
-          className="flex h-8 w-full items-center justify-center gap-2 rounded-full bg-white/[0.09] px-3 text-[12px] font-semibold text-white/82 transition hover:bg-white/[0.13] hover:text-white"
+          className={cn("h-8", DESKTOP_INSPECTOR_RESET_CLASS)}
           type="button"
           onClick={onExportReset}
         >
@@ -4275,6 +4293,7 @@ function DesktopTextInspector({
   const supportedWeights = selectedFont.weights
   const fontWeight = getDesktopTextInspectorFontWeight(settings.fontWeight, supportedWeights)
   const selectedPreset = getDesktopTextPresetId(settings)
+  const [fontMenuOpen, setFontMenuOpen] = useState(false)
 
   useEffect(() => {
     void loadDraftingFont(selectedFont.id)
@@ -4285,72 +4304,63 @@ function DesktopTextInspector({
       <DesktopInspectorHeader title="Text" />
 
       <div className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 scroll-fade-effect-y">
-        <section className="rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-2.5">
-          <label className="mb-2 block text-[12px] font-semibold text-white" htmlFor="desktop-text-preset">
-            Preset
-          </label>
-          <div className="relative">
-            <select
-              id="desktop-text-preset"
-              aria-label="Text preset"
-              className="h-8 w-full appearance-none rounded-[6px] border border-white/[0.1] bg-white/[0.08] px-2.5 pr-7 text-[12px] font-semibold text-white outline-none transition focus:border-white/45"
-              value={selectedPreset}
-              onChange={(event) => {
-                const preset = DESKTOP_TEXT_PRESETS.find(
-                  (item) => item.id === event.currentTarget.value,
-                )
-
-                if (preset) {
+        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
+          <p className="mb-2 truncate text-[12px] font-semibold text-white">Preset</p>
+          <div className="grid grid-cols-3 gap-1.5" data-slot="desktop-text-preset-options">
+            {DESKTOP_TEXT_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                aria-label={`Use ${preset.label} text preset`}
+                aria-pressed={selectedPreset === preset.id}
+                className={cn(
+                  "h-8 px-2 text-[11px] font-semibold",
+                  DESKTOP_INSPECTOR_CONTROL_CLASS,
+                  selectedPreset === preset.id && DESKTOP_INSPECTOR_SELECTED_CLASS,
+                )}
+                type="button"
+                onClick={() =>
                   onTextSettingsChange({
                     fontSize: preset.fontSize,
                     fontWeight: preset.fontWeight,
                     lineHeight: preset.lineHeight,
                   })
                 }
-              }}
-            >
-              {DESKTOP_TEXT_PRESETS.map((preset) => (
-                <option key={preset.id} value={preset.id}>
-                  {preset.label}
-                </option>
-              ))}
-            </select>
-            <ChevronDownIcon className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-white/55" />
+              >
+                {preset.label}
+              </button>
+            ))}
           </div>
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Font</p>
           <div className="grid grid-cols-[1fr_4.75rem] gap-1.5">
-            <div className="relative min-w-0" data-slot="desktop-text-font-selector">
-              <select
-                id="desktop-text-font"
+            <div className="min-w-0" data-slot="desktop-text-font-selector">
+              <button
+                aria-controls="desktop-text-font-listbox"
+                aria-expanded={fontMenuOpen}
                 aria-label="Text font"
-                className="h-8 w-full appearance-none rounded-[6px] border border-white/[0.1] bg-white/[0.08] px-2.5 pr-7 text-[12px] font-semibold text-white outline-none transition focus:border-white/45"
+                aria-haspopup="listbox"
+                className={cn(
+                  "flex h-8 w-full min-w-0 items-center justify-between gap-2 px-2.5 text-left text-[12px] font-semibold",
+                  DESKTOP_INSPECTOR_CONTROL_CLASS,
+                )}
                 style={{ fontFamily: getDraftingFontCssFamily({ fontId: selectedFont.id }) }}
-                value={selectedFont.id}
-                onChange={(event) => {
-                  const font = DRAFTING_FONT_REGISTRY.find(
-                    (item) => item.id === event.currentTarget.value,
-                  )
-
-                  if (font) {
-                    void loadDraftingFont(font.id)
-                    onTextSettingsChange({ fontFamily: font.family, fontId: font.id })
-                  }
-                }}
+                type="button"
+                onClick={() => setFontMenuOpen((open) => !open)}
               >
-                {DRAFTING_FONT_REGISTRY.map((font) => (
-                  <option key={font.id} value={font.id}>
-                    {font.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDownIcon className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-white/55" />
+                <span className="min-w-0 flex-1 truncate">{selectedFont.label}</span>
+                <ChevronDownIcon
+                  className={cn("size-3.5 shrink-0 text-current transition-transform", fontMenuOpen && "rotate-180")}
+                />
+              </button>
             </div>
             <input
               aria-label="Text font size"
-              className="h-8 rounded-[6px] border border-white/[0.1] bg-white/[0.08] px-2 text-[12px] font-semibold text-white outline-none focus:border-white/45"
+              className={cn(
+                "h-8 rounded-[6px] px-2 text-[12px] font-semibold",
+                DESKTOP_INSPECTOR_INPUT_CLASS,
+              )}
               max={300}
               min={6}
               type="number"
@@ -4364,6 +4374,38 @@ function DesktopTextInspector({
               }}
             />
           </div>
+          {fontMenuOpen ? (
+            <div
+              id="desktop-text-font-listbox"
+              aria-label="Text font options"
+              className="mt-2 grid max-h-44 gap-1.5 overflow-y-auto pr-1"
+              data-slot="desktop-text-font-listbox"
+              role="listbox"
+            >
+              {DRAFTING_FONT_REGISTRY.map((font) => (
+                <button
+                  key={font.id}
+                  aria-label={`Use ${font.label} text font`}
+                  aria-selected={selectedFont.id === font.id}
+                  className={cn(
+                    "flex h-8 min-w-0 items-center px-2.5 text-left text-[12px] font-semibold",
+                    DESKTOP_INSPECTOR_CONTROL_CLASS,
+                    selectedFont.id === font.id && DESKTOP_INSPECTOR_SELECTED_CLASS,
+                  )}
+                  role="option"
+                  style={{ fontFamily: getDraftingFontCssFamily({ fontId: font.id }) }}
+                  type="button"
+                  onClick={() => {
+                    void loadDraftingFont(font.id)
+                    onTextSettingsChange({ fontFamily: font.family, fontId: font.id })
+                    setFontMenuOpen(false)
+                  }}
+                >
+                  <span className="min-w-0 flex-1 truncate">{font.label}</span>
+                </button>
+              ))}
+            </div>
+          ) : null}
           <DesktopTextInlineSlider
             label="Size"
             max={300}
@@ -4418,12 +4460,12 @@ function DesktopTextInspector({
           </div>
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <div className="mb-2 flex min-w-0 items-center justify-between gap-3">
             <p className="truncate text-[12px] font-semibold text-white">Text</p>
             <button
               aria-label="Add Text"
-              className="grid size-7 shrink-0 place-items-center rounded-[6px] bg-white/[0.09] text-white/72 transition hover:bg-white/[0.13] hover:text-white"
+              className={cn("grid size-7 shrink-0 place-items-center", DESKTOP_INSPECTOR_CONTROL_CLASS)}
               type="button"
               onClick={() => onTextSettingsChange({ text: DEFAULT_DESKTOP_TEXT_SETTINGS.text })}
             >
@@ -4432,13 +4474,16 @@ function DesktopTextInspector({
           </div>
           <textarea
             aria-label="Text layer content"
-            className="min-h-16 w-full resize-none rounded-[7px] border border-white/[0.09] bg-black/22 px-3 py-2 text-[12px] leading-5 text-white outline-none placeholder:text-white/32 focus:border-white/45"
+            className={cn(
+              "min-h-16 w-full resize-none rounded-[7px] px-3 py-2 text-[12px] leading-5",
+              DESKTOP_INSPECTOR_INPUT_CLASS,
+            )}
             value={settings.text}
             onChange={(event) => onTextSettingsChange({ text: event.currentTarget.value })}
           />
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-3 truncate text-[12px] font-semibold text-white">Color</p>
           <DesktopColorInputRow
             label="Text fill color"
@@ -4447,7 +4492,7 @@ function DesktopTextInspector({
           />
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-3 truncate text-[12px] font-semibold text-white">Alignment</p>
           <div className="grid grid-cols-3 gap-1.5" data-slot="desktop-text-alignment">
             {DESKTOP_TEXT_ALIGN_OPTIONS.map((option) => (
@@ -4456,9 +4501,10 @@ function DesktopTextInspector({
                 aria-label={`Align text ${option.value}`}
                 aria-pressed={settings.textAlign === option.value}
                 className={cn(
-                  "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
+                  "h-8 px-2 text-[11px] font-semibold",
+                  DESKTOP_INSPECTOR_CONTROL_CLASS,
                   settings.textAlign === option.value &&
-                    "border-[#ff3b68]/70 bg-[#ff3b68] text-white",
+                    DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
                 type="button"
                 onClick={() => onTextSettingsChange({ textAlign: option.value })}
@@ -4469,39 +4515,31 @@ function DesktopTextInspector({
           </div>
         </section>
 
-        <section className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3">
+        <section className={cn("mt-3", DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className="mb-3 truncate text-[12px] font-semibold text-white">Spacing</p>
           <div className="grid gap-2">
-            <DesktopTextNumberRow
+            <DesktopTextInlineSlider
               label="Letter spacing"
               max={200}
               min={-50}
               value={settings.letterSpacing}
+              valueLabel={`${Math.round(settings.letterSpacing)} px`}
               onChange={(letterSpacing) => onTextSettingsChange({ letterSpacing })}
             />
-            <DesktopTextNumberRow
+            <DesktopTextInlineSlider
               label="Line height"
               max={4}
               min={0.6}
               step={0.05}
               value={settings.lineHeight}
+              valueLabel={settings.lineHeight.toFixed(2)}
               onChange={(lineHeight) => onTextSettingsChange({ lineHeight })}
             />
           </div>
         </section>
       </div>
 
-      <div className="border-t border-white/[0.09] bg-black/20 p-3">
-        <button
-          aria-label="Reset Text"
-          className="flex h-9 w-full items-center justify-center gap-2 rounded-full bg-white/[0.09] px-3 text-[12px] font-semibold text-white/82 transition hover:bg-white/[0.13] hover:text-white"
-          type="button"
-          onClick={onTextReset}
-        >
-          <RotateCcwIcon className="size-3.5" />
-          Reset Text
-        </button>
-      </div>
+      <DesktopInspectorFooter label="Reset Text" onReset={onTextReset} />
     </div>
   )
 }
@@ -4522,8 +4560,9 @@ function DesktopTextToggleButton({
       aria-label={`${label} text`}
       aria-pressed={active}
       className={cn(
-        "h-8 rounded-[6px] border border-white/[0.09] bg-black/22 px-2 text-[11px] font-semibold text-white/58 transition hover:bg-white/[0.09] hover:text-white",
-        active && "border-[#ff3b68]/70 bg-[#ff3b68] text-white",
+        "h-8 px-2 text-[11px] font-semibold",
+        DESKTOP_INSPECTOR_CONTROL_CLASS,
+        active && DESKTOP_INSPECTOR_SELECTED_CLASS,
       )}
       type="button"
       onClick={onClick}
@@ -4563,7 +4602,7 @@ function DesktopTextInlineSlider({
   valueLabel: string
 }) {
   return (
-    <label className="mt-2 grid min-w-0 gap-1.5 px-1">
+    <label className={cn("mt-2 grid min-w-0 gap-1.5 px-3 py-2.5", DESKTOP_INSPECTOR_CONTROL_CLASS)}>
       <span className="flex min-w-0 items-center justify-between gap-3">
         <span className="truncate text-[12px] font-semibold text-white/74">{label}</span>
         <span className="shrink-0 rounded-full bg-white/[0.08] px-2 py-0.5 text-[10px] font-bold text-white/62">
@@ -4572,51 +4611,13 @@ function DesktopTextInlineSlider({
       </span>
       <input
         aria-label={`Text font ${label.toLowerCase()}`}
-        className="h-1.5 w-full accent-[#ff3b68]"
+        className="h-1.5 w-full accent-white"
         max={max}
         min={min}
         step={step}
         type="range"
         value={value}
         onChange={(event) => onChange(Number(event.currentTarget.value))}
-      />
-    </label>
-  )
-}
-
-function DesktopTextNumberRow({
-  label,
-  max,
-  min,
-  onChange,
-  step = 1,
-  value,
-}: {
-  label: string
-  max: number
-  min: number
-  onChange: (value: number) => void
-  step?: number
-  value: number
-}) {
-  return (
-    <label className="flex min-w-0 items-center justify-between gap-3 rounded-[7px] bg-black/20 px-2.5 py-2">
-      <span className="truncate text-[12px] font-semibold text-white/74">{label}</span>
-      <input
-        aria-label={`Text ${label.toLowerCase()}`}
-        className="h-7 w-20 rounded-[5px] border border-white/[0.08] bg-black/22 px-2 text-[11px] font-semibold text-white/70 outline-none focus:border-white/45"
-        max={max}
-        min={min}
-        step={step}
-        type="number"
-        value={value}
-        onChange={(event) => {
-          const nextValue = Number(event.currentTarget.value)
-
-          if (Number.isFinite(nextValue)) {
-            onChange(nextValue)
-          }
-        }}
       />
     </label>
   )
