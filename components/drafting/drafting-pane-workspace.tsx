@@ -1,0 +1,1484 @@
+"use client"
+
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
+  type TouchEvent,
+  type WheelEvent,
+} from "react"
+import {
+  CheckIcon,
+  CopyPlusIcon,
+  CrosshairIcon,
+  Grid3X3Icon,
+  HandIcon,
+  MagnetIcon,
+  Maximize2Icon,
+  Minimize2Icon,
+  MinusIcon,
+  MousePointer2Icon,
+  PlusIcon,
+  Redo2Icon,
+  SlidersHorizontalIcon,
+  Trash2Icon,
+  TypeIcon,
+  Undo2Icon,
+  ZoomInIcon,
+  ZoomOutIcon,
+} from "lucide-react"
+
+import type { DraftingCardState } from "@/components/drafting/drafting-card-state"
+import type { DraftingCanvasLayer } from "@/components/drafting/drafting-layer-state"
+import { QrPane, type DraftingLayerMenuAction } from "@/components/drafting/qr-pane"
+import { getQrLayout } from "@/components/drafting/qr-layout-engine"
+import type { QrStudioState } from "@/components/qr/qr-studio-state"
+import { Button } from "@/components/ui/button"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
+
+type DraftingPane = {
+  cardState: DraftingCardState
+  id: string
+  layers?: DraftingCanvasLayer[]
+  name: string
+  state: QrStudioState
+}
+
+type DraftingPanelLayouts = Record<string, Record<string, number>>
+type DraftingPanePanOffsets = Record<string, { x: number; y: number }>
+export type DraftingPaneToolbarVariant = "default" | "desktop-zoom"
+export type DraftingPaneCanvasTool = "select" | "pan" | "text"
+
+type DesktopLayerToolbarLayer = {
+  blur: number
+  id: string
+  isLocked: boolean
+  isVisible: boolean
+  name: string
+  opacity: number
+  shadowBlur: number
+  shadowColor: string
+  shadowOffsetX: number
+  shadowOffsetY: number
+  shadowOpacity: number
+}
+
+export type DesktopLayerToolbarControls = {
+  layer: DesktopLayerToolbarLayer | null
+  onLayerChange: (patch: Partial<DesktopLayerToolbarLayer>) => void
+}
+
+const MIN_PREVIEW_ZOOM = 0.1
+const MAX_PREVIEW_ZOOM = 4
+const PREVIEW_ZOOM_STEP = 0.1
+const WHEEL_ZOOM_SENSITIVITY = 0.001
+const DESKTOP_ZOOM_PRESETS = [0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4] as const
+
+type DraftingPaneWorkspaceProps = {
+  panes: DraftingPane[]
+  activePaneId: string
+  canAddQrCode?: boolean
+  canRedo?: boolean
+  canUndo?: boolean
+  onAddQrCode?: () => void
+  onRedo?: () => void
+  onRemoveQrCode?: (paneId: string) => void
+  onUndo?: () => void
+  onPaneSelect: (paneId: string) => void
+  onPaneQrClick: (paneId: string) => void
+  onSwapPanes?: (sourcePaneId: string, targetPaneId: string) => void
+  onLayerChange?: (
+    paneId: string,
+    layerId: string,
+    patch: Partial<DraftingCanvasLayer>,
+  ) => void
+  onLayerAction?: (
+    paneId: string,
+    layerIds: string[],
+    action: DraftingLayerMenuAction,
+  ) => void
+  onLayerCopy?: (paneId: string, layerIds: string[]) => void
+  onLayerPaste?: (paneId: string, point: { x: number; y: number }) => void
+  onLayerSelect?: (
+    paneId: string,
+    layerId: string | null,
+    options?: { additive?: boolean },
+  ) => void
+  onLayerSelectionChange?: (
+    paneId: string,
+    layerIds: string[],
+    options?: { additive?: boolean },
+  ) => void
+  desktopLayerToolbarControls?: DesktopLayerToolbarControls
+  activeCanvasTool?: DraftingPaneCanvasTool | null
+  onAddTextLayerAt?: (paneId: string, point: { x: number; y: number }) => void
+  onCanvasToolChange?: (tool: DraftingPaneCanvasTool | null) => void
+  onCanvasGridChange?: (showGrid: boolean) => void
+  showCanvasGrid?: boolean
+  selectedLayerId?: string | null
+  selectedLayerIds?: string[]
+  toolbarVariant?: DraftingPaneToolbarVariant
+}
+
+function groupPanes<T>(panes: T[], groups: number[]) {
+  let start = 0
+
+  return groups.map((groupSize) => {
+    const group = panes.slice(start, start + groupSize)
+    start += groupSize
+    return group
+  })
+}
+
+function getPortraitSnapshot() {
+  if (typeof window === "undefined" || !window.matchMedia) return false
+  return window.matchMedia("(orientation: portrait)").matches
+}
+
+function subscribePortrait(callback: () => void) {
+  if (typeof window === "undefined" || !window.matchMedia) return () => {}
+  const mql = window.matchMedia("(orientation: portrait)")
+  mql.addEventListener("change", callback)
+  return () => mql.removeEventListener("change", callback)
+}
+
+function DraftingResizeHandle() {
+  return (
+    <ResizableHandle
+      data-slot="drafting-resize-handle"
+      className={cn(
+        "z-10 bg-[var(--drafting-line)] transition-colors duration-150 hover:bg-[var(--drafting-line-hover)] active:bg-[var(--drafting-line-strong)]",
+        "focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0",
+        "after:w-5 after:bg-transparent aria-[orientation=horizontal]:after:h-5 aria-[orientation=horizontal]:after:bg-transparent",
+        "before:absolute before:left-1/2 before:top-1/2 before:z-10 before:h-7 before:w-px before:-translate-x-1/2 before:-translate-y-1/2 before:bg-[var(--drafting-ink-muted)] before:opacity-45 before:content-['']",
+        "aria-[orientation=horizontal]:before:h-px aria-[orientation=horizontal]:before:w-7",
+      )}
+    />
+  )
+}
+
+function clampPreviewZoom(value: number) {
+  return Math.min(MAX_PREVIEW_ZOOM, Math.max(MIN_PREVIEW_ZOOM, value))
+}
+
+function getTouchDistance(touches: React.TouchList) {
+  const first = touches.item(0)
+  const second = touches.item(1)
+
+  if (!first || !second) {
+    return null
+  }
+
+  return Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY)
+}
+
+function DesktopLayerSettingsToolbar({ controls }: { controls: DesktopLayerToolbarControls }) {
+  const { layer, onLayerChange } = controls
+
+  if (!layer) {
+    return null
+  }
+
+  return (
+    <div
+      aria-label={`${layer.name} layer appearance controls`}
+      className="flex max-w-full items-center gap-1"
+      data-slot="desktop-layer-settings-toolbar"
+    >
+      <Popover>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
+              <button
+                aria-label="Layer appearance"
+                className="flex size-8 shrink-0 items-center justify-center rounded-full text-current transition-[background-color,color] duration-150 hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                type="button"
+              >
+                <SlidersHorizontalIcon aria-hidden="true" className="size-4" />
+              </button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent>Layer appearance</TooltipContent>
+        </Tooltip>
+        <PopoverContent
+          align="center"
+          side="top"
+          sideOffset={12}
+          className="w-72 rounded-2xl border-white/[0.12] bg-neutral-950/95 p-3 text-white shadow-[0_18px_48px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl"
+          data-slot="desktop-layer-appearance-popover"
+        >
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-white">{layer.name}</p>
+              <p className="text-[11px] font-medium text-white/45">Layer appearance</p>
+            </div>
+            <span className="rounded-full bg-white/[0.08] px-2 py-1 text-xs font-semibold tabular-nums text-white/70">
+              {layer.opacity}%
+            </span>
+          </div>
+          <div className="space-y-2">
+            <p className="px-1 text-[10px] font-bold uppercase tracking-normal text-white/45">
+              Appearance
+            </p>
+            <DesktopLayerToolbarNumberInput
+              label="Layer opacity"
+              max={100}
+              min={0}
+              value={layer.opacity}
+              onChange={(opacity) => onLayerChange({ opacity })}
+            />
+            <DesktopLayerToolbarNumberInput
+              label="Layer blur"
+              max={96}
+              min={0}
+              value={layer.blur}
+              onChange={(blur) => onLayerChange({ blur })}
+            />
+          </div>
+          <div className="mt-4 space-y-2">
+            <p className="px-1 text-[10px] font-bold uppercase tracking-normal text-white/45">
+              Shadow
+            </p>
+            <DesktopLayerToolbarColorInput
+              label="Layer shadow color"
+              value={layer.shadowColor}
+              onChange={(shadowColor) => onLayerChange({ shadowColor })}
+            />
+            <DesktopLayerToolbarNumberInput
+              label="Shadow blur"
+              max={128}
+              min={0}
+              value={layer.shadowBlur}
+              onChange={(shadowBlur) => onLayerChange({ shadowBlur })}
+            />
+            <DesktopLayerToolbarNumberInput
+              label="Shadow opacity"
+              max={100}
+              min={0}
+              value={layer.shadowOpacity}
+              onChange={(shadowOpacity) => onLayerChange({ shadowOpacity })}
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <DesktopLayerToolbarNumberInput
+                label="Shadow X"
+                value={layer.shadowOffsetX}
+                onChange={(shadowOffsetX) => onLayerChange({ shadowOffsetX })}
+              />
+              <DesktopLayerToolbarNumberInput
+                label="Shadow Y"
+                value={layer.shadowOffsetY}
+                onChange={(shadowOffsetY) => onLayerChange({ shadowOffsetY })}
+              />
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  )
+}
+
+function DesktopLayerToolbarNumberInput({
+  label,
+  max,
+  min,
+  onChange,
+  value,
+}: {
+  label: string
+  max?: number
+  min?: number
+  onChange: (value: number) => void
+  value: number
+}) {
+  return (
+    <label className="flex h-8 min-w-0 items-center justify-between gap-2 rounded-full bg-white/[0.08] pl-3 pr-1 text-[10px] font-bold uppercase tracking-normal text-current">
+      <span className="min-w-0 truncate text-white/52">{label.replace(/^Layer |^Shadow /, "")}</span>
+      <input
+        aria-label={label}
+        className="h-6 w-14 shrink-0 rounded-full border-0 bg-black/20 px-1 text-center text-xs font-semibold text-current outline-none"
+        max={max}
+        min={min}
+        type="number"
+        value={value}
+        onChange={(event) => {
+          const nextValue = Number(event.currentTarget.value)
+          if (Number.isFinite(nextValue)) {
+            onChange(nextValue)
+          }
+        }}
+      />
+    </label>
+  )
+}
+
+function DesktopLayerToolbarColorInput({
+  label,
+  onChange,
+  value,
+}: {
+  label: string
+  onChange: (value: string) => void
+  value: string
+}) {
+  return (
+    <label className="flex h-8 items-center justify-between gap-2 rounded-full bg-white/[0.08] pl-3 pr-1 text-[10px] font-bold uppercase tracking-normal text-current">
+      <span className="whitespace-nowrap text-white/52">Color</span>
+      <input
+        aria-label={label}
+        className="size-6 rounded-full border-0 bg-transparent p-0"
+        type="color"
+        value={value}
+        onChange={(event) => onChange(event.currentTarget.value)}
+      />
+    </label>
+  )
+}
+
+function DraftingPaneSurface({
+  areaName,
+  canSwap,
+  draggingPaneId,
+  isSelected,
+  isSnapTarget,
+  onPaneQrClick,
+  onPaneSelect,
+  onPaneDragEnd,
+  onPaneDragStart,
+  onPaneDrop,
+  onPaneDragOver,
+  onPaneDragLeave,
+  onPaneZoom,
+  onPanePan,
+  onLayerChange,
+  onLayerAction,
+  onLayerCopy,
+  onLayerPaste,
+  onLayerSelect,
+  onLayerSelectionChange,
+  activeCanvasTool,
+  onAddTextLayerAt,
+  onCanvasToolChange,
+  showCanvasGrid = true,
+  pane,
+  panePan,
+  paneZoom,
+  selectedLayerId,
+  selectedLayerIds,
+  snapEnabled,
+}: {
+  areaName?: string
+  canSwap: boolean
+  draggingPaneId: string | null
+  isSelected: boolean
+  isSnapTarget: boolean
+  onPaneQrClick: (paneId: string) => void
+  onPaneSelect: (paneId: string) => void
+  onPaneDragEnd: () => void
+  onPaneDragStart: (paneId: string, event: React.DragEvent<HTMLDivElement>) => void
+  onPaneDrop: (paneId: string, event: React.DragEvent<HTMLDivElement>) => void
+  onPaneDragOver: (paneId: string, event: React.DragEvent<HTMLDivElement>) => void
+  onPaneDragLeave: (paneId: string, event: React.DragEvent<HTMLDivElement>) => void
+  onPanePan: (paneId: string, nextPan: { x: number; y: number }) => void
+  onPaneZoom: (paneId: string, nextZoom: number) => void
+  onLayerChange?: (
+    paneId: string,
+    layerId: string,
+    patch: Partial<DraftingCanvasLayer>,
+  ) => void
+  onLayerAction?: (
+    paneId: string,
+    layerIds: string[],
+    action: DraftingLayerMenuAction,
+  ) => void
+  onLayerCopy?: (paneId: string, layerIds: string[]) => void
+  onLayerPaste?: (paneId: string, point: { x: number; y: number }) => void
+  onLayerSelect?: (
+    paneId: string,
+    layerId: string | null,
+    options?: { additive?: boolean },
+  ) => void
+  onLayerSelectionChange?: (
+    paneId: string,
+    layerIds: string[],
+    options?: { additive?: boolean },
+  ) => void
+  activeCanvasTool?: DraftingPaneCanvasTool | null
+  onAddTextLayerAt?: (paneId: string, point: { x: number; y: number }) => void
+  onCanvasToolChange?: (tool: DraftingPaneCanvasTool | null) => void
+  showCanvasGrid?: boolean
+  pane: DraftingPane
+  panePan: { x: number; y: number }
+  paneZoom: number
+  selectedLayerId?: string | null
+  selectedLayerIds?: string[]
+  snapEnabled: boolean
+}) {
+  const hideLayerSelectionChrome = activeCanvasTool === "pan"
+  const onPaneSelectRef = useRef(onPaneSelect)
+  const onPaneQrClickRef = useRef(onPaneQrClick)
+  const panInteractionRef = useRef<{
+    pointerId: number
+    startClientX: number
+    startClientY: number
+    startPanX: number
+    startPanY: number
+  } | null>(null)
+  const pinchDistanceRef = useRef<number | null>(null)
+  const pinchZoomRef = useRef(paneZoom)
+
+  useEffect(() => {
+    onPaneSelectRef.current = onPaneSelect
+  }, [onPaneSelect])
+
+  useEffect(() => {
+    onPaneQrClickRef.current = onPaneQrClick
+  }, [onPaneQrClick])
+
+  useEffect(() => {
+    pinchZoomRef.current = paneZoom
+  }, [paneZoom])
+
+  const handleSelect = useCallback(() => {
+    onPaneSelectRef.current(pane.id)
+  }, [pane.id])
+
+  const getPlacementPoint = useCallback(
+    (event: ReactMouseEvent<HTMLDivElement> | ReactPointerEvent<HTMLDivElement>) => {
+      const rect = event.currentTarget.getBoundingClientRect()
+
+      return {
+        x: (event.clientX - rect.left - rect.width / 2 - panePan.x) / paneZoom,
+        y: (event.clientY - rect.top - rect.height / 2 - panePan.y) / paneZoom,
+      }
+    },
+    [panePan.x, panePan.y, paneZoom],
+  )
+
+  const isPlacementTarget = useCallback(
+    (event: ReactMouseEvent<HTMLDivElement> | ReactPointerEvent<HTMLDivElement>) =>
+      !(
+        event.target instanceof Element &&
+        event.target.closest("[data-layer-id], [data-slot='drafting-layer-resize-frame'], button")
+      ),
+    [],
+  )
+
+  const handleSurfaceClick = useCallback(
+    (event: ReactMouseEvent<HTMLDivElement>) => {
+      if (activeCanvasTool === "text" && onAddTextLayerAt && isPlacementTarget(event)) {
+        event.preventDefault()
+        event.stopPropagation()
+        onPaneSelectRef.current(pane.id)
+        onAddTextLayerAt(pane.id, getPlacementPoint(event))
+        onCanvasToolChange?.(null)
+        return
+      }
+
+      handleSelect()
+    },
+    [
+      activeCanvasTool,
+      getPlacementPoint,
+      handleSelect,
+      isPlacementTarget,
+      onAddTextLayerAt,
+      onCanvasToolChange,
+      pane.id,
+    ],
+  )
+
+  const handleQrClick = useCallback(() => {
+    onPaneQrClickRef.current(pane.id)
+  }, [pane.id])
+
+  const shouldIgnorePanToolTarget = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) =>
+      event.target instanceof Element &&
+      Boolean(
+        event.target.closest(
+          "button, input, textarea, select, [data-slot='drafting-layer-floating-toolbar'], [data-slot='drafting-layer-context-menu']",
+        ),
+      ),
+    [],
+  )
+
+  const beginPanePan = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      event.preventDefault()
+      event.stopPropagation()
+      event.currentTarget.setPointerCapture(event.pointerId)
+      onPaneSelectRef.current(pane.id)
+      panInteractionRef.current = {
+        pointerId: event.pointerId,
+        startClientX: event.clientX,
+        startClientY: event.clientY,
+        startPanX: panePan.x,
+        startPanY: panePan.y,
+      }
+    },
+    [pane.id, panePan.x, panePan.y],
+  )
+
+  const handlePanePointerDownCapture = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (
+        activeCanvasTool !== "pan" ||
+        event.button !== 0 ||
+        event.pointerType === "touch" ||
+        shouldIgnorePanToolTarget(event)
+      ) {
+        return
+      }
+
+      beginPanePan(event)
+    },
+    [activeCanvasTool, beginPanePan, shouldIgnorePanToolTarget],
+  )
+
+  const handlePanePointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (event.button !== 0 || event.pointerType === "touch") {
+        return
+      }
+
+      if (!isPlacementTarget(event)) {
+        return
+      }
+
+      if (activeCanvasTool === "text" && onAddTextLayerAt) {
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
+
+      if (activeCanvasTool !== "pan") {
+        onPaneSelectRef.current(pane.id)
+        onLayerSelect?.(pane.id, null)
+        return
+      }
+
+      onPaneSelectRef.current(pane.id)
+      onLayerSelect?.(pane.id, null)
+      beginPanePan(event)
+    },
+    [activeCanvasTool, beginPanePan, isPlacementTarget, onAddTextLayerAt, onLayerSelect, pane.id],
+  )
+
+  const handlePanePointerMove = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      const interaction = panInteractionRef.current
+
+      if (!interaction || interaction.pointerId !== event.pointerId) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+      onPanePan(pane.id, {
+        x: interaction.startPanX + event.clientX - interaction.startClientX,
+        y: interaction.startPanY + event.clientY - interaction.startClientY,
+      })
+    },
+    [onPanePan, pane.id],
+  )
+
+  const handlePanePointerEnd = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    if (panInteractionRef.current?.pointerId === event.pointerId) {
+      panInteractionRef.current = null
+    }
+  }, [])
+
+  const handleWheel = useCallback(
+    (event: WheelEvent<HTMLDivElement>) => {
+      event.preventDefault()
+      event.stopPropagation()
+      onPaneSelectRef.current(pane.id)
+
+      const nextZoom = clampPreviewZoom(paneZoom * Math.exp(-event.deltaY * WHEEL_ZOOM_SENSITIVITY))
+      onPaneZoom(pane.id, nextZoom)
+    },
+    [onPaneZoom, pane.id, paneZoom],
+  )
+
+  const handleTouchStart = useCallback(
+    (event: TouchEvent<HTMLDivElement>) => {
+      const distance = getTouchDistance(event.touches)
+
+      if (distance === null) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+      onPaneSelectRef.current(pane.id)
+      pinchDistanceRef.current = distance
+      pinchZoomRef.current = paneZoom
+    },
+    [pane.id, paneZoom],
+  )
+
+  const handleTouchMove = useCallback(
+    (event: TouchEvent<HTMLDivElement>) => {
+      const startDistance = pinchDistanceRef.current
+      const nextDistance = getTouchDistance(event.touches)
+
+      if (startDistance === null || nextDistance === null || startDistance <= 0) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+      onPaneZoom(pane.id, clampPreviewZoom(pinchZoomRef.current * (nextDistance / startDistance)))
+    },
+    [onPaneZoom, pane.id],
+  )
+
+  const handleTouchEnd = useCallback((event: TouchEvent<HTMLDivElement>) => {
+    if (event.touches.length < 2) {
+      pinchDistanceRef.current = null
+    }
+  }, [])
+
+  return (
+    <div
+      key={pane.id}
+      data-slot="dashboard-compose-surface"
+      data-surface-appearance="neutral"
+      data-dragging={draggingPaneId === pane.id ? "true" : "false"}
+      data-grid-visible={showCanvasGrid ? "true" : "false"}
+      data-snap-target={isSnapTarget ? "true" : "false"}
+      draggable={canSwap}
+      className={cn(
+        "relative flex h-full w-full touch-none flex-col items-center justify-center overflow-hidden bg-[var(--drafting-canvas-bg)] transition-opacity duration-150 ease-out after:pointer-events-none after:absolute after:inset-0 after:border-2 after:border-dashed after:border-transparent after:content-[''] after:transition-colors after:duration-150 after:ease-out",
+        canSwap && "cursor-grab active:cursor-grabbing",
+        draggingPaneId === pane.id && "opacity-55",
+        isSnapTarget && "after:border-[var(--drafting-ink)]",
+      )}
+      style={{
+        gridArea: areaName,
+        backgroundImage: showCanvasGrid
+          ? "radial-gradient(circle, rgb(var(--drafting-canvas-dot-rgb) / var(--drafting-canvas-dot-opacity)) 2.4px, transparent 3px)"
+          : "none",
+        backgroundPosition: "0 0",
+        backgroundSize: "30px 30px",
+      }}
+      onClick={handleSurfaceClick}
+      onDragEnd={onPaneDragEnd}
+      onDragLeave={(event) => onPaneDragLeave(pane.id, event)}
+      onDragOver={(event) => onPaneDragOver(pane.id, event)}
+      onDragStart={(event) => onPaneDragStart(pane.id, event)}
+      onDrop={(event) => onPaneDrop(pane.id, event)}
+      onPointerCancel={handlePanePointerEnd}
+      onPointerDownCapture={handlePanePointerDownCapture}
+      onPointerDown={handlePanePointerDown}
+      onPointerMove={handlePanePointerMove}
+      onPointerUp={handlePanePointerEnd}
+      onTouchEnd={handleTouchEnd}
+      onTouchMove={handleTouchMove}
+      onTouchStart={handleTouchStart}
+      onWheel={handleWheel}
+    >
+      <div
+        style={{
+          transform: `translate3d(${panePan.x}px, ${panePan.y}px, 0) scale(${paneZoom})`,
+          transformOrigin: "center center",
+          transition: "transform 150ms ease-out",
+        }}
+        className="flex h-full w-full items-center justify-center"
+      >
+        <QrPane
+          cardState={pane.cardState}
+          interactionScale={paneZoom}
+          layers={pane.layers}
+          snapEnabled={snapEnabled}
+          state={pane.state}
+          isSelected={isSelected}
+          onLayerChange={(layerId, patch) => onLayerChange?.(pane.id, layerId, patch)}
+          onLayerAction={(layerIds, action) => onLayerAction?.(pane.id, layerIds, action)}
+          onLayerCopy={(layerIds) => onLayerCopy?.(pane.id, layerIds)}
+          onLayerPaste={(point) => onLayerPaste?.(pane.id, point)}
+          onLayerSelect={(layerId, options) => onLayerSelect?.(pane.id, layerId, options)}
+          onLayerSelectionChange={(layerIds, options) =>
+            onLayerSelectionChange?.(pane.id, layerIds, options)
+          }
+          onQrClick={handleQrClick}
+          onSelect={handleSelect}
+          selectedLayerId={isSelected && !hideLayerSelectionChrome ? selectedLayerId : null}
+          selectedLayerIds={isSelected && !hideLayerSelectionChrome ? selectedLayerIds : undefined}
+        />
+      </div>
+      {activeCanvasTool === "pan" ? (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 z-[1] cursor-grab touch-none active:cursor-grabbing"
+          data-slot="drafting-pan-overlay"
+          onPointerCancel={handlePanePointerEnd}
+          onPointerDown={beginPanePan}
+          onPointerMove={handlePanePointerMove}
+          onPointerUp={handlePanePointerEnd}
+        />
+      ) : null}
+      {activeCanvasTool === "text" && onAddTextLayerAt ? (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 z-[40] cursor-text touch-none"
+          data-slot="drafting-text-placement-overlay"
+        />
+      ) : null}
+    </div>
+  )
+}
+
+export function DraftingPaneWorkspace({
+  panes,
+  activePaneId,
+  canAddQrCode = true,
+  canRedo = false,
+  canUndo = false,
+  onAddQrCode,
+  onRedo,
+  onRemoveQrCode,
+  onUndo,
+  onPaneSelect,
+  onPaneQrClick,
+  onSwapPanes,
+  onLayerChange,
+  onLayerAction,
+  onLayerCopy,
+  onLayerPaste,
+  onLayerSelect,
+  onLayerSelectionChange,
+  desktopLayerToolbarControls,
+  activeCanvasTool,
+  onAddTextLayerAt,
+  onCanvasToolChange,
+  onCanvasGridChange,
+  showCanvasGrid = true,
+  selectedLayerId,
+  selectedLayerIds,
+  toolbarVariant = "default",
+}: DraftingPaneWorkspaceProps) {
+  const [zoomLevels, setZoomLevels] = useState<Record<string, number>>({})
+  const [panOffsets, setPanOffsets] = useState<DraftingPanePanOffsets>({})
+  const [snapEnabled, setSnapEnabled] = useState(true)
+  const [maximizedPaneId, setMaximizedPaneId] = useState<string | null>(null)
+  const [draggingPaneId, setDraggingPaneId] = useState<string | null>(null)
+  const [snapTargetPaneId, setSnapTargetPaneId] = useState<string | null>(null)
+  const [panelLayouts, setPanelLayouts] = useState<DraftingPanelLayouts>({})
+  const [desktopZoomPopoverOpen, setDesktopZoomPopoverOpen] = useState(false)
+  const draggingPaneIdRef = useRef<string | null>(null)
+  const isPortrait = useSyncExternalStore(
+    subscribePortrait,
+    getPortraitSnapshot,
+    () => false,
+  )
+
+  const activeZoom = zoomLevels[activePaneId] ?? 1
+
+  const handleZoomOut = useCallback(() => {
+    setZoomLevels((current) => ({
+      ...current,
+      [activePaneId]: clampPreviewZoom((current[activePaneId] ?? 1) - PREVIEW_ZOOM_STEP),
+    }))
+  }, [activePaneId])
+
+  const handleZoomIn = useCallback(() => {
+    setZoomLevels((current) => ({
+      ...current,
+      [activePaneId]: clampPreviewZoom((current[activePaneId] ?? 1) + PREVIEW_ZOOM_STEP),
+    }))
+  }, [activePaneId])
+
+  const handlePaneZoom = useCallback((paneId: string, nextZoom: number) => {
+    setZoomLevels((current) => ({
+      ...current,
+      [paneId]: clampPreviewZoom(nextZoom),
+    }))
+  }, [])
+
+  const handleActiveZoomChange = useCallback((nextZoom: number) => {
+    setZoomLevels((current) => ({
+      ...current,
+      [activePaneId]: clampPreviewZoom(nextZoom),
+    }))
+  }, [activePaneId])
+
+  const handleResetView = useCallback(() => {
+    setZoomLevels((current) => ({
+      ...current,
+      [activePaneId]: 1,
+    }))
+    setPanOffsets((current) => ({
+      ...current,
+      [activePaneId]: { x: 0, y: 0 },
+    }))
+  }, [activePaneId])
+
+  const handlePanePan = useCallback((paneId: string, nextPan: { x: number; y: number }) => {
+    setPanOffsets((current) => ({
+      ...current,
+      [paneId]: nextPan,
+    }))
+  }, [])
+
+  const zoomPercent = `${Math.round(activeZoom * 100)}%`
+  const isDesktopZoomToolbar = toolbarVariant === "desktop-zoom"
+  const activeInteractionTool = activeCanvasTool === "pan"
+    ? "pan"
+    : activeCanvasTool === "text"
+      ? "text"
+      : "select"
+
+  const isMaximized = maximizedPaneId !== null
+
+  const handleToggleMaximize = useCallback(() => {
+    setMaximizedPaneId((current) => (current === null ? activePaneId : null))
+  }, [activePaneId])
+
+  const canRemove = panes.length > 1 && onRemoveQrCode
+
+  const visiblePanes = isMaximized
+    ? panes.filter((p) => p.id === activePaneId)
+    : panes
+
+  const canSwapPanes = panes.length > 1 && Boolean(onSwapPanes)
+  const layout = panes.length > 0
+    ? getQrLayout(isMaximized ? 1 : panes.length, isPortrait)
+    : null
+  const topLevelOrientation = layout?.direction === "rows" ? "vertical" : "horizontal"
+  const nestedOrientation = layout?.direction === "rows" ? "horizontal" : "vertical"
+  const layoutKey = layout
+    ? `${layout.direction}-${layout.groups.join("-")}`
+    : "empty"
+  const rootPanelGroupId = `drafting-pane-layout-${layoutKey}-root`
+
+  const handlePanelLayoutChange = useCallback(
+    (groupId: string) => (nextLayout: Record<string, number>) => {
+      setPanelLayouts((current) => {
+        const previousLayout = current[groupId]
+
+        if (
+          previousLayout &&
+          Object.keys(previousLayout).length === Object.keys(nextLayout).length &&
+          Object.entries(nextLayout).every(
+            ([panelId, size]) => previousLayout[panelId] === size,
+          )
+        ) {
+          return current
+        }
+
+        return {
+          ...current,
+          [groupId]: nextLayout,
+        }
+      })
+    },
+    [],
+  )
+
+  const handlePaneDragStart = useCallback(
+    (paneId: string, event: React.DragEvent<HTMLDivElement>) => {
+      if (!canSwapPanes) {
+        event.preventDefault()
+        return
+      }
+
+      event.dataTransfer.effectAllowed = "move"
+      event.dataTransfer.setData("text/plain", paneId)
+      draggingPaneIdRef.current = paneId
+      setDraggingPaneId(paneId)
+      setSnapTargetPaneId(null)
+    },
+    [canSwapPanes],
+  )
+
+  const handlePaneDragOver = useCallback(
+    (paneId: string, event: React.DragEvent<HTMLDivElement>) => {
+      const sourcePaneId =
+        draggingPaneIdRef.current || draggingPaneId || event.dataTransfer.getData("text/plain")
+
+      if (!sourcePaneId || sourcePaneId === paneId) {
+        return
+      }
+
+      event.preventDefault()
+      event.dataTransfer.dropEffect = "move"
+      setSnapTargetPaneId(paneId)
+    },
+    [draggingPaneId],
+  )
+
+  const handlePaneDragLeave = useCallback(
+    (paneId: string, event: React.DragEvent<HTMLDivElement>) => {
+      if (
+        snapTargetPaneId === paneId &&
+        event.relatedTarget instanceof Node &&
+        event.currentTarget.contains(event.relatedTarget)
+      ) {
+        return
+      }
+
+      setSnapTargetPaneId((current) => (current === paneId ? null : current))
+    },
+    [snapTargetPaneId],
+  )
+
+  const handlePaneDrop = useCallback(
+    (targetPaneId: string, event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault()
+
+      const sourcePaneId =
+        draggingPaneIdRef.current || draggingPaneId || event.dataTransfer.getData("text/plain")
+
+      draggingPaneIdRef.current = null
+      setDraggingPaneId(null)
+      setSnapTargetPaneId(null)
+
+      if (!sourcePaneId || sourcePaneId === targetPaneId) {
+        return
+      }
+
+      onSwapPanes?.(sourcePaneId, targetPaneId)
+    },
+    [draggingPaneId, onSwapPanes],
+  )
+
+  const handlePaneDragEnd = useCallback(() => {
+    draggingPaneIdRef.current = null
+    setDraggingPaneId(null)
+    setSnapTargetPaneId(null)
+  }, [])
+
+  return (
+    <TooltipProvider>
+      <div className="relative flex h-full w-full flex-col">
+        <div
+          className="relative min-h-0 flex-1"
+          onDrop={handlePaneDragEnd}
+          onDragOver={(event) => {
+            if (draggingPaneId) {
+              event.preventDefault()
+            }
+          }}
+        >
+          {panes.length === 0 ? (
+            <div className="grid h-full place-items-center text-sm font-medium text-[var(--drafting-ink-muted)]">
+              No QR codes
+            </div>
+          ) : (
+            layout ? (
+              <ResizablePanelGroup
+                className="h-full w-full"
+                data-layout-direction={layout.direction}
+                data-resize-orientation={topLevelOrientation}
+                data-slot="drafting-pane-layout"
+                defaultLayout={panelLayouts[rootPanelGroupId]}
+                id={rootPanelGroupId}
+                onLayoutChange={handlePanelLayoutChange(rootPanelGroupId)}
+                orientation={topLevelOrientation}
+              >
+                {groupPanes(visiblePanes, layout.groups).flatMap((group, groupIndex) => {
+                  const groupPanelId = `group-${groupIndex}`
+                  const nestedPanelGroupId = `drafting-pane-layout-${layoutKey}-group-${groupIndex}`
+                  const groupPanel = (
+                    <ResizablePanel
+                      data-layout-group={groupIndex}
+                      data-layout-group-size={group.length}
+                      defaultSize={100 / layout.groups.length}
+                      id={groupPanelId}
+                      key={groupPanelId}
+                      minSize={12}
+                    >
+                      <ResizablePanelGroup
+                        className="h-full w-full"
+                        data-resize-orientation={nestedOrientation}
+                        defaultLayout={panelLayouts[nestedPanelGroupId]}
+                        id={nestedPanelGroupId}
+                        onLayoutChange={handlePanelLayoutChange(nestedPanelGroupId)}
+                        orientation={nestedOrientation}
+                      >
+                        {group.flatMap((pane, paneIndex) => {
+                          const isSelected = pane.id === activePaneId
+                          const panePan = panOffsets[pane.id] ?? { x: 0, y: 0 }
+                          const paneZoom = zoomLevels[pane.id] ?? 1
+                          const panePanelId = `pane-${groupIndex}-${paneIndex}`
+
+                          const panePanel = (
+                            <ResizablePanel
+                              className="min-h-0 min-w-0"
+                              defaultSize={100 / group.length}
+                              id={panePanelId}
+                              key={panePanelId}
+                              minSize={10}
+                            >
+                              <DraftingPaneSurface
+                                canSwap={canSwapPanes}
+                                draggingPaneId={draggingPaneId}
+                                isSelected={isSelected}
+                                isSnapTarget={snapTargetPaneId === pane.id}
+                                onPaneDragEnd={handlePaneDragEnd}
+                                onPaneDragLeave={handlePaneDragLeave}
+                                onPaneDragOver={handlePaneDragOver}
+                                onPaneDragStart={handlePaneDragStart}
+                                onPaneDrop={handlePaneDrop}
+                                onPanePan={handlePanePan}
+                                onPaneZoom={handlePaneZoom}
+                                onLayerChange={onLayerChange}
+                                onLayerAction={onLayerAction}
+                                onLayerCopy={onLayerCopy}
+                                onLayerPaste={onLayerPaste}
+                                onLayerSelect={onLayerSelect}
+                                onLayerSelectionChange={onLayerSelectionChange}
+                                activeCanvasTool={isSelected ? activeCanvasTool : null}
+                                onAddTextLayerAt={onAddTextLayerAt}
+                                onCanvasToolChange={onCanvasToolChange}
+                                onPaneQrClick={onPaneQrClick}
+                                onPaneSelect={onPaneSelect}
+                                pane={pane}
+                                panePan={panePan}
+                                paneZoom={paneZoom}
+                                selectedLayerId={selectedLayerId}
+                                selectedLayerIds={selectedLayerIds}
+                                showCanvasGrid={showCanvasGrid}
+                                snapEnabled={snapEnabled}
+                              />
+                            </ResizablePanel>
+                          )
+
+                          return paneIndex < group.length - 1
+                            ? [
+                                panePanel,
+                                <DraftingResizeHandle
+                                  key={`pane-${groupIndex}-${paneIndex}-handle`}
+                                />,
+                              ]
+                            : [panePanel]
+                        })}
+                      </ResizablePanelGroup>
+                    </ResizablePanel>
+                  )
+
+                  return groupIndex < layout.groups.length - 1
+                    ? [
+                        groupPanel,
+                        <DraftingResizeHandle key={`group-${groupIndex}-handle`} />,
+                      ]
+                    : [groupPanel]
+                })}
+              </ResizablePanelGroup>
+            ) : null
+          )}
+        </div>
+
+        {isDesktopZoomToolbar ? (
+          <div className="pointer-events-none absolute bottom-4 right-5 z-[60] flex justify-end max-md:right-4">
+            <div
+              data-slot="desktop-resize-toolbar"
+              data-toolbar-appearance="desktop-glass"
+              className="pointer-events-auto inline-flex min-h-14 items-center gap-1 rounded-full border border-white/[0.12] bg-black/55 px-3 py-1.5 text-white/78 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
+            >
+              <button
+                aria-label="Decrease canvas size"
+                className="grid size-8 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
+                disabled={activeZoom <= MIN_PREVIEW_ZOOM}
+                type="button"
+                onClick={handleZoomOut}
+              >
+                <MinusIcon className="size-4" strokeWidth={2.6} />
+              </button>
+              <Popover open={desktopZoomPopoverOpen} onOpenChange={setDesktopZoomPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    aria-label="Choose canvas size"
+                    className="h-8 min-w-[4.75rem] rounded-full px-3 text-center text-[1rem] font-semibold tracking-normal text-white transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                    type="button"
+                    onClick={() => setDesktopZoomPopoverOpen((open) => !open)}
+                    onDoubleClick={() => {
+                      handleResetView()
+                      setDesktopZoomPopoverOpen(false)
+                    }}
+                  >
+                    {zoomPercent}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="center"
+                  side="top"
+                  sideOffset={10}
+                  data-slot="desktop-zoom-popover"
+                  className="w-48 rounded-[20px] border border-white/[0.12] bg-black/70 p-2 text-white/84 shadow-[0_24px_64px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
+                >
+                  <div className="grid gap-0.5" role="menu" aria-label="Canvas size presets">
+                    {DESKTOP_ZOOM_PRESETS.map((preset) => {
+                      const isSelected = Math.round(activeZoom * 100) === Math.round(preset * 100)
+
+                      return (
+                        <button
+                          key={preset}
+                          aria-checked={isSelected}
+                          className="grid h-10 grid-cols-[1.25rem_1fr] items-center rounded-[10px] px-2 text-left text-[1rem] font-semibold text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                          role="menuitemradio"
+                          type="button"
+                          onClick={() => {
+                            handleActiveZoomChange(preset)
+                            setDesktopZoomPopoverOpen(false)
+                          }}
+                        >
+                          <span className="grid place-items-center">
+                            {isSelected ? <CheckIcon className="size-4" strokeWidth={2.6} /> : null}
+                          </span>
+                          <span>{Math.round(preset * 100)}%</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </PopoverContent>
+              </Popover>
+              <button
+                aria-label="Increase canvas size"
+                className="grid size-8 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
+                disabled={activeZoom >= MAX_PREVIEW_ZOOM}
+                type="button"
+                onClick={handleZoomIn}
+              >
+                <PlusIcon className="size-4" strokeWidth={2.3} />
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        <div
+          className={cn(
+            "pointer-events-none absolute bottom-4 z-[60] flex justify-center",
+            isDesktopZoomToolbar
+              ? "inset-x-5 px-2 sm:inset-x-6 md:left-[23.75rem] md:right-0 md:px-0"
+              : "inset-x-5 px-2 sm:inset-x-6 lg:inset-x-8",
+          )}
+        >
+          <div
+            data-slot="dashboard-compose-toolbar"
+            data-toolbar-appearance={isDesktopZoomToolbar ? "desktop-glass" : "neutral"}
+            className={cn(
+              "pointer-events-auto inline-flex max-w-full flex-wrap items-center justify-center gap-1 rounded-[10px] bg-[var(--drafting-panel-bg-active)] px-2 py-1.5",
+              isDesktopZoomToolbar &&
+                "min-h-14 gap-1.5 rounded-full border border-white/[0.12] bg-black/55 px-2.5 text-white/78 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl",
+            )}
+          >
+            {!isDesktopZoomToolbar ? (
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Zoom out preview"
+                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                      onClick={handleZoomOut}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <ZoomOutIcon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Zoom out</TooltipContent>
+                </Tooltip>
+
+                <div className="min-w-12 px-1 text-center font-semibold drafting-type-data text-[var(--drafting-ink)]">
+                  {zoomPercent}
+                </div>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Zoom in preview"
+                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                      onClick={handleZoomIn}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <ZoomInIcon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Zoom in</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Reset view"
+                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                      onClick={handleResetView}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <CrosshairIcon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Reset view</TooltipContent>
+                </Tooltip>
+
+                <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" />
+              </>
+            ) : null}
+
+            {isDesktopZoomToolbar ? (
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Select and move elements"
+                      aria-pressed={activeInteractionTool === "select"}
+                      className={cn(
+                        "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]",
+                        activeInteractionTool === "select" &&
+                          "bg-[var(--drafting-ink)] text-[var(--drafting-paper)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-paper)]",
+                      )}
+                      onClick={() => onCanvasToolChange?.("select")}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <MousePointer2Icon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Select and move elements</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Pan canvas"
+                      aria-pressed={activeInteractionTool === "pan"}
+                      className={cn(
+                        "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]",
+                        activeInteractionTool === "pan" &&
+                          "bg-[var(--drafting-ink)] text-[var(--drafting-paper)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-paper)]",
+                      )}
+                      onClick={() => onCanvasToolChange?.("pan")}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <HandIcon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Pan canvas</TooltipContent>
+                </Tooltip>
+              </>
+            ) : null}
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  aria-label={snapEnabled ? "Disable snapping" : "Enable snapping"}
+                  aria-pressed={snapEnabled}
+                  className={cn(
+                    "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]",
+                    snapEnabled &&
+                      "bg-[var(--drafting-ink)] text-[var(--drafting-paper)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-paper)]",
+                  )}
+                  onClick={() => setSnapEnabled((current) => !current)}
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+                >
+                  <MagnetIcon />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{snapEnabled ? "Snapping on" : "Snapping off"}</TooltipContent>
+            </Tooltip>
+
+            {panes.length > 1 && (
+              <>
+                {!isDesktopZoomToolbar ? <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" /> : null}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label={isMaximized ? "Restore layout" : "Maximize pane"}
+                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                      onClick={handleToggleMaximize}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      {isMaximized ? (
+                        <Minimize2Icon />
+                      ) : (
+                        <Maximize2Icon />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {isMaximized ? "Restore layout" : "Maximize pane"}
+                  </TooltipContent>
+                </Tooltip>
+              </>
+            )}
+
+            {!isDesktopZoomToolbar ? <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" /> : null}
+
+            {isDesktopZoomToolbar ? (
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label={showCanvasGrid ? "Hide canvas grid" : "Show canvas grid"}
+                      aria-pressed={showCanvasGrid}
+                      className={cn(
+                        "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]",
+                        showCanvasGrid &&
+                          "bg-[var(--drafting-ink)] text-[var(--drafting-paper)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-paper)]",
+                      )}
+                      onClick={() => onCanvasGridChange?.(!showCanvasGrid)}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <Grid3X3Icon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{showCanvasGrid ? "Grid on" : "Grid off"}</TooltipContent>
+                </Tooltip>
+              </>
+            ) : null}
+
+            {onAddQrCode ? (
+              <>
+                {isDesktopZoomToolbar ? (
+                  <>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          aria-label="Add text on canvas"
+                          aria-pressed={activeCanvasTool === "text"}
+                          className={cn(
+                            "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] disabled:opacity-40",
+                            activeCanvasTool === "text" &&
+                              "bg-[var(--drafting-ink)] text-[var(--drafting-paper)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-paper)]",
+                          )}
+                          disabled={!onAddTextLayerAt}
+                          onClick={() =>
+                            onCanvasToolChange?.(activeCanvasTool === "text" ? "select" : "text")
+                          }
+                          size="icon"
+                          type="button"
+                          variant="ghost"
+                        >
+                          <TypeIcon />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Click canvas to add text</TooltipContent>
+                    </Tooltip>
+                  </>
+                ) : null}
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Add QR code"
+                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] disabled:opacity-40"
+                      onClick={onAddQrCode}
+                      disabled={!canAddQrCode}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <CopyPlusIcon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {canAddQrCode ? "Add QR code" : "Maximum 10 QR codes reached"}
+                  </TooltipContent>
+                </Tooltip>
+
+                {canRemove ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        aria-label="Remove QR code"
+                        className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                        onClick={() => onRemoveQrCode?.(activePaneId)}
+                        size="icon"
+                        type="button"
+                        variant="ghost"
+                      >
+                        <Trash2Icon />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Remove QR code</TooltipContent>
+                  </Tooltip>
+                ) : null}
+
+                {!isDesktopZoomToolbar ? <div className="mx-1 h-4 w-px bg-[var(--drafting-line)]" /> : null}
+              </>
+            ) : null}
+
+            {!isDesktopZoomToolbar ? (
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Undo"
+                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] disabled:opacity-40"
+                      disabled={!canUndo || !onUndo}
+                      onClick={onUndo}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <Undo2Icon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Undo</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Redo"
+                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] disabled:opacity-40"
+                      disabled={!canRedo || !onRedo}
+                      onClick={onRedo}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <Redo2Icon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Redo</TooltipContent>
+                </Tooltip>
+              </>
+            ) : null}
+
+            {isDesktopZoomToolbar && desktopLayerToolbarControls?.layer ? (
+              <DesktopLayerSettingsToolbar controls={desktopLayerToolbarControls} />
+            ) : null}
+
+          </div>
+        </div>
+      </div>
+    </TooltipProvider>
+  )
+}

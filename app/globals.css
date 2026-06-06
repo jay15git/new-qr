@@ -324,7 +324,7 @@
   animation-fill-mode: both;
 }
 
-[data-slot="new-page"] {
+[data-slot="desktop-page"] {
   min-height: 100dvh;
   --drafting-ink-rgb: 17 17 17;
   --drafting-paper-rgb: 255 255 255;
@@ -439,7 +439,7 @@
   --drafting-dropdown-menu-shadow-open: 0 24px 64px #0000002e, 0 8px 20px #00000014;
 }
 
-.dark :is([data-slot="new-page"], [data-slot="drafting-download-popover"]) {
+.dark :is([data-slot="desktop-page"], [data-slot="drafting-download-popover"]) {
   --drafting-dark-page-bg: #101216;
   --drafting-dark-shell-bg: #101216;
   --drafting-dark-surface-muted: #ffffff08;
@@ -622,7 +622,7 @@
   isolation: isolate;
 }
 
-:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) {
+:is([data-slot="desktop-page"], [data-slot="drafting-download-popover"]) {
   --drafting-type-panel-tab: 0.875rem;
   --drafting-type-section-title: 0.875rem;
   --drafting-type-control-label: 0.875rem;
@@ -636,25 +636,25 @@
   font-optical-sizing: auto;
 }
 
-:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-panel-tab {
+:is([data-slot="desktop-page"], [data-slot="drafting-download-popover"]) .drafting-type-panel-tab {
   font-size: var(--drafting-type-panel-tab);
   line-height: 1.1;
   letter-spacing: 0;
 }
 
-:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-section-title {
+:is([data-slot="desktop-page"], [data-slot="drafting-download-popover"]) .drafting-type-section-title {
   font-size: var(--drafting-type-section-title);
   line-height: 1.15;
   letter-spacing: 0.01em;
 }
 
-:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-control-label {
+:is([data-slot="desktop-page"], [data-slot="drafting-download-popover"]) .drafting-type-control-label {
   font-size: var(--drafting-type-control-label);
   line-height: 1.2;
   letter-spacing: 0.005em;
 }
 
-:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-body {
+:is([data-slot="desktop-page"], [data-slot="drafting-download-popover"]) .drafting-type-body {
   max-width: 65ch;
   font-size: var(--drafting-type-body);
   line-height: 1.55;
@@ -662,38 +662,38 @@
   text-wrap: pretty;
 }
 
-:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-input {
+:is([data-slot="desktop-page"], [data-slot="drafting-download-popover"]) .drafting-type-input {
   font-size: var(--drafting-type-input);
   line-height: 1.45;
   letter-spacing: 0;
 }
 
-:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-nav-label {
+:is([data-slot="desktop-page"], [data-slot="drafting-download-popover"]) .drafting-type-nav-label {
   font-size: var(--drafting-type-nav-label);
   line-height: 1.05;
   letter-spacing: 0.015em;
 }
 
-:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-meta {
+:is([data-slot="desktop-page"], [data-slot="drafting-download-popover"]) .drafting-type-meta {
   font-size: var(--drafting-type-meta);
   line-height: 1.35;
   letter-spacing: 0.01em;
 }
 
-:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-caption {
+:is([data-slot="desktop-page"], [data-slot="drafting-download-popover"]) .drafting-type-caption {
   font-size: var(--drafting-type-caption);
   line-height: 1.25;
   letter-spacing: 0;
 }
 
-:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-data {
+:is([data-slot="desktop-page"], [data-slot="drafting-download-popover"]) .drafting-type-data {
   font-size: var(--drafting-type-meta);
   line-height: 1.35;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
 }
 
-:is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-display-data {
+:is([data-slot="desktop-page"], [data-slot="drafting-download-popover"]) .drafting-type-display-data {
   font-size: var(--drafting-type-display-data);
   line-height: 1;
   letter-spacing: 0;
@@ -701,14 +701,14 @@
 }
 
 @media (min-width: 64rem) {
-  :is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-nav-label {
+  :is([data-slot="desktop-page"], [data-slot="drafting-download-popover"]) .drafting-type-nav-label {
     font-size: var(--drafting-type-nav-label);
     line-height: 1.18;
     letter-spacing: 0.015em;
   }
 }
 
-.dark :is([data-slot="new-page"], [data-slot="drafting-download-popover"]) {
+.dark :is([data-slot="desktop-page"], [data-slot="drafting-download-popover"]) {
   --background: var(--drafting-dark-page-bg);
   --card: var(--drafting-dark-surface-raised);
   --popover: var(--drafting-dark-shell-bg);
@@ -724,12 +724,12 @@
   --drafting-option-card-border-active: var(--drafting-dark-option-border-hover);
 }
 
-.dark [data-slot="new-page"] [data-slot="drafting-surface"] {
+.dark [data-slot="desktop-page"] [data-slot="drafting-surface"] {
   background: var(--drafting-dark-shell-bg);
   box-shadow: var(--drafting-dark-shadow-shell);
 }
 
-.dark [data-slot="new-page"] :is(
+.dark [data-slot="desktop-page"] :is(
   [data-slot="mode-toggle"],
   [data-slot="button"]:not([data-drafting-tool-button="true"]):not([data-drafting-dropdown-trigger="true"]),
   [data-slot="card"],
@@ -747,7 +747,7 @@
   box-shadow: var(--drafting-shadow-rest) !important;
 }
 
-.dark [data-slot="new-page"] :is(
+.dark [data-slot="desktop-page"] :is(
   [data-slot="mode-toggle"],
   [data-slot="button"]:not([data-drafting-tool-button="true"]):not([data-drafting-dropdown-trigger="true"]),
   [data-slot="card"],
@@ -765,7 +765,7 @@
   box-shadow: var(--drafting-shadow-hover) !important;
 }
 
-.dark [data-slot="new-page"] :is(
+.dark [data-slot="desktop-page"] :is(
   [data-slot="button"]:not([data-drafting-tool-button="true"]),
   [data-slot="drafting-layer-row"],
   [data-slot="drafting-color-trigger"],
@@ -774,13 +774,13 @@
   box-shadow: var(--drafting-shadow-active) !important;
 }
 
-.dark [data-slot="new-page"] :is(
+.dark [data-slot="desktop-page"] :is(
   [data-state="open"][data-slot="drafting-color-trigger"]
 ) {
   box-shadow: var(--drafting-shadow-selected) !important;
 }
 
-.dark [data-slot="new-page"] [data-drafting-tool-button="true"][aria-pressed="true"] [data-slot="drafting-tool-button-icon"] {
+.dark [data-slot="desktop-page"] [data-drafting-tool-button="true"][aria-pressed="true"] [data-slot="drafting-tool-button-icon"] {
   box-shadow: var(--drafting-shadow-selected) !important;
 }
 

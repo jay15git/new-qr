@@ -15,12 +15,11 @@ describe("theme contract", () => {
     expect(globalsSource).not.toContain("264.376")
   })
 
-  it("keeps the new drafting chrome on scoped monochrome tokens", () => {
+  it("keeps the drafting chrome on scoped monochrome tokens", () => {
     const checkedFiles = [
-      "app/new/page.tsx",
-      "components/new/drafting-surface.tsx",
-      "components/new/drafting-style-tab.tsx",
-      "components/new/drafting-layers-tab.tsx",
+      "components/drafting/drafting-surface.tsx",
+      "components/drafting/drafting-style-tab.tsx",
+      "components/drafting/drafting-layers-tab.tsx",
     ]
     const disallowedColorTokens =
       /\b(?:amber|sky|red|rose|orange|yellow|pink|purple|violet|blue|cyan|teal|emerald|green|lime)-/
@@ -38,7 +37,7 @@ describe("theme contract", () => {
 
   it("maps the new drafting dark theme to Pencil token aliases", () => {
     const globalsSource = readFileSync(resolve(process.cwd(), "app/globals.css"), "utf8")
-    const qrPaneSource = readFileSync(resolve(process.cwd(), "components/new/qr-pane.tsx"), "utf8")
+    const qrPaneSource = readFileSync(resolve(process.cwd(), "components/drafting/qr-pane.tsx"), "utf8")
     const requiredDarkTokens = [
       "--drafting-dark-page-bg: #101216;",
       "--drafting-dark-shell-bg: #101216;",
@@ -76,7 +75,7 @@ describe("theme contract", () => {
 
     expect(globalsSource).toContain("--drafting-page-bg: var(--drafting-dark-page-bg);")
     expect(globalsSource).toContain(
-      '.dark :is([data-slot="new-page"], [data-slot="drafting-download-popover"])',
+      '.dark :is([data-slot="desktop-page"], [data-slot="drafting-download-popover"])',
     )
     expect(qrPaneSource).toContain('data-drafting-dropdown-content="true"')
     expect(qrPaneSource).toContain("bg-[var(--drafting-dropdown-menu-surface-open)]")
@@ -138,7 +137,7 @@ describe("theme contract", () => {
     }
   })
 
-  it("defines the new drafting typography scale as route-scoped tokens", () => {
+  it("defines the drafting typography scale as route-scoped tokens", () => {
     const globalsSource = readFileSync(resolve(process.cwd(), "app/globals.css"), "utf8")
     const requiredTypographyTokens = [
       "--drafting-type-panel-tab: 0.875rem;",
@@ -150,8 +149,8 @@ describe("theme contract", () => {
       "--drafting-type-meta: 0.875rem;",
       "--drafting-type-caption: 0.75rem;",
       "--drafting-type-display-data: 1.5rem;",
-      ':is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-body',
-      ':is([data-slot="new-page"], [data-slot="drafting-download-popover"]) .drafting-type-nav-label',
+      ':is([data-slot="desktop-page"], [data-slot="drafting-download-popover"]) .drafting-type-body',
+      ':is([data-slot="desktop-page"], [data-slot="drafting-download-popover"]) .drafting-type-nav-label',
     ]
 
     for (const token of requiredTypographyTokens) {
@@ -163,12 +162,11 @@ describe("theme contract", () => {
     expect(globalsSource).not.toContain("font-size: 0.625rem;")
   })
 
-  it("keeps new drafting labels out of forced uppercase styling", () => {
+  it("keeps drafting labels out of forced uppercase styling", () => {
     const checkedFiles = [
-      "components/new/drafting-surface.tsx",
-      "components/new/drafting-style-tab.tsx",
-      "components/new/drafting-layers-tab.tsx",
-      "components/qr/dashboard-compose-surface.tsx",
+      "components/drafting/drafting-surface.tsx",
+      "components/drafting/drafting-style-tab.tsx",
+      "components/drafting/drafting-layers-tab.tsx",
     ]
 
     for (const file of checkedFiles) {

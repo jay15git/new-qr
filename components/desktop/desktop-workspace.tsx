@@ -1,6 +1,6 @@
 "use client"
 
-import { DraftingSurface } from "@/components/new/drafting-surface"
+import { DraftingSurface } from "@/components/drafting/drafting-surface"
 import {
   DesktopToolbarPrototype,
   type DesktopThemeMode,

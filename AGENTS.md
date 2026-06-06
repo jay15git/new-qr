@@ -20,14 +20,11 @@ This version has breaking changes. Read the relevant guide in `node_modules/next
 ## App Structure
 - `app/layout.tsx` defines the root shell, Geist/Bricolage Grotesque/Manrope fonts, and global CSS.
 - `app/page.tsx` is the home route; renders `HomePromptShell` from `components/home/`.
-- **`/new` is the active workspace** and the only route where QR studio work should happen.
-- **`/dashboard` and `/settings` are deprecated.** Do not add features or fixes there unless explicitly asked.
-- `app/settings/page.tsx` is deprecated. It renders `<QrStudio />` (default variant) for legacy access only.
-- `components/qr/qr-studio.tsx` is the main client entrypoint for QR generation. It owns the `QRCodeStyling` instance lifecycle, deferred preview updates, download flow, reset flow, and uploaded logo object URL cleanup.
+- `/desktop` is the active desktop workspace and `/mobile` is the mobile shell.
+- `/new`, `/dashboard`, and `/settings` have been removed. Do not re-add features or fixes there unless explicitly asked.
 - `components/qr/qr-studio-state.ts` is the core state and mapper layer. Update this first when adding new controls, defaults, or `qr-code-styling` options.
 - `components/qr/qr-control-sections.tsx` is the large control-surface form. Follow its existing inline `setState` pattern unless there is a clear reason to refactor.
-- `components/qr/qr-preview-card.tsx` is display/export UI only.
-- `components/new/drafting-surface.tsx` is the active drafting UI for `/new`.
+- `components/drafting/drafting-surface.tsx` is the shared drafting UI used by `/desktop`.
 - `lib/utils.ts` only provides `cn()`.
 
 ## MCP Tools
@@ -39,7 +36,7 @@ This version has breaking changes. Read the relevant guide in `node_modules/next
 
 ## Testing Notes
 - Current tests only cover `components/qr/qr-studio-state.ts` and a growing set of adjacent modules.
-- Vitest is configured with `environment: "node"`, so browser/client behavior in `qr-studio.tsx` is not covered by default.
+- Vitest is configured with `environment: "node"`, so browser/client behavior is not covered by default.
 - If you change React UI behavior, do not assume existing tests cover it.
 
 ## Repo Conventions

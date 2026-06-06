@@ -44,26 +44,26 @@ import {
   DRAFTING_CARD_PATTERNS,
   getDraftingCardPatternStyle,
   type DraftingCardPatternSelectionId,
-} from "@/components/new/drafting-card-patterns"
-import { DEFAULT_DRAFTING_CARD_STATE } from "@/components/new/drafting-card-state"
+} from "@/components/drafting/drafting-card-patterns"
+import { DEFAULT_DRAFTING_CARD_STATE } from "@/components/drafting/drafting-card-state"
 import {
   getCardGeneratedShaderDefinitions,
   getCardImageFilterDefinitions,
   getPaperShaderDefinition,
   type PaperShaderId,
-} from "@/components/new/drafting-paper-shaders"
+} from "@/components/drafting/drafting-paper-shaders"
 import {
   DEFAULT_DRAFTING_TEXT_LAYER,
   type DraftingTextAlign,
   type DraftingTextFontStyle,
   type DraftingTextFontWeight,
-} from "@/components/new/drafting-layer-state"
+} from "@/components/drafting/drafting-layer-state"
 import {
   DRAFTING_FONT_REGISTRY,
   getDraftingFontCssFamily,
   loadDraftingFont,
   resolveDraftingFont,
-} from "@/components/new/drafting-font-registry"
+} from "@/components/drafting/drafting-font-registry"
 import {
   buildStaticQrPayload,
   getDefaultStaticQrValues,

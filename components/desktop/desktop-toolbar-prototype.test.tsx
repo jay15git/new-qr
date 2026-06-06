@@ -23,7 +23,7 @@ afterEach(() => {
 })
 
 describe("DesktopToolbarPrototype", () => {
-  it("renders every /new left rail tool as an accessible icon button", async () => {
+  it("renders every drafting left rail tool as an accessible icon button", async () => {
     const surface = await renderPrototype()
     const buttons = getToolButtons(surface.container)
 
@@ -167,7 +167,7 @@ describe("DesktopToolbarPrototype", () => {
     expect(source).toContain("--elastic-slider-bg: rgba(15, 23, 42, 0.08)")
   })
 
-  it("renders every remaining /new settings tool in the desktop inspector format", async () => {
+  it("renders every remaining drafting settings tool in the desktop inspector format", async () => {
     const surface = await renderPrototype()
     const expectedSlots = [
       ["logo", "desktop-logo-inspector"],
@@ -226,7 +226,7 @@ describe("DesktopToolbarPrototype", () => {
     expect(shapeInspector?.querySelector('input[aria-label="Shape backing shadow color"]')).not.toBeNull()
   })
 
-  it("renders the /new content tab inside the floating inspector", async () => {
+  it("renders the drafting content tab inside the floating inspector", async () => {
     const surface = await renderPrototype()
     const contentButton = getRequiredToolButton(surface.container, "content")
 
