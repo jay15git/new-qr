@@ -3060,7 +3060,8 @@ function DesktopPatternInspector({
                   <input
                     key={`${color}-${index}`}
                     aria-label={`Pattern color ${index + 1}`}
-                    className="size-7 shrink-0 cursor-pointer rounded-full border border-white/[0.12] bg-transparent p-0.5"
+                    className="size-7 shrink-0 cursor-pointer overflow-hidden rounded-full border bg-transparent p-0"
+                    data-slot="desktop-color-picker"
                     type="color"
                     value={color}
                     onChange={(event) =>

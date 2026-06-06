@@ -646,6 +646,17 @@ describe("DesktopToolbarPrototype", () => {
     expect(swatch.className).not.toContain("rounded-[6px]")
     expect(swatch.getAttribute("data-slot")).toBe("desktop-color-picker")
     expect(hexInput.className).toContain("w-20")
+
+    await act(async () => {
+      getRequiredButton(surface.container, "Use Patterns module color").dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    const patternSwatch = getRequiredInput(surface.container, "Pattern color 1")
+    expect(patternSwatch.type).toBe("color")
+    expect(patternSwatch.className).toContain("rounded-full")
+    expect(patternSwatch.className).toContain("size-7")
+    expect(patternSwatch.className).not.toContain("border-white")
+    expect(patternSwatch.getAttribute("data-slot")).toBe("desktop-color-picker")
   })
 
   it("renders a Pixelmator-style shape inspector without placeholder copy", async () => {
