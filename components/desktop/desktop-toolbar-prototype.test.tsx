@@ -164,7 +164,7 @@ describe("DesktopToolbarPrototype", () => {
     expect(source).toContain('[data-slot="tooltip-content"]')
     expect(source).toContain("background: rgba(15, 15, 15, 0.94) !important")
     expect(source).toContain('[data-slot="elastic-slider"]')
-    expect(source).toContain("--elastic-slider-bg: rgba(15, 23, 42, 0.08)")
+    expect(source).toContain("--elastic-slider-bg: rgba(15, 23, 42, 0.035)")
   })
 
   it("renders every remaining drafting settings tool in the desktop inspector format", async () => {
@@ -250,10 +250,14 @@ describe("DesktopToolbarPrototype", () => {
     expect(filterSearchRow?.className).not.toContain("bg-white/[0.08]")
     const filterTrigger = filterSearchRow?.querySelector('[data-slot="desktop-content-type-filter-trigger"]')
     expect(filterTrigger?.className).toContain("desktop-inspector-input-bg")
+    expect(filterTrigger?.className).toContain("min-w-[84px]")
+    expect(filterTrigger?.className).toContain("max-w-24")
     expect(filterTrigger?.querySelector("svg[data-slot='filter-icon']")).toBeNull()
     const searchInput = filterSearchRow?.querySelector('input[aria-label="Search QR types"]')
     expect(searchInput).not.toBeNull()
     expect(searchInput?.className).toContain("desktop-inspector-input-bg")
+    expect(searchInput?.className).toContain("rounded-full")
+    expect(searchInput?.parentElement?.className).toContain("h-full")
     expect(inspector?.querySelector('[data-slot="desktop-content-fields"]')).not.toBeNull()
     expect(inspector?.textContent).toContain("Content")
     expect(inspector?.textContent).toContain("Popular")
@@ -277,8 +281,8 @@ describe("DesktopToolbarPrototype", () => {
 
     expect(linkPreset.getAttribute("aria-pressed")).toBe("true")
     expect(linkPreset.getAttribute("data-desktop-content-type-option")).toBe("true")
-    expect(linkPreset.className).toContain("border-2")
     expect(linkPreset.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(linkPreset.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
     expect(linkPreset.className).not.toContain("border-white/55")
     expect(linkPreset.className).not.toContain("desktop-inspector-selected-bg")
     expect(linkPreset.className).not.toContain("desktop-inspector-selected-fg")
@@ -349,7 +353,8 @@ describe("DesktopToolbarPrototype", () => {
     const gradientMode = getRequiredButton(surface.container, "Use Gradient module color")
     const patternsMode = getRequiredButton(surface.container, "Use Patterns module color")
 
-    expect(solidMode?.className).toContain("desktop-inspector-selected-bg")
+    expect(solidMode?.className).toContain("desktop-inspector-option-selected-bg")
+    expect(solidMode?.className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
     expect(gradientMode.className).not.toContain("bg-black/22")
     expect(gradientMode.className).not.toContain("desktop-inspector-control-bg")
     expect(patternsMode.className).not.toContain("bg-black/22")
@@ -374,7 +379,7 @@ describe("DesktopToolbarPrototype", () => {
     expect(surface.container.textContent).toContain("Module Color")
   })
 
-  it("uses a black selected border without filling module pattern options in light mode", async () => {
+  it("uses an outer black selected ring with selected fill for module pattern options in light mode", async () => {
     const surface = await renderPrototype()
     const themeToggle = getRequiredButton(surface.container, "Switch to light mode")
     const patternButton = getRequiredToolButton(surface.container, "pattern")
@@ -392,13 +397,14 @@ describe("DesktopToolbarPrototype", () => {
 
     const selectedSurface = dotsPattern.querySelector<HTMLElement>('[data-desktop-adaptive-option-preview="true"]')
     expect(dotsPattern.getAttribute("aria-pressed")).toBe("true")
-    expect(dotsPattern.className).toContain("bg-transparent")
+    expect(dotsPattern.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
+    expect(dotsPattern.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
     expect(selectedSurface?.className).toContain("border-2")
-    expect(selectedSurface?.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
-    expect(selectedSurface?.style.backgroundColor).toBe("rgba(255, 255, 255, 0.86)")
+    expect(selectedSurface?.className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(selectedSurface?.style.backgroundColor).toBe("transparent")
   })
 
-  it("uses a white selected border without filling module pattern options in dark mode", async () => {
+  it("uses an outer white selected ring with selected fill for module pattern options in dark mode", async () => {
     const surface = await renderPrototype()
     const patternButton = getRequiredToolButton(surface.container, "pattern")
 
@@ -414,10 +420,11 @@ describe("DesktopToolbarPrototype", () => {
 
     const selectedSurface = dotsPattern.querySelector<HTMLElement>('[data-desktop-adaptive-option-preview="true"]')
     expect(dotsPattern.getAttribute("aria-pressed")).toBe("true")
-    expect(dotsPattern.className).toContain("bg-transparent")
+    expect(dotsPattern.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
+    expect(dotsPattern.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
     expect(selectedSurface?.className).toContain("border-2")
-    expect(selectedSurface?.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
-    expect(selectedSurface?.style.backgroundColor).toBe("rgba(0, 0, 0, 0.88)")
+    expect(selectedSurface?.className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(selectedSurface?.style.backgroundColor).toBe("transparent")
     expect(selectedSurface?.style.color).toBe("rgb(248, 250, 252)")
   })
 
@@ -501,7 +508,7 @@ describe("DesktopToolbarPrototype", () => {
     expect(squareDot.getAttribute("aria-pressed")).toBe("true")
   })
 
-  it("uses a black selected border without filling corner frame and dot options in light mode", async () => {
+  it("uses an outer black selected ring with selected fill for corner frame and dot options in light mode", async () => {
     const surface = await renderPrototype()
     const themeToggle = getRequiredButton(surface.container, "Switch to light mode")
     const cornersButton = getRequiredToolButton(surface.container, "corners")
@@ -523,17 +530,19 @@ describe("DesktopToolbarPrototype", () => {
     const dotSurface = squareDot.querySelector<HTMLElement>('[data-desktop-adaptive-option-preview="true"]')
     expect(squareFrame.getAttribute("aria-pressed")).toBe("true")
     expect(squareDot.getAttribute("aria-pressed")).toBe("true")
-    expect(squareFrame.className).toContain("bg-transparent")
-    expect(squareDot.className).toContain("bg-transparent")
+    expect(squareFrame.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
+    expect(squareDot.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
+    expect(squareFrame.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(squareDot.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
     expect(frameSurface?.className).toContain("border-2")
     expect(dotSurface?.className).toContain("border-2")
-    expect(frameSurface?.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
-    expect(dotSurface?.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
-    expect(frameSurface?.style.backgroundColor).toBe("rgba(255, 255, 255, 0.86)")
-    expect(dotSurface?.style.backgroundColor).toBe("rgba(255, 255, 255, 0.86)")
+    expect(frameSurface?.className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(dotSurface?.className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(frameSurface?.style.backgroundColor).toBe("transparent")
+    expect(dotSurface?.style.backgroundColor).toBe("transparent")
   })
 
-  it("uses a white selected border without filling corner frame and dot options in dark mode", async () => {
+  it("uses an outer white selected ring with selected fill for corner frame and dot options in dark mode", async () => {
     const surface = await renderPrototype()
     const cornersButton = getRequiredToolButton(surface.container, "corners")
 
@@ -553,15 +562,17 @@ describe("DesktopToolbarPrototype", () => {
     const dotSurface = squareDot.querySelector<HTMLElement>('[data-desktop-adaptive-option-preview="true"]')
     expect(squareFrame.getAttribute("aria-pressed")).toBe("true")
     expect(squareDot.getAttribute("aria-pressed")).toBe("true")
-    expect(squareFrame.className).toContain("bg-transparent")
-    expect(squareDot.className).toContain("bg-transparent")
+    expect(squareFrame.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
+    expect(squareDot.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
+    expect(squareFrame.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(squareDot.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
     expect(frameSurface?.className).toContain("border-2")
     expect(dotSurface?.className).toContain("border-2")
-    expect(frameSurface?.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
-    expect(dotSurface?.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
-    expect(frameSurface?.style.backgroundColor).toBe("rgba(0, 0, 0, 0.88)")
+    expect(frameSurface?.className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(dotSurface?.className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(frameSurface?.style.backgroundColor).toBe("transparent")
     expect(frameSurface?.style.color).toBe("rgb(248, 250, 252)")
-    expect(dotSurface?.style.backgroundColor).toBe("rgba(0, 0, 0, 0.88)")
+    expect(dotSurface?.style.backgroundColor).toBe("transparent")
     expect(dotSurface?.style.color).toBe("rgb(248, 250, 252)")
   })
 
@@ -712,7 +723,12 @@ describe("DesktopToolbarPrototype", () => {
     })
 
     expect(circleShape.getAttribute("aria-pressed")).toBe("true")
+    expect(circleShape.getAttribute("data-desktop-option-tile")).toBe("true")
+    expect(circleShape.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(circleShape.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
     expect(solidMode.getAttribute("aria-pressed")).toBe("true")
+    expect(solidMode.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
+    expect(solidMode.className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
     expect(surface.container.querySelector('input[aria-label="Shape solid color"]')).not.toBeNull()
   })
 
@@ -878,7 +894,8 @@ describe("DesktopToolbarPrototype", () => {
     expect(motionToggle.getAttribute("aria-pressed")).toBe("false")
     expect(motionToggle.className).not.toContain("desktop-inspector-control-bg")
     expect(defaultLoader.getAttribute("aria-pressed")).toBe("true")
-    expect(defaultLoader.className).toContain("desktop-inspector-selected-bg")
+    expect(defaultLoader.className).toContain("desktop-inspector-option-selected-bg")
+    expect(defaultLoader.className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
     expect(defaultLoader.className).not.toContain("ring-black")
   })
 
@@ -1095,11 +1112,12 @@ describe("DesktopToolbarPrototype", () => {
     expect(getRequiredTextarea(surface.container, "Text layer content").className).not.toContain("border-white")
     expect(getRequiredButton(surface.container, "Bold text").className).not.toContain("desktop-inspector-control-bg")
     expect(getRequiredButton(surface.container, "Align text left").getAttribute("aria-pressed")).toBe("true")
-    expect(getRequiredButton(surface.container, "Align text left").className).toContain("desktop-inspector-selected-bg")
+    expect(getRequiredButton(surface.container, "Align text left").className).toContain("desktop-inspector-option-selected-bg")
+    expect(getRequiredButton(surface.container, "Align text left").className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
     expect(inspector?.textContent).not.toContain("Reset Text")
   })
 
-  it("keeps desktop content picker defaults flat with border-only selection", async () => {
+  it("keeps desktop content picker defaults flat with ring and fill selection", async () => {
     const surface = await renderPrototype()
     const contentButton = getRequiredToolButton(surface.container, "content")
 
@@ -1119,8 +1137,29 @@ describe("DesktopToolbarPrototype", () => {
     expect(textOption.className).toContain("border-transparent")
     expect(selectedOption?.className).not.toContain("desktop-inspector-selected-bg")
     expect(selectedOption?.className).not.toContain("bg-[var(--desktop-inspector-selected-bg)]")
-    expect(selectedOption?.className).toContain("border-2")
+    expect(selectedOption?.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
     expect(selectedOption?.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(filterTrigger.className).toContain("rounded-full")
+
+    const source = readFileSync(
+      resolve(process.cwd(), "components/desktop/desktop-toolbar-prototype.tsx"),
+      "utf8",
+    )
+    expect(source).toContain('data-slot="desktop-content-type-filter-menu"')
+    expect(source).toContain('{ id: "all", label: "All" }')
+    expect(source).toContain("w-32")
+    expect(source).toContain("bg-white")
+    expect(source).toContain("bg-[#111116]")
+    expect(source).toContain("[&_[data-slot=dropdown-menu-radio-item-indicator]]:hidden")
+    expect(source).not.toContain("[&_[data-slot=dropdown-menu-radio-item-indicator]]:left-3")
+    expect(source).not.toContain("data-[state=checked]:ring-2")
+    expect(source).not.toContain("data-[state=checked]:focus:bg-transparent")
+    expect(source).toContain("data-[state=checked]:focus:bg-slate-950/[0.08]")
+    expect(source).toContain("data-[state=checked]:focus:bg-white/[0.1]")
+    expect(source).not.toContain("[&_[data-slot=dropdown-menu-radio-item-indicator]]:text-current")
+    expect(source).not.toContain("data-[state=checked]:focus:[&_[data-slot=dropdown-menu-radio-item-indicator]]")
+    expect(source).not.toContain("[data-slot=dropdown-menu-radio-item-indicator]_svg")
+    expect(source).toContain(':not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):hover')
   })
 
   it("keeps logo size rows flat instead of stacking grey controls", async () => {

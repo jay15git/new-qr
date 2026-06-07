@@ -1108,10 +1108,10 @@ export function DraftingPaneWorkspace({
               </button>
               <Popover open={desktopZoomPopoverOpen} onOpenChange={setDesktopZoomPopoverOpen}>
                 <PopoverTrigger asChild>
-                  <button
-                    aria-label="Choose canvas size"
-                    className="h-8 min-w-[4.75rem] rounded-full px-3 text-center text-[1rem] font-semibold tracking-normal text-white transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
-                    type="button"
+	                  <button
+	                    aria-label="Choose canvas size"
+	                    className="h-8 min-w-[3.75rem] rounded-full px-2 text-center text-[1rem] font-semibold tracking-normal text-white transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+	                    type="button"
                     onClick={() => setDesktopZoomPopoverOpen((open) => !open)}
                     onDoubleClick={() => {
                       handleResetView()

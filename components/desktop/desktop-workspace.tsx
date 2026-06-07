@@ -86,11 +86,11 @@ function DesktopWorkspaceStyles() {
 
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="elastic-slider"],
       body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="elastic-slider"] {
-        --elastic-slider-bg: rgba(15, 23, 42, 0.08);
-        --elastic-slider-fill: rgba(15, 23, 42, 0.1);
-        --elastic-slider-fill-active: rgba(15, 23, 42, 0.16);
-        --elastic-slider-hash: rgba(15, 23, 42, 0.22);
-        --elastic-slider-handle: rgba(15, 23, 42, 0.58);
+        --elastic-slider-bg: rgba(15, 23, 42, 0.035);
+        --elastic-slider-fill: rgba(15, 23, 42, 0.052);
+        --elastic-slider-fill-active: rgba(15, 23, 42, 0.085);
+        --elastic-slider-hash: rgba(15, 23, 42, 0.13);
+        --elastic-slider-handle: rgba(15, 23, 42, 0.46);
         --elastic-slider-label: rgba(15, 23, 42, 0.56);
         --elastic-slider-focus: rgba(15, 23, 42, 0.78);
       }
