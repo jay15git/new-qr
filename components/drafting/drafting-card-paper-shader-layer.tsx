@@ -62,7 +62,7 @@ export function hasDraftingPaperShaderWebGlSupport() {
   }
 }
 
-export function buildDraftingPaperShaderRenderProps(
+function buildDraftingPaperShaderRenderProps(
   paperShader: DraftingCardPaperShaderState,
   renderOptions?: Record<string, unknown>,
 ) {

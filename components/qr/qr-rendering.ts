@@ -1713,19 +1713,7 @@ function getBackgroundRenderMetrics(
     translateX,
     translateY,
   }
-}
-
-export function getQrBackgroundRenderMetrics(
-  state: Pick<QrStudioState, "backgroundShapeOptions" | "height" | "width">,
-) {
-  return getBackgroundRenderMetrics(
-    clampQrSize(state.width),
-    clampQrSize(state.height),
-    normalizeBackgroundShapeOptions(state.backgroundShapeOptions),
-  )
-}
-
-export function getQrRenderedDimensions(
+}export function getQrRenderedDimensions(
   state: Pick<
     QrStudioState,
     "backgroundImage" | "backgroundShapeId" | "backgroundShapeOptions" | "height" | "width"

@@ -14,18 +14,7 @@ export const DOT_STYLE_PREVIEW_ROWS = Object.freeze(
 
 export function isDotStylePreviewDark(rowIndex: number, columnIndex: number) {
   return DOT_STYLE_PREVIEW_ROWS[rowIndex]?.[columnIndex] === "1"
-}
-
-export function getDotStylePreviewNeighbor(
-  rowIndex: number,
-  columnIndex: number,
-  offsetX: number,
-  offsetY: number,
-) {
-  return isDotStylePreviewDark(rowIndex + offsetY, columnIndex + offsetX)
-}
-
-function buildDotStylePreviewRows() {
+}function buildDotStylePreviewRows() {
   const qr = qrcode(0, STYLE_PREVIEW_ERROR_CORRECTION_LEVEL)
   qr.addData(STYLE_PREVIEW_SAMPLE_DATA, STYLE_PREVIEW_MODE)
   qr.make()

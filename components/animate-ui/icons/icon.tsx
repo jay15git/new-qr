@@ -642,9 +642,6 @@ function getVariants<
 }
 
 export {
-  pathClassName,
-  staticAnimations,
-  AnimateIcon,
   IconWrapper,
   useAnimateIconContext,
   getVariants,

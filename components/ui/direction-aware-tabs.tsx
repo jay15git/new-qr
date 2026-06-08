@@ -250,4 +250,4 @@ function getTabDirection(
 }
 
 export { DirectionAwareTabs }
-export type { DirectionAwareTabsProps, Tab as DirectionAwareTab, TabId }
+export type { DirectionAwareTabsProps, TabId }

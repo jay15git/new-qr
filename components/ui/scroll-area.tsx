@@ -67,17 +67,8 @@ function ScrollAreaThumb({
       {...props}
     />
   )
-}
-
-function ScrollAreaCorner(
-  props: React.ComponentProps<typeof ScrollAreaPrimitive.ScrollAreaCorner>,
-) {
-  return <ScrollAreaPrimitive.ScrollAreaCorner data-slot="scroll-area-corner" {...props} />
-}
-
-export {
+}export {
   ScrollArea,
-  ScrollAreaCorner,
   ScrollAreaScrollbar,
   ScrollAreaThumb,
   ScrollAreaViewport,

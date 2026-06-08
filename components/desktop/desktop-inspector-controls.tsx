@@ -206,35 +206,6 @@ export function DesktopInspectorSegmentedControl<TValue extends string>({
   )
 }
 
-type DesktopInspectorOptionButtonProps = ComponentProps<"button"> & {
-  selected?: boolean
-  selectedClassName?: string
-}
-
-export function DesktopInspectorOptionButton({
-  children,
-  className,
-  selected,
-  selectedClassName = DESKTOP_INSPECTOR_SELECTED_CLASS,
-  type = "button",
-  ...props
-}: DesktopInspectorOptionButtonProps) {
-  return (
-    <button
-      aria-pressed={selected}
-      className={cn(
-        DESKTOP_INSPECTOR_CONTROL_CLASS,
-        selected && selectedClassName,
-        className,
-      )}
-      type={type}
-      {...props}
-    >
-      {children}
-    </button>
-  )
-}
-
 type DesktopInspectorSearchInputProps =
   Omit<ComponentProps<"input">, "onChange"> & {
     iconClassName?: string

@@ -153,9 +153,6 @@ function Blocks(props: BlocksProps) {
 }
 
 export {
-  animations,
-  Blocks,
   Blocks as BlocksIcon,
   type BlocksProps,
-  type BlocksProps as BlocksIconProps,
 };

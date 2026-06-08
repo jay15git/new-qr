@@ -18,14 +18,14 @@ function renderBrandIconMarkup(brandIcon: BrandIconEntry, color: string) {
   )
 }
 
-export function createBrandIconSvgMarkup(
+function createBrandIconSvgMarkup(
   brandIcon: BrandIconEntry,
   color: string,
 ) {
   return renderBrandIconMarkup(brandIcon, color).replaceAll("currentColor", color)
 }
 
-export function svgMarkupToDataUrl(markup: string) {
+function svgMarkupToDataUrl(markup: string) {
   return `data:image/svg+xml,${encodeURIComponent(markup)}`
 }
 
@@ -36,7 +36,7 @@ export function createBrandIconDataUrl(
   return svgMarkupToDataUrl(createBrandIconSvgMarkup(brandIcon, color))
 }
 
-export function createBrandIconGradientSvgMarkup(
+function createBrandIconGradientSvgMarkup(
   brandIcon: BrandIconEntry,
   gradient: StudioGradient,
 ) {

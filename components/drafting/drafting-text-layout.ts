@@ -12,7 +12,7 @@ export type DraftingTextLayout = {
   lines: string[]
 }
 
-export function getDraftingTextLineHeight(layer: DraftingCanvasLayer): number {
+function getDraftingTextLineHeight(layer: DraftingCanvasLayer): number {
   const raw = layer.lineHeight ?? DEFAULT_DRAFTING_TEXT_LAYER.lineHeight
 
   if (!Number.isFinite(raw)) {
@@ -22,7 +22,7 @@ export function getDraftingTextLineHeight(layer: DraftingCanvasLayer): number {
   return Math.max(0.6, Math.min(4, raw))
 }
 
-export function getDraftingTextLetterSpacing(layer: DraftingCanvasLayer): number {
+function getDraftingTextLetterSpacing(layer: DraftingCanvasLayer): number {
   const raw = layer.letterSpacing ?? DEFAULT_DRAFTING_TEXT_LAYER.letterSpacing
 
   if (!Number.isFinite(raw)) {
@@ -39,27 +39,9 @@ export function getDraftingTextFontFamily(layer: DraftingCanvasLayer): string {
   })
 }
 
-export function getDraftingTextFont(layer: DraftingCanvasLayer): string {
+function getDraftingTextFont(layer: DraftingCanvasLayer): string {
   return `${layer.fontStyle ?? DEFAULT_DRAFTING_TEXT_LAYER.fontStyle} ${layer.fontWeight ?? DEFAULT_DRAFTING_TEXT_LAYER.fontWeight} ${layer.fontSize ?? DEFAULT_DRAFTING_TEXT_LAYER.fontSize}px ${getDraftingTextFontFamily(layer)}`
-}
-
-export function measureDraftingTextLineWidth(
-  layer: DraftingCanvasLayer,
-  line: string,
-  ctx?: CanvasRenderingContext2D | null,
-): number {
-  const measure = ctx ?? getMeasureContext()
-  const fontSize = layer.fontSize ?? DEFAULT_DRAFTING_TEXT_LAYER.fontSize
-
-  if (!measure) {
-    return Math.max(0, Array.from(line).length * (fontSize * 0.58))
-  }
-
-  measure.font = getDraftingTextFont(layer)
-  return measureDraftingTextLineWidthWithContext(measure, layer, line)
-}
-
-export function layoutDraftingText(
+}export function layoutDraftingText(
   layer: DraftingCanvasLayer,
   ctx?: CanvasRenderingContext2D | null,
 ): DraftingTextLayout {

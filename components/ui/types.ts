@@ -1,19 +1,4 @@
-import type { SVGProps } from "react";
-
-export type IconEasing =
-  | "linear"
-  | "easeIn"
-  | "easeOut"
-  | "easeInOut"
-  | "circIn"
-  | "circOut"
-  | "circInOut"
-  | "backIn"
-  | "backOut"
-  | "backInOut"
-  | "anticipate";
-
-export interface AnimatedIconProps extends Omit<
+import type { SVGProps } from "react";export interface AnimatedIconProps extends Omit<
   SVGProps<SVGSVGElement>,
   | "ref"
   | "onAnimationStart"

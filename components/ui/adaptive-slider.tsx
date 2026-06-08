@@ -14,20 +14,6 @@ import { cn } from "@/lib/utils"
 
 type OffsetHandle = "start" | "end"
 
-type AdaptiveSliderProps = {
-  className?: string
-  compact?: boolean
-  defaultValue?: number
-  id?: string
-  max?: number
-  min?: number
-  onChange?: (value: number) => void
-  step?: number
-  thumbColor?: string
-  trackGradient?: string
-  value?: number
-}
-
 type AdaptiveOffsetRangeSliderProps = {
   className?: string
   endColor: string
@@ -52,11 +38,6 @@ type MoveAdaptiveOffsetHandleArgs = {
   startValue: number
 }
 
-const DEFAULT_MIN = 0
-const DEFAULT_MAX = 100
-const DEFAULT_STEP = 1
-const DEFAULT_SINGLE_VALUE = 50
-const DEFAULT_TRACK_GRADIENT = "linear-gradient(90deg, #ef4f93 0%, #3730a3 100%)"
 const DEFAULT_START_LABEL = "Start"
 const DEFAULT_END_LABEL = "End"
 const DECORATIVE_DOT_COUNT = 7
@@ -161,62 +142,6 @@ export function moveAdaptiveOffsetHandle({
     values: [nextValue, startValue] as [number, number],
     activeHandle: "start" as const,
   }
-}
-
-export function AdaptiveSlider({
-  className,
-  compact = true,
-  defaultValue = DEFAULT_SINGLE_VALUE,
-  id,
-  max = DEFAULT_MAX,
-  min = DEFAULT_MIN,
-  onChange,
-  step = DEFAULT_STEP,
-  thumbColor = "#ef4f93",
-  trackGradient = DEFAULT_TRACK_GRADIENT,
-  value,
-}: AdaptiveSliderProps) {
-  const fallbackId = useId()
-  const sliderId = id ?? fallbackId
-  const [internalValue, setInternalValue] = useState(defaultValue)
-  const currentValue = clampAdaptiveValue(value ?? internalValue, min, max)
-  const currentPercent = toAdaptivePercent(currentValue, min, max)
-
-  const handleSliderChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const nextValue = snapAdaptiveValue(Number(event.target.value), min, max, step)
-
-    setInternalValue(nextValue)
-    onChange?.(nextValue)
-  }
-
-  return (
-    <div
-      data-slot="adaptive-slider"
-      className={cn("relative w-full select-none", compact ? "py-2" : "py-3", className)}
-    >
-      <div className="relative flex h-14 w-full items-center overflow-visible">
-        <SliderDecorativeTrack gradient={trackGradient} />
-        <input
-          id={sliderId}
-          type="range"
-          min={min}
-          max={max}
-          step={step}
-          value={currentValue}
-          onChange={handleSliderChange}
-          className="absolute inset-0 z-20 h-full w-full cursor-pointer opacity-0"
-        />
-        <motion.div
-          data-slot="adaptive-slider-thumb"
-          className="pointer-events-none absolute top-1/2 z-10 -translate-x-1/2 -translate-y-1/2"
-          animate={{ left: `${currentPercent}%` }}
-          transition={{ type: "spring", stiffness: 280, damping: 28, mass: 0.9 }}
-        >
-          <SliderThumb accentColor={thumbColor} />
-        </motion.div>
-      </div>
-    </div>
-  )
 }
 
 export function AdaptiveOffsetRangeSlider({

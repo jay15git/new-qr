@@ -175,30 +175,7 @@ export function getDraftingFontCssFamily(
   const family = font?.family ?? normalizeUnknownFontFamily(options.fontFamily)
 
   return `"${family}", ${font?.fallback ?? DRAFTING_FONT_FALLBACK}`
-}
-
-export function normalizeDraftingFontId(
-  fontId: unknown,
-  fontFamily: unknown,
-  fallbackFontId?: string,
-) {
-  if (typeof fontId === "string" && FONT_BY_ID.has(fontId)) {
-    return fontId
-  }
-
-  if (typeof fontFamily === "string") {
-    const font = getDraftingFontByFamily(fontFamily)
-    if (font) {
-      return font.id
-    }
-  }
-
-  return fallbackFontId && FONT_BY_ID.has(fallbackFontId)
-    ? fallbackFontId
-    : DEFAULT_DRAFTING_FONT_ID
-}
-
-export function loadDraftingFont(fontId: string | null | undefined): Promise<void> {
+}export function loadDraftingFont(fontId: string | null | undefined): Promise<void> {
   const font = getDraftingFontById(fontId) ?? getDraftingFontById(DEFAULT_DRAFTING_FONT_ID)!
 
   if (typeof document === "undefined") {

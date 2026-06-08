@@ -25,17 +25,7 @@ export type {
   ColorPickerState,
 } from "./hooks/use-color-picker";
 export { useColorPicker } from "./hooks/use-color-picker";
-export {
-  parseColor,
-  formatColor,
-  formatAll,
-  gamutInfo,
-  toGamut,
-  contrast,
-  apcaContrast,
-  isValidColor,
-} from "./lib/color";
-export { colorChannels, setColorChannel } from "./lib/channels";
+export { parseColor } from "./lib/color";
 export type { ChannelDescriptor } from "./lib/channels";
 
 /**

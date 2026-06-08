@@ -68,8 +68,8 @@ export type DraftingLayerAlignAction =
   | "top"
 export type DraftingLayerDistributeAction = "horizontal" | "vertical"
 
-export const DRAFTING_CARD_LAYER_SUFFIX = ":card"
-export const DRAFTING_QR_LAYER_SUFFIX = ":qr"
+const DRAFTING_CARD_LAYER_SUFFIX = ":card"
+const DRAFTING_QR_LAYER_SUFFIX = ":qr"
 
 const DEFAULT_LAYER_SHADOW: DraftingCardShadowState = {
   blur: 0,

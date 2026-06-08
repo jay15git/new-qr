@@ -60,13 +60,7 @@ export function parseColor(input: string): OklchColor | null {
     h: Number.isFinite(oklch.h) ? (oklch.h as number) : 0,
     alpha: oklch.alpha ?? 1,
   };
-}
-
-export function isValidColor(input: string): boolean {
-  return parseColor(input) !== null;
-}
-
-/**
+}/**
  * Serialize a canonical OKLCH color to a CSS string in the chosen format.
  * For sRGB-targeted formats (hex/rgb/hsl/hsb) the color is gamut-mapped to sRGB first.
  * For P3 the color is gamut-mapped to P3.
@@ -211,7 +205,7 @@ export function linSrgbToLinP3(c: {
 }
 
 /* Linear sRGB → linear Rec.2020 (CSS Color 4 reference matrix). */
-export function linSrgbToLinRec2020(c: {
+function linSrgbToLinRec2020(c: {
   r: number;
   g: number;
   b: number;
@@ -421,7 +415,7 @@ export function contrast(fg: OklchColor, bg: OklchColor): ContrastResult {
  *  - Positive Lc: dark text on light bg
  *  - Negative Lc: light text on dark bg
  */
-export function apcaContrast(fg: OklchColor, bg: OklchColor): number {
+function apcaContrast(fg: OklchColor, bg: OklchColor): number {
   const fgRgb = toRgb({ mode: "oklch", ...oklchObj(fg) });
   const bgRgb = toRgb({ mode: "oklch", ...oklchObj(bg) });
   if (!fgRgb || !bgRgb) return 0;

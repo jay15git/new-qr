@@ -13,13 +13,7 @@ import {
   type QrStudioState,
 } from "@/components/qr/qr-studio-state"
 
-export const DASHBOARD_RASTER_EXPORT_QUALITY_PRESETS = [
-  25,
-  50,
-  75,
-  100,
-] as const
-export const DASHBOARD_RASTER_EXPORT_MAX_DIMENSION = 4096
+const DASHBOARD_RASTER_EXPORT_MAX_DIMENSION = 4096
 
 export type DashboardRasterExtension = Exclude<FileExtension, "svg">
 

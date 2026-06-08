@@ -766,7 +766,7 @@ const PAPER_SHADER_CONTROL_CONFIG: Record<
   },
 }
 
-export const PAPER_SHADER_DEFINITIONS: PaperShaderDefinition[] = [
+const PAPER_SHADER_DEFINITIONS: PaperShaderDefinition[] = [
   {
     id: "mesh-gradient",
     label: "Mesh gradient",

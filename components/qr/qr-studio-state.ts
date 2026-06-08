@@ -4,7 +4,6 @@ import type {
   DotType,
   DrawType,
   ErrorCorrectionLevel,
-  FileExtension,
   Gradient,
   GradientType,
   Mode,
@@ -156,21 +155,12 @@ export type QrStudioState = {
   cornersSquareGradient: StudioGradient;
   cornersDotGradient: StudioGradient;
   backgroundGradient: StudioGradient;
-};
-
-export const DOWNLOAD_EXTENSIONS: FileExtension[] = [
-  "svg",
-  "png",
-  "jpeg",
-  "webp",
-];
-
-export const QR_SIZE_MIN = 120;
-export const QR_SIZE_MAX = 1200;
-export const DEFAULT_QR_SIZE = 320;
-export const RASTER_EXPORT_QUALITY_MIN = 25;
-export const RASTER_EXPORT_QUALITY_MAX = 100;
-export const DEFAULT_RASTER_EXPORT_QUALITY = 100;
+};const QR_SIZE_MIN = 120;
+const QR_SIZE_MAX = 1200;
+const DEFAULT_QR_SIZE = 320;
+const RASTER_EXPORT_QUALITY_MIN = 25;
+const RASTER_EXPORT_QUALITY_MAX = 100;
+const DEFAULT_RASTER_EXPORT_QUALITY = 100;
 export const QR_DOT_MATRIX_ANIMATION_SPEED_MIN = 1;
 export const QR_DOT_MATRIX_ANIMATION_SPEED_MAX = 10;
 export const QR_DOT_MATRIX_MATRIX_SIZE_MIN = 5;
@@ -180,12 +170,12 @@ export const QR_DOT_MATRIX_OVERLAY_SCALE_MIN = 100;
 export const QR_DOT_MATRIX_OVERLAY_SCALE_MAX = 140;
 export const QR_DOT_MATRIX_OPACITY_MIN = 0;
 export const QR_DOT_MATRIX_OPACITY_MAX = 1;
-export const BACKGROUND_SHAPE_PADDING_PX_MAX = 192;
-export const BACKGROUND_SHAPE_STROKE_WIDTH_MAX = 24;
-export const BACKGROUND_SHAPE_EDGE_BLUR_MAX = 32;
-export const BACKGROUND_SHAPE_OPACITY_MAX = 100;
-export const BACKGROUND_SHAPE_SHADOW_OFFSET_MIN = -64;
-export const BACKGROUND_SHAPE_SHADOW_OFFSET_MAX = 64;
+const BACKGROUND_SHAPE_PADDING_PX_MAX = 192;
+const BACKGROUND_SHAPE_STROKE_WIDTH_MAX = 24;
+const BACKGROUND_SHAPE_EDGE_BLUR_MAX = 32;
+const BACKGROUND_SHAPE_OPACITY_MAX = 100;
+const BACKGROUND_SHAPE_SHADOW_OFFSET_MIN = -64;
+const BACKGROUND_SHAPE_SHADOW_OFFSET_MAX = 64;
 
 const DEFAULT_GRADIENT: StudioGradient = {
   enabled: false,
@@ -258,19 +248,7 @@ export const QR_DOT_MATRIX_PATTERN_OPTIONS: Array<{
   { label: "Rose", value: "rose" },
   { label: "Cross", value: "cross" },
   { label: "Rings", value: "rings" },
-];
-
-export const QR_DOT_MATRIX_DOT_SHAPE_OPTIONS: Array<{
-  label: string;
-  value: QrDotMatrixDotShape;
-}> = [
-  { label: "Circle", value: "circle" },
-  { label: "Square", value: "square" },
-  { label: "Diamond", value: "diamond" },
-  { label: "Hearts", value: "hearts" },
-];
-
-export const DEFAULT_DOT_MATRIX_ANIMATION: QrDotMatrixAnimationOptions = {
+];export const DEFAULT_DOT_MATRIX_ANIMATION: QrDotMatrixAnimationOptions = {
   animated: true,
   colorPreset: "theme",
   customColor: "#22d3ee",
@@ -371,7 +349,7 @@ export function createDefaultQrStudioState(): QrStudioState {
   };
 }
 
-export function coerceNumber(
+function coerceNumber(
   value: number,
   min: number,
   max: number,
@@ -406,7 +384,7 @@ export function clampDotMatrixAnimationSpeed(value: number) {
   );
 }
 
-export function clampDotMatrixAnimationMatrixSize(value: number) {
+function clampDotMatrixAnimationMatrixSize(value: number) {
   if (!Number.isFinite(value)) {
     return DEFAULT_DOT_MATRIX_ANIMATION.matrixSize;
   }
@@ -693,7 +671,7 @@ export function hasBackgroundImage(state: QrStudioState) {
   return Boolean(getAssetValue(state.backgroundImage));
 }
 
-export function hasBackgroundShape(state: Pick<QrStudioState, "backgroundShapeId">) {
+function hasBackgroundShape(state: Pick<QrStudioState, "backgroundShapeId">) {
   return state.backgroundShapeId !== "none";
 }
 
@@ -711,13 +689,7 @@ export function hasActiveBackgroundShapeOptions(
         (options.shadowOffsetY ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetY) !==
           DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetY),
   );
-}
-
-export function hasLogoImage(state: QrStudioState) {
-  return Boolean(getAssetValue(state.logo));
-}
-
-function mapStudioDotType(type: StudioDotType): DotType {
+}function mapStudioDotType(type: StudioDotType): DotType {
   if (type === "diamond" || type === "heart") {
     return "square";
   }

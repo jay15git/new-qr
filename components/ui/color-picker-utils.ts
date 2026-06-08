@@ -6,16 +6,7 @@ import {
   type RgbaColor,
 } from "@uiw/color-convert"
 
-export const DEFAULT_HEX_COLOR = "#000000"
-export const DEFAULT_SWATCHES = [
-  "#F8371A",
-  "#F97C1B",
-  "#FAC81C",
-  "#3FD0B6",
-  "#2CADF6",
-  "#6462FC",
-  "#F1BBD7",
-]
+const DEFAULT_HEX_COLOR = "#000000"
 
 export function coerceHexColor(value: string) {
   return /^#[0-9a-f]{6}$/i.test(value) ? value : DEFAULT_HEX_COLOR

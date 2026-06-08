@@ -176,7 +176,7 @@ export const QR_INPUT_OPTIONS: Record<QrInputType, QrInputOption> = {
   coupon: { value: "coupon", label: "Coupon", icon: TicketPercent },
 }
 
-export const QUICK_INPUT_VALUES = [
+const QUICK_INPUT_VALUES = [
   "auto",
   "text",
   "link",
@@ -271,8 +271,6 @@ export const QR_CATEGORIES: readonly QrCategory[] = [
   },
 ] as const
 
-const QUICK_INPUT_VALUE_SET = new Set<QrInputType>(QUICK_INPUT_VALUES)
-
 export function getNextOpenQrCategory(
   current: QrCategoryKey | null,
   next: QrCategoryKey
@@ -285,8 +283,4 @@ export function toggleQuickInputType(
   next: QuickQrInputType
 ): QrInputType | null {
   return current === next ? null : next
-}
-
-export function isQuickInputType(value: QrInputType | null): value is QuickQrInputType {
-  return value !== null && QUICK_INPUT_VALUE_SET.has(value)
 }

@@ -6,9 +6,7 @@ export const DASHBOARD_DOCUMENT_DEFAULT_MARGIN = 72
 export const DASHBOARD_QR_STAGE_FIT_RATIO = 0.74
 export const DASHBOARD_IMAGE_STAGE_FIT_RATIO = 0.48
 export const DASHBOARD_QR_NODE_ID = "dashboard-qr-node"
-export const DASHBOARD_QR_NODE_ID_PREFIX = `${DASHBOARD_QR_NODE_ID}-`
-const MIN_DASHBOARD_ZOOM = 0.2
-const MAX_DASHBOARD_ZOOM = 4
+const DASHBOARD_QR_NODE_ID_PREFIX = `${DASHBOARD_QR_NODE_ID}-`
 
 export type DashboardComposeBackgroundMode = "transparent" | "solid" | "gradient"
 
@@ -106,7 +104,7 @@ const DEFAULT_BACKGROUND: DashboardComposeBackground = {
   gradient: createDefaultDashboardComposeBackgroundGradient(),
 }
 
-export const DASHBOARD_DOCUMENT_PRESETS: DashboardDocumentPreset[] = [
+const DASHBOARD_DOCUMENT_PRESETS: DashboardDocumentPreset[] = [
   {
     id: "letter",
     title: "Letter portrait",
@@ -133,7 +131,7 @@ export const DASHBOARD_DOCUMENT_PRESETS: DashboardDocumentPreset[] = [
   },
 ] as const
 
-export const DEFAULT_DASHBOARD_DOCUMENT_PRESET_ID: DashboardDocumentPresetId = "letter"
+const DEFAULT_DASHBOARD_DOCUMENT_PRESET_ID: DashboardDocumentPresetId = "letter"
 
 const DEFAULT_DOCUMENT: DashboardComposeDocument = {
   backgroundColor: "#ffffff",
@@ -171,49 +169,11 @@ export function createDashboardDocumentComposeScene(): DashboardComposeScene {
   }
 }
 
-export function getDashboardDocumentPreset(presetId: DashboardDocumentPresetId) {
+function getDashboardDocumentPreset(presetId: DashboardDocumentPresetId) {
   return (
     DASHBOARD_DOCUMENT_PRESETS.find((preset) => preset.id === presetId) ??
     DASHBOARD_DOCUMENT_PRESETS[0]
   )
-}
-
-export function clampDashboardZoom(zoom: number) {
-  if (!Number.isFinite(zoom)) {
-    return DEFAULT_CAMERA.zoom
-  }
-
-  return Math.min(MAX_DASHBOARD_ZOOM, Math.max(MIN_DASHBOARD_ZOOM, zoom))
-}
-
-export function computeDashboardZoomedCamera(
-  scene: DashboardComposeScene,
-  nextZoom: number,
-  anchor: { x: number; y: number },
-) {
-  const zoom = clampDashboardZoom(nextZoom)
-  const worldX = (anchor.x - scene.camera.panX) / scene.camera.zoom
-  const worldY = (anchor.y - scene.camera.panY) / scene.camera.zoom
-
-  return {
-    zoom,
-    panX: anchor.x - worldX * zoom,
-    panY: anchor.y - worldY * zoom,
-  }
-}
-
-export function updateDashboardComposeCamera(
-  scene: DashboardComposeScene,
-  patch: Partial<DashboardComposeCamera>,
-) {
-  return {
-    ...scene,
-    camera: {
-      ...scene.camera,
-      ...patch,
-      zoom: clampDashboardZoom(patch.zoom ?? scene.camera.zoom),
-    },
-  }
 }
 
 export function updateDashboardComposeBackground(
@@ -224,19 +184,6 @@ export function updateDashboardComposeBackground(
     ...scene,
     background: normalizeDashboardComposeBackground({
       ...scene.background,
-      ...patch,
-    }),
-  }
-}
-
-export function updateDashboardComposeDocument(
-  scene: DashboardComposeScene,
-  patch: Partial<DashboardComposeDocument>,
-) {
-  return {
-    ...scene,
-    document: normalizeDashboardComposeDocument({
-      ...scene.document,
       ...patch,
     }),
   }
@@ -449,7 +396,7 @@ export function reorderDashboardComposeNodes(
   }
 }
 
-export function getDashboardComposeNode(
+function getDashboardComposeNode(
   scene: DashboardComposeScene,
   nodeId = DASHBOARD_QR_NODE_ID,
 ) {

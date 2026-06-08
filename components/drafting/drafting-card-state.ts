@@ -169,7 +169,7 @@ export function createDefaultDraftingCardState() {
   return cloneDraftingCardState(DEFAULT_DRAFTING_CARD_STATE)
 }
 
-export function cloneDraftingCardPaperShaderState(
+function cloneDraftingCardPaperShaderState(
   paperShader: DraftingCardPaperShaderState,
 ): DraftingCardPaperShaderState {
   return {

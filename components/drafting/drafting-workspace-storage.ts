@@ -46,19 +46,7 @@ export async function writeDraftingWorkspaceDraft(
       // Current session history still works if browser storage is unavailable.
     }
   }
-}
-
-export async function deleteDraftingWorkspaceDraft(): Promise<void> {
-  await deleteIndexedDbDraft().catch(() => undefined)
-
-  try {
-    window.localStorage.removeItem(LOCAL_STORAGE_KEY)
-  } catch {
-    // Ignore storage failures.
-  }
-}
-
-function openDraftingWorkspaceDb(): Promise<IDBDatabase> {
+}function openDraftingWorkspaceDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     if (typeof indexedDB === "undefined") {
       reject(new Error("IndexedDB is unavailable."))
@@ -110,23 +98,6 @@ async function writeIndexedDbDraft(document: unknown): Promise<void> {
         id: DRAFT_ID,
         updatedAt: Date.now(),
       } satisfies StoredDraftingWorkspaceRecord)
-    })
-  } finally {
-    db.close()
-  }
-}
-
-async function deleteIndexedDbDraft(): Promise<void> {
-  const db = await openDraftingWorkspaceDb()
-
-  try {
-    await new Promise<void>((resolve, reject) => {
-      const transaction = db.transaction(STORE_NAME, "readwrite")
-
-      transaction.onerror = () =>
-        reject(transaction.error ?? new Error("IndexedDB delete failed."))
-      transaction.oncomplete = () => resolve()
-      transaction.objectStore(STORE_NAME).delete(DRAFT_ID)
     })
   } finally {
     db.close()

@@ -141,7 +141,6 @@ import { cn } from "@/lib/utils"
 import { CheckIcon, ChevronDown, PlusIcon } from "lucide-react"
 
 export type DraftingBinaryColorMode = "solid" | "gradient"
-export type DraftingBackgroundColorMode = DraftingBinaryColorMode | "transparent"
 type DraftingAssetSourceMode = "upload" | "url"
 type DraftingBrandIconCategoryFilter = BrandIconCategory | "all"
 
@@ -2488,7 +2487,7 @@ function formatPaperShaderNumberValue(paramKey: string, value: number) {
   return Number.isInteger(value) ? `${value}` : value.toFixed(2)
 }
 
-export function DraftingCardColorsTab({
+function DraftingCardColorsTab({
   fill,
   patternColors,
   patternId,
@@ -3124,51 +3123,7 @@ export function DraftingBackgroundShapeTab({
       </div>
     </div>
   )
-}
-
-export function DraftingEditBackgroundColorTab({
-  gradient,
-  mode,
-  openItemIds,
-  solidColor,
-  onGradientChange,
-  onModeChange,
-  onOpenItemIdsChange,
-  onSolidColorChange,
-  onTransparentSelect,
-}: {
-  gradient: StudioGradient
-  mode: DraftingBackgroundColorMode
-  onGradientChange: (gradient: StudioGradient) => void
-  onModeChange: (mode: DraftingBackgroundColorMode) => void
-  onOpenItemIdsChange: (itemIds: string[]) => void
-  onSolidColorChange: (value: string) => void
-  onTransparentSelect: () => void
-  openItemIds: string[]
-  solidColor: string
-}) {
-  return (
-    <DraftingAccordion
-      dataSlot="drafting-background-color-accordion"
-      items={buildDraftingBackgroundColorItems({
-        gradient,
-        gradientIdPrefix: "drafting-background-gradient",
-        gradientTitle: "Background gradient",
-        includeTransparent: true,
-        onGradientChange,
-        onModeChange,
-        onSolidColorChange,
-        onTransparentSelect,
-        solidColor,
-      })}
-      selectedId={mode}
-      openItemIds={openItemIds}
-      onOpenItemIdsChange={onOpenItemIdsChange}
-    />
-  )
-}
-
-export function DraftingLogoColorTab({
+}export function DraftingLogoColorTab({
   gradient,
   mode,
   openItemIds,
@@ -3669,65 +3624,6 @@ function buildDraftingSolidGradientItems({
       ),
     },
   ]
-}
-
-function buildDraftingBackgroundColorItems({
-  gradient,
-  gradientIdPrefix,
-  gradientTitle,
-  includeTransparent,
-  onGradientChange,
-  onModeChange,
-  onSolidColorChange,
-  onTransparentSelect,
-  solidColor,
-}: {
-  gradient: StudioGradient
-  gradientIdPrefix: string
-  gradientTitle: string
-  includeTransparent: boolean
-  onGradientChange: (gradient: StudioGradient) => void
-  onModeChange: (mode: DraftingBackgroundColorMode) => void
-  onSolidColorChange: (value: string) => void
-  onTransparentSelect?: () => void
-  solidColor: string
-}) {
-  const items: Array<{
-    id: DraftingBackgroundColorMode
-    title: string
-    content: ReactNode
-  }> = buildDraftingSolidGradientItems({
-    gradient,
-    gradientIdPrefix,
-    gradientTitle,
-    onGradientChange,
-    onModeChange,
-    onSolidColorChange,
-    solidColor,
-  })
-
-  if (!includeTransparent) {
-    return items
-  }
-
-  items.push({
-    id: "transparent",
-    title: "Transparent",
-    content: (
-      <div className="min-w-0 px-4 pb-4">
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full rounded-[8px] border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] text-[var(--drafting-ink)] shadow-[var(--drafting-shadow-rest)] hover:border-[var(--drafting-line-hover)] hover:bg-[var(--drafting-panel-bg-hover)]"
-          onClick={onTransparentSelect}
-        >
-          Use transparent background
-        </Button>
-      </div>
-    ),
-  })
-
-  return items
 }
 
 function buildDraftingAssetSourceItems({
