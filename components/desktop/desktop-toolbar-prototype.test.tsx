@@ -649,13 +649,17 @@ describe("DesktopToolbarPrototype", () => {
 
     const swatch = getRequiredInput(surface.container, "Solid color swatch")
     const hexInput = getRequiredInput(surface.container, "Solid color")
+    const swatchRing = swatch.parentElement
 
     expect(swatch.type).toBe("color")
     expect(swatch.className).toContain("rounded-full")
-    expect(swatch.className).toContain("size-7")
+    expect(swatch.className).toContain("size-5")
     expect(swatch.className).not.toContain("w-12")
     expect(swatch.className).not.toContain("rounded-[6px]")
     expect(swatch.getAttribute("data-slot")).toBe("desktop-color-picker")
+    expect(swatch.closest("label")).toBeNull()
+    expect(swatchRing?.className).toContain("size-7")
+    expect(swatchRing?.className).toContain("border-2")
     expect(hexInput.className).toContain("w-20")
 
     await act(async () => {

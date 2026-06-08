@@ -280,13 +280,13 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/desktop/desktop-toolbar-prototype.test.tsx": {
-    "mtime": 1780848727.2461593,
-    "ast_hash": "8685167e28d5ada052736ff95c6b576d",
+    "mtime": 1780910904.3384275,
+    "ast_hash": "c4600bb4b385d60d929625426a7fb353",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/desktop/desktop-toolbar-prototype.tsx": {
-    "mtime": 1780851933.9197478,
-    "ast_hash": "9e628f79b02ddb01ae92ca6227f030b3",
+    "mtime": 1780910899.1126363,
+    "ast_hash": "43bf158d92ff0988be9d6ece269a14ca",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/desktop/desktop-workspace.tsx": {
@@ -1175,8 +1175,8 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/knip.json": {
-    "mtime": 1780902553.5896142,
-    "ast_hash": "da4c963091c039066c60b241eac5201c",
+    "mtime": 1780903779.724847,
+    "ast_hash": "81c0851b1c6281090c414edf43d95f2d",
     "semantic_hash": ""
   }
 }

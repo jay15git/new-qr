@@ -3217,17 +3217,23 @@ function DesktopColorInputRow({
   const inputLabel = ariaLabel ?? label
 
   return (
-    <label className={DESKTOP_INSPECTOR_ROW_CLASS}>
+    <div className={DESKTOP_INSPECTOR_ROW_CLASS}>
       <span className={DESKTOP_INSPECTOR_LABEL_CLASS}>{label}</span>
       <span className="flex items-center gap-2">
-        <input
-          aria-label={`${inputLabel} swatch`}
-          className="size-7 shrink-0 cursor-pointer overflow-hidden rounded-full border bg-transparent p-0"
-          data-slot="desktop-color-picker"
-          type="color"
-          value={value}
-          onChange={(event) => onChange(event.currentTarget.value)}
-        />
+        <span
+          aria-hidden="true"
+          className="grid size-7 shrink-0 place-items-center rounded-full border-2 bg-transparent p-0.5"
+          style={{ borderColor: value }}
+        >
+          <input
+            aria-label={`${inputLabel} swatch`}
+            className="size-5 shrink-0 cursor-pointer overflow-hidden rounded-full bg-transparent p-0"
+            data-slot="desktop-color-picker"
+            type="color"
+            value={value}
+            onChange={(event) => onChange(event.currentTarget.value)}
+          />
+        </span>
         <DesktopInspectorTextInput
           aria-label={inputLabel}
           className="h-7 w-20 rounded-[5px] px-2 text-[11px] font-semibold"
@@ -3235,7 +3241,7 @@ function DesktopColorInputRow({
           onChange={(event) => onChange(event.currentTarget.value)}
         />
       </span>
-    </label>
+    </div>
   )
 }
 

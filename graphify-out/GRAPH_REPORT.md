@@ -1,7 +1,7 @@
 # Graph Report - new-qr  (2026-06-08)
 
 ## Corpus Check
-- 194 files · ~265,033 words
+- 194 files · ~265,051 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `2e23848d`
+- Built from commit: `14e41137`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -205,7 +205,7 @@ Nodes (19): parseBackgroundShapeOptions(), clampBackgroundShapeEdgeBlur(), clamp
 
 ### Community 8 - "Community 8"
 Cohesion: 0.05
-Nodes (39): BackgroundRenderMetrics, clampDotMatrixUnit(), collectDotMatrixMetrics(), createDotMatrixLoaderSpec(), createDotMatrixModule(), createGeneratedCellAnimation(), createQrMoveLoaderSpec(), DOT_MATRIX_LOADER_SPECS (+31 more)
+Nodes (40): alignCornerGradientDirection(), BackgroundRenderMetrics, collectDotMatrixMetrics(), createBackgroundShapeGradient(), createDotMatrixLoaderSpec(), createGeneratedCellAnimation(), createQrMoveLoaderSpec(), DOT_MATRIX_LOADER_SPECS (+32 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.08
@@ -432,8 +432,8 @@ Cohesion: 0.43
 Nodes (7): applyDashboardDocumentPreset(), clamp(), createDashboardComposeScene(), createDashboardDocumentComposeScene(), getDashboardDocumentPreset(), normalizeDashboardComposeDocument(), updateDashboardComposeDocument()
 
 ### Community 66 - "Community 66"
-Cohesion: 0.29
-Nodes (7): alignCornerGradientDirection(), createBackgroundShapeGradient(), getBackgroundShapeFill(), getDescendantElements(), getElementRegion(), getLinearGradientEndpoints(), getNumericAttribute()
+Cohesion: 0.33
+Nodes (6): clampDotMatrixUnit(), createDotMatrixModule(), getDotMatrixHash01(), getDotMatrixPerimeterIndex(), getDotMatrixRegionCoordinate(), getDotMatrixRing()
 
 ### Community 67 - "Community 67"
 Cohesion: 0.40
@@ -564,8 +564,8 @@ Cohesion: 0.43
 Nodes (6): GradientEditor(), GradientOffsetRangeField(), clampGradientOffset(), degreesToRadians(), normalizeGradientOffsetRange(), radiansToDegrees()
 
 ### Community 101 - "Community 101"
-Cohesion: 0.36
-Nodes (8): addRoundedBackgroundImageClip(), applyBackgroundShapeShadowSourceStroke(), applyBackgroundSurfaceRect(), createBackgroundShapeBlurPath(), createBackgroundShapeShadowFilter(), createBackgroundSurfaceBlurRect(), getOrCreateSvgDefs(), hasActiveBackgroundShapeShadow()
+Cohesion: 0.18
+Nodes (15): addRoundedBackgroundImageClip(), applyBackgroundShapeShadowSourceStroke(), applyBackgroundShapeStroke(), applyBackgroundSurfaceRect(), applySvgRenderBounds(), createBackgroundShapeBlurPath(), createBackgroundShapeShadowFilter(), createBackgroundSurfaceBlurRect() (+7 more)
 
 ### Community 103 - "Community 103"
 Cohesion: 0.29
@@ -584,8 +584,8 @@ Cohesion: 0.33
 Nodes (5): Aesthetic Direction, Brand Personality, Design Context, Design Principles, Users
 
 ### Community 108 - "Community 108"
-Cohesion: 0.10
-Nodes (21): applyBackgroundShapeStroke(), applyDotMatrixOverlayScale(), applyQrMoveModuleFieldAnimation(), applySvgRenderBounds(), createQrMoveModuleFieldStyle(), findDotMatrixLayerAnchor(), formatSvgNumber(), formatSvgOpacity() (+13 more)
+Cohesion: 0.14
+Nodes (14): applyDotMatrixOverlayScale(), applyQrMoveModuleFieldAnimation(), createQrMoveModuleFieldStyle(), findDotMatrixLayerAnchor(), formatSvgOpacity(), getDotMatrixAnchor(), getDotMatrixBaseOpacity(), getDotMatrixOverlayScale() (+6 more)
 
 ### Community 109 - "Community 109"
 Cohesion: 0.33
