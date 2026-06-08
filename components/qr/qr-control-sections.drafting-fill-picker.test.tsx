@@ -103,7 +103,7 @@ describe("Drafting fill picker", () => {
   })
 
   it("does not mirror the hex prop into local color state", () => {
-    const source = readFileSync("components/qr/qr-control-sections.tsx", "utf8")
+    const source = readFileSync("components/qr/qr-color-fields.tsx", "utf8")
     const draftingFillPickerSource = source.match(
       /function DraftingFillPicker[\s\S]*?\n}\n\nconst DRAFTING_FILL_PICKER_SWATCH_STORAGE_KEY/,
     )?.[0]
