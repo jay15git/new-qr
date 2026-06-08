@@ -80,9 +80,9 @@
     "semantic_hash": "94f396cc18a9cb2fa62c8069f6160eb0"
   },
   "/Users/jayant/Documents/projects/new-qr/components/qr/qr-control-sections.drafting-fill-picker.test.tsx": {
-    "mtime": 1780756771.5473282,
-    "ast_hash": "aa1fa1e4c0e3c303fefed12f1dac81c7",
-    "semantic_hash": "aa1fa1e4c0e3c303fefed12f1dac81c7"
+    "mtime": 1780918632.536,
+    "ast_hash": "a4faeed0caf06270e75e0539059fddeb",
+    "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/qr/qr-control-sections.logo-tabs.test.tsx": {
     "mtime": 1780756771.551905,
@@ -100,8 +100,8 @@
     "semantic_hash": "491e2c436c573239bebc602da220cbea"
   },
   "/Users/jayant/Documents/projects/new-qr/components/qr/qr-control-sections.tsx": {
-    "mtime": 1780756771.5402825,
-    "ast_hash": "593af34e875c54e320e1649ab333d33a",
+    "mtime": 1780919106.9769635,
+    "ast_hash": "b158ad885288e72170d7f9f7a9cdcd65",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/qr/qr-dots-palette.test.ts": {
@@ -664,11 +664,6 @@
     "ast_hash": "1c4ea7c18483cef21f95f570a78d5a6f",
     "semantic_hash": ""
   },
-  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/index.json": {
-    "mtime": 1780220907.1446137,
-    "ast_hash": "aefcf009c89b88931081045999ba85d7",
-    "semantic_hash": ""
-  },
   "/Users/jayant/Documents/projects/new-qr/eslint.config.mjs": {
     "mtime": 1779454057.7648888,
     "ast_hash": "d2d8c865b2517fd83c478285245ed176",
@@ -794,114 +789,14 @@
     "ast_hash": "dda480320d216fcdc213fb055be103d6",
     "semantic_hash": ""
   },
-  "/Users/jayant/Documents/projects/new-qr/public/Satoshi_Complete/Fonts/WEB/README.md": {
-    "mtime": 1777185999.284312,
-    "ast_hash": "2fe1c934fc9ab290480d95e260c26e20",
-    "semantic_hash": ""
-  },
   "/Users/jayant/Documents/projects/new-qr/public/Satoshi_Complete/License/FFL.txt": {
     "mtime": 1777185999.3046355,
     "ast_hash": "d7f311f2ab9c0160a9e4ed0921d1aefb",
     "semantic_hash": ""
   },
-  "/Users/jayant/Documents/projects/new-qr/tmp/screenshots/compact-qr-anatomy-concept.html": {
-    "mtime": 1779986613.5463722,
-    "ast_hash": "c8669e299d2719f8dada2af52fa9f410",
-    "semantic_hash": ""
-  },
   "/Users/jayant/Documents/projects/new-qr/.codex-artifacts/pencil-dashboard/OsMXR.png": {
     "mtime": 1776442121.5478067,
     "ast_hash": "c26d2ef6b6d84730ae55eda179da7891",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/designs/exports/KIjRV.png": {
-    "mtime": 1776885900.3772657,
-    "ast_hash": "7a4bec1171220cf2851cbb55c815f0a5",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/designs/exports/ZDE0Q.png": {
-    "mtime": 1776885900.377816,
-    "ast_hash": "4ea21f164df99c43478a91dea45ae304",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/00-page-overview.png": {
-    "mtime": 1780220854.527894,
-    "ast_hash": "efd7fc1c1fbe58317201c2e9a6426aa3",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/01-content.png": {
-    "mtime": 1780220897.5475357,
-    "ast_hash": "efd7fc1c1fbe58317201c2e9a6426aa3",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/02-pattern.png": {
-    "mtime": 1780220898.3437176,
-    "ast_hash": "347e6bc9acafdcd1fcfddeeba6f0b3b0",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/03-corners.png": {
-    "mtime": 1780220899.1436093,
-    "ast_hash": "d3efeb630fd45eea88b6b0f79e7ce5fd",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/04-logo.png": {
-    "mtime": 1780220899.9127913,
-    "ast_hash": "b33a29afbd9aa1385ce9bc65112b081d",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/05-shape.png": {
-    "mtime": 1780220900.711571,
-    "ast_hash": "9a40f44898c7a8d5b924eb68245604c1",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/06-motion.png": {
-    "mtime": 1780220901.5100775,
-    "ast_hash": "38b8f8a05f696e1c49cc406c08555c7e",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/07-encoding.png": {
-    "mtime": 1780220902.309995,
-    "ast_hash": "67a2c8cb5aaf5c154b3f4f89a853ba88",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/08-text.png": {
-    "mtime": 1780220903.1104484,
-    "ast_hash": "306f60c7ddb0ed0d7ffd84d830503350",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/09-image.png": {
-    "mtime": 1780220903.89261,
-    "ast_hash": "4727f41fca446db34befe6af912b5f8d",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/10-decorations.png": {
-    "mtime": 1780220904.6703172,
-    "ast_hash": "6a6356e877243a41ddc048a616e29924",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/11-effects.png": {
-    "mtime": 1780220905.459098,
-    "ast_hash": "93a6237f7a9be9b2ebd8cc68f2b047cf",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/12-layers.png": {
-    "mtime": 1780220906.2977996,
-    "ast_hash": "983a2efe69ac92e53ff58f04d256594b",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/13-export.png": {
-    "mtime": 1780220907.1429093,
-    "ast_hash": "0703b8714fbd59b85745333b5a142efd",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/desktop-settings-screenshots/contact-sheet.png": {
-    "mtime": 1780220953.8637133,
-    "ast_hash": "66c1a1af20b8f6e41b99c3008e43f2ad",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/image.png": {
-    "mtime": 1776685721.6494648,
-    "ast_hash": "f91f7b9874560ed437ddbed08a14b1f5",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/public/diamond-mark-svgrepo-com.svg": {
@@ -937,71 +832,6 @@
   "/Users/jayant/Documents/projects/new-qr/public/window.svg": {
     "mtime": 1776268011.8331213,
     "ast_hash": "a2760511c65806022ad20adf74370ff3",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/screenshots/new-left-rail/01-content.png": {
-    "mtime": 1779246973.486889,
-    "ast_hash": "85aa2bfa9a6853d95c2fdf805569b3a7",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/screenshots/new-left-rail/02-style.png": {
-    "mtime": 1779246974.015899,
-    "ast_hash": "62862e7b58d269e8e026ad6c4c5c2b5e",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/screenshots/new-left-rail/03-corner-frame.png": {
-    "mtime": 1779246974.5345063,
-    "ast_hash": "174071d591c5090b95162701e378a656",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/screenshots/new-left-rail/04-corner-dot.png": {
-    "mtime": 1779246975.0189168,
-    "ast_hash": "243012616a15d87fb487927dd5d261c4",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/screenshots/new-left-rail/05-background.png": {
-    "mtime": 1779246975.529793,
-    "ast_hash": "066ce3b11b595155fe33a3cd93d46029",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/screenshots/new-left-rail/06-logo.png": {
-    "mtime": 1779246976.0966015,
-    "ast_hash": "0fe51534470f5193612f93de83408092",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/screenshots/new-left-rail/07-encoding.png": {
-    "mtime": 1779246976.6027343,
-    "ast_hash": "f1583c30eb6725fbf3170002bc2636a1",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/screenshots/new-left-rail/08-layers.png": {
-    "mtime": 1779246977.0837562,
-    "ast_hash": "802c662d0a1c43c03cf55a08cae4fbf1",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/tmp/screenshots/new-corner-frame.png": {
-    "mtime": 1779986267.4293869,
-    "ast_hash": "c6c31d839c64fcf844e9d006f0d772b7",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/tmp/screenshots/new-current.png": {
-    "mtime": 1779986253.398611,
-    "ast_hash": "6228845e70f74edff5dd1f3298925b54",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/tmp/screenshots/new-layers.png": {
-    "mtime": 1779986269.3017232,
-    "ast_hash": "692803a90da667af6245112226be38c3",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/tmp/screenshots/new-logo.png": {
-    "mtime": 1779986268.3494458,
-    "ast_hash": "2ab8a542150495ab0adaad518890f2d7",
-    "semantic_hash": ""
-  },
-  "/Users/jayant/Documents/projects/new-qr/tmp/screenshots/new-style-body.png": {
-    "mtime": 1779986266.2712877,
-    "ast_hash": "fe1b4d6d180e9e9dc9196878adeda086",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/ui/elastic-slider.test.tsx": {
@@ -1120,8 +950,8 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/drafting/drafting-surface.tsx": {
-    "mtime": 1780757562.8620267,
-    "ast_hash": "6eb86444f0f3b9dc53de0d6989f383fa",
+    "mtime": 1780919106.9775317,
+    "ast_hash": "a8b826862172423d06c6b884c2375a58",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/drafting/drafting-text-layout.ts": {
@@ -1177,6 +1007,26 @@
   "/Users/jayant/Documents/projects/new-qr/knip.json": {
     "mtime": 1780903779.724847,
     "ast_hash": "81c0851b1c6281090c414edf43d95f2d",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/drafting/drafting-layered-export.ts": {
+    "mtime": 1780918759.2127893,
+    "ast_hash": "9bf5fea6451e2ed5470702d3d121e08b",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/drafting/drafting-text-layer-tab.tsx": {
+    "mtime": 1780918967.3072183,
+    "ast_hash": "9636359344523becdeb0ab260413ef31",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-color-fields.tsx": {
+    "mtime": 1780918567.47852,
+    "ast_hash": "1bdb9b62e0864ad561870eacf2d71869",
+    "semantic_hash": ""
+  },
+  "/Users/jayant/Documents/projects/new-qr/components/qr/qr-control-state-actions.ts": {
+    "mtime": 1780918463.1673455,
+    "ast_hash": "3bb82f8bc07f9cd0304d958016b76f71",
     "semantic_hash": ""
   }
 }
