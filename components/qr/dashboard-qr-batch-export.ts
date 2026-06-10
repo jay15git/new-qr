@@ -11,7 +11,7 @@ import {
 
 const DASHBOARD_QR_NODE_EXPORT_MAX_DIMENSION = 4096
 
-export type DashboardQrFileExportNode = Pick<
+type DashboardQrFileExportNode = Pick<
   DashboardComposeSvgNode,
   "id" | "name" | "naturalHeight" | "naturalWidth" | "originalSvgMarkup"
 >

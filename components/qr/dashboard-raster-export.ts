@@ -25,7 +25,7 @@ type DashboardRasterExportOptions = {
   targetSizePx?: number
 }
 
-export type DashboardRasterExportMeasurement = {
+type DashboardRasterExportMeasurement = {
   blobSizeBytes: number
   encoderQuality?: number
   extension: DashboardRasterExtension

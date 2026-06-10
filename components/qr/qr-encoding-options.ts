@@ -41,7 +41,7 @@ export const ERROR_CORRECTION_LEVEL_OPTIONS: Array<{
   },
 ]
 
-export function formatTypeNumberLabel(value: number) {
+function formatTypeNumberLabel(value: number) {
   return value === 0 ? "Auto" : String(value)
 }
 

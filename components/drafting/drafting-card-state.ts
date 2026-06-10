@@ -13,7 +13,7 @@ import {
   type PaperShaderParams,
 } from "@/components/drafting/drafting-paper-shaders"
 
-export type DraftingCardShadowPreset = "none" | "soft" | "medium" | "strong"
+type DraftingCardShadowPreset = "none" | "soft" | "medium" | "strong"
 export type DraftingCardStyleMode = "pattern" | "image" | "image-filter" | "paper-shader"
 
 export type DraftingCardBorderState = {

@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 const CHECKERBOARD =
   "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'><rect width='4' height='4' fill='%23ccc'/><rect x='4' y='4' width='4' height='4' fill='%23ccc'/></svg>\")";
 
-export interface SwatchesProps extends React.HTMLAttributes<HTMLDivElement> {
+interface SwatchesProps extends React.HTMLAttributes<HTMLDivElement> {
   presets?: string[];
   /**
    * When provided, renders a "+" tile after the presets that calls this with

@@ -228,6 +228,110 @@ describe("drafting layer state actions", () => {
     })
   })
 
+  it("normalizes missing and invalid layer geometry without changing layer order", () => {
+    const normalized = normalizeDraftingCanvasLayers(
+      "preview",
+      [
+        {
+          ...createLayer("card", 5),
+          height: 0,
+          opacity: -4,
+          rotation: Number.NaN,
+          width: Number.POSITIVE_INFINITY,
+          x: Number.NaN,
+          y: 24,
+        },
+        {
+          ...createLayer("qr", 2),
+          height: 999,
+          opacity: 9,
+          rotation: 35,
+          width: 72,
+        },
+      ],
+      createDefaultQrStudioState(),
+      createDefaultDraftingCardState(),
+    )
+
+    const cardLayer = normalized.find((layer) => layer.kind === "card")
+    const qrLayer = normalized.find((layer) => layer.kind === "qr")
+
+    expect(cardLayer).toMatchObject({
+      height: 1,
+      opacity: 0,
+      rotation: 0,
+      y: 24,
+      zIndex: 5,
+    })
+    expect(cardLayer?.x).toBeLessThan(0)
+    expect(cardLayer?.width).toBeGreaterThan(1)
+    expect(qrLayer).toMatchObject({
+      height: 72,
+      opacity: 1,
+      rotation: 35,
+      width: 72,
+      zIndex: 2,
+    })
+    expect(normalized.map((layer) => layer.kind)).toEqual(["qr", "card"])
+  })
+
+  it("normalizes group children with shared layer defaults", () => {
+    const normalized = normalizeDraftingCanvasLayers(
+      "preview",
+      [
+        createLayer("card", 0),
+        createLayer("qr", 1),
+        {
+          children: [
+            {
+              height: 12,
+              id: "nested-text",
+              kind: "text",
+              name: "",
+              opacity: 2,
+              rotation: Number.NaN,
+              text: "Nested",
+              width: 88,
+              zIndex: 3,
+            },
+            { kind: "unknown" },
+          ],
+          height: 120,
+          id: "group-1",
+          kind: "group",
+          name: "Group",
+          width: 160,
+          zIndex: 2,
+        },
+      ],
+      createDefaultQrStudioState(),
+      createDefaultDraftingCardState(),
+    )
+
+    const groupLayer = normalized.find((layer) => layer.kind === "group")
+
+    expect(groupLayer).toMatchObject({
+      children: [
+        {
+          fill: DEFAULT_DRAFTING_TEXT_LAYER.fill,
+          fontFamily: DEFAULT_DRAFTING_TEXT_LAYER.fontFamily,
+          id: "nested-text",
+          kind: "text",
+          name: "Text",
+          nodeId: "preview",
+          opacity: 1,
+          rotation: 0,
+          text: "Nested",
+          zIndex: 3,
+        },
+      ],
+      height: 120,
+      id: "group-1",
+      kind: "group",
+      width: 160,
+    })
+  })
+
   it("preserves legacy text font families without a registry font id", () => {
     const normalized = normalizeDraftingCanvasLayers(
       "preview",

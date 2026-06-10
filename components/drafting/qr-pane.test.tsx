@@ -59,10 +59,7 @@ describe("QrPane", () => {
 
     const { container, reactRoot } = renderPane(firstState)
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     expect(buildDashboardQrNodePayloadSpy).toHaveBeenCalledTimes(1)
     expect(container.querySelector('[data-slot="dashboard-compose-node"]')).not.toBeNull()
@@ -102,10 +99,7 @@ describe("QrPane", () => {
     const state = setSquareQrSize(createDefaultQrStudioState(), 240)
     const { container } = renderPane(state)
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const canvas = container.querySelector('[data-slot="dashboard-compose-canvas"]')
     const card = container.querySelector('[data-slot="dashboard-compose-card"]')
@@ -154,10 +148,7 @@ describe("QrPane", () => {
     }
     const { container } = renderPane(state, false, cardState)
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const card = container.querySelector('[data-slot="dashboard-compose-card"]') as HTMLElement
     const node = container.querySelector('[data-slot="dashboard-compose-node"]') as HTMLElement
@@ -193,10 +184,7 @@ describe("QrPane", () => {
     }
     const { container } = renderPane(state, false, cardState)
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const card = container.querySelector('[data-slot="dashboard-compose-card"]') as HTMLElement
     const node = container.querySelector('[data-slot="dashboard-compose-node"]') as HTMLElement
@@ -253,10 +241,7 @@ describe("QrPane", () => {
     }
     const { container } = renderPane(state, false, cardState)
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const card = container.querySelector('[data-slot="dashboard-compose-card"]') as HTMLElement
     const cardShape = card.querySelector('[data-slot="drafting-card-shape"]')
@@ -292,10 +277,7 @@ describe("QrPane", () => {
     }
     const { container } = renderPane(state, false, cardState)
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const card = container.querySelector('[data-slot="dashboard-compose-card"]') as HTMLElement
 
@@ -319,10 +301,7 @@ describe("QrPane", () => {
     }
     const { container } = renderPane(state, false, cardState)
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const card = container.querySelector('[data-slot="dashboard-compose-card"]') as HTMLElement
 
@@ -341,10 +320,7 @@ describe("QrPane", () => {
     }
     const { container } = renderPane(state, false, cardState)
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const card = container.querySelector('[data-slot="dashboard-compose-card"]') as HTMLElement
 
@@ -363,10 +339,7 @@ describe("QrPane", () => {
     }
     const { container } = renderPane(state, false, cardState)
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const card = container.querySelector('[data-slot="dashboard-compose-card"]')
     const node = container.querySelector('[data-slot="dashboard-compose-node"]')
@@ -379,10 +352,7 @@ describe("QrPane", () => {
     const state = setSquareQrSize(createDefaultQrStudioState(), 240)
     const { container } = renderPane(state, true)
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const pane = container.querySelector('[data-slot="qr-pane"]')
     const canvas = container.querySelector('[data-slot="dashboard-compose-canvas"]')
@@ -400,10 +370,7 @@ describe("QrPane", () => {
     const state = setSquareQrSize(createDefaultQrStudioState(), 320)
     const { container } = renderPane(state)
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const node = container.querySelector('[data-slot="dashboard-compose-node"]')
 
@@ -418,10 +385,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:qr",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const directions = Array.from(
       container.querySelectorAll('[data-slot="drafting-layer-resize-handle"]'),
@@ -446,10 +410,7 @@ describe("QrPane", () => {
       selectedLayerId: getDraftingCardLayerId("preview"),
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const card = container.querySelector('[data-slot="dashboard-compose-card"]') as HTMLElement
     const frame = container.querySelector('[data-slot="drafting-layer-resize-frame"]') as HTMLElement
@@ -477,10 +438,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:qr",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const qrLayer = container.querySelector('[data-layer-id="preview:qr"]') as HTMLElement
 
@@ -508,10 +466,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:qr",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const qrLayer = container.querySelector('[data-layer-id="preview:qr"]') as HTMLElement
 
@@ -539,10 +494,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:qr",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const qrLayer = container.querySelector('[data-layer-id="preview:qr"]') as HTMLElement
 
@@ -567,10 +519,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:qr",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const handle = container.querySelector(
       '[data-slot="drafting-layer-resize-handle"][data-resize-direction="e"]',
@@ -602,10 +551,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:qr",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const handle = container.querySelector(
       '[data-slot="drafting-layer-resize-handle"][data-resize-direction="e"]',
@@ -638,10 +584,7 @@ describe("QrPane", () => {
       snapEnabled: false,
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const handle = container.querySelector(
       '[data-slot="drafting-layer-resize-handle"][data-resize-direction="e"]',
@@ -674,10 +617,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:qr",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const selectedLayer = container.querySelector('[data-layer-id="preview:qr"]') as HTMLElement
     const upperLayer = container.querySelector('[data-layer-id="preview:card"]') as HTMLElement
@@ -695,10 +635,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:qr",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const rotateHandle = container.querySelector('[data-slot="drafting-layer-rotate-handle"]')
 
@@ -727,10 +664,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:card",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const sizeValue = container.querySelector('[data-slot="drafting-layer-size-value"]') as HTMLElement
 
@@ -759,10 +693,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:text",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const text = getRequiredElement(container, '[data-slot="drafting-text-layer"]') as HTMLElement
     const content = getRequiredElement(text, '[data-slot="drafting-text-content"]') as HTMLElement
@@ -1127,10 +1058,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:qr",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const frame = container.querySelector('[data-slot="drafting-layer-resize-frame"]') as HTMLElement
 
@@ -1186,10 +1114,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:qr",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const frame = container.querySelector('[data-slot="drafting-layer-resize-frame"]') as HTMLElement
 
@@ -1220,10 +1145,7 @@ describe("QrPane", () => {
       selectedLayerId: null,
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const canvas = getRequiredElement(container, '[data-slot="dashboard-compose-canvas"]')
     setElementRect(canvas, { height: 400, left: 0, top: 0, width: 400 })
@@ -1277,10 +1199,7 @@ describe("QrPane", () => {
       selectedLayerId: null,
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const canvas = getRequiredElement(container, '[data-slot="dashboard-compose-canvas"]')
     setElementRect(canvas, { height: 400, left: 0, top: 0, width: 400 })
@@ -1303,10 +1222,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:qr",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const frame = container.querySelector('[data-slot="drafting-layer-resize-frame"]') as HTMLElement
     const rotateHandle = container.querySelector(
@@ -1357,10 +1273,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:qr",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const frame = container.querySelector('[data-slot="drafting-layer-resize-frame"]') as HTMLElement
     const rotateHandle = container.querySelector(
@@ -1394,10 +1307,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:qr",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const frame = container.querySelector('[data-slot="drafting-layer-resize-frame"]') as HTMLElement
     const rotateHandle = container.querySelector(
@@ -1433,10 +1343,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:qr",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     vi.useFakeTimers()
 
@@ -1494,10 +1401,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:qr",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const frame = container.querySelector('[data-slot="drafting-layer-resize-frame"]') as HTMLElement
     const rotateHandle = container.querySelector(
@@ -1533,10 +1437,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:qr",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const canvas = container.querySelector('[data-slot="dashboard-compose-canvas"]')
 
@@ -1584,10 +1485,7 @@ describe("QrPane", () => {
       selectedLayerId: "preview:qr",
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const svg = Array.from(
       container.querySelectorAll('[data-slot="dashboard-compose-node"] svg'),
@@ -1611,10 +1509,7 @@ describe("QrPane", () => {
   it("keeps the qr canvas unshadowed when not selected", async () => {
     const { container } = renderPane(createDefaultQrStudioState(), false)
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const node = container.querySelector('[data-slot="dashboard-compose-node"]')
 
@@ -1628,10 +1523,7 @@ describe("QrPane", () => {
       onLayerSelect,
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const card = container.querySelector('[data-slot="dashboard-compose-card"]') as HTMLElement
 
@@ -1650,10 +1542,7 @@ describe("QrPane", () => {
       selectedLayerIds,
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     expect(container.querySelectorAll('[data-layer-id][data-selected="true"]')).toHaveLength(2)
     expect(container.querySelector('[data-slot="drafting-layer-resize-frame"]')).toBeNull()
@@ -1683,10 +1572,7 @@ describe("QrPane", () => {
       selectedLayerIds: ["preview:card", "preview:qr"],
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const handle = container.querySelector(
       '[data-slot="drafting-layer-resize-handle"][data-resize-direction="e"]',
@@ -1723,10 +1609,7 @@ describe("QrPane", () => {
       selectedLayerIds: ["preview:card", "preview:qr"],
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const frame = container.querySelector(
       '[data-slot="drafting-layer-multi-select-frame"]',
@@ -1776,10 +1659,7 @@ describe("QrPane", () => {
       selectedLayerIds: ["preview:card", "preview:qr"],
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const frame = container.querySelector(
       '[data-slot="drafting-layer-multi-select-frame"]',
@@ -1823,10 +1703,7 @@ describe("QrPane", () => {
       selectedLayerIds: ["preview:card", "preview:qr"],
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const frame = container.querySelector(
       '[data-slot="drafting-layer-multi-select-frame"]',
@@ -1889,10 +1766,7 @@ describe("QrPane", () => {
       selectedLayerIds: ["preview:card", "preview:qr"],
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const activeFrame = container.querySelector(
       '[data-slot="drafting-layer-multi-select-frame"]',
@@ -1917,10 +1791,7 @@ describe("QrPane", () => {
       selectedLayerIds: ["preview:card", "preview:qr"],
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     const qrLayer = container.querySelector('[data-layer-id="preview:qr"]') as HTMLElement
 
@@ -1954,10 +1825,7 @@ describe("QrPane", () => {
       selectedLayerIds: ["preview:card", "preview:qr"],
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForQrPaneRender()
 
     expect(container.querySelector('[data-slot="drafting-layer-size-value"]')?.textContent).toBe(
       "300 x 140",
@@ -2020,6 +1888,13 @@ function renderPane(
 
 function flushPromises() {
   return Promise.resolve()
+}
+
+async function waitForQrPaneRender() {
+  await act(async () => {
+    await flushPromises()
+    await flushPromises()
+  })
 }
 
 function getRequiredElement(parent: ParentNode, selector: string) {

@@ -14,7 +14,7 @@ type EyeDropperWindow = Window & {
   EyeDropper?: { new (): EyeDropperLike };
 };
 
-export type EyeDropperProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
+type EyeDropperProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 export const EyeDropper = React.forwardRef<HTMLButtonElement, EyeDropperProps>(function EyeDropper(
   { className, ...rest },

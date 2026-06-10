@@ -965,4 +965,3 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
 Slider.displayName = "Slider";
 
 export { Slider };
-export type { SliderAppearance, SliderProps, SliderValue, ValuePosition };

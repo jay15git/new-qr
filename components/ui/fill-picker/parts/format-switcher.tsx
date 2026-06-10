@@ -5,7 +5,7 @@ import { useColorPickerContext } from "../context";
 import type { ColorFormat } from "../lib/types";
 import { cn } from "@/lib/utils";
 
-export interface FormatSwitcherProps
+interface FormatSwitcherProps
   extends Omit<
     React.SelectHTMLAttributes<HTMLSelectElement>,
     "value" | "onChange" | "children"

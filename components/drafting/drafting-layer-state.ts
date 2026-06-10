@@ -490,98 +490,195 @@ function normalizeDraftingCanvasLayer(
     return null
   }
 
-  const kind =
-    value.kind === "card" ||
-    value.kind === "group" ||
-    value.kind === "qr" ||
-    value.kind === "text"
-      ? value.kind
-      : null
+  const kind = getDraftingCanvasLayerKind(value.kind)
 
   if (!kind) {
     return null
   }
 
-  const fallback =
-    fallbackLayers.find((layer) => layer.kind === kind) ??
-    createFallbackLayer(nodeId, kind)
+  const fallback = getDraftingLayerFallback(nodeId, kind, fallbackLayers)
   const width = readFiniteNumber(value.width, fallback.width)
   const height = readFiniteNumber(value.height, fallback.height)
-  const children: DraftingCanvasLayer[] | undefined =
-    kind === "group" && Array.isArray(value.children)
-      ? value.children
-          .map((child): DraftingCanvasLayer | null =>
-            normalizeDraftingCanvasLayer(nodeId, child, fallbackLayers),
-          )
-          .filter((child): child is DraftingCanvasLayer => Boolean(child))
-      : undefined
-  const text =
-    kind === "text" && typeof value.text === "string"
-      ? value.text
-      : kind === "text"
-        ? (fallback.text ?? DEFAULT_DRAFTING_TEXT_LAYER.text)
-        : undefined
-  const textRuns =
-    kind === "text" && text !== undefined
-      ? normalizeTextRuns(value.textRuns, fallback.textRuns, text)
-      : undefined
 
+  const context = {
+    fallback,
+    fallbackLayers,
+    height,
+    kind,
+    nodeId,
+    value,
+    width,
+  }
+
+  if (kind === "qr") {
+    return normalizeQrDraftingCanvasLayer({ ...context, kind })
+  }
+
+  if (kind === "text") {
+    return normalizeTextDraftingCanvasLayer({ ...context, kind })
+  }
+
+  if (kind === "group") {
+    return normalizeGroupDraftingCanvasLayer({ ...context, kind })
+  }
+
+  return normalizeNonTextDraftingCanvasLayer({ ...context, kind })
+}
+
+type NormalizeDraftingLayerContext = {
+  fallback: DraftingCanvasLayer
+  fallbackLayers: DraftingCanvasLayer[]
+  height: number
+  kind: DraftingCanvasLayerKind
+  nodeId: string
+  value: Record<string, unknown>
+  width: number
+}
+
+function getDraftingCanvasLayerKind(value: unknown): DraftingCanvasLayerKind | null {
+  return value === "card" || value === "group" || value === "qr" || value === "text"
+    ? value
+    : null
+}
+
+function getDraftingLayerFallback(
+  nodeId: string,
+  kind: DraftingCanvasLayerKind,
+  fallbackLayers: DraftingCanvasLayer[],
+) {
+  return fallbackLayers.find((layer) => layer.kind === kind) ?? createFallbackLayer(nodeId, kind)
+}
+
+function normalizeSharedDraftingCanvasLayerFields({
+  fallback,
+  height,
+  nodeId,
+  value,
+  width,
+}: NormalizeDraftingLayerContext): Omit<DraftingCanvasLayer, "kind"> {
   return {
     blur: clamp(readFiniteNumber(value.blur, fallback.blur), 0, 96),
-    children,
-    height: Math.max(1, kind === "qr" ? width : height),
+    children: undefined,
+    height: Math.max(1, height),
     id: typeof value.id === "string" ? value.id : fallback.id,
     isLocked:
       typeof value.isLocked === "boolean" ? value.isLocked : fallback.isLocked,
     isVisible:
       typeof value.isVisible === "boolean" ? value.isVisible : fallback.isVisible,
-    kind,
-    fill: kind === "text" ? normalizeHexColor(value.fill, fallback.fill ?? DEFAULT_DRAFTING_TEXT_LAYER.fill) : undefined,
-    fontFamily: kind === "text" ? normalizeTextFontFamily(value, fallback) : undefined,
-    fontId: kind === "text" ? normalizeTextFontId(value, fallback) : undefined,
-    fontSize:
-      kind === "text"
-        ? clamp(readFiniteNumber(value.fontSize, fallback.fontSize ?? DEFAULT_DRAFTING_TEXT_LAYER.fontSize), 6, 300)
-        : undefined,
-    fontStyle:
-      kind === "text" && value.fontStyle === "italic"
-        ? "italic"
-        : kind === "text"
-          ? "normal"
-          : undefined,
-    fontWeight:
-      kind === "text"
-        ? normalizeTextFontWeight(value.fontWeight, fallback.fontWeight)
-        : undefined,
-    letterSpacing:
-      kind === "text"
-        ? clamp(readFiniteNumber(value.letterSpacing, fallback.letterSpacing ?? DEFAULT_DRAFTING_TEXT_LAYER.letterSpacing), -50, 200)
-        : undefined,
-    lineHeight:
-      kind === "text"
-        ? clamp(readFiniteNumber(value.lineHeight, fallback.lineHeight ?? DEFAULT_DRAFTING_TEXT_LAYER.lineHeight), 0.6, 4)
-        : undefined,
+    fill: undefined,
+    fontFamily: undefined,
+    fontId: undefined,
+    fontSize: undefined,
+    fontStyle: undefined,
+    fontWeight: undefined,
+    letterSpacing: undefined,
+    lineHeight: undefined,
     name: typeof value.name === "string" && value.name.trim() ? value.name : fallback.name,
     nodeId,
     opacity: clamp(readFiniteNumber(value.opacity, fallback.opacity), 0, 1),
     rotation: readFiniteNumber(value.rotation, fallback.rotation),
     shadow: normalizeDraftingLayerShadow(value.shadow, fallback.shadow),
-    text,
-    textAlign:
-      kind === "text"
-        ? normalizeTextAlign(value.textAlign, fallback.textAlign)
-        : undefined,
-    textRuns,
-    underline:
-      kind === "text"
-        ? typeof value.underline === "boolean"
-          ? value.underline
-          : (fallback.underline ?? DEFAULT_DRAFTING_TEXT_LAYER.underline)
-        : undefined,
+    text: undefined,
+    textAlign: undefined,
+    textRuns: undefined,
+    underline: undefined,
     width: Math.max(1, width),
     x: readFiniteNumber(value.x, fallback.x),
     y: readFiniteNumber(value.y, fallback.y),
     zIndex: readFiniteNumber(value.zIndex, fallback.zIndex),
+  }
+}
+
+function normalizeNonTextDraftingCanvasLayer(
+  context: NormalizeDraftingLayerContext & { kind: "card" },
+): DraftingCanvasLayer {
+  return {
+    ...normalizeSharedDraftingCanvasLayerFields(context),
+    kind: context.kind,
+  } satisfies DraftingCanvasLayer
+}
+
+function normalizeQrDraftingCanvasLayer(
+  context: NormalizeDraftingLayerContext & { kind: "qr" },
+): DraftingCanvasLayer {
+  const width = Math.max(1, context.width)
+
+  return {
+    ...normalizeSharedDraftingCanvasLayerFields(context),
+    height: width,
+    kind: "qr",
+    width,
+  } satisfies DraftingCanvasLayer
+}
+
+function normalizeGroupDraftingCanvasLayer(
+  context: NormalizeDraftingLayerContext & { kind: "group" },
+): DraftingCanvasLayer {
+  return {
+    ...normalizeSharedDraftingCanvasLayerFields(context),
+    children: normalizeDraftingGroupChildren(context),
+    kind: "group",
+  } satisfies DraftingCanvasLayer
+}
+
+function normalizeDraftingGroupChildren({
+  fallbackLayers,
+  nodeId,
+  value,
+}: NormalizeDraftingLayerContext) {
+  if (!Array.isArray(value.children)) {
+    return undefined
+  }
+
+  return value.children
+    .map((child): DraftingCanvasLayer | null =>
+      normalizeDraftingCanvasLayer(nodeId, child, fallbackLayers),
+    )
+    .filter((child): child is DraftingCanvasLayer => Boolean(child))
+}
+
+function normalizeTextDraftingCanvasLayer(
+  context: NormalizeDraftingLayerContext & { kind: "text" },
+): DraftingCanvasLayer {
+  const { fallback, value } = context
+  const text =
+    typeof value.text === "string"
+      ? value.text
+      : (fallback.text ?? DEFAULT_DRAFTING_TEXT_LAYER.text)
+
+  return {
+    ...normalizeSharedDraftingCanvasLayerFields(context),
+    fill: normalizeHexColor(value.fill, fallback.fill ?? DEFAULT_DRAFTING_TEXT_LAYER.fill),
+    fontFamily: normalizeTextFontFamily(value, fallback),
+    fontId: normalizeTextFontId(value, fallback),
+    fontSize: clamp(
+      readFiniteNumber(value.fontSize, fallback.fontSize ?? DEFAULT_DRAFTING_TEXT_LAYER.fontSize),
+      6,
+      300,
+    ),
+    fontStyle: value.fontStyle === "italic" ? "italic" : "normal",
+    fontWeight: normalizeTextFontWeight(value.fontWeight, fallback.fontWeight),
+    kind: "text",
+    letterSpacing: clamp(
+      readFiniteNumber(
+        value.letterSpacing,
+        fallback.letterSpacing ?? DEFAULT_DRAFTING_TEXT_LAYER.letterSpacing,
+      ),
+      -50,
+      200,
+    ),
+    lineHeight: clamp(
+      readFiniteNumber(value.lineHeight, fallback.lineHeight ?? DEFAULT_DRAFTING_TEXT_LAYER.lineHeight),
+      0.6,
+      4,
+    ),
+    text,
+    textAlign: normalizeTextAlign(value.textAlign, fallback.textAlign),
+    textRuns: normalizeTextRuns(value.textRuns, fallback.textRuns, text),
+    underline:
+      typeof value.underline === "boolean"
+        ? value.underline
+        : (fallback.underline ?? DEFAULT_DRAFTING_TEXT_LAYER.underline),
   } satisfies DraftingCanvasLayer
 }
 

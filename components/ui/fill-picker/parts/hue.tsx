@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 const toHsl = converter("hsl");
 const toHsv = converter("hsv");
 
-export interface HueProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onKeyDown"> {
+interface HueProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onKeyDown"> {
   orientation?: "horizontal" | "vertical";
 }
 

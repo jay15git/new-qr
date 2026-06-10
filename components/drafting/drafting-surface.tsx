@@ -234,7 +234,7 @@ type DraftingBrandIconCategoryFilter = BrandIconCategory | "all"
 type DraftingCardToolId = "card-frame" | "card-surface" | "card-image" | "card-shaders"
 type DraftingSurfaceChrome = "canvas-only" | "full"
 
-export type DraftingWorkspaceController = DesktopToolbarController
+type DraftingWorkspaceController = DesktopToolbarController
 
 type DraftingSurfaceProps = {
   chrome?: DraftingSurfaceChrome

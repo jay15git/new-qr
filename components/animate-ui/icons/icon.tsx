@@ -647,6 +647,4 @@ export {
   getVariants,
   type IconProps,
   type IconWrapperProps,
-  type AnimateIconProps,
-  type AnimateIconContextValue,
 };

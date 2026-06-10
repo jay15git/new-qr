@@ -96,7 +96,7 @@ export type QrInputOption = {
   value: QrInputType
 }
 
-export type QuickQrInputOption = Omit<QrInputOption, "value"> & {
+type QuickQrInputOption = Omit<QrInputOption, "value"> & {
   value: QuickQrInputType
 }
 

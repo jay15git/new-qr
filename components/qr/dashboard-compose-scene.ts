@@ -18,7 +18,7 @@ export type DashboardComposeBackground = {
 
 export type DashboardDocumentPresetId = "letter" | "a4" | "square" | "social-post"
 
-export type DashboardDocumentPreset = {
+type DashboardDocumentPreset = {
   id: DashboardDocumentPresetId
   title: string
   width: number

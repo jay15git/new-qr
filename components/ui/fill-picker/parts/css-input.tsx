@@ -5,7 +5,7 @@ import { useColorPickerContext } from "../context";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-export type CssInputProps = Omit<
+type CssInputProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
   "value" | "onChange"
 >;

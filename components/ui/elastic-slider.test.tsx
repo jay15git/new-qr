@@ -1,21 +1,10 @@
 // @vitest-environment jsdom
 
-import { act } from "react"
-import { createRoot, type Root } from "react-dom/client"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { act, type ReactElement } from "react"
+import { describe, expect, it, vi } from "vitest"
 
 import { ElasticSlider } from "@/components/ui/elastic-slider"
-
-const cleanupCallbacks: Array<() => void> = []
-
-afterEach(() => {
-  for (const cleanup of cleanupCallbacks.splice(0)) {
-    cleanup()
-  }
-
-  vi.unstubAllGlobals()
-  document.body.innerHTML = ""
-})
+import { renderWithJsdomRoot } from "../../test-utils/jsdom-react-root"
 
 describe("ElasticSlider", () => {
   it("renders accessible slider state and formatted value text", () => {
@@ -91,25 +80,8 @@ describe("ElasticSlider", () => {
   })
 })
 
-function renderSlider(element: React.ReactElement) {
-  const container = document.createElement("div")
-  document.body.append(container)
-
-  let root: Root | null = null
-
-  act(() => {
-    root = createRoot(container)
-    root.render(element)
-  })
-
-  cleanupCallbacks.push(() => {
-    act(() => {
-      root?.unmount()
-    })
-    container.remove()
-  })
-
-  return { container }
+function renderSlider(element: ReactElement) {
+  return renderWithJsdomRoot(element)
 }
 
 function getRequiredSlider(container: HTMLElement, name: string) {

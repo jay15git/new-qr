@@ -2,7 +2,7 @@ import type { DraftingCanvasLayer } from "@/components/drafting/drafting-layer-s
 
 export type DraftingFontSource = "fontshare" | "local" | "system"
 
-export type DraftingFontRegistryEntry = {
+type DraftingFontRegistryEntry = {
   cssText?: string
   cssUrl?: string
   fallback: string

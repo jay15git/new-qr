@@ -5,7 +5,7 @@ import { useColorPickerContext } from "../context";
 import { formatColor } from "../lib/color";
 import { cn } from "@/lib/utils";
 
-export interface AlphaProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onKeyDown"> {
+interface AlphaProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onKeyDown"> {
   orientation?: "horizontal" | "vertical";
 }
 

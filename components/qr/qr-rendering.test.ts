@@ -32,6 +32,13 @@ type StubElement = {
   textContent?: string | null
 }
 
+type DotMatrixSvgFixtureOptions = {
+  cols?: number
+  height?: number
+  rows?: number
+  width?: number
+}
+
 function createStubElement(tagName: string): StubElement {
   const element: StubElement = {
     tagName,
@@ -179,30 +186,19 @@ function createStubElement(tagName: string): StubElement {
   return element
 }
 
-function renderDotMatrixTracks(
-  loader: NonNullable<ReturnType<typeof createDefaultQrStudioState>["dotMatrixAnimation"]["loader"]>,
-  pattern: ReturnType<typeof createDefaultQrStudioState>["dotMatrixAnimation"]["pattern"] = "full",
-  patch: QrDotMatrixAnimationPatch = {},
-) {
-  const state = createDefaultQrStudioState()
-  state.dotMatrixAnimation = {
-    ...state.dotMatrixAnimation,
-    ...patch,
-    enabled: true,
-    loader,
-    pattern,
-    speed: patch.speed ?? 3,
-  }
-  const extension = createDotMatrixAnimationExtension(state, "preview")
-  expect(extension).toBeTypeOf("function")
-
+function createDotMatrixSvgFixture({
+  cols = 5,
+  height = 120,
+  rows = 5,
+  width = 120,
+}: DotMatrixSvgFixtureOptions = {}) {
   const svg = createStubElement("svg")
   const defs = createStubElement("defs")
   const dotClipPath = createStubElement("clipPath")
   dotClipPath.setAttribute("id", "clip-path-dot-color-0")
 
-  for (let row = 0; row < 5; row += 1) {
-    for (let col = 0; col < 5; col += 1) {
+  for (let row = 0; row < rows; row += 1) {
+    for (let col = 0; col < cols; col += 1) {
       const dot = createStubElement("rect")
       dot.setAttribute("x", String(10 + col * 5))
       dot.setAttribute("y", String(10 + row * 5))
@@ -220,9 +216,31 @@ function renderDotMatrixTracks(
   dotLayer.setAttribute("fill", "#111827")
   svg.appendChild(dotLayer)
 
+  return { dotLayer, height, svg, width }
+}
+
+function renderDotMatrixTracks(
+  loader: NonNullable<ReturnType<typeof createDefaultQrStudioState>["dotMatrixAnimation"]["loader"]>,
+  pattern: ReturnType<typeof createDefaultQrStudioState>["dotMatrixAnimation"]["pattern"] = "full",
+  patch: QrDotMatrixAnimationPatch = {},
+) {
+  const state = createDefaultQrStudioState()
+  state.dotMatrixAnimation = {
+    ...state.dotMatrixAnimation,
+    ...patch,
+    enabled: true,
+    loader,
+    pattern,
+    speed: patch.speed ?? 3,
+  }
+  const extension = createDotMatrixAnimationExtension(state, "preview")
+  expect(extension).toBeTypeOf("function")
+
+  const { height, svg, width } = createDotMatrixSvgFixture()
+
   extension?.(svg as unknown as SVGElement, {
-    height: 120,
-    width: 120,
+    height,
+    width,
   })
 
   const animationLayer = svg.querySelector('[data-qr-layer="dot-matrix-animation"]')
@@ -961,33 +979,11 @@ describe("qr rendering helpers", () => {
       return
     }
 
-    const svg = createStubElement("svg")
-    const defs = createStubElement("defs")
-    const dotClipPath = createStubElement("clipPath")
-    dotClipPath.setAttribute("id", "clip-path-dot-color-0")
-
-    for (let row = 0; row < 5; row += 1) {
-      for (let col = 0; col < 5; col += 1) {
-        const dot = createStubElement("rect")
-        dot.setAttribute("x", String(10 + col * 5))
-        dot.setAttribute("y", String(10 + row * 5))
-        dot.setAttribute("width", "5")
-        dot.setAttribute("height", "5")
-        dotClipPath.appendChild(dot)
-      }
-    }
-
-    defs.appendChild(dotClipPath)
-    svg.appendChild(defs)
-
-    const dotLayer = createStubElement("rect")
-    dotLayer.setAttribute("clip-path", "url('#clip-path-dot-color-0')")
-    dotLayer.setAttribute("fill", "#111827")
-    svg.appendChild(dotLayer)
+    const { height, svg, width } = createDotMatrixSvgFixture()
 
     extension(svg as unknown as SVGElement, {
-      height: 120,
-      width: 120,
+      height,
+      width,
     })
 
     const animationLayer = svg.querySelector('[data-qr-layer="dot-matrix-animation"]')

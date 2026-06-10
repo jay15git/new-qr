@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-export interface GamutBadgeProps extends React.HTMLAttributes<HTMLDivElement> {
+interface GamutBadgeProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Show the "Gamut" prefix label. Default true. */
   showLabel?: boolean;
 }

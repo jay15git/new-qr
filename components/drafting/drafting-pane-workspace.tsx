@@ -83,7 +83,7 @@ type DesktopLayerToolbarLayer = {
   shadowOpacity: number
 }
 
-export type DesktopLayerToolbarControls = {
+type DesktopLayerToolbarControls = {
   layer: DesktopLayerToolbarLayer | null
   onLayerChange: (patch: Partial<DesktopLayerToolbarLayer>) => void
 }

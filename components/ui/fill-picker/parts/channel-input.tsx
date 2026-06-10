@@ -11,7 +11,7 @@ import {
 import type { ColorFormat } from "../lib/types";
 import { cn } from "@/lib/utils";
 
-export interface ChannelInputProps
+interface ChannelInputProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
   /** Override the formats from <ColorPicker.Root formats={...}>. */
   formats?: ColorFormat[];

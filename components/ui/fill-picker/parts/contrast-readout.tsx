@@ -15,9 +15,9 @@ import { cn } from "@/lib/utils";
 const CHECKERBOARD =
   "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'><rect width='4' height='4' fill='%23ccc'/><rect x='4' y='4' width='4' height='4' fill='%23ccc'/></svg>\")";
 
-export type ContrastMetric = "wcag" | "apca";
+type ContrastMetric = "wcag" | "apca";
 
-export interface ContrastReadoutProps extends React.HTMLAttributes<HTMLDivElement> {
+interface ContrastReadoutProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Which contrast metrics are available. The first entry is shown by default;
    * if more than one is provided, the readout becomes a button and the user

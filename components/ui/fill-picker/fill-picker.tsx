@@ -14,19 +14,10 @@ import { Preview } from "./parts/preview";
 import { EyeDropper } from "./parts/eye-dropper";
 
 export type {
-  ColorFormat,
   OklchColor,
-  GamutInfo,
-  ContrastResult,
-  Gamut,
 } from "./lib/types";
-export type {
-  UseColorPickerProps,
-  ColorPickerState,
-} from "./hooks/use-color-picker";
 export { useColorPicker } from "./hooks/use-color-picker";
 export { parseColor } from "./lib/color";
-export type { ChannelDescriptor } from "./lib/channels";
 
 /**
  * Compositional color picker. Compose `<ColorPicker.Root>` with the named

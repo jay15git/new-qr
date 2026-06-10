@@ -5,7 +5,7 @@ import { Home01Icon, LibraryIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { motion } from "motion/react";
 
-export interface TabItem {
+interface TabItem {
   id: string;
   label: string;
   icon: ReactNode;

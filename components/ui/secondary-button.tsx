@@ -2,7 +2,7 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-export interface SecondaryButtonProps
+interface SecondaryButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   selected?: boolean
 }

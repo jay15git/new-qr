@@ -103,14 +103,14 @@ export type PaperShaderParamValue =
 
 export type PaperShaderParams = Record<string, PaperShaderParamValue>
 
-export type PaperShaderPreset = {
+type PaperShaderPreset = {
   name: string
   params: PaperShaderParams
 }
 
 type PaperShaderComponent = ComponentType<Record<string, unknown>>
 
-export type PaperShaderGroup = "background" | "texture" | "border" | "image-filter"
+type PaperShaderGroup = "background" | "texture" | "border" | "image-filter"
 
 export type PaperShaderNumberControl = {
   key: string
@@ -160,12 +160,12 @@ export type PaperShaderControlDefinition =
   | PaperShaderImageControl
   | PaperShaderNumberControl
 
-export type PaperShaderRenderOptions = {
+type PaperShaderRenderOptions = {
   maxPixelCount?: number
   minPixelRatio?: number
 }
 
-export type PaperShaderDefinition = {
+type PaperShaderDefinition = {
   id: string
   label: string
   group: PaperShaderGroup

@@ -596,10 +596,7 @@ describe("DraftingSurface", () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface()
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
     const callsBeforeEdit = buildDashboardQrNodePayloadSpy.mock.calls.length
     const autoContentInput = getRequiredElement(
@@ -705,16 +702,9 @@ describe("DraftingSurface", () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface()
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
-    await act(async () => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add QR code"]'))
-      await flushPromises()
-      await flushPromises()
-    })
+    await addQrCode(surface.container)
 
     expect(
       getRequiredElement(surface.container, 'input[aria-label="Download Current QR"]'),
@@ -741,16 +731,9 @@ describe("DraftingSurface", () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface()
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
-    await act(async () => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add QR code"]'))
-      await flushPromises()
-      await flushPromises()
-    })
+    await addQrCode(surface.container)
 
     await act(async () => {
       activateElement(
@@ -787,16 +770,9 @@ describe("DraftingSurface", () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface()
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
-    await act(async () => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add QR code"]'))
-      await flushPromises()
-      await flushPromises()
-    })
+    await addQrCode(surface.container)
 
     await act(async () => {
       activateElement(
@@ -865,10 +841,7 @@ describe("DraftingSurface", () => {
     const surface = renderSurface()
     const backgroundButton = getRequiredElement(surface.container, 'button[aria-label="Open Shape"]')
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
     act(() => {
       activateElement(backgroundButton)
@@ -1017,10 +990,7 @@ describe("DraftingSurface", () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface({ openDownloadPopover: false })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
     act(() => {
       activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Text"]'))
@@ -1098,10 +1068,7 @@ describe("DraftingSurface", () => {
     act(() => {
       activateElement(getRequiredElement(surface.container, '[data-slot="drafting-download-submit"]'))
     })
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
     const exportCall = downloadDashboardQrNodeExportSpy.mock.calls.at(-1) as unknown as
       | [{ node: { originalSvgMarkup: string } }]
@@ -1793,10 +1760,7 @@ describe("DraftingSurface", () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface()
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
     openCardOnlyMode(surface.container)
 
@@ -1872,10 +1836,7 @@ describe("DraftingSurface", () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface()
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
     openCardOnlyMode(surface.container)
 
@@ -1929,10 +1890,7 @@ describe("DraftingSurface", () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface()
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
     openCardOnlyMode(surface.container)
 
@@ -2011,10 +1969,7 @@ describe("DraftingSurface", () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface()
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
     openCardOnlyMode(surface.container)
 
@@ -2043,10 +1998,7 @@ describe("DraftingSurface", () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface()
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
     openCardOnlyMode(surface.container)
 
@@ -2098,10 +2050,7 @@ describe("DraftingSurface", () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface()
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
     openCardOnlyMode(surface.container)
 
@@ -2116,11 +2065,7 @@ describe("DraftingSurface", () => {
       changeInputValue(getFillInput(), "#ff00aa")
     })
 
-    await act(async () => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add QR code"]'))
-      await flushPromises()
-      await flushPromises()
-    })
+    await addQrCode(surface.container)
 
     act(() => {
       changeInputValue(getFillInput(), "#00ffaa")
@@ -2153,10 +2098,7 @@ describe("DraftingSurface", () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface({ includeResetOverlay: true })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
     openCardOnlyMode(surface.container)
 
@@ -2168,11 +2110,7 @@ describe("DraftingSurface", () => {
       activateElement(getRadioInputByAriaLabel(surface.container, "Pattern 003"))
     })
 
-    await act(async () => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add QR code"]'))
-      await flushPromises()
-      await flushPromises()
-    })
+    await addQrCode(surface.container)
 
     act(() => {
       activateElement(getRadioInputByAriaLabel(surface.container, "Pattern 004"))
@@ -2209,10 +2147,7 @@ describe("DraftingSurface", () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface({ includeResetOverlay: true })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
     openCardOnlyMode(surface.container)
 
@@ -2234,11 +2169,7 @@ describe("DraftingSurface", () => {
       )
     })
 
-    await act(async () => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add QR code"]'))
-      await flushPromises()
-      await flushPromises()
-    })
+    await addQrCode(surface.container)
 
     act(() => {
       activateElement(getRequiredElement(surface.container, 'button[aria-label="Open Decorations"]'))
@@ -2355,11 +2286,7 @@ describe("DraftingSurface", () => {
       )
     })
 
-    await act(async () => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add QR code"]'))
-      await flushPromises()
-      await flushPromises()
-    })
+    await addQrCode(surface.container)
 
     act(() => {
       activateElement(
@@ -2722,10 +2649,7 @@ describe("DraftingSurface", () => {
       'button[aria-label="Open Shape"]',
     )
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
     act(() => {
       backgroundButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -2848,10 +2772,7 @@ describe("DraftingSurface", () => {
       'button[aria-label="Open Shape"]',
     )
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
     act(() => {
       backgroundButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -3534,18 +3455,11 @@ describe("DraftingSurface", () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface()
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
     expect(surface.container.querySelectorAll('[data-slot="dashboard-compose-node"]')).toHaveLength(1)
 
-    await act(async () => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add QR code"]'))
-      await flushPromises()
-      await flushPromises()
-    })
+    await addQrCode(surface.container)
 
     const selectedNodeId = getRequiredElement(
       surface.container,
@@ -3593,10 +3507,7 @@ describe("DraftingSurface", () => {
     )
     const surface = renderSurface()
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
     await act(async () => {
       changeInputValue(
@@ -3610,11 +3521,7 @@ describe("DraftingSurface", () => {
       await flushPromises()
     })
 
-    await act(async () => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add QR code"]'))
-      await flushPromises()
-      await flushPromises()
-    })
+    await addQrCode(surface.container)
 
     await act(async () => {
       changeInputValue(
@@ -3798,10 +3705,7 @@ describe("DraftingSurface", () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface({ includeResetOverlay: true, openDownloadPopover: false })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
     const initialCall = buildDashboardQrNodePayloadSpy.mock.calls as unknown as Array<
       [QrStudioState]
@@ -3816,10 +3720,7 @@ describe("DraftingSurface", () => {
       activateElement(getRequiredElement(surface.container, 'button[aria-label="Reset defaults"]'))
     })
 
-    await act(async () => {
-      await flushPromises()
-      await flushPromises()
-    })
+    await waitForDraftingSurface()
 
     const resetCall = buildDashboardQrNodePayloadSpy.mock.calls as unknown as Array<
       [QrStudioState]
@@ -4666,6 +4567,21 @@ function getButtonByExactText(parent: ParentNode, text: string) {
 
 async function flushPromises() {
   await Promise.resolve()
+}
+
+async function waitForDraftingSurface() {
+  await act(async () => {
+    await flushPromises()
+    await flushPromises()
+  })
+}
+
+async function addQrCode(parent: ParentNode) {
+  await act(async () => {
+    activateElement(getRequiredElement(parent, 'button[aria-label="Add QR code"]'))
+    await flushPromises()
+    await flushPromises()
+  })
 }
 
 async function advanceDraftingTimers() {
