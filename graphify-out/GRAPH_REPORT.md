@@ -1,7 +1,7 @@
 # Graph Report - new-qr  (2026-06-10)
 
 ## Corpus Check
-- 195 files · ~190,886 words
+- 195 files · ~191,002 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8609f6a5`
+- Built from commit: `ede11f19`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -182,7 +182,7 @@ Nodes (59): DesktopDecorationsSettings, DesktopEncodingSettings, DesktopExportSe
 
 ### Community 2 - "Community 2"
 Cohesion: 0.05
-Nodes (38): applyAssetNoneSelection(), applyAssetUrlValue(), applyBackgroundGradient(), applyBackgroundSolidColor(), applyBackgroundTransparentSelection(), applyCornerGradient(), applyCornerSolidColor(), applyDotsGradient() (+30 more)
+Nodes (40): BACKGROUND_MODES, BackgroundColorMode, BackgroundSettingsTabId, BRAND_ICON_CATEGORY_OPTIONS, BrandIconCategoryFilter, DashboardAssetKey, DashboardCornerColorKey, DOT_COLOR_MODES (+32 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.04
@@ -265,8 +265,8 @@ Cohesion: 0.15
 Nodes (31): appendCalendarLine(), appendVCardLine(), buildCouponPayload(), buildEventPayload(), buildMailtoPayload(), buildMapPayload(), buildSmsPayload(), buildStaticQrPayload() (+23 more)
 
 ### Community 23 - "Community 23"
-Cohesion: 0.11
-Nodes (17): applyAssetNoneSelection(), applyAssetUrlValue(), applyBackgroundGradient(), applyBackgroundSolidColor(), applyBackgroundTransparentSelection(), applyCornerGradient(), applyCornerSolidColor(), applyDotsGradient() (+9 more)
+Cohesion: 0.12
+Nodes (15): applyAssetNoneSelection(), applyAssetUrlValue(), applyBackgroundGradient(), applyBackgroundSolidColor(), applyBackgroundTransparentSelection(), applyCornerGradient(), applyCornerSolidColor(), applyDotsGradient() (+7 more)
 
 ### Community 24 - "Community 24"
 Cohesion: 0.07
@@ -656,7 +656,7 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.081) - this node is a cross-community bridge._
 - **Why does `QrInputType` connect `Community 60` to `Community 0`, `Community 1`, `Community 3`, `Community 5`, `Community 47`, `Community 22`, `Community 55`, `Community 26`?**
   _High betweenness centrality (0.019) - this node is a cross-community bridge._
-- **Why does `StudioGradient` connect `Community 44` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 37`, `Community 8`, `Community 14`, `Community 23`, `Community 24`?**
+- **Why does `StudioGradient` connect `Community 44` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 37`, `Community 8`, `Community 14`, `Community 24`?**
   _High betweenness centrality (0.018) - this node is a cross-community bridge._
 - **What connects `SessionStart`, `PreToolUse`, `files` to the rest of the system?**
   _737 weakly-connected nodes found - possible documentation gaps or missing edges._
@@ -665,4 +665,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.032467532467532464 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.04713804713804714 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.045112781954887216 - nodes in this community are weakly interconnected._

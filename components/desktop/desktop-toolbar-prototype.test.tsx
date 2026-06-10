@@ -46,6 +46,40 @@ describe("DesktopToolbarPrototype", () => {
     expect(imageButton.getAttribute("aria-pressed")).toBe("true")
   })
 
+  it("renders the icon rail inside the inspector shell as one left toolbar", async () => {
+    const surface = await renderPrototype({ controller: { activeTool: "content" } })
+    const shell = surface.container.querySelector('[data-slot="desktop-left-toolbar-shell"]')
+    const rail = surface.container.querySelector('[data-slot="desktop-floating-toolbar"]')
+    const inspector = surface.container.querySelector('[data-slot="desktop-floating-inspector"]')
+    const source = readFileSync(
+      resolve(process.cwd(), "components/desktop/desktop-toolbar-prototype.tsx"),
+      "utf8",
+    )
+
+    expect(shell).not.toBeNull()
+    expect(shell?.querySelector('[data-slot="desktop-floating-toolbar"]')).toBe(rail)
+    expect(shell?.querySelector('[data-slot="desktop-floating-inspector"]')).toBe(inspector)
+    expect(shell?.className).toContain("grid-cols-[4.5rem_minmax(0,1fr)]")
+    expect(rail?.className).not.toContain("fixed")
+    expect(rail?.className).not.toContain("rounded-full")
+    expect(rail?.className).not.toContain("bg-black/55")
+    expect(inspector?.className).not.toContain("fixed")
+    expect(inspector?.className).not.toContain("rounded-[20px]")
+    expect(inspector?.className).not.toContain("bg-black/55")
+    expect(source).toContain('[data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] {')
+    expect(source).toContain("color: rgba(15, 23, 42, 0.58) !important;")
+  })
+
+  it("keeps settings panel headings transparent", () => {
+    const source = readFileSync(
+      resolve(process.cwd(), "components/desktop/desktop-inspector-controls.tsx"),
+      "utf8",
+    )
+
+    expect(source).toContain("DESKTOP_INSPECTOR_HEADER_CLASS")
+    expect(source).not.toContain("bg-[var(--desktop-inspector-header-bg)]")
+  })
+
   it("toggles the desktop prototype between dark and light mode", async () => {
     const surface = await renderPrototype()
     const prototype = surface.container.querySelector('[data-slot="desktop-toolbar-prototype"]')
@@ -206,10 +240,12 @@ describe("DesktopToolbarPrototype", () => {
     const inspector = surface.container.querySelector(
       '[data-slot="desktop-floating-inspector"]',
     )
+    const shell = surface.container.querySelector('[data-slot="desktop-left-toolbar-shell"]')
 
     expect(inspector).not.toBeNull()
     expect(inspector?.getAttribute("aria-label")).toBe("Content settings")
-    expect(inspector?.className).toContain("z-[25]")
+    expect(shell?.className).toContain("z-[25]")
+    expect(shell?.querySelector('[data-slot="desktop-floating-inspector"]')).toBe(inspector)
     expect(inspector?.querySelector('[data-slot="desktop-content-inspector"]')).not.toBeNull()
     expect(inspector?.querySelector('[data-slot="desktop-content-type-collection"]')).not.toBeNull()
     expect(inspector?.querySelector('[data-slot="desktop-content-type-filters"]')).toBeNull()

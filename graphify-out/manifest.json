@@ -260,13 +260,13 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/desktop/desktop-toolbar-prototype.test.tsx": {
-    "mtime": 1781067572.4816875,
-    "ast_hash": "165981596a3b9702a50be6a74c1f616f",
+    "mtime": 1781089092.7751417,
+    "ast_hash": "8bccada436805a0cf03fc9492595162a",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/desktop/desktop-toolbar-prototype.tsx": {
-    "mtime": 1781064978.292975,
-    "ast_hash": "66a8c444cd4e3e74ece07eb34b8d927a",
+    "mtime": 1781088969.8694098,
+    "ast_hash": "65a1137dd115efc105b6a1e2e97a7393",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/desktop/desktop-workspace.tsx": {
@@ -925,12 +925,12 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/drafting/drafting-surface.test.tsx": {
-    "mtime": 1781075763.3322723,
+    "mtime": 1781088676.3297424,
     "ast_hash": "a9e6fc974c9051145b9aa02a8189ec27",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/drafting/drafting-surface.tsx": {
-    "mtime": 1781067111.2964966,
+    "mtime": 1781088676.3301122,
     "ast_hash": "56158efac35fe53b68640c9cdfc68ef6",
     "semantic_hash": ""
   },
@@ -980,8 +980,8 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/desktop/desktop-inspector-controls.tsx": {
-    "mtime": 1781064978.285912,
-    "ast_hash": "fcab7d7392af4c7491b6161e70277ce0",
+    "mtime": 1781089106.2427394,
+    "ast_hash": "c2e5c96ec776fbb8624f7112e5af4ef2",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/knip.json": {

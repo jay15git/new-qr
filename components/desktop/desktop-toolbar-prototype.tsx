@@ -1101,143 +1101,149 @@ export function DesktopToolbarPrototype({
             <Redo2Icon className="size-4" />
           </button>
         </div>
-        <nav
-          aria-label="Desktop tools"
-          data-slot="desktop-floating-toolbar"
-          className="fixed bottom-5 left-5 top-5 z-[25] flex w-14 flex-col items-center justify-start gap-1.5 overflow-x-hidden overflow-y-auto rounded-full border border-white/[0.12] bg-black/55 p-1.5 text-white/72 shadow-[0_22px_55px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl max-md:bottom-4 max-md:left-3 max-md:top-4 max-md:w-12 max-md:p-1"
+        <div
+          data-slot="desktop-left-toolbar-shell"
+          data-toolbar-appearance="desktop-glass"
+          className="fixed bottom-5 left-5 top-5 z-[25] grid w-[23.75rem] grid-cols-[4.5rem_minmax(0,1fr)] overflow-hidden rounded-[20px] border border-white/[0.1] bg-black/55 text-white shadow-[0_24px_65px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl max-md:bottom-4 max-md:left-3 max-md:top-4 max-md:w-[min(20rem,calc(100vw-1.5rem))] max-md:grid-cols-[3.5rem_minmax(0,1fr)] max-md:rounded-[18px]"
         >
-          {DESKTOP_TOOLBAR_TOOLS.map((tool, index) => {
-            const isActive = actualActiveTool === tool.id
-            const previousGroup = DESKTOP_TOOLBAR_TOOLS[index - 1]?.group
-            const startsGroup = index > 0 && tool.group !== previousGroup
-
-            return (
-              <div key={tool.id} className="flex flex-col items-center gap-1.5">
-                {startsGroup ? (
-                  <span
-                    aria-hidden="true"
-                    data-slot="desktop-toolbar-separator"
-                    className="my-1 h-px w-7 bg-white/[0.13]"
-                  />
-                ) : null}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      aria-label={`Open ${tool.title}`}
-                      aria-pressed={isActive}
-                      data-desktop-tool-button="true"
-                      data-tool-id={tool.id}
-                      type="button"
-                      className={cn(
-                        "grid size-11 place-items-center rounded-full text-current transition-[background-color,color,box-shadow,transform] duration-150 ease-out outline-none hover:bg-white/[0.11] hover:text-white focus-visible:ring-2 focus-visible:ring-white/45 active:scale-95 max-md:size-10",
-                        isActive &&
-                          "bg-white/[0.18] text-white shadow-none hover:bg-white/[0.2]",
-                      )}
-                      onClick={() => onActiveToolChange(tool.id)}
-                    >
-                      {tool.renderIcon()}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    hideArrow
-                    side="right"
-                    sideOffset={10}
-                    className="border border-white/[0.12] bg-[#15161a] text-white shadow-xl"
-                  >
-                    {tool.title}
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            )
-          })}
-        </nav>
-
-        {activeToolConfig ? (
-          <aside
-            aria-label={`${activeToolConfig.title} settings`}
-            data-slot="desktop-floating-inspector"
-            className="fixed bottom-5 left-[5.75rem] top-5 z-[25] flex w-72 min-w-0 flex-col overflow-hidden rounded-[20px] border border-white/[0.1] bg-black/55 text-white shadow-[0_24px_65px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl max-md:bottom-4 max-md:left-[4.25rem] max-md:top-4 max-md:w-[min(16rem,calc(100vw-5rem))] max-md:rounded-[18px]"
+          <nav
+            aria-label="Desktop tools"
+            data-slot="desktop-floating-toolbar"
+            className="relative flex min-h-0 min-w-0 flex-col items-center justify-start gap-1.5 overflow-x-hidden overflow-y-auto border-r border-white/[0.08] p-1.5 text-white/72 max-md:p-1"
           >
-            {actualActiveTool === "content" ? (
-              <DesktopContentInspector
-                contentType={actualContentType}
-                contentValues={actualContentValues}
-                desktopTheme={actualDesktopTheme}
-                encodedValue={actualEncodedContentValue}
-                validation={actualContentValidation}
-                onContentTypeChange={controller?.onContentTypeChange ?? handleContentTypeChange}
-                onContentValueChange={controller?.onContentValueChange ?? handleContentValueChange}
-              />
-            ) : actualActiveTool === "pattern" ? (
-              <DesktopPatternInspector
-                desktopTheme={actualDesktopTheme}
-                settings={actualPatternSettings}
-                onPatternSettingsChange={onPatternSettingsChange}
-              />
-            ) : actualActiveTool === "corners" ? (
-              <DesktopCornersInspector
-                desktopTheme={actualDesktopTheme}
-                settings={actualCornersSettings}
-                onCornersSettingsChange={onCornersSettingsChange}
-              />
-            ) : actualActiveTool === "logo" ? (
-              <DesktopLogoInspector
-                desktopTheme={actualDesktopTheme}
-                settings={actualLogoSettings}
-                onLogoSettingsChange={onLogoSettingsChange}
-              />
-            ) : actualActiveTool === "shape" ? (
-              <DesktopShapeInspector
-                desktopTheme={actualDesktopTheme}
-                settings={actualShapeSettings}
-                onShapeSettingsChange={onShapeSettingsChange}
-              />
-            ) : actualActiveTool === "motion" ? (
-              <DesktopMotionInspector
-                settings={actualMotionSettings}
-                onMotionSettingsChange={onMotionSettingsChange}
-              />
-            ) : actualActiveTool === "encoding" ? (
-              <DesktopEncodingInspector
-                settings={actualEncodingSettings}
-                onEncodingSettingsChange={onEncodingSettingsChange}
-              />
-            ) : actualActiveTool === "text" ? (
-              <DesktopTextInspector
-                settings={actualTextSettings}
-                onTextSettingsChange={onTextSettingsChange}
-              />
-            ) : actualActiveTool === "image" ? (
-              <DesktopImageInspector
-                settings={actualImageSettings}
-                onImageSettingsChange={onImageSettingsChange}
-              />
-            ) : actualActiveTool === "decorations" ? (
-              <DesktopDecorationsInspector
-                settings={actualDecorationsSettings}
-                onDecorationsSettingsChange={onDecorationsSettingsChange}
-              />
-            ) : actualActiveTool === "effects" ? (
-              <DesktopEffectsInspector
-                settings={actualEffectsSettings}
-                onEffectsSettingsChange={onEffectsSettingsChange}
-              />
-            ) : actualActiveTool === "layers" ? (
-              <DesktopLayersInspector
-                settings={actualLayersSettings}
-                onLayersSettingsChange={onLayersSettingsChange}
-              />
-            ) : actualActiveTool === "export" ? (
-              <DesktopExportInspector
-                settings={actualExportSettings}
-                onExportDownload={controller?.onExportDownload ?? (() => undefined)}
-                onExportSettingsChange={onExportSettingsChange}
-              />
-            ) : (
-              <DesktopPlaceholderInspector tool={activeToolConfig} />
-            )}
-          </aside>
-        ) : null}
+            {DESKTOP_TOOLBAR_TOOLS.map((tool, index) => {
+              const isActive = actualActiveTool === tool.id
+              const previousGroup = DESKTOP_TOOLBAR_TOOLS[index - 1]?.group
+              const startsGroup = index > 0 && tool.group !== previousGroup
+
+              return (
+                <div key={tool.id} className="flex flex-col items-center gap-1.5">
+                  {startsGroup ? (
+                    <span
+                      aria-hidden="true"
+                      data-slot="desktop-toolbar-separator"
+                      className="my-1 h-px w-7 bg-white/[0.13]"
+                    />
+                  ) : null}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        aria-label={`Open ${tool.title}`}
+                        aria-pressed={isActive}
+                        data-desktop-tool-button="true"
+                        data-tool-id={tool.id}
+                        type="button"
+                        className={cn(
+                          "grid size-11 place-items-center rounded-full text-current transition-[background-color,color,box-shadow,transform] duration-150 ease-out outline-none hover:bg-white/[0.11] hover:text-white focus-visible:ring-2 focus-visible:ring-white/45 active:scale-95 max-md:size-10",
+                          isActive &&
+                            "bg-white/[0.18] text-white shadow-none hover:bg-white/[0.2]",
+                        )}
+                        onClick={() => onActiveToolChange(tool.id)}
+                      >
+                        {tool.renderIcon()}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      hideArrow
+                      side="right"
+                      sideOffset={10}
+                      className="border border-white/[0.12] bg-[#15161a] text-white shadow-xl"
+                    >
+                      {tool.title}
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              )
+            })}
+          </nav>
+
+          {activeToolConfig ? (
+            <aside
+              aria-label={`${activeToolConfig.title} settings`}
+              data-slot="desktop-floating-inspector"
+              className="flex min-h-0 min-w-0 flex-col overflow-hidden text-white"
+            >
+              {actualActiveTool === "content" ? (
+                <DesktopContentInspector
+                  contentType={actualContentType}
+                  contentValues={actualContentValues}
+                  desktopTheme={actualDesktopTheme}
+                  encodedValue={actualEncodedContentValue}
+                  validation={actualContentValidation}
+                  onContentTypeChange={controller?.onContentTypeChange ?? handleContentTypeChange}
+                  onContentValueChange={controller?.onContentValueChange ?? handleContentValueChange}
+                />
+              ) : actualActiveTool === "pattern" ? (
+                <DesktopPatternInspector
+                  desktopTheme={actualDesktopTheme}
+                  settings={actualPatternSettings}
+                  onPatternSettingsChange={onPatternSettingsChange}
+                />
+              ) : actualActiveTool === "corners" ? (
+                <DesktopCornersInspector
+                  desktopTheme={actualDesktopTheme}
+                  settings={actualCornersSettings}
+                  onCornersSettingsChange={onCornersSettingsChange}
+                />
+              ) : actualActiveTool === "logo" ? (
+                <DesktopLogoInspector
+                  desktopTheme={actualDesktopTheme}
+                  settings={actualLogoSettings}
+                  onLogoSettingsChange={onLogoSettingsChange}
+                />
+              ) : actualActiveTool === "shape" ? (
+                <DesktopShapeInspector
+                  desktopTheme={actualDesktopTheme}
+                  settings={actualShapeSettings}
+                  onShapeSettingsChange={onShapeSettingsChange}
+                />
+              ) : actualActiveTool === "motion" ? (
+                <DesktopMotionInspector
+                  settings={actualMotionSettings}
+                  onMotionSettingsChange={onMotionSettingsChange}
+                />
+              ) : actualActiveTool === "encoding" ? (
+                <DesktopEncodingInspector
+                  settings={actualEncodingSettings}
+                  onEncodingSettingsChange={onEncodingSettingsChange}
+                />
+              ) : actualActiveTool === "text" ? (
+                <DesktopTextInspector
+                  settings={actualTextSettings}
+                  onTextSettingsChange={onTextSettingsChange}
+                />
+              ) : actualActiveTool === "image" ? (
+                <DesktopImageInspector
+                  settings={actualImageSettings}
+                  onImageSettingsChange={onImageSettingsChange}
+                />
+              ) : actualActiveTool === "decorations" ? (
+                <DesktopDecorationsInspector
+                  settings={actualDecorationsSettings}
+                  onDecorationsSettingsChange={onDecorationsSettingsChange}
+                />
+              ) : actualActiveTool === "effects" ? (
+                <DesktopEffectsInspector
+                  settings={actualEffectsSettings}
+                  onEffectsSettingsChange={onEffectsSettingsChange}
+                />
+              ) : actualActiveTool === "layers" ? (
+                <DesktopLayersInspector
+                  settings={actualLayersSettings}
+                  onLayersSettingsChange={onLayersSettingsChange}
+                />
+              ) : actualActiveTool === "export" ? (
+                <DesktopExportInspector
+                  settings={actualExportSettings}
+                  onExportDownload={controller?.onExportDownload ?? (() => undefined)}
+                  onExportSettingsChange={onExportSettingsChange}
+                />
+              ) : (
+                <DesktopPlaceholderInspector tool={activeToolConfig} />
+              )}
+            </aside>
+          ) : null}
+        </div>
       </section>
     </TooltipProvider>
   )
@@ -1250,8 +1256,7 @@ function DesktopThemeStyles() {
         color-scheme: light;
       }
 
-      [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"],
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"],
+      [data-desktop-theme="light"] [data-slot="desktop-left-toolbar-shell"],
       [data-desktop-theme="light"] [data-slot="desktop-theme-toggle"],
       [data-desktop-theme="light"] [data-slot="desktop-action-toolbar"] {
         background: rgba(255, 255, 255, 0.72) !important;
@@ -1265,6 +1270,10 @@ function DesktopThemeStyles() {
       [data-desktop-theme="light"] [data-slot="desktop-action-toolbar"] button:hover {
         background: rgba(15, 23, 42, 0.08) !important;
         color: rgba(15, 23, 42, 0.92) !important;
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] {
+        color: rgba(15, 23, 42, 0.58) !important;
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] button[aria-pressed="true"] {
@@ -1469,12 +1478,20 @@ function DesktopThemeStyles() {
         background-color: rgba(15, 23, 42, 0.11) !important;
       }
 
-      [data-slot="desktop-floating-inspector"] {
+      [data-slot="desktop-left-toolbar-shell"] {
         background: rgba(0, 0, 0, 0.55) !important;
         border-color: rgba(255, 255, 255, 0.12) !important;
         border-radius: 20px !important;
         box-shadow: 0 22px 55px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
         backdrop-filter: blur(40px) !important;
+      }
+
+      [data-slot="desktop-left-toolbar-shell"] [data-slot="desktop-floating-toolbar"],
+      [data-slot="desktop-left-toolbar-shell"] [data-slot="desktop-floating-inspector"] {
+        background: transparent !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
       }
 
       [data-slot="desktop-floating-inspector"] .scroll-fade-effect-y > section,
@@ -1494,7 +1511,7 @@ function DesktopThemeStyles() {
         margin-top: 0 !important;
       }
 
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] {
+      [data-desktop-theme="light"] [data-slot="desktop-left-toolbar-shell"] {
         background: rgba(255, 255, 255, 0.72) !important;
         border-color: rgba(15, 23, 42, 0.12) !important;
         box-shadow: 0 24px 64px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.86) !important;
