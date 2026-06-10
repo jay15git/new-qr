@@ -1350,7 +1350,7 @@ function DesktopThemeStyles() {
       }
 
       [data-slot="desktop-floating-inspector"] {
-        --desktop-inspector-section-bg: rgba(255, 255, 255, 0.026);
+        --desktop-inspector-section-bg: rgba(255, 255, 255, 0.055);
         --desktop-inspector-header-bg: rgba(255, 255, 255, 0.025);
         --desktop-inspector-footer-bg: rgba(0, 0, 0, 0.18);
         --desktop-inspector-control-bg: transparent;

@@ -2925,7 +2925,7 @@
       "source_file": "components/ui/fill-picker/lib/channels.ts",
       "source_location": "L12",
       "id": "lib_channels_channeldescriptor",
-      "community": 10,
+      "community": 33,
       "norm_label": "channeldescriptor"
     },
     {
@@ -3132,7 +3132,7 @@
       "source_file": "components/ui/fill-picker/lib/color.ts",
       "source_location": "L51",
       "id": "lib_color_parsecolor",
-      "community": 10,
+      "community": 27,
       "norm_label": "parsecolor()"
     },
     {
@@ -3609,7 +3609,7 @@
       "source_file": "components/ui/fill-picker/parts/channel-input.tsx",
       "source_location": "L1",
       "id": "parts_channel_input",
-      "community": 10,
+      "community": 33,
       "norm_label": "channel-input.tsx"
     },
     {
@@ -3618,7 +3618,7 @@
       "source_file": "components/ui/fill-picker/parts/channel-input.tsx",
       "source_location": "L14",
       "id": "parts_channel_input_channelinputprops",
-      "community": 10,
+      "community": 33,
       "norm_label": "channelinputprops"
     },
     {
@@ -3627,7 +3627,7 @@
       "source_file": "components/ui/fill-picker/parts/channel-input.tsx",
       "source_location": "L29",
       "id": "parts_channel_input_channelinput",
-      "community": 10,
+      "community": 33,
       "norm_label": "channelinput"
     },
     {
@@ -3636,7 +3636,7 @@
       "source_file": "components/ui/fill-picker/parts/channel-input.tsx",
       "source_location": "L93",
       "id": "parts_channel_input_formatselect",
-      "community": 10,
+      "community": 33,
       "norm_label": "formatselect()"
     },
     {
@@ -3645,7 +3645,7 @@
       "source_file": "components/ui/fill-picker/parts/channel-input.tsx",
       "source_location": "L137",
       "id": "parts_channel_input_hexfield",
-      "community": 10,
+      "community": 33,
       "norm_label": "hexfield()"
     },
     {
@@ -3654,7 +3654,7 @@
       "source_file": "components/ui/fill-picker/parts/channel-input.tsx",
       "source_location": "L192",
       "id": "parts_channel_input_channelfield",
-      "community": 10,
+      "community": 33,
       "norm_label": "channelfield()"
     },
     {
@@ -3663,7 +3663,7 @@
       "source_file": "components/ui/fill-picker/parts/channel-input.tsx",
       "source_location": "L279",
       "id": "parts_channel_input_divider",
-      "community": 10,
+      "community": 33,
       "norm_label": "divider()"
     },
     {
@@ -3672,7 +3672,7 @@
       "source_file": "components/ui/fill-picker/parts/channel-input.tsx",
       "source_location": "L283",
       "id": "parts_channel_input_formatnumber",
-      "community": 10,
+      "community": 33,
       "norm_label": "formatnumber()"
     },
     {
@@ -3870,7 +3870,7 @@
       "source_file": "components/ui/fill-picker/parts/format-switcher.tsx",
       "source_location": "L1",
       "id": "parts_format_switcher",
-      "community": 73,
+      "community": 10,
       "norm_label": "format-switcher.tsx"
     },
     {
@@ -3888,7 +3888,7 @@
       "source_file": "components/ui/fill-picker/parts/format-switcher.tsx",
       "source_location": "L18",
       "id": "parts_format_switcher_formatswitcher",
-      "community": 73,
+      "community": 10,
       "norm_label": "formatswitcher"
     },
     {
@@ -4005,7 +4005,7 @@
       "source_file": "components/ui/fill-picker/parts/root.tsx",
       "source_location": "L8",
       "id": "parts_root_rootprops",
-      "community": 10,
+      "community": 73,
       "norm_label": "rootprops"
     },
     {
@@ -5560,7 +5560,7 @@
       "label": "DesktopWorkspaceStyles()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/DesktopWorkspace.tsx",
-      "source_location": "L47",
+      "source_location": "L56",
       "id": "components_desktopworkspace_desktopworkspacestyles",
       "community": 65,
       "norm_label": "desktopworkspacestyles()"
@@ -5578,7 +5578,7 @@
       "label": "renderPrototype()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1245",
+      "source_location": "L1246",
       "id": "components_floatingtoolbar_test_renderprototype",
       "community": 6,
       "norm_label": "renderprototype()"
@@ -5587,7 +5587,7 @@
       "label": "getToolButtons()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1255",
+      "source_location": "L1256",
       "id": "components_floatingtoolbar_test_gettoolbuttons",
       "community": 6,
       "norm_label": "gettoolbuttons()"
@@ -5596,7 +5596,7 @@
       "label": "getRequiredToolButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1263",
+      "source_location": "L1264",
       "id": "components_floatingtoolbar_test_getrequiredtoolbutton",
       "community": 6,
       "norm_label": "getrequiredtoolbutton()"
@@ -5605,7 +5605,7 @@
       "label": "clickButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1275",
+      "source_location": "L1276",
       "id": "components_floatingtoolbar_test_clickbutton",
       "community": 6,
       "norm_label": "clickbutton()"
@@ -5614,7 +5614,7 @@
       "label": "openTool()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1281",
+      "source_location": "L1282",
       "id": "components_floatingtoolbar_test_opentool",
       "community": 6,
       "norm_label": "opentool()"
@@ -5623,7 +5623,7 @@
       "label": "getRequiredSlider()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1285",
+      "source_location": "L1286",
       "id": "components_floatingtoolbar_test_getrequiredslider",
       "community": 6,
       "norm_label": "getrequiredslider()"
@@ -5632,7 +5632,7 @@
       "label": "getRequiredSliderRow()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1295",
+      "source_location": "L1296",
       "id": "components_floatingtoolbar_test_getrequiredsliderrow",
       "community": 6,
       "norm_label": "getrequiredsliderrow()"
@@ -5641,7 +5641,7 @@
       "label": "getRequiredButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1306",
+      "source_location": "L1307",
       "id": "components_floatingtoolbar_test_getrequiredbutton",
       "community": 6,
       "norm_label": "getrequiredbutton()"
@@ -5650,7 +5650,7 @@
       "label": "getRequiredInput()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1318",
+      "source_location": "L1319",
       "id": "components_floatingtoolbar_test_getrequiredinput",
       "community": 6,
       "norm_label": "getrequiredinput()"
@@ -5659,7 +5659,7 @@
       "label": "getRequiredTextarea()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1328",
+      "source_location": "L1329",
       "id": "components_floatingtoolbar_test_getrequiredtextarea",
       "community": 6,
       "norm_label": "getrequiredtextarea()"
@@ -5668,7 +5668,7 @@
       "label": "setInputValue()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1338",
+      "source_location": "L1339",
       "id": "components_floatingtoolbar_test_setinputvalue",
       "community": 6,
       "norm_label": "setinputvalue()"
@@ -5677,7 +5677,7 @@
       "label": "setTextareaValue()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1344",
+      "source_location": "L1345",
       "id": "components_floatingtoolbar_test_settextareavalue",
       "community": 6,
       "norm_label": "settextareavalue()"
@@ -6633,7 +6633,7 @@
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
       "source_location": "L4020",
       "id": "components_floatingtoolbar_desktopeffectsinspector",
-      "community": 28,
+      "community": 102,
       "norm_label": "desktopeffectsinspector()"
     },
     {
@@ -12879,7 +12879,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L1510",
       "id": "components_stylepanel_draftingcardimagetab",
-      "community": 28,
+      "community": 102,
       "norm_label": "draftingcardimagetab()"
     },
     {
@@ -12888,7 +12888,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L1578",
       "id": "components_stylepanel_draftingcardshaderstab",
-      "community": 28,
+      "community": 102,
       "norm_label": "draftingcardshaderstab()"
     },
     {
@@ -12906,7 +12906,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L1674",
       "id": "components_stylepanel_draftingcardpapershaderpanel",
-      "community": 28,
+      "community": 102,
       "norm_label": "draftingcardpapershaderpanel()"
     },
     {
@@ -15579,7 +15579,7 @@
       "source_file": "features/workspace/rendering/paper-shaders.test.ts",
       "source_location": "L1",
       "id": "rendering_paper_shaders_test",
-      "community": 28,
+      "community": 102,
       "norm_label": "paper-shaders.test.ts"
     },
     {
@@ -15588,7 +15588,7 @@
       "source_file": "features/workspace/rendering/paper-shaders.test.ts",
       "source_location": "L9",
       "id": "rendering_paper_shaders_test_getnumbercontrol",
-      "community": 28,
+      "community": 102,
       "norm_label": "getnumbercontrol()"
     },
     {
@@ -15597,7 +15597,7 @@
       "source_file": "features/workspace/rendering/paper-shaders.test.ts",
       "source_location": "L18",
       "id": "rendering_paper_shaders_test_getenumcontrol",
-      "community": 28,
+      "community": 102,
       "norm_label": "getenumcontrol()"
     },
     {
@@ -15885,7 +15885,7 @@
       "source_file": "features/workspace/rendering/paper-shaders.tsx",
       "source_location": "L1016",
       "id": "rendering_paper_shaders_getpapershaderdefinition",
-      "community": 28,
+      "community": 102,
       "norm_label": "getpapershaderdefinition()"
     },
     {
@@ -15894,7 +15894,7 @@
       "source_file": "features/workspace/rendering/paper-shaders.tsx",
       "source_location": "L1023",
       "id": "rendering_paper_shaders_getcardimagefilterdefinitions",
-      "community": 28,
+      "community": 102,
       "norm_label": "getcardimagefilterdefinitions()"
     },
     {
@@ -15903,7 +15903,7 @@
       "source_file": "features/workspace/rendering/paper-shaders.tsx",
       "source_location": "L1027",
       "id": "rendering_paper_shaders_getcardgeneratedshaderdefinitions",
-      "community": 28,
+      "community": 102,
       "norm_label": "getcardgeneratedshaderdefinitions()"
     },
     {
@@ -18683,7 +18683,7 @@
       "file_type": "code",
       "source_file": "components/ui/fill-picker/lib/color.ts",
       "source_location": "L65",
-      "community": 10,
+      "community": 27,
       "norm_label": "isvalidcolor()",
       "id": "lib_color_isvalidcolor"
     },
@@ -60544,5 +60544,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "65ed62200fc89a714613e1c6b029d405105f27ab"
+  "built_at_commit": "43da9f49eaac10863d1c3d6d57d5a30fd51fbabc"
 }

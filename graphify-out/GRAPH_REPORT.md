@@ -1,16 +1,16 @@
 # Graph Report - new-qr  (2026-06-10)
 
 ## Corpus Check
-- 198 files · ~191,958 words
+- 198 files · ~191,985 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2089 nodes · 3966 edges · 124 communities (120 shown, 4 thin omitted)
+- 2089 nodes · 3966 edges · 125 communities (121 shown, 4 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `65ed6220`
+- Built from commit: `43da9f49`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -117,6 +117,7 @@
 - [[_COMMUNITY_Community 99|Community 99]]
 - [[_COMMUNITY_Community 100|Community 100]]
 - [[_COMMUNITY_Community 101|Community 101]]
+- [[_COMMUNITY_Community 102|Community 102]]
 - [[_COMMUNITY_Community 103|Community 103]]
 - [[_COMMUNITY_Community 104|Community 104]]
 - [[_COMMUNITY_Community 105|Community 105]]
@@ -163,7 +164,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (124 total, 4 thin omitted)
+## Communities (125 total, 4 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.40
@@ -206,8 +207,8 @@ Cohesion: 0.09
 Nodes (46): addDashboardComposeImageNode(), applyDashboardDocumentPreset(), centerDashboardComposeNode(), clamp(), createDashboardComposeScene(), createDashboardDocumentComposeScene(), createDashboardQrNode(), createDefaultDashboardComposeBackgroundGradient() (+38 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.09
-Nodes (30): ColorPicker, SameColorCommitter(), ALL_FORMATS, applyComponent(), BLACK, clamp(), coerce(), ColorComponent (+22 more)
+Cohesion: 0.12
+Nodes (23): ColorPicker, SameColorCommitter(), ALL_FORMATS, applyComponent(), BLACK, clamp(), coerce(), ColorComponent (+15 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.11
@@ -274,12 +275,12 @@ Cohesion: 0.15
 Nodes (11): DropdownMenu(), DropdownMenuCheckboxItem(), DropdownMenuContent(), DropdownMenuGroup(), DropdownMenuItem(), DropdownMenuRadioGroup(), DropdownMenuRadioItem(), DropdownMenuSub() (+3 more)
 
 ### Community 27 - "Community 27"
-Cohesion: 0.18
-Nodes (24): ALL_FORMATS, apcaContrast(), channelsInRange(), clamp(), compositeOnBg(), contrast(), formatAll(), formatColor() (+16 more)
+Cohesion: 0.16
+Nodes (26): ALL_FORMATS, apcaContrast(), channelsInRange(), clamp(), compositeOnBg(), contrast(), formatAll(), formatColor() (+18 more)
 
 ### Community 28 - "Community 28"
-Cohesion: 0.11
-Nodes (18): buildDraftingPaperShaderRenderProps(), DraftingCardPaperShaderLayer(), DraftingCardPaperShaderLayerProps, DraftingCardPaperShaderRenderer(), DraftingCardPaperShaderRendererProps, hasDraftingPaperShaderWebGlSupport(), PaperShaderErrorBoundary, PaperShaderErrorBoundaryProps (+10 more)
+Cohesion: 0.15
+Nodes (9): buildDraftingPaperShaderRenderProps(), DraftingCardPaperShaderLayer(), DraftingCardPaperShaderLayerProps, DraftingCardPaperShaderRenderer(), DraftingCardPaperShaderRendererProps, hasDraftingPaperShaderWebGlSupport(), PaperShaderErrorBoundary, PaperShaderErrorBoundaryProps (+1 more)
 
 ### Community 29 - "Community 29"
 Cohesion: 0.21
@@ -298,8 +299,8 @@ Cohesion: 0.14
 Nodes (17): buildHeartPath(), CORNER_DOT_PREVIEW_ROWS, CORNER_SQUARE_PREVIEW_ROWS, CornerDotStylePreview(), CornerSquareStylePreview(), MatrixPreviewShape(), PreviewDotShapeKind, PreviewShape() (+9 more)
 
 ### Community 33 - "Community 33"
-Cohesion: 0.25
-Nodes (16): ALPHA_DESCRIPTOR(), clamp(), colorChannels(), floatChannel(), fromCulori(), intChannel(), oklchObj(), setColorChannel() (+8 more)
+Cohesion: 0.15
+Nodes (21): ALPHA_DESCRIPTOR(), ChannelDescriptor, clamp(), colorChannels(), floatChannel(), fromCulori(), intChannel(), oklchObj() (+13 more)
 
 ### Community 34 - "Community 34"
 Cohesion: 0.17
@@ -573,6 +574,10 @@ Nodes (4): finishPaperShaderThumbnail(), notifyPaperShaderThumbnailSubscribers()
 Cohesion: 0.50
 Nodes (3): QR_BACKGROUND_SHAPES, QrBackgroundShapeDefinition, QrBackgroundShapeId
 
+### Community 102 - "Community 102"
+Cohesion: 0.29
+Nodes (9): DesktopEffectsInspector(), DraftingCardImageTab(), DraftingCardPaperShaderPanel(), DraftingCardShadersTab(), getCardGeneratedShaderDefinitions(), getCardImageFilterDefinitions(), getPaperShaderDefinition(), getEnumControl() (+1 more)
+
 ### Community 103 - "Community 103"
 Cohesion: 0.29
 Nodes (7): pendingEvent, action, count, freeformPrompt, id, pageUrl, type
@@ -637,7 +642,7 @@ Nodes (3): run, setup, teardown
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `Community 73` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 4`, `Community 6`, `Community 8`, `Community 10`, `Community 13`, `Community 17`, `Community 20`, `Community 26`, `Community 40`, `Community 41`, `Community 42`, `Community 43`, `Community 48`, `Community 49`, `Community 50`, `Community 56`, `Community 57`, `Community 61`, `Community 65`, `Community 66`, `Community 70`, `Community 75`, `Community 79`, `Community 83`, `Community 84`, `Community 87`, `Community 90`, `Community 91`, `Community 95`, `Community 96`, `Community 109`, `Community 119`?**
+- **Why does `cn()` connect `Community 73` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 4`, `Community 6`, `Community 8`, `Community 10`, `Community 13`, `Community 17`, `Community 20`, `Community 26`, `Community 33`, `Community 40`, `Community 41`, `Community 42`, `Community 43`, `Community 48`, `Community 49`, `Community 50`, `Community 56`, `Community 57`, `Community 61`, `Community 65`, `Community 66`, `Community 70`, `Community 75`, `Community 79`, `Community 83`, `Community 84`, `Community 87`, `Community 90`, `Community 91`, `Community 95`, `Community 96`, `Community 109`, `Community 119`?**
   _High betweenness centrality (0.080) - this node is a cross-community bridge._
 - **Why does `QrInputType` connect `Community 60` to `Community 1`, `Community 2`, `Community 3`, `Community 5`, `Community 21`, `Community 22`, `Community 55`, `Community 26`?**
   _High betweenness centrality (0.017) - this node is a cross-community bridge._

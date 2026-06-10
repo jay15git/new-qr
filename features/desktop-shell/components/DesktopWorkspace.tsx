@@ -6,7 +6,7 @@ import {
   type DesktopThemeMode,
 } from "@/features/desktop-shell/components/FloatingToolbar"
 import { cn } from "@/lib/utils"
-import { useState } from "react"
+import { useState, type CSSProperties } from "react"
 
 type DesktopWorkspaceProps = {
   fontClassName?: string
@@ -14,12 +14,21 @@ type DesktopWorkspaceProps = {
 
 export function DesktopWorkspace({ fontClassName }: DesktopWorkspaceProps) {
   const [desktopTheme, setDesktopTheme] = useState<DesktopThemeMode>("dark")
+  const workspaceTone = {
+    "--workspace-shell": "#1f1f1f",
+    "--workspace-page": "#171717",
+    "--drafting-dark-shell-bg": "#1f1f1f",
+    "--drafting-dark-page-bg": "#171717",
+    "--drafting-canvas-bg": "#1f1f1f",
+    "--drafting-surface-bg": "#1f1f1f",
+  } as CSSProperties
 
   return (
     <section
       aria-label="Desktop workspace"
       data-desktop-theme={desktopTheme}
       data-slot="desktop-workspace"
+      style={workspaceTone}
       className={cn(
         fontClassName,
         "relative h-dvh min-h-dvh overflow-hidden transition-colors duration-200",
@@ -49,7 +58,7 @@ function DesktopWorkspaceStyles() {
     <style>{`
       [data-slot="desktop-workspace"] [data-slot="drafting-surface"] {
         --drafting-canvas-dot-rgb: 246 248 251;
-        --drafting-canvas-dot-opacity: 0.035;
+        --drafting-canvas-dot-opacity: 0.075;
         position: absolute;
         inset: 0;
         height: 100dvh;

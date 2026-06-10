@@ -39,8 +39,8 @@ describe("theme contract", () => {
     const globalsSource = readFileSync(resolve(process.cwd(), "app/globals.css"), "utf8")
     const qrPaneSource = readFileSync(resolve(process.cwd(), "features/workspace/components/Pane.tsx"), "utf8")
     const requiredDarkTokens = [
-      "--drafting-dark-page-bg: #101216;",
-      "--drafting-dark-shell-bg: #101216;",
+      "--drafting-dark-page-bg: #171717;",
+      "--drafting-dark-shell-bg: #1f1f1f;",
       "--drafting-dark-surface-muted: #ffffff08;",
       "--drafting-dark-surface-subtle: #ffffff0d;",
       "--drafting-dark-surface-raised: #171a20;",
@@ -90,9 +90,9 @@ describe("theme contract", () => {
     )
     expect(globalsSource).toContain("--drafting-canvas-bg: var(--drafting-dark-shell-bg);")
     expect(globalsSource).toContain("--drafting-canvas-dot-rgb: var(--drafting-ink-rgb);")
-    expect(globalsSource).toContain("--drafting-canvas-dot-opacity: 0.035;")
+    expect(globalsSource).toContain("--drafting-canvas-dot-opacity: 0.075;")
     expect(globalsSource).toContain("--drafting-canvas-check-rgb: 246 248 251;")
-    expect(globalsSource).toContain("--drafting-canvas-check-opacity: 0.028;")
+    expect(globalsSource).toContain("--drafting-canvas-check-opacity: 0.052;")
     expect(globalsSource).toContain("--drafting-control-bg: var(--drafting-dark-button-fill-default);")
     expect(globalsSource).toContain("--drafting-ink: var(--drafting-dark-text-primary);")
     expect(globalsSource).toContain("--drafting-line: var(--drafting-dark-border);")
