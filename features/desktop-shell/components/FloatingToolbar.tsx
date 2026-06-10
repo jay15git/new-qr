@@ -113,6 +113,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  ColorPicker as AmploColorPicker,
+  parseColor,
+  type OklchColor,
+} from "@/components/ui/fill-picker/fill-picker"
+import {
   DESKTOP_INSPECTOR_CONTROL_CLASS,
   DESKTOP_INSPECTOR_FIELD_ROW_CLASS,
   DESKTOP_INSPECTOR_FOCUS_CLASS,
@@ -183,6 +193,17 @@ type DesktopToolbarTool = {
 }
 
 export type DesktopThemeMode = "dark" | "light"
+
+const DESKTOP_COLOR_PICKER_SWATCHES = [
+  "#111111",
+  "#4B4F56",
+  "#FFFFFF",
+  "#C19B1D",
+  "#151515",
+  "oklch(0.7 0.18 30)",
+  "oklch(0.7 0.18 150)",
+  "color(display-p3 0.85 0.45 0.15)",
+]
 
 const DESKTOP_TOOLBAR_TOOLS: DesktopToolbarTool[] = [
   {
@@ -1353,6 +1374,18 @@ function DesktopThemeStyles() {
         --desktop-inspector-focus: rgba(15, 23, 42, 0.36);
       }
 
+      [data-slot="desktop-color-picker-popover"] {
+        --desktop-color-picker-popover-bg: rgba(23, 24, 29, 0.95);
+        --desktop-color-picker-popover-border: rgba(255, 255, 255, 0.1);
+        --desktop-color-picker-popover-fg: #ffffff;
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-color-picker-popover"] {
+        --desktop-color-picker-popover-bg: rgba(255, 255, 255, 0.96);
+        --desktop-color-picker-popover-border: rgba(15, 23, 42, 0.12);
+        --desktop-color-picker-popover-fg: #18181b;
+      }
+
       [data-slot="desktop-floating-inspector"] :is(input, textarea, select) {
         background-color: var(--desktop-inspector-field-bg) !important;
         border-color: transparent !important;
@@ -1582,20 +1615,6 @@ function DesktopThemeStyles() {
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [data-slot="desktop-color-picker"] {
         border-color: rgba(15, 23, 42, 0.14) !important;
-      }
-
-      [data-slot="desktop-floating-inspector"] [data-slot="desktop-color-picker"]::-webkit-color-swatch-wrapper {
-        padding: 0;
-      }
-
-      [data-slot="desktop-floating-inspector"] [data-slot="desktop-color-picker"]::-webkit-color-swatch {
-        border: 0;
-        border-radius: 9999px;
-      }
-
-      [data-slot="desktop-floating-inspector"] [data-slot="desktop-color-picker"]::-moz-color-swatch {
-        border: 0;
-        border-radius: 9999px;
       }
     `}</style>
   )
@@ -3114,17 +3133,15 @@ function DesktopPatternInspector({
             <div className="mt-2.5 grid gap-2">
               <div className="flex min-w-0 flex-wrap gap-2 border-b border-white/[0.07] px-0 py-2.5 last:border-b-0">
                 {settings.dotsPalette.map((color, index) => (
-                  <input
+                  <DesktopColorPickerPopover
+                    ariaLabel={`Pattern color ${index + 1}`}
                     key={`${color}-${index}`}
-                    aria-label={`Pattern color ${index + 1}`}
-                    className="size-7 shrink-0 cursor-pointer overflow-hidden rounded-full border bg-transparent p-0"
-                    data-slot="desktop-color-picker"
-                    type="color"
+                    triggerClassName="size-7 shrink-0"
                     value={color}
-                    onChange={(event) =>
+                    onChange={(nextColor) =>
                       onPatternSettingsChange({
                         dotsPalette: settings.dotsPalette.map((currentColor, currentIndex) =>
-                          currentIndex === index ? event.currentTarget.value : currentColor,
+                          currentIndex === index ? nextColor : currentColor,
                         ),
                       })
                     }
@@ -3238,17 +3255,14 @@ function DesktopColorInputRow({
       <span className={DESKTOP_INSPECTOR_LABEL_CLASS}>{label}</span>
       <span className="flex items-center gap-2">
         <span
-          aria-hidden="true"
           className="grid size-7 shrink-0 place-items-center rounded-full border-2 bg-transparent p-0.5"
           style={{ borderColor: value }}
         >
-          <input
+          <DesktopColorPickerPopover
             aria-label={`${inputLabel} swatch`}
-            className="size-5 shrink-0 cursor-pointer overflow-hidden rounded-full bg-transparent p-0"
-            data-slot="desktop-color-picker"
-            type="color"
+            triggerClassName="size-5 shrink-0 border-0"
             value={value}
-            onChange={(event) => onChange(event.currentTarget.value)}
+            onChange={onChange}
           />
         </span>
         <DesktopInspectorTextInput
@@ -3260,6 +3274,79 @@ function DesktopColorInputRow({
       </span>
     </div>
   )
+}
+
+function DesktopColorPickerPopover({
+  ariaLabel,
+  "aria-label": ariaLabelProp,
+  onChange,
+  triggerClassName,
+  value,
+}: {
+  ariaLabel?: string
+  "aria-label"?: string
+  onChange: (value: string) => void
+  triggerClassName?: string
+  value: string
+}) {
+  const triggerLabel = ariaLabel ?? ariaLabelProp ?? "Color swatch"
+  const color = parseDesktopColor(value)
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          aria-label={triggerLabel}
+          className={cn(
+            "cursor-pointer overflow-hidden rounded-full border bg-transparent p-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35",
+            triggerClassName,
+          )}
+          data-slot="desktop-color-picker"
+          style={{ backgroundColor: value }}
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            className="block size-full rounded-full"
+            style={{ backgroundColor: value }}
+          />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="end"
+        data-slot="desktop-color-picker-popover"
+        className="w-[300px] border-0 bg-transparent p-0 shadow-none"
+        sideOffset={8}
+      >
+        <AmploColorPicker.Root
+          backgroundColor="#111111"
+          className={cn(
+            "max-w-none gap-3 border-[var(--desktop-color-picker-popover-border)] bg-[var(--desktop-color-picker-popover-bg)] p-3 text-[var(--desktop-color-picker-popover-fg)] shadow-2xl shadow-black/30 backdrop-blur-xl",
+            "data-[slot=color-picker]:rounded-xl",
+          )}
+          defaultFormat="hex"
+          onValueChange={(_nextColor, _formatted, formats) => onChange(formats.hex)}
+          value={color}
+        >
+          <AmploColorPicker.Area mode="hsv-sv" />
+          <div className="flex flex-col gap-1.5">
+            <AmploColorPicker.Hue />
+            <AmploColorPicker.Alpha />
+          </div>
+          <div className="flex items-center gap-2">
+            <AmploColorPicker.FormatSwitcher className="flex-1" />
+            <AmploColorPicker.EyeDropper className="h-8 w-full flex-1" />
+          </div>
+          <AmploColorPicker.CssInput className="font-mono text-xs" />
+          <AmploColorPicker.Swatches presets={DESKTOP_COLOR_PICKER_SWATCHES} />
+        </AmploColorPicker.Root>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+function parseDesktopColor(value: string): OklchColor {
+  return parseColor(value) ?? { l: 0, c: 0, h: 0, alpha: 1 }
 }
 
 function DesktopNumberRow({

@@ -640,13 +640,13 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/desktop-shell/components/FloatingToolbar.test.tsx": {
-    "mtime": 1781091856.1618261,
-    "ast_hash": "0f8a8ffeb93aeaae617b49e94c7f908b",
+    "mtime": 1781092969.30171,
+    "ast_hash": "1f40bf36b4a1b980c27262a8277e443c",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/desktop-shell/components/FloatingToolbar.tsx": {
-    "mtime": 1781091856.1642566,
-    "ast_hash": "78d5f7b8ae4169c1939b0127426f177c",
+    "mtime": 1781093033.5138917,
+    "ast_hash": "cfa9440b23aafb1a2c768cf7fe975f8c",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/desktop-shell/components/InspectorControls.test.tsx": {
@@ -675,8 +675,8 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/qr-code/adapters/react-qr-adapter.ts": {
-    "mtime": 1781091779.6314657,
-    "ast_hash": "38826718a199709fc28372d1fadb9b34",
+    "mtime": 1781098815.384792,
+    "ast_hash": "c62e96768683b1f1d19bdc6d093c75d5",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/qr-code/assets/brand-icon-svg.ts": {
@@ -785,8 +785,8 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/qr-code/model/state.test.ts": {
-    "mtime": 1781091794.547805,
-    "ast_hash": "6123b57c9c161aa1c545694e844ecc8e",
+    "mtime": 1781098822.239615,
+    "ast_hash": "39d70f7702c4b87e84f93c95be1bff4e",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/qr-code/model/state.ts": {
@@ -930,8 +930,8 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/workspace/components/WorkspaceSurface.test.tsx": {
-    "mtime": 1781091822.5313835,
-    "ast_hash": "9a54fafffa092fdcefe5aecf1aeb7275",
+    "mtime": 1781098599.3098023,
+    "ast_hash": "3a6998e06462f4f3c4ff1d3559fd246a",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/workspace/components/WorkspaceSurface.tsx": {

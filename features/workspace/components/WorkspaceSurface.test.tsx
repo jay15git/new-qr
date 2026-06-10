@@ -1306,9 +1306,13 @@ describe("WorkspaceSurface", () => {
     expect(root.getAttribute("data-qr-content-value")).toBe("https://example.com/desktop-live")
   })
 
-  it("wires desktop pattern and logo inspectors into the active drafting QR state", () => {
+  it("wires desktop pattern and logo inspectors into the active drafting QR state", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderDesktopOverlaySurface()
     const root = getRequiredElement(surface.container, '[data-slot="drafting-surface"]')
+
+    await waitForDraftingSurface()
+    const callsBeforePatternEdit = buildDashboardQrNodePayloadSpy.mock.calls.length
 
     act(() => {
       activateElement(getRequiredElement(surface.container, '[data-tool-id="pattern"]'))
@@ -1322,6 +1326,19 @@ describe("WorkspaceSurface", () => {
     })
 
     expect(root.getAttribute("data-qr-content-value")).toBe("https://new-qr-studio.local/launch")
+    await act(async () => {
+      await flushPromises()
+      await flushPromises()
+    })
+
+    expect(buildDashboardQrNodePayloadSpy).toHaveBeenCalledTimes(callsBeforePatternEdit + 1)
+    expect(buildDashboardQrNodePayloadSpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        dataModulesSettings: expect.objectContaining({ color: "#123456" }),
+        dotsColorMode: "solid",
+      }),
+      expect.objectContaining({ animationMode: "preview" }),
+    )
 
     act(() => {
       activateElement(getRequiredElement(surface.container, '[data-tool-id="logo"]'))

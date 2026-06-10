@@ -381,6 +381,19 @@ describe("qr studio state helpers", () => {
     expect(options.gradient).toBeUndefined();
   });
 
+  it("keeps module solid colors when finder pattern gradients are enabled", () => {
+    const state = createDefaultQrStudioState();
+    state.dataModulesSettings.color = "#112233";
+    state.dotsColorMode = "solid";
+    state.finderPatternOuterGradient.enabled = true;
+    state.finderPatternInnerGradient.enabled = true;
+
+    const options = toReactQrCodeProps(state);
+
+    expect(options.dataModulesSettings?.color).toBe("#112233");
+    expect(options.gradient).toBeUndefined();
+  });
+
   it("emits gradient payloads when enabled", () => {
     const state = createDefaultQrStudioState();
     state.dotsColorMode = "gradient";
