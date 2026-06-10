@@ -17,9 +17,9 @@ describe("theme contract", () => {
 
   it("keeps the drafting chrome on scoped monochrome tokens", () => {
     const checkedFiles = [
-      "components/drafting/drafting-surface.tsx",
-      "components/drafting/drafting-style-tab.tsx",
-      "components/drafting/drafting-layers-tab.tsx",
+      "features/workspace/components/WorkspaceSurface.tsx",
+      "features/workspace/components/StylePanel.tsx",
+      "features/workspace/components/LayerList.tsx",
     ]
     const disallowedColorTokens =
       /\b(?:amber|sky|red|rose|orange|yellow|pink|purple|violet|blue|cyan|teal|emerald|green|lime)-/
@@ -37,7 +37,7 @@ describe("theme contract", () => {
 
   it("maps the new drafting dark theme to Pencil token aliases", () => {
     const globalsSource = readFileSync(resolve(process.cwd(), "app/globals.css"), "utf8")
-    const qrPaneSource = readFileSync(resolve(process.cwd(), "components/drafting/qr-pane.tsx"), "utf8")
+    const qrPaneSource = readFileSync(resolve(process.cwd(), "features/workspace/components/Pane.tsx"), "utf8")
     const requiredDarkTokens = [
       "--drafting-dark-page-bg: #101216;",
       "--drafting-dark-shell-bg: #101216;",
@@ -164,9 +164,9 @@ describe("theme contract", () => {
 
   it("keeps drafting labels out of forced uppercase styling", () => {
     const checkedFiles = [
-      "components/drafting/drafting-surface.tsx",
-      "components/drafting/drafting-style-tab.tsx",
-      "components/drafting/drafting-layers-tab.tsx",
+      "features/workspace/components/WorkspaceSurface.tsx",
+      "features/workspace/components/StylePanel.tsx",
+      "features/workspace/components/LayerList.tsx",
     ]
 
     for (const file of checkedFiles) {

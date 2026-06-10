@@ -39,6 +39,9 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-workspace-page: var(--workspace-page);
+  --color-workspace-shell: var(--workspace-shell);
+  --color-workspace-shell-light: var(--workspace-shell-light);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -81,6 +84,9 @@
   --chart-3: oklch(0.58 0.06 170);
   --chart-4: oklch(0.53 0.05 140);
   --chart-5: oklch(0.48 0.045 110);
+  --workspace-page: #07080a;
+  --workspace-shell: #1b1d21;
+  --workspace-shell-light: #e7e9ec;
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0.003 95);
   --sidebar-foreground: oklch(0.26 0.014 252);

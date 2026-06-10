@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import localFont from "next/font/local"
 
-import { DesktopWorkspace } from "@/components/desktop/desktop-workspace"
+import { DesktopWorkspace } from "@/features/desktop-shell/components/DesktopWorkspace"
 
 const satoshi = localFont({
   src: "../../public/Satoshi_Complete/Fonts/WEB/fonts/Satoshi-Variable.woff2",
@@ -19,7 +19,7 @@ export default function DesktopPage() {
   return (
     <main
       data-slot="desktop-page"
-      className={`${satoshi.className} min-h-dvh overflow-hidden bg-[#07080a] text-white`}
+      className={`${satoshi.className} min-h-dvh overflow-hidden bg-workspace-page text-white`}
     >
       <DesktopWorkspace fontClassName={satoshi.className} />
     </main>

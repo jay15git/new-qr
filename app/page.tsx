@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 
-import { HomePromptShell } from "@/components/home/home-prompt-shell"
+import { HomePromptShell } from "@/features/home/components/HomePromptShell"
 
 export const metadata: Metadata = {
   title: "QR Studio Home",

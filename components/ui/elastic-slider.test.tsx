@@ -4,7 +4,7 @@ import { act, type ReactElement } from "react"
 import { describe, expect, it, vi } from "vitest"
 
 import { ElasticSlider } from "@/components/ui/elastic-slider"
-import { renderWithJsdomRoot } from "../../test-utils/jsdom-react-root"
+import { renderWithJsdomRoot } from "@/test-utils/jsdom-react-root"
 
 describe("ElasticSlider", () => {
   it("renders accessible slider state and formatted value text", () => {

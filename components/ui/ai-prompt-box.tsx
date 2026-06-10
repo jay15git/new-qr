@@ -18,7 +18,7 @@ import {
   toggleQuickInputType,
   type QuickQrInputType,
   type QrInputType,
-} from "@/components/ui/qr-input-config";
+} from "@/features/qr-code/content/input-options";
 
 // Utility function for className merging
 const cn = (...classes: (string | undefined | null | false)[]) => classes.filter(Boolean).join(" ");

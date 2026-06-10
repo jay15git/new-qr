@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs"
 import { isValidElement } from "react"
 import { describe, expect, it, vi } from "vitest"
 
-vi.mock("@/components/desktop/desktop-workspace", () => ({
+vi.mock("@/features/desktop-shell/components/DesktopWorkspace", () => ({
   DesktopWorkspace: ({ fontClassName }: { fontClassName?: string }) => (
     <div data-font-class-name={fontClassName} data-testid="desktop-workspace" />
   ),
@@ -14,7 +14,7 @@ vi.mock("next/font/local", () => ({
   }),
 }))
 
-import { DesktopWorkspace } from "@/components/desktop/desktop-workspace"
+import { DesktopWorkspace } from "@/features/desktop-shell/components/DesktopWorkspace"
 import DesktopPage, { metadata } from "./page"
 
 describe("desktop page", () => {
@@ -40,7 +40,7 @@ describe("desktop page", () => {
   })
 
   it("keeps portaled layer appearance popovers in sync with desktop light mode", () => {
-    const workspaceSource = readFileSync("components/desktop/desktop-workspace.tsx", "utf8")
+    const workspaceSource = readFileSync("features/desktop-shell/components/DesktopWorkspace.tsx", "utf8")
 
     expect(workspaceSource).toContain(
       'body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"]',
