@@ -16,7 +16,7 @@ import {
   setDotMatrixAnimationOptions,
   setRasterExportQualityPercent,
   setSquareQrSize,
-  toQrCodeOptions,
+  toReactQrCodeProps,
 } from "./qr-studio-state";
 
 describe("qr studio state helpers", () => {
@@ -49,17 +49,16 @@ describe("qr studio state helpers", () => {
     });
   });
 
-  it("builds svg options from the default state", () => {
+  it("builds ReactQRCode props from the default state", () => {
     const state = createDefaultQrStudioState();
-    const options = toQrCodeOptions(state);
+    const props = toReactQrCodeProps(state);
 
-    expect(options.type).toBe("svg");
-    expect(options.width).toBe(320);
-    expect(options.height).toBe(320);
-    expect(options.data).toContain("https://");
-    expect(options.image).toBeUndefined();
-    expect(options.backgroundOptions?.color).toBe("#f8fafc");
-    expect(options.backgroundOptions?.round).toBe(0);
+    expect(props.size).toBe(320);
+    expect(props.value).toContain("https://");
+    expect(props.imageSettings).toBeUndefined();
+    expect(props.background).toBe("#f8fafc");
+    expect(props.level).toBe("Q");
+    expect(props.dataModulesSettings?.style).toBe("rounded");
   });
 
   it("keeps upstream qr background transparent when a vector background shape is active", () => {
@@ -67,19 +66,20 @@ describe("qr studio state helpers", () => {
     state.backgroundShapeId = "circle";
     state.backgroundOptions.color = "#d0bcff";
 
-    const options = toQrCodeOptions(state);
+    const props = toReactQrCodeProps(state);
 
-    expect(options.backgroundOptions?.color).toBe("transparent");
-    expect(options.backgroundOptions?.gradient).toBeUndefined();
+    expect(props.background).toBe("transparent");
   });
 
   it("maps qr background radius onto upstream background round", () => {
     const state = createDefaultQrStudioState();
     state.backgroundOptions.round = 0.42;
 
-    const options = toQrCodeOptions(state);
+    const props = toReactQrCodeProps(state);
 
-    expect(options.backgroundOptions?.round).toBe(0.42);
+    expect(props.svgProps?.style).toEqual(
+      expect.objectContaining({ borderRadius: "42%" }),
+    );
   });
 
   it("clamps qr background radius to the upstream round range", () => {
@@ -89,8 +89,12 @@ describe("qr studio state helpers", () => {
     const highRadiusState = createDefaultQrStudioState();
     highRadiusState.backgroundOptions.round = 2;
 
-    expect(toQrCodeOptions(lowRadiusState).backgroundOptions?.round).toBe(0);
-    expect(toQrCodeOptions(highRadiusState).backgroundOptions?.round).toBe(1);
+    expect(toReactQrCodeProps(lowRadiusState).svgProps?.style).toEqual(
+      expect.objectContaining({ borderRadius: "0%" }),
+    );
+    expect(toReactQrCodeProps(highRadiusState).svgProps?.style).toEqual(
+      expect.objectContaining({ borderRadius: "100%" }),
+    );
     expect(clampQrBackgroundRound(Number.NaN)).toBe(0);
   });
 
@@ -280,8 +284,8 @@ describe("qr studio state helpers", () => {
 
     const styleColorChanged = {
       ...custom,
-      dotsOptions: {
-        ...custom.dotsOptions,
+      dataModulesSettings: {
+        ...custom.dataModulesSettings,
         color: "#ff0000",
       },
     };
@@ -368,35 +372,35 @@ describe("qr studio state helpers", () => {
 
   it("keeps solid colors when gradients are disabled", () => {
     const state = createDefaultQrStudioState();
-    state.dotsOptions.color = "#112233";
+    state.dataModulesSettings.color = "#112233";
     state.dotsColorMode = "solid";
 
-    const options = toQrCodeOptions(state);
+    const options = toReactQrCodeProps(state);
 
-    expect(options.dotsOptions?.color).toBe("#112233");
-    expect(options.dotsOptions?.gradient).toBeUndefined();
+    expect(options.dataModulesSettings?.color).toBe("#112233");
+    expect(options.gradient).toBeUndefined();
   });
 
   it("emits gradient payloads when enabled", () => {
     const state = createDefaultQrStudioState();
     state.dotsColorMode = "gradient";
-    state.dotsGradient.enabled = true;
-    state.dotsGradient.type = "radial";
-    state.dotsGradient.rotation = 1.2;
-    state.dotsGradient.colorStops = [
+    state.dataModulesGradient.enabled = true;
+    state.dataModulesGradient.type = "radial";
+    state.dataModulesGradient.rotation = 1.2;
+    state.dataModulesGradient.colorStops = [
       { offset: 0, color: "#101010" },
       { offset: 1, color: "#fafafa" },
     ];
 
-    const options = toQrCodeOptions(state);
+    const options = toReactQrCodeProps(state);
 
-    expect(options.dotsOptions?.color).toBeUndefined();
-    expect(options.dotsOptions?.gradient).toEqual({
+    expect(options.dataModulesSettings?.color).toBeUndefined();
+    expect(options.gradient).toEqual({
       type: "radial",
       rotation: 1.2,
-      colorStops: [
-        { offset: 0, color: "#101010" },
-        { offset: 1, color: "#fafafa" },
+      stops: [
+        { offset: "0", color: "#101010" },
+        { offset: "1", color: "#fafafa" },
       ],
     });
   });
@@ -404,19 +408,19 @@ describe("qr studio state helpers", () => {
   it("omits upstream dot colors when palette mode is enabled", () => {
     const state = createDefaultQrStudioState();
     state.dotsColorMode = "palette";
-    state.dotsOptions.color = "#112233";
-    state.dotsGradient.enabled = true;
-    state.dotsGradient.type = "radial";
-    state.dotsGradient.rotation = 1.2;
-    state.dotsGradient.colorStops = [
+    state.dataModulesSettings.color = "#112233";
+    state.dataModulesGradient.enabled = true;
+    state.dataModulesGradient.type = "radial";
+    state.dataModulesGradient.rotation = 1.2;
+    state.dataModulesGradient.colorStops = [
       { offset: 0, color: "#101010" },
       { offset: 1, color: "#fafafa" },
     ];
 
-    const options = toQrCodeOptions(state);
+    const options = toReactQrCodeProps(state);
 
-    expect(options.dotsOptions?.color).toBeUndefined();
-    expect(options.dotsOptions?.gradient).toBeUndefined();
+    expect(options.dataModulesSettings?.color).toBeUndefined();
+    expect(options.gradient).toBeUndefined();
   });
 
   it("still emits background gradient payloads when enabled", () => {
@@ -429,14 +433,14 @@ describe("qr studio state helpers", () => {
       { offset: 1, color: "#fafafa" },
     ];
 
-    const options = toQrCodeOptions(state);
+    const options = toReactQrCodeProps(state);
 
-    expect(options.backgroundOptions?.gradient).toEqual({
+    expect(options.background).toEqual({
       type: "radial",
       rotation: 1.2,
-      colorStops: [
-        { offset: 0, color: "#101010" },
-        { offset: 1, color: "#fafafa" },
+      stops: [
+        { offset: "0", color: "#101010" },
+        { offset: "1", color: "#fafafa" },
       ],
     });
   });
@@ -448,48 +452,48 @@ describe("qr studio state helpers", () => {
       value: "   ",
     };
 
-    const options = toQrCodeOptions(state);
+    const options = toReactQrCodeProps(state);
 
-    expect(options.image).toBeUndefined();
+    expect(options.imageSettings).toBeUndefined();
   });
 
   it("preserves intentionally blank content instead of swapping in a hidden URL", () => {
     const state = createDefaultQrStudioState();
     state.data = "   ";
 
-    const options = toQrCodeOptions(state);
+    const options = toReactQrCodeProps(state);
 
-    expect(options.data).toBe("");
+    expect(options.value).toBe("");
   });
 
-  it("maps custom heart dots to square modules for the upstream renderer", () => {
+  it("passes native heart dots to the ReactQRCode renderer", () => {
     const state = createDefaultQrStudioState();
-    state.dotsOptions.type = "heart" as typeof state.dotsOptions.type;
+    state.dataModulesSettings.type = "heart" as typeof state.dataModulesSettings.type;
 
-    const options = toQrCodeOptions(state);
+    const options = toReactQrCodeProps(state);
 
-    expect(options.dotsOptions?.type).toBe("square");
+    expect(options.dataModulesSettings?.style).toBe("heart");
   });
 
-  it("maps custom diamond dots to square modules for the upstream renderer", () => {
+  it("passes native diamond dots to the ReactQRCode renderer", () => {
     const state = createDefaultQrStudioState();
-    state.dotsOptions.type = "diamond" as typeof state.dotsOptions.type;
+    state.dataModulesSettings.type = "diamond" as typeof state.dataModulesSettings.type;
 
-    const options = toQrCodeOptions(state);
+    const options = toReactQrCodeProps(state);
 
-    expect(options.dotsOptions?.type).toBe("square");
+    expect(options.dataModulesSettings?.style).toBe("diamond");
   });
 
-  it("maps the shared logo asset onto the upstream image field", () => {
+  it("maps the shared logo asset onto ReactQRCode image settings", () => {
     const state = createDefaultQrStudioState();
     state.logo = {
       source: "url",
       value: "https://example.com/logo.png",
     };
 
-    const options = toQrCodeOptions(state);
+    const options = toReactQrCodeProps(state);
 
-    expect(options.image).toBe("https://example.com/logo.png");
+    expect(options.imageSettings?.src).toBe("https://example.com/logo.png");
   });
 
   it("keeps upstream logo size coefficients within the full 0 to 1 range", () => {
@@ -499,8 +503,9 @@ describe("qr studio state helpers", () => {
     const fullSizeState = createDefaultQrStudioState();
     fullSizeState.imageOptions.imageSize = 1.4;
 
-    expect(toQrCodeOptions(zeroSizeState).imageOptions?.imageSize).toBe(0);
-    expect(toQrCodeOptions(fullSizeState).imageOptions?.imageSize).toBe(1);
+    expect(toReactQrCodeProps(zeroSizeState).imageSettings).toBeUndefined();
+    fullSizeState.logo = { source: "url", value: "https://example.com/logo.png" };
+    expect(toReactQrCodeProps(fullSizeState).imageSettings?.width).toBe(320);
   });
 
   it("maps preset logo assets onto the upstream image field", () => {
@@ -512,9 +517,9 @@ describe("qr studio state helpers", () => {
       value: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http://www.w3.org/2000/svg%22%20/%3E",
     };
 
-    const options = toQrCodeOptions(state);
+    const options = toReactQrCodeProps(state);
 
-    expect(options.image).toBe(
+    expect(options.imageSettings?.src).toBe(
       "data:image/svg+xml,%3Csvg%20xmlns%3D%22http://www.w3.org/2000/svg%22%20/%3E",
     );
   });
@@ -533,9 +538,8 @@ describe("qr studio state helpers", () => {
       value: "blob:https://new-qr-studio.local/background.png",
     };
 
-    const options = toQrCodeOptions(state);
+    const options = toReactQrCodeProps(state);
 
-    expect(options.backgroundOptions?.color).toBeUndefined();
-    expect(options.backgroundOptions?.gradient).toBeUndefined();
+    expect(options.background).toBe("transparent");
   });
 });

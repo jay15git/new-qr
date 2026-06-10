@@ -43,13 +43,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { Slider as UnlumenSlider } from "@/components/unlumen-ui/slider"
 import { cn } from "@/lib/utils"
 import type {
-  CornerDotType,
-  CornerSquareType,
-  DrawType,
-  GradientType,
-  Mode,
-  TypeNumber,
-} from "qr-code-styling"
+  QrDrawType,
+  QrFinderPatternInnerStyle,
+  QrFinderPatternOuterStyle,
+  QrGradientType,
+  QrMode,
+  QrTypeNumber,
+} from "@/components/qr/qr-types"
 
 import { getActiveCustomDotShape } from "@/components/qr/custom-dot-shapes"
 import {
@@ -83,7 +83,7 @@ import type {
   AssetSourceMode,
   DotsColorMode,
   QrStudioState,
-  StudioDotType,
+  StudioDataModulesStyle,
   StudioGradient,
 } from "@/components/qr/qr-studio-state"
 import {
@@ -166,19 +166,19 @@ const BRAND_ICON_CATEGORY_OPTIONS: Array<{
   { label: "Web", value: "web" },
 ]
 
-const DRAW_TYPES: Array<{ label: string; value: DrawType }> = [
+const DRAW_TYPES: Array<{ label: string; value: QrDrawType }> = [
   { label: "SVG", value: "svg" },
   { label: "Canvas", value: "canvas" },
 ]
 
-const QR_MODES: Array<{ label: string; value: Mode }> = [
+const QR_MODES: Array<{ label: string; value: QrMode }> = [
   { label: "Byte", value: "Byte" },
   { label: "Alphanumeric", value: "Alphanumeric" },
   { label: "Numeric", value: "Numeric" },
   { label: "Kanji", value: "Kanji" },
 ]
 
-const GRADIENT_TYPES: Array<{ label: string; value: GradientType }> = [
+const GRADIENT_TYPES: Array<{ label: string; value: QrGradientType }> = [
   { label: "Linear", value: "linear" },
   { label: "Radial", value: "radial" },
 ]
@@ -237,17 +237,17 @@ export function QrControlSections({
   const [brandIconCategory, setBrandIconCategory] =
     useState<BrandIconCategoryFilter>("all")
   const contentError = state.data.trim() ? null : "Add text or a URL to encode"
-  const activeCustomDotShape = getActiveCustomDotShape(state.dotsOptions.type)
+  const activeCustomDotShape = getActiveCustomDotShape(state.dataModulesSettings.type)
   const backgroundImageActive = hasBackgroundImage(state)
   const filteredBrandIcons = filterBrandIcons(brandIconQuery, brandIconCategory)
   const popularBrandIcons = POPULAR_BRAND_ICON_IDS.map((id) => getBrandIconById(id))
   const presetLogoColor = state.logo.presetColor ?? DEFAULT_BRAND_ICON_COLOR
   const selectedLogoColorItemId = state.logoGradient.enabled ? "gradient" : "solid"
   const backgroundColorMode = getBackgroundColorMode(state)
-  const selectedCornerSquareColorItemId = state.cornersSquareGradient.enabled
+  const selectedCornerSquareColorItemId = state.finderPatternOuterGradient.enabled
     ? "gradient"
     : "solid"
-  const selectedCornerDotColorItemId = state.cornersDotGradient.enabled
+  const selectedCornerDotColorItemId = state.finderPatternInnerGradient.enabled
     ? "gradient"
     : "solid"
   const isDashboardMode = activeSection !== undefined
@@ -345,12 +345,12 @@ export function QrControlSections({
       onValueChange={(value) =>
         setState((current) => ({
           ...current,
-          dotsOptions: { ...current.dotsOptions, type: value as StudioDotType },
+          dataModulesSettings: { ...current.dataModulesSettings, type: value as StudioDataModulesStyle },
         }))
       }
       options={DOT_STYLE_OPTIONS}
       previewKind="dots"
-      value={state.dotsOptions.type}
+      value={state.dataModulesSettings.type}
     />
   ) : (
     <SelectField
@@ -359,11 +359,11 @@ export function QrControlSections({
       onValueChange={(value) =>
         setState((current) => ({
           ...current,
-          dotsOptions: { ...current.dotsOptions, type: value as StudioDotType },
+          dataModulesSettings: { ...current.dataModulesSettings, type: value as StudioDataModulesStyle },
         }))
       }
       options={DOT_STYLE_OPTIONS}
-      value={state.dotsOptions.type}
+      value={state.dataModulesSettings.type}
     />
   )
 
@@ -379,11 +379,11 @@ export function QrControlSections({
       </FieldContent>
       <Switch
         id="dots-round-size"
-        checked={state.dotsOptions.roundSize}
+        checked={state.dataModulesSettings.roundSize}
         onCheckedChange={(checked) =>
           setState((current) => ({
             ...current,
-            dotsOptions: { ...current.dotsOptions, roundSize: checked },
+            dataModulesSettings: { ...current.dataModulesSettings, roundSize: checked },
           }))
         }
       />
@@ -415,7 +415,7 @@ export function QrControlSections({
         setState((current) => applyDotsSolidColor(current, value))
       }}
       pickerClassName="mx-auto"
-      value={state.dotsOptions.color}
+      value={state.dataModulesSettings.color}
     />
   )
 
@@ -436,7 +436,7 @@ export function QrControlSections({
 
   const gradientDotColorControl = (
     <GradientEditor
-      gradient={{ ...state.dotsGradient, enabled: true }}
+      gradient={{ ...state.dataModulesGradient, enabled: true }}
       hideToggle
       idPrefix="dots-gradient"
       isDashboardMode={isDashboardMode}
@@ -483,15 +483,15 @@ export function QrControlSections({
       onValueChange={(value) =>
         setState((current) => ({
           ...current,
-          cornersSquareOptions: {
-            ...current.cornersSquareOptions,
-            type: value as CornerSquareType,
+          finderPatternOuterSettings: {
+            ...current.finderPatternOuterSettings,
+            type: value as QrFinderPatternOuterStyle,
           },
         }))
       }
       options={CORNER_SQUARE_STYLE_OPTIONS}
       previewKind="corner-square"
-      value={state.cornersSquareOptions.type}
+      value={state.finderPatternOuterSettings.type}
     />
   ) : (
     <SelectField
@@ -500,14 +500,14 @@ export function QrControlSections({
       onValueChange={(value) =>
         setState((current) => ({
           ...current,
-          cornersSquareOptions: {
-            ...current.cornersSquareOptions,
-            type: value as CornerSquareType,
+          finderPatternOuterSettings: {
+            ...current.finderPatternOuterSettings,
+            type: value as QrFinderPatternOuterStyle,
           },
         }))
       }
       options={CORNER_SQUARE_STYLE_OPTIONS}
-      value={state.cornersSquareOptions.type}
+      value={state.finderPatternOuterSettings.type}
     />
   )
 
@@ -533,7 +533,7 @@ export function QrControlSections({
                 )
               }}
               pickerClassName="mx-auto"
-              value={state.cornersSquareOptions.color}
+              value={state.finderPatternOuterSettings.color}
             />
           ),
         },
@@ -542,7 +542,7 @@ export function QrControlSections({
           title: "Gradient",
           content: (
             <GradientEditor
-              gradient={{ ...state.cornersSquareGradient, enabled: true }}
+              gradient={{ ...state.finderPatternOuterGradient, enabled: true }}
               hideToggle
               idPrefix="corner-square-gradient"
               isDashboardMode={isDashboardMode}
@@ -568,15 +568,15 @@ export function QrControlSections({
       onValueChange={(value) =>
         setState((current) => ({
           ...current,
-          cornersDotOptions: {
-            ...current.cornersDotOptions,
-            type: value as CornerDotType,
+          finderPatternInnerSettings: {
+            ...current.finderPatternInnerSettings,
+            type: value as QrFinderPatternInnerStyle,
           },
         }))
       }
       options={CORNER_DOT_STYLE_OPTIONS}
       previewKind="corner-dot"
-      value={state.cornersDotOptions.type}
+      value={state.finderPatternInnerSettings.type}
     />
   ) : (
     <SelectField
@@ -585,14 +585,14 @@ export function QrControlSections({
       onValueChange={(value) =>
         setState((current) => ({
           ...current,
-          cornersDotOptions: {
-            ...current.cornersDotOptions,
-            type: value as CornerDotType,
+          finderPatternInnerSettings: {
+            ...current.finderPatternInnerSettings,
+            type: value as QrFinderPatternInnerStyle,
           },
         }))
       }
       options={CORNER_DOT_STYLE_OPTIONS}
-      value={state.cornersDotOptions.type}
+      value={state.finderPatternInnerSettings.type}
     />
   )
 
@@ -618,7 +618,7 @@ export function QrControlSections({
                 )
               }}
               pickerClassName="mx-auto"
-              value={state.cornersDotOptions.color}
+              value={state.finderPatternInnerSettings.color}
             />
           ),
         },
@@ -627,7 +627,7 @@ export function QrControlSections({
           title: "Gradient",
           content: (
             <GradientEditor
-              gradient={{ ...state.cornersDotGradient, enabled: true }}
+              gradient={{ ...state.finderPatternInnerGradient, enabled: true }}
               hideToggle
               idPrefix="corner-dot-gradient"
               isDashboardMode={isDashboardMode}
@@ -1244,7 +1244,7 @@ export function QrControlSections({
                     onValueChange={(value) =>
                       setState((current) => ({
                         ...current,
-                        type: value as DrawType,
+                        type: value as QrDrawType,
                       }))
                     }
                   >
@@ -1356,10 +1356,10 @@ export function QrControlSections({
                       onValueChange={(value) =>
                         setState((current) => ({
                           ...current,
-                          dotsOptions: { ...current.dotsOptions, color: value },
+                          dataModulesSettings: { ...current.dataModulesSettings, color: value },
                         }))
                       }
-                      value={state.dotsOptions.color}
+                      value={state.dataModulesSettings.color}
                     />
                   ) : null}
 
@@ -1382,14 +1382,14 @@ export function QrControlSections({
 
               {!isDashboardStyleSection && state.dotsColorMode === "gradient" ? (
                 <GradientEditor
-                  gradient={{ ...state.dotsGradient, enabled: true }}
+                  gradient={{ ...state.dataModulesGradient, enabled: true }}
                   hideToggle
                   idPrefix="dots-gradient"
                   isDashboardMode={isDashboardMode}
                   onGradientChange={(gradient) =>
                     setState((current) => ({
                       ...current,
-                      dotsGradient: { ...gradient, enabled: true },
+                      dataModulesGradient: { ...gradient, enabled: true },
                     }))
                   }
                   title="Dot gradient"
@@ -1419,24 +1419,24 @@ export function QrControlSections({
                   onValueChange={(value) =>
                     setState((current) => ({
                       ...current,
-                      cornersSquareOptions: {
-                        ...current.cornersSquareOptions,
+                      finderPatternOuterSettings: {
+                        ...current.finderPatternOuterSettings,
                         color: value,
                       },
                     }))
                   }
-                  value={state.cornersSquareOptions.color}
+                  value={state.finderPatternOuterSettings.color}
                 />
               </FieldGroup>
 
               <GradientEditor
-                gradient={state.cornersSquareGradient}
+                gradient={state.finderPatternOuterGradient}
                 idPrefix="corner-square-gradient"
                 isDashboardMode={isDashboardMode}
                 onGradientChange={(gradient) =>
                   setState((current) => ({
                     ...current,
-                    cornersSquareGradient: gradient,
+                    finderPatternOuterGradient: gradient,
                   }))
                 }
                 title="Corner square gradient"
@@ -1451,22 +1451,22 @@ export function QrControlSections({
                   onValueChange={(value) =>
                     setState((current) => ({
                       ...current,
-                      cornersDotOptions: {
-                        ...current.cornersDotOptions,
+                      finderPatternInnerSettings: {
+                        ...current.finderPatternInnerSettings,
                         color: value,
                       },
                     }))
                   }
-                  value={state.cornersDotOptions.color}
+                  value={state.finderPatternInnerSettings.color}
                 />
               </FieldGroup>
 
               <GradientEditor
-                gradient={state.cornersDotGradient}
+                gradient={state.finderPatternInnerGradient}
                 idPrefix="corner-dot-gradient"
                 isDashboardMode={isDashboardMode}
                 onGradientChange={(gradient) =>
-                  setState((current) => ({ ...current, cornersDotGradient: gradient }))
+                  setState((current) => ({ ...current, finderPatternInnerGradient: gradient }))
                 }
                 title="Corner dot gradient"
               />
@@ -1831,7 +1831,7 @@ export function QrControlSections({
               onValueChange={(value) =>
                 setState((current) => ({
                   ...current,
-                  qrOptions: { ...current.qrOptions, mode: value as Mode },
+                  qrOptions: { ...current.qrOptions, mode: value as QrMode },
                 }))
               }
               options={QR_MODES}
@@ -1845,7 +1845,7 @@ export function QrControlSections({
                   ...current,
                   qrOptions: {
                     ...current.qrOptions,
-                    typeNumber: Number(value) as TypeNumber,
+                    typeNumber: Number(value) as QrTypeNumber,
                   },
                 }))
               }
@@ -2129,7 +2129,7 @@ export function GradientEditor({
               id={`${idPrefix}-type`}
               label="Gradient type"
               onValueChange={(value) =>
-                onGradientChange({ ...gradient, type: value as GradientType })
+                onGradientChange({ ...gradient, type: value as QrGradientType })
               }
               value={gradient.type}
             />
@@ -2140,7 +2140,7 @@ export function GradientEditor({
               id={`${idPrefix}-type`}
               label="Gradient type"
               onValueChange={(value) =>
-                onGradientChange({ ...gradient, type: value as GradientType })
+                onGradientChange({ ...gradient, type: value as QrGradientType })
               }
               options={GRADIENT_TYPES}
               value={gradient.type}
@@ -2707,7 +2707,7 @@ function GradientTypeOptionCardPicker({
   )
 }
 
-function GradientTypePreview({ label, type }: { label?: string; type: GradientType }) {
+function GradientTypePreview({ label, type }: { label?: string; type: QrGradientType }) {
   return (
     <div className="flex size-full items-center justify-center gap-2 px-3">
       <HugeiconsIcon

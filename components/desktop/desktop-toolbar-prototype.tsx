@@ -4,12 +4,12 @@ import { Image02Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useEffect, useId, useMemo, useState, type CSSProperties, type ReactNode } from "react"
 import type {
-  CornerDotType,
-  CornerSquareType,
-  ErrorCorrectionLevel,
-  FileExtension,
-  TypeNumber,
-} from "qr-code-styling"
+  QrFinderPatternInnerStyle,
+  QrFinderPatternOuterStyle,
+  QrErrorCorrectionLevel,
+  QrFileExtension,
+  QrTypeNumber,
+} from "@/components/qr/qr-types"
 import {
   AlignCenterIcon,
   AlignLeftIcon,
@@ -97,13 +97,13 @@ import {
   type QrDotMatrixAnimationOptions,
   type QrDotMatrixAnimationPatch,
   type StudioGradient,
-  type StudioDotType,
+  type StudioDataModulesStyle,
 } from "@/components/qr/qr-studio-state"
 import {
   ERROR_CORRECTION_LEVEL_OPTIONS,
   TYPE_NUMBER_MAX,
   TYPE_NUMBER_MIN,
-  formatTypeNumberLabel,
+  formatQrTypeNumberLabel,
 } from "@/components/qr/qr-encoding-options"
 import {
   DropdownMenu,
@@ -329,10 +329,10 @@ const DESKTOP_ALL_CONTENT_TYPES = Array.from(
 
 export type DesktopPatternSettings = {
   dotsColorMode: DotsColorMode
-  dotsGradient: StudioGradient
+  dataModulesGradient: StudioGradient
   dotsPalette: string[]
   dotsSolidColor: string
-  qrDotType: StudioDotType
+  qrDotType: StudioDataModulesStyle
 }
 
 export type DesktopLogoSourceMode = "brand" | "none" | "upload" | "url"
@@ -356,11 +356,11 @@ export type DesktopCornersSettings = {
   cornerDotColorMode: DesktopCornerColorMode
   cornerDotGradient: StudioGradient
   cornerDotSolidColor: string
-  cornerDotType: CornerDotType
+  cornerDotType: QrFinderPatternInnerStyle
   cornerSquareColorMode: DesktopCornerColorMode
   cornerSquareGradient: StudioGradient
   cornerSquareSolidColor: string
-  cornerSquareType: CornerSquareType
+  cornerSquareType: QrFinderPatternOuterStyle
 }
 
 type DesktopCornerColorMode = "solid" | "gradient"
@@ -404,8 +404,8 @@ export type DesktopShapeSettings = {
 export type DesktopMotionSettings = QrDotMatrixAnimationOptions
 
 export type DesktopEncodingSettings = {
-  errorCorrectionLevel: ErrorCorrectionLevel
-  typeNumber: TypeNumber
+  errorCorrectionLevel: QrErrorCorrectionLevel
+  typeNumber: QrTypeNumber
 }
 
 type DesktopImageIntent = "image-object" | "logo" | "shape-fill"
@@ -472,7 +472,7 @@ export type DesktopRasterExportPresetId =
   | "web-social"
 
 export type DesktopExportSettings = {
-  extension: FileExtension
+  extension: QrFileExtension
   qualityPresetId: DesktopRasterExportPresetId
   target: DesktopExportTarget
 }
@@ -625,7 +625,7 @@ const DESKTOP_EXPORT_TARGET_OPTIONS: Array<{ label: string; value: DesktopExport
 ]
 
 const DESKTOP_DOWNLOAD_EXTENSIONS = ["svg", "png", "webp", "jpeg"] as const satisfies ReadonlyArray<
-  FileExtension
+  QrFileExtension
 >
 
 const DESKTOP_RASTER_EXPORT_PRESETS = [
@@ -639,7 +639,7 @@ const DESKTOP_RASTER_EXPORT_PRESETS = [
 
 const DEFAULT_DESKTOP_PATTERN_SETTINGS: DesktopPatternSettings = {
   dotsColorMode: "solid",
-  dotsGradient: DEFAULT_DESKTOP_DOTS_GRADIENT,
+  dataModulesGradient: DEFAULT_DESKTOP_DOTS_GRADIENT,
   dotsPalette: DEFAULT_DESKTOP_DOTS_PALETTE,
   dotsSolidColor: "#18181b",
   qrDotType: "rounded",
@@ -669,7 +669,7 @@ const DEFAULT_DESKTOP_CORNERS_SETTINGS: DesktopCornersSettings = {
     ],
   },
   cornerDotSolidColor: "#18181b",
-  cornerDotType: "dot",
+  cornerDotType: "circle",
   cornerSquareColorMode: "solid",
   cornerSquareGradient: {
     ...DEFAULT_DESKTOP_DOTS_GRADIENT,
@@ -679,7 +679,7 @@ const DEFAULT_DESKTOP_CORNERS_SETTINGS: DesktopCornersSettings = {
     ],
   },
   cornerSquareSolidColor: "#18181b",
-  cornerSquareType: "extra-rounded",
+  cornerSquareType: "rounded-lg",
 }
 
 const DEFAULT_DESKTOP_SHAPE_SETTINGS: DesktopShapeSettings = {
@@ -2071,7 +2071,7 @@ function DesktopCornerStyleButton({
   previewKind: Extract<StylePreviewKind, "corner-dot" | "corner-square">
   selected: boolean
   target: "corner dot" | "corner frame"
-  value: CornerDotType | CornerSquareType
+  value: QrFinderPatternInnerStyle | QrFinderPatternOuterStyle
 }) {
   return (
     <div className="group flex min-w-0 flex-col gap-1.5">
@@ -3065,29 +3065,29 @@ function DesktopPatternInspector({
               <DesktopColorInputRow
                 ariaLabel="Start color"
                 label="Start color"
-                value={settings.dotsGradient.colorStops[0].color}
+                value={settings.dataModulesGradient.colorStops[0].color}
                 onChange={(color) =>
                   onPatternSettingsChange({
-                    dotsGradient: updateDesktopGradientColor(settings.dotsGradient, 0, color),
+                    dataModulesGradient: updateDesktopGradientColor(settings.dataModulesGradient, 0, color),
                   })
                 }
               />
               <DesktopColorInputRow
                 ariaLabel="End color"
                 label="End color"
-                value={settings.dotsGradient.colorStops[1].color}
+                value={settings.dataModulesGradient.colorStops[1].color}
                 onChange={(color) =>
                   onPatternSettingsChange({
-                    dotsGradient: updateDesktopGradientColor(settings.dotsGradient, 1, color),
+                    dataModulesGradient: updateDesktopGradientColor(settings.dataModulesGradient, 1, color),
                   })
                 }
               />
               <DesktopSegmentedRow
                 label="Type"
                 options={DESKTOP_GRADIENT_TYPE_OPTIONS}
-                value={settings.dotsGradient.type}
+                value={settings.dataModulesGradient.type}
                 onChange={(type) =>
-                  onPatternSettingsChange({ dotsGradient: { ...settings.dotsGradient, type } })
+                  onPatternSettingsChange({ dataModulesGradient: { ...settings.dataModulesGradient, type } })
                 }
               />
             </div>
@@ -3146,7 +3146,7 @@ function DesktopModulePatternButton({
   label: string
   onClick: () => void
   selected: boolean
-  value: StudioDotType
+  value: StudioDataModulesStyle
 }) {
   return (
     <div className="group flex min-w-0 flex-col gap-1.5">
@@ -3183,7 +3183,7 @@ function DesktopQrDotPreview({
 }: {
   className?: string
   style?: CSSProperties
-  value: StudioDotType
+  value: StudioDataModulesStyle
 }) {
   return (
     <span
@@ -3706,8 +3706,8 @@ function DesktopEncodingInspector({
             max={TYPE_NUMBER_MAX}
             min={TYPE_NUMBER_MIN}
             value={settings.typeNumber}
-            valueLabel={formatTypeNumberLabel(settings.typeNumber)}
-            onChange={(typeNumber) => onEncodingSettingsChange({ typeNumber: typeNumber as TypeNumber })}
+            valueLabel={formatQrTypeNumberLabel(settings.typeNumber)}
+            onChange={(typeNumber) => onEncodingSettingsChange({ typeNumber: typeNumber as QrTypeNumber })}
           />
         </section>
 

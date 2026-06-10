@@ -6,12 +6,12 @@ import { StylePreview } from "@/components/qr/qr-style-preview-renderer"
 describe("StylePreview", () => {
   it("renders the extracted qr fragment preview for native dot styles", () => {
     const markup = renderToStaticMarkup(
-      <StylePreview previewKind="dots" value="classy-rounded" />,
+      <StylePreview previewKind="dots" value="circuit-board" />,
     )
 
     expect(markup).toContain('data-slot="style-preview-fragment"')
     expect(markup).toContain('data-preview-kind="dots"')
-    expect(markup).toContain('data-preview-style="classy-rounded"')
+    expect(markup).toContain('data-preview-style="circuit-board"')
     expect(markup).toContain('data-preview-fragment-size="9"')
     expect(markup).toContain('data-preview-module-pitch="4"')
     expect(markup).toContain('data-preview-module-size="4"')
@@ -34,10 +34,10 @@ describe("StylePreview", () => {
 
   it("renders dedicated corner-dot previews without the generic icon path", () => {
     const filledMarkup = renderToStaticMarkup(
-      <StylePreview previewKind="corner-dot" value="dot" />,
+      <StylePreview previewKind="corner-dot" value="circle" />,
     )
     const gridMarkup = renderToStaticMarkup(
-      <StylePreview previewKind="corner-dot" value="classy-rounded" />,
+      <StylePreview previewKind="corner-dot" value="leaf" />,
     )
 
     expect(filledMarkup).toContain('data-slot="style-preview-corner-dot"')
@@ -51,10 +51,10 @@ describe("StylePreview", () => {
 
   it("renders dedicated ring and fallback-grid corner-square previews without cutout masks", () => {
     const ringMarkup = renderToStaticMarkup(
-      <StylePreview previewKind="corner-square" value="extra-rounded" />,
+      <StylePreview previewKind="corner-square" value="rounded-lg" />,
     )
     const gridMarkup = renderToStaticMarkup(
-      <StylePreview previewKind="corner-square" value="classy-rounded" />,
+      <StylePreview previewKind="corner-square" value="leaf" />,
     )
 
     expect(ringMarkup).toContain('data-slot="style-preview-corner-square"')

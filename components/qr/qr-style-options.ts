@@ -1,40 +1,68 @@
-import type { CornerDotType, CornerSquareType } from "qr-code-styling"
+import type {
+  QrFinderPatternInnerStyle,
+  QrFinderPatternOuterStyle,
+} from "@/components/qr/qr-types"
+import type { StudioDataModulesStyle } from "@/components/qr/qr-studio-state"
 
-import type { StudioDotType } from "@/components/qr/qr-studio-state"
-
-export const DOT_STYLE_OPTIONS: Array<{ label: string; value: StudioDotType }> = [
-  { label: "Rounded", value: "rounded" },
+export const DOT_STYLE_OPTIONS: Array<{ label: string; value: StudioDataModulesStyle }> = [
   { label: "Square", value: "square" },
-  { label: "Dots", value: "dots" },
-  { label: "Classy", value: "classy" },
-  { label: "Classy rounded", value: "classy-rounded" },
-  { label: "Extra rounded", value: "extra-rounded" },
+  { label: "Small square", value: "square-sm" },
+  { label: "Pinched square", value: "pinched-square" },
+  { label: "Rounded", value: "rounded" },
+  { label: "Leaf", value: "leaf" },
+  { label: "Vertical line", value: "vertical-line" },
+  { label: "Horizontal line", value: "horizontal-line" },
+  { label: "Circuit board", value: "circuit-board" },
+  { label: "Circle", value: "circle" },
   { label: "Diamond", value: "diamond" },
+  { label: "Star", value: "star" },
   { label: "Heart", value: "heart" },
+  { label: "Hashtag", value: "hashtag" },
 ]
 
 export const CORNER_SQUARE_STYLE_OPTIONS: Array<{
   label: string
-  value: CornerSquareType
+  value: QrFinderPatternOuterStyle
 }> = [
-  { label: "Extra rounded", value: "extra-rounded" },
   { label: "Square", value: "square" },
+  { label: "Pinched square", value: "pinched-square" },
+  { label: "Small rounded", value: "rounded-sm" },
   { label: "Rounded", value: "rounded" },
-  { label: "Dots", value: "dots" },
-  { label: "Classy", value: "classy" },
-  { label: "Classy rounded", value: "classy-rounded" },
-  { label: "Dot", value: "dot" },
+  { label: "Large rounded", value: "rounded-lg" },
+  { label: "Circle", value: "circle" },
+  { label: "Inpoint small", value: "inpoint-sm" },
+  { label: "Inpoint", value: "inpoint" },
+  { label: "Inpoint large", value: "inpoint-lg" },
+  { label: "Outpoint small", value: "outpoint-sm" },
+  { label: "Outpoint", value: "outpoint" },
+  { label: "Outpoint large", value: "outpoint-lg" },
+  { label: "Leaf small", value: "leaf-sm" },
+  { label: "Leaf", value: "leaf" },
+  { label: "Leaf large", value: "leaf-lg" },
 ]
 
 export const CORNER_DOT_STYLE_OPTIONS: Array<{
   label: string
-  value: CornerDotType
+  value: QrFinderPatternInnerStyle
 }> = [
-  { label: "Dot", value: "dot" },
   { label: "Square", value: "square" },
+  { label: "Pinched square", value: "pinched-square" },
+  { label: "Small rounded", value: "rounded-sm" },
   { label: "Rounded", value: "rounded" },
-  { label: "Dots", value: "dots" },
-  { label: "Classy", value: "classy" },
-  { label: "Classy rounded", value: "classy-rounded" },
-  { label: "Extra rounded", value: "extra-rounded" },
+  { label: "Large rounded", value: "rounded-lg" },
+  { label: "Circle", value: "circle" },
+  { label: "Inpoint small", value: "inpoint-sm" },
+  { label: "Inpoint", value: "inpoint" },
+  { label: "Inpoint large", value: "inpoint-lg" },
+  { label: "Outpoint small", value: "outpoint-sm" },
+  { label: "Outpoint", value: "outpoint" },
+  { label: "Outpoint large", value: "outpoint-lg" },
+  { label: "Leaf small", value: "leaf-sm" },
+  { label: "Leaf", value: "leaf" },
+  { label: "Leaf large", value: "leaf-lg" },
+  { label: "Diamond", value: "diamond" },
+  { label: "Star", value: "star" },
+  { label: "Heart", value: "heart" },
+  { label: "Hashtag", value: "hashtag" },
+  { label: "Microchip", value: "microchip" },
 ]

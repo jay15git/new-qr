@@ -64,10 +64,11 @@ describe("QrControlSections", () => {
     expect(markup).toContain('type="radio"')
     expect(markup).toContain("Rounded")
     expect(markup).toContain("Square")
-    expect(markup).toContain("Dots")
-    expect(markup).toContain("Classy")
-    expect(markup).toContain("Classy rounded")
-    expect(markup).toContain("Extra rounded")
+    expect(markup).toContain("Small square")
+    expect(markup).toContain("Pinched square")
+    expect(markup).toContain("Circle")
+    expect(markup).toContain("Circuit board")
+    expect(markup).toContain("Hashtag")
     expect(markup).toContain("Diamond")
     expect(markup).toContain("Heart")
     expect(markup).not.toContain('grid-cols-3 gap-2')
@@ -89,10 +90,10 @@ describe("QrControlSections", () => {
     expect(markup).toContain("min-h-28")
     expect(markup).toContain('class="size-[5.5rem] text-foreground/80 dark:text-white"')
     expect(markup).toMatch(
-      /data-preview-style="classy"[\s\S]*?data-slot="style-preview-native-module"/,
+      /data-preview-style="circle"[\s\S]*?data-slot="style-preview-native-module"/,
     )
     expect(markup).toMatch(
-      /data-preview-style="classy-rounded"[\s\S]*?data-slot="style-preview-native-module"/,
+      /data-preview-style="circuit-board"[\s\S]*?data-slot="style-preview-native-module"/,
     )
     expect(markup).toMatch(
       /data-preview-style="diamond"[\s\S]*?data-slot="style-preview-custom-module"/,
@@ -126,26 +127,26 @@ describe("QrControlSections", () => {
       <QrControlSections {...baseProps} activeSection="corner-dot" />,
     )
 
-    const dotMarkup = getStylePreviewMarkup(markup, "dot")
+    const circleMarkup = getStylePreviewMarkup(markup, "circle")
     const squareMarkup = getStylePreviewMarkup(markup, "square")
-    const extraRoundedMarkup = getStylePreviewMarkup(markup, "extra-rounded")
-    const classyRoundedMarkup = getStylePreviewMarkup(markup, "classy-rounded")
+    const heartMarkup = getStylePreviewMarkup(markup, "heart")
+    const leafMarkup = getStylePreviewMarkup(markup, "leaf")
 
-    expect(dotMarkup).toContain('data-slot="style-preview-corner-dot"')
-    expect(dotMarkup).toContain('data-corner-dot-renderer="filled"')
-    expect(dotMarkup).toContain("<circle")
+    expect(circleMarkup).toContain('data-slot="style-preview-corner-dot"')
+    expect(circleMarkup).toContain('data-corner-dot-renderer="filled"')
+    expect(circleMarkup).toContain("<circle")
     expect(squareMarkup).toContain('data-slot="style-preview-corner-dot"')
     expect(squareMarkup).toContain('data-corner-dot-renderer="filled"')
     expect(squareMarkup).toContain("<rect")
-    expect(extraRoundedMarkup).toContain('data-slot="style-preview-corner-dot"')
-    expect(extraRoundedMarkup).toContain('data-corner-dot-renderer="filled"')
-    expect(extraRoundedMarkup).toContain('data-slot="style-preview-corner-dot-shape"')
-    expect(classyRoundedMarkup).toContain('data-slot="style-preview-corner-dot"')
-    expect(classyRoundedMarkup).toContain('data-corner-dot-renderer="grid"')
-    expect(classyRoundedMarkup).toContain("<path")
-    expect(dotMarkup).not.toBe(squareMarkup)
-    expect(squareMarkup).not.toBe(extraRoundedMarkup)
-    expect(extraRoundedMarkup).not.toBe(classyRoundedMarkup)
+    expect(heartMarkup).toContain('data-slot="style-preview-corner-dot"')
+    expect(heartMarkup).toContain('data-corner-dot-renderer="filled"')
+    expect(heartMarkup).toContain('data-slot="style-preview-corner-dot-shape"')
+    expect(leafMarkup).toContain('data-slot="style-preview-corner-dot"')
+    expect(leafMarkup).toContain('data-corner-dot-renderer="grid"')
+    expect(leafMarkup).toContain("<path")
+    expect(circleMarkup).not.toBe(squareMarkup)
+    expect(squareMarkup).not.toBe(heartMarkup)
+    expect(heartMarkup).not.toBe(leafMarkup)
   })
 
   it("renders distinct corner-square preview markup for ring and fallback-grid styles", () => {
@@ -153,29 +154,29 @@ describe("QrControlSections", () => {
       <QrControlSections {...baseProps} activeSection="corner-square" />,
     )
 
-    const dotMarkup = getStylePreviewMarkup(markup, "dot")
+    const circleMarkup = getStylePreviewMarkup(markup, "circle")
     const squareMarkup = getStylePreviewMarkup(markup, "square")
-    const extraRoundedMarkup = getStylePreviewMarkup(markup, "extra-rounded")
-    const classyRoundedMarkup = getStylePreviewMarkup(markup, "classy-rounded")
+    const roundedLargeMarkup = getStylePreviewMarkup(markup, "rounded-lg")
+    const leafMarkup = getStylePreviewMarkup(markup, "leaf")
 
-    expect(dotMarkup).toContain('data-slot="style-preview-corner-square-frame"')
-    expect(dotMarkup).toContain('data-corner-square-renderer="ring"')
-    expect(dotMarkup).toContain('data-corner-frame-variant="dot"')
-    expect(dotMarkup).toContain("<path")
+    expect(circleMarkup).toContain('data-slot="style-preview-corner-square-frame"')
+    expect(circleMarkup).toContain('data-corner-square-renderer="ring"')
+    expect(circleMarkup).toContain('data-corner-frame-variant="circle"')
+    expect(circleMarkup).toContain("<path")
     expect(squareMarkup).toContain('data-slot="style-preview-corner-square-frame"')
     expect(squareMarkup).toContain('data-corner-square-renderer="ring"')
     expect(squareMarkup).toContain('data-corner-frame-variant="square"')
     expect(squareMarkup).toContain("<path")
-    expect(extraRoundedMarkup).toContain('data-slot="style-preview-corner-square-frame"')
-    expect(extraRoundedMarkup).toContain('data-corner-square-renderer="ring"')
-    expect(extraRoundedMarkup).toContain('data-corner-frame-variant="extra-rounded"')
-    expect(extraRoundedMarkup).toContain('fill-rule="evenodd"')
-    expect(classyRoundedMarkup).toContain('data-corner-square-renderer="grid"')
-    expect(classyRoundedMarkup).toContain('data-slot="style-preview-corner-square-grid"')
-    expect(classyRoundedMarkup).toContain('data-slot="style-preview-native-module"')
-    expect(dotMarkup).not.toBe(squareMarkup)
-    expect(squareMarkup).not.toBe(extraRoundedMarkup)
-    expect(extraRoundedMarkup).not.toBe(classyRoundedMarkup)
+    expect(roundedLargeMarkup).toContain('data-slot="style-preview-corner-square-frame"')
+    expect(roundedLargeMarkup).toContain('data-corner-square-renderer="ring"')
+    expect(roundedLargeMarkup).toContain('data-corner-frame-variant="rounded-lg"')
+    expect(roundedLargeMarkup).toContain('fill-rule="evenodd"')
+    expect(leafMarkup).toContain('data-corner-square-renderer="grid"')
+    expect(leafMarkup).toContain('data-slot="style-preview-corner-square-grid"')
+    expect(leafMarkup).toContain('data-slot="style-preview-native-module"')
+    expect(circleMarkup).not.toBe(squareMarkup)
+    expect(squareMarkup).not.toBe(roundedLargeMarkup)
+    expect(roundedLargeMarkup).not.toBe(leafMarkup)
   })
 
   it("renders the dashboard color tab as a mutually exclusive accordion", () => {
@@ -260,13 +261,13 @@ describe("QrControlSections", () => {
     expect(markup).not.toContain("Corner square color")
     expect(markup).not.toContain("Corner square gradient")
     expect(markup).not.toContain("Corner dot style")
-    expect(markup).toContain("Extra rounded")
     expect(markup).toContain("Square")
     expect(markup).toContain("Rounded")
-    expect(markup).toContain("Dots")
-    expect(markup).toContain("Classy")
-    expect(markup).toContain("Classy rounded")
-    expect(markup).toContain("Dot")
+    expect(markup).toContain("Large rounded")
+    expect(markup).toContain("Circle")
+    expect(markup).toContain("Inpoint")
+    expect(markup).toContain("Outpoint")
+    expect(markup).toContain("Leaf")
     expect(markup).toMatch(
       /data-slot="direction-aware-tab-panels" class="relative mx-auto h-full w-full min-h-0 overflow-hidden"/,
     )
@@ -285,13 +286,15 @@ describe("QrControlSections", () => {
     expect(markup).not.toContain("Corner dot color")
     expect(markup).not.toContain("Corner dot gradient")
     expect(markup).not.toContain("Corner square style")
-    expect(markup).toContain("Dot")
     expect(markup).toContain("Square")
     expect(markup).toContain("Rounded")
-    expect(markup).toContain("Dots")
-    expect(markup).toContain("Classy")
-    expect(markup).toContain("Classy rounded")
-    expect(markup).toContain("Extra rounded")
+    expect(markup).toContain("Large rounded")
+    expect(markup).toContain("Circle")
+    expect(markup).toContain("Diamond")
+    expect(markup).toContain("Star")
+    expect(markup).toContain("Heart")
+    expect(markup).toContain("Hashtag")
+    expect(markup).toContain("Microchip")
     expect(markup).toMatch(
       /data-slot="direction-aware-tab-panels" class="relative mx-auto h-full w-full min-h-0 overflow-hidden"/,
     )
@@ -319,7 +322,7 @@ describe("QrControlSections", () => {
 
   it("uses the enhanced gradient controls for corner square in dashboard mode", () => {
     const state = createDefaultQrStudioState()
-    state.cornersSquareGradient.enabled = true
+    state.finderPatternOuterGradient.enabled = true
 
     const markup = renderToStaticMarkup(
       <QrControlSections
@@ -346,7 +349,7 @@ describe("QrControlSections", () => {
 
   it("opens the corner dot gradient accordion item when its gradient is enabled", () => {
     const state = createDefaultQrStudioState()
-    state.cornersDotGradient.enabled = true
+    state.finderPatternInnerGradient.enabled = true
 
     const markup = renderToStaticMarkup(
       <QrControlSections
@@ -366,7 +369,7 @@ describe("QrControlSections", () => {
 
   it("uses the enhanced gradient controls for corner dot in dashboard mode", () => {
     const state = createDefaultQrStudioState()
-    state.cornersDotGradient.enabled = true
+    state.finderPatternInnerGradient.enabled = true
 
     const markup = renderToStaticMarkup(
       <QrControlSections

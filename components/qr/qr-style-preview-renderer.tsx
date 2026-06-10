@@ -1,5 +1,3 @@
-import type { CornerDotType, CornerSquareType } from "qr-code-styling"
-
 import {
   DOT_STYLE_PREVIEW_ROWS,
   isDotStylePreviewDark,
@@ -27,11 +25,11 @@ export function StylePreview({
   value: string
 }) {
   if (previewKind === "corner-dot") {
-    return <CornerDotStylePreview value={value as CornerDotType} />
+    return <CornerDotStylePreview value={value} />
   }
 
   if (previewKind === "corner-square") {
-    return <CornerSquareStylePreview value={value as CornerSquareType} />
+    return <CornerSquareStylePreview value={value} />
   }
 
   const modulePitch = 4
@@ -79,12 +77,18 @@ export function StylePreview({
 function CornerDotStylePreview({
   value,
 }: {
-  value: CornerDotType
+  value: string
 }) {
   const filledSize = 15
   const filledStart = (48 - filledSize) / 2
   const usesFilledShape =
-    value === "dot" || value === "square" || value === "extra-rounded"
+    value === "circle" ||
+    value === "diamond" ||
+    value === "hashtag" ||
+    value === "heart" ||
+    value === "microchip" ||
+    value === "square" ||
+    value === "star"
 
   return (
     <svg
@@ -122,10 +126,14 @@ function CornerDotStylePreview({
 function CornerSquareStylePreview({
   value,
 }: {
-  value: CornerSquareType
+  value: string
 }) {
   const usesRingRenderer =
-    value === "dot" || value === "square" || value === "extra-rounded"
+    value === "circle" ||
+    value === "rounded" ||
+    value === "rounded-lg" ||
+    value === "rounded-sm" ||
+    value === "square"
 
   return (
     <svg
@@ -162,7 +170,7 @@ function CornerSquareRing({
   y,
   size,
 }: {
-  value: CornerSquareType
+  value: string
   x: number
   y: number
   size: number
@@ -170,7 +178,7 @@ function CornerSquareRing({
   const unit = size / 7
 
   switch (value) {
-    case "dot":
+    case "circle":
       return (
         <path
           clipRule="evenodd"
@@ -181,20 +189,25 @@ function CornerSquareRing({
           fillRule="evenodd"
         />
       )
-    case "extra-rounded":
-      return (
-        <path
-          clipRule="evenodd"
-          d={[
-            `M ${x} ${y + 2.5 * unit}v ${2 * unit}a ${2.5 * unit} ${2.5 * unit}, 0, 0, 0, ${2.5 * unit} ${2.5 * unit}h ${2 * unit}a ${2.5 * unit} ${2.5 * unit}, 0, 0, 0, ${2.5 * unit} ${-2.5 * unit}v ${-2 * unit}a ${2.5 * unit} ${2.5 * unit}, 0, 0, 0, ${-2.5 * unit} ${-2.5 * unit}h ${-2 * unit}a ${2.5 * unit} ${2.5 * unit}, 0, 0, 0, ${-2.5 * unit} ${2.5 * unit}`,
-            `M ${x + 2.5 * unit} ${y + unit}h ${2 * unit}a ${1.5 * unit} ${1.5 * unit}, 0, 0, 1, ${1.5 * unit} ${1.5 * unit}v ${2 * unit}a ${1.5 * unit} ${1.5 * unit}, 0, 0, 1, ${-1.5 * unit} ${1.5 * unit}h ${-2 * unit}a ${1.5 * unit} ${1.5 * unit}, 0, 0, 1, ${-1.5 * unit} ${-1.5 * unit}v ${-2 * unit}a ${1.5 * unit} ${1.5 * unit}, 0, 0, 1, ${1.5 * unit} ${-1.5 * unit}`,
-          ].join("")}
-          data-corner-frame-variant={value}
-          data-slot="style-preview-corner-square-frame"
-          fill="currentColor"
-          fillRule="evenodd"
-        />
-      )
+    case "rounded-lg":
+    case "rounded":
+    case "rounded-sm":
+      {
+        const radiusFactor = value === "rounded-lg" ? 2.5 : value === "rounded" ? 1.5 : 0.75
+        return (
+          <path
+            clipRule="evenodd"
+            d={[
+              `M ${x} ${y + radiusFactor * unit}v ${size - 2 * radiusFactor * unit}a ${radiusFactor * unit} ${radiusFactor * unit}, 0, 0, 0, ${radiusFactor * unit} ${radiusFactor * unit}h ${size - 2 * radiusFactor * unit}a ${radiusFactor * unit} ${radiusFactor * unit}, 0, 0, 0, ${radiusFactor * unit} ${-radiusFactor * unit}v ${2 * radiusFactor * unit - size}a ${radiusFactor * unit} ${radiusFactor * unit}, 0, 0, 0, ${-radiusFactor * unit} ${-radiusFactor * unit}h ${2 * radiusFactor * unit - size}a ${radiusFactor * unit} ${radiusFactor * unit}, 0, 0, 0, ${-radiusFactor * unit} ${radiusFactor * unit}`,
+              `M ${x + 2 * unit} ${y + 2 * unit}h ${3 * unit}v ${3 * unit}h ${-3 * unit}z`,
+            ].join("")}
+            data-corner-frame-variant={value}
+            data-slot="style-preview-corner-square-frame"
+            fill="currentColor"
+            fillRule="evenodd"
+          />
+        )
+      }
     case "square":
     default:
       return (
@@ -264,7 +277,7 @@ function MatrixPreviewShape({
   x: number
   y: number
 }) {
-  if (value === "diamond" || value === "heart") {
+  if (value === "diamond" || value === "heart" || value === "star" || value === "hashtag") {
     return (
       <PreviewShape
         size={size}
@@ -280,16 +293,22 @@ function MatrixPreviewShape({
     isDark(rowIndex + offsetY, columnIndex + offsetX)
 
   switch (value) {
-    case "dots":
-      return renderPreviewDotShape("dot", { size, x, y })
+    case "circle":
+      return renderPreviewDotShape("circle", { size, x, y })
     case "rounded":
       return renderRoundedPreviewShape({ getNeighbor, size, x, y })
-    case "extra-rounded":
-      return renderExtraRoundedPreviewShape({ getNeighbor, size, x, y })
-    case "classy":
-      return renderClassyPreviewShape({ getNeighbor, size, x, y })
-    case "classy-rounded":
+    case "leaf":
       return renderClassyRoundedPreviewShape({ getNeighbor, size, x, y })
+    case "pinched-square":
+      return renderPreviewDotShape("corners-rounded", { size, x, y })
+    case "square-sm":
+      return renderPreviewDotShape("small-square", { size, x, y })
+    case "vertical-line":
+      return renderPreviewDotShape("vertical-line", { size, x, y })
+    case "horizontal-line":
+      return renderPreviewDotShape("horizontal-line", { size, x, y })
+    case "circuit-board":
+      return renderPreviewDotShape("circuit-board", { size, x, y })
     case "square":
     default:
       return renderPreviewDotShape("square", { size, x, y })
@@ -310,8 +329,7 @@ function PreviewShape({
   y: number
 }) {
   switch (value) {
-    case "dots":
-    case "dot":
+    case "circle":
       return (
         <circle
           cx={x + size / 2}
@@ -333,7 +351,7 @@ function PreviewShape({
           y={y}
         />
       )
-    case "extra-rounded":
+    case "rounded-lg":
       return (
         <rect
           data-slot={slotName}
@@ -361,21 +379,25 @@ function PreviewShape({
           fill="currentColor"
         />
       )
-    case "classy":
+    case "star":
       return (
         <path
           data-slot={slotName}
-          d={`M ${x + size * 0.16} ${y} H ${x + size} V ${y + size * 0.82} Q ${x + size * 0.92} ${y + size * 0.08} ${x + size * 0.16} ${y + size * 0.82} Z`}
+          d={`M ${x + size * 0.5} ${y} L ${x + size * 0.62} ${y + size * 0.36} H ${x + size} L ${x + size * 0.69} ${y + size * 0.58} L ${x + size * 0.82} ${y + size} L ${x + size * 0.5} ${y + size * 0.74} L ${x + size * 0.18} ${y + size} L ${x + size * 0.31} ${y + size * 0.58} L ${x} ${y + size * 0.36} H ${x + size * 0.38} Z`}
           fill="currentColor"
         />
       )
-    case "classy-rounded":
+    case "hashtag":
       return (
-        <path
+        <g
           data-slot={slotName}
-          d={`M ${x + size * 0.22} ${y + size * 0.02} H ${x + size * 0.84} Q ${x + size} ${y + size * 0.02} ${x + size} ${y + size * 0.18} V ${y + size * 0.78} Q ${x + size * 0.86} ${y + size} ${x + size * 0.7} ${y + size} H ${x + size * 0.34} Q ${x + size * 0.04} ${y + size} ${x + size * 0.04} ${y + size * 0.7} V ${y + size * 0.28} Q ${x + size * 0.04} ${y + size * 0.08} ${x + size * 0.22} ${y + size * 0.02} Z`}
           fill="currentColor"
-        />
+        >
+          <rect height={size} width={size * 0.22} x={x + size * 0.22} y={y} />
+          <rect height={size} width={size * 0.22} x={x + size * 0.58} y={y} />
+          <rect height={size * 0.22} width={size} x={x} y={y + size * 0.22} />
+          <rect height={size * 0.22} width={size} x={x} y={y + size * 0.58} />
+        </g>
       )
     case "square":
     default:
@@ -397,9 +419,13 @@ type PreviewDotShapeKind =
   | "corner-extra-rounded"
   | "corner-rounded"
   | "corners-rounded"
-  | "dot"
+  | "circle"
+  | "circuit-board"
+  | "horizontal-line"
   | "side-rounded"
+  | "small-square"
   | "square"
+  | "vertical-line"
 
 function renderRoundedPreviewShape({
   getNeighbor,
@@ -419,7 +445,7 @@ function renderRoundedPreviewShape({
   const neighborCount = Number(left) + Number(right) + Number(up) + Number(down)
 
   if (neighborCount === 0) {
-    return renderPreviewDotShape("dot", { size, x, y })
+    return renderPreviewDotShape("circle", { size, x, y })
   }
 
   if (neighborCount > 2 || (left && right) || (up && down)) {
@@ -436,94 +462,6 @@ function renderRoundedPreviewShape({
   const rotation = up ? Math.PI / 2 : right ? Math.PI : down ? -Math.PI / 2 : 0
 
   return renderPreviewDotShape("side-rounded", { rotation, size, x, y })
-}
-
-function renderExtraRoundedPreviewShape({
-  getNeighbor,
-  size,
-  x,
-  y,
-}: {
-  getNeighbor: (offsetX: number, offsetY: number) => boolean
-  size: number
-  x: number
-  y: number
-}) {
-  const left = getNeighbor(-1, 0)
-  const right = getNeighbor(1, 0)
-  const up = getNeighbor(0, -1)
-  const down = getNeighbor(0, 1)
-  const neighborCount = Number(left) + Number(right) + Number(up) + Number(down)
-
-  if (neighborCount === 0) {
-    return renderPreviewDotShape("dot", { size, x, y })
-  }
-
-  if (neighborCount > 2 || (left && right) || (up && down)) {
-    return renderPreviewDotShape("square", { size, x, y })
-  }
-
-  if (neighborCount === 2) {
-    const rotation =
-      left && up ? Math.PI / 2 : up && right ? Math.PI : right && down ? -Math.PI / 2 : 0
-
-    return renderPreviewDotShape("corner-extra-rounded", {
-      rotation,
-      size,
-      x,
-      y,
-    })
-  }
-
-  const rotation = up ? Math.PI / 2 : right ? Math.PI : down ? -Math.PI / 2 : 0
-
-  return renderPreviewDotShape("side-rounded", { rotation, size, x, y })
-}
-
-function renderClassyPreviewShape({
-  getNeighbor,
-  size,
-  x,
-  y,
-}: {
-  getNeighbor: (offsetX: number, offsetY: number) => boolean
-  size: number
-  x: number
-  y: number
-}) {
-  const left = getNeighbor(-1, 0)
-  const right = getNeighbor(1, 0)
-  const up = getNeighbor(0, -1)
-  const down = getNeighbor(0, 1)
-
-  if (!left && !right && !up && !down) {
-    return renderPreviewDotShape("corners-rounded", {
-      rotation: Math.PI / 2,
-      size,
-      x,
-      y,
-    })
-  }
-
-  if (left || up) {
-    if (right || down) {
-      return renderPreviewDotShape("square", { size, x, y })
-    }
-
-    return renderPreviewDotShape("corner-rounded", {
-      rotation: Math.PI / 2,
-      size,
-      x,
-      y,
-    })
-  }
-
-  return renderPreviewDotShape("corner-rounded", {
-    rotation: -Math.PI / 2,
-    size,
-    x,
-    y,
-  })
 }
 
 function renderClassyRoundedPreviewShape({
@@ -587,7 +525,7 @@ function renderPreviewDotShape(
   },
 ) {
   switch (kind) {
-    case "dot":
+    case "circle":
       return (
         <circle
           cx={x + size / 2}
@@ -595,6 +533,53 @@ function renderPreviewDotShape(
           data-slot="style-preview-native-module"
           fill="currentColor"
           r={size / 2}
+        />
+      )
+    case "small-square":
+      return (
+        <rect
+          data-slot="style-preview-native-module"
+          fill="currentColor"
+          height={size * 0.72}
+          width={size * 0.72}
+          x={x + size * 0.14}
+          y={y + size * 0.14}
+        />
+      )
+    case "vertical-line":
+      return (
+        <rect
+          data-slot="style-preview-native-module"
+          fill="currentColor"
+          height={size}
+          rx={size * 0.2}
+          width={size * 0.45}
+          x={x + size * 0.275}
+          y={y}
+        />
+      )
+    case "horizontal-line":
+      return (
+        <rect
+          data-slot="style-preview-native-module"
+          fill="currentColor"
+          height={size * 0.45}
+          rx={size * 0.2}
+          width={size}
+          x={x}
+          y={y + size * 0.275}
+        />
+      )
+    case "circuit-board":
+      return (
+        <rect
+          data-slot="style-preview-native-module"
+          fill="currentColor"
+          height={size * 0.62}
+          rx={size * 0.18}
+          width={size * 0.62}
+          x={x + size * 0.19}
+          y={y + size * 0.19}
         />
       )
     case "square":

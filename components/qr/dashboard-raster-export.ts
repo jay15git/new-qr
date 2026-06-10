@@ -1,21 +1,21 @@
-import QRCodeStyling, { type FileExtension } from "qr-code-styling"
-
-import { createDashboardSurfaceQrState } from "@/components/qr/dashboard-qr-svg"
 import {
-  buildQrExtension,
+  createDashboardSurfaceQrState,
+  renderDashboardQrSvgMarkup,
+} from "@/components/qr/dashboard-qr-svg"
+import {
   getQrRenderedDimensions,
   scaleQrBackgroundShapeOptions,
 } from "@/components/qr/qr-rendering"
 import {
   clampQrSize,
   clampRasterExportQualityPercent,
-  toQrCodeOptions,
   type QrStudioState,
 } from "@/components/qr/qr-studio-state"
+import type { QrFileExtension } from "@/components/qr/qr-types"
 
 const DASHBOARD_RASTER_EXPORT_MAX_DIMENSION = 4096
 
-export type DashboardRasterExtension = Exclude<FileExtension, "svg">
+export type DashboardRasterExtension = Exclude<QrFileExtension, "svg">
 
 type DashboardRasterExportOptions = {
   extension: DashboardRasterExtension
@@ -35,7 +35,7 @@ export type DashboardRasterExportMeasurement = {
 }
 
 export function isRasterExportExtension(
-  extension: FileExtension,
+  extension: QrFileExtension,
 ): extension is DashboardRasterExtension {
   return extension !== "svg"
 }
@@ -184,20 +184,9 @@ async function renderDashboardRasterExport({
     height: Math.max(1, Math.round(clampQrSize(state.height) * renderScale)),
     width: Math.max(1, Math.round(clampQrSize(state.width) * renderScale)),
   }
-  const qrCode = new QRCodeStyling(toQrCodeOptions(exportState))
-  const qrExtension = buildQrExtension(exportState)
-
-  if (qrExtension) {
-    qrCode.applyExtension(qrExtension)
-  }
-
-  const rawSvg = await qrCode.getRawData("svg")
-
-  if (!rawSvg) {
-    throw new Error("QR SVG data is unavailable.")
-  }
-
-  const svgBlob = toExportBlob(rawSvg, "image/svg+xml")
+  const svgBlob = new Blob([renderDashboardQrSvgMarkup(exportState)], {
+    type: "image/svg+xml",
+  })
   const image = await loadSvgBlobAsImage(svgBlob)
   const canvas = document.createElement("canvas")
 
@@ -239,14 +228,6 @@ function getMimeTypeForRasterExtension(extension: DashboardRasterExtension) {
     case "webp":
       return "image/webp"
   }
-}
-
-function toExportBlob(rawData: Blob | Buffer | Uint8Array, mimeType: string) {
-  if (rawData instanceof Blob) {
-    return rawData.type ? rawData : new Blob([rawData], { type: mimeType })
-  }
-
-  return new Blob([Uint8Array.from(rawData)], { type: mimeType })
 }
 
 async function loadSvgBlobAsImage(blob: Blob) {

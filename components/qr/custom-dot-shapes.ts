@@ -1,4 +1,4 @@
-import type { StudioDotType } from "@/components/qr/qr-studio-state"
+import type { StudioDataModulesStyle } from "@/components/qr/qr-studio-state"
 
 export type CustomDotShape = "diamond" | "heart"
 
@@ -67,6 +67,6 @@ export function getCustomDotShapeGeometry(
   }
 }
 
-export function getActiveCustomDotShape(type: StudioDotType): CustomDotShape | null {
+export function getActiveCustomDotShape(type: StudioDataModulesStyle): CustomDotShape | null {
   return isCustomDotShape(type) ? type : null
 }

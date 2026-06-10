@@ -5,7 +5,7 @@ This version has breaking changes. Read the relevant guide in `node_modules/next
 <!-- END:nextjs-agent-rules -->
 
 ## Stack
-- Single-package `pnpm` app using Next.js `16.2.3`, React `19`, Tailwind CSS `4`, Vitest `4`, shadcn/ui (`radix-nova`), and `qr-code-styling`.
+- Single-package `pnpm` app using Next.js `16.2.3`, React `19`, Tailwind CSS `4`, Vitest `4`, shadcn/ui (`radix-nova`), and `@lglab/react-qr-code`.
 - Use `pnpm`; the repo is locked with `pnpm-lock.yaml`.
 
 ## Commands
@@ -22,7 +22,7 @@ This version has breaking changes. Read the relevant guide in `node_modules/next
 - `app/page.tsx` is the home route; renders `HomePromptShell` from `components/home/`.
 - `/desktop` is the active desktop workspace and `/mobile` is the mobile shell.
 - `/new`, `/dashboard`, and `/settings` have been removed. Do not re-add features or fixes there unless explicitly asked.
-- `components/qr/qr-studio-state.ts` is the core state and mapper layer. Update this first when adding new controls, defaults, or `qr-code-styling` options.
+- `components/qr/qr-studio-state.ts` is the core state and mapper layer. Update this first when adding new controls, defaults, or `@lglab/react-qr-code` options.
 - `components/qr/qr-control-sections.tsx` is the large control-surface form. Follow its existing inline `setState` pattern unless there is a clear reason to refactor.
 - `components/drafting/drafting-surface.tsx` is the shared drafting UI used by `/desktop`.
 - `lib/utils.ts` only provides `cn()`.

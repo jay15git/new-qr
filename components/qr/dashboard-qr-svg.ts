@@ -1,8 +1,10 @@
-import QRCodeStyling from "qr-code-styling"
+import { ReactQRCode } from "@lglab/react-qr-code"
+import { createElement } from "react"
+import { renderToStaticMarkup } from "react-dom/server"
 
 import type { DashboardQrNodePayload } from "@/components/qr/dashboard-compose-scene"
 import { buildQrExtension, getQrRenderedDimensions } from "@/components/qr/qr-rendering"
-import { toQrCodeOptions, type QrStudioState } from "@/components/qr/qr-studio-state"
+import { toReactQrCodeProps, type QrStudioState } from "@/components/qr/qr-studio-state"
 
 export function createDashboardSurfaceQrState(state: QrStudioState): QrStudioState {
   return {
@@ -23,34 +25,51 @@ export async function buildDashboardQrNodePayload(
   options: { animationMode?: "export" | "none" | "preview" } = {},
 ): Promise<DashboardQrNodePayload> {
   const dashboardState = createDashboardSurfaceQrState(state)
-  const qrCode = new QRCodeStyling(toQrCodeOptions(dashboardState))
   const extension = buildQrExtension(dashboardState, {
     animationMode: options.animationMode ?? "none",
   })
+  const markup = stripXmlDeclaration(
+    renderToStaticMarkup(createElement(ReactQRCode, toReactQrCodeProps(dashboardState))),
+  )
 
   if (extension) {
-    qrCode.applyExtension(extension)
+    return {
+      markup: applyQrSvgExtension(markup, extension, dashboardState),
+      naturalHeight: getQrRenderedDimensions(dashboardState).height,
+      naturalWidth: getQrRenderedDimensions(dashboardState).width,
+    }
   }
-
-  const rawData = await qrCode.getRawData("svg")
-
-  if (!rawData) {
-    throw new Error("QR SVG data is unavailable.")
-  }
-
-  const markup = await readQrMarkup(rawData)
 
   return {
-    markup: stripXmlDeclaration(markup),
+    markup,
     naturalHeight: getQrRenderedDimensions(dashboardState).height,
     naturalWidth: getQrRenderedDimensions(dashboardState).width,
   }
 }
 
-async function readQrMarkup(rawData: Blob | Buffer | Uint8Array) {
-  if (rawData instanceof Blob) {
-    return rawData.text()
+export function renderDashboardQrSvgMarkup(state: QrStudioState) {
+  return stripXmlDeclaration(
+    renderToStaticMarkup(createElement(ReactQRCode, toReactQrCodeProps(state))),
+  )
+}
+
+function applyQrSvgExtension(
+  markup: string,
+  extension: NonNullable<ReturnType<typeof buildQrExtension>>,
+  state: QrStudioState,
+) {
+  const parser = new DOMParser()
+  const document = parser.parseFromString(markup, "image/svg+xml")
+  const svg = document.documentElement as unknown as SVGElement
+
+  if (svg.tagName.toLowerCase() !== "svg" || document.querySelector("parsererror")) {
+    throw new Error("QR SVG data is unavailable.")
   }
 
-  return new TextDecoder().decode(rawData)
+  extension(svg, {
+    height: getQrRenderedDimensions(state).height,
+    width: getQrRenderedDimensions(state).width,
+  })
+
+  return new XMLSerializer().serializeToString(svg)
 }

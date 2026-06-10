@@ -24,8 +24,8 @@ export function applyDotsSolidColor(state: QrStudioState, color: string) {
   return {
     ...state,
     dotsColorMode: "solid" as const,
-    dotsOptions: {
-      ...state.dotsOptions,
+    dataModulesSettings: {
+      ...state.dataModulesSettings,
       color,
     },
   }
@@ -35,7 +35,7 @@ export function applyDotsGradient(state: QrStudioState, gradient: StudioGradient
   return {
     ...state,
     dotsColorMode: "gradient" as const,
-    dotsGradient: {
+    dataModulesGradient: {
       ...gradient,
       enabled: true,
     },
@@ -57,12 +57,12 @@ export function applyCornerSolidColor(
   if (cornerKey === "cornersSquare") {
     return {
       ...state,
-      cornersSquareOptions: {
-        ...state.cornersSquareOptions,
+      finderPatternOuterSettings: {
+        ...state.finderPatternOuterSettings,
         color,
       },
-      cornersSquareGradient: {
-        ...state.cornersSquareGradient,
+      finderPatternOuterGradient: {
+        ...state.finderPatternOuterGradient,
         enabled: false,
       },
     }
@@ -70,12 +70,12 @@ export function applyCornerSolidColor(
 
   return {
     ...state,
-    cornersDotOptions: {
-      ...state.cornersDotOptions,
+    finderPatternInnerSettings: {
+      ...state.finderPatternInnerSettings,
       color,
     },
-    cornersDotGradient: {
-      ...state.cornersDotGradient,
+    finderPatternInnerGradient: {
+      ...state.finderPatternInnerGradient,
       enabled: false,
     },
   }
@@ -89,7 +89,7 @@ export function applyCornerGradient(
   if (cornerKey === "cornersSquare") {
     return {
       ...state,
-      cornersSquareGradient: {
+      finderPatternOuterGradient: {
         ...gradient,
         enabled: true,
       },
@@ -98,7 +98,7 @@ export function applyCornerGradient(
 
   return {
     ...state,
-    cornersDotGradient: {
+    finderPatternInnerGradient: {
       ...gradient,
       enabled: true,
     },

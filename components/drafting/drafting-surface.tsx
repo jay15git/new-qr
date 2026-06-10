@@ -5,12 +5,12 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
 
 import type {
-  CornerDotType,
-  CornerSquareType,
-  ErrorCorrectionLevel,
-  FileExtension,
-  TypeNumber,
-} from "qr-code-styling"
+  QrErrorCorrectionLevel,
+  QrFileExtension,
+  QrFinderPatternInnerStyle,
+  QrFinderPatternOuterStyle,
+  QrTypeNumber,
+} from "@/components/qr/qr-types"
 
 import {
   DraftingBackgroundColorTab,
@@ -167,7 +167,7 @@ import {
   type DotsColorMode,
   type QrDotMatrixAnimationOptions,
   type QrStudioState,
-  type StudioDotType,
+  type StudioDataModulesStyle,
   type StudioGradient,
   setDotMatrixAnimationOptions,
 } from "@/components/qr/qr-studio-state"
@@ -312,7 +312,7 @@ const DRAFTING_KEYBOARD_SHORTCUT_GROUPS = [
 const IGNORE_DRAFTING_UPLOAD_ERROR: (message: string) => void = () => undefined
 const DEFAULT_DOWNLOAD_NAME = "new-qr-studio"
 const DRAFTING_DOWNLOAD_EXTENSIONS = ["svg", "png", "webp", "jpeg"] as const satisfies ReadonlyArray<
-  FileExtension
+  QrFileExtension
 >
 const DRAFTING_RASTER_EXPORT_PRESETS = [
   {
@@ -699,15 +699,15 @@ export function DraftingSurface({
   const [selectedQrSize, setSelectedQrSize] = useState(
     DEFAULT_DRAFTING_PANE_QR_SIZE,
   )
-  const [selectedDotType, setSelectedDotType] = useState<StudioDotType>("rounded")
+  const [selectedDotType, setSelectedDotType] = useState<StudioDataModulesStyle>("rounded")
   const [selectedDotsColorMode, setSelectedDotsColorMode] = useState<DotsColorMode>(
     DEFAULT_DRAFTING_STUDIO_STATE.dotsColorMode,
   )
   const [selectedDotColor, setSelectedDotColor] = useState(
-    DEFAULT_DRAFTING_STUDIO_STATE.dotsOptions.color,
+    DEFAULT_DRAFTING_STUDIO_STATE.dataModulesSettings.color,
   )
   const [selectedDotsGradient, setSelectedDotsGradient] = useState<StudioGradient>(
-    structuredClone(DEFAULT_DRAFTING_STUDIO_STATE.dotsGradient),
+    structuredClone(DEFAULT_DRAFTING_STUDIO_STATE.dataModulesGradient),
   )
   const [selectedDotsPalette, setSelectedDotsPalette] = useState<string[]>([
     ...DEFAULT_DRAFTING_STUDIO_STATE.dotsPalette,
@@ -717,34 +717,34 @@ export function DraftingSurface({
       ...DEFAULT_DRAFTING_STUDIO_STATE.dotMatrixAnimation,
     })
   const [openDotsColorItems, setOpenDotsColorItems] = useState<string[]>(["solid"])
-  const [selectedCornerSquareType, setSelectedCornerSquareType] =
-    useState<CornerSquareType>("extra-rounded")
+  const [selectedQrFinderPatternOuterStyle, setSelectedQrFinderPatternOuterStyle] =
+    useState<QrFinderPatternOuterStyle>("rounded-lg")
   const [selectedCornerSquareColorMode, setSelectedCornerSquareColorMode] =
     useState<DraftingBinaryColorMode>(
-      DEFAULT_DRAFTING_STUDIO_STATE.cornersSquareGradient.enabled ? "gradient" : "solid",
+      DEFAULT_DRAFTING_STUDIO_STATE.finderPatternOuterGradient.enabled ? "gradient" : "solid",
     )
   const [selectedCornerSquareColor, setSelectedCornerSquareColor] = useState(
-    DEFAULT_DRAFTING_STUDIO_STATE.cornersSquareOptions.color,
+    DEFAULT_DRAFTING_STUDIO_STATE.finderPatternOuterSettings.color,
   )
   const [selectedCornerSquareGradient, setSelectedCornerSquareGradient] =
     useState<StudioGradient>(
-      structuredClone(DEFAULT_DRAFTING_STUDIO_STATE.cornersSquareGradient),
+      structuredClone(DEFAULT_DRAFTING_STUDIO_STATE.finderPatternOuterGradient),
     )
   const [openCornerSquareColorItems, setOpenCornerSquareColorItems] = useState<string[]>([
     "solid",
   ])
-  const [selectedCornerDotType, setSelectedCornerDotType] =
-    useState<CornerDotType>("dot")
+  const [selectedQrFinderPatternInnerStyle, setSelectedQrFinderPatternInnerStyle] =
+    useState<QrFinderPatternInnerStyle>("circle")
   const [selectedCornerDotColorMode, setSelectedCornerDotColorMode] =
     useState<DraftingBinaryColorMode>(
-      DEFAULT_DRAFTING_STUDIO_STATE.cornersDotGradient.enabled ? "gradient" : "solid",
+      DEFAULT_DRAFTING_STUDIO_STATE.finderPatternInnerGradient.enabled ? "gradient" : "solid",
     )
   const [selectedCornerDotColor, setSelectedCornerDotColor] = useState(
-    DEFAULT_DRAFTING_STUDIO_STATE.cornersDotOptions.color,
+    DEFAULT_DRAFTING_STUDIO_STATE.finderPatternInnerSettings.color,
   )
   const [selectedCornerDotGradient, setSelectedCornerDotGradient] =
     useState<StudioGradient>(
-      structuredClone(DEFAULT_DRAFTING_STUDIO_STATE.cornersDotGradient),
+      structuredClone(DEFAULT_DRAFTING_STUDIO_STATE.finderPatternInnerGradient),
     )
   const [openCornerDotColorItems, setOpenCornerDotColorItems] = useState<string[]>([
     "solid",
@@ -827,11 +827,11 @@ export function DraftingSurface({
   const [selectedSaveAsBlob, setSelectedSaveAsBlob] = useState(
     DEFAULT_DRAFTING_STUDIO_STATE.imageOptions.saveAsBlob,
   )
-  const [selectedTypeNumber, setSelectedTypeNumber] = useState<TypeNumber>(
+  const [selectedQrTypeNumber, setSelectedQrTypeNumber] = useState<QrTypeNumber>(
     DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.typeNumber,
   )
-  const [selectedErrorCorrectionLevel, setSelectedErrorCorrectionLevel] =
-    useState<ErrorCorrectionLevel>(
+  const [selectedQrErrorCorrectionLevel, setSelectedQrErrorCorrectionLevel] =
+    useState<QrErrorCorrectionLevel>(
       DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.errorCorrectionLevel,
     )
   const [activeQrNodeId, setActiveQrNodeId] = useState(DASHBOARD_QR_NODE_ID)
@@ -935,8 +935,8 @@ export function DraftingSurface({
       backgroundShapeOptions: { ...selectedBackgroundShapeOptions },
       qrOptions: {
         ...DEFAULT_DRAFTING_STUDIO_STATE.qrOptions,
-        typeNumber: selectedTypeNumber,
-        errorCorrectionLevel: selectedErrorCorrectionLevel,
+        typeNumber: selectedQrTypeNumber,
+        errorCorrectionLevel: selectedQrErrorCorrectionLevel,
       },
       imageOptions: {
         ...DEFAULT_DRAFTING_STUDIO_STATE.imageOptions,
@@ -945,20 +945,20 @@ export function DraftingSurface({
         margin: selectedLogoMargin,
         saveAsBlob: selectedSaveAsBlob,
       },
-      dotsOptions: {
-        ...DEFAULT_DRAFTING_STUDIO_STATE.dotsOptions,
+      dataModulesSettings: {
+        ...DEFAULT_DRAFTING_STUDIO_STATE.dataModulesSettings,
         type: selectedDotType,
         color: selectedDotColor,
       },
       dotsColorMode: selectedDotsColorMode,
       dotsPalette: [...selectedDotsPalette],
       dotMatrixAnimation: { ...selectedDotMatrixAnimation },
-      cornersSquareOptions: {
-        type: selectedCornerSquareType,
+      finderPatternOuterSettings: {
+        type: selectedQrFinderPatternOuterStyle,
         color: selectedCornerSquareColor,
       },
-      cornersDotOptions: {
-        type: selectedCornerDotType,
+      finderPatternInnerSettings: {
+        type: selectedQrFinderPatternInnerStyle,
         color: selectedCornerDotColor,
       },
       backgroundOptions: {
@@ -970,15 +970,15 @@ export function DraftingSurface({
         ...structuredClone(selectedLogoGradient),
         enabled: selectedLogoColorMode === "gradient",
       },
-      dotsGradient: {
+      dataModulesGradient: {
         ...structuredClone(selectedDotsGradient),
         enabled: selectedDotsColorMode === "gradient",
       },
-      cornersSquareGradient: {
+      finderPatternOuterGradient: {
         ...structuredClone(selectedCornerSquareGradient),
         enabled: selectedCornerSquareColorMode === "gradient",
       },
-      cornersDotGradient: {
+      finderPatternInnerGradient: {
         ...structuredClone(selectedCornerDotGradient),
         enabled: selectedCornerDotColorMode === "gradient",
       },
@@ -1001,18 +1001,18 @@ export function DraftingSurface({
       selectedCornerDotColor,
       selectedCornerDotColorMode,
       selectedCornerDotGradient,
-      selectedCornerDotType,
+      selectedQrFinderPatternInnerStyle,
       selectedCornerSquareColor,
       selectedCornerSquareColorMode,
       selectedCornerSquareGradient,
-      selectedCornerSquareType,
+      selectedQrFinderPatternOuterStyle,
       selectedDotColor,
       selectedDotMatrixAnimation,
       selectedDotsColorMode,
       selectedDotsGradient,
       selectedDotsPalette,
       selectedDotType,
-      selectedErrorCorrectionLevel,
+      selectedQrErrorCorrectionLevel,
       selectedHideBackgroundDots,
       selectedLogoColor,
       selectedLogoColorMode,
@@ -1027,7 +1027,7 @@ export function DraftingSurface({
       selectedQrMargin,
       selectedQrSize,
       selectedSaveAsBlob,
-      selectedTypeNumber,
+      selectedQrTypeNumber,
     ],
   )
   const keyboardStateRef = useRef({
@@ -1330,26 +1330,26 @@ export function DraftingSurface({
     setSelectedQrRadius(clampQrBackgroundRound(nextState.backgroundOptions.round))
     setSelectedRasterExportQualityPercent(nextState.rasterExportQualityPercent)
     setSelectedQrSize(nextState.width)
-    setSelectedDotType(nextState.dotsOptions.type)
+    setSelectedDotType(nextState.dataModulesSettings.type)
     setSelectedDotsColorMode(nextState.dotsColorMode)
-    setSelectedDotColor(nextState.dotsOptions.color)
-    setSelectedDotsGradient(structuredClone(nextState.dotsGradient))
+    setSelectedDotColor(nextState.dataModulesSettings.color)
+    setSelectedDotsGradient(structuredClone(nextState.dataModulesGradient))
     setSelectedDotMatrixAnimation({ ...nextState.dotMatrixAnimation })
     setOpenDotsColorItems([nextState.dotsColorMode])
-    setSelectedCornerSquareType(nextState.cornersSquareOptions.type)
+    setSelectedQrFinderPatternOuterStyle(nextState.finderPatternOuterSettings.type)
     setSelectedCornerSquareColorMode(
-      nextState.cornersSquareGradient.enabled ? "gradient" : "solid",
+      nextState.finderPatternOuterGradient.enabled ? "gradient" : "solid",
     )
-    setSelectedCornerSquareColor(nextState.cornersSquareOptions.color)
-    setSelectedCornerSquareGradient(structuredClone(nextState.cornersSquareGradient))
+    setSelectedCornerSquareColor(nextState.finderPatternOuterSettings.color)
+    setSelectedCornerSquareGradient(structuredClone(nextState.finderPatternOuterGradient))
     setOpenCornerSquareColorItems([
-      nextState.cornersSquareGradient.enabled ? "gradient" : "solid",
+      nextState.finderPatternOuterGradient.enabled ? "gradient" : "solid",
     ])
-    setSelectedCornerDotType(nextState.cornersDotOptions.type)
-    setSelectedCornerDotColorMode(nextState.cornersDotGradient.enabled ? "gradient" : "solid")
-    setSelectedCornerDotColor(nextState.cornersDotOptions.color)
-    setSelectedCornerDotGradient(structuredClone(nextState.cornersDotGradient))
-    setOpenCornerDotColorItems([nextState.cornersDotGradient.enabled ? "gradient" : "solid"])
+    setSelectedQrFinderPatternInnerStyle(nextState.finderPatternInnerSettings.type)
+    setSelectedCornerDotColorMode(nextState.finderPatternInnerGradient.enabled ? "gradient" : "solid")
+    setSelectedCornerDotColor(nextState.finderPatternInnerSettings.color)
+    setSelectedCornerDotGradient(structuredClone(nextState.finderPatternInnerGradient))
+    setOpenCornerDotColorItems([nextState.finderPatternInnerGradient.enabled ? "gradient" : "solid"])
     setSelectedBackgroundColorMode(
       nextState.backgroundGradient.enabled ? "gradient" : "solid",
     )
@@ -1386,8 +1386,8 @@ export function DraftingSurface({
     setSelectedLogoMargin(nextState.imageOptions.margin)
     setSelectedHideBackgroundDots(nextState.imageOptions.hideBackgroundDots)
     setSelectedSaveAsBlob(nextState.imageOptions.saveAsBlob)
-    setSelectedTypeNumber(nextState.qrOptions.typeNumber)
-    setSelectedErrorCorrectionLevel(nextState.qrOptions.errorCorrectionLevel)
+    setSelectedQrTypeNumber(nextState.qrOptions.typeNumber)
+    setSelectedQrErrorCorrectionLevel(nextState.qrOptions.errorCorrectionLevel)
   }
 
   function buildDraftingWorkspaceDocument(): DraftingWorkspaceDocumentV1 {
@@ -2967,8 +2967,8 @@ export function DraftingSurface({
     if (toolId === "corner-square" && tabId === "style") {
       return (
         <DraftingCornerSquareStyleTab
-          onValueChange={setSelectedCornerSquareType}
-          value={selectedCornerSquareType}
+          onValueChange={setSelectedQrFinderPatternOuterStyle}
+          value={selectedQrFinderPatternOuterStyle}
         />
       )
     }
@@ -3002,8 +3002,8 @@ export function DraftingSurface({
     if (toolId === "corner-dot" && tabId === "style") {
       return (
         <DraftingCornerDotStyleTab
-          onValueChange={setSelectedCornerDotType}
-          value={selectedCornerDotType}
+          onValueChange={setSelectedQrFinderPatternInnerStyle}
+          value={selectedQrFinderPatternInnerStyle}
         />
       )
     }
@@ -3209,10 +3209,10 @@ export function DraftingSurface({
     if (toolId === "encoding" && tabId === "encoding") {
       return renderWithSliderVariant(
         <DraftingEncodingTab
-          errorCorrectionLevel={selectedErrorCorrectionLevel}
-          typeNumber={selectedTypeNumber}
-          onErrorCorrectionLevelChange={setSelectedErrorCorrectionLevel}
-          onTypeNumberChange={setSelectedTypeNumber}
+          errorCorrectionLevel={selectedQrErrorCorrectionLevel}
+          typeNumber={selectedQrTypeNumber}
+          onQrErrorCorrectionLevelChange={setSelectedQrErrorCorrectionLevel}
+          onQrTypeNumberChange={setSelectedQrTypeNumber}
         />,
       )
     }
@@ -3654,7 +3654,7 @@ export function DraftingSurface({
   const desktopActiveTool = getDesktopToolbarToolId(activeTool)
   const desktopPatternSettings: DesktopPatternSettings = {
     dotsColorMode: selectedDotsColorMode,
-    dotsGradient: selectedDotsGradient,
+    dataModulesGradient: selectedDotsGradient,
     dotsPalette: selectedDotsPalette,
     dotsSolidColor: selectedDotColor,
     qrDotType: selectedDotType,
@@ -3676,11 +3676,11 @@ export function DraftingSurface({
     cornerDotColorMode: selectedCornerDotColorMode,
     cornerDotGradient: selectedCornerDotGradient,
     cornerDotSolidColor: selectedCornerDotColor,
-    cornerDotType: selectedCornerDotType,
+    cornerDotType: selectedQrFinderPatternInnerStyle,
     cornerSquareColorMode: selectedCornerSquareColorMode,
     cornerSquareGradient: selectedCornerSquareGradient,
     cornerSquareSolidColor: selectedCornerSquareColor,
-    cornerSquareType: selectedCornerSquareType,
+    cornerSquareType: selectedQrFinderPatternOuterStyle,
   }
   const desktopShapeSettings: DesktopShapeSettings = {
     backgroundShapeId: selectedBackgroundShapeId,
@@ -3716,8 +3716,8 @@ export function DraftingSurface({
     shadowOpacity: selectedCardState.shadow.opacity,
   }
   const desktopEncodingSettings: DesktopEncodingSettings = {
-    errorCorrectionLevel: selectedErrorCorrectionLevel,
-    typeNumber: selectedTypeNumber,
+    errorCorrectionLevel: selectedQrErrorCorrectionLevel,
+    typeNumber: selectedQrTypeNumber,
   }
   const desktopImageSettings: DesktopImageSettings = {
     fit: selectedCardState.cardImage.fit,
@@ -3780,10 +3780,10 @@ export function DraftingSurface({
       setSelectedDotsColorMode("solid")
       setSelectedDotColor(patch.dotsSolidColor)
     }
-    if (patch.dotsGradient) {
+    if (patch.dataModulesGradient) {
       ensureDotsColorItemExpanded("gradient")
       setSelectedDotsColorMode("gradient")
-      setSelectedDotsGradient({ ...patch.dotsGradient, enabled: true })
+      setSelectedDotsGradient({ ...patch.dataModulesGradient, enabled: true })
     }
     if (patch.dotsPalette) {
       ensureDotsColorItemExpanded("palette")
@@ -3793,10 +3793,10 @@ export function DraftingSurface({
   }
 
   function resetDesktopPatternSettings() {
-    setSelectedDotType(DEFAULT_DRAFTING_STUDIO_STATE.dotsOptions.type)
+    setSelectedDotType(DEFAULT_DRAFTING_STUDIO_STATE.dataModulesSettings.type)
     setSelectedDotsColorMode(DEFAULT_DRAFTING_STUDIO_STATE.dotsColorMode)
-    setSelectedDotColor(DEFAULT_DRAFTING_STUDIO_STATE.dotsOptions.color)
-    setSelectedDotsGradient(structuredClone(DEFAULT_DRAFTING_STUDIO_STATE.dotsGradient))
+    setSelectedDotColor(DEFAULT_DRAFTING_STUDIO_STATE.dataModulesSettings.color)
+    setSelectedDotsGradient(structuredClone(DEFAULT_DRAFTING_STUDIO_STATE.dataModulesGradient))
     setSelectedDotsPalette([...DEFAULT_DRAFTING_STUDIO_STATE.dotsPalette])
   }
 
@@ -3869,7 +3869,7 @@ export function DraftingSurface({
   }
 
   function updateDesktopCornersSettings(patch: Partial<DesktopCornersSettings>) {
-    if (patch.cornerSquareType) setSelectedCornerSquareType(patch.cornerSquareType)
+    if (patch.cornerSquareType) setSelectedQrFinderPatternOuterStyle(patch.cornerSquareType)
     if (patch.cornerSquareColorMode) setSelectedCornerSquareColorMode(patch.cornerSquareColorMode)
     if (patch.cornerSquareSolidColor) {
       setSelectedCornerSquareColorMode("solid")
@@ -3879,7 +3879,7 @@ export function DraftingSurface({
       setSelectedCornerSquareColorMode("gradient")
       setSelectedCornerSquareGradient({ ...patch.cornerSquareGradient, enabled: true })
     }
-    if (patch.cornerDotType) setSelectedCornerDotType(patch.cornerDotType)
+    if (patch.cornerDotType) setSelectedQrFinderPatternInnerStyle(patch.cornerDotType)
     if (patch.cornerDotColorMode) setSelectedCornerDotColorMode(patch.cornerDotColorMode)
     if (patch.cornerDotSolidColor) {
       setSelectedCornerDotColorMode("solid")
@@ -3988,8 +3988,8 @@ export function DraftingSurface({
   }
 
   function updateDesktopEncodingSettings(patch: Partial<DesktopEncodingSettings>) {
-    if (patch.typeNumber !== undefined) setSelectedTypeNumber(patch.typeNumber)
-    if (patch.errorCorrectionLevel) setSelectedErrorCorrectionLevel(patch.errorCorrectionLevel)
+    if (patch.typeNumber !== undefined) setSelectedQrTypeNumber(patch.typeNumber)
+    if (patch.errorCorrectionLevel) setSelectedQrErrorCorrectionLevel(patch.errorCorrectionLevel)
   }
 
   function updateDesktopTextSettings(patch: Partial<DesktopTextSettings>) {
@@ -4127,8 +4127,8 @@ export function DraftingSurface({
         styleMode: patch.generatedShaderId ? "paper-shader" : patch.filterId ? "image-filter" : current.styleMode,
       })),
     onEncodingReset: () => {
-      setSelectedTypeNumber(DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.typeNumber)
-      setSelectedErrorCorrectionLevel(DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.errorCorrectionLevel)
+      setSelectedQrTypeNumber(DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.typeNumber)
+      setSelectedQrErrorCorrectionLevel(DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.errorCorrectionLevel)
     },
     onEncodingSettingsChange: updateDesktopEncodingSettings,
     onExportDownload: () => {
@@ -4177,11 +4177,11 @@ export function DraftingSurface({
       data-logo-source-mode={selectedLogoSourceMode}
       data-qr-content-type={selectedContentType}
       data-qr-content-value={selectedContentValue}
-      data-qr-error-correction-level={selectedErrorCorrectionLevel}
+      data-qr-error-correction-level={selectedQrErrorCorrectionLevel}
       data-qr-margin={selectedQrMargin}
       data-qr-radius={selectedQrRadius}
       data-qr-size={selectedQrSize}
-      data-qr-type-number={selectedTypeNumber}
+      data-qr-type-number={selectedQrTypeNumber}
       data-slot="drafting-surface"
       tabIndex={-1}
       className={cn(

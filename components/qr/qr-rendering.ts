@@ -1,15 +1,7 @@
-import type { ExtensionFunction } from "qr-code-styling"
-
 import {
   getQrBackgroundShapeDefinition,
   type QrBackgroundShapeDefinition,
 } from "@/components/qr/qr-background-shapes"
-import {
-  getActiveCustomDotShape,
-  type CustomDotShape,
-} from "@/components/qr/custom-dot-shapes"
-import { createDotsPaletteExtension } from "@/components/qr/qr-dots-palette"
-import { createCustomDotShapeExtension } from "@/components/qr/qr-svg-custom-shape-extension"
 import {
   clampBackgroundShapeOffset,
   clampBackgroundShapeOpacity,
@@ -31,6 +23,14 @@ import {
 } from "@/components/qr/qr-studio-state"
 
 type QrAnimationRenderMode = "export" | "none" | "preview"
+export type QrSvgExtensionOptions = {
+  height?: number
+  width?: number
+}
+export type QrSvgExtensionFunction = (
+  svg: SVGElement,
+  options: QrSvgExtensionOptions,
+) => void
 
 const SVG_NS = "http://www.w3.org/2000/svg"
 const DOTS_CLIP_PATH_PREFIX = "clip-path-dot-color-"
@@ -40,19 +40,15 @@ const DOT_MATRIX_QUIET_TRACK_INDEX = -1
 
 export function buildQrExtension(
   state: QrStudioState,
-  options: { animationMode?: QrAnimationRenderMode } = {},
+  _options: { animationMode?: QrAnimationRenderMode } = {},
 ) {
-  const extensions: ExtensionFunction[] = []
-  const customDotShape = getSvgCustomDotShape(state)
+  void _options
+
+  const extensions: QrSvgExtensionFunction[] = []
   const backgroundImage = getAssetValue(state.backgroundImage)
   const backgroundShape = backgroundImage
     ? null
     : getQrBackgroundShapeDefinition(state.backgroundShapeId)
-  const alignedCornerGradientExtension = createAlignedCornerGradientExtension(state)
-  const dotMatrixAnimationExtension = createDotMatrixAnimationExtension(
-    state,
-    options.animationMode ?? "none",
-  )
 
   if (backgroundImage) {
     extensions.push(
@@ -69,34 +65,13 @@ export function buildQrExtension(
     extensions.push(createBackgroundSurfaceExtension(state))
   }
 
-  if (customDotShape) {
-    extensions.push(createCustomDotShapeExtension(customDotShape))
-  }
-
-  if (state.dotsColorMode === "palette") {
-    extensions.push(
-      createDotsPaletteExtension({
-        palette: state.dotsPalette,
-        seed: state.data.trim(),
-      }),
-    )
-  }
-
-  if (alignedCornerGradientExtension) {
-    extensions.push(alignedCornerGradientExtension)
-  }
-
-  if (dotMatrixAnimationExtension) {
-    extensions.push(dotMatrixAnimationExtension)
-  }
-
   if (extensions.length === 0) {
     return null
   }
 
   return (
-    svg: Parameters<ExtensionFunction>[0],
-    options: Parameters<ExtensionFunction>[1],
+    svg: SVGElement,
+    options: QrSvgExtensionOptions,
   ) => {
     for (const extension of extensions) {
       extension(svg, options)
@@ -112,9 +87,7 @@ export function getQrExtensionKey(
 
   return JSON.stringify({
     animation:
-      shouldApplyDotMatrixAnimation(state, animationMode)
-        ? state.dotMatrixAnimation
-        : null,
+      null,
     animationMode,
     backgroundImage: getAssetValue(state.backgroundImage),
     backgroundRound: state.backgroundOptions.round,
@@ -125,11 +98,9 @@ export function getQrExtensionKey(
     backgroundShapeOptions: getAssetValue(state.backgroundImage)
       ? null
       : state.backgroundShapeOptions,
-    cornersDotGradient: getAlignedCornerGradientKey(state.cornersDotGradient),
-    cornersSquareGradient: getAlignedCornerGradientKey(
-      state.cornersSquareGradient,
-    ),
-    customDotShape: getSvgCustomDotShape(state),
+    finderPatternInnerGradient: null,
+    finderPatternOuterGradient: null,
+    customDotShape: null,
     dotsColorMode: state.dotsColorMode,
     dotsPalette: state.dotsPalette,
     seed: state.data.trim(),
@@ -139,7 +110,7 @@ export function getQrExtensionKey(
 export function createDotMatrixAnimationExtension(
   state: QrStudioState,
   mode: QrAnimationRenderMode,
-): ExtensionFunction | null {
+): QrSvgExtensionFunction | null {
   if (!shouldApplyDotMatrixAnimation(state, mode)) {
     return null
   }
@@ -1202,7 +1173,7 @@ function getDotMatrixTrackStyle(track: DotMatrixTrack) {
 
 function getDotMatrixCoverRect(
   svg: SVGElement,
-  options: Parameters<ExtensionFunction>[1],
+  options: QrSvgExtensionOptions,
   metrics: DotMatrixMetrics,
 ) {
   const width =
@@ -1515,7 +1486,7 @@ function findDotMatrixLayerAnchor(svg: SVGElement) {
 function createBackgroundShapeExtension(
   shape: QrBackgroundShapeDefinition,
   state: Pick<QrStudioState, "backgroundGradient" | "backgroundOptions" | "backgroundShapeOptions">,
-): ExtensionFunction {
+): QrSvgExtensionFunction {
   return (svg, options) => {
     const document = svg.ownerDocument
 
@@ -1835,7 +1806,7 @@ function isManagedBackgroundLayer(node: Element) {
 
 function createBackgroundSurfaceExtension(
   state: Pick<QrStudioState, "backgroundGradient" | "backgroundOptions" | "backgroundShapeOptions">,
-): ExtensionFunction {
+): QrSvgExtensionFunction {
   return (svg, options) => {
     const document = svg.ownerDocument
 
@@ -2212,13 +2183,13 @@ function getBackgroundShapeGradientKey(
 }
 
 export function createAlignedCornerGradientExtension(
-  state: Pick<QrStudioState, "cornersDotGradient" | "cornersSquareGradient">,
-): ExtensionFunction | null {
+  state: Pick<QrStudioState, "finderPatternInnerGradient" | "finderPatternOuterGradient">,
+): QrSvgExtensionFunction | null {
   const cornerSquareRotation = getAlignedCornerGradientRotation(
-    state.cornersSquareGradient,
+    state.finderPatternOuterGradient,
   )
   const cornerDotRotation = getAlignedCornerGradientRotation(
-    state.cornersDotGradient,
+    state.finderPatternInnerGradient,
   )
 
   if (cornerSquareRotation === null && cornerDotRotation === null) {
@@ -2245,7 +2216,7 @@ export function createAlignedCornerGradientExtension(
 function createBackgroundImageExtension(
   imageHref: string,
   backgroundRound: number,
-): ExtensionFunction {
+): QrSvgExtensionFunction {
   return (svg, options) => {
     const document = svg.ownerDocument
 
@@ -2294,7 +2265,7 @@ function createBackgroundImageExtension(
 function addRoundedBackgroundImageClip(
   svg: SVGElement,
   backgroundRound: number,
-  options: Parameters<ExtensionFunction>[1],
+  options: QrSvgExtensionOptions,
 ) {
   if (backgroundRound <= 0) {
     return null
@@ -2352,27 +2323,6 @@ function getBackgroundImageInsertReference(svg: SVGElement) {
   }
 
   return children.find((child) => child.tagName.toLowerCase() !== "defs") ?? null
-}
-
-function getSvgCustomDotShape(state: QrStudioState): CustomDotShape | null {
-  if (state.type !== "svg") {
-    return null
-  }
-
-  return getActiveCustomDotShape(state.dotsOptions.type)
-}
-
-function getAlignedCornerGradientKey(
-  gradient: Pick<StudioGradient, "enabled" | "rotation" | "type">,
-) {
-  if (!gradient.enabled || gradient.type !== "linear") {
-    return null
-  }
-
-  return {
-    rotation: gradient.rotation,
-    type: gradient.type,
-  }
 }
 
 function getAlignedCornerGradientRotation(

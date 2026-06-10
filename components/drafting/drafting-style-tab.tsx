@@ -13,11 +13,11 @@ import {
 import { Search01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import type {
-  CornerDotType,
-  CornerSquareType,
-  ErrorCorrectionLevel,
-  TypeNumber,
-} from "qr-code-styling"
+  QrFinderPatternInnerStyle,
+  QrFinderPatternOuterStyle,
+  QrErrorCorrectionLevel,
+  QrTypeNumber,
+} from "@/components/qr/qr-types"
 
 import FileUpload from "@/components/kokonutui/file-upload"
 import {
@@ -74,7 +74,7 @@ import {
 } from "@/components/qr/qr-style-options"
 import {
   ERROR_CORRECTION_LEVEL_OPTIONS,
-  formatTypeNumberLabel,
+  formatQrTypeNumberLabel,
   TYPE_NUMBER_MAX,
   TYPE_NUMBER_MIN,
 } from "@/components/qr/qr-encoding-options"
@@ -89,7 +89,7 @@ import type {
   DotsColorMode,
   QrDotMatrixAnimationOptions,
   QrDotMatrixAnimationPatch,
-  StudioDotType,
+  StudioDataModulesStyle,
   StudioGradient,
 } from "@/components/qr/qr-studio-state"
 import {
@@ -873,8 +873,8 @@ export function DraftingStyleTab({
   onValueChange,
   value,
 }: {
-  onValueChange: (value: StudioDotType) => void
-  value: StudioDotType
+  onValueChange: (value: StudioDataModulesStyle) => void
+  value: StudioDataModulesStyle
 }) {
   return (
     <DraftingOptionCardGrid
@@ -2587,8 +2587,8 @@ export function DraftingCornerSquareStyleTab({
   onValueChange,
   value,
 }: {
-  onValueChange: (value: CornerSquareType) => void
-  value: CornerSquareType
+  onValueChange: (value: QrFinderPatternOuterStyle) => void
+  value: QrFinderPatternOuterStyle
 }) {
   return (
     <DraftingOptionCardGrid
@@ -2607,8 +2607,8 @@ export function DraftingCornerDotStyleTab({
   onValueChange,
   value,
 }: {
-  onValueChange: (value: CornerDotType) => void
-  value: CornerDotType
+  onValueChange: (value: QrFinderPatternInnerStyle) => void
+  value: QrFinderPatternInnerStyle
 }) {
   return (
     <DraftingOptionCardGrid
@@ -3460,27 +3460,27 @@ export function DraftingLogoSizeTab({
 export function DraftingEncodingTab({
   errorCorrectionLevel,
   typeNumber,
-  onErrorCorrectionLevelChange,
-  onTypeNumberChange,
+  onQrErrorCorrectionLevelChange,
+  onQrTypeNumberChange,
 }: {
-  errorCorrectionLevel: ErrorCorrectionLevel
-  typeNumber: TypeNumber
-  onErrorCorrectionLevelChange: (value: ErrorCorrectionLevel) => void
-  onTypeNumberChange: (value: TypeNumber) => void
+  errorCorrectionLevel: QrErrorCorrectionLevel
+  typeNumber: QrTypeNumber
+  onQrErrorCorrectionLevelChange: (value: QrErrorCorrectionLevel) => void
+  onQrTypeNumberChange: (value: QrTypeNumber) => void
 }) {
   return (
     <div data-slot="drafting-encoding-tab" className="min-w-0 space-y-4">
       <DraftingSliderField
         dataSlot="drafting-type-number-slider"
         description="Auto picks the QR version for you. Higher values force denser versions with more modules."
-        formatValue={(value) => formatTypeNumberLabel(value)}
+        formatValue={(value) => formatQrTypeNumberLabel(value)}
         id="drafting-type-number"
         label="Type number"
         max={TYPE_NUMBER_MAX}
         min={TYPE_NUMBER_MIN}
         step={1}
         value={typeNumber}
-        onChange={(value) => onTypeNumberChange(value as TypeNumber)}
+        onChange={(value) => onQrTypeNumberChange(value as QrTypeNumber)}
       />
 
       <section data-slot="drafting-error-correction-section" className="space-y-3">
@@ -3517,7 +3517,7 @@ export function DraftingEncodingTab({
                 label={`${option.title} (${option.label})`}
                 motifClassName="size-full px-3 py-3"
                 name="drafting-error-correction"
-                onSelect={() => onErrorCorrectionLevelChange(option.value)}
+                onSelect={() => onQrErrorCorrectionLevelChange(option.value)}
                 value={option.value}
               >
                 <span className="flex size-full flex-col items-start justify-between gap-2 text-left">

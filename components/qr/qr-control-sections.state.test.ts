@@ -42,15 +42,15 @@ describe("dashboard settings state helpers", () => {
     const nextState = applyDotsSolidColor(state, "#ff0000")
 
     expect(nextState.dotsColorMode).toBe("solid")
-    expect(nextState.dotsOptions.color).toBe("#ff0000")
-    expect(nextState.dotsGradient).toEqual(state.dotsGradient)
+    expect(nextState.dataModulesSettings.color).toBe("#ff0000")
+    expect(nextState.dataModulesGradient).toEqual(state.dataModulesGradient)
   })
 
   it("applies gradient dots editing without selecting on panel open alone", () => {
     const state = createDefaultQrStudioState()
 
     const nextState = applyDotsGradient(state, {
-      ...state.dotsGradient,
+      ...state.dataModulesGradient,
       colorStops: [
         { offset: 0, color: "#111111" },
         { offset: 1, color: "#eeeeee" },
@@ -59,7 +59,7 @@ describe("dashboard settings state helpers", () => {
 
     expect(state.dotsColorMode).toBe("solid")
     expect(nextState.dotsColorMode).toBe("gradient")
-    expect(nextState.dotsGradient.colorStops[0].color).toBe("#111111")
+    expect(nextState.dataModulesGradient.colorStops[0].color).toBe("#111111")
   })
 
   it("applies explicit palette selection without mutating the palette", () => {
@@ -73,19 +73,19 @@ describe("dashboard settings state helpers", () => {
 
   it("applies solid corner edits by disabling the matching gradient", () => {
     const state = createDefaultQrStudioState()
-    state.cornersSquareGradient.enabled = true
+    state.finderPatternOuterGradient.enabled = true
 
     const nextState = applyCornerSolidColor(state, "cornersSquare", "#00ff00")
 
-    expect(nextState.cornersSquareOptions.color).toBe("#00ff00")
-    expect(nextState.cornersSquareGradient.enabled).toBe(false)
+    expect(nextState.finderPatternOuterSettings.color).toBe("#00ff00")
+    expect(nextState.finderPatternOuterGradient.enabled).toBe(false)
   })
 
   it("applies gradient corner edits by enabling the matching gradient", () => {
     const state = createDefaultQrStudioState()
 
     const nextState = applyCornerGradient(state, "cornersDot", {
-      ...state.cornersDotGradient,
+      ...state.finderPatternInnerGradient,
       enabled: false,
       colorStops: [
         { offset: 0, color: "#222222" },
@@ -93,8 +93,8 @@ describe("dashboard settings state helpers", () => {
       ],
     })
 
-    expect(nextState.cornersDotGradient.enabled).toBe(true)
-    expect(nextState.cornersDotGradient.colorStops[1].color).toBe("#dddddd")
+    expect(nextState.finderPatternInnerGradient.enabled).toBe(true)
+    expect(nextState.finderPatternInnerGradient.colorStops[1].color).toBe("#dddddd")
   })
 
   it("applies solid background edits by clearing transparency and gradient mode", () => {

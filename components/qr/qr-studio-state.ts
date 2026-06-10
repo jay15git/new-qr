@@ -1,18 +1,17 @@
-import type {
-  CornerDotType,
-  CornerSquareType,
-  DotType,
-  DrawType,
-  ErrorCorrectionLevel,
-  Gradient,
-  GradientType,
-  Mode,
-  Options,
-  TypeNumber,
-} from "qr-code-styling";
-
 import type { BrandIconId } from "@/components/qr/brand-icon-catalog";
 import type { QrBackgroundShapeId } from "@/components/qr/qr-background-shapes";
+import type {
+  QrDataModulesStyle,
+  QrDrawType,
+  QrErrorCorrectionLevel,
+  QrFinderPatternInnerStyle,
+  QrFinderPatternOuterStyle,
+  QrGradientSettings,
+  QrGradientType,
+  QrMode,
+  QrTypeNumber,
+  ReactQRCodeProps,
+} from "@/components/qr/qr-types";
 
 export type GradientStop = {
   offset: number;
@@ -21,12 +20,12 @@ export type GradientStop = {
 
 export type StudioGradient = {
   enabled: boolean;
-  type: GradientType;
+  type: QrGradientType;
   rotation: number;
   colorStops: [GradientStop, GradientStop];
 };
 
-export type StudioDotType = DotType | "diamond" | "heart";
+export type StudioDataModulesStyle = QrDataModulesStyle;
 export type DotsColorMode = "solid" | "gradient" | "palette";
 export type AssetSourceMode = "none" | "preset" | "url" | "upload";
 export type QrDotMatrixSquareLoader =
@@ -108,7 +107,7 @@ export type BackgroundShapeOptions = {
 
 export type QrStudioState = {
   data: string;
-  type: DrawType;
+  type: QrDrawType;
   width: number;
   height: number;
   margin: number;
@@ -118,9 +117,9 @@ export type QrStudioState = {
   backgroundShapeId: QrBackgroundShapeId;
   backgroundShapeOptions: BackgroundShapeOptions;
   qrOptions: {
-    typeNumber: TypeNumber;
-    mode: Mode;
-    errorCorrectionLevel: ErrorCorrectionLevel;
+    typeNumber: QrTypeNumber;
+    mode: QrMode;
+    errorCorrectionLevel: QrErrorCorrectionLevel;
   };
   imageOptions: {
     hideBackgroundDots: boolean;
@@ -129,20 +128,20 @@ export type QrStudioState = {
     saveAsBlob: boolean;
     crossOrigin: "anonymous";
   };
-  dotsOptions: {
-    type: StudioDotType;
+  dataModulesSettings: {
+    type: StudioDataModulesStyle;
     color: string;
     roundSize: boolean;
   };
   dotMatrixAnimation: QrDotMatrixAnimationOptions;
   dotsColorMode: DotsColorMode;
   dotsPalette: string[];
-  cornersSquareOptions: {
-    type: CornerSquareType;
+  finderPatternOuterSettings: {
+    type: QrFinderPatternOuterStyle;
     color: string;
   };
-  cornersDotOptions: {
-    type: CornerDotType;
+  finderPatternInnerSettings: {
+    type: QrFinderPatternInnerStyle;
     color: string;
   };
   backgroundOptions: {
@@ -151,9 +150,9 @@ export type QrStudioState = {
     transparent: boolean;
   };
   logoGradient: StudioGradient;
-  dotsGradient: StudioGradient;
-  cornersSquareGradient: StudioGradient;
-  cornersDotGradient: StudioGradient;
+  dataModulesGradient: StudioGradient;
+  finderPatternOuterGradient: StudioGradient;
+  finderPatternInnerGradient: StudioGradient;
   backgroundGradient: StudioGradient;
 };const QR_SIZE_MIN = 120;
 const QR_SIZE_MAX = 1200;
@@ -314,7 +313,7 @@ export function createDefaultQrStudioState(): QrStudioState {
       saveAsBlob: true,
       crossOrigin: "anonymous",
     },
-    dotsOptions: {
+    dataModulesSettings: {
       type: "rounded",
       color: "#111827",
       roundSize: true,
@@ -322,12 +321,12 @@ export function createDefaultQrStudioState(): QrStudioState {
     dotMatrixAnimation: { ...DEFAULT_DOT_MATRIX_ANIMATION },
     dotsColorMode: "solid",
     dotsPalette: [...DEFAULT_DOTS_PALETTE],
-    cornersSquareOptions: {
-      type: "extra-rounded",
+    finderPatternOuterSettings: {
+      type: "rounded-lg",
       color: "#111827",
     },
-    cornersDotOptions: {
-      type: "dot",
+    finderPatternInnerSettings: {
+      type: "circle",
       color: "#111827",
     },
     backgroundOptions: {
@@ -336,9 +335,9 @@ export function createDefaultQrStudioState(): QrStudioState {
       transparent: false,
     },
     logoGradient: structuredClone(DEFAULT_GRADIENT),
-    dotsGradient: structuredClone(DEFAULT_GRADIENT),
-    cornersSquareGradient: structuredClone(DEFAULT_GRADIENT),
-    cornersDotGradient: structuredClone(DEFAULT_GRADIENT),
+    dataModulesGradient: structuredClone(DEFAULT_GRADIENT),
+    finderPatternOuterGradient: structuredClone(DEFAULT_GRADIENT),
+    finderPatternInnerGradient: structuredClone(DEFAULT_GRADIENT),
     backgroundGradient: {
       ...structuredClone(DEFAULT_GRADIENT),
       colorStops: [
@@ -598,66 +597,63 @@ export function setDotMatrixAnimationOptions(
   };
 }
 
-export function toQrCodeOptions(state: QrStudioState): Options {
+export function toReactQrCodeProps(state: QrStudioState): ReactQRCodeProps {
   const logoImage = getAssetValue(state.logo);
   const backgroundImage = getAssetValue(state.backgroundImage);
   const customBackgroundSurfaceActive =
     !backgroundImage &&
     (hasBackgroundShape(state) || hasActiveBackgroundShapeOptions(state.backgroundShapeOptions));
+  const qrSize = clampQrSize(state.width);
+  const logoSize = Math.max(
+    1,
+    Math.round(qrSize * coerceNumber(state.imageOptions.imageSize, 0, 1, 0.4)),
+  );
 
   return {
-    width: clampQrSize(state.width),
-    height: clampQrSize(state.height),
-    type: state.type,
-    data: state.data.trim(),
-    margin: coerceNumber(state.margin, 0, 80, 12),
-    image: logoImage,
-    qrOptions: {
-      ...state.qrOptions,
-    },
-    imageOptions: {
-      ...state.imageOptions,
-      imageSize: coerceNumber(state.imageOptions.imageSize, 0, 1, 0.4),
-      margin: coerceNumber(state.imageOptions.margin, 0, 40, 12),
-    },
-    dotsOptions: {
-      type: mapStudioDotType(state.dotsOptions.type),
-      roundSize: state.dotsOptions.roundSize,
+    background:
+      backgroundImage || customBackgroundSurfaceActive || state.backgroundOptions.transparent
+        ? "transparent"
+        : buildGradient(state.backgroundGradient) ?? state.backgroundOptions.color,
+    boostLevel: true,
+    dataModulesSettings: {
       color: getDotsColor(state),
-      gradient: getDotsGradient(state),
+      randomSize: !state.dataModulesSettings.roundSize,
+      style: state.dataModulesSettings.type,
     },
-    cornersSquareOptions: {
-      type: state.cornersSquareOptions.type,
-      color: state.cornersSquareGradient.enabled
-        ? undefined
-        : state.cornersSquareOptions.color,
-      gradient: buildGradient(state.cornersSquareGradient),
+    finderPatternInnerSettings: {
+      color: state.finderPatternInnerGradient.enabled ? undefined : state.finderPatternInnerSettings.color,
+      style: state.finderPatternInnerSettings.type,
     },
-    cornersDotOptions: {
-      type: state.cornersDotOptions.type,
-      color: state.cornersDotGradient.enabled
-        ? undefined
-        : state.cornersDotOptions.color,
-      gradient: buildGradient(state.cornersDotGradient),
+    finderPatternOuterSettings: {
+      color: state.finderPatternOuterGradient.enabled ? undefined : state.finderPatternOuterSettings.color,
+      style: state.finderPatternOuterSettings.type,
     },
-    backgroundOptions: {
-      round: clampQrBackgroundRound(state.backgroundOptions.round),
-      color:
-        backgroundImage ||
-        customBackgroundSurfaceActive ||
-        state.backgroundGradient.enabled ||
-        state.backgroundOptions.transparent
-          ? backgroundImage
-            ? undefined
-            : customBackgroundSurfaceActive || state.backgroundOptions.transparent
-              ? "transparent"
-              : undefined
-          : state.backgroundOptions.color,
-      gradient:
-        backgroundImage || customBackgroundSurfaceActive
-          ? undefined
-          : buildGradient(state.backgroundGradient),
+    gradient:
+      getDotsGradient(state) ??
+      buildGradient(state.finderPatternOuterGradient) ??
+      buildGradient(state.finderPatternInnerGradient),
+    imageSettings: logoImage
+      ? {
+          crossOrigin: state.imageOptions.crossOrigin,
+          excavate: state.imageOptions.hideBackgroundDots,
+          height: logoSize,
+          src: logoImage,
+          width: logoSize,
+        }
+      : undefined,
+    level: state.qrOptions.errorCorrectionLevel,
+    marginSize: Math.max(0, Math.floor(coerceNumber(state.margin, 0, 80, 12))),
+    minVersion: Math.max(1, state.qrOptions.typeNumber || 1),
+    size: qrSize,
+    svgProps: {
+      style: {
+        borderRadius: `${clampQrBackgroundRound(state.backgroundOptions.round) * 100}%`,
+        display: "block",
+        height: "100%",
+        width: "100%",
+      },
     },
+    value: state.data.trim(),
   };
 }
 
@@ -689,12 +685,6 @@ export function hasActiveBackgroundShapeOptions(
         (options.shadowOffsetY ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetY) !==
           DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetY),
   );
-}function mapStudioDotType(type: StudioDotType): DotType {
-  if (type === "diamond" || type === "heart") {
-    return "square";
-  }
-
-  return type;
 }
 
 function getDotsColor(state: QrStudioState) {
@@ -702,7 +692,7 @@ function getDotsColor(state: QrStudioState) {
     return undefined;
   }
 
-  return state.dotsOptions.color;
+  return state.dataModulesSettings.color;
 }
 
 function getDotsGradient(state: QrStudioState) {
@@ -711,12 +701,12 @@ function getDotsGradient(state: QrStudioState) {
   }
 
   return buildGradient({
-    ...state.dotsGradient,
+    ...state.dataModulesGradient,
     enabled: true,
   });
 }
 
-function buildGradient(gradient: StudioGradient): Gradient | undefined {
+function buildGradient(gradient: StudioGradient): QrGradientSettings | undefined {
   if (!gradient.enabled) {
     return undefined;
   }
@@ -724,8 +714,8 @@ function buildGradient(gradient: StudioGradient): Gradient | undefined {
   return {
     type: gradient.type,
     rotation: gradient.rotation,
-    colorStops: gradient.colorStops.map((stop) => ({
-      offset: coerceNumber(stop.offset, 0, 1, 0),
+    stops: gradient.colorStops.map((stop) => ({
+      offset: String(coerceNumber(stop.offset, 0, 1, 0)),
       color: stop.color,
     })),
   };

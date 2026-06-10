@@ -475,7 +475,7 @@ describe("qr rendering helpers", () => {
   it("keeps loader color independent from the QR style color in preview and export", () => {
     for (const mode of ["preview", "export"] as const) {
       const state = createDefaultQrStudioState()
-      state.dotsOptions.color = "#ff0000"
+      state.dataModulesSettings.color = "#ff0000"
       state.dotMatrixAnimation = {
         ...state.dotMatrixAnimation,
         colorPreset: "theme",
@@ -1022,17 +1022,17 @@ describe("qr rendering helpers", () => {
     expect(createDotMatrixAnimationExtension(state, "export")).toBeTypeOf("function")
   })
 
-  it("changes the extension key when a linear corner gradient changes", () => {
+  it("keeps the extension key stable when only ReactQRCode-owned corner gradients change", () => {
     const defaultState = createDefaultQrStudioState()
     const stateWithCornerGradient = createDefaultQrStudioState()
-    stateWithCornerGradient.cornersSquareGradient = {
-      ...stateWithCornerGradient.cornersSquareGradient,
+    stateWithCornerGradient.finderPatternOuterGradient = {
+      ...stateWithCornerGradient.finderPatternOuterGradient,
       enabled: true,
       rotation: Math.PI / 3,
       type: "linear",
     }
 
-    expect(getQrExtensionKey(stateWithCornerGradient)).not.toBe(
+    expect(getQrExtensionKey(stateWithCornerGradient)).toBe(
       getQrExtensionKey(defaultState),
     )
   })
@@ -1400,8 +1400,8 @@ describe("qr rendering helpers", () => {
 
   it("normalizes all corner-frame linear gradients to the same relative direction", () => {
     const state = createDefaultQrStudioState()
-    state.cornersSquareGradient = {
-      ...state.cornersSquareGradient,
+    state.finderPatternOuterGradient = {
+      ...state.finderPatternOuterGradient,
       enabled: true,
       rotation: Math.PI / 4,
       type: "linear",
@@ -1459,8 +1459,8 @@ describe("qr rendering helpers", () => {
 
   it("normalizes all corner-dot linear gradients to the same relative direction", () => {
     const state = createDefaultQrStudioState()
-    state.cornersDotGradient = {
-      ...state.cornersDotGradient,
+    state.finderPatternInnerGradient = {
+      ...state.finderPatternInnerGradient,
       enabled: true,
       rotation: Math.PI / 2,
       type: "linear",
@@ -1518,8 +1518,8 @@ describe("qr rendering helpers", () => {
 
   it("does not create an alignment extension for radial corner gradients", () => {
     const state = createDefaultQrStudioState()
-    state.cornersSquareGradient = {
-      ...state.cornersSquareGradient,
+    state.finderPatternOuterGradient = {
+      ...state.finderPatternOuterGradient,
       enabled: true,
       type: "radial",
     }

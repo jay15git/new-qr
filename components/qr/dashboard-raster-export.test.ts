@@ -2,29 +2,6 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-const qrCodeConstructorSpy = vi.fn()
-
-vi.mock("qr-code-styling", () => ({
-  default: class MockQRCodeStyling {
-    constructor(options: { height?: number; width?: number }) {
-      qrCodeConstructorSpy(options)
-    }
-
-    applyExtension() {}
-
-    async getRawData() {
-      return new Blob(
-        [
-          '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10" /></svg>',
-        ],
-        {
-          type: "image/svg+xml",
-        },
-      )
-    }
-  },
-}))
-
 import {
   downloadDashboardRasterExport,
   formatDashboardExportFileSize,
@@ -54,7 +31,6 @@ describe("dashboard raster export helper", () => {
   beforeEach(() => {
     let objectUrlCallCount = 0
 
-    qrCodeConstructorSpy.mockClear()
     anchorClickSpy = vi.fn()
     canvasContext = {
       clearRect: vi.fn(),
@@ -136,13 +112,7 @@ describe("dashboard raster export helper", () => {
       state,
     })
 
-    expect(qrCodeConstructorSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        height: 640,
-        type: "svg",
-        width: 640,
-      }),
-    )
+    expect(createdCanvases[0]).toEqual(expect.objectContaining({ height: 640, width: 640 }))
     expect(canvasToBlobSpy).toHaveBeenCalledWith(expect.any(Function), "image/png", undefined)
     expect(anchorClickSpy).toHaveBeenCalledTimes(1)
   })
@@ -158,13 +128,7 @@ describe("dashboard raster export helper", () => {
       targetSizePx: 1024,
     })
 
-    expect(qrCodeConstructorSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        height: 1024,
-        type: "svg",
-        width: 1024,
-      }),
-    )
+    expect(createdCanvases[0]).toEqual(expect.objectContaining({ height: 1024, width: 1024 }))
     expect(getDashboardRasterExportDimensions(state, 100, 9000)).toEqual({
       height: 4096,
       requestedScale: 4096 / 320,
@@ -202,13 +166,6 @@ describe("dashboard raster export helper", () => {
       state,
     })
 
-    expect(qrCodeConstructorSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        height: 320,
-        type: "svg",
-        width: 320,
-      }),
-    )
     expect(createdCanvases[0]).toEqual(expect.objectContaining({
       height: 406,
       width: 406,
@@ -244,13 +201,6 @@ describe("dashboard raster export helper", () => {
       scale: 2,
       width: 812,
     })
-    expect(qrCodeConstructorSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        height: 640,
-        type: "svg",
-        width: 640,
-      }),
-    )
     expect(createdCanvases[0]).toEqual(expect.objectContaining({
       height: 812,
       width: 812,

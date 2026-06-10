@@ -369,7 +369,7 @@ describe("DesktopToolbarPrototype", () => {
       patternButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
-    const dotsPattern = getRequiredButton(surface.container, "Use Dots pattern")
+    const dotsPattern = getRequiredButton(surface.container, "Use Circle pattern")
 
     await act(async () => {
       dotsPattern.dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -389,7 +389,7 @@ describe("DesktopToolbarPrototype", () => {
       patternButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
-    const dotsPattern = getRequiredButton(surface.container, "Use Dots pattern")
+    const dotsPattern = getRequiredButton(surface.container, "Use Circle pattern")
 
     await act(async () => {
       dotsPattern.dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -412,7 +412,7 @@ describe("DesktopToolbarPrototype", () => {
       patternButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
-    const dotsPattern = getRequiredButton(surface.container, "Use Dots pattern")
+    const dotsPattern = getRequiredButton(surface.container, "Use Circle pattern")
 
     await act(async () => {
       dotsPattern.dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -436,7 +436,7 @@ describe("DesktopToolbarPrototype", () => {
       patternButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
-    const dotsPattern = getRequiredButton(surface.container, "Use Dots pattern")
+    const dotsPattern = getRequiredButton(surface.container, "Use Circle pattern")
     const previewGlyph = dotsPattern.querySelector<HTMLElement>(
       '[data-desktop-adaptive-option-preview="true"] > span',
     )
@@ -479,7 +479,7 @@ describe("DesktopToolbarPrototype", () => {
     })
 
     const squareFrame = getRequiredButton(surface.container, "Use Square corner frame")
-    const defaultCornerDot = getRequiredButton(surface.container, "Use Dot corner dot")
+    const defaultCornerDot = getRequiredButton(surface.container, "Use Circle corner dot")
 
     await act(async () => {
       squareFrame.dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -497,7 +497,7 @@ describe("DesktopToolbarPrototype", () => {
       cornersButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
-    const defaultCornerFrame = getRequiredButton(surface.container, "Use Extra rounded corner frame")
+    const defaultCornerFrame = getRequiredButton(surface.container, "Use Large rounded corner frame")
     const squareDot = getRequiredButton(surface.container, "Use Square corner dot")
 
     await act(async () => {

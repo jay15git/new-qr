@@ -1,7 +1,7 @@
 import { zipSync } from "fflate"
-import type { FileExtension } from "qr-code-styling"
 
 import type { DashboardComposeSvgNode } from "@/components/qr/dashboard-compose-scene"
+import type { QrFileExtension } from "@/components/qr/qr-types"
 import {
   clampDashboardRasterTargetSize,
   getDashboardRasterExportScale,
@@ -17,7 +17,7 @@ export type DashboardQrFileExportNode = Pick<
 >
 
 type DashboardQrNodeExportOptions = {
-  extension: FileExtension
+  extension: QrFileExtension
   name: string
   node: DashboardQrFileExportNode
   qualityPercent: number
@@ -25,7 +25,7 @@ type DashboardQrNodeExportOptions = {
 }
 
 type DashboardQrBatchZipExportOptions = {
-  extension: FileExtension
+  extension: QrFileExtension
   name: string
   nodes: DashboardQrFileExportNode[]
   qualityPercent: number
@@ -220,7 +220,7 @@ async function canvasToBlob(
 
 function getUniqueDownloadFileName(
   name: string,
-  extension: FileExtension,
+  extension: QrFileExtension,
   counts: Map<string, number>,
 ) {
   const baseName = sanitizeDownloadFileName(name)

@@ -1347,7 +1347,7 @@ describe("DraftingSurface", () => {
       activateElement(getRequiredElement(surface.container, '[data-tool-id="pattern"]'))
     })
     act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Use Dots pattern"]'))
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Use Circle pattern"]'))
       changeInputValue(
         getRequiredElement(surface.container, 'input[aria-label="Solid color"]') as HTMLInputElement,
         "#123456",
@@ -1683,7 +1683,7 @@ describe("DraftingSurface", () => {
     ) as HTMLInputElement
 
     expect(styleGrid.getAttribute("role")).toBe("radiogroup")
-    expect(styleGrid.querySelectorAll('[data-slot="option-card"]').length).toBe(8)
+    expect(styleGrid.querySelectorAll('[data-slot="option-card"]').length).toBe(13)
     expect(
       squareInput.parentElement
         ?.querySelector('[data-slot="option-card"]')
@@ -2557,9 +2557,9 @@ describe("DraftingSurface", () => {
       surface.container,
       '[data-slot="drafting-corner-square-option-grid"]',
     )
-    const extraRoundedInput = getRequiredElement(
+    const roundedLargeInput = getRequiredElement(
       surface.container,
-      'input[type="radio"][aria-label="Extra rounded"]',
+      'input[type="radio"][aria-label="Large rounded"]',
     ) as HTMLInputElement
     const squareInput = getRequiredElement(
       surface.container,
@@ -2569,16 +2569,16 @@ describe("DraftingSurface", () => {
     expect(cornerFrameGrid.getAttribute("role")).toBe("radiogroup")
     expect(
       cornerFrameGrid.querySelectorAll('[data-slot="option-card"]').length,
-    ).toBe(7)
+    ).toBe(15)
     expect(cornerFrameGrid.innerHTML).toContain("size-[4.5rem]")
-    expect(extraRoundedInput.checked).toBe(true)
+    expect(roundedLargeInput.checked).toBe(true)
     expect(squareInput.checked).toBe(false)
 
     act(() => {
       squareInput.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
-    expect(extraRoundedInput.checked).toBe(false)
+    expect(roundedLargeInput.checked).toBe(false)
     expect(squareInput.checked).toBe(true)
   })
 
@@ -2597,9 +2597,9 @@ describe("DraftingSurface", () => {
       surface.container,
       '[data-slot="drafting-corner-dot-option-grid"]',
     )
-    const dotInput = getRequiredElement(
+    const circleInput = getRequiredElement(
       cornerDotGrid,
-      'input[type="radio"][aria-label="Dot"]',
+      'input[type="radio"][aria-label="Circle"]',
     ) as HTMLInputElement
     const roundedInput = getRequiredElement(
       cornerDotGrid,
@@ -2607,15 +2607,15 @@ describe("DraftingSurface", () => {
     ) as HTMLInputElement
 
     expect(cornerDotGrid.getAttribute("role")).toBe("radiogroup")
-    expect(cornerDotGrid.querySelectorAll('[data-slot="option-card"]').length).toBe(7)
-    expect(dotInput.checked).toBe(true)
+    expect(cornerDotGrid.querySelectorAll('[data-slot="option-card"]').length).toBe(20)
+    expect(circleInput.checked).toBe(true)
     expect(roundedInput.checked).toBe(false)
 
     act(() => {
       roundedInput.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
-    expect(dotInput.checked).toBe(false)
+    expect(circleInput.checked).toBe(false)
     expect(roundedInput.checked).toBe(true)
   })
 

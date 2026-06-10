@@ -1,26 +1,6 @@
-import { describe, expect, it, vi } from "vitest"
+// @vitest-environment jsdom
 
-const applyExtensionSpy = vi.fn()
-
-vi.mock("qr-code-styling", () => ({
-  default: class MockQRCodeStyling {
-    private options: { height?: number; width?: number }
-
-    constructor(options: { height?: number; width?: number }) {
-      this.options = options
-    }
-
-    applyExtension() {
-      applyExtensionSpy()
-    }
-
-    async getRawData() {
-      return Buffer.from(
-        `<svg xmlns="http://www.w3.org/2000/svg" width="${this.options.width}" height="${this.options.height}"></svg>`,
-      )
-    }
-  },
-}))
+import { describe, expect, it } from "vitest"
 
 import {
   buildDashboardQrNodePayload,
@@ -55,7 +35,6 @@ describe("dashboard qr svg helpers", () => {
   })
 
   it("uses the canonical qr size when building the dashboard payload", async () => {
-    applyExtensionSpy.mockClear()
     const state = setSquareQrSize(createDefaultQrStudioState(), 512)
 
     const payload = await buildDashboardQrNodePayload(state)
@@ -63,28 +42,24 @@ describe("dashboard qr svg helpers", () => {
     expect(payload.naturalWidth).toBe(512)
     expect(payload.naturalHeight).toBe(512)
     expect(payload.markup).toContain("<svg")
-    expect(applyExtensionSpy).not.toHaveBeenCalled()
+    expect(payload.markup).toContain('width="512"')
+    expect(payload.markup).toContain("width:100%")
   })
 
-  it("applies the shared svg extension path when corner gradient alignment is needed", async () => {
-    applyExtensionSpy.mockClear()
+  it("renders ReactQRCode finder pattern styles into the dashboard payload", async () => {
     const state = createDefaultQrStudioState()
-    state.cornersDotGradient = {
-      ...state.cornersDotGradient,
-      enabled: true,
-      rotation: Math.PI / 3,
-      type: "linear",
-    }
+    state.finderPatternInnerSettings.type = "heart"
+    state.finderPatternOuterSettings.type = "rounded-lg"
 
     const payload = await buildDashboardQrNodePayload(state)
 
     expect(payload.naturalWidth).toBe(state.width)
     expect(payload.naturalHeight).toBe(state.height)
-    expect(applyExtensionSpy).toHaveBeenCalledTimes(1)
+    expect(payload.markup).toContain('data-testid="finder-patterns-inner"')
+    expect(payload.markup).toContain('data-testid="finder-patterns-outer"')
   })
 
   it("reports expanded natural size when background effects grow outside the qr", async () => {
-    applyExtensionSpy.mockClear()
     const state = setSquareQrSize(createDefaultQrStudioState(), 320)
     state.backgroundShapeId = "circle"
     state.backgroundShapeOptions = {
@@ -103,6 +78,6 @@ describe("dashboard qr svg helpers", () => {
 
     expect(payload.naturalWidth).toBe(406)
     expect(payload.naturalHeight).toBe(406)
-    expect(applyExtensionSpy).toHaveBeenCalledTimes(1)
+    expect(payload.markup).toContain('data-qr-layer="background-shape"')
   })
 })
