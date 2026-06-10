@@ -576,11 +576,10 @@ describe("FloatingToolbar", () => {
     const surface = await renderPrototype()
     await openTool(surface.container, "pattern")
 
-    const swatch = getRequiredInput(surface.container, "Solid color swatch")
+    const swatch = getRequiredButton(surface.container, "Solid color swatch")
     const hexInput = getRequiredInput(surface.container, "Solid color")
     const swatchRing = swatch.parentElement
 
-    expect(swatch.type).toBe("color")
     expect(swatch.className).toContain("rounded-full")
     expect(swatch.className).toContain("size-5")
     expect(swatch.className).not.toContain("w-12")
@@ -590,15 +589,44 @@ describe("FloatingToolbar", () => {
     expect(swatchRing?.className).toContain("size-7")
     expect(swatchRing?.className).toContain("border-2")
     expect(hexInput.className).toContain("w-20")
+    expect(surface.container.querySelector('input[type="color"]')).toBeNull()
+
+    await clickButton(swatch)
+
+    expect(document.body.querySelector('[data-slot="color-picker"]')).not.toBeNull()
+    expect(document.body.querySelector('[data-slot="color-picker-area"]')).not.toBeNull()
 
     await clickButton(getRequiredButton(surface.container, "Use Patterns module color"))
 
-    const patternSwatch = getRequiredInput(surface.container, "Pattern color 1")
-    expect(patternSwatch.type).toBe("color")
+    const patternSwatch = getRequiredButton(surface.container, "Pattern color 1")
     expect(patternSwatch.className).toContain("rounded-full")
     expect(patternSwatch.className).toContain("size-7")
     expect(patternSwatch.className).not.toContain("border-white")
     expect(patternSwatch.getAttribute("data-slot")).toBe("desktop-color-picker")
+
+    await clickButton(patternSwatch)
+
+    expect(document.body.querySelector('[data-slot="color-picker"]')).not.toBeNull()
+    expect(document.body.querySelector('[data-slot="color-picker-area"]')).not.toBeNull()
+  })
+
+  it("updates desktop swatch color from the Amplo color picker input as hex", async () => {
+    const surface = await renderPrototype()
+    await openTool(surface.container, "pattern")
+
+    const swatch = getRequiredButton(surface.container, "Solid color swatch")
+    await clickButton(swatch)
+
+    const pickerInput = getRequiredInput(document.body, "Color value")
+    const solidInput = getRequiredInput(surface.container, "Solid color")
+
+    await act(async () => {
+      setInputValue(pickerInput, "oklch(0.7 0.18 30)")
+      pickerInput.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Enter" }))
+    })
+
+    expect(solidInput.value).toMatch(/^#[0-9a-f]{6}$/i)
+    expect(solidInput.value.toLowerCase()).not.toBe("#111111")
   })
 
   it("renders a Pixelmator-style shape inspector without placeholder copy", async () => {

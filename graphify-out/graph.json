@@ -1404,7 +1404,7 @@
       "source_file": "components/mode-toggle.test.tsx",
       "source_location": "L1",
       "id": "components_mode_toggle_test",
-      "community": 70,
+      "community": 95,
       "norm_label": "mode-toggle.test.tsx"
     },
     {
@@ -1413,7 +1413,7 @@
       "source_file": "components/mode-toggle.tsx",
       "source_location": "L1",
       "id": "components_mode_toggle",
-      "community": 70,
+      "community": 95,
       "norm_label": "mode-toggle.tsx"
     },
     {
@@ -1422,7 +1422,7 @@
       "source_file": "components/mode-toggle.tsx",
       "source_location": "L10",
       "id": "components_mode_toggle_modetoggleprops",
-      "community": 70,
+      "community": 95,
       "norm_label": "modetoggleprops"
     },
     {
@@ -1431,7 +1431,7 @@
       "source_file": "components/mode-toggle.tsx",
       "source_location": "L15",
       "id": "components_mode_toggle_subscribe",
-      "community": 70,
+      "community": 95,
       "norm_label": "subscribe()"
     },
     {
@@ -1440,7 +1440,7 @@
       "source_file": "components/mode-toggle.tsx",
       "source_location": "L19",
       "id": "components_mode_toggle_modetoggle",
-      "community": 70,
+      "community": 95,
       "norm_label": "modetoggle()"
     },
     {
@@ -1926,7 +1926,7 @@
       "source_file": "components/ui/button.tsx",
       "source_location": "L1",
       "id": "ui_button",
-      "community": 95,
+      "community": 61,
       "norm_label": "button.tsx"
     },
     {
@@ -1935,7 +1935,7 @@
       "source_file": "components/ui/button.tsx",
       "source_location": "L7",
       "id": "ui_button_buttonvariants",
-      "community": 95,
+      "community": 61,
       "norm_label": "buttonvariants"
     },
     {
@@ -1944,7 +1944,7 @@
       "source_file": "components/ui/button.tsx",
       "source_location": "L44",
       "id": "ui_button_button",
-      "community": 95,
+      "community": 61,
       "norm_label": "button()"
     },
     {
@@ -2655,7 +2655,7 @@
       "source_file": "components/ui/fill-picker/context.tsx",
       "source_location": "L1",
       "id": "fill_picker_context",
-      "community": 10,
+      "community": 73,
       "norm_label": "context.tsx"
     },
     {
@@ -2673,7 +2673,7 @@
       "source_file": "components/ui/fill-picker/context.tsx",
       "source_location": "L8",
       "id": "fill_picker_context_usecolorpickercontext",
-      "community": 95,
+      "community": 73,
       "norm_label": "usecolorpickercontext()"
     },
     {
@@ -2925,7 +2925,7 @@
       "source_file": "components/ui/fill-picker/lib/channels.ts",
       "source_location": "L12",
       "id": "lib_channels_channeldescriptor",
-      "community": 33,
+      "community": 10,
       "norm_label": "channeldescriptor"
     },
     {
@@ -3177,7 +3177,7 @@
       "source_file": "components/ui/fill-picker/lib/color.ts",
       "source_location": "L152",
       "id": "lib_color_gamutsigneddistance",
-      "community": 40,
+      "community": 27,
       "norm_label": "gamutsigneddistance()"
     },
     {
@@ -3186,7 +3186,7 @@
       "source_file": "components/ui/fill-picker/lib/color.ts",
       "source_location": "L170",
       "id": "lib_color_oklchtolinearsrgb",
-      "community": 40,
+      "community": 27,
       "norm_label": "oklchtolinearsrgb()"
     },
     {
@@ -3195,7 +3195,7 @@
       "source_file": "components/ui/fill-picker/lib/color.ts",
       "source_location": "L195",
       "id": "lib_color_linsrgbtolinp3",
-      "community": 40,
+      "community": 27,
       "norm_label": "linsrgbtolinp3()"
     },
     {
@@ -3204,7 +3204,7 @@
       "source_file": "components/ui/fill-picker/lib/color.ts",
       "source_location": "L208",
       "id": "lib_color_linsrgbtolinrec2020",
-      "community": 40,
+      "community": 27,
       "norm_label": "linsrgbtolinrec2020()"
     },
     {
@@ -3393,7 +3393,7 @@
       "source_file": "components/ui/fill-picker/parts/alpha.tsx",
       "source_location": "L1",
       "id": "parts_alpha",
-      "community": 95,
+      "community": 73,
       "norm_label": "alpha.tsx"
     },
     {
@@ -3402,7 +3402,7 @@
       "source_file": "components/ui/fill-picker/parts/alpha.tsx",
       "source_location": "L8",
       "id": "parts_alpha_alphaprops",
-      "community": 95,
+      "community": 73,
       "norm_label": "alphaprops"
     },
     {
@@ -3411,7 +3411,7 @@
       "source_file": "components/ui/fill-picker/parts/alpha.tsx",
       "source_location": "L15",
       "id": "parts_alpha_alpha",
-      "community": 95,
+      "community": 73,
       "norm_label": "alpha"
     },
     {
@@ -3465,7 +3465,7 @@
       "source_file": "components/ui/fill-picker/parts/area.tsx",
       "source_location": "L85",
       "id": "parts_area_area",
-      "community": 40,
+      "community": 10,
       "norm_label": "area"
     },
     {
@@ -3609,7 +3609,7 @@
       "source_file": "components/ui/fill-picker/parts/channel-input.tsx",
       "source_location": "L1",
       "id": "parts_channel_input",
-      "community": 33,
+      "community": 10,
       "norm_label": "channel-input.tsx"
     },
     {
@@ -3618,7 +3618,7 @@
       "source_file": "components/ui/fill-picker/parts/channel-input.tsx",
       "source_location": "L14",
       "id": "parts_channel_input_channelinputprops",
-      "community": 33,
+      "community": 10,
       "norm_label": "channelinputprops"
     },
     {
@@ -3627,7 +3627,7 @@
       "source_file": "components/ui/fill-picker/parts/channel-input.tsx",
       "source_location": "L29",
       "id": "parts_channel_input_channelinput",
-      "community": 33,
+      "community": 10,
       "norm_label": "channelinput"
     },
     {
@@ -3636,7 +3636,7 @@
       "source_file": "components/ui/fill-picker/parts/channel-input.tsx",
       "source_location": "L93",
       "id": "parts_channel_input_formatselect",
-      "community": 33,
+      "community": 10,
       "norm_label": "formatselect()"
     },
     {
@@ -3645,7 +3645,7 @@
       "source_file": "components/ui/fill-picker/parts/channel-input.tsx",
       "source_location": "L137",
       "id": "parts_channel_input_hexfield",
-      "community": 33,
+      "community": 10,
       "norm_label": "hexfield()"
     },
     {
@@ -3654,7 +3654,7 @@
       "source_file": "components/ui/fill-picker/parts/channel-input.tsx",
       "source_location": "L192",
       "id": "parts_channel_input_channelfield",
-      "community": 33,
+      "community": 10,
       "norm_label": "channelfield()"
     },
     {
@@ -3663,7 +3663,7 @@
       "source_file": "components/ui/fill-picker/parts/channel-input.tsx",
       "source_location": "L279",
       "id": "parts_channel_input_divider",
-      "community": 33,
+      "community": 10,
       "norm_label": "divider()"
     },
     {
@@ -3672,7 +3672,7 @@
       "source_file": "components/ui/fill-picker/parts/channel-input.tsx",
       "source_location": "L283",
       "id": "parts_channel_input_formatnumber",
-      "community": 33,
+      "community": 10,
       "norm_label": "formatnumber()"
     },
     {
@@ -3825,7 +3825,7 @@
       "source_file": "components/ui/fill-picker/parts/eye-dropper.tsx",
       "source_location": "L1",
       "id": "parts_eye_dropper",
-      "community": 95,
+      "community": 73,
       "norm_label": "eye-dropper.tsx"
     },
     {
@@ -3834,7 +3834,7 @@
       "source_file": "components/ui/fill-picker/parts/eye-dropper.tsx",
       "source_location": "L9",
       "id": "parts_eye_dropper_eyedropperlike",
-      "community": 95,
+      "community": 73,
       "norm_label": "eyedropperlike"
     },
     {
@@ -3843,7 +3843,7 @@
       "source_file": "components/ui/fill-picker/parts/eye-dropper.tsx",
       "source_location": "L13",
       "id": "parts_eye_dropper_eyedropperwindow",
-      "community": 95,
+      "community": 73,
       "norm_label": "eyedropperwindow"
     },
     {
@@ -3852,7 +3852,7 @@
       "source_file": "components/ui/fill-picker/parts/eye-dropper.tsx",
       "source_location": "L17",
       "id": "parts_eye_dropper_eyedropperprops",
-      "community": 95,
+      "community": 73,
       "norm_label": "eyedropperprops"
     },
     {
@@ -3861,7 +3861,7 @@
       "source_file": "components/ui/fill-picker/parts/eye-dropper.tsx",
       "source_location": "L19",
       "id": "parts_eye_dropper_eyedropper",
-      "community": 95,
+      "community": 73,
       "norm_label": "eyedropper"
     },
     {
@@ -3969,7 +3969,7 @@
       "source_file": "components/ui/fill-picker/parts/preview.tsx",
       "source_location": "L1",
       "id": "parts_preview",
-      "community": 95,
+      "community": 73,
       "norm_label": "preview.tsx"
     },
     {
@@ -3978,7 +3978,7 @@
       "source_file": "components/ui/fill-picker/parts/preview.tsx",
       "source_location": "L8",
       "id": "parts_preview_previewprops",
-      "community": 95,
+      "community": 73,
       "norm_label": "previewprops"
     },
     {
@@ -3987,7 +3987,7 @@
       "source_file": "components/ui/fill-picker/parts/preview.tsx",
       "source_location": "L13",
       "id": "parts_preview_preview",
-      "community": 95,
+      "community": 73,
       "norm_label": "preview"
     },
     {
@@ -4410,7 +4410,7 @@
       "source_file": "components/ui/option-card.tsx",
       "source_location": "L1",
       "id": "ui_option_card",
-      "community": 94,
+      "community": 4,
       "norm_label": "option-card.tsx"
     },
     {
@@ -4419,7 +4419,7 @@
       "source_file": "components/ui/option-card.tsx",
       "source_location": "L5",
       "id": "ui_option_card_optioncardprops",
-      "community": 94,
+      "community": 4,
       "norm_label": "optioncardprops"
     },
     {
@@ -4428,7 +4428,7 @@
       "source_file": "components/ui/option-card.tsx",
       "source_location": "L20",
       "id": "ui_option_card_optioncard",
-      "community": 94,
+      "community": 4,
       "norm_label": "optioncard()"
     },
     {
@@ -4500,7 +4500,7 @@
       "source_file": "components/ui/receipt-text.tsx",
       "source_location": "L1",
       "id": "ui_receipt_text",
-      "community": 114,
+      "community": 95,
       "norm_label": "receipt-text.tsx"
     },
     {
@@ -4509,7 +4509,7 @@
       "source_file": "components/ui/receipt-text.tsx",
       "source_location": "L8",
       "id": "ui_receipt_text_receipttexticonhandle",
-      "community": 114,
+      "community": 95,
       "norm_label": "receipttexticonhandle"
     },
     {
@@ -4518,7 +4518,7 @@
       "source_file": "components/ui/receipt-text.tsx",
       "source_location": "L13",
       "id": "ui_receipt_text_receipttexticonprops",
-      "community": 114,
+      "community": 95,
       "norm_label": "receipttexticonprops"
     },
     {
@@ -4527,7 +4527,7 @@
       "source_file": "components/ui/receipt-text.tsx",
       "source_location": "L17",
       "id": "ui_receipt_text_lines_container_variants",
-      "community": 114,
+      "community": 95,
       "norm_label": "lines_container_variants"
     },
     {
@@ -4536,7 +4536,7 @@
       "source_file": "components/ui/receipt-text.tsx",
       "source_location": "L26",
       "id": "ui_receipt_text_line_variants",
-      "community": 114,
+      "community": 95,
       "norm_label": "line_variants"
     },
     {
@@ -4545,7 +4545,7 @@
       "source_file": "components/ui/receipt-text.tsx",
       "source_location": "L39",
       "id": "ui_receipt_text_receipttexticon",
-      "community": 114,
+      "community": 95,
       "norm_label": "receipttexticon"
     },
     {
@@ -4752,7 +4752,7 @@
       "source_file": "components/ui/switch.test.tsx",
       "source_location": "L1",
       "id": "ui_switch_test",
-      "community": 70,
+      "community": 95,
       "norm_label": "switch.test.tsx"
     },
     {
@@ -4761,7 +4761,7 @@
       "source_file": "components/ui/switch.tsx",
       "source_location": "L1",
       "id": "ui_switch",
-      "community": 70,
+      "community": 95,
       "norm_label": "switch.tsx"
     },
     {
@@ -4770,7 +4770,7 @@
       "source_file": "components/ui/switch.tsx",
       "source_location": "L8",
       "id": "ui_switch_switch",
-      "community": 70,
+      "community": 95,
       "norm_label": "switch()"
     },
     {
@@ -4779,7 +4779,7 @@
       "source_file": "components/ui/textarea.tsx",
       "source_location": "L1",
       "id": "ui_textarea",
-      "community": 64,
+      "community": 95,
       "norm_label": "textarea.tsx"
     },
     {
@@ -4788,7 +4788,7 @@
       "source_file": "components/ui/textarea.tsx",
       "source_location": "L5",
       "id": "ui_textarea_textarea",
-      "community": 64,
+      "community": 95,
       "norm_label": "textarea()"
     },
     {
@@ -5148,7 +5148,7 @@
       "source_file": "components/vendor/kokonutui/ai-input-search.test.tsx",
       "source_location": "L1",
       "id": "kokonutui_ai_input_search_test",
-      "community": 64,
+      "community": 95,
       "norm_label": "ai-input-search.test.tsx"
     },
     {
@@ -5157,7 +5157,7 @@
       "source_file": "components/vendor/kokonutui/ai-input-search.tsx",
       "source_location": "L1",
       "id": "kokonutui_ai_input_search",
-      "community": 64,
+      "community": 95,
       "norm_label": "ai-input-search.tsx"
     },
     {
@@ -5166,7 +5166,7 @@
       "source_file": "components/vendor/kokonutui/ai-input-search.tsx",
       "source_location": "L21",
       "id": "kokonutui_ai_input_search_aiinputshortcut",
-      "community": 64,
+      "community": 95,
       "norm_label": "aiinputshortcut"
     },
     {
@@ -5175,7 +5175,7 @@
       "source_file": "components/vendor/kokonutui/ai-input-search.tsx",
       "source_location": "L26",
       "id": "kokonutui_ai_input_search_aiinputsearchprops",
-      "community": 64,
+      "community": 95,
       "norm_label": "aiinputsearchprops"
     },
     {
@@ -5184,7 +5184,7 @@
       "source_file": "components/vendor/kokonutui/ai-input-search.tsx",
       "source_location": "L34",
       "id": "kokonutui_ai_input_search_ai_input_search",
-      "community": 64,
+      "community": 95,
       "norm_label": "ai_input_search()"
     },
     {
@@ -5578,7 +5578,7 @@
       "label": "renderPrototype()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1173",
+      "source_location": "L1201",
       "id": "components_floatingtoolbar_test_renderprototype",
       "community": 6,
       "norm_label": "renderprototype()"
@@ -5587,7 +5587,7 @@
       "label": "getToolButtons()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1183",
+      "source_location": "L1211",
       "id": "components_floatingtoolbar_test_gettoolbuttons",
       "community": 6,
       "norm_label": "gettoolbuttons()"
@@ -5596,7 +5596,7 @@
       "label": "getRequiredToolButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1191",
+      "source_location": "L1219",
       "id": "components_floatingtoolbar_test_getrequiredtoolbutton",
       "community": 6,
       "norm_label": "getrequiredtoolbutton()"
@@ -5605,7 +5605,7 @@
       "label": "clickButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1203",
+      "source_location": "L1231",
       "id": "components_floatingtoolbar_test_clickbutton",
       "community": 6,
       "norm_label": "clickbutton()"
@@ -5614,7 +5614,7 @@
       "label": "openTool()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1209",
+      "source_location": "L1237",
       "id": "components_floatingtoolbar_test_opentool",
       "community": 6,
       "norm_label": "opentool()"
@@ -5623,7 +5623,7 @@
       "label": "getRequiredSlider()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1213",
+      "source_location": "L1241",
       "id": "components_floatingtoolbar_test_getrequiredslider",
       "community": 6,
       "norm_label": "getrequiredslider()"
@@ -5632,7 +5632,7 @@
       "label": "getRequiredSliderRow()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1223",
+      "source_location": "L1251",
       "id": "components_floatingtoolbar_test_getrequiredsliderrow",
       "community": 6,
       "norm_label": "getrequiredsliderrow()"
@@ -5641,7 +5641,7 @@
       "label": "getRequiredButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1234",
+      "source_location": "L1262",
       "id": "components_floatingtoolbar_test_getrequiredbutton",
       "community": 6,
       "norm_label": "getrequiredbutton()"
@@ -5650,7 +5650,7 @@
       "label": "getRequiredInput()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1246",
+      "source_location": "L1274",
       "id": "components_floatingtoolbar_test_getrequiredinput",
       "community": 6,
       "norm_label": "getrequiredinput()"
@@ -5659,7 +5659,7 @@
       "label": "getRequiredTextarea()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1256",
+      "source_location": "L1284",
       "id": "components_floatingtoolbar_test_getrequiredtextarea",
       "community": 6,
       "norm_label": "getrequiredtextarea()"
@@ -5668,7 +5668,7 @@
       "label": "setInputValue()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1266",
+      "source_location": "L1294",
       "id": "components_floatingtoolbar_test_setinputvalue",
       "community": 6,
       "norm_label": "setinputvalue()"
@@ -5677,7 +5677,7 @@
       "label": "setTextareaValue()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1272",
+      "source_location": "L1300",
       "id": "components_floatingtoolbar_test_settextareavalue",
       "community": 6,
       "norm_label": "settextareavalue()"
@@ -5695,7 +5695,7 @@
       "label": "DesktopToolbarGroup",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L162",
+      "source_location": "L172",
       "id": "components_floatingtoolbar_desktoptoolbargroup",
       "community": 2,
       "norm_label": "desktoptoolbargroup"
@@ -5704,7 +5704,7 @@
       "label": "DesktopToolbarToolId",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L163",
+      "source_location": "L173",
       "id": "components_floatingtoolbar_desktoptoolbartoolid",
       "community": 1,
       "norm_label": "desktoptoolbartoolid"
@@ -5713,7 +5713,7 @@
       "label": "DesktopToolbarTool",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L178",
+      "source_location": "L188",
       "id": "components_floatingtoolbar_desktoptoolbartool",
       "community": 2,
       "norm_label": "desktoptoolbartool"
@@ -5722,16 +5722,25 @@
       "label": "DesktopThemeMode",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L185",
+      "source_location": "L195",
       "id": "components_floatingtoolbar_desktopthememode",
       "community": 11,
       "norm_label": "desktopthememode"
     },
     {
+      "label": "DESKTOP_COLOR_PICKER_SWATCHES",
+      "file_type": "code",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L197",
+      "id": "components_floatingtoolbar_desktop_color_picker_swatches",
+      "community": 2,
+      "norm_label": "desktop_color_picker_swatches"
+    },
+    {
       "label": "DESKTOP_TOOLBAR_TOOLS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L187",
+      "source_location": "L208",
       "id": "components_floatingtoolbar_desktop_toolbar_tools",
       "community": 6,
       "norm_label": "desktop_toolbar_tools"
@@ -5740,7 +5749,7 @@
       "label": "DESKTOP_CONTENT_PRESET_TYPES",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L270",
+      "source_location": "L291",
       "id": "components_floatingtoolbar_desktop_content_preset_types",
       "community": 2,
       "norm_label": "desktop_content_preset_types"
@@ -5749,7 +5758,7 @@
       "label": "DesktopContentCollectionId",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L284",
+      "source_location": "L305",
       "id": "components_floatingtoolbar_desktopcontentcollectionid",
       "community": 2,
       "norm_label": "desktopcontentcollectionid"
@@ -5758,7 +5767,7 @@
       "label": "DESKTOP_CONTENT_COLLECTIONS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L286",
+      "source_location": "L307",
       "id": "components_floatingtoolbar_desktop_content_collections",
       "community": 2,
       "norm_label": "desktop_content_collections"
@@ -5767,7 +5776,7 @@
       "label": "DESKTOP_CONTENT_FILTER_OPTIONS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L318",
+      "source_location": "L339",
       "id": "components_floatingtoolbar_desktop_content_filter_options",
       "community": 2,
       "norm_label": "desktop_content_filter_options"
@@ -5776,7 +5785,7 @@
       "label": "DESKTOP_ALL_CONTENT_TYPES",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L323",
+      "source_location": "L344",
       "id": "components_floatingtoolbar_desktop_all_content_types",
       "community": 2,
       "norm_label": "desktop_all_content_types"
@@ -5785,7 +5794,7 @@
       "label": "DesktopPatternSettings",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L330",
+      "source_location": "L351",
       "id": "components_floatingtoolbar_desktoppatternsettings",
       "community": 1,
       "norm_label": "desktoppatternsettings"
@@ -5794,7 +5803,7 @@
       "label": "DesktopLogoSourceMode",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L338",
+      "source_location": "L359",
       "id": "components_floatingtoolbar_desktoplogosourcemode",
       "community": 1,
       "norm_label": "desktoplogosourcemode"
@@ -5803,7 +5812,7 @@
       "label": "DesktopAssetSourceMode",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L339",
+      "source_location": "L360",
       "id": "components_floatingtoolbar_desktopassetsourcemode",
       "community": 1,
       "norm_label": "desktopassetsourcemode"
@@ -5812,7 +5821,7 @@
       "label": "DesktopLogoSettings",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L341",
+      "source_location": "L362",
       "id": "components_floatingtoolbar_desktoplogosettings",
       "community": 1,
       "norm_label": "desktoplogosettings"
@@ -5821,7 +5830,7 @@
       "label": "DesktopCornersSettings",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L355",
+      "source_location": "L376",
       "id": "components_floatingtoolbar_desktopcornerssettings",
       "community": 1,
       "norm_label": "desktopcornerssettings"
@@ -5830,7 +5839,7 @@
       "label": "DesktopCornerColorMode",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L366",
+      "source_location": "L387",
       "id": "components_floatingtoolbar_desktopcornercolormode",
       "community": 2,
       "norm_label": "desktopcornercolormode"
@@ -5839,7 +5848,7 @@
       "label": "DesktopShapeColorMode",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L368",
+      "source_location": "L389",
       "id": "components_floatingtoolbar_desktopshapecolormode",
       "community": 2,
       "norm_label": "desktopshapecolormode"
@@ -5848,7 +5857,7 @@
       "label": "DesktopShapeSettings",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L370",
+      "source_location": "L391",
       "id": "components_floatingtoolbar_desktopshapesettings",
       "community": 1,
       "norm_label": "desktopshapesettings"
@@ -5857,7 +5866,7 @@
       "label": "DesktopMotionSettings",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L404",
+      "source_location": "L425",
       "id": "components_floatingtoolbar_desktopmotionsettings",
       "community": 1,
       "norm_label": "desktopmotionsettings"
@@ -5866,7 +5875,7 @@
       "label": "DesktopEncodingSettings",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L406",
+      "source_location": "L427",
       "id": "components_floatingtoolbar_desktopencodingsettings",
       "community": 1,
       "norm_label": "desktopencodingsettings"
@@ -5875,7 +5884,7 @@
       "label": "DesktopImageIntent",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L411",
+      "source_location": "L432",
       "id": "components_floatingtoolbar_desktopimageintent",
       "community": 2,
       "norm_label": "desktopimageintent"
@@ -5884,7 +5893,7 @@
       "label": "DesktopImageSettings",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L413",
+      "source_location": "L434",
       "id": "components_floatingtoolbar_desktopimagesettings",
       "community": 1,
       "norm_label": "desktopimagesettings"
@@ -5893,7 +5902,7 @@
       "label": "DesktopDecorationsSettings",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L421",
+      "source_location": "L442",
       "id": "components_floatingtoolbar_desktopdecorationssettings",
       "community": 1,
       "norm_label": "desktopdecorationssettings"
@@ -5902,7 +5911,7 @@
       "label": "DesktopEffectsSettings",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L430",
+      "source_location": "L451",
       "id": "components_floatingtoolbar_desktopeffectssettings",
       "community": 1,
       "norm_label": "desktopeffectssettings"
@@ -5911,7 +5920,7 @@
       "label": "DesktopLayerKind",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L440",
+      "source_location": "L461",
       "id": "components_floatingtoolbar_desktoplayerkind",
       "community": 2,
       "norm_label": "desktoplayerkind"
@@ -5920,7 +5929,7 @@
       "label": "DesktopLayerRow",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L441",
+      "source_location": "L462",
       "id": "components_floatingtoolbar_desktoplayerrow",
       "community": 1,
       "norm_label": "desktoplayerrow"
@@ -5929,7 +5938,7 @@
       "label": "DesktopLayersSettings",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L460",
+      "source_location": "L481",
       "id": "components_floatingtoolbar_desktoplayerssettings",
       "community": 1,
       "norm_label": "desktoplayerssettings"
@@ -5938,7 +5947,7 @@
       "label": "DesktopExportTarget",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L465",
+      "source_location": "L486",
       "id": "components_floatingtoolbar_desktopexporttarget",
       "community": 1,
       "norm_label": "desktopexporttarget"
@@ -5947,7 +5956,7 @@
       "label": "DesktopRasterExportPresetId",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L466",
+      "source_location": "L487",
       "id": "components_floatingtoolbar_desktoprasterexportpresetid",
       "community": 2,
       "norm_label": "desktoprasterexportpresetid"
@@ -5956,7 +5965,7 @@
       "label": "DesktopExportSettings",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L474",
+      "source_location": "L495",
       "id": "components_floatingtoolbar_desktopexportsettings",
       "community": 1,
       "norm_label": "desktopexportsettings"
@@ -5965,7 +5974,7 @@
       "label": "DesktopTextSettings",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L480",
+      "source_location": "L501",
       "id": "components_floatingtoolbar_desktoptextsettings",
       "community": 1,
       "norm_label": "desktoptextsettings"
@@ -5974,7 +5983,7 @@
       "label": "DesktopTextPresetId",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L494",
+      "source_location": "L515",
       "id": "components_floatingtoolbar_desktoptextpresetid",
       "community": 2,
       "norm_label": "desktoptextpresetid"
@@ -5983,7 +5992,7 @@
       "label": "DesktopToolbarController",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L496",
+      "source_location": "L517",
       "id": "components_floatingtoolbar_desktoptoolbarcontroller",
       "community": 1,
       "norm_label": "desktoptoolbarcontroller"
@@ -5992,7 +6001,7 @@
       "label": "DEFAULT_DESKTOP_DOTS_GRADIENT",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L550",
+      "source_location": "L571",
       "id": "components_floatingtoolbar_default_desktop_dots_gradient",
       "community": 2,
       "norm_label": "default_desktop_dots_gradient"
@@ -6001,7 +6010,7 @@
       "label": "DEFAULT_DESKTOP_DOTS_PALETTE",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L560",
+      "source_location": "L581",
       "id": "components_floatingtoolbar_default_desktop_dots_palette",
       "community": 2,
       "norm_label": "default_desktop_dots_palette"
@@ -6010,7 +6019,7 @@
       "label": "DESKTOP_BRAND_ICON_CATEGORY_OPTIONS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L562",
+      "source_location": "L583",
       "id": "components_floatingtoolbar_desktop_brand_icon_category_options",
       "community": 2,
       "norm_label": "desktop_brand_icon_category_options"
@@ -6019,7 +6028,7 @@
       "label": "DESKTOP_DOTS_COLOR_MODES",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L575",
+      "source_location": "L596",
       "id": "components_floatingtoolbar_desktop_dots_color_modes",
       "community": 2,
       "norm_label": "desktop_dots_color_modes"
@@ -6028,7 +6037,7 @@
       "label": "DESKTOP_CORNER_COLOR_MODES",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L581",
+      "source_location": "L602",
       "id": "components_floatingtoolbar_desktop_corner_color_modes",
       "community": 2,
       "norm_label": "desktop_corner_color_modes"
@@ -6037,7 +6046,7 @@
       "label": "DESKTOP_SHAPE_COLOR_MODES",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L586",
+      "source_location": "L607",
       "id": "components_floatingtoolbar_desktop_shape_color_modes",
       "community": 2,
       "norm_label": "desktop_shape_color_modes"
@@ -6046,7 +6055,7 @@
       "label": "DESKTOP_GRADIENT_TYPE_OPTIONS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L591",
+      "source_location": "L612",
       "id": "components_floatingtoolbar_desktop_gradient_type_options",
       "community": 2,
       "norm_label": "desktop_gradient_type_options"
@@ -6055,7 +6064,7 @@
       "label": "DESKTOP_LOGO_SOURCE_OPTIONS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L596",
+      "source_location": "L617",
       "id": "components_floatingtoolbar_desktop_logo_source_options",
       "community": 2,
       "norm_label": "desktop_logo_source_options"
@@ -6064,7 +6073,7 @@
       "label": "DESKTOP_ASSET_SOURCE_OPTIONS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L603",
+      "source_location": "L624",
       "id": "components_floatingtoolbar_desktop_asset_source_options",
       "community": 2,
       "norm_label": "desktop_asset_source_options"
@@ -6073,7 +6082,7 @@
       "label": "DESKTOP_IMAGE_INTENT_OPTIONS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L608",
+      "source_location": "L629",
       "id": "components_floatingtoolbar_desktop_image_intent_options",
       "community": 2,
       "norm_label": "desktop_image_intent_options"
@@ -6082,7 +6091,7 @@
       "label": "DESKTOP_DECORATION_OPTIONS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L614",
+      "source_location": "L635",
       "id": "components_floatingtoolbar_desktop_decoration_options",
       "community": 2,
       "norm_label": "desktop_decoration_options"
@@ -6091,7 +6100,7 @@
       "label": "DESKTOP_EXPORT_TARGET_OPTIONS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L621",
+      "source_location": "L642",
       "id": "components_floatingtoolbar_desktop_export_target_options",
       "community": 2,
       "norm_label": "desktop_export_target_options"
@@ -6100,7 +6109,7 @@
       "label": "DESKTOP_RASTER_EXPORT_PRESETS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L631",
+      "source_location": "L652",
       "id": "components_floatingtoolbar_desktop_raster_export_presets",
       "community": 2,
       "norm_label": "desktop_raster_export_presets"
@@ -6109,7 +6118,7 @@
       "label": "DEFAULT_DESKTOP_PATTERN_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L640",
+      "source_location": "L661",
       "id": "components_floatingtoolbar_default_desktop_pattern_settings",
       "community": 2,
       "norm_label": "default_desktop_pattern_settings"
@@ -6118,7 +6127,7 @@
       "label": "DEFAULT_DESKTOP_LOGO_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L648",
+      "source_location": "L669",
       "id": "components_floatingtoolbar_default_desktop_logo_settings",
       "community": 2,
       "norm_label": "default_desktop_logo_settings"
@@ -6127,7 +6136,7 @@
       "label": "DEFAULT_DESKTOP_CORNERS_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L662",
+      "source_location": "L683",
       "id": "components_floatingtoolbar_default_desktop_corners_settings",
       "community": 2,
       "norm_label": "default_desktop_corners_settings"
@@ -6136,7 +6145,7 @@
       "label": "DEFAULT_DESKTOP_SHAPE_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L685",
+      "source_location": "L706",
       "id": "components_floatingtoolbar_default_desktop_shape_settings",
       "community": 2,
       "norm_label": "default_desktop_shape_settings"
@@ -6145,7 +6154,7 @@
       "label": "DEFAULT_DESKTOP_MOTION_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L727",
+      "source_location": "L748",
       "id": "components_floatingtoolbar_default_desktop_motion_settings",
       "community": 2,
       "norm_label": "default_desktop_motion_settings"
@@ -6154,7 +6163,7 @@
       "label": "DEFAULT_DESKTOP_ENCODING_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L731",
+      "source_location": "L752",
       "id": "components_floatingtoolbar_default_desktop_encoding_settings",
       "community": 2,
       "norm_label": "default_desktop_encoding_settings"
@@ -6163,7 +6172,7 @@
       "label": "DEFAULT_DESKTOP_IMAGE_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L736",
+      "source_location": "L757",
       "id": "components_floatingtoolbar_default_desktop_image_settings",
       "community": 2,
       "norm_label": "default_desktop_image_settings"
@@ -6172,7 +6181,7 @@
       "label": "DEFAULT_DESKTOP_DECORATIONS_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L744",
+      "source_location": "L765",
       "id": "components_floatingtoolbar_default_desktop_decorations_settings",
       "community": 2,
       "norm_label": "default_desktop_decorations_settings"
@@ -6181,7 +6190,7 @@
       "label": "DEFAULT_DESKTOP_EFFECTS_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L753",
+      "source_location": "L774",
       "id": "components_floatingtoolbar_default_desktop_effects_settings",
       "community": 2,
       "norm_label": "default_desktop_effects_settings"
@@ -6190,7 +6199,7 @@
       "label": "DEFAULT_DESKTOP_LAYERS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L763",
+      "source_location": "L784",
       "id": "components_floatingtoolbar_default_desktop_layers",
       "community": 2,
       "norm_label": "default_desktop_layers"
@@ -6199,7 +6208,7 @@
       "label": "DEFAULT_DESKTOP_LAYERS_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L820",
+      "source_location": "L841",
       "id": "components_floatingtoolbar_default_desktop_layers_settings",
       "community": 2,
       "norm_label": "default_desktop_layers_settings"
@@ -6208,7 +6217,7 @@
       "label": "DEFAULT_DESKTOP_EXPORT_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L825",
+      "source_location": "L846",
       "id": "components_floatingtoolbar_default_desktop_export_settings",
       "community": 2,
       "norm_label": "default_desktop_export_settings"
@@ -6217,7 +6226,7 @@
       "label": "DEFAULT_DESKTOP_TEXT_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L831",
+      "source_location": "L852",
       "id": "components_floatingtoolbar_default_desktop_text_settings",
       "community": 2,
       "norm_label": "default_desktop_text_settings"
@@ -6226,7 +6235,7 @@
       "label": "DESKTOP_TEXT_PRESETS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L845",
+      "source_location": "L866",
       "id": "components_floatingtoolbar_desktop_text_presets",
       "community": 2,
       "norm_label": "desktop_text_presets"
@@ -6235,7 +6244,7 @@
       "label": "DESKTOP_TEXT_ALIGN_OPTIONS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L857",
+      "source_location": "L878",
       "id": "components_floatingtoolbar_desktop_text_align_options",
       "community": 2,
       "norm_label": "desktop_text_align_options"
@@ -6244,7 +6253,7 @@
       "label": "DESKTOP_MOTION_COLOR_SWATCHES",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L863",
+      "source_location": "L884",
       "id": "components_floatingtoolbar_desktop_motion_color_swatches",
       "community": 2,
       "norm_label": "desktop_motion_color_swatches"
@@ -6253,7 +6262,7 @@
       "label": "FloatingToolbar()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L874",
+      "source_location": "L895",
       "id": "components_floatingtoolbar_floatingtoolbar",
       "community": 29,
       "norm_label": "floatingtoolbar()"
@@ -6262,7 +6271,7 @@
       "label": "DesktopThemeStyles()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L1252",
+      "source_location": "L1273",
       "id": "components_floatingtoolbar_desktopthemestyles",
       "community": 2,
       "norm_label": "desktopthemestyles()"
@@ -6271,7 +6280,7 @@
       "label": "DesktopInspectorHeader()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L1604",
+      "source_location": "L1623",
       "id": "components_floatingtoolbar_desktopinspectorheader",
       "community": 2,
       "norm_label": "desktopinspectorheader()"
@@ -6280,16 +6289,16 @@
       "label": "getDesktopAdaptiveOptionPreviewStyle()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L1616",
+      "source_location": "L1635",
       "id": "components_floatingtoolbar_getdesktopadaptiveoptionpreviewstyle",
-      "community": 91,
+      "community": 2,
       "norm_label": "getdesktopadaptiveoptionpreviewstyle()"
     },
     {
       "label": "DesktopLogoInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L1625",
+      "source_location": "L1644",
       "id": "components_floatingtoolbar_desktoplogoinspector",
       "community": 2,
       "norm_label": "desktoplogoinspector()"
@@ -6298,7 +6307,7 @@
       "label": "DesktopBrandIconButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L1839",
+      "source_location": "L1858",
       "id": "components_floatingtoolbar_desktopbrandiconbutton",
       "community": 2,
       "norm_label": "desktopbrandiconbutton()"
@@ -6307,7 +6316,7 @@
       "label": "DesktopCornersInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L1867",
+      "source_location": "L1886",
       "id": "components_floatingtoolbar_desktopcornersinspector",
       "community": 2,
       "norm_label": "desktopcornersinspector()"
@@ -6316,7 +6325,7 @@
       "label": "DesktopCornerColorSection()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L1990",
+      "source_location": "L2009",
       "id": "components_floatingtoolbar_desktopcornercolorsection",
       "community": 2,
       "norm_label": "desktopcornercolorsection()"
@@ -6325,16 +6334,16 @@
       "label": "DesktopCornerStyleButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2076",
+      "source_location": "L2095",
       "id": "components_floatingtoolbar_desktopcornerstylebutton",
-      "community": 91,
+      "community": 2,
       "norm_label": "desktopcornerstylebutton()"
     },
     {
       "label": "DesktopShapeInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2133",
+      "source_location": "L2152",
       "id": "components_floatingtoolbar_desktopshapeinspector",
       "community": 2,
       "norm_label": "desktopshapeinspector()"
@@ -6343,16 +6352,16 @@
       "label": "DesktopShapePresetButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2403",
+      "source_location": "L2422",
       "id": "components_floatingtoolbar_desktopshapepresetbutton",
-      "community": 91,
+      "community": 2,
       "norm_label": "desktopshapepresetbutton()"
     },
     {
       "label": "DesktopShapePreview()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2450",
+      "source_location": "L2469",
       "id": "components_floatingtoolbar_desktopshapepreview",
       "community": 2,
       "norm_label": "desktopshapepreview()"
@@ -6361,7 +6370,7 @@
       "label": "DesktopMotionInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2524",
+      "source_location": "L2543",
       "id": "components_floatingtoolbar_desktopmotioninspector",
       "community": 2,
       "norm_label": "desktopmotioninspector()"
@@ -6370,7 +6379,7 @@
       "label": "DesktopMotionToggleRow()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2657",
+      "source_location": "L2676",
       "id": "components_floatingtoolbar_desktopmotiontogglerow",
       "community": 2,
       "norm_label": "desktopmotiontogglerow()"
@@ -6379,7 +6388,7 @@
       "label": "DesktopMotionSliderRow()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2702",
+      "source_location": "L2721",
       "id": "components_floatingtoolbar_desktopmotionsliderrow",
       "community": 2,
       "norm_label": "desktopmotionsliderrow()"
@@ -6388,7 +6397,7 @@
       "label": "DesktopElasticSliderRow()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2733",
+      "source_location": "L2752",
       "id": "components_floatingtoolbar_desktopelasticsliderrow",
       "community": 2,
       "norm_label": "desktopelasticsliderrow()"
@@ -6397,7 +6406,7 @@
       "label": "DesktopMotionLoaderButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2774",
+      "source_location": "L2793",
       "id": "components_floatingtoolbar_desktopmotionloaderbutton",
       "community": 2,
       "norm_label": "desktopmotionloaderbutton()"
@@ -6406,7 +6415,7 @@
       "label": "DesktopMotionColorPresetButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2802",
+      "source_location": "L2821",
       "id": "components_floatingtoolbar_desktopmotioncolorpresetbutton",
       "community": 2,
       "norm_label": "desktopmotioncolorpresetbutton()"
@@ -6415,7 +6424,7 @@
       "label": "DesktopContentInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2842",
+      "source_location": "L2861",
       "id": "components_floatingtoolbar_desktopcontentinspector",
       "community": 2,
       "norm_label": "desktopcontentinspector()"
@@ -6424,7 +6433,7 @@
       "label": "DesktopPatternInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3011",
+      "source_location": "L3030",
       "id": "components_floatingtoolbar_desktoppatterninspector",
       "community": 2,
       "norm_label": "desktoppatterninspector()"
@@ -6433,16 +6442,16 @@
       "label": "DesktopModulePatternButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3155",
+      "source_location": "L3172",
       "id": "components_floatingtoolbar_desktopmodulepatternbutton",
-      "community": 91,
+      "community": 2,
       "norm_label": "desktopmodulepatternbutton()"
     },
     {
       "label": "DesktopQrDotPreview()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3196",
+      "source_location": "L3213",
       "id": "components_floatingtoolbar_desktopqrdotpreview",
       "community": 2,
       "norm_label": "desktopqrdotpreview()"
@@ -6451,16 +6460,34 @@
       "label": "DesktopColorInputRow()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3223",
+      "source_location": "L3240",
       "id": "components_floatingtoolbar_desktopcolorinputrow",
       "community": 2,
       "norm_label": "desktopcolorinputrow()"
     },
     {
+      "label": "DesktopColorPickerPopover()",
+      "file_type": "code",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L3279",
+      "id": "components_floatingtoolbar_desktopcolorpickerpopover",
+      "community": 2,
+      "norm_label": "desktopcolorpickerpopover()"
+    },
+    {
+      "label": "parseDesktopColor()",
+      "file_type": "code",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L3348",
+      "id": "components_floatingtoolbar_parsedesktopcolor",
+      "community": 2,
+      "norm_label": "parsedesktopcolor()"
+    },
+    {
       "label": "DesktopNumberRow()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3265",
+      "source_location": "L3352",
       "id": "components_floatingtoolbar_desktopnumberrow",
       "community": 2,
       "norm_label": "desktopnumberrow()"
@@ -6469,7 +6496,7 @@
       "label": "DesktopPatternSwatchButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3303",
+      "source_location": "L3390",
       "id": "components_floatingtoolbar_desktoppatternswatchbutton",
       "community": 2,
       "norm_label": "desktoppatternswatchbutton()"
@@ -6478,7 +6505,7 @@
       "label": "DesktopTextPresetButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3341",
+      "source_location": "L3428",
       "id": "components_floatingtoolbar_desktoptextpresetbutton",
       "community": 2,
       "norm_label": "desktoptextpresetbutton()"
@@ -6487,7 +6514,7 @@
       "label": "DesktopSegmentedRow()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3369",
+      "source_location": "L3456",
       "id": "components_floatingtoolbar_desktopsegmentedrow",
       "community": 2,
       "norm_label": "desktopsegmentedrow()"
@@ -6496,7 +6523,7 @@
       "label": "updateDesktopGradientColor()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3392",
+      "source_location": "L3479",
       "id": "components_floatingtoolbar_updatedesktopgradientcolor",
       "community": 2,
       "norm_label": "updatedesktopgradientcolor()"
@@ -6505,16 +6532,16 @@
       "label": "DesktopContentFields()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3406",
+      "source_location": "L3493",
       "id": "components_floatingtoolbar_desktopcontentfields",
-      "community": 79,
+      "community": 2,
       "norm_label": "desktopcontentfields()"
     },
     {
       "label": "DesktopContentField",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3432",
+      "source_location": "L3519",
       "id": "components_floatingtoolbar_desktopcontentfield",
       "community": 2,
       "norm_label": "desktopcontentfield"
@@ -6523,52 +6550,52 @@
       "label": "DesktopContentFieldRow()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3442",
+      "source_location": "L3529",
       "id": "components_floatingtoolbar_desktopcontentfieldrow",
-      "community": 79,
+      "community": 2,
       "norm_label": "desktopcontentfieldrow()"
     },
     {
       "label": "getDesktopContentFields()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3529",
+      "source_location": "L3616",
       "id": "components_floatingtoolbar_getdesktopcontentfields",
-      "community": 79,
+      "community": 2,
       "norm_label": "getdesktopcontentfields()"
     },
     {
       "label": "isUrlContentType()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3671",
+      "source_location": "L3758",
       "id": "components_floatingtoolbar_isurlcontenttype",
-      "community": 79,
+      "community": 2,
       "norm_label": "isurlcontenttype()"
     },
     {
       "label": "isUsernameContentType()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3692",
+      "source_location": "L3779",
       "id": "components_floatingtoolbar_isusernamecontenttype",
-      "community": 79,
+      "community": 2,
       "norm_label": "isusernamecontenttype()"
     },
     {
       "label": "stringContentValue()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3705",
+      "source_location": "L3792",
       "id": "components_floatingtoolbar_stringcontentvalue",
-      "community": 79,
+      "community": 2,
       "norm_label": "stringcontentvalue()"
     },
     {
       "label": "DesktopEncodingInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3709",
+      "source_location": "L3796",
       "id": "components_floatingtoolbar_desktopencodinginspector",
       "community": 2,
       "norm_label": "desktopencodinginspector()"
@@ -6577,7 +6604,7 @@
       "label": "DesktopImageInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3765",
+      "source_location": "L3852",
       "id": "components_floatingtoolbar_desktopimageinspector",
       "community": 2,
       "norm_label": "desktopimageinspector()"
@@ -6586,7 +6613,7 @@
       "label": "DesktopDecorationsInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3835",
+      "source_location": "L3922",
       "id": "components_floatingtoolbar_desktopdecorationsinspector",
       "community": 2,
       "norm_label": "desktopdecorationsinspector()"
@@ -6595,7 +6622,7 @@
       "label": "DesktopEffectsInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3923",
+      "source_location": "L4010",
       "id": "components_floatingtoolbar_desktopeffectsinspector",
       "community": 28,
       "norm_label": "desktopeffectsinspector()"
@@ -6604,7 +6631,7 @@
       "label": "DesktopLayersInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4037",
+      "source_location": "L4124",
       "id": "components_floatingtoolbar_desktoplayersinspector",
       "community": 2,
       "norm_label": "desktoplayersinspector()"
@@ -6613,7 +6640,7 @@
       "label": "DesktopExportInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4127",
+      "source_location": "L4214",
       "id": "components_floatingtoolbar_desktopexportinspector",
       "community": 2,
       "norm_label": "desktopexportinspector()"
@@ -6622,16 +6649,16 @@
       "label": "DesktopTextInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4232",
+      "source_location": "L4319",
       "id": "components_floatingtoolbar_desktoptextinspector",
-      "community": 84,
+      "community": 2,
       "norm_label": "desktoptextinspector()"
     },
     {
       "label": "DesktopTextToggleButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4490",
+      "source_location": "L4577",
       "id": "components_floatingtoolbar_desktoptexttogglebutton",
       "community": 2,
       "norm_label": "desktoptexttogglebutton()"
@@ -6640,7 +6667,7 @@
       "label": "DesktopTextAlignIcon()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4518",
+      "source_location": "L4605",
       "id": "components_floatingtoolbar_desktoptextalignicon",
       "community": 2,
       "norm_label": "desktoptextalignicon()"
@@ -6649,7 +6676,7 @@
       "label": "DesktopTextInlineSlider()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4530",
+      "source_location": "L4617",
       "id": "components_floatingtoolbar_desktoptextinlineslider",
       "community": 2,
       "norm_label": "desktoptextinlineslider()"
@@ -6658,43 +6685,43 @@
       "label": "getDesktopTextPresetId()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4569",
+      "source_location": "L4656",
       "id": "components_floatingtoolbar_getdesktoptextpresetid",
-      "community": 84,
+      "community": 2,
       "norm_label": "getdesktoptextpresetid()"
     },
     {
       "label": "getDesktopTextInspectorFontWeight()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4580",
+      "source_location": "L4667",
       "id": "components_floatingtoolbar_getdesktoptextinspectorfontweight",
-      "community": 84,
+      "community": 2,
       "norm_label": "getdesktoptextinspectorfontweight()"
     },
     {
       "label": "getNearestDesktopFontWeight()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4595",
+      "source_location": "L4682",
       "id": "components_floatingtoolbar_getnearestdesktopfontweight",
-      "community": 84,
+      "community": 2,
       "norm_label": "getnearestdesktopfontweight()"
     },
     {
       "label": "getDesktopFontWeightSliderStep()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4608",
+      "source_location": "L4695",
       "id": "components_floatingtoolbar_getdesktopfontweightsliderstep",
-      "community": 84,
+      "community": 2,
       "norm_label": "getdesktopfontweightsliderstep()"
     },
     {
       "label": "DesktopPlaceholderInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4620",
+      "source_location": "L4707",
       "id": "components_floatingtoolbar_desktopplaceholderinspector",
       "community": 2,
       "norm_label": "desktopplaceholderinspector()"
@@ -6903,7 +6930,7 @@
       "source_file": "features/qr-code/adapters/react-qr-adapter.ts",
       "source_location": "L1",
       "id": "adapters_react_qr_adapter",
-      "community": 63,
+      "community": 7,
       "norm_label": "react-qr-adapter.ts"
     },
     {
@@ -6912,43 +6939,43 @@
       "source_file": "features/qr-code/adapters/react-qr-adapter.ts",
       "source_location": "L11",
       "id": "adapters_react_qr_adapter_toreactqrcodeprops",
-      "community": 63,
+      "community": 7,
       "norm_label": "toreactqrcodeprops()"
     },
     {
       "label": "getDotsColor()",
       "file_type": "code",
       "source_file": "features/qr-code/adapters/react-qr-adapter.ts",
-      "source_location": "L76",
+      "source_location": "L73",
       "id": "adapters_react_qr_adapter_getdotscolor",
-      "community": 63,
+      "community": 7,
       "norm_label": "getdotscolor()"
     },
     {
       "label": "getDotsGradient()",
       "file_type": "code",
       "source_file": "features/qr-code/adapters/react-qr-adapter.ts",
-      "source_location": "L84",
+      "source_location": "L81",
       "id": "adapters_react_qr_adapter_getdotsgradient",
-      "community": 63,
+      "community": 7,
       "norm_label": "getdotsgradient()"
     },
     {
       "label": "buildGradient()",
       "file_type": "code",
       "source_file": "features/qr-code/adapters/react-qr-adapter.ts",
-      "source_location": "L95",
+      "source_location": "L92",
       "id": "adapters_react_qr_adapter_buildgradient",
-      "community": 63,
+      "community": 7,
       "norm_label": "buildgradient()"
     },
     {
       "label": "coerceNumber()",
       "file_type": "code",
       "source_file": "features/qr-code/adapters/react-qr-adapter.ts",
-      "source_location": "L110",
+      "source_location": "L107",
       "id": "adapters_react_qr_adapter_coercenumber",
-      "community": 63,
+      "community": 7,
       "norm_label": "coercenumber()"
     },
     {
@@ -7236,7 +7263,7 @@
       "source_file": "features/qr-code/components/ControlsPanel.logo-tabs.test.tsx",
       "source_location": "L1",
       "id": "components_controlspanel_logo_tabs_test",
-      "community": 82,
+      "community": 71,
       "norm_label": "controlspanel.logo-tabs.test.tsx"
     },
     {
@@ -7245,7 +7272,7 @@
       "source_file": "features/qr-code/components/ControlsPanel.logo-tabs.test.tsx",
       "source_location": "L17",
       "id": "components_controlspanel_logo_tabs_test_baseprops",
-      "community": 82,
+      "community": 71,
       "norm_label": "baseprops"
     },
     {
@@ -7254,7 +7281,7 @@
       "source_file": "features/qr-code/components/ControlsPanel.logo-tabs.test.tsx",
       "source_location": "L30",
       "id": "components_controlspanel_logo_tabs_test_logotabconfig",
-      "community": 82,
+      "community": 71,
       "norm_label": "logotabconfig"
     },
     {
@@ -7263,7 +7290,7 @@
       "source_file": "features/qr-code/components/ControlsPanel.logo-tabs.test.tsx",
       "source_location": "L35",
       "id": "components_controlspanel_logo_tabs_test_getcapturedlogotabs",
-      "community": 82,
+      "community": 71,
       "norm_label": "getcapturedlogotabs()"
     },
     {
@@ -7272,7 +7299,7 @@
       "source_file": "features/qr-code/components/ControlsPanel.logo-tabs.test.tsx",
       "source_location": "L39",
       "id": "components_controlspanel_logo_tabs_test_gettabmarkup",
-      "community": 82,
+      "community": 71,
       "norm_label": "gettabmarkup()"
     },
     {
@@ -7632,7 +7659,7 @@
       "source_file": "features/qr-code/components/DotsPaletteCard.tsx",
       "source_location": "L7",
       "id": "components_dotspalettecard_dotspalettecard",
-      "community": 4,
+      "community": 95,
       "norm_label": "dotspalettecard()"
     },
     {
@@ -8739,7 +8766,7 @@
       "source_file": "features/qr-code/model/state.test.ts",
       "source_location": "L1",
       "id": "model_state_test",
-      "community": 22,
+      "community": 7,
       "norm_label": "state.test.ts"
     },
     {
@@ -8748,7 +8775,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L1",
       "id": "model_state",
-      "community": 22,
+      "community": 7,
       "norm_label": "state.ts"
     },
     {
@@ -8757,7 +8784,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L14",
       "id": "model_state_gradientstop",
-      "community": 22,
+      "community": 7,
       "norm_label": "gradientstop"
     },
     {
@@ -8766,7 +8793,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L19",
       "id": "model_state_studiogradient",
-      "community": 36,
+      "community": 30,
       "norm_label": "studiogradient"
     },
     {
@@ -8784,7 +8811,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L27",
       "id": "model_state_dotscolormode",
-      "community": 22,
+      "community": 4,
       "norm_label": "dotscolormode"
     },
     {
@@ -8793,7 +8820,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L28",
       "id": "model_state_assetsourcemode",
-      "community": 22,
+      "community": 4,
       "norm_label": "assetsourcemode"
     },
     {
@@ -8802,7 +8829,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L29",
       "id": "model_state_qrdotmatrixsquareloader",
-      "community": 22,
+      "community": 14,
       "norm_label": "qrdotmatrixsquareloader"
     },
     {
@@ -8811,7 +8838,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L50",
       "id": "model_state_qrdotmatrixcolorpreset",
-      "community": 22,
+      "community": 7,
       "norm_label": "qrdotmatrixcolorpreset"
     },
     {
@@ -8820,7 +8847,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L59",
       "id": "model_state_qrdotmatrixpattern",
-      "community": 22,
+      "community": 7,
       "norm_label": "qrdotmatrixpattern"
     },
     {
@@ -8829,7 +8856,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L60",
       "id": "model_state_qrdotmatrixdotshape",
-      "community": 22,
+      "community": 7,
       "norm_label": "qrdotmatrixdotshape"
     },
     {
@@ -8838,7 +8865,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L62",
       "id": "model_state_qrdotmatrixanimationoptions",
-      "community": 22,
+      "community": 14,
       "norm_label": "qrdotmatrixanimationoptions"
     },
     {
@@ -8856,7 +8883,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L87",
       "id": "model_state_studioasset",
-      "community": 22,
+      "community": 7,
       "norm_label": "studioasset"
     },
     {
@@ -8874,7 +8901,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L106",
       "id": "model_state_qrstudiostate",
-      "community": 25,
+      "community": 63,
       "norm_label": "qrstudiostate"
     },
     {
@@ -8883,7 +8910,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L177",
       "id": "model_state_default_gradient",
-      "community": 22,
+      "community": 7,
       "norm_label": "default_gradient"
     },
     {
@@ -8892,7 +8919,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L187",
       "id": "model_state_default_dots_palette",
-      "community": 22,
+      "community": 7,
       "norm_label": "default_dots_palette"
     },
     {
@@ -8901,7 +8928,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L194",
       "id": "model_state_qr_dot_matrix_square_loader_options",
-      "community": 53,
+      "community": 7,
       "norm_label": "qr_dot_matrix_square_loader_options"
     },
     {
@@ -8910,7 +8937,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L220",
       "id": "model_state_qr_dot_matrix_square_loader_values",
-      "community": 22,
+      "community": 7,
       "norm_label": "qr_dot_matrix_square_loader_values"
     },
     {
@@ -8919,7 +8946,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L224",
       "id": "model_state_qr_dot_matrix_color_preset_options",
-      "community": 22,
+      "community": 3,
       "norm_label": "qr_dot_matrix_color_preset_options"
     },
     {
@@ -8928,7 +8955,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L238",
       "id": "model_state_qr_dot_matrix_pattern_options",
-      "community": 22,
+      "community": 3,
       "norm_label": "qr_dot_matrix_pattern_options"
     },
     {
@@ -8937,7 +8964,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L248",
       "id": "model_state_default_dot_matrix_animation",
-      "community": 22,
+      "community": 7,
       "norm_label": "default_dot_matrix_animation"
     },
     {
@@ -8946,7 +8973,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L268",
       "id": "model_state_default_background_shape_options",
-      "community": 25,
+      "community": 63,
       "norm_label": "default_background_shape_options"
     },
     {
@@ -8955,7 +8982,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L280",
       "id": "model_state_createdefaultqrstudiostate",
-      "community": 29,
+      "community": 36,
       "norm_label": "createdefaultqrstudiostate()"
     },
     {
@@ -8964,7 +8991,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L349",
       "id": "model_state_coercenumber",
-      "community": 22,
+      "community": 7,
       "norm_label": "coercenumber()"
     },
     {
@@ -8973,7 +9000,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L362",
       "id": "model_state_clampqrsize",
-      "community": 63,
+      "community": 7,
       "norm_label": "clampqrsize()"
     },
     {
@@ -8991,7 +9018,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L375",
       "id": "model_state_clampdotmatrixanimationspeed",
-      "community": 22,
+      "community": 7,
       "norm_label": "clampdotmatrixanimationspeed()"
     },
     {
@@ -9000,7 +9027,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L384",
       "id": "model_state_clampdotmatrixanimationmatrixsize",
-      "community": 22,
+      "community": 7,
       "norm_label": "clampdotmatrixanimationmatrixsize()"
     },
     {
@@ -9009,7 +9036,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L399",
       "id": "model_state_clampdotmatrixanimationoverlayscale",
-      "community": 22,
+      "community": 7,
       "norm_label": "clampdotmatrixanimationoverlayscale()"
     },
     {
@@ -9018,7 +9045,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L408",
       "id": "model_state_clampdotmatrixanimationopacity",
-      "community": 22,
+      "community": 7,
       "norm_label": "clampdotmatrixanimationopacity()"
     },
     {
@@ -9027,7 +9054,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L417",
       "id": "model_state_coercedotmatrixsquareloader",
-      "community": 22,
+      "community": 7,
       "norm_label": "coercedotmatrixsquareloader()"
     },
     {
@@ -9036,7 +9063,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L423",
       "id": "model_state_coercedotmatrixanimationcolor",
-      "community": 22,
+      "community": 7,
       "norm_label": "coercedotmatrixanimationcolor()"
     },
     {
@@ -9045,7 +9072,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L427",
       "id": "model_state_clampbackgroundshapepaddingpx",
-      "community": 22,
+      "community": 7,
       "norm_label": "clampbackgroundshapepaddingpx()"
     },
     {
@@ -9054,7 +9081,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L436",
       "id": "model_state_clampbackgroundshapestrokewidth",
-      "community": 22,
+      "community": 7,
       "norm_label": "clampbackgroundshapestrokewidth()"
     },
     {
@@ -9063,7 +9090,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L445",
       "id": "model_state_clampbackgroundshapeopacity",
-      "community": 22,
+      "community": 7,
       "norm_label": "clampbackgroundshapeopacity()"
     },
     {
@@ -9072,7 +9099,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L454",
       "id": "model_state_clampbackgroundshapeoffset",
-      "community": 22,
+      "community": 7,
       "norm_label": "clampbackgroundshapeoffset()"
     },
     {
@@ -9081,7 +9108,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L463",
       "id": "model_state_clampbackgroundshapeedgeblur",
-      "community": 22,
+      "community": 7,
       "norm_label": "clampbackgroundshapeedgeblur()"
     },
     {
@@ -9090,7 +9117,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L472",
       "id": "model_state_clampqrbackgroundround",
-      "community": 63,
+      "community": 7,
       "norm_label": "clampqrbackgroundround()"
     },
     {
@@ -9099,7 +9126,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L476",
       "id": "model_state_setsquareqrsize",
-      "community": 44,
+      "community": 7,
       "norm_label": "setsquareqrsize()"
     },
     {
@@ -9108,7 +9135,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L490",
       "id": "model_state_setrasterexportqualitypercent",
-      "community": 22,
+      "community": 7,
       "norm_label": "setrasterexportqualitypercent()"
     },
     {
@@ -9117,7 +9144,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L506",
       "id": "model_state_setdotmatrixanimationoptions",
-      "community": 22,
+      "community": 7,
       "norm_label": "setdotmatrixanimationoptions()"
     },
     {
@@ -9126,7 +9153,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L598",
       "id": "model_state_getassetvalue",
-      "community": 63,
+      "community": 7,
       "norm_label": "getassetvalue()"
     },
     {
@@ -9144,7 +9171,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L608",
       "id": "model_state_hasactivebackgroundshapeoptions",
-      "community": 63,
+      "community": 7,
       "norm_label": "hasactivebackgroundshapeoptions()"
     },
     {
@@ -9153,7 +9180,7 @@
       "source_file": "features/qr-code/model/types.ts",
       "source_location": "L1",
       "id": "model_types",
-      "community": 66,
+      "community": 7,
       "norm_label": "types.ts"
     },
     {
@@ -9171,7 +9198,7 @@
       "source_file": "features/qr-code/model/types.ts",
       "source_location": "L11",
       "id": "model_types_qrdrawtype",
-      "community": 66,
+      "community": 7,
       "norm_label": "qrdrawtype"
     },
     {
@@ -9189,7 +9216,7 @@
       "source_file": "features/qr-code/model/types.ts",
       "source_location": "L54",
       "id": "model_types_qrmode",
-      "community": 66,
+      "community": 7,
       "norm_label": "qrmode"
     },
     {
@@ -9198,7 +9225,7 @@
       "source_file": "features/qr-code/model/types.ts",
       "source_location": "L55",
       "id": "model_types_qrgradienttype",
-      "community": 66,
+      "community": 7,
       "norm_label": "qrgradienttype"
     },
     {
@@ -9342,7 +9369,7 @@
       "source_file": "features/qr-code/rendering/compose-scene.ts",
       "source_location": "L80",
       "id": "rendering_compose_scene_dashboardqrnodepayload",
-      "community": 7,
+      "community": 9,
       "norm_label": "dashboardqrnodepayload"
     },
     {
@@ -10422,7 +10449,7 @@
       "source_file": "features/qr-code/rendering/svg-extension.ts",
       "source_location": "L1288",
       "id": "rendering_svg_extension_getgenerateddotmatrixopacitysamples",
-      "community": 67,
+      "community": 77,
       "norm_label": "getgenerateddotmatrixopacitysamples()"
     },
     {
@@ -10728,7 +10755,7 @@
       "source_file": "features/qr-code/rendering/svg-extension.ts",
       "source_location": "L2185",
       "id": "rendering_svg_extension_createalignedcornergradientextension",
-      "community": 14,
+      "community": 53,
       "norm_label": "createalignedcornergradientextension()"
     },
     {
@@ -10773,7 +10800,7 @@
       "source_file": "features/qr-code/rendering/svg-extension.ts",
       "source_location": "L2328",
       "id": "rendering_svg_extension_getalignedcornergradientrotation",
-      "community": 14,
+      "community": 53,
       "norm_label": "getalignedcornergradientrotation()"
     },
     {
@@ -10836,7 +10863,7 @@
       "source_file": "features/qr-code/styles/background-shapes.ts",
       "source_location": "L1",
       "id": "styles_background_shapes",
-      "community": 3,
+      "community": 82,
       "norm_label": "background-shapes.ts"
     },
     {
@@ -10845,7 +10872,7 @@
       "source_file": "features/qr-code/styles/background-shapes.ts",
       "source_location": "L1",
       "id": "styles_background_shapes_qrbackgroundshapeid",
-      "community": 3,
+      "community": 82,
       "norm_label": "qrbackgroundshapeid"
     },
     {
@@ -10854,7 +10881,7 @@
       "source_file": "features/qr-code/styles/background-shapes.ts",
       "source_location": "L26",
       "id": "styles_background_shapes_qrbackgroundshapedefinition",
-      "community": 3,
+      "community": 82,
       "norm_label": "qrbackgroundshapedefinition"
     },
     {
@@ -10863,7 +10890,7 @@
       "source_file": "features/qr-code/styles/background-shapes.ts",
       "source_location": "L36",
       "id": "styles_background_shapes_qr_background_shapes",
-      "community": 3,
+      "community": 82,
       "norm_label": "qr_background_shapes"
     },
     {
@@ -10872,7 +10899,7 @@
       "source_file": "features/qr-code/styles/background-shapes.ts",
       "source_location": "L171",
       "id": "styles_background_shapes_getqrbackgroundshapedefinition",
-      "community": 30,
+      "community": 62,
       "norm_label": "getqrbackgroundshapedefinition()"
     },
     {
@@ -11403,7 +11430,7 @@
       "source_file": "features/workspace/components/Canvas.tsx",
       "source_location": "L143",
       "id": "components_canvas_grouppanes",
-      "community": 42,
+      "community": 64,
       "norm_label": "grouppanes()"
     },
     {
@@ -11493,7 +11520,7 @@
       "source_file": "features/workspace/components/Canvas.tsx",
       "source_location": "L752",
       "id": "components_canvas_canvas",
-      "community": 42,
+      "community": 64,
       "norm_label": "canvas()"
     },
     {
@@ -12735,7 +12762,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L185",
       "id": "components_stylepanel_draftingcontenttab",
-      "community": 3,
+      "community": 70,
       "norm_label": "draftingcontenttab()"
     },
     {
@@ -12753,7 +12780,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L369",
       "id": "components_stylepanel_builddraftingcontentfielditems",
-      "community": 3,
+      "community": 70,
       "norm_label": "builddraftingcontentfielditems()"
     },
     {
@@ -12762,7 +12789,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L834",
       "id": "components_stylepanel_isurlcontenttype",
-      "community": 3,
+      "community": 70,
       "norm_label": "isurlcontenttype()"
     },
     {
@@ -12771,7 +12798,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L855",
       "id": "components_stylepanel_isusernamecontenttype",
-      "community": 3,
+      "community": 70,
       "norm_label": "isusernamecontenttype()"
     },
     {
@@ -12780,7 +12807,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L868",
       "id": "components_stylepanel_stringcontentvalue",
-      "community": 3,
+      "community": 70,
       "norm_label": "stringcontentvalue()"
     },
     {
@@ -12798,7 +12825,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L892",
       "id": "components_stylepanel_draftingsizetab",
-      "community": 1,
+      "community": 3,
       "norm_label": "draftingsizetab()"
     },
     {
@@ -12951,7 +12978,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L1993",
       "id": "components_stylepanel_notifypapershaderthumbnailsubscribers",
-      "community": 3,
+      "community": 79,
       "norm_label": "notifypapershaderthumbnailsubscribers()"
     },
     {
@@ -12969,7 +12996,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L2010",
       "id": "components_stylepanel_requestpapershaderthumbnail",
-      "community": 3,
+      "community": 79,
       "norm_label": "requestpapershaderthumbnail()"
     },
     {
@@ -12978,7 +13005,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L2029",
       "id": "components_stylepanel_processnextpapershaderthumbnail",
-      "community": 3,
+      "community": 79,
       "norm_label": "processnextpapershaderthumbnail()"
     },
     {
@@ -12987,7 +13014,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L2043",
       "id": "components_stylepanel_finishpapershaderthumbnail",
-      "community": 3,
+      "community": 79,
       "norm_label": "finishpapershaderthumbnail()"
     },
     {
@@ -13068,7 +13095,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L2490",
       "id": "components_stylepanel_draftingcardcolorstab",
-      "community": 24,
+      "community": 22,
       "norm_label": "draftingcardcolorstab()"
     },
     {
@@ -13453,7 +13480,7 @@
       "label": "renderSurface()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4320",
+      "source_location": "L4337",
       "id": "components_workspacesurface_test_rendersurface",
       "community": 16,
       "norm_label": "rendersurface()"
@@ -13462,7 +13489,7 @@
       "label": "renderDesktopOverlaySurface()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4382",
+      "source_location": "L4399",
       "id": "components_workspacesurface_test_renderdesktopoverlaysurface",
       "community": 16,
       "norm_label": "renderdesktopoverlaysurface()"
@@ -13471,7 +13498,7 @@
       "label": "getRequiredElement()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4417",
+      "source_location": "L4434",
       "id": "components_workspacesurface_test_getrequiredelement",
       "community": 16,
       "norm_label": "getrequiredelement()"
@@ -13480,7 +13507,7 @@
       "label": "getRadioInputByAriaLabel()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4425",
+      "source_location": "L4442",
       "id": "components_workspacesurface_test_getradioinputbyarialabel",
       "community": 16,
       "norm_label": "getradioinputbyarialabel()"
@@ -13489,7 +13516,7 @@
       "label": "activateElement()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4435",
+      "source_location": "L4452",
       "id": "components_workspacesurface_test_activateelement",
       "community": 16,
       "norm_label": "activateelement()"
@@ -13498,7 +13525,7 @@
       "label": "dispatchBodyShortcut()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4457",
+      "source_location": "L4474",
       "id": "components_workspacesurface_test_dispatchbodyshortcut",
       "community": 16,
       "norm_label": "dispatchbodyshortcut()"
@@ -13507,7 +13534,7 @@
       "label": "changeInputValue()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4471",
+      "source_location": "L4488",
       "id": "components_workspacesurface_test_changeinputvalue",
       "community": 16,
       "norm_label": "changeinputvalue()"
@@ -13516,7 +13543,7 @@
       "label": "setInputFiles()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4486",
+      "source_location": "L4503",
       "id": "components_workspacesurface_test_setinputfiles",
       "community": 16,
       "norm_label": "setinputfiles()"
@@ -13525,7 +13552,7 @@
       "label": "createDataTransfer()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4493",
+      "source_location": "L4510",
       "id": "components_workspacesurface_test_createdatatransfer",
       "community": 16,
       "norm_label": "createdatatransfer()"
@@ -13534,7 +13561,7 @@
       "label": "createDragEvent()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4506",
+      "source_location": "L4523",
       "id": "components_workspacesurface_test_createdragevent",
       "community": 16,
       "norm_label": "createdragevent()"
@@ -13543,7 +13570,7 @@
       "label": "openCardOnlyMode()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4519",
+      "source_location": "L4536",
       "id": "components_workspacesurface_test_opencardonlymode",
       "community": 16,
       "norm_label": "opencardonlymode()"
@@ -13552,7 +13579,7 @@
       "label": "getSelectedPreviewCard()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4532",
+      "source_location": "L4549",
       "id": "components_workspacesurface_test_getselectedpreviewcard",
       "community": 16,
       "norm_label": "getselectedpreviewcard()"
@@ -13561,7 +13588,7 @@
       "label": "getAccordionTriggerByText()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4548",
+      "source_location": "L4565",
       "id": "components_workspacesurface_test_getaccordiontriggerbytext",
       "community": 16,
       "norm_label": "getaccordiontriggerbytext()"
@@ -13570,7 +13597,7 @@
       "label": "getButtonByExactText()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4558",
+      "source_location": "L4575",
       "id": "components_workspacesurface_test_getbuttonbyexacttext",
       "community": 16,
       "norm_label": "getbuttonbyexacttext()"
@@ -13579,7 +13606,7 @@
       "label": "flushPromises()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4568",
+      "source_location": "L4585",
       "id": "components_workspacesurface_test_flushpromises",
       "community": 16,
       "norm_label": "flushpromises()"
@@ -13588,7 +13615,7 @@
       "label": "waitForDraftingSurface()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4572",
+      "source_location": "L4589",
       "id": "components_workspacesurface_test_waitfordraftingsurface",
       "community": 16,
       "norm_label": "waitfordraftingsurface()"
@@ -13597,7 +13624,7 @@
       "label": "addQrCode()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4579",
+      "source_location": "L4596",
       "id": "components_workspacesurface_test_addqrcode",
       "community": 16,
       "norm_label": "addqrcode()"
@@ -13606,7 +13633,7 @@
       "label": "advanceDraftingTimers()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4587",
+      "source_location": "L4604",
       "id": "components_workspacesurface_test_advancedraftingtimers",
       "community": 16,
       "norm_label": "advancedraftingtimers()"
@@ -13615,7 +13642,7 @@
       "label": "createMemoryStorage()",
       "file_type": "code",
       "source_file": "features/workspace/components/WorkspaceSurface.test.tsx",
-      "source_location": "L4596",
+      "source_location": "L4613",
       "id": "components_workspacesurface_test_creatememorystorage",
       "community": 16,
       "norm_label": "creatememorystorage()"
@@ -13986,7 +14013,7 @@
       "source_file": "features/workspace/components/WorkspaceSurface.tsx",
       "source_location": "L4816",
       "id": "components_workspacesurface_patchdraftinglayerbyid",
-      "community": 47,
+      "community": 65,
       "norm_label": "patchdraftinglayerbyid()"
     },
     {
@@ -14076,7 +14103,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L40",
       "id": "export_layered_export_builddraftinglayerednodepayload",
-      "community": 25,
+      "community": 63,
       "norm_label": "builddraftinglayerednodepayload()"
     },
     {
@@ -14094,7 +14121,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L86",
       "id": "export_layered_export_builddraftinglayeredsvgmarkup",
-      "community": 25,
+      "community": 63,
       "norm_label": "builddraftinglayeredsvgmarkup()"
     },
     {
@@ -14103,7 +14130,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L118",
       "id": "export_layered_export_getdraftinglayerbounds",
-      "community": 25,
+      "community": 30,
       "norm_label": "getdraftinglayerbounds()"
     },
     {
@@ -14247,7 +14274,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L1",
       "id": "model_card_patterns",
-      "community": 24,
+      "community": 22,
       "norm_label": "card-patterns.ts"
     },
     {
@@ -14256,7 +14283,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L3",
       "id": "model_card_patterns_drafting_card_pattern_none_id",
-      "community": 24,
+      "community": 22,
       "norm_label": "drafting_card_pattern_none_id"
     },
     {
@@ -14265,7 +14292,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L5",
       "id": "model_card_patterns_draftingcardpatterncolorslotid",
-      "community": 24,
+      "community": 22,
       "norm_label": "draftingcardpatterncolorslotid"
     },
     {
@@ -14274,7 +14301,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L6",
       "id": "model_card_patterns_draftingcardpatternstyle",
-      "community": 24,
+      "community": 22,
       "norm_label": "draftingcardpatternstyle"
     },
     {
@@ -14283,7 +14310,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L8",
       "id": "model_card_patterns_draftingcardpatterncoloroverrides",
-      "community": 24,
+      "community": 22,
       "norm_label": "draftingcardpatterncoloroverrides"
     },
     {
@@ -14292,7 +14319,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L10",
       "id": "model_card_patterns_draftingcardpatterncolorslot",
-      "community": 24,
+      "community": 22,
       "norm_label": "draftingcardpatterncolorslot"
     },
     {
@@ -14301,7 +14328,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L16",
       "id": "model_card_patterns_draftingcardpattern",
-      "community": 24,
+      "community": 22,
       "norm_label": "draftingcardpattern"
     },
     {
@@ -14310,7 +14337,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L2662",
       "id": "model_card_patterns_draftingcardpatternid",
-      "community": 24,
+      "community": 22,
       "norm_label": "draftingcardpatternid"
     },
     {
@@ -14319,7 +14346,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L2663",
       "id": "model_card_patterns_draftingcardpatternselectionid",
-      "community": 24,
+      "community": 22,
       "norm_label": "draftingcardpatternselectionid"
     },
     {
@@ -14328,7 +14355,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L2667",
       "id": "model_card_patterns_getdraftingcardpatternbyid",
-      "community": 24,
+      "community": 22,
       "norm_label": "getdraftingcardpatternbyid()"
     },
     {
@@ -14337,7 +14364,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L2677",
       "id": "model_card_patterns_getdraftingcardpatternstyle",
-      "community": 24,
+      "community": 22,
       "norm_label": "getdraftingcardpatternstyle()"
     },
     {
@@ -14436,7 +14463,7 @@
       "source_file": "features/workspace/model/card-state.ts",
       "source_location": "L103",
       "id": "model_card_state_clonedraftingcardstate",
-      "community": 24,
+      "community": 29,
       "norm_label": "clonedraftingcardstate()"
     },
     {
@@ -14544,7 +14571,7 @@
       "source_file": "features/workspace/model/document.ts",
       "source_location": "L38",
       "id": "model_document_draftingworkspacedocumentv1",
-      "community": 65,
+      "community": 29,
       "norm_label": "draftingworkspacedocumentv1"
     },
     {
@@ -14616,7 +14643,7 @@
       "source_file": "features/workspace/model/document.ts",
       "source_location": "L242",
       "id": "model_document_parsebackgroundshapeoptions",
-      "community": 22,
+      "community": 7,
       "norm_label": "parsebackgroundshapeoptions()"
     },
     {
@@ -14778,7 +14805,7 @@
       "source_file": "features/workspace/model/fonts.ts",
       "source_location": "L211",
       "id": "model_fonts_ensuredraftingfontsforlayers",
-      "community": 25,
+      "community": 63,
       "norm_label": "ensuredraftingfontsforlayers()"
     },
     {
@@ -14877,7 +14904,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L1",
       "id": "model_layers",
-      "community": 15,
+      "community": 47,
       "norm_label": "layers.ts"
     },
     {
@@ -14886,7 +14913,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L14",
       "id": "model_layers_draftingcanvaslayerkind",
-      "community": 15,
+      "community": 47,
       "norm_label": "draftingcanvaslayerkind"
     },
     {
@@ -14895,7 +14922,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L15",
       "id": "model_layers_draftingtextalign",
-      "community": 15,
+      "community": 47,
       "norm_label": "draftingtextalign"
     },
     {
@@ -14904,7 +14931,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L16",
       "id": "model_layers_draftingtextfontstyle",
-      "community": 15,
+      "community": 47,
       "norm_label": "draftingtextfontstyle"
     },
     {
@@ -14913,7 +14940,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L17",
       "id": "model_layers_draftingtextfontweight",
-      "community": 15,
+      "community": 47,
       "norm_label": "draftingtextfontweight"
     },
     {
@@ -14922,7 +14949,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L18",
       "id": "model_layers_draftingtextrun",
-      "community": 25,
+      "community": 8,
       "norm_label": "draftingtextrun"
     },
     {
@@ -14931,7 +14958,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L29",
       "id": "model_layers_draftingcanvaslayer",
-      "community": 68,
+      "community": 47,
       "norm_label": "draftingcanvaslayer"
     },
     {
@@ -14949,7 +14976,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L61",
       "id": "model_layers_draftinglayerreorderaction",
-      "community": 15,
+      "community": 8,
       "norm_label": "draftinglayerreorderaction"
     },
     {
@@ -14958,7 +14985,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L62",
       "id": "model_layers_draftinglayeralignaction",
-      "community": 15,
+      "community": 8,
       "norm_label": "draftinglayeralignaction"
     },
     {
@@ -14967,7 +14994,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L69",
       "id": "model_layers_draftinglayerdistributeaction",
-      "community": 15,
+      "community": 8,
       "norm_label": "draftinglayerdistributeaction"
     },
     {
@@ -14976,7 +15003,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L74",
       "id": "model_layers_default_layer_shadow",
-      "community": 15,
+      "community": 47,
       "norm_label": "default_layer_shadow"
     },
     {
@@ -15012,7 +15039,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L103",
       "id": "model_layers_isdraftingcardlayerid",
-      "community": 15,
+      "community": 47,
       "norm_label": "isdraftingcardlayerid()"
     },
     {
@@ -15021,7 +15048,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L107",
       "id": "model_layers_isdraftingqrlayerid",
-      "community": 15,
+      "community": 47,
       "norm_label": "isdraftingqrlayerid()"
     },
     {
@@ -15030,7 +15057,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L111",
       "id": "model_layers_createdefaultdraftinglayers",
-      "community": 44,
+      "community": 29,
       "norm_label": "createdefaultdraftinglayers()"
     },
     {
@@ -15048,7 +15075,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L181",
       "id": "model_layers_clonedraftingcanvaslayer",
-      "community": 47,
+      "community": 65,
       "norm_label": "clonedraftingcanvaslayer()"
     },
     {
@@ -15066,7 +15093,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L201",
       "id": "model_layers_normalizedraftingcanvaslayers",
-      "community": 44,
+      "community": 29,
       "norm_label": "normalizedraftingcanvaslayers()"
     },
     {
@@ -15075,7 +15102,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L227",
       "id": "model_layers_patchdraftingcanvaslayer",
-      "community": 47,
+      "community": 65,
       "norm_label": "patchdraftingcanvaslayer()"
     },
     {
@@ -15165,7 +15192,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L475",
       "id": "model_layers_roundlayerpatch",
-      "community": 15,
+      "community": 47,
       "norm_label": "roundlayerpatch()"
     },
     {
@@ -15183,7 +15210,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L528",
       "id": "model_layers_normalizedraftinglayercontext",
-      "community": 15,
+      "community": 47,
       "norm_label": "normalizedraftinglayercontext"
     },
     {
@@ -15282,7 +15309,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L743",
       "id": "model_layers_remapdraftingcanvaslayerforpaste",
-      "community": 47,
+      "community": 65,
       "norm_label": "remapdraftingcanvaslayerforpaste()"
     },
     {
@@ -15291,7 +15318,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L773",
       "id": "model_layers_createdraftinglayerinstanceid",
-      "community": 47,
+      "community": 65,
       "norm_label": "createdraftinglayerinstanceid()"
     },
     {
@@ -15300,7 +15327,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L782",
       "id": "model_layers_rectanglesintersect",
-      "community": 15,
+      "community": 47,
       "norm_label": "rectanglesintersect()"
     },
     {
@@ -15390,7 +15417,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L934",
       "id": "model_layers_aretextrunstylesequal",
-      "community": 15,
+      "community": 47,
       "norm_label": "aretextrunstylesequal()"
     },
     {
@@ -15417,7 +15444,7 @@
       "source_file": "features/workspace/model/layout-engine.test.ts",
       "source_location": "L1",
       "id": "model_layout_engine_test",
-      "community": 42,
+      "community": 64,
       "norm_label": "layout-engine.test.ts"
     },
     {
@@ -15426,7 +15453,7 @@
       "source_file": "features/workspace/model/layout-engine.ts",
       "source_location": "L1",
       "id": "model_layout_engine",
-      "community": 42,
+      "community": 64,
       "norm_label": "layout-engine.ts"
     },
     {
@@ -15435,7 +15462,7 @@
       "source_file": "features/workspace/model/layout-engine.ts",
       "source_location": "L1",
       "id": "model_layout_engine_qrlayout",
-      "community": 42,
+      "community": 64,
       "norm_label": "qrlayout"
     },
     {
@@ -15444,7 +15471,7 @@
       "source_file": "features/workspace/model/layout-engine.ts",
       "source_location": "L8",
       "id": "model_layout_engine_getqrlayout",
-      "community": 42,
+      "community": 64,
       "norm_label": "getqrlayout()"
     },
     {
@@ -15453,7 +15480,7 @@
       "source_file": "features/workspace/model/storage.ts",
       "source_location": "L1",
       "id": "model_storage",
-      "community": 65,
+      "community": 29,
       "norm_label": "storage.ts"
     },
     {
@@ -15462,7 +15489,7 @@
       "source_file": "features/workspace/model/storage.ts",
       "source_location": "L13",
       "id": "model_storage_storeddraftingworkspacerecord",
-      "community": 65,
+      "community": 29,
       "norm_label": "storeddraftingworkspacerecord"
     },
     {
@@ -15471,7 +15498,7 @@
       "source_file": "features/workspace/model/storage.ts",
       "source_location": "L19",
       "id": "model_storage_readdraftingworkspacedraft",
-      "community": 65,
+      "community": 29,
       "norm_label": "readdraftingworkspacedraft()"
     },
     {
@@ -15480,7 +15507,7 @@
       "source_file": "features/workspace/model/storage.ts",
       "source_location": "L34",
       "id": "model_storage_writedraftingworkspacedraft",
-      "community": 65,
+      "community": 29,
       "norm_label": "writedraftingworkspacedraft()"
     },
     {
@@ -15489,7 +15516,7 @@
       "source_file": "features/workspace/model/storage.ts",
       "source_location": "L49",
       "id": "model_storage_opendraftingworkspacedb",
-      "community": 65,
+      "community": 29,
       "norm_label": "opendraftingworkspacedb()"
     },
     {
@@ -15498,7 +15525,7 @@
       "source_file": "features/workspace/model/storage.ts",
       "source_location": "L70",
       "id": "model_storage_readindexeddbdraft",
-      "community": 65,
+      "community": 29,
       "norm_label": "readindexeddbdraft()"
     },
     {
@@ -15507,7 +15534,7 @@
       "source_file": "features/workspace/model/storage.ts",
       "source_location": "L87",
       "id": "model_storage_writeindexeddbdraft",
-      "community": 65,
+      "community": 29,
       "norm_label": "writeindexeddbdraft()"
     },
     {
@@ -15516,7 +15543,7 @@
       "source_file": "features/workspace/model/storage.ts",
       "source_location": "L107",
       "id": "model_storage_normalizestoredrecord",
-      "community": 65,
+      "community": 29,
       "norm_label": "normalizestoredrecord()"
     },
     {
@@ -15570,7 +15597,7 @@
       "source_file": "features/workspace/rendering/paper-shaders.tsx",
       "source_location": "L104",
       "id": "rendering_paper_shaders_papershaderparams",
-      "community": 23,
+      "community": 24,
       "norm_label": "papershaderparams"
     },
     {
@@ -15813,7 +15840,7 @@
       "source_file": "features/workspace/rendering/paper-shaders.tsx",
       "source_location": "L1004",
       "id": "rendering_paper_shaders_papershaderid",
-      "community": 23,
+      "community": 24,
       "norm_label": "papershaderid"
     },
     {
@@ -15876,7 +15903,7 @@
       "source_file": "features/workspace/rendering/qr-artwork.ts",
       "source_location": "L1",
       "id": "rendering_qr_artwork",
-      "community": 25,
+      "community": 63,
       "norm_label": "qr-artwork.ts"
     },
     {
@@ -15885,7 +15912,7 @@
       "source_file": "features/workspace/rendering/qr-artwork.ts",
       "source_location": "L6",
       "id": "rendering_qr_artwork_createdraftingqrartworkstate",
-      "community": 25,
+      "community": 63,
       "norm_label": "createdraftingqrartworkstate()"
     },
     {
@@ -15894,7 +15921,7 @@
       "source_file": "features/workspace/rendering/qr-artwork.ts",
       "source_location": "L14",
       "id": "rendering_qr_artwork_sanitizedraftingqrartworkmarkup",
-      "community": 25,
+      "community": 63,
       "norm_label": "sanitizedraftingqrartworkmarkup()"
     },
     {
@@ -15903,7 +15930,7 @@
       "source_file": "features/workspace/rendering/qr-artwork.ts",
       "source_location": "L48",
       "id": "rendering_qr_artwork_islegacyqrbackingnode",
-      "community": 25,
+      "community": 63,
       "norm_label": "islegacyqrbackingnode()"
     },
     {
@@ -16074,7 +16101,7 @@
       "source_file": "hooks/use-auto-resize-textarea.ts",
       "source_location": "L1",
       "id": "hooks_use_auto_resize_textarea",
-      "community": 64,
+      "community": 95,
       "norm_label": "use-auto-resize-textarea.ts"
     },
     {
@@ -16083,7 +16110,7 @@
       "source_file": "hooks/use-auto-resize-textarea.ts",
       "source_location": "L3",
       "id": "hooks_use_auto_resize_textarea_useautoresizetextareaprops",
-      "community": 64,
+      "community": 95,
       "norm_label": "useautoresizetextareaprops"
     },
     {
@@ -16092,7 +16119,7 @@
       "source_file": "hooks/use-auto-resize-textarea.ts",
       "source_location": "L8",
       "id": "hooks_use_auto_resize_textarea_useautoresizetextarea",
-      "community": 64,
+      "community": 95,
       "norm_label": "useautoresizetextarea()"
     },
     {
@@ -24010,6 +24037,17 @@
       "target": "fill_picker_fill_picker"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L120",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_floatingtoolbar",
+      "target": "fill_picker_fill_picker"
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "components/ui/fill-picker/fill-picker.tsx",
@@ -24545,6 +24583,17 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "components_colorfield",
+      "target": "fill_picker_fill_picker_colorpicker"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L120",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_floatingtoolbar",
       "target": "fill_picker_fill_picker_colorpicker"
     },
     {
@@ -26211,6 +26260,28 @@
       "target": "lib_color_parsecolor"
     },
     {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L120",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_floatingtoolbar",
+      "target": "lib_color_parsecolor"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L3349",
+      "weight": 1.0,
+      "source": "components_floatingtoolbar_parsedesktopcolor",
+      "target": "lib_color_parsecolor"
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -26863,6 +26934,17 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "components_colorfield",
+      "target": "lib_types_oklchcolor"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L120",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_floatingtoolbar",
       "target": "lib_types_oklchcolor"
     },
     {
@@ -28938,6 +29020,17 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L115",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_floatingtoolbar",
+      "target": "ui_popover"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "features/workspace/components/WorkspaceSurface.tsx",
       "source_location": "L196",
       "weight": 1.0,
@@ -28986,6 +29079,17 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "components_canvas",
+      "target": "ui_popover_popovercontent"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L115",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_floatingtoolbar",
       "target": "ui_popover_popovercontent"
     },
     {
@@ -31833,6 +31937,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L197",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_floatingtoolbar",
+      "target": "components_floatingtoolbar_desktop_color_picker_swatches"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
       "source_location": "L286",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -32018,6 +32132,16 @@
       "confidence_score": 1.0,
       "source": "components_floatingtoolbar",
       "target": "components_floatingtoolbar_desktopcolorinputrow"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L3279",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_floatingtoolbar",
+      "target": "components_floatingtoolbar_desktopcolorpickerpopover"
     },
     {
       "relation": "contains",
@@ -32748,6 +32872,16 @@
       "confidence_score": 1.0,
       "source": "components_floatingtoolbar",
       "target": "components_floatingtoolbar_isusernamecontenttype"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L3348",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_floatingtoolbar",
+      "target": "components_floatingtoolbar_parsedesktopcolor"
     },
     {
       "relation": "contains",
@@ -33769,6 +33903,17 @@
       "confidence_score": 1.0,
       "source": "components_floatingtoolbar_desktopshapepresetbutton",
       "target": "components_floatingtoolbar_getdesktopadaptiveoptionpreviewstyle"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L3293",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_floatingtoolbar_desktopcolorpickerpopover",
+      "target": "components_floatingtoolbar_parsedesktopcolor"
     },
     {
       "relation": "calls",
@@ -60123,5 +60268,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "3da61d457570c7a78c7218aa3ea4c363f2240cd7"
+  "built_at_commit": "b9be537c1a33bccb65aebe013790577509bff112"
 }

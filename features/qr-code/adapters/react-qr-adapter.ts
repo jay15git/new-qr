@@ -44,10 +44,7 @@ export function toReactQrCodeProps(state: QrStudioState): ReactQRCodeProps {
         : state.finderPatternOuterSettings.color,
       style: state.finderPatternOuterSettings.type,
     },
-    gradient:
-      getDotsGradient(state) ??
-      buildGradient(state.finderPatternOuterGradient) ??
-      buildGradient(state.finderPatternInnerGradient),
+    gradient: getDotsGradient(state),
     imageSettings: logoImage
       ? {
           crossOrigin: state.imageOptions.crossOrigin,
