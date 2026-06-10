@@ -4648,7 +4648,7 @@ export function WorkspaceSurface({
               aria-label={`${activeToolConfig.title} inspector panel`}
               data-active-tool={activeTool}
               data-slot="drafting-tab-panel-scroll"
-              className="h-full w-full overflow-x-hidden scroll-fade-effect-y"
+              className="h-full w-full overflow-x-hidden overflow-y-auto scroll-fade-effect-y"
             >
               <div className="min-w-0 max-w-full overflow-x-hidden px-3 py-4 sm:px-4">
                 {renderStackedInspectorContent(activeTool)}

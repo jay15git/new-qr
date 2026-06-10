@@ -1,0 +1,71 @@
+// @vitest-environment jsdom
+
+import { describe, expect, it, vi } from "vitest"
+
+const buildDashboardQrNodePayloadSpy = vi.fn()
+
+vi.mock("@/features/qr-code/rendering/qr-svg", () => ({
+  buildDashboardQrNodePayload: (
+    ...args: Parameters<typeof buildDashboardQrNodePayloadSpy>
+  ) => buildDashboardQrNodePayloadSpy(...args),
+}))
+
+import { createDefaultQrStudioState } from "@/features/qr-code/model/state"
+import { buildDraftingLayeredNodePayload } from "@/features/workspace/export/layered-export"
+import { createDefaultDraftingCardState } from "@/features/workspace/model/card-state"
+import { createDefaultDraftingLayers } from "@/features/workspace/model/layers"
+
+describe("drafting layered export", () => {
+  it("exports app-owned qr background shapes without qr-library backing artifacts", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue({
+      markup:
+        '<svg width="240" height="240" viewBox="0 0 240 240"><defs><filter data-qr-layer="background-shape-blur-filter" id="background-shape-blur-filter"/><clipPath id="clip-path-background-color-0"><rect width="240" height="240"/></clipPath><clipPath id="clip-path-dot-color-0"><path d="M20 20h40v40H20z"/></clipPath></defs><path data-qr-layer="background-shape" d="M0 0h240v240H0z"/><rect width="240" height="240" clip-path="url(\'#clip-path-background-color-0\')" fill="#fff"/><path data-qr-layer="dot" clip-path="url(\'#clip-path-dot-color-0\')" d="M20 20h40v40H20z" fill="#111"/></svg>',
+      naturalHeight: 240,
+      naturalWidth: 240,
+    })
+    const state = createDefaultQrStudioState()
+    state.backgroundShapeId = "flower"
+    state.backgroundImage = {
+      source: "url",
+      value: "https://example.com/background.png",
+    }
+    state.backgroundGradient = {
+      enabled: true,
+      type: "linear",
+      rotation: 45,
+      colorStops: [
+        { offset: 0, color: "#ff0000" },
+        { offset: 1, color: "#0000ff" },
+      ],
+    }
+    const cardState = createDefaultDraftingCardState()
+    const layers = createDefaultDraftingLayers("preview", state, cardState)
+
+    const payload = await buildDraftingLayeredNodePayload({
+      cardState,
+      layers,
+      name: "QR Code",
+      nodeId: "preview",
+      state,
+    })
+
+    expect(buildDashboardQrNodePayloadSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        backgroundGradient: expect.objectContaining({ enabled: false }),
+        backgroundImage: {
+          source: "none",
+          value: undefined,
+          presetId: undefined,
+          presetColor: undefined,
+        },
+        backgroundOptions: expect.objectContaining({ transparent: true }),
+        backgroundShapeId: "none",
+      }),
+      expect.objectContaining({ animationMode: "export" }),
+    )
+    expect(payload.originalSvgMarkup).toContain('data-drafting-qr-background="flower"')
+    expect(payload.originalSvgMarkup).toContain('data-qr-layer="dot"')
+    expect(payload.originalSvgMarkup).not.toContain('data-qr-layer="background-shape"')
+    expect(payload.originalSvgMarkup).not.toContain("clip-path-background-color")
+  })
+})

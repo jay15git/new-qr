@@ -3703,8 +3703,9 @@ describe("WorkspaceSurface", () => {
     expect(panelScrollArea.getAttribute("data-scrollbar-visibility")).toBe("while-scrolling")
     expect(panelScrollArea.className).toContain("overflow-hidden")
     expect(panelScroll.className).toContain("overflow-x-hidden")
+    expect(panelScroll.className).toContain("overflow-y-auto")
+    expect(panelScroll.className).not.toContain("overflow-y-scroll")
     expect(panelScroll.className).toContain("scroll-fade-effect-y")
-    expect(panelScroll.className).not.toContain("overflow-y-auto")
     expect(panelScroll.getAttribute("data-radix-scroll-area-viewport")).toBe("")
     expect(
       surface.container.querySelector('[data-slot="drafting-tab-panel-scrollbar"]'),
@@ -3716,9 +3717,12 @@ describe("WorkspaceSurface", () => {
 
     expect(globalsSource).toContain('[data-slot="drafting-nav"]::before')
     expect(globalsSource).not.toContain('[data-slot="drafting-nav"]::after')
+    expect(globalsSource).toContain('[data-slot="drafting-tab-panel-scroll"]')
+    expect(globalsSource).toContain("scrollbar-width: none")
+    expect(globalsSource).toContain("::-webkit-scrollbar")
   })
 
-  it("keeps the drafting background preview solid on first render and after reset", async () => {
+  it("keeps the qr renderer foreground-only on first render and after reset", async () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue(QR_PAYLOAD)
     const surface = renderSurface({ includeResetOverlay: true, openDownloadPopover: false })
 
@@ -3729,7 +3733,9 @@ describe("WorkspaceSurface", () => {
     >
     const initialState = initialCall[0]?.[0]
 
-    expect(initialState?.backgroundOptions.transparent).toBe(false)
+    expect(initialState?.backgroundOptions.transparent).toBe(true)
+    expect(initialState?.backgroundShapeId).toBe("none")
+    expect(initialState?.backgroundGradient.enabled).toBe(false)
     expect(initialState?.width).toBe(240)
     expect(initialState?.height).toBe(240)
 
@@ -3744,9 +3750,9 @@ describe("WorkspaceSurface", () => {
     >
     const resetState = resetCall.at(-1)?.[0]
 
-    expect(
-      resetState?.backgroundOptions.transparent,
-    ).toBe(false)
+    expect(resetState?.backgroundOptions.transparent).toBe(true)
+    expect(resetState?.backgroundShapeId).toBe("none")
+    expect(resetState?.backgroundGradient.enabled).toBe(false)
     expect(resetState?.width).toBe(240)
     expect(resetState?.height).toBe(240)
   })

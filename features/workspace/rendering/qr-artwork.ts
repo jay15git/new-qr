@@ -6,6 +6,20 @@ import {
 export function createDraftingQrArtworkState(state: QrStudioState): QrStudioState {
   return {
     ...state,
+    backgroundGradient: {
+      ...state.backgroundGradient,
+      enabled: false,
+    },
+    backgroundImage: {
+      source: "none",
+      value: undefined,
+      presetId: undefined,
+      presetColor: undefined,
+    },
+    backgroundOptions: {
+      ...state.backgroundOptions,
+      transparent: true,
+    },
     backgroundShapeId: "none",
     backgroundShapeOptions: { ...DEFAULT_BACKGROUND_SHAPE_OPTIONS },
   }
@@ -36,6 +50,12 @@ export function sanitizeDraftingQrArtworkMarkup(markup: string) {
     }
   }
 
+  for (const clipPath of Array.from(svg.querySelectorAll("clipPath"))) {
+    if (isLegacyQrBackingNode(clipPath)) {
+      clipPath.remove()
+    }
+  }
+
   for (const defs of Array.from(svg.querySelectorAll("defs"))) {
     if (defs.children.length === 0) {
       defs.remove()
@@ -49,6 +69,12 @@ function isLegacyQrBackingNode(node: Element) {
   const layer = node.getAttribute("data-qr-layer")
 
   if (layer?.startsWith("background-")) {
+    return true
+  }
+
+  const id = node.getAttribute("id")
+
+  if (id?.includes("clip-path-background-color")) {
     return true
   }
 

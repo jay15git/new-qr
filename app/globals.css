@@ -330,6 +330,14 @@
   animation-fill-mode: both;
 }
 
+[data-slot="drafting-tab-panel-scroll"] {
+  scrollbar-width: none;
+}
+
+[data-slot="drafting-tab-panel-scroll"]::-webkit-scrollbar {
+  display: none;
+}
+
 [data-slot="desktop-page"] {
   min-height: 100dvh;
   --drafting-ink-rgb: 17 17 17;

@@ -263,9 +263,24 @@ describe("Pane", () => {
     expect(dropShadow?.getAttribute("stdDeviation")).toBe("10")
     expect(dropShadow?.getAttribute("flood-color")).toBe("#22c55e")
     expect(dropShadow?.getAttribute("flood-opacity")).toBe("0.8")
+    expect(buildDashboardQrNodePayloadSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        backgroundGradient: expect.objectContaining({ enabled: false }),
+        backgroundImage: {
+          source: "none",
+          value: undefined,
+          presetId: undefined,
+          presetColor: undefined,
+        },
+        backgroundOptions: expect.objectContaining({ transparent: true }),
+        backgroundShapeId: "none",
+      }),
+      expect.objectContaining({ animationMode: "preview" }),
+    )
     expect(qrSvg?.querySelector('[data-qr-layer="background-shape"]')).toBeNull()
     expect(qrSvg?.querySelector('[data-qr-layer="background-shape-blur"]')).toBeNull()
     expect(qrSvg?.querySelector('[data-qr-layer="background-shape-blur-filter"]')).toBeNull()
+    expect(qrSvg?.querySelector('rect[clip-path*="clip-path-background-color"]')).toBeNull()
     expect(qrSvg?.querySelector('[data-qr-layer="dot"]')).not.toBeNull()
   })
 

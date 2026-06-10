@@ -118,6 +118,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import {
+  ScrollArea,
+  ScrollAreaScrollbar,
+  ScrollAreaThumb,
+  ScrollAreaViewport,
+} from "@/components/ui/scroll-area"
+import {
   ColorPicker as AmploColorPicker,
   parseColor,
   type OklchColor,
@@ -134,7 +140,6 @@ import {
   DESKTOP_INSPECTOR_RESET_CLASS,
   DESKTOP_INSPECTOR_ROW_CLASS,
   DESKTOP_INSPECTOR_ROW_GAP_CLASS,
-  DESKTOP_INSPECTOR_SCROLL_CLASS,
   DESKTOP_INSPECTOR_SECTION_CLASS,
   DESKTOP_INSPECTOR_SECTION_GAP_CLASS,
   DESKTOP_INSPECTOR_SELECTED_CLASS,
@@ -1527,34 +1532,10 @@ function DesktopThemeStyles() {
         backdrop-filter: none !important;
       }
 
-      [data-slot="desktop-floating-inspector"] .scroll-fade-effect-y > section,
-      [data-slot="desktop-floating-inspector"] .scroll-fade-effect-y > div,
-      [data-slot="desktop-floating-inspector"] .scroll-fade-effect-y > details {
-        background: var(--desktop-inspector-section-bg) !important;
-        border-width: 0 !important;
-        border-top-width: 0 !important;
-        border-radius: 10px !important;
-        box-shadow: none !important;
-        margin-top: 10px !important;
-        padding: 12px !important;
-      }
-
-      [data-slot="desktop-floating-inspector"] .scroll-fade-effect-y > :first-child {
-        border-top-width: 0 !important;
-        margin-top: 0 !important;
-      }
-
       [data-desktop-theme="light"] [data-slot="desktop-left-toolbar-shell"] {
         background: rgba(255, 255, 255, 0.72) !important;
         border-color: rgba(15, 23, 42, 0.12) !important;
         box-shadow: 0 24px 64px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.86) !important;
-      }
-
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] .scroll-fade-effect-y > section,
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] .scroll-fade-effect-y > div,
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] .scroll-fade-effect-y > details {
-        background: var(--desktop-inspector-section-bg) !important;
-        border-top-color: rgba(15, 23, 42, 0.1) !important;
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [data-desktop-shape-option-preview="true"] {
@@ -1632,6 +1613,35 @@ function DesktopInspectorHeader({
   )
 }
 
+function DesktopInspectorScrollArea({
+  children,
+}: {
+  children: ReactNode
+}) {
+  return (
+    <ScrollArea
+      data-scrollbar-visibility="while-scrolling"
+      data-slot="desktop-inspector-scroll-area"
+      scrollHideDelay={500}
+      type="scroll"
+      className="min-h-0 flex-1 overflow-hidden"
+    >
+      <ScrollAreaViewport
+        data-slot="desktop-inspector-scroll"
+        className="h-full w-full overflow-x-hidden overflow-y-auto px-3 py-3 scroll-fade-effect-y [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {children}
+      </ScrollAreaViewport>
+      <ScrollAreaScrollbar
+        data-slot="desktop-inspector-scrollbar"
+        className="w-2 border-none p-[1px]"
+      >
+        <ScrollAreaThumb className="bg-white/24 hover:bg-white/38" />
+      </ScrollAreaScrollbar>
+    </ScrollArea>
+  )
+}
+
 function getDesktopAdaptiveOptionPreviewStyle(
   desktopTheme: DesktopThemeMode,
 ): CSSProperties {
@@ -1663,7 +1673,7 @@ function DesktopLogoInspector({
     <div data-slot="desktop-logo-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Logo" />
 
-      <div className={DESKTOP_INSPECTOR_SCROLL_CLASS}>
+      <DesktopInspectorScrollArea>
         <DesktopInspectorSection>
           <DesktopInspectorLabel>Source</DesktopInspectorLabel>
           <DesktopInspectorSegmentedControl
@@ -1849,7 +1859,7 @@ function DesktopLogoInspector({
             </div>
           </section>
         ) : null}
-      </div>
+      </DesktopInspectorScrollArea>
 
     </div>
   )
@@ -1899,9 +1909,9 @@ function DesktopCornersInspector({
       <div data-impeccable-variants="a34b4748" data-impeccable-variant-count="3" style={{ display: "contents" }}>
         {/* impeccable-variants-start a34b4748 */}
         {/* Original */}
-        <div data-impeccable-variant="original">
-          <div className={DESKTOP_INSPECTOR_SCROLL_CLASS}>
-            <section className="p-0">
+        <div data-impeccable-variant="original" className="flex min-h-0 flex-1 flex-col">
+          <DesktopInspectorScrollArea>
+            <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
               <div className="mb-2 min-w-0">
                 <p className="truncate text-[12px] font-semibold text-white">Corner Frame</p>
               </div>
@@ -1943,7 +1953,7 @@ function DesktopCornersInspector({
               }
             />
 
-            <section className={cn(DESKTOP_INSPECTOR_MAJOR_GAP_CLASS, "p-0")}>
+            <section className={cn(DESKTOP_INSPECTOR_MAJOR_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
               <div className="mb-2 min-w-0">
                 <p className="truncate text-[12px] font-semibold text-white">Corner Dot</p>
               </div>
@@ -1996,7 +2006,7 @@ function DesktopCornersInspector({
                 Valid
               </span>
             </div>
-          </div>
+          </DesktopInspectorScrollArea>
         </div>
         {/* Variants: insert below this line */}
         {/* impeccable-variants-end a34b4748 */}
@@ -2162,8 +2172,8 @@ function DesktopShapeInspector({
     <div data-slot="desktop-shape-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Shape" />
 
-      <div className={DESKTOP_INSPECTOR_SCROLL_CLASS}>
-        <section className="p-0">
+      <DesktopInspectorScrollArea>
+        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <div className="mb-2 min-w-0">
             <p className="truncate text-[12px] font-semibold text-white">Shape Options</p>
           </div>
@@ -2413,7 +2423,7 @@ function DesktopShapeInspector({
             <DesktopElasticSliderRow label="Shape shadow Y" max={64} min={-64} value={settings.shapeShadowOffsetY} valueLabel={`${Math.round(settings.shapeShadowOffsetY)}`} onChange={(shapeShadowOffsetY) => onShapeSettingsChange({ shapeShadowOffsetY })} />
           </div>
         </section>
-      </div>
+      </DesktopInspectorScrollArea>
 
     </div>
   )
@@ -2551,7 +2561,7 @@ function DesktopMotionInspector({
     <div data-slot="desktop-motion-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Motion" />
 
-      <div className={DESKTOP_INSPECTOR_SCROLL_CLASS}>
+      <DesktopInspectorScrollArea>
         <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <DesktopMotionToggleRow
             checked={settings.enabled}
@@ -2667,7 +2677,7 @@ function DesktopMotionInspector({
             />
           </div>
         </section>
-      </div>
+      </DesktopInspectorScrollArea>
 
     </div>
   )
@@ -2905,8 +2915,8 @@ function DesktopContentInspector({
     <div data-slot="desktop-content-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Content" />
 
-      <div className={DESKTOP_INSPECTOR_SCROLL_CLASS}>
-        <div>
+      <DesktopInspectorScrollArea>
+        <DesktopInspectorSection dataSlot="desktop-content-type-section">
           <div className="min-w-0">
             <div
               className="flex h-9 w-full min-w-0 items-center gap-2"
@@ -3002,7 +3012,7 @@ function DesktopContentInspector({
               </p>
             ) : null}
           </div>
-        </div>
+        </DesktopInspectorSection>
 
         <div className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <DesktopContentFields
@@ -3021,7 +3031,7 @@ function DesktopContentInspector({
             {encodedValue || "No payload yet"}
           </pre>
         </details>
-      </div>
+      </DesktopInspectorScrollArea>
 
     </div>
   )
@@ -3040,8 +3050,8 @@ function DesktopPatternInspector({
     <div data-slot="desktop-pattern-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Pattern" />
 
-      <div className={DESKTOP_INSPECTOR_SCROLL_CLASS}>
-        <section className="p-0">
+      <DesktopInspectorScrollArea>
+        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <div className="mb-2 min-w-0">
             <p className="truncate text-[12px] font-semibold text-white">Module Pattern</p>
           </div>
@@ -3163,7 +3173,7 @@ function DesktopPatternInspector({
             Valid
           </span>
         </div>
-      </div>
+      </DesktopInspectorScrollArea>
 
     </div>
   )
@@ -3803,7 +3813,7 @@ function DesktopEncodingInspector({
   return (
     <div data-slot="desktop-encoding-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Encoding" />
-      <div className={DESKTOP_INSPECTOR_SCROLL_CLASS}>
+      <DesktopInspectorScrollArea>
         <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <DesktopMotionSliderRow
             label="Type number"
@@ -3844,7 +3854,7 @@ function DesktopEncodingInspector({
             ))}
           </div>
         </section>
-      </div>
+      </DesktopInspectorScrollArea>
     </div>
   )
 }
@@ -3859,7 +3869,7 @@ function DesktopImageInspector({
   return (
     <div data-slot="desktop-image-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Image" />
-      <div className={DESKTOP_INSPECTOR_SCROLL_CLASS}>
+      <DesktopInspectorScrollArea>
         <DesktopInspectorSection>
           <DesktopInspectorLabel>Intent</DesktopInspectorLabel>
           <DesktopInspectorSegmentedControl
@@ -3914,7 +3924,7 @@ function DesktopImageInspector({
             />
           </div>
         </DesktopInspectorSection>
-      </div>
+      </DesktopInspectorScrollArea>
     </div>
   )
 }
@@ -3929,7 +3939,7 @@ function DesktopDecorationsInspector({
   return (
     <div data-slot="desktop-decorations-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Decorations" />
-      <div className={DESKTOP_INSPECTOR_SCROLL_CLASS}>
+      <DesktopInspectorScrollArea>
         <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Add</p>
           <div className="grid grid-cols-2 gap-1.5" data-slot="desktop-decoration-kind">
@@ -4002,7 +4012,7 @@ function DesktopDecorationsInspector({
             />
           </div>
         </section>
-      </div>
+      </DesktopInspectorScrollArea>
     </div>
   )
 }
@@ -4022,7 +4032,7 @@ function DesktopEffectsInspector({
   return (
     <div data-slot="desktop-effects-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Effects" />
-      <div className={DESKTOP_INSPECTOR_SCROLL_CLASS}>
+      <DesktopInspectorScrollArea>
         <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Generated Effects</p>
           <div className="grid max-h-40 grid-cols-2 gap-1.5 overflow-y-auto pr-1" data-slot="desktop-generated-effects">
@@ -4116,7 +4126,7 @@ function DesktopEffectsInspector({
             onValueChange={(filterPresetName) => onEffectsSettingsChange({ filterPresetName })}
           />
         </section>
-      </div>
+      </DesktopInspectorScrollArea>
     </div>
   )
 }
@@ -4146,7 +4156,7 @@ function DesktopLayersInspector({
   return (
     <div data-slot="desktop-layers-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Layers" />
-      <div className={DESKTOP_INSPECTOR_SCROLL_CLASS}>
+      <DesktopInspectorScrollArea>
         <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <div className="mb-2 flex min-w-0 items-center justify-between gap-3">
             <p className="truncate text-[12px] font-semibold text-white">Layer Stack</p>
@@ -4206,7 +4216,7 @@ function DesktopLayersInspector({
             </section>
           </>
         ) : null}
-      </div>
+      </DesktopInspectorScrollArea>
     </div>
   )
 }
@@ -4228,7 +4238,7 @@ function DesktopExportInspector({
   return (
     <div data-slot="desktop-export-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Export" />
-      <div className={DESKTOP_INSPECTOR_SCROLL_CLASS}>
+      <DesktopInspectorScrollArea>
         <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Target</p>
           <div className="grid gap-1.5" data-slot="desktop-export-target-list">
@@ -4294,7 +4304,7 @@ function DesktopExportInspector({
             </div>
           </section>
         ) : null}
-      </div>
+      </DesktopInspectorScrollArea>
       <div className={DESKTOP_INSPECTOR_FOOTER_CLASS}>
         <button
           aria-label={`Download ${settings.extension.toUpperCase()}`}
@@ -4340,7 +4350,7 @@ function DesktopTextInspector({
     <div data-slot="desktop-text-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Text" />
 
-      <div className={DESKTOP_INSPECTOR_SCROLL_CLASS}>
+      <DesktopInspectorScrollArea>
         <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <p className="mb-2 truncate text-[12px] font-semibold text-white">Preset</p>
           <div className="grid grid-cols-3 gap-1.5" data-slot="desktop-text-preset-options">
@@ -4568,7 +4578,7 @@ function DesktopTextInspector({
             />
           </div>
         </section>
-      </div>
+      </DesktopInspectorScrollArea>
 
     </div>
   )

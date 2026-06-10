@@ -247,6 +247,17 @@ describe("FloatingToolbar", () => {
     expect(shell?.className).toContain("z-[25]")
     expect(shell?.querySelector('[data-slot="desktop-floating-inspector"]')).toBe(inspector)
     expect(inspector?.querySelector('[data-slot="desktop-content-inspector"]')).not.toBeNull()
+    const scrollArea = inspector?.querySelector('[data-slot="desktop-inspector-scroll-area"]')
+    const scrollViewport = inspector?.querySelector('[data-slot="desktop-inspector-scroll"]')
+    const scrollGroups = Array.from(scrollViewport?.firstElementChild?.children ?? [])
+    expect(scrollArea?.getAttribute("data-scrollbar-visibility")).toBe("while-scrolling")
+    expect(scrollViewport?.className).toContain("overflow-y-auto")
+    expect(scrollGroups).toHaveLength(3)
+    expect(scrollGroups[0]?.getAttribute("data-slot")).toBe("desktop-content-type-section")
+    expect(scrollGroups[0]?.className).toContain("bg-[var(--desktop-inspector-section-bg)]")
+    expect(scrollGroups[1]?.className).toContain("bg-[var(--desktop-inspector-section-bg)]")
+    expect(scrollGroups[2]?.tagName).toBe("DETAILS")
+    expect(scrollGroups[2]?.className).toContain("bg-[var(--desktop-inspector-section-bg)]")
     expect(inspector?.querySelector('[data-slot="desktop-content-type-collection"]')).not.toBeNull()
     expect(inspector?.querySelector('[data-slot="desktop-content-type-filters"]')).toBeNull()
     expect(inspector?.querySelector('[data-slot="desktop-content-type-filter-trigger"]')).not.toBeNull()
@@ -314,6 +325,7 @@ describe("FloatingToolbar", () => {
     expect(source).not.toContain('className="border-t border-white/[0.09] bg-black/20 p-3"')
     expect(source).not.toContain('className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3"')
     expect(source).not.toContain("[data-slot=\"desktop-floating-inspector\"] [class*=\"bg-white/\"]")
+    expect(source).not.toContain(".scroll-fade-effect-y > div")
   })
 
   it("renders a Pixelmator-style pattern inspector without a duplicate pattern card", async () => {
@@ -423,6 +435,15 @@ describe("FloatingToolbar", () => {
 
     expect(inspector?.getAttribute("aria-label")).toBe("Corners settings")
     expect(inspector?.querySelector('[data-slot="desktop-corners-inspector"]')).not.toBeNull()
+    expect(inspector?.querySelector('[data-impeccable-variant="original"]')?.className).toContain(
+      "flex-1",
+    )
+    expect(inspector?.querySelector('[data-impeccable-variant="original"]')?.className).toContain(
+      "min-h-0",
+    )
+    expect(
+      inspector?.querySelector('[data-slot="desktop-inspector-scroll"]')?.className,
+    ).toContain("overflow-y-auto")
     expect(inspector?.querySelector('[data-slot="desktop-corner-frame-preset-shelf"]')).not.toBeNull()
     expect(inspector?.querySelector('[data-slot="desktop-corner-dot-preset-shelf"]')).not.toBeNull()
     expect(inspector?.textContent).toContain("Corner Frame")
@@ -652,6 +673,17 @@ describe("FloatingToolbar", () => {
     )
 
     expect(inspector?.querySelector('[data-slot="desktop-shape-preset-shelf"]')).not.toBeNull()
+    expect(inspector?.querySelector('[data-slot="desktop-inspector-scroll-area"]')).not.toBeNull()
+    expect(
+      inspector?.querySelector('[data-slot="desktop-inspector-scroll"]')?.className,
+    ).toContain("overflow-y-auto")
+    expect(
+      inspector
+        ?.querySelector('[data-slot="desktop-inspector-scroll"]')
+        ?.firstElementChild
+        ?.children[0]
+        ?.getAttribute("class"),
+    ).toContain("bg-[var(--desktop-inspector-section-bg)]")
     expect(inspector?.querySelector('[data-slot="desktop-shape-color-mode"]')).not.toBeNull()
     expect(inspector?.textContent).toContain("Shape Options")
     expect(inspector?.textContent).toContain("Shape Color")
@@ -793,8 +825,20 @@ describe("FloatingToolbar", () => {
     const inspector = surface.container.querySelector(
       '[data-slot="desktop-floating-inspector"]',
     )
+    const scrollArea = inspector?.querySelector(
+      '[data-slot="desktop-inspector-scroll-area"]',
+    )
+    const scrollViewport = inspector?.querySelector(
+      '[data-slot="desktop-inspector-scroll"]',
+    )
 
     expect(inspector?.querySelector('[data-slot="desktop-motion-loader-shelf"]')).not.toBeNull()
+    expect(scrollArea?.getAttribute("data-scrollbar-visibility")).toBe("while-scrolling")
+    expect(scrollArea?.className).toContain("overflow-hidden")
+    expect(scrollViewport?.className).toContain("overflow-y-auto")
+    expect(scrollViewport?.className).not.toContain("overflow-y-scroll")
+    expect(scrollViewport?.className).toContain("[scrollbar-width:none]")
+    expect(scrollViewport?.className).toContain("[&::-webkit-scrollbar]:hidden")
     expect(inspector?.textContent).toContain("Motion")
     expect(inspector?.textContent).toContain("Loader")
     expect(inspector?.textContent).toContain("Timing")
