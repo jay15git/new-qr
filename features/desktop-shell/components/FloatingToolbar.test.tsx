@@ -63,6 +63,7 @@ describe("FloatingToolbar", () => {
     expect(rail?.className).not.toContain("fixed")
     expect(rail?.className).not.toContain("rounded-full")
     expect(rail?.className).not.toContain("bg-black/55")
+    expect(rail?.className).toContain("pt-14")
     expect(inspector?.className).not.toContain("fixed")
     expect(inspector?.className).not.toContain("rounded-[20px]")
     expect(inspector?.className).not.toContain("bg-black/55")
@@ -102,6 +103,97 @@ describe("FloatingToolbar", () => {
     expect(getRequiredButton(surface.container, "Switch to dark mode")).not.toBeNull()
   })
 
+  it("opens desktop keyboard shortcuts from the top-right utility toolbar", async () => {
+    Object.defineProperty(navigator, "platform", {
+      configurable: true,
+      value: "Win32",
+    })
+    const surface = await renderPrototype()
+    const utilityToolbar = surface.container.querySelector('[data-slot="desktop-utility-toolbar"]')
+    const shortcutsTrigger = getRequiredButton(surface.container, "Open keyboard shortcuts")
+
+    expect(utilityToolbar?.contains(shortcutsTrigger)).toBe(true)
+    expect(document.body.querySelector('[data-slot="desktop-keyboard-shortcuts-popover"]')).toBeNull()
+
+    await clickButton(shortcutsTrigger)
+
+    const popover = document.body.querySelector('[data-slot="desktop-keyboard-shortcuts-popover"]')
+    const source = readFileSync(
+      resolve(process.cwd(), "features/desktop-shell/components/FloatingToolbar.tsx"),
+      "utf8",
+    )
+    const platformToggle = popover?.querySelector('[data-slot="desktop-shortcut-platform-toggle"]')
+    const scrollArea = popover?.querySelector('[data-slot="desktop-keyboard-shortcuts-scroll-area"]')
+    const scrollViewport = popover?.querySelector('[data-slot="desktop-keyboard-shortcuts-scroll"]')
+    const windowsButton = popover?.querySelector<HTMLButtonElement>(
+      '[data-slot="desktop-shortcut-platform-button"][data-platform="windows"]',
+    )
+    const appleButton = popover?.querySelector<HTMLButtonElement>(
+      '[data-slot="desktop-shortcut-platform-button"][data-platform="apple"]',
+    )
+    const keycaps = Array.from(
+      popover?.querySelectorAll('[data-slot="desktop-shortcut-kbd"]') ?? [],
+    )
+    const keycapLabels = keycaps.map((keycap) => keycap.textContent)
+    const comboSeparators = Array.from(
+      popover?.querySelectorAll('[data-slot="desktop-shortcut-combo-separator"]') ?? [],
+    ).map((separator) => separator.textContent)
+
+    expect(popover).not.toBeNull()
+    expect(platformToggle).not.toBeNull()
+    expect(scrollArea).not.toBeNull()
+    expect(scrollViewport).not.toBeNull()
+    expect(source).toContain('data-slot="desktop-keyboard-shortcuts-scrollbar"')
+    expect(source).toContain('[data-slot="desktop-keyboard-shortcuts-scroll-thumb"]')
+    expect(source).toContain("scrollbar-color: rgba(23, 23, 23, 0.38) transparent")
+    expect(popover?.className).toContain("h-[min(44rem,calc(100dvh-7rem))]")
+    expect(popover?.className).toContain("w-[min(27rem,calc(100vw-1rem))]")
+    expect(popover?.className).toContain("bg-[#0a0a0a]")
+    expect(popover?.className).not.toContain("bg-black/72")
+    expect(popover?.className).not.toContain("backdrop-blur")
+    expect(source).toContain("background: #ffffff !important;")
+    expect(source).toContain("--desktop-inspector-section-bg\": \"#181818\"")
+    expect(scrollArea?.className).toContain("h-full")
+    expect(scrollViewport?.className).not.toContain("[scrollbar-width:none]")
+    expect(popover?.innerHTML).not.toContain("border-b border-white/[0.08]")
+    expect(platformToggle?.className).not.toContain("bg-white")
+    expect(platformToggle?.className).not.toContain("border")
+    expect(windowsButton).not.toBeNull()
+    expect(appleButton).not.toBeNull()
+    expect(windowsButton?.getAttribute("aria-label")).toBe("Use Windows shortcuts")
+    expect(appleButton?.getAttribute("aria-label")).toBe("Use Apple shortcuts")
+    expect(windowsButton?.textContent).toBe("")
+    expect(appleButton?.textContent).toBe("")
+    expect(windowsButton?.getAttribute("aria-pressed")).toBe("true")
+    expect(appleButton?.getAttribute("aria-pressed")).toBe("false")
+    expect(popover?.textContent).toContain("Shortcuts")
+    expect(popover?.textContent).not.toContain("Keyboard")
+    expect(popover?.textContent).not.toContain("Arrow keys")
+    expect(popover?.textContent).not.toContain("Cmd/Ctrl + C")
+    expect(keycapLabels).toContain("↑")
+    expect(keycapLabels).toContain("↓")
+    expect(keycapLabels).toContain("←")
+    expect(keycapLabels).toContain("→")
+    expect(keycapLabels).toContain("← ↑ ↓ →")
+    expect(keycapLabels).toContain("Ctrl")
+    expect(keycapLabels).toContain("C")
+    expect(keycapLabels).toContain("Delete")
+    expect(keycaps[0]?.className).toContain("min-h-6")
+    expect(comboSeparators).toContain("+")
+    expect(popover?.textContent).toContain("Lock/unlock selected layers")
+
+    await clickButton(appleButton as HTMLButtonElement)
+
+    const updatedKeycaps = Array.from(
+      popover?.querySelectorAll('[data-slot="desktop-shortcut-kbd"]') ?? [],
+    ).map((keycap) => keycap.textContent)
+
+    expect(windowsButton?.getAttribute("aria-pressed")).toBe("false")
+    expect(appleButton?.getAttribute("aria-pressed")).toBe("true")
+    expect(updatedKeycaps).toContain("⌘")
+    expect(updatedKeycaps).not.toContain("Ctrl")
+  })
+
   it("wires undo and redo through the top-right desktop action toolbar", async () => {
     const onUndo = vi.fn()
     const onRedo = vi.fn()
@@ -116,9 +208,12 @@ describe("FloatingToolbar", () => {
       },
     })
     const actionToolbar = surface.container.querySelector('[data-slot="desktop-action-toolbar"]')
+    const utilityToolbar = surface.container.querySelector('[data-slot="desktop-utility-toolbar"]')
 
     expect(actionToolbar?.className).toContain("min-h-14")
-    expect(getRequiredButton(surface.container, "Switch to light mode").className).toContain("size-14")
+    expect(utilityToolbar?.className).toContain("min-h-14")
+    expect(getRequiredButton(utilityToolbar as HTMLElement, "Open keyboard shortcuts").className).toContain("size-10")
+    expect(getRequiredButton(utilityToolbar as HTMLElement, "Switch to light mode").className).toContain("size-10")
     expect(getRequiredButton(actionToolbar as HTMLElement, "Reset defaults").className).toContain("size-8")
     expect(getRequiredButton(actionToolbar as HTMLElement, "Undo").className).toContain("size-8")
     expect(getRequiredButton(actionToolbar as HTMLElement, "Redo").className).toContain("size-8")

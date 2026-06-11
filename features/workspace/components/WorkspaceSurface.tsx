@@ -1,6 +1,6 @@
 "use client"
 
-import { Image02Icon, SignalIcon, SquareIcon } from "@hugeicons/core-free-icons"
+import { Image02Icon, KeyboardIcon, SignalIcon, SquareIcon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
 
@@ -71,6 +71,7 @@ import {
   type DraftingLayerReorderAction,
   type DraftingLayerStateByNodeId,
 } from "@/features/workspace/model/layers"
+import { DRAFTING_KEYBOARD_SHORTCUT_GROUPS } from "@/features/workspace/model/keyboard-shortcuts"
 import {
   cloneDraftingQrState,
   cloneDraftingWorkspaceDocument,
@@ -181,7 +182,6 @@ import {
   CircleIcon,
   DownloadIcon,
   FrameIcon,
-  KeyboardIcon,
   LinkIcon,
   PieChart,
   RectangleHorizontalIcon,
@@ -273,42 +273,6 @@ const DEFAULT_DRAFTING_PANE_QR_SIZE = 240
 const DRAFTING_LAYER_CLIPBOARD_TYPE = "new-qr/drafting-layers"
 const DRAFTING_LAYER_CLIPBOARD_VERSION = 1
 const DRAFTING_LAYER_PASTE_OFFSET = 24
-const DRAFTING_KEYBOARD_SHORTCUT_GROUPS = [
-  {
-    title: "Canvas",
-    shortcuts: [
-      ["Arrow keys", "Nudge selected layer 1px"],
-      ["Shift + Arrow", "Nudge selected layer 10px"],
-      ["Delete / Backspace", "Delete selected layers"],
-      ["Cmd/Ctrl + A", "Select all visible unlocked layers"],
-      ["Esc", "Clear selection"],
-    ],
-  },
-  {
-    title: "Edit",
-    shortcuts: [
-      ["Cmd/Ctrl + Z", "Undo"],
-      ["Cmd/Ctrl + Shift + Z", "Redo"],
-      ["Cmd/Ctrl + Y", "Redo"],
-      ["Cmd/Ctrl + C", "Copy selected layers"],
-      ["Cmd/Ctrl + V", "Paste copied layers"],
-      ["Cmd/Ctrl + D", "Duplicate QR pane"],
-      ["Cmd/Ctrl + G", "Group selected layers"],
-      ["Cmd/Ctrl + Shift + G", "Ungroup selected groups"],
-    ],
-  },
-  {
-    title: "Layers",
-    shortcuts: [
-      ["Cmd/Ctrl + [", "Send backward"],
-      ["Cmd/Ctrl + ]", "Bring forward"],
-      ["Cmd/Ctrl + Shift + [", "Send to back"],
-      ["Cmd/Ctrl + Shift + ]", "Bring to front"],
-      ["Cmd/Ctrl + Shift + L", "Lock/unlock selected layers"],
-      ["Cmd/Ctrl + Shift + H", "Hide/show selected layers"],
-    ],
-  },
-] as const
 const IGNORE_DRAFTING_UPLOAD_ERROR: (message: string) => void = () => undefined
 const DEFAULT_DOWNLOAD_NAME = "new-qr-studio"
 const DRAFTING_DOWNLOAD_EXTENSIONS = ["svg", "png", "webp", "jpeg"] as const satisfies ReadonlyArray<
@@ -4228,7 +4192,12 @@ export function WorkspaceSurface({
                   data-slot="drafting-shortcuts-trigger"
                   className="h-8 shrink-0 px-2 sm:px-3"
                 >
-                  <KeyboardIcon data-icon="inline-start" />
+                  <HugeiconsIcon
+                    icon={KeyboardIcon}
+                    size={16}
+                    color="currentColor"
+                    strokeWidth={1.8}
+                  />
                   <span className="hidden sm:inline">Shortcuts</span>
                 </SecondaryButton>
               </PopoverTrigger>

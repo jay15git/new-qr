@@ -1,6 +1,6 @@
 "use client"
 
-import { Image02Icon } from "@hugeicons/core-free-icons"
+import { AppleIcon, Image02Icon, KeyboardIcon, WindowsOldIcon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useEffect, useId, useMemo, useState, type CSSProperties, type ReactNode } from "react"
 import type {
@@ -57,6 +57,7 @@ import {
   type DraftingTextFontStyle,
   type DraftingTextFontWeight,
 } from "@/features/workspace/model/layers"
+import { DRAFTING_KEYBOARD_SHORTCUT_GROUPS } from "@/features/workspace/model/keyboard-shortcuts"
 import {
   DRAFTING_FONT_REGISTRY,
   getDraftingFontCssFamily,
@@ -117,6 +118,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { Kbd } from "@/components/kbd"
 import {
   ScrollArea,
   ScrollAreaScrollbar,
@@ -198,6 +200,52 @@ type DesktopToolbarTool = {
 }
 
 export type DesktopThemeMode = "dark" | "light"
+
+type DesktopShortcutPlatform = "apple" | "windows"
+
+const DESKTOP_SHORTCUT_PLATFORMS: Array<{
+  icon: typeof WindowsOldIcon
+  label: string
+  value: DesktopShortcutPlatform
+}> = [
+  { icon: WindowsOldIcon, label: "Windows", value: "windows" },
+  { icon: AppleIcon, label: "Apple", value: "apple" },
+]
+
+function getDefaultShortcutPlatform(): DesktopShortcutPlatform {
+  if (typeof navigator === "undefined") {
+    return "windows"
+  }
+
+  const platform =
+    (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ??
+    navigator.platform ??
+    ""
+  const userAgent = navigator.userAgent ?? ""
+  const platformSignature = `${platform} ${userAgent}`.toLowerCase()
+
+  return /mac|iphone|ipad|ipod/.test(platformSignature) ? "apple" : "windows"
+}
+
+function getShortcutKeyCombos(keys: string, platform: DesktopShortcutPlatform): string[][] {
+  if (keys === "Arrow keys") {
+    return [["↑"], ["↓"], ["←"], ["→"]]
+  }
+
+  if (keys === "Shift + Arrow") {
+    return [["Shift", "← ↑ ↓ →"]]
+  }
+
+  return keys.split(" / ").map((combo) =>
+    combo.split(" + ").map((key) => {
+      if (key === "Cmd/Ctrl") {
+        return platform === "apple" ? "⌘" : "Ctrl"
+      }
+
+      return key
+    }),
+  )
+}
 
 const DESKTOP_COLOR_PICKER_SWATCHES = [
   "#111111",
@@ -908,6 +956,9 @@ export function FloatingToolbar({
 } = {}) {
   const [activeTool, setActiveTool] = useState<DesktopToolbarToolId | null>(null)
   const [desktopTheme, setDesktopTheme] = useState<DesktopThemeMode>("dark")
+  const [shortcutPlatform, setShortcutPlatform] = useState<DesktopShortcutPlatform>(
+    getDefaultShortcutPlatform,
+  )
   const [patternSettings, setPatternSettings] = useState<DesktopPatternSettings>(
     DEFAULT_DESKTOP_PATTERN_SETTINGS,
   )
@@ -1080,20 +1131,185 @@ export function FloatingToolbar({
         )}
       >
         <DesktopThemeStyles />
-        <button
-          aria-label={`Switch to ${actualDesktopTheme === "light" ? "dark" : "light"} mode`}
-          data-slot="desktop-theme-toggle"
+        <div
+          data-slot="desktop-utility-toolbar"
           data-toolbar-appearance="desktop-glass"
-          className="fixed right-5 top-5 z-30 grid size-14 place-items-center rounded-full border border-white/[0.12] bg-black/55 text-white/72 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 max-md:right-4 max-md:top-4"
-          type="button"
-          onClick={handleDesktopThemeToggle}
+          className="fixed right-5 top-5 z-30 inline-flex min-h-14 items-center gap-1 rounded-full border border-white/[0.12] bg-black/55 px-2 py-1.5 text-white/72 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl max-md:right-4 max-md:top-4"
         >
-          {actualDesktopTheme === "light" ? (
-            <MoonIcon className="size-4" />
-          ) : (
-            <SunIcon className="size-4" />
-          )}
-        </button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                aria-label="Open keyboard shortcuts"
+                data-slot="desktop-keyboard-shortcuts-trigger"
+                className="grid size-10 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 max-md:size-9"
+                type="button"
+              >
+                <HugeiconsIcon
+                  icon={KeyboardIcon}
+                  size={18}
+                  color="currentColor"
+                  strokeWidth={1.8}
+                />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="end"
+              data-slot="desktop-keyboard-shortcuts-popover"
+              sideOffset={12}
+              className="z-[20000] flex h-[min(44rem,calc(100dvh-7rem))] max-h-[min(44rem,calc(100dvh-7rem))] w-[min(27rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-[16px] border border-[#242424] bg-[#0a0a0a] p-0 text-white shadow-[0_24px_70px_rgba(0,0,0,0.35)]"
+              style={
+                {
+                  "--desktop-inspector-field-bg": "#141414",
+                  "--desktop-inspector-section-bg": "#181818",
+                } as CSSProperties
+              }
+            >
+              <div className="grid shrink-0 grid-cols-[auto_1fr_auto] items-center gap-3 px-4 pb-2 pt-3">
+                <div
+                  aria-label="Shortcut platform"
+                  className="inline-flex gap-1"
+                  data-slot="desktop-shortcut-platform-toggle"
+                  role="group"
+                >
+                  {DESKTOP_SHORTCUT_PLATFORMS.map((platform) => {
+                    const isSelected = shortcutPlatform === platform.value
+
+	                    return (
+	                      <button
+	                        aria-label={`Use ${platform.label} shortcuts`}
+	                        aria-pressed={isSelected}
+	                        className={cn(
+	                          "grid size-7 place-items-center rounded-full text-white/52 transition hover:bg-[#262626] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35",
+	                          isSelected && "bg-[#303030] text-white",
+	                        )}
+	                        data-platform={platform.value}
+	                        data-slot="desktop-shortcut-platform-button"
+	                        key={platform.value}
+	                        onClick={() => setShortcutPlatform(platform.value)}
+	                        type="button"
+	                      >
+	                        <HugeiconsIcon
+	                          icon={platform.icon}
+	                          size={15}
+	                          color="currentColor"
+	                          strokeWidth={1.8}
+	                        />
+	                      </button>
+	                    )
+                  })}
+                </div>
+                <div className="min-w-0 text-center">
+                  <h2 className="text-sm font-semibold text-white/92">Shortcuts</h2>
+                </div>
+                <span aria-hidden="true" className="w-[3.75rem]" />
+              </div>
+              <ScrollArea
+                className="h-full min-h-0 flex-1 overflow-hidden"
+                data-scrollbar-visibility="while-scrolling"
+                data-slot="desktop-keyboard-shortcuts-scroll-area"
+                scrollHideDelay={500}
+                type="scroll"
+              >
+                <ScrollAreaViewport
+                  className="h-full w-full overflow-x-hidden overflow-y-auto px-3 pb-3 pt-1 scroll-fade-effect-y"
+                  data-slot="desktop-keyboard-shortcuts-scroll"
+                >
+                  <div className="grid gap-2.5">
+                    {DRAFTING_KEYBOARD_SHORTCUT_GROUPS.map((group) => (
+                      <section
+                        key={group.title}
+                        aria-label={`${group.title} shortcuts`}
+                        className={cn(DESKTOP_INSPECTOR_SECTION_CLASS, "p-2.5")}
+                      >
+                        <h3 className="px-1 pb-1.5 text-[11px] font-semibold text-white/64">
+                          {group.title}
+                        </h3>
+                        <div className="grid gap-1">
+                          {group.shortcuts.map(([keys, description]) => (
+                            <div
+                              key={keys}
+                              className="grid grid-cols-[minmax(10rem,12.5rem)_1fr] items-center gap-3 rounded-[7px] px-2 py-1.5 text-[12px]"
+                            >
+                              <span
+                                className="flex min-w-0 flex-wrap items-center gap-1.5 justify-self-start"
+                                data-slot="desktop-shortcut-keycaps"
+                              >
+                                {getShortcutKeyCombos(keys, shortcutPlatform).map((combo, comboIndex) => (
+                                  <span
+                                    className="inline-flex items-center gap-1"
+                                    key={`${keys}-${comboIndex}`}
+                                  >
+                                    {comboIndex > 0 ? (
+                                      <span className="px-0.5 text-[10px] font-semibold text-white/34">
+                                        /
+                                      </span>
+                                    ) : null}
+                                    {combo.map((key, keyIndex) => (
+                                      <span
+                                        className="inline-flex items-center gap-1"
+                                        key={`${keys}-${comboIndex}-${key}-${keyIndex}`}
+                                      >
+                                        {keyIndex > 0 ? (
+                                          <span
+                                            aria-hidden="true"
+                                            className="text-[11px] font-semibold text-white/38"
+                                            data-slot="desktop-shortcut-combo-separator"
+                                          >
+                                            +
+                                          </span>
+                                        ) : null}
+                                        <Kbd
+                                          className="border-[#333333] bg-[#202020] text-white/88 shadow-[0_3px_6px_-2px_rgba(0,0,0,0.25)]"
+                                          data-slot="desktop-shortcut-kbd"
+                                          size="md"
+                                          variant="sculpted"
+                                        >
+                                          {key}
+                                        </Kbd>
+                                      </span>
+                                    ))}
+                                  </span>
+                                ))}
+                              </span>
+                              <span className="min-w-0 text-white/58">{description}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    ))}
+                  </div>
+                </ScrollAreaViewport>
+                <ScrollAreaScrollbar
+                  className="w-2 border-none p-[1px]"
+                  data-slot="desktop-keyboard-shortcuts-scrollbar"
+                >
+                  <ScrollAreaThumb
+                    className="bg-white/24 hover:bg-white/38"
+                    data-slot="desktop-keyboard-shortcuts-scroll-thumb"
+                  />
+                </ScrollAreaScrollbar>
+              </ScrollArea>
+            </PopoverContent>
+          </Popover>
+          <span
+            aria-hidden="true"
+            data-slot="desktop-utility-toolbar-separator"
+            className="h-7 w-px bg-white/[0.1]"
+          />
+          <button
+            aria-label={`Switch to ${actualDesktopTheme === "light" ? "dark" : "light"} mode`}
+            data-slot="desktop-theme-toggle"
+            className="grid size-10 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 max-md:size-9"
+            type="button"
+            onClick={handleDesktopThemeToggle}
+          >
+            {actualDesktopTheme === "light" ? (
+              <MoonIcon className="size-4" />
+            ) : (
+              <SunIcon className="size-4" />
+            )}
+          </button>
+        </div>
         <div
           data-slot="desktop-action-toolbar"
           data-toolbar-appearance="desktop-glass"
@@ -1135,7 +1351,7 @@ export function FloatingToolbar({
           <nav
             aria-label="Desktop tools"
             data-slot="desktop-floating-toolbar"
-            className="relative flex min-h-0 min-w-0 flex-col items-center justify-start gap-1.5 overflow-x-hidden overflow-y-auto border-r border-white/[0.08] p-1.5 text-white/72 max-md:p-1"
+            className="relative flex min-h-0 min-w-0 flex-col items-center justify-start gap-1.5 overflow-x-hidden overflow-y-auto border-r border-white/[0.08] p-1.5 pt-14 text-white/72 max-md:p-1 max-md:pt-12"
           >
             {DESKTOP_TOOLBAR_TOOLS.map((tool, index) => {
               const isActive = actualActiveTool === tool.id
@@ -1283,7 +1499,7 @@ function DesktopThemeStyles() {
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-left-toolbar-shell"],
-      [data-desktop-theme="light"] [data-slot="desktop-theme-toggle"],
+      [data-desktop-theme="light"] [data-slot="desktop-utility-toolbar"],
       [data-desktop-theme="light"] [data-slot="desktop-action-toolbar"] {
         background: rgba(255, 255, 255, 0.72) !important;
         border-color: rgba(15, 23, 42, 0.12) !important;
@@ -1292,7 +1508,7 @@ function DesktopThemeStyles() {
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] button:hover,
-      [data-desktop-theme="light"] [data-slot="desktop-theme-toggle"]:hover,
+      [data-desktop-theme="light"] [data-slot="desktop-utility-toolbar"] button:hover,
       [data-desktop-theme="light"] [data-slot="desktop-action-toolbar"] button:hover {
         background: rgba(15, 23, 42, 0.08) !important;
         color: rgba(15, 23, 42, 0.92) !important;
@@ -1309,6 +1525,109 @@ function DesktopThemeStyles() {
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] [class*="border-white"] {
         border-color: rgba(15, 23, 42, 0.11) !important;
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-utility-toolbar-separator"] {
+        background: rgba(15, 23, 42, 0.12) !important;
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-popover"] {
+        background: #ffffff !important;
+        border-color: #dedede !important;
+        color: rgba(23, 23, 23, 0.92) !important;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.14) !important;
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-popover"] div,
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-popover"] section,
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-popover"] kbd {
+        border-color: #dddddd !important;
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-popover"] section {
+        background: #f4f4f4 !important;
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-popover"] [data-slot="desktop-shortcut-platform-toggle"] {
+        background: transparent !important;
+        border-color: transparent !important;
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-popover"] [data-slot="desktop-shortcut-platform-button"] {
+        color: rgba(23, 23, 23, 0.52) !important;
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-popover"] [data-slot="desktop-shortcut-platform-button"]:hover {
+        background: #eeeeee !important;
+        color: rgba(23, 23, 23, 0.86) !important;
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-popover"] [data-slot="desktop-shortcut-platform-button"][aria-pressed="true"] {
+        background: #e5e5e5 !important;
+        color: rgba(23, 23, 23, 0.94) !important;
+        box-shadow: none !important;
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-popover"] kbd {
+        background: #ffffff !important;
+        color: rgba(23, 23, 23, 0.86) !important;
+      }
+
+      [data-slot="desktop-keyboard-shortcuts-scroll"] {
+        scrollbar-color: rgba(255, 255, 255, 0.32) transparent;
+        scrollbar-width: thin !important;
+      }
+
+      [data-slot="desktop-keyboard-shortcuts-scroll"]::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      [data-slot="desktop-keyboard-shortcuts-scroll"]::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      [data-slot="desktop-keyboard-shortcuts-scroll"]::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.32);
+        background-clip: content-box;
+        border: 3px solid transparent;
+        border-radius: 999px;
+      }
+
+      [data-slot="desktop-keyboard-shortcuts-scroll"]::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.46);
+        background-clip: content-box;
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-scroll"] {
+        scrollbar-color: rgba(23, 23, 23, 0.38) transparent;
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-scroll"]::-webkit-scrollbar-thumb {
+        background: rgba(23, 23, 23, 0.38);
+        background-clip: content-box;
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-scroll"]::-webkit-scrollbar-thumb:hover {
+        background: rgba(23, 23, 23, 0.52);
+        background-clip: content-box;
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-scroll-thumb"] {
+        background: rgba(23, 23, 23, 0.24) !important;
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-scroll-thumb"]:hover {
+        background: rgba(23, 23, 23, 0.38) !important;
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-popover"] p,
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-popover"] h3,
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-popover"] span {
+        color: rgba(23, 23, 23, 0.6) !important;
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-popover"] h2 {
+        color: rgba(23, 23, 23, 0.92) !important;
       }
 
       [data-slot="desktop-style-preview-surface"] {
