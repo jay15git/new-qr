@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest"
 import {
   buildDashboardQrNodePayload,
   createDashboardSurfaceQrState,
+  renderDashboardQrSvgMarkup,
   stripXmlDeclaration,
 } from "@/features/qr-code/rendering/qr-svg"
 import {
@@ -57,6 +58,33 @@ describe("dashboard qr svg helpers", () => {
     expect(payload.naturalHeight).toBe(state.height)
     expect(payload.markup).toContain('data-testid="finder-patterns-inner"')
     expect(payload.markup).toContain('data-testid="finder-patterns-outer"')
+  })
+
+  it("applies palette module colors to the rendered dashboard qr payload", async () => {
+    const state = createDefaultQrStudioState()
+    state.dotsColorMode = "palette"
+    state.dotsPalette = ["#04879c", "#0c3c78", "#f30a49"]
+
+    const payload = await buildDashboardQrNodePayload(state)
+
+    expect(payload.markup).toContain('data-qr-layer="dot-palette"')
+    expect(payload.markup).toContain('fill="#04879c"')
+    expect(payload.markup).toContain('fill="#0c3c78"')
+    expect(payload.markup).toContain('fill="#f30a49"')
+    expect(payload.markup).toContain('opacity="0"')
+  })
+
+  it("applies palette module colors to direct qr svg markup", () => {
+    const state = createDefaultQrStudioState()
+    state.dotsColorMode = "palette"
+    state.dotsPalette = ["#04879c", "#0c3c78", "#f30a49"]
+
+    const markup = renderDashboardQrSvgMarkup(state)
+
+    expect(markup).toContain('data-qr-layer="dot-palette"')
+    expect(markup).toContain('fill="#04879c"')
+    expect(markup).toContain('fill="#0c3c78"')
+    expect(markup).toContain('fill="#f30a49"')
   })
 
   it("reports expanded natural size when background effects grow outside the qr", async () => {

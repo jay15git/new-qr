@@ -152,6 +152,14 @@ function createStubElement(tagName: string): StubElement {
           return node.attributes["data-qr-layer"] === "dot-matrix-animation"
         }
 
+        if (selector === '[data-qr-layer="dot-palette"]') {
+          return node.attributes["data-qr-layer"] === "dot-palette"
+        }
+
+        if (selector === '[data-qr-layer="dot-palette-color"]') {
+          return node.attributes["data-qr-layer"] === "dot-palette-color"
+        }
+
         return false
       }
 
@@ -346,6 +354,41 @@ describe("qr rendering helpers", () => {
     expect(getQrExtensionKey(stateWithBackgroundShape)).not.toBe(
       getQrExtensionKey(defaultState),
     )
+  })
+
+  it("applies palette module colors as qr dot layers", () => {
+    const state = createDefaultQrStudioState()
+    state.dotsColorMode = "palette"
+    state.dotsPalette = ["#111111", "#eeeeee"]
+
+    const extension = buildQrExtension(state)
+    expect(extension).toBeTypeOf("function")
+
+    if (!extension) {
+      return
+    }
+
+    const { dotLayer, height, svg, width } = createDotMatrixSvgFixture({
+      cols: 2,
+      rows: 2,
+    })
+
+    extension(svg as unknown as SVGElement, {
+      height,
+      width,
+    })
+
+    const paletteLayer = svg.querySelector('[data-qr-layer="dot-palette"]')
+    const colorLayers = svg.querySelectorAll('[data-qr-layer="dot-palette-color"]')
+
+    expect(dotLayer.getAttribute("opacity")).toBe("0")
+    expect(paletteLayer?.getAttribute("data-qr-palette-size")).toBe("2")
+    expect(colorLayers).toHaveLength(2)
+    expect(colorLayers.map((layer) => layer.getAttribute("fill"))).toEqual([
+      "#111111",
+      "#eeeeee",
+    ])
+    expect(colorLayers.every((layer) => layer.getAttribute("clip-path")?.includes("qr-dot-palette-clip-"))).toBe(true)
   })
 
   it("adds dot matrix animation as grouped track clip layers while keeping corner markers stable", () => {

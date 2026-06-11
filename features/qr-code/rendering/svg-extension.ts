@@ -65,6 +65,10 @@ export function buildQrExtension(
     extensions.push(createBackgroundSurfaceExtension(state))
   }
 
+  if (state.dotsColorMode === "palette" && getActiveDotsPalette(state).length > 0) {
+    extensions.push(createDotsPaletteExtension(state))
+  }
+
   if (extensions.length === 0) {
     return null
   }
@@ -268,6 +272,104 @@ export function createDotMatrixAnimationExtension(
   }
 }
 
+function createDotsPaletteExtension(
+  state: Pick<QrStudioState, "dotsPalette">,
+): QrSvgExtensionFunction {
+  const palette = getActiveDotsPalette(state)
+
+  return (svg, options) => {
+    const document = svg.ownerDocument
+
+    if (!document || palette.length === 0) {
+      return
+    }
+
+    svg.querySelectorAll('[data-qr-layer="dot-palette"]').forEach((node) => {
+      node.remove()
+    })
+
+    const dotLayers = getQrModuleClipLayers(svg)
+    const dotPathLayers = getQrModulePathLayers(svg)
+
+    if (dotLayers.length === 0 && dotPathLayers.length === 0) {
+      return
+    }
+
+    const dotShapes = dotLayers.flatMap((layer) => layer.shapes)
+    const dotPathShapes = dotPathLayers.flatMap((layer) => layer.shapes)
+    const allDotShapes = [...dotShapes, ...dotPathShapes]
+    const metrics = collectDotMatrixMetrics(allDotShapes)
+    const assignments = new Map<string, SVGElement[]>()
+
+    for (const [fallbackIndex, shape] of allDotShapes.entries()) {
+      const coordinates = metrics ? resolveDotMatrixCoordinates(shape, metrics) : null
+      const paletteIndex = coordinates
+        ? Math.abs(coordinates.row + coordinates.col) % palette.length
+        : fallbackIndex % palette.length
+      const color = palette[paletteIndex]
+      const shapes = assignments.get(color) ?? []
+
+      shapes.push(shape)
+      assignments.set(color, shapes)
+    }
+
+    if (assignments.size === 0) {
+      return
+    }
+
+    suppressDotMatrixBaseLayers(dotLayers)
+    suppressDotMatrixBasePathLayers(dotPathLayers)
+
+    const group = document.createElementNS(SVG_NS, "g")
+    group.setAttribute("data-qr-layer", "dot-palette")
+    group.setAttribute("data-qr-palette-size", String(palette.length))
+    const defs = document.createElementNS(SVG_NS, "defs")
+    defs.setAttribute("data-qr-layer", "dot-palette-defs")
+    group.appendChild(defs)
+
+    const coverRect = getDotMatrixCoverRect(
+      svg,
+      options,
+      metrics ?? getFallbackDotMatrixMetrics(allDotShapes),
+    )
+
+    let index = 0
+    for (const [color, shapes] of assignments.entries()) {
+      const clipPath = document.createElementNS(SVG_NS, "clipPath")
+      const clipPathId = `qr-dot-palette-clip-${index}`
+
+      clipPath.setAttribute("id", clipPathId)
+      clipPath.setAttribute("data-qr-layer", "dot-palette-clip")
+
+      for (const shape of shapes) {
+        const clonedShape = shape.cloneNode(true) as SVGElement
+        clonedShape.removeAttribute("clip-path")
+        clipPath.appendChild(clonedShape)
+      }
+
+      defs.appendChild(clipPath)
+
+      const paletteLayer = document.createElementNS(SVG_NS, "rect")
+      paletteLayer.setAttribute("x", formatSvgNumber(coverRect.x))
+      paletteLayer.setAttribute("y", formatSvgNumber(coverRect.y))
+      paletteLayer.setAttribute("width", formatSvgNumber(coverRect.width))
+      paletteLayer.setAttribute("height", formatSvgNumber(coverRect.height))
+      paletteLayer.setAttribute("clip-path", `url('#${clipPathId}')`)
+      paletteLayer.setAttribute("fill", color)
+      paletteLayer.setAttribute("data-qr-layer", "dot-palette-color")
+      paletteLayer.setAttribute("data-qr-palette-index", String(index))
+      group.appendChild(paletteLayer)
+      index += 1
+    }
+
+    if (group.children.length <= 1) {
+      return
+    }
+
+    svg.insertBefore(group, findDotMatrixLayerAnchor(svg))
+  }
+}
+
 function shouldApplyDotMatrixAnimation(
   state: QrStudioState,
   mode: QrAnimationRenderMode,
@@ -295,6 +397,12 @@ type DotClipLayer = {
   element: SVGRectElement
   fill: string
   shapes: SVGElement[]
+}
+
+type DotPathLayer = {
+  element: SVGPathElement
+  fill: string
+  shapes: SVGPathElement[]
 }
 
 type DotMatrixMetrics = {
@@ -418,7 +526,50 @@ function getQrModuleClipLayers(svg: SVGElement): DotClipLayer[] {
     .filter((layer): layer is DotClipLayer => layer !== null)
 }
 
+function getQrModulePathLayers(svg: SVGElement): DotPathLayer[] {
+  return Array.from(svg.querySelectorAll("path"))
+    .map((element) => {
+      if (element.getAttribute("data-testid") !== "data-modules") {
+        return null
+      }
+
+      const pathData = element.getAttribute("d")
+      const pathSegments = splitSvgPathData(pathData)
+
+      if (pathSegments.length === 0) {
+        return null
+      }
+
+      const document = element.ownerDocument
+      const shapes = pathSegments.map((segment) => {
+        const shape = document.createElementNS(SVG_NS, "path")
+        shape.setAttribute("d", segment)
+        return shape
+      })
+
+      return {
+        element,
+        fill: element.getAttribute("fill") ?? "currentColor",
+        shapes,
+      } satisfies DotPathLayer
+    })
+    .filter((layer): layer is DotPathLayer => layer !== null)
+}
+
+function splitSvgPathData(pathData: string | null) {
+  return (pathData ?? "")
+    .split(/(?=M\s*[+-]?(?:\d+\.?\d*|\.\d+)[\s,])/)
+    .map((segment) => segment.trim())
+    .filter(Boolean)
+}
+
 function suppressDotMatrixBaseLayers(dotLayers: DotClipLayer[]) {
+  for (const layer of dotLayers) {
+    layer.element.setAttribute("opacity", "0")
+  }
+}
+
+function suppressDotMatrixBasePathLayers(dotLayers: DotPathLayer[]) {
   for (const layer of dotLayers) {
     layer.element.setAttribute("opacity", "0")
   }
@@ -426,6 +577,12 @@ function suppressDotMatrixBaseLayers(dotLayers: DotClipLayer[]) {
 
 function getClipPathId(clipPath: string | null) {
   return /url\(['"]?#([^'")]+)['"]?\)/.exec(clipPath ?? "")?.[1] ?? null
+}
+
+function getActiveDotsPalette(state: Pick<QrStudioState, "dotsPalette">) {
+  return state.dotsPalette
+    .map((color) => color.trim())
+    .filter((color, index, palette) => color.length > 0 && palette.indexOf(color) === index)
 }
 
 function isSvgElementLike(node: Element): node is SVGElement {
@@ -471,6 +628,24 @@ function collectDotMatrixMetrics(dotShapes: SVGElement[]): DotMatrixMetrics | nu
     maxY: Math.max(...anchors.map((anchor) => anchor.y + (anchor.size ?? cellSize))),
     originX,
     originY,
+  }
+}
+
+function getFallbackDotMatrixMetrics(dotShapes: SVGElement[]): DotMatrixMetrics {
+  const anchors = dotShapes
+    .map((shape) => getDotMatrixAnchor(shape))
+    .filter((anchor): anchor is DotMatrixAnchor => anchor !== null)
+  const maxX = anchors.length > 0 ? Math.max(...anchors.map((anchor) => anchor.x + (anchor.size ?? 0))) : 0
+  const maxY = anchors.length > 0 ? Math.max(...anchors.map((anchor) => anchor.y + (anchor.size ?? 0))) : 0
+
+  return {
+    cellSize: 1,
+    maxCol: 0,
+    maxRow: 0,
+    maxX,
+    maxY,
+    originX: 0,
+    originY: 0,
   }
 }
 

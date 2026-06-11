@@ -49,9 +49,13 @@ export async function buildDashboardQrNodePayload(
 }
 
 export function renderDashboardQrSvgMarkup(state: QrStudioState) {
-  return stripXmlDeclaration(
-    renderToStaticMarkup(createElement(ReactQRCode, toReactQrCodeProps(state))),
+  const dashboardState = createDashboardSurfaceQrState(state)
+  const extension = buildQrExtension(dashboardState)
+  const markup = stripXmlDeclaration(
+    renderToStaticMarkup(createElement(ReactQRCode, toReactQrCodeProps(dashboardState))),
   )
+
+  return extension ? applyQrSvgExtension(markup, extension, dashboardState) : markup
 }
 
 function applyQrSvgExtension(
