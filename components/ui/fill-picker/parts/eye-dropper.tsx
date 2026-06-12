@@ -55,7 +55,10 @@ export const EyeDropper = React.forwardRef<HTMLButtonElement, EyeDropperProps>(f
       size="icon-sm"
       aria-label="Pick color from screen"
       onClick={onClick}
-      className={cn("cursor-pointer", className)}
+      className={cn(
+        "cursor-pointer !border-[var(--color-picker-control-border,var(--border))] !bg-[var(--color-picker-control-bg,var(--background))] !text-[var(--color-picker-fg,var(--foreground))] shadow-xs hover:!bg-[var(--color-picker-control-hover-bg,var(--muted))] hover:!text-[var(--color-picker-fg,var(--foreground))] focus-visible:!border-[var(--color-picker-focus,var(--ring))] focus-visible:ring-[var(--color-picker-focus,var(--ring))]/30",
+        className,
+      )}
       {...rest}
     >
       <Pipette className="size-4" />

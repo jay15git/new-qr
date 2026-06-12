@@ -64,9 +64,9 @@ export const Swatches = React.forwardRef<HTMLDivElement, SwatchesProps>(function
             aria-label={p}
             onClick={() => setColor(p)}
             className={cn(
-              "relative size-5 cursor-pointer overflow-hidden rounded-sm border border-border outline-none transition-transform",
-              "focus-visible:ring-2 focus-visible:ring-ring hover:scale-110",
-              active && "ring-2 ring-ring",
+              "relative size-5 cursor-pointer overflow-hidden rounded-full border-0 outline-none transition-transform",
+              "focus-visible:ring-2 focus-visible:ring-[var(--color-picker-focus,var(--ring))] hover:scale-110",
+              active && "ring-2 ring-[var(--color-picker-focus,var(--ring))]",
             )}
             style={{ backgroundImage: CHECKERBOARD, backgroundSize: "8px 8px" }}
           >
@@ -84,8 +84,8 @@ export const Swatches = React.forwardRef<HTMLDivElement, SwatchesProps>(function
           aria-label="Add current color to swatches"
           onClick={() => onAdd(color, formatColor(color, "hex"))}
           className={cn(
-            "inline-flex size-5 cursor-pointer items-center justify-center rounded-sm border border-dashed border-border text-muted-foreground outline-none transition-colors",
-            "hover:border-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring",
+            "inline-flex size-5 cursor-pointer items-center justify-center rounded-md border border-dashed border-[var(--color-picker-control-border,var(--border))] bg-[var(--color-picker-control-bg,transparent)] text-[var(--color-picker-muted-fg,var(--muted-foreground))] outline-none transition-colors",
+            "hover:border-[var(--color-picker-fg,var(--foreground))] hover:bg-[var(--color-picker-control-hover-bg,var(--muted))] hover:text-[var(--color-picker-fg,var(--foreground))] focus-visible:ring-2 focus-visible:ring-[var(--color-picker-focus,var(--ring))]",
           )}
         >
           <Plus className="size-3" />

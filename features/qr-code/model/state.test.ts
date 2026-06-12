@@ -394,7 +394,7 @@ describe("qr studio state helpers", () => {
     expect(options.gradient).toBeUndefined();
   });
 
-  it("emits gradient payloads when enabled", () => {
+  it("omits upstream gradients for module gradient mode so finder patterns stay solid", () => {
     const state = createDefaultQrStudioState();
     state.dotsColorMode = "gradient";
     state.dataModulesGradient.enabled = true;
@@ -408,14 +408,7 @@ describe("qr studio state helpers", () => {
     const options = toReactQrCodeProps(state);
 
     expect(options.dataModulesSettings?.color).toBeUndefined();
-    expect(options.gradient).toEqual({
-      type: "radial",
-      rotation: 1.2,
-      stops: [
-        { offset: "0", color: "#101010" },
-        { offset: "1", color: "#fafafa" },
-      ],
-    });
+    expect(options.gradient).toBeUndefined();
   });
 
   it("omits upstream dot colors when palette mode is enabled", () => {

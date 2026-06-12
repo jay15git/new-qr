@@ -97,6 +97,10 @@ function createStubElement(tagName: string): StubElement {
           return node.tagName === "rect"
         }
 
+        if (selector === "path") {
+          return node.tagName === "path"
+        }
+
         if (selector === "clipPath") {
           return node.tagName === "clipPath"
         }
@@ -158,6 +162,18 @@ function createStubElement(tagName: string): StubElement {
 
         if (selector === '[data-qr-layer="dot-palette-color"]') {
           return node.attributes["data-qr-layer"] === "dot-palette-color"
+        }
+
+        if (selector === '[data-qr-layer="dot-gradient"]') {
+          return node.attributes["data-qr-layer"] === "dot-gradient"
+        }
+
+        if (selector === '[data-qr-layer="dot-gradient-fill"]') {
+          return node.attributes["data-qr-layer"] === "dot-gradient-fill"
+        }
+
+        if (selector === '[data-qr-layer="dot-gradient-definition"]') {
+          return node.attributes["data-qr-layer"] === "dot-gradient-definition"
         }
 
         return false
@@ -225,6 +241,36 @@ function createDotMatrixSvgFixture({
   svg.appendChild(dotLayer)
 
   return { dotLayer, height, svg, width }
+}
+
+function getPaletteLayerAnchors(svg: StubElement, colorLayers: StubElement[]) {
+  return new Map(
+    colorLayers.map((layer) => {
+      const color = layer.getAttribute("fill") ?? ""
+      const clipPathId = /#([^'")]+)/.exec(layer.getAttribute("clip-path") ?? "")?.[1]
+      const clipPath = svg.querySelectorAll("clipPath").find(
+        (candidate) => candidate.getAttribute("id") === clipPathId,
+      )
+      const anchors =
+        clipPath?.children
+          .map((shape) => {
+            if (shape.tagName === "path") {
+              const match = /M\s*([+-]?(?:\d+\.?\d*|\.\d+))[\s,]+([+-]?(?:\d+\.?\d*|\.\d+))/.exec(
+                shape.getAttribute("d") ?? "",
+              )
+              return match ? `${Math.floor(Number(match[1]))},${Math.floor(Number(match[2]))}` : null
+            }
+
+            const x = shape.getAttribute("x")
+            const y = shape.getAttribute("y")
+
+            return x && y ? `${x},${y}` : null
+          })
+          .filter((anchor): anchor is string => anchor !== null) ?? []
+
+      return [color, anchors] as const
+    }),
+  )
 }
 
 function renderDotMatrixTracks(
@@ -389,6 +435,154 @@ describe("qr rendering helpers", () => {
       "#eeeeee",
     ])
     expect(colorLayers.every((layer) => layer.getAttribute("clip-path")?.includes("qr-dot-palette-clip-"))).toBe(true)
+  })
+
+  it("scatters palette colors without sorted bands or checkerboard repetition", () => {
+    const state = createDefaultQrStudioState()
+    state.dotsColorMode = "palette"
+    state.dotsPalette = ["#111111", "#222222", "#333333", "#444444"]
+
+    const extension = buildQrExtension(state)
+    expect(extension).toBeTypeOf("function")
+
+    if (!extension) {
+      return
+    }
+
+    const { height, svg, width } = createDotMatrixSvgFixture({
+      cols: 4,
+      rows: 4,
+    })
+
+    extension(svg as unknown as SVGElement, {
+      height,
+      width,
+    })
+
+    const colorLayers = svg.querySelectorAll('[data-qr-layer="dot-palette-color"]')
+    const anchorsByColor = getPaletteLayerAnchors(svg, colorLayers)
+    const allAnchors = new Map(
+      Array.from(anchorsByColor.entries()).flatMap(([color, anchors]) =>
+        anchors.map((anchor) => [anchor, color] as const),
+      ),
+    )
+    const firstRowColors = [0, 1, 2, 3].map((col) => allAnchors.get(`${10 + col * 5},10`))
+    const rowMajorColors = Array.from({ length: 16 }, (_item, index) => {
+      const row = Math.floor(index / 4)
+      const col = index % 4
+      return allAnchors.get(`${10 + col * 5},${10 + row * 5}`)
+    })
+    const rowMajorRuns = rowMajorColors.reduce<string[][]>((runs, color) => {
+      const lastRun = runs[runs.length - 1]
+
+      if (lastRun && lastRun[0] === color) {
+        lastRun.push(color ?? "")
+      } else {
+        runs.push([color ?? ""])
+      }
+
+      return runs
+    }, [])
+
+    expect(colorLayers.map((layer) => layer.getAttribute("fill"))).toEqual([
+      "#111111",
+      "#222222",
+      "#333333",
+      "#444444",
+    ])
+    expect(rowMajorRuns.some((run) => run.length >= 4)).toBe(false)
+    expect(firstRowColors).not.toEqual(["#111111", "#111111", "#111111", "#111111"])
+    expect(firstRowColors).not.toEqual(["#111111", "#222222", "#333333", "#444444"])
+    expect(firstRowColors).not.toEqual(["#111111", "#222222", "#111111", "#222222"])
+  })
+
+  it("keeps same-coordinate palette path fragments grouped together", () => {
+    const state = createDefaultQrStudioState()
+    state.dotsColorMode = "palette"
+    state.dotsPalette = ["#111111", "#222222", "#333333", "#444444"]
+
+    const extension = buildQrExtension(state)
+    expect(extension).toBeTypeOf("function")
+
+    if (!extension) {
+      return
+    }
+
+    const svg = createStubElement("svg")
+    const pathLayer = createStubElement("path")
+    pathLayer.setAttribute("data-testid", "data-modules")
+    pathLayer.setAttribute(
+      "d",
+      "M10.25,10.25h1.5v0.5h-1.5Z M10,10.5a0.5,0.5 0 1,1 1,0a0.5,0.5 0 1,1 -1,0Z M15.25,10.25h1.5v0.5h-1.5Z M15,10.5a0.5,0.5 0 1,1 1,0a0.5,0.5 0 1,1 -1,0Z",
+    )
+    svg.appendChild(pathLayer)
+
+    extension(svg as unknown as SVGElement, {
+      height: 120,
+      width: 120,
+    })
+
+    const colorLayers = svg.querySelectorAll('[data-qr-layer="dot-palette-color"]')
+    const anchorsByColor = getPaletteLayerAnchors(svg, colorLayers)
+    const colorsForFirstCoordinate = Array.from(anchorsByColor.entries())
+      .filter((entry) => entry[1].includes("10,10"))
+      .map(([color]) => color)
+    const colorsForSecondCoordinate = Array.from(anchorsByColor.entries())
+      .filter((entry) => entry[1].includes("15,10"))
+      .map(([color]) => color)
+
+    expect(colorsForFirstCoordinate).toHaveLength(1)
+    expect(colorsForSecondCoordinate).toHaveLength(1)
+  })
+
+  it("applies module gradients only to data modules", () => {
+    const state = createDefaultQrStudioState()
+    state.dotsColorMode = "gradient"
+    state.dataModulesGradient = {
+      enabled: true,
+      type: "linear",
+      rotation: Math.PI / 2,
+      colorStops: [
+        { offset: 0, color: "#111111" },
+        { offset: 1, color: "#eeeeee" },
+      ],
+    }
+
+    const extension = buildQrExtension(state)
+    expect(extension).toBeTypeOf("function")
+
+    if (!extension) {
+      return
+    }
+
+    const { dotLayer, height, svg, width } = createDotMatrixSvgFixture({
+      cols: 2,
+      rows: 2,
+    })
+    const cornerLayer = createStubElement("rect")
+    cornerLayer.setAttribute("clip-path", "url('#clip-path-corners-square-color-0-0-0')")
+    cornerLayer.setAttribute("fill", "#111827")
+    svg.appendChild(cornerLayer)
+
+    extension(svg as unknown as SVGElement, {
+      height,
+      width,
+    })
+
+    const gradientLayer = svg.querySelector('[data-qr-layer="dot-gradient"]')
+    const gradientFill = svg.querySelector('[data-qr-layer="dot-gradient-fill"]')
+    const gradientDefinition = svg.querySelector('[data-qr-layer="dot-gradient-definition"]')
+
+    expect(dotLayer.getAttribute("opacity")).toBe("0")
+    expect(cornerLayer.getAttribute("opacity")).toBeNull()
+    expect(gradientLayer).not.toBeNull()
+    expect(gradientFill?.getAttribute("fill")).toBe("url('#dot-gradient-definition')")
+    expect(gradientFill?.getAttribute("clip-path")).toContain("dot-gradient-clip")
+    expect(gradientDefinition?.tagName).toBe("linearGradient")
+    expect(gradientDefinition?.getAttribute("x1")).toBe("15")
+    expect(gradientDefinition?.getAttribute("y1")).toBe("10")
+    expect(gradientDefinition?.getAttribute("x2")).toBe("15")
+    expect(gradientDefinition?.getAttribute("y2")).toBe("20")
   })
 
   it("adds dot matrix animation as grouped track clip layers while keeping corner markers stable", () => {

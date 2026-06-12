@@ -44,7 +44,7 @@ export function toReactQrCodeProps(state: QrStudioState): ReactQRCodeProps {
         : state.finderPatternOuterSettings.color,
       style: state.finderPatternOuterSettings.type,
     },
-    gradient: getDotsGradient(state),
+    gradient: undefined,
     imageSettings: logoImage
       ? {
           crossOrigin: state.imageOptions.crossOrigin,
@@ -76,17 +76,6 @@ function getDotsColor(state: QrStudioState) {
   }
 
   return state.dataModulesSettings.color;
-}
-
-function getDotsGradient(state: QrStudioState) {
-  if (state.dotsColorMode !== "gradient") {
-    return undefined;
-  }
-
-  return buildGradient({
-    ...state.dataModulesGradient,
-    enabled: true,
-  });
 }
 
 function buildGradient(gradient: StudioGradient): QrGradientSettings | undefined {

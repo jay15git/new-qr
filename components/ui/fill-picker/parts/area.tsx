@@ -249,8 +249,8 @@ export const Area = React.forwardRef<HTMLDivElement, AreaProps>(function Area(
       onPointerMove={onPointerMove}
       onKeyDown={onKeyDown}
       className={cn(
-        "relative h-45 w-full cursor-crosshair overflow-hidden rounded-md border border-border outline-none touch-none select-none",
-        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-popover",
+        "relative h-45 w-full cursor-crosshair overflow-hidden rounded-xl border border-[var(--color-picker-control-border,var(--border))] bg-[var(--color-picker-control-bg,transparent)] shadow-[0_1px_0_var(--color-picker-highlight,rgba(255,255,255,0.08))_inset] outline-none touch-none select-none",
+        "focus-visible:ring-2 focus-visible:ring-[var(--color-picker-focus,var(--ring))] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-picker-bg,var(--popover))]",
         className,
       )}
       {...rest}

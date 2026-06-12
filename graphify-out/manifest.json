@@ -205,18 +205,18 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/alpha.tsx": {
-    "mtime": 1781067111.2974992,
-    "ast_hash": "042ffc4f5d890b6e3505be49099b559c",
+    "mtime": 1781269253.88999,
+    "ast_hash": "841e6310c3aaf4674e0a516e0c5cbcca",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/area.tsx": {
-    "mtime": 1781067143.1584082,
-    "ast_hash": "31ff26e0df110873124ebe7ec82c2d47",
+    "mtime": 1781269253.8896637,
+    "ast_hash": "7b37a38f60f8e27376b4517e34489e30",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/channel-input.tsx": {
-    "mtime": 1781067111.2981155,
-    "ast_hash": "e41737ccb0877ab1ffa2aba275f47f3e",
+    "mtime": 1781269253.8901463,
+    "ast_hash": "54fcfb59da48467aef4514b8cde136e2",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/contrast-readout.tsx": {
@@ -225,18 +225,18 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/css-input.tsx": {
-    "mtime": 1781067111.2985222,
-    "ast_hash": "fa38c82e6871100976a63366b45f5c26",
+    "mtime": 1781269586.8347607,
+    "ast_hash": "98e8eb9d088417dbc76ccdd31e1862c2",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/eye-dropper.tsx": {
-    "mtime": 1781067111.2986147,
-    "ast_hash": "6b76804d2368581980e60b9761dc5bea",
+    "mtime": 1781269586.8352118,
+    "ast_hash": "d87885fd7d58c2f9d0b6371ed2d19471",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/format-switcher.tsx": {
-    "mtime": 1781067111.298713,
-    "ast_hash": "fbfe346dff62acea89982ca63a7874b9",
+    "mtime": 1781269253.8890378,
+    "ast_hash": "f6b37b78ca4168c8ea178a0b4cabf776",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/gamut-badge.tsx": {
@@ -245,8 +245,8 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/hue.tsx": {
-    "mtime": 1781067111.298919,
-    "ast_hash": "3b53eeac508eed392dbf9dfee979d1b1",
+    "mtime": 1781269253.8898644,
+    "ast_hash": "8eba81846ad632f2669f28537c3a29aa",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/preview.tsx": {
@@ -255,13 +255,13 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/root.tsx": {
-    "mtime": 1781067111.2991354,
-    "ast_hash": "2fc899e0afbf798924a91e239e3b9cda",
+    "mtime": 1781269253.8887613,
+    "ast_hash": "f3f67db8e6e90e56deaaf468e1d76eb2",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/ui/fill-picker/parts/swatches.tsx": {
-    "mtime": 1781067111.2992418,
-    "ast_hash": "43f80f79896b074174dbb01f20782e8f",
+    "mtime": 1781269344.3513203,
+    "ast_hash": "87f5dddb4a9039859368488dc95b7e33",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/components/ui/fluid-tabs.tsx": {
@@ -640,13 +640,13 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/desktop-shell/components/FloatingToolbar.test.tsx": {
-    "mtime": 1781164779.910157,
-    "ast_hash": "22a153883a513e2596ac4d2c8bd54f88",
+    "mtime": 1781184507.0085227,
+    "ast_hash": "38247f53b3132344e4079dfeef08ac23",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/desktop-shell/components/FloatingToolbar.tsx": {
-    "mtime": 1781164796.8213325,
-    "ast_hash": "284fff238a33662f99f7647794dc1d7e",
+    "mtime": 1781269833.8983974,
+    "ast_hash": "69f2d06837c5bc5540c1d4a4209302b1",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/desktop-shell/components/InspectorControls.test.tsx": {
@@ -675,8 +675,8 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/qr-code/adapters/react-qr-adapter.ts": {
-    "mtime": 1781100647.28063,
-    "ast_hash": "c62e96768683b1f1d19bdc6d093c75d5",
+    "mtime": 1781188205.4457552,
+    "ast_hash": "0a3a7e30d38fb68647a1590c9ceeb8f8",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/qr-code/assets/brand-icon-svg.ts": {
@@ -785,8 +785,8 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/qr-code/model/state.test.ts": {
-    "mtime": 1781100647.2809584,
-    "ast_hash": "39d70f7702c4b87e84f93c95be1bff4e",
+    "mtime": 1781188212.1449993,
+    "ast_hash": "6662f7df56513f0aef97daabf024bb55",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/qr-code/model/state.ts": {
@@ -810,8 +810,8 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/qr-code/rendering/qr-svg.test.ts": {
-    "mtime": 1781167134.7411137,
-    "ast_hash": "2f00864e40b5fc75b5ab85f5e3afbfd5",
+    "mtime": 1781188373.413013,
+    "ast_hash": "6510e734a7db806749e1f2caf2aa97e6",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/qr-code/rendering/qr-svg.ts": {
@@ -820,13 +820,13 @@
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/qr-code/rendering/svg-extension.test.ts": {
-    "mtime": 1781166690.7402472,
-    "ast_hash": "7f10f1bbee7b8881a53e795c850863b5",
+    "mtime": 1781188364.0520644,
+    "ast_hash": "0abd3a3c979c63b2af38d814f3dc8490",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/qr-code/rendering/svg-extension.ts": {
-    "mtime": 1781167099.5221722,
-    "ast_hash": "49fb24a6eaed5eef0c178b5fbb708fd8",
+    "mtime": 1781188473.0513432,
+    "ast_hash": "fbef6f05179eee67ad1b778346374213",
     "semantic_hash": ""
   },
   "/Users/jayant/Documents/projects/new-qr/features/qr-code/styles/background-shapes.ts": {

@@ -40,8 +40,8 @@ export const FormatSwitcher = React.forwardRef<
         value={format}
         onChange={(e) => setFormat(e.target.value as ColorFormat)}
         className={cn(
-          "h-8 w-full appearance-none rounded-md border border-input bg-transparent pl-2.5 pr-7 font-mono text-xs uppercase tracking-wide shadow-xs outline-none",
-          "focus-visible:ring-1 focus-visible:ring-ring",
+          "h-8 w-full appearance-none rounded-lg border border-[var(--color-picker-control-border,var(--input))] bg-[var(--color-picker-control-bg,transparent)] pl-2.5 pr-7 font-mono text-xs uppercase tracking-wide text-[var(--color-picker-fg,var(--foreground))] shadow-xs outline-none transition-colors",
+          "hover:bg-[var(--color-picker-control-hover-bg,var(--muted))] focus-visible:border-[var(--color-picker-focus,var(--ring))] focus-visible:ring-2 focus-visible:ring-[var(--color-picker-focus,var(--ring))]/30",
           "cursor-pointer",
           selectClassName,
         )}
@@ -56,7 +56,7 @@ export const FormatSwitcher = React.forwardRef<
       <svg
         aria-hidden="true"
         viewBox="0 0 12 12"
-        className="pointer-events-none absolute right-2 size-3 text-muted-foreground"
+        className="pointer-events-none absolute right-2 size-3 text-[var(--color-picker-muted-fg,var(--muted-foreground))]"
       >
         <path
           d="M3 4.5l3 3 3-3"

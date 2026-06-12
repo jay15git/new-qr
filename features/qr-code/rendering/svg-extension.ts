@@ -65,6 +65,10 @@ export function buildQrExtension(
     extensions.push(createBackgroundSurfaceExtension(state))
   }
 
+  if (state.dotsColorMode === "gradient") {
+    extensions.push(createDotsGradientExtension(state))
+  }
+
   if (state.dotsColorMode === "palette" && getActiveDotsPalette(state).length > 0) {
     extensions.push(createDotsPaletteExtension(state))
   }
@@ -105,6 +109,7 @@ export function getQrExtensionKey(
     finderPatternInnerGradient: null,
     finderPatternOuterGradient: null,
     customDotShape: null,
+    dataModulesGradient: state.dotsColorMode === "gradient" ? state.dataModulesGradient : null,
     dotsColorMode: state.dotsColorMode,
     dotsPalette: state.dotsPalette,
     seed: state.data.trim(),
@@ -273,9 +278,10 @@ export function createDotMatrixAnimationExtension(
 }
 
 function createDotsPaletteExtension(
-  state: Pick<QrStudioState, "dotsPalette">,
+  state: Pick<QrStudioState, "data" | "dotsPalette">,
 ): QrSvgExtensionFunction {
   const palette = getActiveDotsPalette(state)
+  const paletteSeed = hashDotPaletteString(state.data.trim())
 
   return (svg, options) => {
     const document = svg.ownerDocument
@@ -299,21 +305,26 @@ function createDotsPaletteExtension(
     const dotPathShapes = dotPathLayers.flatMap((layer) => layer.shapes)
     const allDotShapes = [...dotShapes, ...dotPathShapes]
     const metrics = collectDotMatrixMetrics(allDotShapes)
-    const assignments = new Map<string, SVGElement[]>()
+    const shapeGroups = createDotPaletteShapeGroups(allDotShapes, metrics)
+    const assignments = palette.map((color) => ({
+      color,
+      paletteIndex: palette.indexOf(color),
+      shapes: [] as SVGElement[],
+    }))
+    const groupAssignments = shapeGroups.map((group) => ({
+      group,
+      paletteIndex: getDotPaletteIndex(group, palette.length, paletteSeed),
+    }))
 
-    for (const [fallbackIndex, shape] of allDotShapes.entries()) {
-      const coordinates = metrics ? resolveDotMatrixCoordinates(shape, metrics) : null
-      const paletteIndex = coordinates
-        ? Math.abs(coordinates.row + coordinates.col) % palette.length
-        : fallbackIndex % palette.length
-      const color = palette[paletteIndex]
-      const shapes = assignments.get(color) ?? []
+    balanceDotPaletteAssignments(groupAssignments, palette.length, paletteSeed)
 
-      shapes.push(shape)
-      assignments.set(color, shapes)
+    for (const { group, paletteIndex } of groupAssignments) {
+      assignments[paletteIndex]?.shapes.push(...group.shapes)
     }
 
-    if (assignments.size === 0) {
+    const activeAssignments = assignments.filter((assignment) => assignment.shapes.length > 0)
+
+    if (activeAssignments.length === 0) {
       return
     }
 
@@ -333,8 +344,7 @@ function createDotsPaletteExtension(
       metrics ?? getFallbackDotMatrixMetrics(allDotShapes),
     )
 
-    let index = 0
-    for (const [color, shapes] of assignments.entries()) {
+    for (const [index, { color, paletteIndex, shapes }] of activeAssignments.entries()) {
       const clipPath = document.createElementNS(SVG_NS, "clipPath")
       const clipPathId = `qr-dot-palette-clip-${index}`
 
@@ -357,9 +367,8 @@ function createDotsPaletteExtension(
       paletteLayer.setAttribute("clip-path", `url('#${clipPathId}')`)
       paletteLayer.setAttribute("fill", color)
       paletteLayer.setAttribute("data-qr-layer", "dot-palette-color")
-      paletteLayer.setAttribute("data-qr-palette-index", String(index))
+      paletteLayer.setAttribute("data-qr-palette-index", String(paletteIndex))
       group.appendChild(paletteLayer)
-      index += 1
     }
 
     if (group.children.length <= 1) {
@@ -367,6 +376,95 @@ function createDotsPaletteExtension(
     }
 
     svg.insertBefore(group, findDotMatrixLayerAnchor(svg))
+  }
+}
+
+function createDotsGradientExtension(
+  state: Pick<QrStudioState, "dataModulesGradient">,
+): QrSvgExtensionFunction {
+  return (svg) => {
+    const document = svg.ownerDocument
+
+    if (!document) {
+      return
+    }
+
+    svg.querySelectorAll('[data-qr-layer="dot-gradient"]').forEach((node) => {
+      node.remove()
+    })
+    svg.querySelectorAll('[data-qr-layer="dot-gradient-definition"]').forEach((node) => {
+      node.remove()
+    })
+
+    const dotLayers = getQrModuleClipLayers(svg)
+    const dotPathLayers = getQrModulePathLayers(svg)
+
+    if (dotLayers.length === 0 && dotPathLayers.length === 0) {
+      return
+    }
+
+    const dotShapes = dotLayers.flatMap((layer) => layer.shapes)
+    const dotPathShapes = dotPathLayers.flatMap((layer) => layer.shapes)
+    const allDotShapes = [...dotShapes, ...dotPathShapes]
+    const metrics = collectDotMatrixMetrics(allDotShapes) ?? getFallbackDotMatrixMetrics(allDotShapes)
+    const coverRect = getDotShapeCoverRect(metrics)
+    const gradientId = "dot-gradient-definition"
+    const gradient = createBackgroundShapeGradient(svg, state.dataModulesGradient, {
+      height: coverRect.height,
+      id: gradientId,
+      layer: "dot-gradient-definition",
+      width: coverRect.width,
+      x: coverRect.x,
+      y: coverRect.y,
+    })
+
+    if (!gradient) {
+      return
+    }
+
+    suppressDotMatrixBaseLayers(dotLayers)
+    suppressDotMatrixBasePathLayers(dotPathLayers)
+
+    const group = document.createElementNS(SVG_NS, "g")
+    const defs = document.createElementNS(SVG_NS, "defs")
+    const clipPath = document.createElementNS(SVG_NS, "clipPath")
+    const clipPathId = "dot-gradient-clip"
+
+    group.setAttribute("data-qr-layer", "dot-gradient")
+    defs.setAttribute("data-qr-layer", "dot-gradient-defs")
+    clipPath.setAttribute("id", clipPathId)
+    clipPath.setAttribute("data-qr-layer", "dot-gradient-clip")
+
+    for (const shape of allDotShapes) {
+      const clonedShape = shape.cloneNode(true) as SVGElement
+      clonedShape.removeAttribute("clip-path")
+      clipPath.appendChild(clonedShape)
+    }
+
+    defs.appendChild(gradient)
+    defs.appendChild(clipPath)
+    group.appendChild(defs)
+
+    const gradientFill = document.createElementNS(SVG_NS, "rect")
+    gradientFill.setAttribute("x", formatSvgNumber(coverRect.x))
+    gradientFill.setAttribute("y", formatSvgNumber(coverRect.y))
+    gradientFill.setAttribute("width", formatSvgNumber(coverRect.width))
+    gradientFill.setAttribute("height", formatSvgNumber(coverRect.height))
+    gradientFill.setAttribute("clip-path", `url('#${clipPathId}')`)
+    gradientFill.setAttribute("fill", `url('#${gradientId}')`)
+    gradientFill.setAttribute("data-qr-layer", "dot-gradient-fill")
+    group.appendChild(gradientFill)
+
+    svg.insertBefore(group, findDotMatrixLayerAnchor(svg))
+  }
+}
+
+function getDotShapeCoverRect(metrics: DotMatrixMetrics) {
+  return {
+    height: Math.max(metrics.cellSize, metrics.maxY - metrics.originY),
+    width: Math.max(metrics.cellSize, metrics.maxX - metrics.originX),
+    x: metrics.originX,
+    y: metrics.originY,
   }
 }
 
@@ -418,6 +516,17 @@ type DotMatrixMetrics = {
 type DotMatrixCoordinates = {
   col: number
   row: number
+}
+
+type DotPaletteShapeGroup = {
+  coordinates: DotMatrixCoordinates | null
+  fallbackIndex: number
+  shapes: SVGElement[]
+}
+
+type DotPaletteGroupAssignment = {
+  group: DotPaletteShapeGroup
+  paletteIndex: number
 }
 
 type DotMatrixModule = DotMatrixCoordinates & {
@@ -575,6 +684,157 @@ function suppressDotMatrixBasePathLayers(dotLayers: DotPathLayer[]) {
   }
 }
 
+function createDotPaletteShapeGroups(
+  shapes: SVGElement[],
+  metrics: DotMatrixMetrics | null,
+): DotPaletteShapeGroup[] {
+  const groups = new Map<string, DotPaletteShapeGroup>()
+
+  for (const [fallbackIndex, shape] of shapes.entries()) {
+    const coordinates = metrics ? resolveDotMatrixCoordinates(shape, metrics) : null
+    const key = coordinates ? `${coordinates.row}:${coordinates.col}` : `fallback:${fallbackIndex}`
+    const group = groups.get(key)
+
+    if (group) {
+      group.shapes.push(shape)
+      continue
+    }
+
+    groups.set(key, {
+      coordinates,
+      fallbackIndex,
+      shapes: [shape],
+    })
+  }
+
+  return Array.from(groups.values()).sort(compareDotPaletteShapeGroups)
+}
+
+function compareDotPaletteShapeGroups(left: DotPaletteShapeGroup, right: DotPaletteShapeGroup) {
+  if (left.coordinates && right.coordinates) {
+    return (
+      left.coordinates.row - right.coordinates.row ||
+      left.coordinates.col - right.coordinates.col ||
+      left.fallbackIndex - right.fallbackIndex
+    )
+  }
+
+  if (left.coordinates) {
+    return -1
+  }
+
+  if (right.coordinates) {
+    return 1
+  }
+
+  return left.fallbackIndex - right.fallbackIndex
+}
+
+function getDotPaletteIndex(group: DotPaletteShapeGroup, paletteLength: number, seed: number) {
+  if (paletteLength <= 0) {
+    return 0
+  }
+
+  return hashDotPaletteGroup(group, seed) % paletteLength
+}
+
+function balanceDotPaletteAssignments(
+  assignments: DotPaletteGroupAssignment[],
+  paletteLength: number,
+  seed: number,
+) {
+  if (assignments.length < paletteLength || paletteLength <= 1) {
+    return
+  }
+
+  const counts = countDotPaletteAssignments(assignments, paletteLength)
+  const missingPaletteIndexes = counts
+    .map((count, paletteIndex) => (count === 0 ? paletteIndex : null))
+    .filter((paletteIndex): paletteIndex is number => paletteIndex !== null)
+
+  for (const missingPaletteIndex of missingPaletteIndexes) {
+    let candidateIndex = -1
+    let candidateScore = -1
+
+    for (const [assignmentIndex, assignment] of assignments.entries()) {
+      if (counts[assignment.paletteIndex] <= 1) {
+        continue
+      }
+
+      const score = hashDotPaletteNumbers([
+        seed,
+        missingPaletteIndex,
+        assignmentIndex,
+        assignment.group.coordinates?.row ?? -1,
+        assignment.group.coordinates?.col ?? assignment.group.fallbackIndex,
+      ])
+
+      if (score > candidateScore) {
+        candidateIndex = assignmentIndex
+        candidateScore = score
+      }
+    }
+
+    if (candidateIndex === -1) {
+      return
+    }
+
+    const assignment = assignments[candidateIndex]
+    counts[assignment.paletteIndex] -= 1
+    assignment.paletteIndex = missingPaletteIndex
+    counts[missingPaletteIndex] += 1
+  }
+}
+
+function countDotPaletteAssignments(
+  assignments: DotPaletteGroupAssignment[],
+  paletteLength: number,
+) {
+  const counts = Array.from({ length: paletteLength }, () => 0)
+
+  for (const assignment of assignments) {
+    counts[assignment.paletteIndex] += 1
+  }
+
+  return counts
+}
+
+function hashDotPaletteGroup(group: DotPaletteShapeGroup, seed: number) {
+  return hashDotPaletteNumbers([
+    seed,
+    group.coordinates?.row ?? -1,
+    group.coordinates?.col ?? -1,
+    group.fallbackIndex,
+  ])
+}
+
+function hashDotPaletteString(value: string) {
+  const input = value.length > 0 ? value : "qr-dot-palette"
+  let hash = 2166136261
+
+  for (let index = 0; index < input.length; index += 1) {
+    hash ^= input.charCodeAt(index)
+    hash = Math.imul(hash, 16777619)
+  }
+
+  return hash >>> 0
+}
+
+function hashDotPaletteNumbers(values: number[]) {
+  let hash = 0x811c9dc5
+
+  for (const value of values) {
+    hash ^= value | 0
+    hash = Math.imul(hash, 0x45d9f3b)
+    hash ^= hash >>> 16
+  }
+
+  hash = Math.imul(hash ^ (hash >>> 15), 0x2c1b3c6d)
+  hash = Math.imul(hash ^ (hash >>> 12), 0x297a2d39)
+
+  return (hash ^ (hash >>> 15)) >>> 0
+}
+
 function getClipPathId(clipPath: string | null) {
   return /url\(['"]?#([^'")]+)['"]?\)/.exec(clipPath ?? "")?.[1] ?? null
 }
@@ -710,7 +970,7 @@ function getPathAnchor(pathDefinition: string | null): DotMatrixAnchor | null {
     return null
   }
 
-  return { x, y }
+  return { size: 1, x: Math.floor(x), y: Math.floor(y) }
 }
 
 function getDotNumericAttribute(shape: SVGElement, attributeName: string) {
@@ -2264,11 +2524,17 @@ function createBackgroundShapeGradient(
   {
     height,
     id,
+    layer = "background-shape-gradient",
     width,
+    x = 0,
+    y = 0,
   }: {
     height: number
     id: string
+    layer?: string
     width: number
+    x?: number
+    y?: number
   },
 ) {
   const document = svg.ownerDocument
@@ -2283,20 +2549,20 @@ function createBackgroundShapeGradient(
   )
 
   gradientElement.setAttribute("id", id)
-  gradientElement.setAttribute("data-qr-layer", "background-shape-gradient")
+  gradientElement.setAttribute("data-qr-layer", layer)
   gradientElement.setAttribute("gradientUnits", "userSpaceOnUse")
 
   if (gradient.type === "radial") {
-    gradientElement.setAttribute("cx", String(width / 2))
-    gradientElement.setAttribute("cy", String(height / 2))
+    gradientElement.setAttribute("cx", String(x + width / 2))
+    gradientElement.setAttribute("cy", String(y + height / 2))
     gradientElement.setAttribute("r", String(Math.max(width, height) / 2))
   } else {
     const endpoints = getLinearGradientEndpoints({
       height,
       rotation: gradient.rotation,
       width,
-      x: 0,
-      y: 0,
+      x,
+      y,
     })
 
     gradientElement.setAttribute("x1", String(endpoints.x1))

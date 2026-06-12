@@ -58,8 +58,8 @@ export const ChannelInput = React.forwardRef<
       ref={ref}
       data-slot="color-picker-channel-input"
       className={cn(
-        "flex h-8 items-stretch overflow-hidden rounded-md border border-input bg-transparent font-mono text-xs shadow-xs",
-        "focus-within:ring-1 focus-within:ring-ring",
+        "flex h-8 items-stretch overflow-hidden rounded-lg border border-[var(--color-picker-control-border,var(--input))] bg-[var(--color-picker-control-bg,transparent)] font-mono text-xs text-[var(--color-picker-fg,var(--foreground))] shadow-xs",
+        "focus-within:border-[var(--color-picker-focus,var(--ring))] focus-within:ring-2 focus-within:ring-[var(--color-picker-focus,var(--ring))]/30",
         className,
       )}
       {...rest}
@@ -106,7 +106,7 @@ function FormatSelect({
         aria-label="Color format"
         value={format}
         onChange={(e) => onChange(e.target.value as ColorFormat)}
-        className="h-full appearance-none bg-transparent pl-2 pr-5 font-mono text-xs uppercase tracking-wide outline-none"
+        className="h-full appearance-none bg-transparent pl-2 pr-5 font-mono text-xs uppercase tracking-wide text-[var(--color-picker-fg,var(--foreground))] outline-none"
       >
         {formats.map((f) => (
           <option key={f} value={f}>
@@ -117,7 +117,7 @@ function FormatSelect({
       <svg
         aria-hidden="true"
         viewBox="0 0 12 12"
-        className="pointer-events-none absolute right-1.5 size-3 text-muted-foreground"
+        className="pointer-events-none absolute right-1.5 size-3 text-[var(--color-picker-muted-fg,var(--muted-foreground))]"
       >
         <path
           d="M3 4.5l3 3 3-3"
@@ -180,7 +180,7 @@ function HexField({
         }
       }}
       className={cn(
-        "min-w-0 flex-1 bg-transparent px-2 outline-none",
+        "min-w-0 flex-1 bg-transparent px-2 text-[var(--color-picker-fg,var(--foreground))] outline-none",
         error && "text-destructive",
       )}
     />
@@ -260,12 +260,12 @@ function ChannelField({
             setDraft(display);
           }
         }}
-        className="w-full min-w-0 bg-transparent px-1.5 text-center outline-none tabular-nums"
+        className="w-full min-w-0 bg-transparent px-1.5 text-center text-[var(--color-picker-fg,var(--foreground))] outline-none tabular-nums"
       />
       {channel.suffix && (
         <span
           aria-hidden
-          className="pointer-events-none pr-1.5 text-muted-foreground"
+          className="pointer-events-none pr-1.5 text-[var(--color-picker-muted-fg,var(--muted-foreground))]"
         >
           {channel.suffix}
         </span>
@@ -277,7 +277,7 @@ function ChannelField({
 /* ────────────────────── Helpers ────────────────────── */
 
 function Divider() {
-  return <div aria-hidden className="w-px self-stretch bg-border" />;
+  return <div aria-hidden className="w-px self-stretch bg-[var(--color-picker-control-border,var(--border))]" />;
 }
 
 function formatNumber(value: number, precision: number): string {

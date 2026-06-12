@@ -972,7 +972,7 @@
       "source_file": "app/desktop/page.test.tsx",
       "source_location": "L1",
       "id": "desktop_page_test",
-      "community": 21,
+      "community": 11,
       "norm_label": "page.test.tsx"
     },
     {
@@ -981,7 +981,7 @@
       "source_file": "app/desktop/page.tsx",
       "source_location": "L1",
       "id": "desktop_page",
-      "community": 21,
+      "community": 11,
       "norm_label": "page.tsx"
     },
     {
@@ -990,7 +990,7 @@
       "source_file": "app/desktop/page.tsx",
       "source_location": "L6",
       "id": "desktop_page_satoshi",
-      "community": 21,
+      "community": 11,
       "norm_label": "satoshi"
     },
     {
@@ -999,7 +999,7 @@
       "source_file": "app/desktop/page.tsx",
       "source_location": "L13",
       "id": "desktop_page_metadata",
-      "community": 21,
+      "community": 11,
       "norm_label": "metadata"
     },
     {
@@ -1008,7 +1008,7 @@
       "source_file": "app/desktop/page.tsx",
       "source_location": "L18",
       "id": "desktop_page_desktoppage",
-      "community": 21,
+      "community": 11,
       "norm_label": "desktoppage()"
     },
     {
@@ -2043,7 +2043,7 @@
       "source_file": "components/ui/button.tsx",
       "source_location": "L1",
       "id": "ui_button",
-      "community": 73,
+      "community": 61,
       "norm_label": "button.tsx"
     },
     {
@@ -2052,7 +2052,7 @@
       "source_file": "components/ui/button.tsx",
       "source_location": "L7",
       "id": "ui_button_buttonvariants",
-      "community": 73,
+      "community": 61,
       "norm_label": "buttonvariants"
     },
     {
@@ -2061,7 +2061,7 @@
       "source_file": "components/ui/button.tsx",
       "source_location": "L44",
       "id": "ui_button_button",
-      "community": 73,
+      "community": 61,
       "norm_label": "button()"
     },
     {
@@ -2070,7 +2070,7 @@
       "source_file": "components/ui/card.tsx",
       "source_location": "L1",
       "id": "ui_card",
-      "community": 4,
+      "community": 79,
       "norm_label": "card.tsx"
     },
     {
@@ -2079,7 +2079,7 @@
       "source_file": "components/ui/card.tsx",
       "source_location": "L5",
       "id": "ui_card_card",
-      "community": 4,
+      "community": 79,
       "norm_label": "card()"
     },
     {
@@ -2088,7 +2088,7 @@
       "source_file": "components/ui/card.tsx",
       "source_location": "L23",
       "id": "ui_card_cardheader",
-      "community": 4,
+      "community": 79,
       "norm_label": "cardheader()"
     },
     {
@@ -2097,7 +2097,7 @@
       "source_file": "components/ui/card.tsx",
       "source_location": "L36",
       "id": "ui_card_cardtitle",
-      "community": 4,
+      "community": 79,
       "norm_label": "cardtitle()"
     },
     {
@@ -2106,7 +2106,7 @@
       "source_file": "components/ui/card.tsx",
       "source_location": "L49",
       "id": "ui_card_carddescription",
-      "community": 4,
+      "community": 79,
       "norm_label": "carddescription()"
     },
     {
@@ -2115,7 +2115,7 @@
       "source_file": "components/ui/card.tsx",
       "source_location": "L57",
       "id": "ui_card_cardcontent",
-      "community": 4,
+      "community": 79,
       "norm_label": "cardcontent()"
     },
     {
@@ -2124,7 +2124,7 @@
       "source_file": "components/ui/color-palette-card.tsx",
       "source_location": "L1",
       "id": "ui_color_palette_card",
-      "community": 73,
+      "community": 80,
       "norm_label": "color-palette-card.tsx"
     },
     {
@@ -2133,7 +2133,7 @@
       "source_file": "components/ui/color-palette-card.tsx",
       "source_location": "L5",
       "id": "ui_color_palette_card_colorpalettecardprops",
-      "community": 73,
+      "community": 80,
       "norm_label": "colorpalettecardprops"
     },
     {
@@ -2142,7 +2142,7 @@
       "source_file": "components/ui/color-palette-card.tsx",
       "source_location": "L11",
       "id": "ui_color_palette_card_colorpalettecard",
-      "community": 73,
+      "community": 80,
       "norm_label": "colorpalettecard"
     },
     {
@@ -2367,7 +2367,7 @@
       "source_file": "components/ui/download.tsx",
       "source_location": "L1",
       "id": "ui_download",
-      "community": 80,
+      "community": 90,
       "norm_label": "download.tsx"
     },
     {
@@ -2376,7 +2376,7 @@
       "source_file": "components/ui/download.tsx",
       "source_location": "L10",
       "id": "ui_download_downloadiconhandle",
-      "community": 80,
+      "community": 90,
       "norm_label": "downloadiconhandle"
     },
     {
@@ -2385,7 +2385,7 @@
       "source_file": "components/ui/download.tsx",
       "source_location": "L15",
       "id": "ui_download_downloadiconprops",
-      "community": 80,
+      "community": 90,
       "norm_label": "downloadiconprops"
     },
     {
@@ -2394,7 +2394,7 @@
       "source_file": "components/ui/download.tsx",
       "source_location": "L19",
       "id": "ui_download_arrow_variants",
-      "community": 80,
+      "community": 90,
       "norm_label": "arrow_variants"
     },
     {
@@ -2403,7 +2403,7 @@
       "source_file": "components/ui/download.tsx",
       "source_location": "L32",
       "id": "ui_download_downloadicon",
-      "community": 80,
+      "community": 90,
       "norm_label": "downloadicon"
     },
     {
@@ -2745,7 +2745,7 @@
       "source_file": "components/ui/field.tsx",
       "source_location": "L69",
       "id": "ui_field_fieldlabel",
-      "community": 25,
+      "community": 13,
       "norm_label": "fieldlabel()"
     },
     {
@@ -2772,7 +2772,7 @@
       "source_file": "components/ui/fill-picker/context.tsx",
       "source_location": "L1",
       "id": "fill_picker_context",
-      "community": 73,
+      "community": 10,
       "norm_label": "context.tsx"
     },
     {
@@ -2781,7 +2781,7 @@
       "source_file": "components/ui/fill-picker/context.tsx",
       "source_location": "L6",
       "id": "fill_picker_context_colorpickercontext",
-      "community": 73,
+      "community": 10,
       "norm_label": "colorpickercontext"
     },
     {
@@ -2790,7 +2790,7 @@
       "source_file": "components/ui/fill-picker/context.tsx",
       "source_location": "L8",
       "id": "fill_picker_context_usecolorpickercontext",
-      "community": 73,
+      "community": 80,
       "norm_label": "usecolorpickercontext()"
     },
     {
@@ -2799,7 +2799,7 @@
       "source_file": "components/ui/fill-picker/fill-picker.test.tsx",
       "source_location": "L1",
       "id": "fill_picker_fill_picker_test",
-      "community": 25,
+      "community": 10,
       "norm_label": "fill-picker.test.tsx"
     },
     {
@@ -2808,7 +2808,7 @@
       "source_file": "components/ui/fill-picker/fill-picker.test.tsx",
       "source_location": "L14",
       "id": "fill_picker_fill_picker_test_setinputvalue",
-      "community": 25,
+      "community": 10,
       "norm_label": "setinputvalue()"
     },
     {
@@ -2817,7 +2817,7 @@
       "source_file": "components/ui/fill-picker/fill-picker.test.tsx",
       "source_location": "L44",
       "id": "fill_picker_fill_picker_test_samecolorcommitter",
-      "community": 25,
+      "community": 10,
       "norm_label": "samecolorcommitter()"
     },
     {
@@ -2826,7 +2826,7 @@
       "source_file": "components/ui/fill-picker/fill-picker.test.tsx",
       "source_location": "L83",
       "id": "fill_picker_fill_picker_test_controlledfillpicker",
-      "community": 25,
+      "community": 10,
       "norm_label": "controlledfillpicker()"
     },
     {
@@ -2835,7 +2835,7 @@
       "source_file": "components/ui/fill-picker/fill-picker.test.tsx",
       "source_location": "L172",
       "id": "fill_picker_fill_picker_test_editablefillpicker",
-      "community": 25,
+      "community": 10,
       "norm_label": "editablefillpicker()"
     },
     {
@@ -2844,7 +2844,7 @@
       "source_file": "components/ui/fill-picker/fill-picker.tsx",
       "source_location": "L1",
       "id": "fill_picker_fill_picker",
-      "community": 73,
+      "community": 10,
       "norm_label": "fill-picker.tsx"
     },
     {
@@ -2853,7 +2853,7 @@
       "source_file": "components/ui/fill-picker/fill-picker.tsx",
       "source_location": "L28",
       "id": "fill_picker_fill_picker_colorpicker",
-      "community": 25,
+      "community": 10,
       "norm_label": "colorpicker"
     },
     {
@@ -2925,7 +2925,7 @@
       "source_file": "components/ui/fill-picker/hooks/use-color-picker.ts",
       "source_location": "L76",
       "id": "hooks_use_color_picker_coerce",
-      "community": 25,
+      "community": 10,
       "norm_label": "coerce()"
     },
     {
@@ -2970,7 +2970,7 @@
       "source_file": "components/ui/fill-picker/hooks/use-color-picker.ts",
       "source_location": "L115",
       "id": "hooks_use_color_picker_usecolorpicker",
-      "community": 25,
+      "community": 10,
       "norm_label": "usecolorpicker()"
     },
     {
@@ -3249,7 +3249,7 @@
       "source_file": "components/ui/fill-picker/lib/color.ts",
       "source_location": "L51",
       "id": "lib_color_parsecolor",
-      "community": 25,
+      "community": 27,
       "norm_label": "parsecolor()"
     },
     {
@@ -3339,7 +3339,7 @@
       "source_file": "components/ui/fill-picker/lib/color.ts",
       "source_location": "L294",
       "id": "lib_color_gamutfromformat",
-      "community": 73,
+      "community": 25,
       "norm_label": "gamutfromformat()"
     },
     {
@@ -3510,7 +3510,7 @@
       "source_file": "components/ui/fill-picker/parts/alpha.tsx",
       "source_location": "L1",
       "id": "parts_alpha",
-      "community": 73,
+      "community": 80,
       "norm_label": "alpha.tsx"
     },
     {
@@ -3519,7 +3519,7 @@
       "source_file": "components/ui/fill-picker/parts/alpha.tsx",
       "source_location": "L8",
       "id": "parts_alpha_alphaprops",
-      "community": 73,
+      "community": 80,
       "norm_label": "alphaprops"
     },
     {
@@ -3528,7 +3528,7 @@
       "source_file": "components/ui/fill-picker/parts/alpha.tsx",
       "source_location": "L15",
       "id": "parts_alpha_alpha",
-      "community": 73,
+      "community": 80,
       "norm_label": "alpha"
     },
     {
@@ -3582,7 +3582,7 @@
       "source_file": "components/ui/fill-picker/parts/area.tsx",
       "source_location": "L85",
       "id": "parts_area_area",
-      "community": 73,
+      "community": 10,
       "norm_label": "area"
     },
     {
@@ -3735,7 +3735,7 @@
       "source_file": "components/ui/fill-picker/parts/channel-input.tsx",
       "source_location": "L14",
       "id": "parts_channel_input_channelinputprops",
-      "community": 33,
+      "community": 10,
       "norm_label": "channelinputprops"
     },
     {
@@ -3915,7 +3915,7 @@
       "source_file": "components/ui/fill-picker/parts/css-input.tsx",
       "source_location": "L1",
       "id": "parts_css_input",
-      "community": 73,
+      "community": 80,
       "norm_label": "css-input.tsx"
     },
     {
@@ -3924,7 +3924,7 @@
       "source_file": "components/ui/fill-picker/parts/css-input.tsx",
       "source_location": "L8",
       "id": "parts_css_input_cssinputprops",
-      "community": 73,
+      "community": 80,
       "norm_label": "cssinputprops"
     },
     {
@@ -3933,7 +3933,7 @@
       "source_file": "components/ui/fill-picker/parts/css-input.tsx",
       "source_location": "L13",
       "id": "parts_css_input_cssinput",
-      "community": 73,
+      "community": 80,
       "norm_label": "cssinput"
     },
     {
@@ -3942,7 +3942,7 @@
       "source_file": "components/ui/fill-picker/parts/eye-dropper.tsx",
       "source_location": "L1",
       "id": "parts_eye_dropper",
-      "community": 73,
+      "community": 80,
       "norm_label": "eye-dropper.tsx"
     },
     {
@@ -3951,7 +3951,7 @@
       "source_file": "components/ui/fill-picker/parts/eye-dropper.tsx",
       "source_location": "L9",
       "id": "parts_eye_dropper_eyedropperlike",
-      "community": 73,
+      "community": 80,
       "norm_label": "eyedropperlike"
     },
     {
@@ -3960,7 +3960,7 @@
       "source_file": "components/ui/fill-picker/parts/eye-dropper.tsx",
       "source_location": "L13",
       "id": "parts_eye_dropper_eyedropperwindow",
-      "community": 73,
+      "community": 80,
       "norm_label": "eyedropperwindow"
     },
     {
@@ -3969,7 +3969,7 @@
       "source_file": "components/ui/fill-picker/parts/eye-dropper.tsx",
       "source_location": "L17",
       "id": "parts_eye_dropper_eyedropperprops",
-      "community": 73,
+      "community": 80,
       "norm_label": "eyedropperprops"
     },
     {
@@ -3978,7 +3978,7 @@
       "source_file": "components/ui/fill-picker/parts/eye-dropper.tsx",
       "source_location": "L19",
       "id": "parts_eye_dropper_eyedropper",
-      "community": 73,
+      "community": 80,
       "norm_label": "eyedropper"
     },
     {
@@ -4041,7 +4041,7 @@
       "source_file": "components/ui/fill-picker/parts/hue.tsx",
       "source_location": "L1",
       "id": "parts_hue",
-      "community": 73,
+      "community": 25,
       "norm_label": "hue.tsx"
     },
     {
@@ -4050,7 +4050,7 @@
       "source_file": "components/ui/fill-picker/parts/hue.tsx",
       "source_location": "L10",
       "id": "parts_hue_tohsl",
-      "community": 73,
+      "community": 25,
       "norm_label": "tohsl"
     },
     {
@@ -4059,7 +4059,7 @@
       "source_file": "components/ui/fill-picker/parts/hue.tsx",
       "source_location": "L11",
       "id": "parts_hue_tohsv",
-      "community": 73,
+      "community": 25,
       "norm_label": "tohsv"
     },
     {
@@ -4068,7 +4068,7 @@
       "source_file": "components/ui/fill-picker/parts/hue.tsx",
       "source_location": "L13",
       "id": "parts_hue_hueprops",
-      "community": 73,
+      "community": 25,
       "norm_label": "hueprops"
     },
     {
@@ -4077,7 +4077,7 @@
       "source_file": "components/ui/fill-picker/parts/hue.tsx",
       "source_location": "L17",
       "id": "parts_hue_hue",
-      "community": 73,
+      "community": 25,
       "norm_label": "hue"
     },
     {
@@ -4086,7 +4086,7 @@
       "source_file": "components/ui/fill-picker/parts/preview.tsx",
       "source_location": "L1",
       "id": "parts_preview",
-      "community": 73,
+      "community": 80,
       "norm_label": "preview.tsx"
     },
     {
@@ -4095,7 +4095,7 @@
       "source_file": "components/ui/fill-picker/parts/preview.tsx",
       "source_location": "L8",
       "id": "parts_preview_previewprops",
-      "community": 73,
+      "community": 80,
       "norm_label": "previewprops"
     },
     {
@@ -4104,7 +4104,7 @@
       "source_file": "components/ui/fill-picker/parts/preview.tsx",
       "source_location": "L13",
       "id": "parts_preview_preview",
-      "community": 73,
+      "community": 80,
       "norm_label": "preview"
     },
     {
@@ -4113,7 +4113,7 @@
       "source_file": "components/ui/fill-picker/parts/root.tsx",
       "source_location": "L1",
       "id": "parts_root",
-      "community": 73,
+      "community": 10,
       "norm_label": "root.tsx"
     },
     {
@@ -4131,7 +4131,7 @@
       "source_file": "components/ui/fill-picker/parts/root.tsx",
       "source_location": "L15",
       "id": "parts_root_root",
-      "community": 73,
+      "community": 10,
       "norm_label": "root"
     },
     {
@@ -4140,7 +4140,7 @@
       "source_file": "components/ui/fill-picker/parts/swatches.tsx",
       "source_location": "L1",
       "id": "parts_swatches",
-      "community": 73,
+      "community": 10,
       "norm_label": "swatches.tsx"
     },
     {
@@ -4158,7 +4158,7 @@
       "source_file": "components/ui/fill-picker/parts/swatches.tsx",
       "source_location": "L25",
       "id": "parts_swatches_default_presets",
-      "community": 73,
+      "community": 10,
       "norm_label": "default_presets"
     },
     {
@@ -4167,7 +4167,7 @@
       "source_file": "components/ui/fill-picker/parts/swatches.tsx",
       "source_location": "L38",
       "id": "parts_swatches_swatches",
-      "community": 73,
+      "community": 10,
       "norm_label": "swatches"
     },
     {
@@ -4221,7 +4221,7 @@
       "source_file": "components/ui/gallery-vertical-end.tsx",
       "source_location": "L1",
       "id": "ui_gallery_vertical_end",
-      "community": 119,
+      "community": 95,
       "norm_label": "gallery-vertical-end.tsx"
     },
     {
@@ -4230,7 +4230,7 @@
       "source_file": "components/ui/gallery-vertical-end.tsx",
       "source_location": "L10",
       "id": "ui_gallery_vertical_end_galleryverticalendiconhandle",
-      "community": 119,
+      "community": 95,
       "norm_label": "galleryverticalendiconhandle"
     },
     {
@@ -4239,7 +4239,7 @@
       "source_file": "components/ui/gallery-vertical-end.tsx",
       "source_location": "L15",
       "id": "ui_gallery_vertical_end_galleryverticalendiconprops",
-      "community": 119,
+      "community": 95,
       "norm_label": "galleryverticalendiconprops"
     },
     {
@@ -4248,7 +4248,7 @@
       "source_file": "components/ui/gallery-vertical-end.tsx",
       "source_location": "L19",
       "id": "ui_gallery_vertical_end_path_variants",
-      "community": 119,
+      "community": 95,
       "norm_label": "path_variants"
     },
     {
@@ -4257,7 +4257,7 @@
       "source_file": "components/ui/gallery-vertical-end.tsx",
       "source_location": "L41",
       "id": "ui_gallery_vertical_end_galleryverticalendicon",
-      "community": 119,
+      "community": 95,
       "norm_label": "galleryverticalendicon"
     },
     {
@@ -4320,7 +4320,7 @@
       "source_file": "components/ui/input.tsx",
       "source_location": "L1",
       "id": "ui_input",
-      "community": 73,
+      "community": 80,
       "norm_label": "input.tsx"
     },
     {
@@ -4329,7 +4329,7 @@
       "source_file": "components/ui/input.tsx",
       "source_location": "L5",
       "id": "ui_input_input",
-      "community": 73,
+      "community": 80,
       "norm_label": "input()"
     },
     {
@@ -4419,7 +4419,7 @@
       "source_file": "components/ui/layers.tsx",
       "source_location": "L1",
       "id": "ui_layers",
-      "community": 87,
+      "community": 101,
       "norm_label": "layers.tsx"
     },
     {
@@ -4428,7 +4428,7 @@
       "source_file": "components/ui/layers.tsx",
       "source_location": "L10",
       "id": "ui_layers_layersiconhandle",
-      "community": 87,
+      "community": 101,
       "norm_label": "layersiconhandle"
     },
     {
@@ -4437,7 +4437,7 @@
       "source_file": "components/ui/layers.tsx",
       "source_location": "L15",
       "id": "ui_layers_layersiconprops",
-      "community": 87,
+      "community": 101,
       "norm_label": "layersiconprops"
     },
     {
@@ -4446,7 +4446,7 @@
       "source_file": "components/ui/layers.tsx",
       "source_location": "L19",
       "id": "ui_layers_default_transition",
-      "community": 87,
+      "community": 101,
       "norm_label": "default_transition"
     },
     {
@@ -4455,7 +4455,7 @@
       "source_file": "components/ui/layers.tsx",
       "source_location": "L26",
       "id": "ui_layers_layersicon",
-      "community": 87,
+      "community": 101,
       "norm_label": "layersicon"
     },
     {
@@ -4527,7 +4527,7 @@
       "source_file": "components/ui/option-card.tsx",
       "source_location": "L1",
       "id": "ui_option_card",
-      "community": 101,
+      "community": 1,
       "norm_label": "option-card.tsx"
     },
     {
@@ -4536,7 +4536,7 @@
       "source_file": "components/ui/option-card.tsx",
       "source_location": "L5",
       "id": "ui_option_card_optioncardprops",
-      "community": 101,
+      "community": 1,
       "norm_label": "optioncardprops"
     },
     {
@@ -4545,7 +4545,7 @@
       "source_file": "components/ui/option-card.tsx",
       "source_location": "L20",
       "id": "ui_option_card_optioncard",
-      "community": 101,
+      "community": 1,
       "norm_label": "optioncard()"
     },
     {
@@ -4896,7 +4896,7 @@
       "source_file": "components/ui/textarea.tsx",
       "source_location": "L1",
       "id": "ui_textarea",
-      "community": 90,
+      "community": 80,
       "norm_label": "textarea.tsx"
     },
     {
@@ -4905,7 +4905,7 @@
       "source_file": "components/ui/textarea.tsx",
       "source_location": "L5",
       "id": "ui_textarea_textarea",
-      "community": 90,
+      "community": 80,
       "norm_label": "textarea()"
     },
     {
@@ -5265,7 +5265,7 @@
       "source_file": "components/vendor/kokonutui/ai-input-search.test.tsx",
       "source_location": "L1",
       "id": "kokonutui_ai_input_search_test",
-      "community": 90,
+      "community": 80,
       "norm_label": "ai-input-search.test.tsx"
     },
     {
@@ -5274,7 +5274,7 @@
       "source_file": "components/vendor/kokonutui/ai-input-search.tsx",
       "source_location": "L1",
       "id": "kokonutui_ai_input_search",
-      "community": 90,
+      "community": 80,
       "norm_label": "ai-input-search.tsx"
     },
     {
@@ -5283,7 +5283,7 @@
       "source_file": "components/vendor/kokonutui/ai-input-search.tsx",
       "source_location": "L21",
       "id": "kokonutui_ai_input_search_aiinputshortcut",
-      "community": 90,
+      "community": 80,
       "norm_label": "aiinputshortcut"
     },
     {
@@ -5292,7 +5292,7 @@
       "source_file": "components/vendor/kokonutui/ai-input-search.tsx",
       "source_location": "L26",
       "id": "kokonutui_ai_input_search_aiinputsearchprops",
-      "community": 90,
+      "community": 80,
       "norm_label": "aiinputsearchprops"
     },
     {
@@ -5301,7 +5301,7 @@
       "source_file": "components/vendor/kokonutui/ai-input-search.tsx",
       "source_location": "L34",
       "id": "kokonutui_ai_input_search_ai_input_search",
-      "community": 90,
+      "community": 80,
       "norm_label": "ai_input_search()"
     },
     {
@@ -5652,7 +5652,7 @@
       "source_file": "features/desktop-shell/components/DesktopWorkspace.tsx",
       "source_location": "L1",
       "id": "components_desktopworkspace",
-      "community": 21,
+      "community": 11,
       "norm_label": "desktopworkspace.tsx"
     },
     {
@@ -5661,7 +5661,7 @@
       "source_file": "features/desktop-shell/components/DesktopWorkspace.tsx",
       "source_location": "L11",
       "id": "components_desktopworkspace_desktopworkspaceprops",
-      "community": 21,
+      "community": 11,
       "norm_label": "desktopworkspaceprops"
     },
     {
@@ -5670,7 +5670,7 @@
       "source_file": "features/desktop-shell/components/DesktopWorkspace.tsx",
       "source_location": "L15",
       "id": "components_desktopworkspace_desktopworkspace",
-      "community": 21,
+      "community": 11,
       "norm_label": "desktopworkspace()"
     },
     {
@@ -5679,7 +5679,7 @@
       "source_file": "features/desktop-shell/components/DesktopWorkspace.tsx",
       "source_location": "L56",
       "id": "components_desktopworkspace_desktopworkspacestyles",
-      "community": 21,
+      "community": 11,
       "norm_label": "desktopworkspacestyles()"
     },
     {
@@ -5695,7 +5695,7 @@
       "label": "renderPrototype()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1341",
+      "source_location": "L1374",
       "id": "components_floatingtoolbar_test_renderprototype",
       "community": 6,
       "norm_label": "renderprototype()"
@@ -5704,7 +5704,7 @@
       "label": "getToolButtons()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1351",
+      "source_location": "L1384",
       "id": "components_floatingtoolbar_test_gettoolbuttons",
       "community": 6,
       "norm_label": "gettoolbuttons()"
@@ -5713,7 +5713,7 @@
       "label": "getRequiredToolButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1359",
+      "source_location": "L1392",
       "id": "components_floatingtoolbar_test_getrequiredtoolbutton",
       "community": 6,
       "norm_label": "getrequiredtoolbutton()"
@@ -5722,7 +5722,7 @@
       "label": "clickButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1371",
+      "source_location": "L1404",
       "id": "components_floatingtoolbar_test_clickbutton",
       "community": 6,
       "norm_label": "clickbutton()"
@@ -5731,7 +5731,7 @@
       "label": "openTool()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1377",
+      "source_location": "L1410",
       "id": "components_floatingtoolbar_test_opentool",
       "community": 6,
       "norm_label": "opentool()"
@@ -5740,7 +5740,7 @@
       "label": "getRequiredSlider()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1381",
+      "source_location": "L1414",
       "id": "components_floatingtoolbar_test_getrequiredslider",
       "community": 6,
       "norm_label": "getrequiredslider()"
@@ -5749,7 +5749,7 @@
       "label": "getRequiredSliderRow()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1391",
+      "source_location": "L1424",
       "id": "components_floatingtoolbar_test_getrequiredsliderrow",
       "community": 6,
       "norm_label": "getrequiredsliderrow()"
@@ -5758,7 +5758,7 @@
       "label": "getRequiredButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1402",
+      "source_location": "L1435",
       "id": "components_floatingtoolbar_test_getrequiredbutton",
       "community": 6,
       "norm_label": "getrequiredbutton()"
@@ -5767,7 +5767,7 @@
       "label": "getRequiredInput()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1414",
+      "source_location": "L1447",
       "id": "components_floatingtoolbar_test_getrequiredinput",
       "community": 6,
       "norm_label": "getrequiredinput()"
@@ -5776,7 +5776,7 @@
       "label": "getRequiredTextarea()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1424",
+      "source_location": "L1457",
       "id": "components_floatingtoolbar_test_getrequiredtextarea",
       "community": 6,
       "norm_label": "getrequiredtextarea()"
@@ -5785,7 +5785,7 @@
       "label": "setInputValue()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1434",
+      "source_location": "L1467",
       "id": "components_floatingtoolbar_test_setinputvalue",
       "community": 6,
       "norm_label": "setinputvalue()"
@@ -5794,7 +5794,7 @@
       "label": "setTextareaValue()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.test.tsx",
-      "source_location": "L1440",
+      "source_location": "L1473",
       "id": "components_floatingtoolbar_test_settextareavalue",
       "community": 6,
       "norm_label": "settextareavalue()"
@@ -5841,7 +5841,7 @@
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
       "source_location": "L202",
       "id": "components_floatingtoolbar_desktopthememode",
-      "community": 21,
+      "community": 11,
       "norm_label": "desktopthememode"
     },
     {
@@ -6169,10 +6169,19 @@
       "norm_label": "default_desktop_dots_palette"
     },
     {
-      "label": "DESKTOP_BRAND_ICON_CATEGORY_OPTIONS",
+      "label": "DESKTOP_DOTS_PALETTE_PRESETS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
       "source_location": "L636",
+      "id": "components_floatingtoolbar_desktop_dots_palette_presets",
+      "community": 2,
+      "norm_label": "desktop_dots_palette_presets"
+    },
+    {
+      "label": "DESKTOP_BRAND_ICON_CATEGORY_OPTIONS",
+      "file_type": "code",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L652",
       "id": "components_floatingtoolbar_desktop_brand_icon_category_options",
       "community": 2,
       "norm_label": "desktop_brand_icon_category_options"
@@ -6181,7 +6190,7 @@
       "label": "DESKTOP_DOTS_COLOR_MODES",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L649",
+      "source_location": "L665",
       "id": "components_floatingtoolbar_desktop_dots_color_modes",
       "community": 2,
       "norm_label": "desktop_dots_color_modes"
@@ -6190,7 +6199,7 @@
       "label": "DESKTOP_CORNER_COLOR_MODES",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L655",
+      "source_location": "L671",
       "id": "components_floatingtoolbar_desktop_corner_color_modes",
       "community": 2,
       "norm_label": "desktop_corner_color_modes"
@@ -6199,7 +6208,7 @@
       "label": "DESKTOP_SHAPE_COLOR_MODES",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L660",
+      "source_location": "L676",
       "id": "components_floatingtoolbar_desktop_shape_color_modes",
       "community": 2,
       "norm_label": "desktop_shape_color_modes"
@@ -6208,7 +6217,7 @@
       "label": "DESKTOP_GRADIENT_TYPE_OPTIONS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L665",
+      "source_location": "L681",
       "id": "components_floatingtoolbar_desktop_gradient_type_options",
       "community": 2,
       "norm_label": "desktop_gradient_type_options"
@@ -6217,7 +6226,7 @@
       "label": "DESKTOP_LOGO_SOURCE_OPTIONS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L670",
+      "source_location": "L686",
       "id": "components_floatingtoolbar_desktop_logo_source_options",
       "community": 2,
       "norm_label": "desktop_logo_source_options"
@@ -6226,7 +6235,7 @@
       "label": "DESKTOP_ASSET_SOURCE_OPTIONS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L677",
+      "source_location": "L693",
       "id": "components_floatingtoolbar_desktop_asset_source_options",
       "community": 2,
       "norm_label": "desktop_asset_source_options"
@@ -6235,7 +6244,7 @@
       "label": "DESKTOP_IMAGE_INTENT_OPTIONS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L682",
+      "source_location": "L698",
       "id": "components_floatingtoolbar_desktop_image_intent_options",
       "community": 2,
       "norm_label": "desktop_image_intent_options"
@@ -6244,7 +6253,7 @@
       "label": "DESKTOP_DECORATION_OPTIONS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L688",
+      "source_location": "L704",
       "id": "components_floatingtoolbar_desktop_decoration_options",
       "community": 2,
       "norm_label": "desktop_decoration_options"
@@ -6253,7 +6262,7 @@
       "label": "DESKTOP_EXPORT_TARGET_OPTIONS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L695",
+      "source_location": "L711",
       "id": "components_floatingtoolbar_desktop_export_target_options",
       "community": 2,
       "norm_label": "desktop_export_target_options"
@@ -6262,7 +6271,7 @@
       "label": "DESKTOP_RASTER_EXPORT_PRESETS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L705",
+      "source_location": "L721",
       "id": "components_floatingtoolbar_desktop_raster_export_presets",
       "community": 2,
       "norm_label": "desktop_raster_export_presets"
@@ -6271,7 +6280,7 @@
       "label": "DEFAULT_DESKTOP_PATTERN_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L714",
+      "source_location": "L730",
       "id": "components_floatingtoolbar_default_desktop_pattern_settings",
       "community": 2,
       "norm_label": "default_desktop_pattern_settings"
@@ -6280,7 +6289,7 @@
       "label": "DEFAULT_DESKTOP_LOGO_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L722",
+      "source_location": "L738",
       "id": "components_floatingtoolbar_default_desktop_logo_settings",
       "community": 2,
       "norm_label": "default_desktop_logo_settings"
@@ -6289,7 +6298,7 @@
       "label": "DEFAULT_DESKTOP_CORNERS_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L736",
+      "source_location": "L752",
       "id": "components_floatingtoolbar_default_desktop_corners_settings",
       "community": 2,
       "norm_label": "default_desktop_corners_settings"
@@ -6298,7 +6307,7 @@
       "label": "DEFAULT_DESKTOP_SHAPE_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L759",
+      "source_location": "L775",
       "id": "components_floatingtoolbar_default_desktop_shape_settings",
       "community": 2,
       "norm_label": "default_desktop_shape_settings"
@@ -6307,7 +6316,7 @@
       "label": "DEFAULT_DESKTOP_MOTION_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L801",
+      "source_location": "L817",
       "id": "components_floatingtoolbar_default_desktop_motion_settings",
       "community": 2,
       "norm_label": "default_desktop_motion_settings"
@@ -6316,7 +6325,7 @@
       "label": "DEFAULT_DESKTOP_ENCODING_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L805",
+      "source_location": "L821",
       "id": "components_floatingtoolbar_default_desktop_encoding_settings",
       "community": 2,
       "norm_label": "default_desktop_encoding_settings"
@@ -6325,7 +6334,7 @@
       "label": "DEFAULT_DESKTOP_IMAGE_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L810",
+      "source_location": "L826",
       "id": "components_floatingtoolbar_default_desktop_image_settings",
       "community": 2,
       "norm_label": "default_desktop_image_settings"
@@ -6334,7 +6343,7 @@
       "label": "DEFAULT_DESKTOP_DECORATIONS_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L818",
+      "source_location": "L834",
       "id": "components_floatingtoolbar_default_desktop_decorations_settings",
       "community": 2,
       "norm_label": "default_desktop_decorations_settings"
@@ -6343,7 +6352,7 @@
       "label": "DEFAULT_DESKTOP_EFFECTS_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L827",
+      "source_location": "L843",
       "id": "components_floatingtoolbar_default_desktop_effects_settings",
       "community": 2,
       "norm_label": "default_desktop_effects_settings"
@@ -6352,7 +6361,7 @@
       "label": "DEFAULT_DESKTOP_LAYERS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L837",
+      "source_location": "L853",
       "id": "components_floatingtoolbar_default_desktop_layers",
       "community": 2,
       "norm_label": "default_desktop_layers"
@@ -6361,7 +6370,7 @@
       "label": "DEFAULT_DESKTOP_LAYERS_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L894",
+      "source_location": "L910",
       "id": "components_floatingtoolbar_default_desktop_layers_settings",
       "community": 2,
       "norm_label": "default_desktop_layers_settings"
@@ -6370,7 +6379,7 @@
       "label": "DEFAULT_DESKTOP_EXPORT_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L899",
+      "source_location": "L915",
       "id": "components_floatingtoolbar_default_desktop_export_settings",
       "community": 2,
       "norm_label": "default_desktop_export_settings"
@@ -6379,7 +6388,7 @@
       "label": "DEFAULT_DESKTOP_TEXT_SETTINGS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L905",
+      "source_location": "L921",
       "id": "components_floatingtoolbar_default_desktop_text_settings",
       "community": 2,
       "norm_label": "default_desktop_text_settings"
@@ -6388,7 +6397,7 @@
       "label": "DESKTOP_TEXT_PRESETS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L919",
+      "source_location": "L935",
       "id": "components_floatingtoolbar_desktop_text_presets",
       "community": 2,
       "norm_label": "desktop_text_presets"
@@ -6397,7 +6406,7 @@
       "label": "DESKTOP_TEXT_ALIGN_OPTIONS",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L931",
+      "source_location": "L947",
       "id": "components_floatingtoolbar_desktop_text_align_options",
       "community": 2,
       "norm_label": "desktop_text_align_options"
@@ -6406,7 +6415,7 @@
       "label": "DESKTOP_MOTION_COLOR_SWATCHES",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L937",
+      "source_location": "L953",
       "id": "components_floatingtoolbar_desktop_motion_color_swatches",
       "community": 2,
       "norm_label": "desktop_motion_color_swatches"
@@ -6415,7 +6424,7 @@
       "label": "FloatingToolbar()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L948",
+      "source_location": "L964",
       "id": "components_floatingtoolbar_floatingtoolbar",
       "community": 21,
       "norm_label": "floatingtoolbar()"
@@ -6424,7 +6433,7 @@
       "label": "DesktopThemeStyles()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L1494",
+      "source_location": "L1510",
       "id": "components_floatingtoolbar_desktopthemestyles",
       "community": 2,
       "norm_label": "desktopthemestyles()"
@@ -6433,7 +6442,7 @@
       "label": "DesktopInspectorHeader()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L1923",
+      "source_location": "L1959",
       "id": "components_floatingtoolbar_desktopinspectorheader",
       "community": 2,
       "norm_label": "desktopinspectorheader()"
@@ -6442,7 +6451,7 @@
       "label": "DesktopInspectorScrollArea()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L1935",
+      "source_location": "L1971",
       "id": "components_floatingtoolbar_desktopinspectorscrollarea",
       "community": 2,
       "norm_label": "desktopinspectorscrollarea()"
@@ -6451,16 +6460,16 @@
       "label": "getDesktopAdaptiveOptionPreviewStyle()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L1964",
+      "source_location": "L2000",
       "id": "components_floatingtoolbar_getdesktopadaptiveoptionpreviewstyle",
-      "community": 2,
+      "community": 109,
       "norm_label": "getdesktopadaptiveoptionpreviewstyle()"
     },
     {
       "label": "DesktopLogoInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L1973",
+      "source_location": "L2009",
       "id": "components_floatingtoolbar_desktoplogoinspector",
       "community": 2,
       "norm_label": "desktoplogoinspector()"
@@ -6469,7 +6478,7 @@
       "label": "DesktopBrandIconButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2187",
+      "source_location": "L2223",
       "id": "components_floatingtoolbar_desktopbrandiconbutton",
       "community": 2,
       "norm_label": "desktopbrandiconbutton()"
@@ -6478,7 +6487,7 @@
       "label": "DesktopCornersInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2215",
+      "source_location": "L2251",
       "id": "components_floatingtoolbar_desktopcornersinspector",
       "community": 2,
       "norm_label": "desktopcornersinspector()"
@@ -6487,7 +6496,7 @@
       "label": "DesktopCornerColorSection()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2338",
+      "source_location": "L2374",
       "id": "components_floatingtoolbar_desktopcornercolorsection",
       "community": 2,
       "norm_label": "desktopcornercolorsection()"
@@ -6496,16 +6505,16 @@
       "label": "DesktopCornerStyleButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2424",
+      "source_location": "L2460",
       "id": "components_floatingtoolbar_desktopcornerstylebutton",
-      "community": 2,
+      "community": 109,
       "norm_label": "desktopcornerstylebutton()"
     },
     {
       "label": "DesktopShapeInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2481",
+      "source_location": "L2517",
       "id": "components_floatingtoolbar_desktopshapeinspector",
       "community": 2,
       "norm_label": "desktopshapeinspector()"
@@ -6514,16 +6523,16 @@
       "label": "DesktopShapePresetButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2751",
+      "source_location": "L2787",
       "id": "components_floatingtoolbar_desktopshapepresetbutton",
-      "community": 2,
+      "community": 109,
       "norm_label": "desktopshapepresetbutton()"
     },
     {
       "label": "DesktopShapePreview()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2798",
+      "source_location": "L2834",
       "id": "components_floatingtoolbar_desktopshapepreview",
       "community": 2,
       "norm_label": "desktopshapepreview()"
@@ -6532,7 +6541,7 @@
       "label": "DesktopMotionInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L2872",
+      "source_location": "L2908",
       "id": "components_floatingtoolbar_desktopmotioninspector",
       "community": 2,
       "norm_label": "desktopmotioninspector()"
@@ -6541,7 +6550,7 @@
       "label": "DesktopMotionToggleRow()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3005",
+      "source_location": "L3041",
       "id": "components_floatingtoolbar_desktopmotiontogglerow",
       "community": 2,
       "norm_label": "desktopmotiontogglerow()"
@@ -6550,7 +6559,7 @@
       "label": "DesktopMotionSliderRow()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3050",
+      "source_location": "L3086",
       "id": "components_floatingtoolbar_desktopmotionsliderrow",
       "community": 2,
       "norm_label": "desktopmotionsliderrow()"
@@ -6559,7 +6568,7 @@
       "label": "DesktopElasticSliderRow()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3081",
+      "source_location": "L3117",
       "id": "components_floatingtoolbar_desktopelasticsliderrow",
       "community": 2,
       "norm_label": "desktopelasticsliderrow()"
@@ -6568,7 +6577,7 @@
       "label": "DesktopMotionLoaderButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3122",
+      "source_location": "L3158",
       "id": "components_floatingtoolbar_desktopmotionloaderbutton",
       "community": 2,
       "norm_label": "desktopmotionloaderbutton()"
@@ -6577,16 +6586,25 @@
       "label": "DesktopMotionColorPresetButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3150",
+      "source_location": "L3186",
       "id": "components_floatingtoolbar_desktopmotioncolorpresetbutton",
       "community": 2,
       "norm_label": "desktopmotioncolorpresetbutton()"
     },
     {
+      "label": "DesktopPatternPalettePresetButton()",
+      "file_type": "code",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L3226",
+      "id": "components_floatingtoolbar_desktoppatternpalettepresetbutton",
+      "community": 2,
+      "norm_label": "desktoppatternpalettepresetbutton()"
+    },
+    {
       "label": "DesktopContentInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3190",
+      "source_location": "L3266",
       "id": "components_floatingtoolbar_desktopcontentinspector",
       "community": 2,
       "norm_label": "desktopcontentinspector()"
@@ -6595,7 +6613,7 @@
       "label": "DesktopPatternInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3359",
+      "source_location": "L3435",
       "id": "components_floatingtoolbar_desktoppatterninspector",
       "community": 2,
       "norm_label": "desktoppatterninspector()"
@@ -6604,16 +6622,16 @@
       "label": "DesktopModulePatternButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3501",
+      "source_location": "L3590",
       "id": "components_floatingtoolbar_desktopmodulepatternbutton",
-      "community": 2,
+      "community": 109,
       "norm_label": "desktopmodulepatternbutton()"
     },
     {
       "label": "DesktopQrDotPreview()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3542",
+      "source_location": "L3631",
       "id": "components_floatingtoolbar_desktopqrdotpreview",
       "community": 2,
       "norm_label": "desktopqrdotpreview()"
@@ -6622,34 +6640,43 @@
       "label": "DesktopColorInputRow()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3569",
+      "source_location": "L3658",
       "id": "components_floatingtoolbar_desktopcolorinputrow",
       "community": 2,
       "norm_label": "desktopcolorinputrow()"
     },
     {
+      "label": "DesktopColorSwatchPicker()",
+      "file_type": "code",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L3691",
+      "id": "components_floatingtoolbar_desktopcolorswatchpicker",
+      "community": 2,
+      "norm_label": "desktopcolorswatchpicker()"
+    },
+    {
       "label": "DesktopColorPickerPopover()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3608",
+      "source_location": "L3715",
       "id": "components_floatingtoolbar_desktopcolorpickerpopover",
-      "community": 2,
+      "community": 118,
       "norm_label": "desktopcolorpickerpopover()"
     },
     {
       "label": "parseDesktopColor()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3677",
+      "source_location": "L3785",
       "id": "components_floatingtoolbar_parsedesktopcolor",
-      "community": 2,
+      "community": 118,
       "norm_label": "parsedesktopcolor()"
     },
     {
       "label": "DesktopNumberRow()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3681",
+      "source_location": "L3789",
       "id": "components_floatingtoolbar_desktopnumberrow",
       "community": 2,
       "norm_label": "desktopnumberrow()"
@@ -6658,7 +6685,7 @@
       "label": "DesktopPatternSwatchButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3719",
+      "source_location": "L3827",
       "id": "components_floatingtoolbar_desktoppatternswatchbutton",
       "community": 2,
       "norm_label": "desktoppatternswatchbutton()"
@@ -6667,7 +6694,7 @@
       "label": "DesktopTextPresetButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3757",
+      "source_location": "L3865",
       "id": "components_floatingtoolbar_desktoptextpresetbutton",
       "community": 2,
       "norm_label": "desktoptextpresetbutton()"
@@ -6676,7 +6703,7 @@
       "label": "DesktopSegmentedRow()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3785",
+      "source_location": "L3893",
       "id": "components_floatingtoolbar_desktopsegmentedrow",
       "community": 2,
       "norm_label": "desktopsegmentedrow()"
@@ -6685,16 +6712,25 @@
       "label": "updateDesktopGradientColor()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3808",
+      "source_location": "L3916",
       "id": "components_floatingtoolbar_updatedesktopgradientcolor",
       "community": 2,
       "norm_label": "updatedesktopgradientcolor()"
     },
     {
+      "label": "areDesktopColorPalettesEqual()",
+      "file_type": "code",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L3930",
+      "id": "components_floatingtoolbar_aredesktopcolorpalettesequal",
+      "community": 2,
+      "norm_label": "aredesktopcolorpalettesequal()"
+    },
+    {
       "label": "DesktopContentFields()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3822",
+      "source_location": "L3937",
       "id": "components_floatingtoolbar_desktopcontentfields",
       "community": 82,
       "norm_label": "desktopcontentfields()"
@@ -6703,7 +6739,7 @@
       "label": "DesktopContentField",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3848",
+      "source_location": "L3963",
       "id": "components_floatingtoolbar_desktopcontentfield",
       "community": 2,
       "norm_label": "desktopcontentfield"
@@ -6712,7 +6748,7 @@
       "label": "DesktopContentFieldRow()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3858",
+      "source_location": "L3973",
       "id": "components_floatingtoolbar_desktopcontentfieldrow",
       "community": 82,
       "norm_label": "desktopcontentfieldrow()"
@@ -6721,7 +6757,7 @@
       "label": "getDesktopContentFields()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L3945",
+      "source_location": "L4060",
       "id": "components_floatingtoolbar_getdesktopcontentfields",
       "community": 82,
       "norm_label": "getdesktopcontentfields()"
@@ -6730,7 +6766,7 @@
       "label": "isUrlContentType()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4087",
+      "source_location": "L4202",
       "id": "components_floatingtoolbar_isurlcontenttype",
       "community": 82,
       "norm_label": "isurlcontenttype()"
@@ -6739,7 +6775,7 @@
       "label": "isUsernameContentType()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4108",
+      "source_location": "L4223",
       "id": "components_floatingtoolbar_isusernamecontenttype",
       "community": 82,
       "norm_label": "isusernamecontenttype()"
@@ -6748,7 +6784,7 @@
       "label": "stringContentValue()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4121",
+      "source_location": "L4236",
       "id": "components_floatingtoolbar_stringcontentvalue",
       "community": 82,
       "norm_label": "stringcontentvalue()"
@@ -6757,16 +6793,16 @@
       "label": "DesktopEncodingInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4125",
+      "source_location": "L4240",
       "id": "components_floatingtoolbar_desktopencodinginspector",
-      "community": 2,
+      "community": 119,
       "norm_label": "desktopencodinginspector()"
     },
     {
       "label": "DesktopImageInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4181",
+      "source_location": "L4296",
       "id": "components_floatingtoolbar_desktopimageinspector",
       "community": 2,
       "norm_label": "desktopimageinspector()"
@@ -6775,7 +6811,7 @@
       "label": "DesktopDecorationsInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4251",
+      "source_location": "L4366",
       "id": "components_floatingtoolbar_desktopdecorationsinspector",
       "community": 2,
       "norm_label": "desktopdecorationsinspector()"
@@ -6784,7 +6820,7 @@
       "label": "DesktopEffectsInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4339",
+      "source_location": "L4454",
       "id": "components_floatingtoolbar_desktopeffectsinspector",
       "community": 28,
       "norm_label": "desktopeffectsinspector()"
@@ -6793,7 +6829,7 @@
       "label": "DesktopLayersInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4453",
+      "source_location": "L4568",
       "id": "components_floatingtoolbar_desktoplayersinspector",
       "community": 2,
       "norm_label": "desktoplayersinspector()"
@@ -6802,7 +6838,7 @@
       "label": "DesktopExportInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4543",
+      "source_location": "L4658",
       "id": "components_floatingtoolbar_desktopexportinspector",
       "community": 2,
       "norm_label": "desktopexportinspector()"
@@ -6811,7 +6847,7 @@
       "label": "DesktopTextInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4648",
+      "source_location": "L4763",
       "id": "components_floatingtoolbar_desktoptextinspector",
       "community": 63,
       "norm_label": "desktoptextinspector()"
@@ -6820,7 +6856,7 @@
       "label": "DesktopTextToggleButton()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4906",
+      "source_location": "L5021",
       "id": "components_floatingtoolbar_desktoptexttogglebutton",
       "community": 2,
       "norm_label": "desktoptexttogglebutton()"
@@ -6829,7 +6865,7 @@
       "label": "DesktopTextAlignIcon()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4934",
+      "source_location": "L5049",
       "id": "components_floatingtoolbar_desktoptextalignicon",
       "community": 2,
       "norm_label": "desktoptextalignicon()"
@@ -6838,7 +6874,7 @@
       "label": "DesktopTextInlineSlider()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4946",
+      "source_location": "L5061",
       "id": "components_floatingtoolbar_desktoptextinlineslider",
       "community": 2,
       "norm_label": "desktoptextinlineslider()"
@@ -6847,7 +6883,7 @@
       "label": "getDesktopTextPresetId()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4985",
+      "source_location": "L5100",
       "id": "components_floatingtoolbar_getdesktoptextpresetid",
       "community": 63,
       "norm_label": "getdesktoptextpresetid()"
@@ -6856,7 +6892,7 @@
       "label": "getDesktopTextInspectorFontWeight()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L4996",
+      "source_location": "L5111",
       "id": "components_floatingtoolbar_getdesktoptextinspectorfontweight",
       "community": 63,
       "norm_label": "getdesktoptextinspectorfontweight()"
@@ -6865,7 +6901,7 @@
       "label": "getNearestDesktopFontWeight()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L5011",
+      "source_location": "L5126",
       "id": "components_floatingtoolbar_getnearestdesktopfontweight",
       "community": 63,
       "norm_label": "getnearestdesktopfontweight()"
@@ -6874,7 +6910,7 @@
       "label": "getDesktopFontWeightSliderStep()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L5024",
+      "source_location": "L5139",
       "id": "components_floatingtoolbar_getdesktopfontweightsliderstep",
       "community": 63,
       "norm_label": "getdesktopfontweightsliderstep()"
@@ -6883,7 +6919,7 @@
       "label": "DesktopPlaceholderInspector()",
       "file_type": "code",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
-      "source_location": "L5036",
+      "source_location": "L5151",
       "id": "components_floatingtoolbar_desktopplaceholderinspector",
       "community": 2,
       "norm_label": "desktopplaceholderinspector()"
@@ -7092,7 +7128,7 @@
       "source_file": "features/qr-code/adapters/react-qr-adapter.ts",
       "source_location": "L1",
       "id": "adapters_react_qr_adapter",
-      "community": 15,
+      "community": 7,
       "norm_label": "react-qr-adapter.ts"
     },
     {
@@ -7101,7 +7137,7 @@
       "source_file": "features/qr-code/adapters/react-qr-adapter.ts",
       "source_location": "L11",
       "id": "adapters_react_qr_adapter_toreactqrcodeprops",
-      "community": 15,
+      "community": 7,
       "norm_label": "toreactqrcodeprops()"
     },
     {
@@ -7110,34 +7146,25 @@
       "source_file": "features/qr-code/adapters/react-qr-adapter.ts",
       "source_location": "L73",
       "id": "adapters_react_qr_adapter_getdotscolor",
-      "community": 15,
+      "community": 7,
       "norm_label": "getdotscolor()"
-    },
-    {
-      "label": "getDotsGradient()",
-      "file_type": "code",
-      "source_file": "features/qr-code/adapters/react-qr-adapter.ts",
-      "source_location": "L81",
-      "id": "adapters_react_qr_adapter_getdotsgradient",
-      "community": 15,
-      "norm_label": "getdotsgradient()"
     },
     {
       "label": "buildGradient()",
       "file_type": "code",
       "source_file": "features/qr-code/adapters/react-qr-adapter.ts",
-      "source_location": "L92",
+      "source_location": "L81",
       "id": "adapters_react_qr_adapter_buildgradient",
-      "community": 15,
+      "community": 7,
       "norm_label": "buildgradient()"
     },
     {
       "label": "coerceNumber()",
       "file_type": "code",
       "source_file": "features/qr-code/adapters/react-qr-adapter.ts",
-      "source_location": "L107",
+      "source_location": "L96",
       "id": "adapters_react_qr_adapter_coercenumber",
-      "community": 15,
+      "community": 7,
       "norm_label": "coercenumber()"
     },
     {
@@ -7317,7 +7344,7 @@
       "source_file": "features/qr-code/components/ColorField.tsx",
       "source_location": "L1",
       "id": "components_colorfield",
-      "community": 25,
+      "community": 13,
       "norm_label": "colorfield.tsx"
     },
     {
@@ -7326,7 +7353,7 @@
       "source_file": "features/qr-code/components/ColorField.tsx",
       "source_location": "L14",
       "id": "components_colorfield_embeddedcolorpickerfield",
-      "community": 25,
+      "community": 13,
       "norm_label": "embeddedcolorpickerfield()"
     },
     {
@@ -7335,7 +7362,7 @@
       "source_file": "features/qr-code/components/ColorField.tsx",
       "source_location": "L66",
       "id": "components_colorfield_draftingfillpicker",
-      "community": 25,
+      "community": 13,
       "norm_label": "draftingfillpicker()"
     },
     {
@@ -7344,7 +7371,7 @@
       "source_file": "features/qr-code/components/ColorField.tsx",
       "source_location": "L163",
       "id": "components_colorfield_drafting_fill_picker_default_swatches",
-      "community": 25,
+      "community": 13,
       "norm_label": "drafting_fill_picker_default_swatches"
     },
     {
@@ -7353,7 +7380,7 @@
       "source_file": "features/qr-code/components/ColorField.tsx",
       "source_location": "L174",
       "id": "components_colorfield_drafting_fill_picker_slider_class_name",
-      "community": 25,
+      "community": 13,
       "norm_label": "drafting_fill_picker_slider_class_name"
     },
     {
@@ -7362,7 +7389,7 @@
       "source_file": "features/qr-code/components/ColorField.tsx",
       "source_location": "L180",
       "id": "components_colorfield_drafting_fill_picker_input_class_name",
-      "community": 25,
+      "community": 13,
       "norm_label": "drafting_fill_picker_input_class_name"
     },
     {
@@ -7371,7 +7398,7 @@
       "source_file": "features/qr-code/components/ColorField.tsx",
       "source_location": "L187",
       "id": "components_colorfield_parsedraftingcolor",
-      "community": 25,
+      "community": 13,
       "norm_label": "parsedraftingcolor()"
     },
     {
@@ -7380,7 +7407,7 @@
       "source_file": "features/qr-code/components/ColorField.tsx",
       "source_location": "L191",
       "id": "components_colorfield_readdraftingsavedswatches",
-      "community": 25,
+      "community": 13,
       "norm_label": "readdraftingsavedswatches()"
     },
     {
@@ -7389,7 +7416,7 @@
       "source_file": "features/qr-code/components/ColorField.tsx",
       "source_location": "L208",
       "id": "components_colorfield_writedraftingsavedswatches",
-      "community": 25,
+      "community": 13,
       "norm_label": "writedraftingsavedswatches()"
     },
     {
@@ -7398,7 +7425,7 @@
       "source_file": "features/qr-code/components/ColorField.tsx",
       "source_location": "L223",
       "id": "components_colorfield_mergedraftingswatches",
-      "community": 25,
+      "community": 13,
       "norm_label": "mergedraftingswatches()"
     },
     {
@@ -7407,7 +7434,7 @@
       "source_file": "features/qr-code/components/ControlsPanel.drafting-fill-picker.test.tsx",
       "source_location": "L1",
       "id": "components_controlspanel_drafting_fill_picker_test",
-      "community": 106,
+      "community": 4,
       "norm_label": "controlspanel.drafting-fill-picker.test.tsx"
     },
     {
@@ -7416,7 +7443,7 @@
       "source_file": "features/qr-code/components/ControlsPanel.drafting-fill-picker.test.tsx",
       "source_location": "L29",
       "id": "components_controlspanel_drafting_fill_picker_test_controlleddraftingfillpicker",
-      "community": 106,
+      "community": 4,
       "norm_label": "controlleddraftingfillpicker()"
     },
     {
@@ -7470,7 +7497,7 @@
       "source_file": "features/qr-code/components/ControlsPanel.test.tsx",
       "source_location": "L1",
       "id": "components_controlspanel_test",
-      "community": 11,
+      "community": 53,
       "norm_label": "controlspanel.test.tsx"
     },
     {
@@ -7479,7 +7506,7 @@
       "source_file": "features/qr-code/components/ControlsPanel.test.tsx",
       "source_location": "L8",
       "id": "components_controlspanel_test_baseprops",
-      "community": 11,
+      "community": 53,
       "norm_label": "baseprops"
     },
     {
@@ -7488,7 +7515,7 @@
       "source_file": "features/qr-code/components/ControlsPanel.test.tsx",
       "source_location": "L21",
       "id": "components_controlspanel_test_getstylepreviewmarkup",
-      "community": 11,
+      "community": 53,
       "norm_label": "getstylepreviewmarkup()"
     },
     {
@@ -7812,7 +7839,7 @@
       "source_file": "features/qr-code/components/DotsPaletteCard.tsx",
       "source_location": "L1",
       "id": "components_dotspalettecard",
-      "community": 73,
+      "community": 80,
       "norm_label": "dotspalettecard.tsx"
     },
     {
@@ -7821,7 +7848,7 @@
       "source_file": "features/qr-code/components/DotsPaletteCard.tsx",
       "source_location": "L7",
       "id": "components_dotspalettecard_dotspalettecard",
-      "community": 4,
+      "community": 80,
       "norm_label": "dotspalettecard()"
     },
     {
@@ -8955,7 +8982,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L19",
       "id": "model_state_studiogradient",
-      "community": 15,
+      "community": 30,
       "norm_label": "studiogradient"
     },
     {
@@ -8973,7 +9000,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L27",
       "id": "model_state_dotscolormode",
-      "community": 4,
+      "community": 7,
       "norm_label": "dotscolormode"
     },
     {
@@ -8982,7 +9009,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L28",
       "id": "model_state_assetsourcemode",
-      "community": 4,
+      "community": 7,
       "norm_label": "assetsourcemode"
     },
     {
@@ -8991,7 +9018,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L29",
       "id": "model_state_qrdotmatrixsquareloader",
-      "community": 14,
+      "community": 7,
       "norm_label": "qrdotmatrixsquareloader"
     },
     {
@@ -9027,7 +9054,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L62",
       "id": "model_state_qrdotmatrixanimationoptions",
-      "community": 14,
+      "community": 7,
       "norm_label": "qrdotmatrixanimationoptions"
     },
     {
@@ -9054,7 +9081,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L94",
       "id": "model_state_backgroundshapeoptions",
-      "community": 7,
+      "community": 21,
       "norm_label": "backgroundshapeoptions"
     },
     {
@@ -9090,7 +9117,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L194",
       "id": "model_state_qr_dot_matrix_square_loader_options",
-      "community": 7,
+      "community": 53,
       "norm_label": "qr_dot_matrix_square_loader_options"
     },
     {
@@ -9108,7 +9135,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L224",
       "id": "model_state_qr_dot_matrix_color_preset_options",
-      "community": 3,
+      "community": 7,
       "norm_label": "qr_dot_matrix_color_preset_options"
     },
     {
@@ -9117,7 +9144,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L238",
       "id": "model_state_qr_dot_matrix_pattern_options",
-      "community": 3,
+      "community": 7,
       "norm_label": "qr_dot_matrix_pattern_options"
     },
     {
@@ -9144,7 +9171,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L280",
       "id": "model_state_createdefaultqrstudiostate",
-      "community": 11,
+      "community": 53,
       "norm_label": "createdefaultqrstudiostate()"
     },
     {
@@ -9279,7 +9306,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L472",
       "id": "model_state_clampqrbackgroundround",
-      "community": 15,
+      "community": 7,
       "norm_label": "clampqrbackgroundround()"
     },
     {
@@ -9297,7 +9324,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L490",
       "id": "model_state_setrasterexportqualitypercent",
-      "community": 7,
+      "community": 22,
       "norm_label": "setrasterexportqualitypercent()"
     },
     {
@@ -9315,7 +9342,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L598",
       "id": "model_state_getassetvalue",
-      "community": 15,
+      "community": 7,
       "norm_label": "getassetvalue()"
     },
     {
@@ -9333,7 +9360,7 @@
       "source_file": "features/qr-code/model/state.ts",
       "source_location": "L608",
       "id": "model_state_hasactivebackgroundshapeoptions",
-      "community": 15,
+      "community": 7,
       "norm_label": "hasactivebackgroundshapeoptions()"
     },
     {
@@ -9342,7 +9369,7 @@
       "source_file": "features/qr-code/model/types.ts",
       "source_location": "L1",
       "id": "model_types",
-      "community": 66,
+      "community": 102,
       "norm_label": "types.ts"
     },
     {
@@ -9351,7 +9378,7 @@
       "source_file": "features/qr-code/model/types.ts",
       "source_location": "L10",
       "id": "model_types_qrfileextension",
-      "community": 66,
+      "community": 22,
       "norm_label": "qrfileextension"
     },
     {
@@ -9360,7 +9387,7 @@
       "source_file": "features/qr-code/model/types.ts",
       "source_location": "L11",
       "id": "model_types_qrdrawtype",
-      "community": 66,
+      "community": 102,
       "norm_label": "qrdrawtype"
     },
     {
@@ -9369,7 +9396,7 @@
       "source_file": "features/qr-code/model/types.ts",
       "source_location": "L12",
       "id": "model_types_qrtypenumber",
-      "community": 66,
+      "community": 102,
       "norm_label": "qrtypenumber"
     },
     {
@@ -9378,7 +9405,7 @@
       "source_file": "features/qr-code/model/types.ts",
       "source_location": "L54",
       "id": "model_types_qrmode",
-      "community": 66,
+      "community": 102,
       "norm_label": "qrmode"
     },
     {
@@ -9387,7 +9414,7 @@
       "source_file": "features/qr-code/model/types.ts",
       "source_location": "L55",
       "id": "model_types_qrgradienttype",
-      "community": 66,
+      "community": 102,
       "norm_label": "qrgradienttype"
     },
     {
@@ -9495,7 +9522,7 @@
       "source_file": "features/qr-code/rendering/compose-scene.ts",
       "source_location": "L57",
       "id": "rendering_compose_scene_dashboardcomposesvgnode",
-      "community": 22,
+      "community": 9,
       "norm_label": "dashboardcomposesvgnode"
     },
     {
@@ -9531,7 +9558,7 @@
       "source_file": "features/qr-code/rendering/compose-scene.ts",
       "source_location": "L80",
       "id": "rendering_compose_scene_dashboardqrnodepayload",
-      "community": 64,
+      "community": 62,
       "norm_label": "dashboardqrnodepayload"
     },
     {
@@ -9828,7 +9855,7 @@
       "source_file": "features/qr-code/rendering/qr-svg.test.ts",
       "source_location": "L1",
       "id": "rendering_qr_svg_test",
-      "community": 64,
+      "community": 62,
       "norm_label": "qr-svg.test.ts"
     },
     {
@@ -9837,7 +9864,7 @@
       "source_file": "features/qr-code/rendering/qr-svg.ts",
       "source_location": "L1",
       "id": "rendering_qr_svg",
-      "community": 64,
+      "community": 62,
       "norm_label": "qr-svg.ts"
     },
     {
@@ -9846,7 +9873,7 @@
       "source_file": "features/qr-code/rendering/qr-svg.ts",
       "source_location": "L10",
       "id": "rendering_qr_svg_createdashboardsurfaceqrstate",
-      "community": 64,
+      "community": 62,
       "norm_label": "createdashboardsurfaceqrstate()"
     },
     {
@@ -9855,7 +9882,7 @@
       "source_file": "features/qr-code/rendering/qr-svg.ts",
       "source_location": "L17",
       "id": "rendering_qr_svg_stripxmldeclaration",
-      "community": 64,
+      "community": 62,
       "norm_label": "stripxmldeclaration()"
     },
     {
@@ -9864,7 +9891,7 @@
       "source_file": "features/qr-code/rendering/qr-svg.ts",
       "source_location": "L24",
       "id": "rendering_qr_svg_builddashboardqrnodepayload",
-      "community": 64,
+      "community": 62,
       "norm_label": "builddashboardqrnodepayload()"
     },
     {
@@ -9873,7 +9900,7 @@
       "source_file": "features/qr-code/rendering/qr-svg.ts",
       "source_location": "L51",
       "id": "rendering_qr_svg_renderdashboardqrsvgmarkup",
-      "community": 64,
+      "community": 62,
       "norm_label": "renderdashboardqrsvgmarkup()"
     },
     {
@@ -9882,7 +9909,7 @@
       "source_file": "features/qr-code/rendering/qr-svg.ts",
       "source_location": "L61",
       "id": "rendering_qr_svg_applyqrsvgextension",
-      "community": 64,
+      "community": 62,
       "norm_label": "applyqrsvgextension()"
     },
     {
@@ -9925,16 +9952,25 @@
       "label": "createDotMatrixSvgFixture()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.test.ts",
-      "source_location": "L197",
+      "source_location": "L213",
       "id": "rendering_svg_extension_test_createdotmatrixsvgfixture",
       "community": 53,
       "norm_label": "createdotmatrixsvgfixture()"
     },
     {
+      "label": "getPaletteLayerAnchors()",
+      "file_type": "code",
+      "source_file": "features/qr-code/rendering/svg-extension.test.ts",
+      "source_location": "L246",
+      "id": "rendering_svg_extension_test_getpalettelayeranchors",
+      "community": 53,
+      "norm_label": "getpalettelayeranchors()"
+    },
+    {
       "label": "renderDotMatrixTracks()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.test.ts",
-      "source_location": "L230",
+      "source_location": "L276",
       "id": "rendering_svg_extension_test_renderdotmatrixtracks",
       "community": 53,
       "norm_label": "renderdotmatrixtracks()"
@@ -9943,7 +9979,7 @@
       "label": "getTrackDuration()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.test.ts",
-      "source_location": "L263",
+      "source_location": "L309",
       "id": "rendering_svg_extension_test_gettrackduration",
       "community": 53,
       "norm_label": "gettrackduration()"
@@ -9952,7 +9988,7 @@
       "label": "getTrackForRegion()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.test.ts",
-      "source_location": "L267",
+      "source_location": "L313",
       "id": "rendering_svg_extension_test_gettrackforregion",
       "community": 53,
       "norm_label": "gettrackforregion()"
@@ -9961,7 +9997,7 @@
       "label": "appendGradientRectPair()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.test.ts",
-      "source_location": "L273",
+      "source_location": "L319",
       "id": "rendering_svg_extension_test_appendgradientrectpair",
       "community": 53,
       "norm_label": "appendgradientrectpair()"
@@ -9970,7 +10006,7 @@
       "label": "getGradientRelativeCoordinates()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.test.ts",
-      "source_location": "L308",
+      "source_location": "L354",
       "id": "rendering_svg_extension_test_getgradientrelativecoordinates",
       "community": 53,
       "norm_label": "getgradientrelativecoordinates()"
@@ -10033,7 +10069,7 @@
       "label": "getQrExtensionKey()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L86",
+      "source_location": "L90",
       "id": "rendering_svg_extension_getqrextensionkey",
       "community": 94,
       "norm_label": "getqrextensionkey()"
@@ -10042,7 +10078,7 @@
       "label": "createDotMatrixAnimationExtension()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L114",
+      "source_location": "L119",
       "id": "rendering_svg_extension_createdotmatrixanimationextension",
       "community": 53,
       "norm_label": "createdotmatrixanimationextension()"
@@ -10051,16 +10087,34 @@
       "label": "createDotsPaletteExtension()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L275",
+      "source_location": "L280",
       "id": "rendering_svg_extension_createdotspaletteextension",
       "community": 62,
       "norm_label": "createdotspaletteextension()"
     },
     {
+      "label": "createDotsGradientExtension()",
+      "file_type": "code",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L382",
+      "id": "rendering_svg_extension_createdotsgradientextension",
+      "community": 62,
+      "norm_label": "createdotsgradientextension()"
+    },
+    {
+      "label": "getDotShapeCoverRect()",
+      "file_type": "code",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L462",
+      "id": "rendering_svg_extension_getdotshapecoverrect",
+      "community": 14,
+      "norm_label": "getdotshapecoverrect()"
+    },
+    {
       "label": "shouldApplyDotMatrixAnimation()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L373",
+      "source_location": "L471",
       "id": "rendering_svg_extension_shouldapplydotmatrixanimation",
       "community": 53,
       "norm_label": "shouldapplydotmatrixanimation()"
@@ -10069,7 +10123,7 @@
       "label": "DotClipLayer",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L396",
+      "source_location": "L494",
       "id": "rendering_svg_extension_dotcliplayer",
       "community": 14,
       "norm_label": "dotcliplayer"
@@ -10078,7 +10132,7 @@
       "label": "DotPathLayer",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L402",
+      "source_location": "L500",
       "id": "rendering_svg_extension_dotpathlayer",
       "community": 14,
       "norm_label": "dotpathlayer"
@@ -10087,7 +10141,7 @@
       "label": "DotMatrixMetrics",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L408",
+      "source_location": "L506",
       "id": "rendering_svg_extension_dotmatrixmetrics",
       "community": 14,
       "norm_label": "dotmatrixmetrics"
@@ -10096,16 +10150,34 @@
       "label": "DotMatrixCoordinates",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L418",
+      "source_location": "L516",
       "id": "rendering_svg_extension_dotmatrixcoordinates",
       "community": 14,
       "norm_label": "dotmatrixcoordinates"
     },
     {
+      "label": "DotPaletteShapeGroup",
+      "file_type": "code",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L521",
+      "id": "rendering_svg_extension_dotpaletteshapegroup",
+      "community": 14,
+      "norm_label": "dotpaletteshapegroup"
+    },
+    {
+      "label": "DotPaletteGroupAssignment",
+      "file_type": "code",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L527",
+      "id": "rendering_svg_extension_dotpalettegroupassignment",
+      "community": 14,
+      "norm_label": "dotpalettegroupassignment"
+    },
+    {
       "label": "DotMatrixModule",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L423",
+      "source_location": "L532",
       "id": "rendering_svg_extension_dotmatrixmodule",
       "community": 14,
       "norm_label": "dotmatrixmodule"
@@ -10114,7 +10186,7 @@
       "label": "DotMatrixAnchor",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L443",
+      "source_location": "L552",
       "id": "rendering_svg_extension_dotmatrixanchor",
       "community": 14,
       "norm_label": "dotmatrixanchor"
@@ -10123,7 +10195,7 @@
       "label": "DotMatrixTrack",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L449",
+      "source_location": "L558",
       "id": "rendering_svg_extension_dotmatrixtrack",
       "community": 14,
       "norm_label": "dotmatrixtrack"
@@ -10132,7 +10204,7 @@
       "label": "DotMatrixCell",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L464",
+      "source_location": "L573",
       "id": "rendering_svg_extension_dotmatrixcell",
       "community": 14,
       "norm_label": "dotmatrixcell"
@@ -10141,7 +10213,7 @@
       "label": "DotMatrixCellAnimation",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L471",
+      "source_location": "L580",
       "id": "rendering_svg_extension_dotmatrixcellanimation",
       "community": 14,
       "norm_label": "dotmatrixcellanimation"
@@ -10150,7 +10222,7 @@
       "label": "DotMatrixLoaderSpec",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L483",
+      "source_location": "L592",
       "id": "rendering_svg_extension_dotmatrixloaderspec",
       "community": 14,
       "norm_label": "dotmatrixloaderspec"
@@ -10159,7 +10231,7 @@
       "label": "DotMatrixLoaderResolver",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L489",
+      "source_location": "L598",
       "id": "rendering_svg_extension_dotmatrixloaderresolver",
       "community": 14,
       "norm_label": "dotmatrixloaderresolver"
@@ -10168,7 +10240,7 @@
       "label": "getQrModuleClipLayers()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L495",
+      "source_location": "L604",
       "id": "rendering_svg_extension_getqrmodulecliplayers",
       "community": 14,
       "norm_label": "getqrmodulecliplayers()"
@@ -10177,7 +10249,7 @@
       "label": "getQrModulePathLayers()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L529",
+      "source_location": "L638",
       "id": "rendering_svg_extension_getqrmodulepathlayers",
       "community": 14,
       "norm_label": "getqrmodulepathlayers()"
@@ -10186,7 +10258,7 @@
       "label": "splitSvgPathData()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L559",
+      "source_location": "L668",
       "id": "rendering_svg_extension_splitsvgpathdata",
       "community": 14,
       "norm_label": "splitsvgpathdata()"
@@ -10195,7 +10267,7 @@
       "label": "suppressDotMatrixBaseLayers()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L566",
+      "source_location": "L675",
       "id": "rendering_svg_extension_suppressdotmatrixbaselayers",
       "community": 14,
       "norm_label": "suppressdotmatrixbaselayers()"
@@ -10204,16 +10276,88 @@
       "label": "suppressDotMatrixBasePathLayers()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L572",
+      "source_location": "L681",
       "id": "rendering_svg_extension_suppressdotmatrixbasepathlayers",
       "community": 14,
       "norm_label": "suppressdotmatrixbasepathlayers()"
     },
     {
+      "label": "createDotPaletteShapeGroups()",
+      "file_type": "code",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L687",
+      "id": "rendering_svg_extension_createdotpaletteshapegroups",
+      "community": 65,
+      "norm_label": "createdotpaletteshapegroups()"
+    },
+    {
+      "label": "compareDotPaletteShapeGroups()",
+      "file_type": "code",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L713",
+      "id": "rendering_svg_extension_comparedotpaletteshapegroups",
+      "community": 14,
+      "norm_label": "comparedotpaletteshapegroups()"
+    },
+    {
+      "label": "getDotPaletteIndex()",
+      "file_type": "code",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L733",
+      "id": "rendering_svg_extension_getdotpaletteindex",
+      "community": 14,
+      "norm_label": "getdotpaletteindex()"
+    },
+    {
+      "label": "balanceDotPaletteAssignments()",
+      "file_type": "code",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L741",
+      "id": "rendering_svg_extension_balancedotpaletteassignments",
+      "community": 14,
+      "norm_label": "balancedotpaletteassignments()"
+    },
+    {
+      "label": "countDotPaletteAssignments()",
+      "file_type": "code",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L789",
+      "id": "rendering_svg_extension_countdotpaletteassignments",
+      "community": 14,
+      "norm_label": "countdotpaletteassignments()"
+    },
+    {
+      "label": "hashDotPaletteGroup()",
+      "file_type": "code",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L802",
+      "id": "rendering_svg_extension_hashdotpalettegroup",
+      "community": 14,
+      "norm_label": "hashdotpalettegroup()"
+    },
+    {
+      "label": "hashDotPaletteString()",
+      "file_type": "code",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L811",
+      "id": "rendering_svg_extension_hashdotpalettestring",
+      "community": 62,
+      "norm_label": "hashdotpalettestring()"
+    },
+    {
+      "label": "hashDotPaletteNumbers()",
+      "file_type": "code",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L823",
+      "id": "rendering_svg_extension_hashdotpalettenumbers",
+      "community": 14,
+      "norm_label": "hashdotpalettenumbers()"
+    },
+    {
       "label": "getClipPathId()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L578",
+      "source_location": "L838",
       "id": "rendering_svg_extension_getclippathid",
       "community": 14,
       "norm_label": "getclippathid()"
@@ -10222,7 +10366,7 @@
       "label": "getActiveDotsPalette()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L582",
+      "source_location": "L842",
       "id": "rendering_svg_extension_getactivedotspalette",
       "community": 62,
       "norm_label": "getactivedotspalette()"
@@ -10231,7 +10375,7 @@
       "label": "isSvgElementLike()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L588",
+      "source_location": "L848",
       "id": "rendering_svg_extension_issvgelementlike",
       "community": 14,
       "norm_label": "issvgelementlike()"
@@ -10240,7 +10384,7 @@
       "label": "collectDotMatrixMetrics()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L592",
+      "source_location": "L852",
       "id": "rendering_svg_extension_collectdotmatrixmetrics",
       "community": 14,
       "norm_label": "collectdotmatrixmetrics()"
@@ -10249,7 +10393,7 @@
       "label": "getFallbackDotMatrixMetrics()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L634",
+      "source_location": "L894",
       "id": "rendering_svg_extension_getfallbackdotmatrixmetrics",
       "community": 14,
       "norm_label": "getfallbackdotmatrixmetrics()"
@@ -10258,43 +10402,43 @@
       "label": "resolveDotMatrixCoordinates()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L652",
+      "source_location": "L912",
       "id": "rendering_svg_extension_resolvedotmatrixcoordinates",
-      "community": 86,
+      "community": 65,
       "norm_label": "resolvedotmatrixcoordinates()"
     },
     {
       "label": "getDotMatrixAnchor()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L665",
+      "source_location": "L925",
       "id": "rendering_svg_extension_getdotmatrixanchor",
-      "community": 86,
+      "community": 65,
       "norm_label": "getdotmatrixanchor()"
     },
     {
       "label": "getPathAnchor()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L694",
+      "source_location": "L954",
       "id": "rendering_svg_extension_getpathanchor",
-      "community": 86,
+      "community": 65,
       "norm_label": "getpathanchor()"
     },
     {
       "label": "getDotNumericAttribute()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L716",
+      "source_location": "L976",
       "id": "rendering_svg_extension_getdotnumericattribute",
-      "community": 86,
+      "community": 65,
       "norm_label": "getdotnumericattribute()"
     },
     {
       "label": "getSmallestPositiveDelta()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L728",
+      "source_location": "L988",
       "id": "rendering_svg_extension_getsmallestpositivedelta",
       "community": 14,
       "norm_label": "getsmallestpositivedelta()"
@@ -10303,43 +10447,43 @@
       "label": "getDotMatrixAnimationDuration()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L743",
+      "source_location": "L1003",
       "id": "rendering_svg_extension_getdotmatrixanimationduration",
-      "community": 69,
+      "community": 14,
       "norm_label": "getdotmatrixanimationduration()"
     },
     {
       "label": "getDotMatrixAnimationSpeedMultiplier()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L753",
+      "source_location": "L1013",
       "id": "rendering_svg_extension_getdotmatrixanimationspeedmultiplier",
-      "community": 69,
+      "community": 14,
       "norm_label": "getdotmatrixanimationspeedmultiplier()"
     },
     {
       "label": "getDotMatrixDensitySpeedFactor()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L762",
+      "source_location": "L1022",
       "id": "rendering_svg_extension_getdotmatrixdensityspeedfactor",
-      "community": 69,
+      "community": 14,
       "norm_label": "getdotmatrixdensityspeedfactor()"
     },
     {
       "label": "getDotMatrixTileSize()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L766",
+      "source_location": "L1026",
       "id": "rendering_svg_extension_getdotmatrixtilesize",
-      "community": 69,
+      "community": 14,
       "norm_label": "getdotmatrixtilesize()"
     },
     {
       "label": "getDotMatrixBaseOpacity()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L775",
+      "source_location": "L1035",
       "id": "rendering_svg_extension_getdotmatrixbaseopacity",
       "community": 14,
       "norm_label": "getdotmatrixbaseopacity()"
@@ -10348,7 +10492,7 @@
       "label": "getDotMatrixOverlayScale()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L779",
+      "source_location": "L1039",
       "id": "rendering_svg_extension_getdotmatrixoverlayscale",
       "community": 14,
       "norm_label": "getdotmatrixoverlayscale()"
@@ -10357,7 +10501,7 @@
       "label": "DotMatrixSquareLoaderId",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L783",
+      "source_location": "L1043",
       "id": "rendering_svg_extension_dotmatrixsquareloaderid",
       "community": 14,
       "norm_label": "dotmatrixsquareloaderid"
@@ -10366,7 +10510,7 @@
       "label": "DOT_MATRIX_LOADER_SPECS",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L805",
+      "source_location": "L1065",
       "id": "rendering_svg_extension_dot_matrix_loader_specs",
       "community": 14,
       "norm_label": "dot_matrix_loader_specs"
@@ -10375,7 +10519,7 @@
       "label": "createDotMatrixLoaderSpec()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L880",
+      "source_location": "L1140",
       "id": "rendering_svg_extension_createdotmatrixloaderspec",
       "community": 14,
       "norm_label": "createdotmatrixloaderspec()"
@@ -10384,7 +10528,7 @@
       "label": "createClassCellAnimation()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L892",
+      "source_location": "L1152",
       "id": "rendering_svg_extension_createclasscellanimation",
       "community": 14,
       "norm_label": "createclasscellanimation()"
@@ -10393,16 +10537,16 @@
       "label": "createQuietCellAnimation()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L913",
+      "source_location": "L1173",
       "id": "rendering_svg_extension_createquietcellanimation",
-      "community": 69,
+      "community": 14,
       "norm_label": "createquietcellanimation()"
     },
     {
       "label": "createGeneratedCellAnimation()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L927",
+      "source_location": "L1187",
       "id": "rendering_svg_extension_creategeneratedcellanimation",
       "community": 14,
       "norm_label": "creategeneratedcellanimation()"
@@ -10411,106 +10555,106 @@
       "label": "createDotMatrixModule()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L965",
+      "source_location": "L1225",
       "id": "rendering_svg_extension_createdotmatrixmodule",
-      "community": 100,
+      "community": 14,
       "norm_label": "createdotmatrixmodule()"
     },
     {
       "label": "createDotMatrixLoaderTracks()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1014",
+      "source_location": "L1274",
       "id": "rendering_svg_extension_createdotmatrixloadertracks",
-      "community": 69,
+      "community": 14,
       "norm_label": "createdotmatrixloadertracks()"
     },
     {
       "label": "getDotMatrixRegionCoordinate()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1077",
+      "source_location": "L1337",
       "id": "rendering_svg_extension_getdotmatrixregioncoordinate",
-      "community": 100,
+      "community": 14,
       "norm_label": "getdotmatrixregioncoordinate()"
     },
     {
       "label": "getDotMatrixCell()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1084",
+      "source_location": "L1344",
       "id": "rendering_svg_extension_getdotmatrixcell",
-      "community": 69,
+      "community": 14,
       "norm_label": "getdotmatrixcell()"
     },
     {
       "label": "rowMajorIndex()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1093",
+      "source_location": "L1353",
       "id": "rendering_svg_extension_rowmajorindex",
-      "community": 67,
+      "community": 14,
       "norm_label": "rowmajorindex()"
     },
     {
       "label": "indexToCoord()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1097",
+      "source_location": "L1357",
       "id": "rendering_svg_extension_indextocoord",
-      "community": 67,
+      "community": 14,
       "norm_label": "indextocoord()"
     },
     {
       "label": "findDotMatrixCellIndex()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1106",
+      "source_location": "L1366",
       "id": "rendering_svg_extension_finddotmatrixcellindex",
-      "community": 77,
+      "community": 14,
       "norm_label": "finddotmatrixcellindex()"
     },
     {
       "label": "getDotMatrixCenter()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1114",
+      "source_location": "L1374",
       "id": "rendering_svg_extension_getdotmatrixcenter",
-      "community": 67,
+      "community": 14,
       "norm_label": "getdotmatrixcenter()"
     },
     {
       "label": "createSpiralInwardPath()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1118",
+      "source_location": "L1378",
       "id": "rendering_svg_extension_createspiralinwardpath",
-      "community": 77,
+      "community": 14,
       "norm_label": "createspiralinwardpath()"
     },
     {
       "label": "createOuterRingClockwisePath()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1152",
+      "source_location": "L1412",
       "id": "rendering_svg_extension_createouterringclockwisepath",
-      "community": 77,
+      "community": 14,
       "norm_label": "createouterringclockwisepath()"
     },
     {
       "label": "createRingPathClockwise()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1156",
+      "source_location": "L1416",
       "id": "rendering_svg_extension_createringpathclockwise",
-      "community": 77,
+      "community": 14,
       "norm_label": "createringpathclockwise()"
     },
     {
       "label": "trBlPathNormFromIndex()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1183",
+      "source_location": "L1443",
       "id": "rendering_svg_extension_trblpathnormfromindex",
       "community": 14,
       "norm_label": "trblpathnormfromindex()"
@@ -10519,61 +10663,61 @@
       "label": "spiralInwardOrderValue()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1189",
+      "source_location": "L1449",
       "id": "rendering_svg_extension_spiralinwardordervalue",
-      "community": 77,
+      "community": 14,
       "norm_label": "spiralinwardordervalue()"
     },
     {
       "label": "outerRingClockwiseOrderValue()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1195",
+      "source_location": "L1455",
       "id": "rendering_svg_extension_outerringclockwiseordervalue",
-      "community": 77,
+      "community": 14,
       "norm_label": "outerringclockwiseordervalue()"
     },
     {
       "label": "middleRingAntiClockwiseOrderValue()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1201",
+      "source_location": "L1461",
       "id": "rendering_svg_extension_middleringanticlockwiseordervalue",
-      "community": 77,
+      "community": 14,
       "norm_label": "middleringanticlockwiseordervalue()"
     },
     {
       "label": "diagonalSnakeOrderValue()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1207",
+      "source_location": "L1467",
       "id": "rendering_svg_extension_diagonalsnakeordervalue",
-      "community": 67,
+      "community": 14,
       "norm_label": "diagonalsnakeordervalue()"
     },
     {
       "label": "getDotMatrixPatternIndexes()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1236",
+      "source_location": "L1496",
       "id": "rendering_svg_extension_getdotmatrixpatternindexes",
-      "community": 67,
+      "community": 14,
       "norm_label": "getdotmatrixpatternindexes()"
     },
     {
       "label": "stableDotMatrixStyleVarSignature()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1265",
+      "source_location": "L1525",
       "id": "rendering_svg_extension_stabledotmatrixstylevarsignature",
-      "community": 69,
+      "community": 14,
       "norm_label": "stabledotmatrixstylevarsignature()"
     },
     {
       "label": "getGeneratedDotMatrixKeyframesName()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1272",
+      "source_location": "L1532",
       "id": "rendering_svg_extension_getgenerateddotmatrixkeyframesname",
       "community": 14,
       "norm_label": "getgenerateddotmatrixkeyframesname()"
@@ -10582,43 +10726,43 @@
       "label": "getDotMatrixPerimeterIndex()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1281",
+      "source_location": "L1541",
       "id": "rendering_svg_extension_getdotmatrixperimeterindex",
-      "community": 100,
+      "community": 14,
       "norm_label": "getdotmatrixperimeterindex()"
     },
     {
       "label": "getDotMatrixRing()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1306",
+      "source_location": "L1566",
       "id": "rendering_svg_extension_getdotmatrixring",
-      "community": 100,
+      "community": 14,
       "norm_label": "getdotmatrixring()"
     },
     {
       "label": "getDotMatrixHash01()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1315",
+      "source_location": "L1575",
       "id": "rendering_svg_extension_getdotmatrixhash01",
-      "community": 100,
+      "community": 14,
       "norm_label": "getdotmatrixhash01()"
     },
     {
       "label": "clampDotMatrixUnit()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1325",
+      "source_location": "L1585",
       "id": "rendering_svg_extension_clampdotmatrixunit",
-      "community": 100,
+      "community": 14,
       "norm_label": "clampdotmatrixunit()"
     },
     {
       "label": "getDotMatrixTrackStyle()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1333",
+      "source_location": "L1593",
       "id": "rendering_svg_extension_getdotmatrixtrackstyle",
       "community": 51,
       "norm_label": "getdotmatrixtrackstyle()"
@@ -10627,7 +10771,7 @@
       "label": "getDotMatrixCoverRect()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1349",
+      "source_location": "L1609",
       "id": "rendering_svg_extension_getdotmatrixcoverrect",
       "community": 14,
       "norm_label": "getdotmatrixcoverrect()"
@@ -10636,16 +10780,16 @@
       "label": "applyDotMatrixOverlayScale()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1371",
+      "source_location": "L1631",
       "id": "rendering_svg_extension_applydotmatrixoverlayscale",
-      "community": 86,
+      "community": 65,
       "norm_label": "applydotmatrixoverlayscale()"
     },
     {
       "label": "resolveDotMatrixColors()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1404",
+      "source_location": "L1664",
       "id": "rendering_svg_extension_resolvedotmatrixcolors",
       "community": 14,
       "norm_label": "resolvedotmatrixcolors()"
@@ -10654,43 +10798,43 @@
       "label": "createGeneratedDotMatrixKeyframes()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1438",
+      "source_location": "L1698",
       "id": "rendering_svg_extension_creategenerateddotmatrixkeyframes",
-      "community": 67,
+      "community": 14,
       "norm_label": "creategenerateddotmatrixkeyframes()"
     },
     {
       "label": "getMatrixSizeFromRegion()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1455",
+      "source_location": "L1715",
       "id": "rendering_svg_extension_getmatrixsizefromregion",
-      "community": 67,
+      "community": 14,
       "norm_label": "getmatrixsizefromregion()"
     },
     {
       "label": "getGeneratedDotMatrixOpacitySamples()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1463",
+      "source_location": "L1723",
       "id": "rendering_svg_extension_getgenerateddotmatrixopacitysamples",
-      "community": 77,
+      "community": 14,
       "norm_label": "getgenerateddotmatrixopacitysamples()"
     },
     {
       "label": "createDotMatrixOpacityKeyframes()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1568",
+      "source_location": "L1828",
       "id": "rendering_svg_extension_createdotmatrixopacitykeyframes",
-      "community": 67,
+      "community": 14,
       "norm_label": "createdotmatrixopacitykeyframes()"
     },
     {
       "label": "getDotMatrixAnchorValue()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1581",
+      "source_location": "L1841",
       "id": "rendering_svg_extension_getdotmatrixanchorvalue",
       "community": 14,
       "norm_label": "getdotmatrixanchorvalue()"
@@ -10699,7 +10843,7 @@
       "label": "createDotMatrixAnimationStyle()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1593",
+      "source_location": "L1853",
       "id": "rendering_svg_extension_createdotmatrixanimationstyle",
       "community": 14,
       "norm_label": "createdotmatrixanimationstyle()"
@@ -10708,7 +10852,7 @@
       "label": "findDotMatrixLayerAnchor()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1651",
+      "source_location": "L1911",
       "id": "rendering_svg_extension_finddotmatrixlayeranchor",
       "community": 14,
       "norm_label": "finddotmatrixlayeranchor()"
@@ -10717,7 +10861,7 @@
       "label": "createBackgroundShapeExtension()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1661",
+      "source_location": "L1921",
       "id": "rendering_svg_extension_createbackgroundshapeextension",
       "community": 62,
       "norm_label": "createbackgroundshapeextension()"
@@ -10726,7 +10870,7 @@
       "label": "normalizeBackgroundShapeOptions()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1721",
+      "source_location": "L1981",
       "id": "rendering_svg_extension_normalizebackgroundshapeoptions",
       "community": 94,
       "norm_label": "normalizebackgroundshapeoptions()"
@@ -10735,7 +10879,7 @@
       "label": "coerceNonNegativeSvgNumber()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1764",
+      "source_location": "L2024",
       "id": "rendering_svg_extension_coercenonnegativesvgnumber",
       "community": 94,
       "norm_label": "coercenonnegativesvgnumber()"
@@ -10744,7 +10888,7 @@
       "label": "getLegacyBackgroundShapePaddingPx()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1772",
+      "source_location": "L2032",
       "id": "rendering_svg_extension_getlegacybackgroundshapepaddingpx",
       "community": 94,
       "norm_label": "getlegacybackgroundshapepaddingpx()"
@@ -10753,7 +10897,7 @@
       "label": "applyBackgroundShapeStroke()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1780",
+      "source_location": "L2040",
       "id": "rendering_svg_extension_applybackgroundshapestroke",
       "community": 51,
       "norm_label": "applybackgroundshapestroke()"
@@ -10762,7 +10906,7 @@
       "label": "hasActiveBackgroundSurfaceOptions()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1798",
+      "source_location": "L2058",
       "id": "rendering_svg_extension_hasactivebackgroundsurfaceoptions",
       "community": 94,
       "norm_label": "hasactivebackgroundsurfaceoptions()"
@@ -10771,7 +10915,7 @@
       "label": "BackgroundRenderMetrics",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1804",
+      "source_location": "L2064",
       "id": "rendering_svg_extension_backgroundrendermetrics",
       "community": 14,
       "norm_label": "backgroundrendermetrics"
@@ -10780,25 +10924,25 @@
       "label": "getBackgroundRenderMetrics()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1823",
+      "source_location": "L2083",
       "id": "rendering_svg_extension_getbackgroundrendermetrics",
-      "community": 64,
+      "community": 62,
       "norm_label": "getbackgroundrendermetrics()"
     },
     {
       "label": "getQrRenderedDimensions()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1862",
+      "source_location": "L2122",
       "id": "rendering_svg_extension_getqrrendereddimensions",
-      "community": 64,
+      "community": 62,
       "norm_label": "getqrrendereddimensions()"
     },
     {
       "label": "scaleQrBackgroundShapeOptions()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1894",
+      "source_location": "L2154",
       "id": "rendering_svg_extension_scaleqrbackgroundshapeoptions",
       "community": 94,
       "norm_label": "scaleqrbackgroundshapeoptions()"
@@ -10807,7 +10951,7 @@
       "label": "applySvgRenderBounds()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1913",
+      "source_location": "L2173",
       "id": "rendering_svg_extension_applysvgrenderbounds",
       "community": 51,
       "norm_label": "applysvgrenderbounds()"
@@ -10816,7 +10960,7 @@
       "label": "coerceSvgNumber()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1922",
+      "source_location": "L2182",
       "id": "rendering_svg_extension_coercesvgnumber",
       "community": 94,
       "norm_label": "coercesvgnumber()"
@@ -10825,7 +10969,7 @@
       "label": "wrapQrContent()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1930",
+      "source_location": "L2190",
       "id": "rendering_svg_extension_wrapqrcontent",
       "community": 51,
       "norm_label": "wrapqrcontent()"
@@ -10834,7 +10978,7 @@
       "label": "getFirstDrawableSvgChild()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1967",
+      "source_location": "L2227",
       "id": "rendering_svg_extension_getfirstdrawablesvgchild",
       "community": 51,
       "norm_label": "getfirstdrawablesvgchild()"
@@ -10843,7 +10987,7 @@
       "label": "isManagedBackgroundLayer()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1976",
+      "source_location": "L2236",
       "id": "rendering_svg_extension_ismanagedbackgroundlayer",
       "community": 14,
       "norm_label": "ismanagedbackgroundlayer()"
@@ -10852,7 +10996,7 @@
       "label": "createBackgroundSurfaceExtension()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L1982",
+      "source_location": "L2242",
       "id": "rendering_svg_extension_createbackgroundsurfaceextension",
       "community": 62,
       "norm_label": "createbackgroundsurfaceextension()"
@@ -10861,7 +11005,7 @@
       "label": "getQrBackgroundSurfaceRect()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2035",
+      "source_location": "L2295",
       "id": "rendering_svg_extension_getqrbackgroundsurfacerect",
       "community": 14,
       "norm_label": "getqrbackgroundsurfacerect()"
@@ -10870,7 +11014,7 @@
       "label": "applyBackgroundSurfaceRect()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2043",
+      "source_location": "L2303",
       "id": "rendering_svg_extension_applybackgroundsurfacerect",
       "community": 51,
       "norm_label": "applybackgroundsurfacerect()"
@@ -10879,7 +11023,7 @@
       "label": "createBackgroundSurfaceBlurRect()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2056",
+      "source_location": "L2316",
       "id": "rendering_svg_extension_createbackgroundsurfaceblurrect",
       "community": 51,
       "norm_label": "createbackgroundsurfaceblurrect()"
@@ -10888,7 +11032,7 @@
       "label": "createBackgroundShapeBlurPath()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2104",
+      "source_location": "L2364",
       "id": "rendering_svg_extension_createbackgroundshapeblurpath",
       "community": 51,
       "norm_label": "createbackgroundshapeblurpath()"
@@ -10897,7 +11041,7 @@
       "label": "hasActiveBackgroundShapeShadow()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2155",
+      "source_location": "L2415",
       "id": "rendering_svg_extension_hasactivebackgroundshapeshadow",
       "community": 51,
       "norm_label": "hasactivebackgroundshapeshadow()"
@@ -10906,7 +11050,7 @@
       "label": "applyBackgroundShapeShadowSourceStroke()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2166",
+      "source_location": "L2426",
       "id": "rendering_svg_extension_applybackgroundshapeshadowsourcestroke",
       "community": 51,
       "norm_label": "applybackgroundshapeshadowsourcestroke()"
@@ -10915,7 +11059,7 @@
       "label": "createBackgroundShapeShadowFilter()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2182",
+      "source_location": "L2442",
       "id": "rendering_svg_extension_createbackgroundshapeshadowfilter",
       "community": 51,
       "norm_label": "createbackgroundshapeshadowfilter()"
@@ -10924,7 +11068,7 @@
       "label": "getBackgroundShapeFill()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2236",
+      "source_location": "L2496",
       "id": "rendering_svg_extension_getbackgroundshapefill",
       "community": 76,
       "norm_label": "getbackgroundshapefill()"
@@ -10933,7 +11077,7 @@
       "label": "createBackgroundShapeGradient()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2261",
+      "source_location": "L2521",
       "id": "rendering_svg_extension_createbackgroundshapegradient",
       "community": 76,
       "norm_label": "createbackgroundshapegradient()"
@@ -10942,7 +11086,7 @@
       "label": "getBackgroundShapeTransform()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2318",
+      "source_location": "L2584",
       "id": "rendering_svg_extension_getbackgroundshapetransform",
       "community": 51,
       "norm_label": "getbackgroundshapetransform()"
@@ -10951,7 +11095,7 @@
       "label": "formatSvgNumber()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2330",
+      "source_location": "L2596",
       "id": "rendering_svg_extension_formatsvgnumber",
       "community": 51,
       "norm_label": "formatsvgnumber()"
@@ -10960,7 +11104,7 @@
       "label": "formatSvgOpacity()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2338",
+      "source_location": "L2604",
       "id": "rendering_svg_extension_formatsvgopacity",
       "community": 51,
       "norm_label": "formatsvgopacity()"
@@ -10969,7 +11113,7 @@
       "label": "getBackgroundShapeGradientKey()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2346",
+      "source_location": "L2612",
       "id": "rendering_svg_extension_getbackgroundshapegradientkey",
       "community": 94,
       "norm_label": "getbackgroundshapegradientkey()"
@@ -10978,7 +11122,7 @@
       "label": "createAlignedCornerGradientExtension()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2360",
+      "source_location": "L2626",
       "id": "rendering_svg_extension_createalignedcornergradientextension",
       "community": 53,
       "norm_label": "createalignedcornergradientextension()"
@@ -10987,7 +11131,7 @@
       "label": "createBackgroundImageExtension()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2391",
+      "source_location": "L2657",
       "id": "rendering_svg_extension_createbackgroundimageextension",
       "community": 62,
       "norm_label": "createbackgroundimageextension()"
@@ -10996,7 +11140,7 @@
       "label": "addRoundedBackgroundImageClip()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2440",
+      "source_location": "L2706",
       "id": "rendering_svg_extension_addroundedbackgroundimageclip",
       "community": 51,
       "norm_label": "addroundedbackgroundimageclip()"
@@ -11005,7 +11149,7 @@
       "label": "getOrCreateSvgDefs()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2475",
+      "source_location": "L2741",
       "id": "rendering_svg_extension_getorcreatesvgdefs",
       "community": 51,
       "norm_label": "getorcreatesvgdefs()"
@@ -11014,7 +11158,7 @@
       "label": "getBackgroundImageInsertReference()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2490",
+      "source_location": "L2756",
       "id": "rendering_svg_extension_getbackgroundimageinsertreference",
       "community": 14,
       "norm_label": "getbackgroundimageinsertreference()"
@@ -11023,7 +11167,7 @@
       "label": "getAlignedCornerGradientRotation()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2503",
+      "source_location": "L2769",
       "id": "rendering_svg_extension_getalignedcornergradientrotation",
       "community": 53,
       "norm_label": "getalignedcornergradientrotation()"
@@ -11032,7 +11176,7 @@
       "label": "alignCornerGradientDirection()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2513",
+      "source_location": "L2779",
       "id": "rendering_svg_extension_aligncornergradientdirection",
       "community": 76,
       "norm_label": "aligncornergradientdirection()"
@@ -11041,7 +11185,7 @@
       "label": "getDescendantElements()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2567",
+      "source_location": "L2833",
       "id": "rendering_svg_extension_getdescendantelements",
       "community": 76,
       "norm_label": "getdescendantelements()"
@@ -11050,7 +11194,7 @@
       "label": "getPaintServerId()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2585",
+      "source_location": "L2851",
       "id": "rendering_svg_extension_getpaintserverid",
       "community": 14,
       "norm_label": "getpaintserverid()"
@@ -11059,7 +11203,7 @@
       "label": "getElementRegion()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2595",
+      "source_location": "L2861",
       "id": "rendering_svg_extension_getelementregion",
       "community": 76,
       "norm_label": "getelementregion()"
@@ -11068,7 +11212,7 @@
       "label": "getNumericAttribute()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2615",
+      "source_location": "L2881",
       "id": "rendering_svg_extension_getnumericattribute",
       "community": 76,
       "norm_label": "getnumericattribute()"
@@ -11077,7 +11221,7 @@
       "label": "getLinearGradientEndpoints()",
       "file_type": "code",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
-      "source_location": "L2627",
+      "source_location": "L2893",
       "id": "rendering_svg_extension_getlineargradientendpoints",
       "community": 76,
       "norm_label": "getlineargradientendpoints()"
@@ -11088,7 +11232,7 @@
       "source_file": "features/qr-code/styles/background-shapes.ts",
       "source_location": "L1",
       "id": "styles_background_shapes",
-      "community": 95,
+      "community": 3,
       "norm_label": "background-shapes.ts"
     },
     {
@@ -11097,7 +11241,7 @@
       "source_file": "features/qr-code/styles/background-shapes.ts",
       "source_location": "L1",
       "id": "styles_background_shapes_qrbackgroundshapeid",
-      "community": 95,
+      "community": 3,
       "norm_label": "qrbackgroundshapeid"
     },
     {
@@ -11106,7 +11250,7 @@
       "source_file": "features/qr-code/styles/background-shapes.ts",
       "source_location": "L26",
       "id": "styles_background_shapes_qrbackgroundshapedefinition",
-      "community": 95,
+      "community": 3,
       "norm_label": "qrbackgroundshapedefinition"
     },
     {
@@ -11115,7 +11259,7 @@
       "source_file": "features/qr-code/styles/background-shapes.ts",
       "source_location": "L36",
       "id": "styles_background_shapes_qr_background_shapes",
-      "community": 95,
+      "community": 3,
       "norm_label": "qr_background_shapes"
     },
     {
@@ -11214,7 +11358,7 @@
       "source_file": "features/qr-code/styles/encoding-options.ts",
       "source_location": "L1",
       "id": "styles_encoding_options",
-      "community": 66,
+      "community": 102,
       "norm_label": "encoding-options.ts"
     },
     {
@@ -11223,7 +11367,7 @@
       "source_file": "features/qr-code/styles/encoding-options.ts",
       "source_location": "L9",
       "id": "styles_encoding_options_type_numbers",
-      "community": 66,
+      "community": 102,
       "norm_label": "type_numbers"
     },
     {
@@ -11232,7 +11376,7 @@
       "source_file": "features/qr-code/styles/encoding-options.ts",
       "source_location": "L17",
       "id": "styles_encoding_options_error_correction_level_options",
-      "community": 66,
+      "community": 102,
       "norm_label": "error_correction_level_options"
     },
     {
@@ -11241,7 +11385,7 @@
       "source_file": "features/qr-code/styles/encoding-options.ts",
       "source_location": "L44",
       "id": "styles_encoding_options_formattypenumberlabel",
-      "community": 66,
+      "community": 102,
       "norm_label": "formattypenumberlabel()"
     },
     {
@@ -11655,7 +11799,7 @@
       "source_file": "features/workspace/components/Canvas.tsx",
       "source_location": "L143",
       "id": "components_canvas_grouppanes",
-      "community": 0,
+      "community": 87,
       "norm_label": "grouppanes()"
     },
     {
@@ -11745,7 +11889,7 @@
       "source_file": "features/workspace/components/Canvas.tsx",
       "source_location": "L752",
       "id": "components_canvas_canvas",
-      "community": 0,
+      "community": 87,
       "norm_label": "canvas()"
     },
     {
@@ -13059,7 +13203,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L933",
       "id": "components_stylepanel_draftingmotiontab",
-      "community": 3,
+      "community": 1,
       "norm_label": "draftingmotiontab()"
     },
     {
@@ -13203,7 +13347,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L1993",
       "id": "components_stylepanel_notifypapershaderthumbnailsubscribers",
-      "community": 102,
+      "community": 3,
       "norm_label": "notifypapershaderthumbnailsubscribers()"
     },
     {
@@ -13221,7 +13365,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L2010",
       "id": "components_stylepanel_requestpapershaderthumbnail",
-      "community": 102,
+      "community": 3,
       "norm_label": "requestpapershaderthumbnail()"
     },
     {
@@ -13230,7 +13374,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L2029",
       "id": "components_stylepanel_processnextpapershaderthumbnail",
-      "community": 102,
+      "community": 3,
       "norm_label": "processnextpapershaderthumbnail()"
     },
     {
@@ -13239,7 +13383,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L2043",
       "id": "components_stylepanel_finishpapershaderthumbnail",
-      "community": 102,
+      "community": 3,
       "norm_label": "finishpapershaderthumbnail()"
     },
     {
@@ -13320,7 +13464,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L2490",
       "id": "components_stylepanel_draftingcardcolorstab",
-      "community": 79,
+      "community": 24,
       "norm_label": "draftingcardcolorstab()"
     },
     {
@@ -13347,7 +13491,7 @@
       "source_file": "features/workspace/components/StylePanel.tsx",
       "source_location": "L2626",
       "id": "components_stylepanel_draftingdotscolortab",
-      "community": 3,
+      "community": 1,
       "norm_label": "draftingdotscolortab()"
     },
     {
@@ -14301,7 +14445,7 @@
       "source_file": "features/workspace/export/layered-export.test.ts",
       "source_location": "L1",
       "id": "export_layered_export_test",
-      "community": 44,
+      "community": 0,
       "norm_label": "layered-export.test.ts"
     },
     {
@@ -14310,7 +14454,7 @@
       "source_file": "features/workspace/export/layered-export.test.ts",
       "source_location": "L5",
       "id": "export_layered_export_test_builddashboardqrnodepayloadspy",
-      "community": 44,
+      "community": 0,
       "norm_label": "builddashboardqrnodepayloadspy"
     },
     {
@@ -14319,7 +14463,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L1",
       "id": "export_layered_export",
-      "community": 30,
+      "community": 0,
       "norm_label": "layered-export.ts"
     },
     {
@@ -14328,7 +14472,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L27",
       "id": "export_layered_export_downloaddraftingsvgexport",
-      "community": 30,
+      "community": 0,
       "norm_label": "downloaddraftingsvgexport()"
     },
     {
@@ -14337,7 +14481,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L40",
       "id": "export_layered_export_builddraftinglayerednodepayload",
-      "community": 30,
+      "community": 0,
       "norm_label": "builddraftinglayerednodepayload()"
     },
     {
@@ -14346,7 +14490,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L79",
       "id": "export_layered_export_draftinglayerbounds",
-      "community": 30,
+      "community": 0,
       "norm_label": "draftinglayerbounds"
     },
     {
@@ -14355,7 +14499,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L86",
       "id": "export_layered_export_builddraftinglayeredsvgmarkup",
-      "community": 30,
+      "community": 0,
       "norm_label": "builddraftinglayeredsvgmarkup()"
     },
     {
@@ -14373,7 +14517,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L156",
       "id": "export_layered_export_getdraftinglayerfiltermarkup",
-      "community": 30,
+      "community": 0,
       "norm_label": "getdraftinglayerfiltermarkup()"
     },
     {
@@ -14382,7 +14526,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L170",
       "id": "export_layered_export_getdraftinglayerfiltermarkups",
-      "community": 30,
+      "community": 0,
       "norm_label": "getdraftinglayerfiltermarkups()"
     },
     {
@@ -14391,7 +14535,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L177",
       "id": "export_layered_export_getdraftingcardlayersvg",
-      "community": 30,
+      "community": 0,
       "norm_label": "getdraftingcardlayersvg()"
     },
     {
@@ -14400,7 +14544,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L190",
       "id": "export_layered_export_getdraftinggrouplayersvg",
-      "community": 30,
+      "community": 0,
       "norm_label": "getdraftinggrouplayersvg()"
     },
     {
@@ -14409,7 +14553,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L216",
       "id": "export_layered_export_getdraftingqrlayersvg",
-      "community": 30,
+      "community": 0,
       "norm_label": "getdraftingqrlayersvg()"
     },
     {
@@ -14418,7 +14562,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L231",
       "id": "export_layered_export_getdraftingtextlayersvg",
-      "community": 30,
+      "community": 0,
       "norm_label": "getdraftingtextlayersvg()"
     },
     {
@@ -14427,7 +14571,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L271",
       "id": "export_layered_export_splitdraftingtextrunsbyline",
-      "community": 30,
+      "community": 0,
       "norm_label": "splitdraftingtextrunsbyline()"
     },
     {
@@ -14436,7 +14580,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L292",
       "id": "export_layered_export_getdraftingtextlayerruns",
-      "community": 30,
+      "community": 0,
       "norm_label": "getdraftingtextlayerruns()"
     },
     {
@@ -14445,7 +14589,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L302",
       "id": "export_layered_export_getdraftingtextrunsvg",
-      "community": 30,
+      "community": 0,
       "norm_label": "getdraftingtextrunsvg()"
     },
     {
@@ -14454,7 +14598,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L308",
       "id": "export_layered_export_getdraftinglayersvgtransform",
-      "community": 30,
+      "community": 0,
       "norm_label": "getdraftinglayersvgtransform()"
     },
     {
@@ -14463,7 +14607,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L315",
       "id": "export_layered_export_scalenestedsvgmarkup",
-      "community": 30,
+      "community": 0,
       "norm_label": "scalenestedsvgmarkup()"
     },
     {
@@ -14472,7 +14616,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L339",
       "id": "export_layered_export_cleannestedsvgattributes",
-      "community": 30,
+      "community": 0,
       "norm_label": "cleannestedsvgattributes()"
     },
     {
@@ -14481,7 +14625,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L346",
       "id": "export_layered_export_getsvgid",
-      "community": 30,
+      "community": 0,
       "norm_label": "getsvgid()"
     },
     {
@@ -14490,7 +14634,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L350",
       "id": "export_layered_export_escapexml",
-      "community": 30,
+      "community": 0,
       "norm_label": "escapexml()"
     },
     {
@@ -14499,7 +14643,7 @@
       "source_file": "features/workspace/export/layered-export.ts",
       "source_location": "L358",
       "id": "export_layered_export_downloadblob",
-      "community": 30,
+      "community": 0,
       "norm_label": "downloadblob()"
     },
     {
@@ -14508,7 +14652,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L1",
       "id": "model_card_patterns",
-      "community": 79,
+      "community": 24,
       "norm_label": "card-patterns.ts"
     },
     {
@@ -14517,7 +14661,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L3",
       "id": "model_card_patterns_drafting_card_pattern_none_id",
-      "community": 79,
+      "community": 24,
       "norm_label": "drafting_card_pattern_none_id"
     },
     {
@@ -14526,7 +14670,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L5",
       "id": "model_card_patterns_draftingcardpatterncolorslotid",
-      "community": 79,
+      "community": 24,
       "norm_label": "draftingcardpatterncolorslotid"
     },
     {
@@ -14535,7 +14679,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L6",
       "id": "model_card_patterns_draftingcardpatternstyle",
-      "community": 79,
+      "community": 24,
       "norm_label": "draftingcardpatternstyle"
     },
     {
@@ -14544,7 +14688,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L8",
       "id": "model_card_patterns_draftingcardpatterncoloroverrides",
-      "community": 79,
+      "community": 24,
       "norm_label": "draftingcardpatterncoloroverrides"
     },
     {
@@ -14553,7 +14697,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L10",
       "id": "model_card_patterns_draftingcardpatterncolorslot",
-      "community": 79,
+      "community": 24,
       "norm_label": "draftingcardpatterncolorslot"
     },
     {
@@ -14562,7 +14706,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L16",
       "id": "model_card_patterns_draftingcardpattern",
-      "community": 79,
+      "community": 24,
       "norm_label": "draftingcardpattern"
     },
     {
@@ -14571,7 +14715,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L2662",
       "id": "model_card_patterns_draftingcardpatternid",
-      "community": 79,
+      "community": 24,
       "norm_label": "draftingcardpatternid"
     },
     {
@@ -14580,7 +14724,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L2663",
       "id": "model_card_patterns_draftingcardpatternselectionid",
-      "community": 79,
+      "community": 24,
       "norm_label": "draftingcardpatternselectionid"
     },
     {
@@ -14589,7 +14733,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L2667",
       "id": "model_card_patterns_getdraftingcardpatternbyid",
-      "community": 79,
+      "community": 24,
       "norm_label": "getdraftingcardpatternbyid()"
     },
     {
@@ -14598,7 +14742,7 @@
       "source_file": "features/workspace/model/card-patterns.ts",
       "source_location": "L2677",
       "id": "model_card_patterns_getdraftingcardpatternstyle",
-      "community": 79,
+      "community": 24,
       "norm_label": "getdraftingcardpatternstyle()"
     },
     {
@@ -14697,7 +14841,7 @@
       "source_file": "features/workspace/model/card-state.ts",
       "source_location": "L103",
       "id": "model_card_state_clonedraftingcardstate",
-      "community": 11,
+      "community": 21,
       "norm_label": "clonedraftingcardstate()"
     },
     {
@@ -14724,7 +14868,7 @@
       "source_file": "features/workspace/model/card-state.ts",
       "source_location": "L168",
       "id": "model_card_state_createdefaultdraftingcardstate",
-      "community": 11,
+      "community": 21,
       "norm_label": "createdefaultdraftingcardstate()"
     },
     {
@@ -14733,7 +14877,7 @@
       "source_file": "features/workspace/model/card-state.ts",
       "source_location": "L172",
       "id": "model_card_state_clonedraftingcardpapershaderstate",
-      "community": 11,
+      "community": 21,
       "norm_label": "clonedraftingcardpapershaderstate()"
     },
     {
@@ -14760,7 +14904,7 @@
       "source_file": "features/workspace/model/document.test.ts",
       "source_location": "L1",
       "id": "model_document_test",
-      "community": 11,
+      "community": 21,
       "norm_label": "document.test.ts"
     },
     {
@@ -14769,7 +14913,7 @@
       "source_file": "features/workspace/model/document.ts",
       "source_location": "L1",
       "id": "model_document",
-      "community": 11,
+      "community": 21,
       "norm_label": "document.ts"
     },
     {
@@ -14778,7 +14922,7 @@
       "source_file": "features/workspace/model/document.ts",
       "source_location": "L34",
       "id": "model_document_draftingqrstatebynodeid",
-      "community": 1,
+      "community": 21,
       "norm_label": "draftingqrstatebynodeid"
     },
     {
@@ -14787,7 +14931,7 @@
       "source_file": "features/workspace/model/document.ts",
       "source_location": "L35",
       "id": "model_document_draftingcardstatebynodeid",
-      "community": 1,
+      "community": 21,
       "norm_label": "draftingcardstatebynodeid"
     },
     {
@@ -14796,7 +14940,7 @@
       "source_file": "features/workspace/model/document.ts",
       "source_location": "L36",
       "id": "model_document_draftingcontentvaluesbytype",
-      "community": 1,
+      "community": 21,
       "norm_label": "draftingcontentvaluesbytype"
     },
     {
@@ -14805,7 +14949,7 @@
       "source_file": "features/workspace/model/document.ts",
       "source_location": "L38",
       "id": "model_document_draftingworkspacedocumentv1",
-      "community": 11,
+      "community": 21,
       "norm_label": "draftingworkspacedocumentv1"
     },
     {
@@ -14814,7 +14958,7 @@
       "source_file": "features/workspace/model/document.ts",
       "source_location": "L51",
       "id": "model_document_clonedraftingworkspacedocument",
-      "community": 11,
+      "community": 21,
       "norm_label": "clonedraftingworkspacedocument()"
     },
     {
@@ -14823,7 +14967,7 @@
       "source_file": "features/workspace/model/document.ts",
       "source_location": "L76",
       "id": "model_document_createdefaultdraftingworkspacedocument",
-      "community": 11,
+      "community": 21,
       "norm_label": "createdefaultdraftingworkspacedocument()"
     },
     {
@@ -14832,7 +14976,7 @@
       "source_file": "features/workspace/model/document.ts",
       "source_location": "L107",
       "id": "model_document_parsedraftingworkspacedocument",
-      "community": 11,
+      "community": 21,
       "norm_label": "parsedraftingworkspacedocument()"
     },
     {
@@ -14841,7 +14985,7 @@
       "source_file": "features/workspace/model/document.ts",
       "source_location": "L191",
       "id": "model_document_serializedraftingworkspacedocument",
-      "community": 11,
+      "community": 21,
       "norm_label": "serializedraftingworkspacedocument()"
     },
     {
@@ -14850,7 +14994,7 @@
       "source_file": "features/workspace/model/document.ts",
       "source_location": "L197",
       "id": "model_document_createdefaultdraftingworkspaceqrstate",
-      "community": 11,
+      "community": 21,
       "norm_label": "createdefaultdraftingworkspaceqrstate()"
     },
     {
@@ -14859,7 +15003,7 @@
       "source_file": "features/workspace/model/document.ts",
       "source_location": "L206",
       "id": "model_document_clonedraftingqrstate",
-      "community": 1,
+      "community": 21,
       "norm_label": "clonedraftingqrstate()"
     },
     {
@@ -14868,7 +15012,7 @@
       "source_file": "features/workspace/model/document.ts",
       "source_location": "L210",
       "id": "model_document_parseqrstate",
-      "community": 11,
+      "community": 21,
       "norm_label": "parseqrstate()"
     },
     {
@@ -14886,7 +15030,7 @@
       "source_file": "features/workspace/model/document.ts",
       "source_location": "L300",
       "id": "model_document_parsecardstate",
-      "community": 11,
+      "community": 21,
       "norm_label": "parsecardstate()"
     },
     {
@@ -14895,7 +15039,7 @@
       "source_file": "features/workspace/model/document.ts",
       "source_location": "L313",
       "id": "model_document_parsecontentvaluesbytype",
-      "community": 11,
+      "community": 21,
       "norm_label": "parsecontentvaluesbytype()"
     },
     {
@@ -14904,7 +15048,7 @@
       "source_file": "features/workspace/model/document.ts",
       "source_location": "L321",
       "id": "model_document_parseqrinputtype",
-      "community": 11,
+      "community": 21,
       "norm_label": "parseqrinputtype()"
     },
     {
@@ -14913,7 +15057,7 @@
       "source_file": "features/workspace/model/document.ts",
       "source_location": "L325",
       "id": "model_document_isrecord",
-      "community": 11,
+      "community": 21,
       "norm_label": "isrecord()"
     },
     {
@@ -15039,7 +15183,7 @@
       "source_file": "features/workspace/model/fonts.ts",
       "source_location": "L211",
       "id": "model_fonts_ensuredraftingfontsforlayers",
-      "community": 30,
+      "community": 0,
       "norm_label": "ensuredraftingfontsforlayers()"
     },
     {
@@ -15120,7 +15264,7 @@
       "source_file": "features/workspace/model/keyboard-shortcuts.ts",
       "source_location": "L1",
       "id": "model_keyboard_shortcuts",
-      "community": 1,
+      "community": 64,
       "norm_label": "keyboard-shortcuts.ts"
     },
     {
@@ -15129,7 +15273,7 @@
       "source_file": "features/workspace/model/keyboard-shortcuts.ts",
       "source_location": "L1",
       "id": "model_keyboard_shortcuts_drafting_keyboard_shortcut_groups",
-      "community": 1,
+      "community": 64,
       "norm_label": "drafting_keyboard_shortcut_groups"
     },
     {
@@ -15138,7 +15282,7 @@
       "source_file": "features/workspace/model/layers.test.ts",
       "source_location": "L1",
       "id": "model_layers_test",
-      "community": 65,
+      "community": 47,
       "norm_label": "layers.test.ts"
     },
     {
@@ -15147,7 +15291,7 @@
       "source_file": "features/workspace/model/layers.test.ts",
       "source_location": "L427",
       "id": "model_layers_test_createlayer",
-      "community": 65,
+      "community": 47,
       "norm_label": "createlayer()"
     },
     {
@@ -15201,7 +15345,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L18",
       "id": "model_layers_draftingtextrun",
-      "community": 30,
+      "community": 47,
       "norm_label": "draftingtextrun"
     },
     {
@@ -15210,7 +15354,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L29",
       "id": "model_layers_draftingcanvaslayer",
-      "community": 65,
+      "community": 47,
       "norm_label": "draftingcanvaslayer"
     },
     {
@@ -15219,7 +15363,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L60",
       "id": "model_layers_draftinglayerstatebynodeid",
-      "community": 1,
+      "community": 21,
       "norm_label": "draftinglayerstatebynodeid"
     },
     {
@@ -15246,7 +15390,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L69",
       "id": "model_layers_draftinglayerdistributeaction",
-      "community": 47,
+      "community": 8,
       "norm_label": "draftinglayerdistributeaction"
     },
     {
@@ -15264,7 +15408,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L81",
       "id": "model_layers_default_drafting_text_layer",
-      "community": 65,
+      "community": 47,
       "norm_label": "default_drafting_text_layer"
     },
     {
@@ -15291,7 +15435,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L103",
       "id": "model_layers_isdraftingcardlayerid",
-      "community": 1,
+      "community": 47,
       "norm_label": "isdraftingcardlayerid()"
     },
     {
@@ -15300,7 +15444,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L107",
       "id": "model_layers_isdraftingqrlayerid",
-      "community": 1,
+      "community": 47,
       "norm_label": "isdraftingqrlayerid()"
     },
     {
@@ -15336,7 +15480,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L190",
       "id": "model_layers_clonedraftinglayerstatebynodeid",
-      "community": 11,
+      "community": 21,
       "norm_label": "clonedraftinglayerstatebynodeid()"
     },
     {
@@ -15345,7 +15489,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L201",
       "id": "model_layers_normalizedraftingcanvaslayers",
-      "community": 44,
+      "community": 21,
       "norm_label": "normalizedraftingcanvaslayers()"
     },
     {
@@ -15363,7 +15507,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L234",
       "id": "model_layers_reorderdraftingcanvaslayer",
-      "community": 65,
+      "community": 47,
       "norm_label": "reorderdraftingcanvaslayer()"
     },
     {
@@ -15372,7 +15516,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L260",
       "id": "model_layers_aligndraftingcanvaslayers",
-      "community": 65,
+      "community": 47,
       "norm_label": "aligndraftingcanvaslayers()"
     },
     {
@@ -15381,7 +15525,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L295",
       "id": "model_layers_distributedraftingcanvaslayers",
-      "community": 65,
+      "community": 47,
       "norm_label": "distributedraftingcanvaslayers()"
     },
     {
@@ -15390,7 +15534,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L332",
       "id": "model_layers_clonedraftingcanvaslayersforpaste",
-      "community": 65,
+      "community": 47,
       "norm_label": "clonedraftingcanvaslayersforpaste()"
     },
     {
@@ -15399,7 +15543,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L352",
       "id": "model_layers_groupdraftingcanvaslayers",
-      "community": 65,
+      "community": 47,
       "norm_label": "groupdraftingcanvaslayers()"
     },
     {
@@ -15408,7 +15552,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L402",
       "id": "model_layers_ungroupdraftingcanvaslayer",
-      "community": 65,
+      "community": 47,
       "norm_label": "ungroupdraftingcanvaslayer()"
     },
     {
@@ -15417,7 +15561,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L427",
       "id": "model_layers_getdraftingmarqueeselection",
-      "community": 65,
+      "community": 47,
       "norm_label": "getdraftingmarqueeselection()"
     },
     {
@@ -15426,7 +15570,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L451",
       "id": "model_layers_normalizelayerzindexes",
-      "community": 65,
+      "community": 47,
       "norm_label": "normalizelayerzindexes()"
     },
     {
@@ -15435,7 +15579,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L455",
       "id": "model_layers_getlayerbounds",
-      "community": 65,
+      "community": 47,
       "norm_label": "getlayerbounds()"
     },
     {
@@ -15480,7 +15624,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L544",
       "id": "model_layers_getdraftinglayerfallback",
-      "community": 44,
+      "community": 47,
       "norm_label": "getdraftinglayerfallback()"
     },
     {
@@ -15552,7 +15696,7 @@
       "source_file": "features/workspace/model/layers.ts",
       "source_location": "L702",
       "id": "model_layers_createfallbacklayer",
-      "community": 44,
+      "community": 47,
       "norm_label": "createfallbacklayer()"
     },
     {
@@ -15696,7 +15840,7 @@
       "source_file": "features/workspace/model/layout-engine.test.ts",
       "source_location": "L1",
       "id": "model_layout_engine_test",
-      "community": 0,
+      "community": 87,
       "norm_label": "layout-engine.test.ts"
     },
     {
@@ -15705,7 +15849,7 @@
       "source_file": "features/workspace/model/layout-engine.ts",
       "source_location": "L1",
       "id": "model_layout_engine",
-      "community": 0,
+      "community": 87,
       "norm_label": "layout-engine.ts"
     },
     {
@@ -15714,7 +15858,7 @@
       "source_file": "features/workspace/model/layout-engine.ts",
       "source_location": "L1",
       "id": "model_layout_engine_qrlayout",
-      "community": 0,
+      "community": 87,
       "norm_label": "qrlayout"
     },
     {
@@ -15723,7 +15867,7 @@
       "source_file": "features/workspace/model/layout-engine.ts",
       "source_location": "L8",
       "id": "model_layout_engine_getqrlayout",
-      "community": 0,
+      "community": 87,
       "norm_label": "getqrlayout()"
     },
     {
@@ -15732,7 +15876,7 @@
       "source_file": "features/workspace/model/storage.ts",
       "source_location": "L1",
       "id": "model_storage",
-      "community": 11,
+      "community": 21,
       "norm_label": "storage.ts"
     },
     {
@@ -15741,7 +15885,7 @@
       "source_file": "features/workspace/model/storage.ts",
       "source_location": "L13",
       "id": "model_storage_storeddraftingworkspacerecord",
-      "community": 11,
+      "community": 21,
       "norm_label": "storeddraftingworkspacerecord"
     },
     {
@@ -15750,7 +15894,7 @@
       "source_file": "features/workspace/model/storage.ts",
       "source_location": "L19",
       "id": "model_storage_readdraftingworkspacedraft",
-      "community": 11,
+      "community": 21,
       "norm_label": "readdraftingworkspacedraft()"
     },
     {
@@ -15759,7 +15903,7 @@
       "source_file": "features/workspace/model/storage.ts",
       "source_location": "L34",
       "id": "model_storage_writedraftingworkspacedraft",
-      "community": 11,
+      "community": 21,
       "norm_label": "writedraftingworkspacedraft()"
     },
     {
@@ -15768,7 +15912,7 @@
       "source_file": "features/workspace/model/storage.ts",
       "source_location": "L49",
       "id": "model_storage_opendraftingworkspacedb",
-      "community": 11,
+      "community": 21,
       "norm_label": "opendraftingworkspacedb()"
     },
     {
@@ -15777,7 +15921,7 @@
       "source_file": "features/workspace/model/storage.ts",
       "source_location": "L70",
       "id": "model_storage_readindexeddbdraft",
-      "community": 11,
+      "community": 21,
       "norm_label": "readindexeddbdraft()"
     },
     {
@@ -15786,7 +15930,7 @@
       "source_file": "features/workspace/model/storage.ts",
       "source_location": "L87",
       "id": "model_storage_writeindexeddbdraft",
-      "community": 11,
+      "community": 21,
       "norm_label": "writeindexeddbdraft()"
     },
     {
@@ -15795,7 +15939,7 @@
       "source_file": "features/workspace/model/storage.ts",
       "source_location": "L107",
       "id": "model_storage_normalizestoredrecord",
-      "community": 11,
+      "community": 21,
       "norm_label": "normalizestoredrecord()"
     },
     {
@@ -16200,7 +16344,7 @@
       "source_file": "features/workspace/rendering/qr-layer-shadow.ts",
       "source_location": "L1",
       "id": "rendering_qr_layer_shadow",
-      "community": 30,
+      "community": 0,
       "norm_label": "qr-layer-shadow.ts"
     },
     {
@@ -16209,7 +16353,7 @@
       "source_file": "features/workspace/rendering/qr-layer-shadow.ts",
       "source_location": "L5",
       "id": "rendering_qr_layer_shadow_hasdraftinglayershadow",
-      "community": 30,
+      "community": 0,
       "norm_label": "hasdraftinglayershadow()"
     },
     {
@@ -16218,7 +16362,7 @@
       "source_file": "features/workspace/rendering/qr-layer-shadow.ts",
       "source_location": "L12",
       "id": "rendering_qr_layer_shadow_applydraftingqrforegroundshadow",
-      "community": 30,
+      "community": 0,
       "norm_label": "applydraftingqrforegroundshadow()"
     },
     {
@@ -16227,7 +16371,7 @@
       "source_file": "features/workspace/rendering/qr-layer-shadow.ts",
       "source_location": "L58",
       "id": "rendering_qr_layer_shadow_getorcreatesvgdefs",
-      "community": 30,
+      "community": 0,
       "norm_label": "getorcreatesvgdefs()"
     },
     {
@@ -16236,7 +16380,7 @@
       "source_file": "features/workspace/rendering/qr-layer-shadow.ts",
       "source_location": "L72",
       "id": "rendering_qr_layer_shadow_createforegroundshadowfilter",
-      "community": 30,
+      "community": 0,
       "norm_label": "createforegroundshadowfilter()"
     },
     {
@@ -16245,7 +16389,7 @@
       "source_file": "features/workspace/rendering/qr-layer-shadow.ts",
       "source_location": "L95",
       "id": "rendering_qr_layer_shadow_isqrbackgroundlayer",
-      "community": 30,
+      "community": 0,
       "norm_label": "isqrbackgroundlayer()"
     },
     {
@@ -16254,7 +16398,7 @@
       "source_file": "features/workspace/rendering/qr-layer-shadow.ts",
       "source_location": "L108",
       "id": "rendering_qr_layer_shadow_getsvgid",
-      "community": 30,
+      "community": 0,
       "norm_label": "getsvgid()"
     },
     {
@@ -16362,7 +16506,7 @@
       "source_file": "hooks/use-auto-resize-textarea.ts",
       "source_location": "L1",
       "id": "hooks_use_auto_resize_textarea",
-      "community": 90,
+      "community": 80,
       "norm_label": "use-auto-resize-textarea.ts"
     },
     {
@@ -16371,7 +16515,7 @@
       "source_file": "hooks/use-auto-resize-textarea.ts",
       "source_location": "L3",
       "id": "hooks_use_auto_resize_textarea_useautoresizetextareaprops",
-      "community": 90,
+      "community": 80,
       "norm_label": "useautoresizetextareaprops"
     },
     {
@@ -16380,7 +16524,7 @@
       "source_file": "hooks/use-auto-resize-textarea.ts",
       "source_location": "L8",
       "id": "hooks_use_auto_resize_textarea_useautoresizetextarea",
-      "community": 90,
+      "community": 80,
       "norm_label": "useautoresizetextarea()"
     },
     {
@@ -16542,7 +16686,7 @@
       "source_file": "lib/utils.ts",
       "source_location": "L1",
       "id": "lib_utils",
-      "community": 73,
+      "community": 80,
       "norm_label": "utils.ts"
     },
     {
@@ -16551,7 +16695,7 @@
       "source_file": "lib/utils.ts",
       "source_location": "L4",
       "id": "lib_utils_cn",
-      "community": 73,
+      "community": 80,
       "norm_label": "cn()"
     },
     {
@@ -18684,8 +18828,17 @@
       "source_file": "features/qr-code/styles/encoding-options.ts",
       "source_location": "L48",
       "id": "styles_encoding_options_formatqrtypenumberlabel",
-      "community": 2,
+      "community": 119,
       "norm_label": "formatqrtypenumberlabel"
+    },
+    {
+      "label": "getDotsGradient()",
+      "file_type": "code",
+      "source_file": "features/qr-code/adapters/react-qr-adapter.ts",
+      "source_location": "L81",
+      "community": 7,
+      "norm_label": "getdotsgradient()",
+      "id": "adapters_react_qr_adapter_getdotsgradient"
     },
     {
       "label": "DRAFTING_KEYBOARD_SHORTCUT_GROUPS",
@@ -18818,7 +18971,7 @@
       "file_type": "code",
       "source_file": "components/ui/card.tsx",
       "source_location": "L59",
-      "community": 4,
+      "community": 79,
       "norm_label": "cardaction()",
       "id": "ui_card_cardaction"
     },
@@ -18827,7 +18980,7 @@
       "file_type": "code",
       "source_file": "components/ui/card.tsx",
       "source_location": "L82",
-      "community": 4,
+      "community": 79,
       "norm_label": "cardfooter()",
       "id": "ui_card_cardfooter"
     },
@@ -18917,7 +19070,7 @@
       "file_type": "code",
       "source_file": "components/ui/fill-picker/lib/color.ts",
       "source_location": "L65",
-      "community": 25,
+      "community": 27,
       "norm_label": "isvalidcolor()",
       "id": "lib_color_isvalidcolor"
     },
@@ -32290,6 +32443,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L3906",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_floatingtoolbar",
+      "target": "components_floatingtoolbar_aredesktopcolorpalettesequal"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
       "source_location": "L662",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -32540,6 +32703,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L636",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_floatingtoolbar",
+      "target": "components_floatingtoolbar_desktop_dots_palette_presets"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
       "source_location": "L621",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -32685,6 +32858,16 @@
       "confidence_score": 1.0,
       "source": "components_floatingtoolbar",
       "target": "components_floatingtoolbar_desktopcolorpickerpopover"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L3601",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_floatingtoolbar",
+      "target": "components_floatingtoolbar_desktopcolorswatchpicker"
     },
     {
       "relation": "contains",
@@ -33095,6 +33278,16 @@
       "confidence_score": 1.0,
       "source": "components_floatingtoolbar",
       "target": "components_floatingtoolbar_desktoppatterninspector"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/desktop-shell/components/FloatingToolbar.tsx",
+      "source_location": "L3206",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_floatingtoolbar",
+      "target": "components_floatingtoolbar_desktoppatternpalettepresetbutton"
     },
     {
       "relation": "contains",
@@ -43902,9 +44095,9 @@
       "source_file": "features/qr-code/rendering/qr-svg.test.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "rendering_qr_svg_test",
-      "target": "rendering_qr_svg_renderdashboardqrsvgmarkup",
-      "confidence_score": 1.0
+      "target": "rendering_qr_svg_renderdashboardqrsvgmarkup"
     },
     {
       "relation": "imports",
@@ -44040,9 +44233,9 @@
       "source_file": "features/qr-code/rendering/qr-svg.ts",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "rendering_qr_svg_renderdashboardqrsvgmarkup",
-      "target": "rendering_qr_svg_createdashboardsurfaceqrstate",
-      "confidence_score": 1.0
+      "target": "rendering_qr_svg_createdashboardsurfaceqrstate"
     },
     {
       "relation": "calls",
@@ -44150,9 +44343,9 @@
       "source_file": "features/qr-code/rendering/qr-svg.ts",
       "source_location": "L58",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "rendering_qr_svg_renderdashboardqrsvgmarkup",
-      "target": "rendering_qr_svg_applyqrsvgextension",
-      "confidence_score": 1.0
+      "target": "rendering_qr_svg_applyqrsvgextension"
     },
     {
       "relation": "calls",
@@ -44280,6 +44473,16 @@
       "confidence_score": 1.0,
       "source": "rendering_svg_extension_test",
       "target": "rendering_svg_extension_test_getgradientrelativecoordinates"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.test.ts",
+      "source_location": "L234",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension_test",
+      "target": "rendering_svg_extension_test_getpalettelayeranchors"
     },
     {
       "relation": "contains",
@@ -44460,6 +44663,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L647",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension",
+      "target": "rendering_svg_extension_balancedotpaletteassignments"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
       "source_location": "L41",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -44505,6 +44718,26 @@
       "confidence_score": 1.0,
       "source": "rendering_svg_extension",
       "target": "rendering_svg_extension_collectdotmatrixmetrics"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L619",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension",
+      "target": "rendering_svg_extension_comparedotpaletteshapegroups"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L695",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension",
+      "target": "rendering_svg_extension_countdotpaletteassignments"
     },
     {
       "relation": "contains",
@@ -44655,6 +44888,26 @@
       "confidence_score": 1.0,
       "source": "rendering_svg_extension",
       "target": "rendering_svg_extension_createdotmatrixopacitykeyframes"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L593",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension",
+      "target": "rendering_svg_extension_createdotpaletteshapegroups"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L382",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension",
+      "target": "rendering_svg_extension_createdotsgradientextension"
     },
     {
       "relation": "contains",
@@ -44860,11 +45113,31 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L433",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension",
+      "target": "rendering_svg_extension_dotpalettegroupassignment"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L427",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension",
+      "target": "rendering_svg_extension_dotpaletteshapegroup"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
       "source_location": "L402",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "rendering_svg_extension",
-      "target": "rendering_svg_extension_dotpathlayer",
-      "confidence_score": 1.0
+      "target": "rendering_svg_extension_dotpathlayer"
     },
     {
       "relation": "contains",
@@ -45180,6 +45453,26 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L639",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension",
+      "target": "rendering_svg_extension_getdotpaletteindex"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L462",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension",
+      "target": "rendering_svg_extension_getdotshapecoverrect"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
       "source_location": "L2420",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -45332,9 +45625,9 @@
       "source_file": "features/qr-code/rendering/svg-extension.ts",
       "source_location": "L529",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "rendering_svg_extension",
-      "target": "rendering_svg_extension_getqrmodulepathlayers",
-      "confidence_score": 1.0
+      "target": "rendering_svg_extension_getqrmodulepathlayers"
     },
     {
       "relation": "contains",
@@ -45375,6 +45668,36 @@
       "confidence_score": 1.0,
       "source": "rendering_svg_extension",
       "target": "rendering_svg_extension_hasactivebackgroundsurfaceoptions"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L708",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension",
+      "target": "rendering_svg_extension_hashdotpalettegroup"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L729",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension",
+      "target": "rendering_svg_extension_hashdotpalettenumbers"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L717",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension",
+      "target": "rendering_svg_extension_hashdotpalettestring"
     },
     {
       "relation": "contains",
@@ -45542,9 +45865,9 @@
       "source_file": "features/qr-code/rendering/svg-extension.ts",
       "source_location": "L559",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "rendering_svg_extension",
-      "target": "rendering_svg_extension_splitsvgpathdata",
-      "confidence_score": 1.0
+      "target": "rendering_svg_extension_splitsvgpathdata"
     },
     {
       "relation": "contains",
@@ -45572,9 +45895,9 @@
       "source_file": "features/qr-code/rendering/svg-extension.ts",
       "source_location": "L572",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "rendering_svg_extension",
-      "target": "rendering_svg_extension_suppressdotmatrixbasepathlayers",
-      "confidence_score": 1.0
+      "target": "rendering_svg_extension_suppressdotmatrixbasepathlayers"
     },
     {
       "relation": "contains",
@@ -45671,6 +45994,17 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "rendering_svg_extension_buildqrextension",
+      "target": "rendering_svg_extension_createdotsgradientextension"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L69",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension_buildqrextension",
       "target": "rendering_svg_extension_createdotspaletteextension"
     },
     {
@@ -45738,6 +46072,72 @@
       "confidence_score": 1.0,
       "source": "rendering_svg_extension_createdotspaletteextension",
       "target": "rendering_svg_extension_getactivedotspalette"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L279",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension_createdotspaletteextension",
+      "target": "rendering_svg_extension_hashdotpalettestring"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L600",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension_createdotpaletteshapegroups",
+      "target": "rendering_svg_extension_resolvedotmatrixcoordinates"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L644",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension_getdotpaletteindex",
+      "target": "rendering_svg_extension_hashdotpalettegroup"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L656",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension_balancedotpaletteassignments",
+      "target": "rendering_svg_extension_countdotpaletteassignments"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L670",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension_balancedotpaletteassignments",
+      "target": "rendering_svg_extension_hashdotpalettenumbers"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "features/qr-code/rendering/svg-extension.ts",
+      "source_location": "L709",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rendering_svg_extension_hashdotpalettegroup",
+      "target": "rendering_svg_extension_hashdotpalettenumbers"
     },
     {
       "relation": "calls",
@@ -61227,5 +61627,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "90ac0556b5ee397646a0da624e5951416f514297"
+  "built_at_commit": "5948cec66b062fc5c8ec914eb683d9e936e7e0b2"
 }

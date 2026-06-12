@@ -633,6 +633,22 @@ const DEFAULT_DESKTOP_DOTS_GRADIENT: StudioGradient = {
 
 const DEFAULT_DESKTOP_DOTS_PALETTE = ["#04879c", "#0c3c78", "#090030", "#f30a49"]
 
+const DESKTOP_DOTS_PALETTE_PRESETS: Array<{
+  colors: string[]
+  label: string
+}> = [
+  { label: "Aurora", colors: ["#67e8f9", "#a78bfa", "#f0abfc", "#f8fafc"] },
+  { label: "Fire", colors: ["#f97316", "#ef4444", "#facc15", "#7f1d1d"] },
+  { label: "Mint", colors: ["#34d399", "#6ee7b7", "#d9f99d", "#064e3b"] },
+  { label: "Neon", colors: ["#22d3ee", "#a855f7", "#f8fafc", "#111827"] },
+  { label: "Ocean", colors: ["#38bdf8", "#2563eb", "#0f172a", "#bae6fd"] },
+  { label: "Prism", colors: ["#64748b", "#eab308", "#22c55e", "#ec4899"] },
+  { label: "Sunset", colors: ["#f59e0b", "#f97316", "#fde047", "#7c2d12"] },
+  { label: "Signal", colors: ["#04879c", "#0c3c78", "#090030", "#f30a49"] },
+  { label: "Candy", colors: ["#fb7185", "#f0abfc", "#c084fc", "#38bdf8"] },
+  { label: "Mono", colors: ["#020617", "#334155", "#94a3b8", "#f8fafc"] },
+]
+
 const DESKTOP_BRAND_ICON_CATEGORY_OPTIONS: Array<{
   label: string
   value: BrandIconCategory | "all"
@@ -1699,12 +1715,32 @@ function DesktopThemeStyles() {
       }
 
       [data-slot="desktop-color-picker-popover"] {
+        --color-picker-bg: rgba(23, 24, 29, 0.95);
+        --color-picker-border: rgba(255, 255, 255, 0.1);
+        --color-picker-fg: #ffffff;
+        --color-picker-muted-fg: rgba(255, 255, 255, 0.64);
+        --color-picker-control-bg: rgba(0, 0, 0, 0.22);
+        --color-picker-control-hover-bg: rgba(255, 255, 255, 0.08);
+        --color-picker-control-border: rgba(255, 255, 255, 0.12);
+        --color-picker-focus: rgba(255, 255, 255, 0.38);
+        --color-picker-highlight: rgba(255, 255, 255, 0.1);
+        --color-picker-swatch-inner: rgba(255, 255, 255, 0.18);
         --desktop-color-picker-popover-bg: rgba(23, 24, 29, 0.95);
         --desktop-color-picker-popover-border: rgba(255, 255, 255, 0.1);
         --desktop-color-picker-popover-fg: #ffffff;
       }
 
       body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-color-picker-popover"] {
+        --color-picker-bg: rgba(255, 255, 255, 0.96);
+        --color-picker-border: rgba(15, 23, 42, 0.12);
+        --color-picker-fg: #18181b;
+        --color-picker-muted-fg: rgba(15, 23, 42, 0.58);
+        --color-picker-control-bg: rgba(15, 23, 42, 0.04);
+        --color-picker-control-hover-bg: rgba(15, 23, 42, 0.08);
+        --color-picker-control-border: rgba(15, 23, 42, 0.12);
+        --color-picker-focus: rgba(15, 23, 42, 0.34);
+        --color-picker-highlight: rgba(255, 255, 255, 0.9);
+        --color-picker-swatch-inner: rgba(15, 23, 42, 0.16);
         --desktop-color-picker-popover-bg: rgba(255, 255, 255, 0.96);
         --desktop-color-picker-popover-border: rgba(15, 23, 42, 0.12);
         --desktop-color-picker-popover-fg: #18181b;
@@ -3187,6 +3223,46 @@ function DesktopMotionColorPresetButton({
   )
 }
 
+function DesktopPatternPalettePresetButton({
+  colors,
+  label,
+  onClick,
+  selected,
+}: {
+  colors: string[]
+  label: string
+  onClick: () => void
+  selected: boolean
+}) {
+  return (
+    <button
+      aria-label={`Use ${label} pattern palette`}
+      aria-pressed={selected}
+      className={cn(
+        "relative flex h-9 min-w-0 items-center gap-2 px-2 text-left",
+        DESKTOP_INSPECTOR_CONTROL_CLASS,
+        selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
+      )}
+      type="button"
+      onClick={onClick}
+    >
+      <span className="flex shrink-0 -space-x-1">
+        {colors.map((color, index) => (
+          <span
+            key={`${label}-${color}-${index}`}
+            aria-hidden="true"
+            className="size-4 rounded-full border border-black/35"
+            style={{ backgroundColor: color }}
+          />
+        ))}
+      </span>
+      <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-white/78">
+        {label}
+      </span>
+    </button>
+  )
+}
+
 function DesktopContentInspector({
   contentType,
   contentValues,
@@ -3460,20 +3536,33 @@ function DesktopPatternInspector({
 
           {settings.dotsColorMode === "palette" ? (
             <div className="mt-2.5 grid gap-2">
-              <div className="flex min-w-0 flex-wrap gap-2 border-b border-white/[0.07] px-0 py-2.5 last:border-b-0">
-                {settings.dotsPalette.map((color, index) => (
-                  <DesktopColorPickerPopover
-                    ariaLabel={`Pattern color ${index + 1}`}
-                    key={`${color}-${index}`}
-                    triggerClassName="size-7 shrink-0"
-                    value={color}
-                    onChange={(nextColor) =>
-                      onPatternSettingsChange({
-                        dotsPalette: settings.dotsPalette.map((currentColor, currentIndex) =>
-                          currentIndex === index ? nextColor : currentColor,
-                        ),
-                      })
-                    }
+              <div className={cn(DESKTOP_INSPECTOR_ROW_CLASS, "border-b border-white/[0.07] py-2.5 last:border-b-0")}>
+                <span className={DESKTOP_INSPECTOR_LABEL_CLASS}>Palette</span>
+                <span className="flex min-w-0 flex-wrap justify-end gap-2">
+                  {settings.dotsPalette.map((color, index) => (
+                    <DesktopColorSwatchPicker
+                      ariaLabel={`Pattern color ${index + 1}`}
+                      key={`${color}-${index}`}
+                      value={color}
+                      onChange={(nextColor) =>
+                        onPatternSettingsChange({
+                          dotsPalette: settings.dotsPalette.map((currentColor, currentIndex) =>
+                            currentIndex === index ? nextColor : currentColor,
+                          ),
+                        })
+                      }
+                    />
+                  ))}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5" data-slot="desktop-pattern-palette-presets">
+                {DESKTOP_DOTS_PALETTE_PRESETS.map((preset) => (
+                  <DesktopPatternPalettePresetButton
+                    colors={preset.colors}
+                    key={preset.label}
+                    label={preset.label}
+                    selected={areDesktopColorPalettesEqual(settings.dotsPalette, preset.colors)}
+                    onClick={() => onPatternSettingsChange({ dotsPalette: [...preset.colors] })}
                   />
                 ))}
               </div>
@@ -3583,17 +3672,11 @@ function DesktopColorInputRow({
     <div className={DESKTOP_INSPECTOR_ROW_CLASS}>
       <span className={DESKTOP_INSPECTOR_LABEL_CLASS}>{label}</span>
       <span className="flex items-center gap-2">
-        <span
-          className="grid size-7 shrink-0 place-items-center rounded-full border-2 bg-transparent p-0.5"
-          style={{ borderColor: value }}
-        >
-          <DesktopColorPickerPopover
-            aria-label={`${inputLabel} swatch`}
-            triggerClassName="size-5 shrink-0 border-0"
-            value={value}
-            onChange={onChange}
-          />
-        </span>
+        <DesktopColorSwatchPicker
+          ariaLabel={`${inputLabel} swatch`}
+          value={value}
+          onChange={onChange}
+        />
         <DesktopInspectorTextInput
           aria-label={inputLabel}
           className="h-7 w-20 rounded-[5px] px-2 text-[11px] font-semibold"
@@ -3602,6 +3685,30 @@ function DesktopColorInputRow({
         />
       </span>
     </div>
+  )
+}
+
+function DesktopColorSwatchPicker({
+  ariaLabel,
+  onChange,
+  value,
+}: {
+  ariaLabel: string
+  onChange: (value: string) => void
+  value: string
+}) {
+  return (
+    <span
+      className="grid size-7 shrink-0 place-items-center rounded-full border-2 bg-transparent p-0.5"
+      style={{ borderColor: value }}
+    >
+      <DesktopColorPickerPopover
+        aria-label={ariaLabel}
+        triggerClassName="size-5 shrink-0 border-0"
+        value={value}
+        onChange={onChange}
+      />
+    </span>
   )
 }
 
@@ -3642,9 +3749,10 @@ function DesktopColorPickerPopover({
         </button>
       </PopoverTrigger>
       <PopoverContent
-        align="end"
+        align="center"
         data-slot="desktop-color-picker-popover"
         className="w-[300px] border-0 bg-transparent p-0 shadow-none"
+        side="right"
         sideOffset={8}
       >
         <AmploColorPicker.Root
@@ -3817,6 +3925,13 @@ function updateDesktopGradientColor(
       stopIndex === index ? { ...stop, color } : stop,
     ) as StudioGradient["colorStops"],
   }
+}
+
+function areDesktopColorPalettesEqual(currentPalette: string[], presetPalette: string[]): boolean {
+  return (
+    currentPalette.length === presetPalette.length &&
+    currentPalette.every((color, index) => color.toLowerCase() === presetPalette[index]?.toLowerCase())
+  )
 }
 
 function DesktopContentFields({

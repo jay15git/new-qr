@@ -87,6 +87,49 @@ describe("dashboard qr svg helpers", () => {
     expect(markup).toContain('fill="#f30a49"')
   })
 
+  it.each(["circle", "diamond", "circuit-board"] as const)(
+    "keeps all palette colors visible for %s data module shapes",
+    (style) => {
+      const state = createDefaultQrStudioState()
+      state.dotsColorMode = "palette"
+      state.dotsPalette = ["#111111", "#222222", "#333333", "#444444"]
+      state.dataModulesSettings.type = style
+
+      const markup = renderDashboardQrSvgMarkup(state)
+
+      expect(markup).toContain('data-qr-layer="dot-palette"')
+      for (const color of state.dotsPalette) {
+        expect(markup).toContain(`fill="${color}"`)
+      }
+    },
+  )
+
+  it("applies module gradients without repainting finder patterns", () => {
+    const state = createDefaultQrStudioState()
+    state.dotsColorMode = "gradient"
+    state.dataModulesGradient = {
+      enabled: true,
+      type: "linear",
+      rotation: Math.PI / 2,
+      colorStops: [
+        { offset: 0, color: "#101010" },
+        { offset: 1, color: "#fafafa" },
+      ],
+    }
+
+    const markup = renderDashboardQrSvgMarkup(state)
+
+    expect(markup).toContain('data-qr-layer="dot-gradient"')
+    expect(markup).toContain('data-qr-layer="dot-gradient-fill"')
+    expect(markup).toContain('fill="url(\'#dot-gradient-definition\')"')
+    expect(markup).toContain('data-testid="finder-patterns-inner"')
+    expect(markup).toContain('data-testid="finder-patterns-outer"')
+    expect(markup).toMatch(/<rect[^>]+fill="#111827"[^>]+data-testid="finder-patterns-inner"/)
+    expect(markup).toMatch(/<path[^>]+fill="#111827"[^>]+data-testid="finder-patterns-outer"/)
+    expect(markup).not.toContain('data-testid="finder-patterns-inner" fill="url(')
+    expect(markup).not.toContain('data-testid="finder-patterns-outer" fill="url(')
+  })
+
   it("reports expanded natural size when background effects grow outside the qr", async () => {
     const state = setSquareQrSize(createDefaultQrStudioState(), 320)
     state.backgroundShapeId = "circle"

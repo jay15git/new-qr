@@ -716,10 +716,21 @@ describe("FloatingToolbar", () => {
     await clickButton(getRequiredButton(surface.container, "Use Patterns module color"))
 
     const patternSwatch = getRequiredButton(surface.container, "Pattern color 1")
+    const patternSwatchRing = patternSwatch.parentElement
+    const patternPaletteRow = patternSwatch.closest(".justify-between")
+    const patternPaletteLabel = Array.from(
+      surface.container.querySelectorAll('[data-slot="desktop-module-color"] span'),
+    ).find((element) => element.textContent === "Palette")
+    const patternPaletteControls = patternSwatchRing?.parentElement
     expect(patternSwatch.className).toContain("rounded-full")
-    expect(patternSwatch.className).toContain("size-7")
+    expect(patternSwatch.className).toContain("size-5")
     expect(patternSwatch.className).not.toContain("border-white")
     expect(patternSwatch.getAttribute("data-slot")).toBe("desktop-color-picker")
+    expect(patternSwatchRing?.className).toContain("size-7")
+    expect(patternSwatchRing?.className).toContain("border-2")
+    expect(patternPaletteLabel).not.toBeNull()
+    expect(patternPaletteControls?.className).toContain("justify-end")
+    expect(patternPaletteRow).not.toBeNull()
 
     await clickButton(patternSwatch)
 
@@ -744,6 +755,28 @@ describe("FloatingToolbar", () => {
 
     expect(solidInput.value).toMatch(/^#[0-9a-f]{6}$/i)
     expect(solidInput.value.toLowerCase()).not.toBe("#111111")
+  })
+
+  it("renders curated pattern palette presets and applies them", async () => {
+    const surface = await renderPrototype()
+    await openTool(surface.container, "pattern")
+
+    await clickButton(getRequiredButton(surface.container, "Use Patterns module color"))
+
+    const presetGrid = surface.container.querySelector('[data-slot="desktop-pattern-palette-presets"]')
+    const presetButtons = presetGrid?.querySelectorAll("button")
+    const signalPreset = getRequiredButton(surface.container, "Use Signal pattern palette")
+    const auroraPreset = getRequiredButton(surface.container, "Use Aurora pattern palette")
+
+    expect(presetGrid).not.toBeNull()
+    expect(presetButtons).toHaveLength(10)
+    expect(signalPreset.getAttribute("aria-pressed")).toBe("true")
+    expect(auroraPreset.getAttribute("aria-pressed")).toBe("false")
+
+    await clickButton(auroraPreset)
+
+    expect(auroraPreset.getAttribute("aria-pressed")).toBe("true")
+    expect(signalPreset.getAttribute("aria-pressed")).toBe("false")
   })
 
   it("renders a Pixelmator-style shape inspector without placeholder copy", async () => {

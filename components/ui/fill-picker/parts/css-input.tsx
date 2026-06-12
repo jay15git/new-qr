@@ -59,7 +59,11 @@ export const CssInput = React.forwardRef<HTMLInputElement, CssInputProps>(functi
           setError(false);
         }
       }}
-      className={cn("h-8 px-2 font-mono text-xs", className)}
+      className={cn(
+        "h-8 rounded-lg !border-[var(--color-picker-control-border,var(--input))] !bg-[var(--color-picker-control-bg,transparent)] px-2 font-mono text-xs !text-[var(--color-picker-fg,var(--foreground))] shadow-xs",
+        "hover:bg-[var(--color-picker-control-hover-bg,var(--muted))] focus-visible:border-[var(--color-picker-focus,var(--ring))] focus-visible:ring-2 focus-visible:ring-[var(--color-picker-focus,var(--ring))]/30",
+        className,
+      )}
       {...rest}
     />
   );

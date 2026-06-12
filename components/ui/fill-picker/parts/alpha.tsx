@@ -84,9 +84,9 @@ export const Alpha = React.forwardRef<HTMLDivElement, AlphaProps>(function Alpha
       onPointerMove={onPointerMove}
       onKeyDown={onKeyDown}
       className={cn(
-        "relative cursor-pointer rounded-full outline-none touch-none",
+        "relative cursor-pointer rounded-full shadow-[0_0_0_1px_var(--color-picker-control-border,var(--border)),0_1px_0_var(--color-picker-highlight,rgba(255,255,255,0.08))_inset] outline-none touch-none",
         isVertical ? "h-32 w-3" : "h-3 w-full",
-        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-popover",
+        "focus-visible:ring-2 focus-visible:ring-[var(--color-picker-focus,var(--ring))] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-picker-bg,var(--popover))]",
         className,
       )}
       {...rest}
