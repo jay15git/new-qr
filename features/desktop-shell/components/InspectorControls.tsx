@@ -7,6 +7,7 @@ import {
 import { ChevronDownIcon, SearchIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { Input } from "@/components/ui/input"
 
 export const DESKTOP_INSPECTOR_SECTION_CLASS =
   "rounded-[10px] bg-[var(--desktop-inspector-section-bg)] p-3"
@@ -218,7 +219,7 @@ export function DesktopInspectorSearchInput({
   iconClassName,
   inputClassName,
   onValueChange,
-  type = "search",
+  type = "text",
   ...props
 }: DesktopInspectorSearchInputProps) {
   return (
@@ -229,11 +230,12 @@ export function DesktopInspectorSearchInput({
           iconClassName,
         )}
       />
-      <input
+      <Input
         className={cn(
-          "h-full w-full rounded-[6px] pl-7 pr-2 text-[12px]",
+          "h-full w-full rounded-[6px] border-transparent pl-7 pr-2 text-[12px]",
           DESKTOP_INSPECTOR_INPUT_CLASS,
           inputClassName,
+          "focus-visible:ring-0 focus-visible:shadow-none",
         )}
         type={type}
         onChange={(event) => onValueChange(event.currentTarget.value)}

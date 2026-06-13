@@ -367,7 +367,7 @@ describe("FloatingToolbar", () => {
     const searchInput = filterSearchRow?.querySelector('input[aria-label="Search QR types"]')
     expect(searchInput).not.toBeNull()
     expect(searchInput?.className).toContain("desktop-inspector-input-bg")
-    expect(searchInput?.className).toContain("rounded-full")
+    expect(searchInput?.className).toContain("rounded-[7px]")
     expect(searchInput?.parentElement?.className).toContain("h-full")
     expect(inspector?.querySelector('[data-slot="desktop-content-fields"]')).not.toBeNull()
     expect(inspector?.textContent).toContain("Content")
@@ -1183,7 +1183,7 @@ describe("FloatingToolbar", () => {
     expect(selectedOption?.className).not.toContain("bg-[var(--desktop-inspector-selected-bg)]")
     expect(selectedOption?.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
     expect(selectedOption?.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
-    expect(filterTrigger.className).toContain("rounded-full")
+    expect(filterTrigger.className).toContain("rounded-[7px]")
 
     const source = readFileSync(
       resolve(process.cwd(), "features/desktop-shell/components/FloatingToolbar.tsx"),

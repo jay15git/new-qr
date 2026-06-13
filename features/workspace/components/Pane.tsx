@@ -84,7 +84,7 @@ type PaneProps = {
   state: QrStudioState
 }
 
-type ResizeDirection = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw"
+export type ResizeDirection = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw"
 type SnapAxis = "x" | "y"
 export type DraftingLayerMenuAction =
   | DraftingLayerAlignAction
@@ -224,7 +224,7 @@ function toRgba(color: string, opacity: number) {
   return color
 }
 
-function resizeDraftingLayer(
+export function resizeDraftingLayer(
   layer: DraftingCanvasLayer,
   direction: ResizeDirection,
   deltaX: number,
@@ -251,7 +251,7 @@ function resizeDraftingLayer(
   }
 }
 
-function resizeSquareLayer(
+export function resizeSquareLayer(
   layer: DraftingCanvasLayer,
   direction: ResizeDirection,
   deltaX: number,
@@ -279,7 +279,7 @@ function resizeSquareLayer(
   })
 }
 
-function anchorSquareLayerResize(
+export function anchorSquareLayerResize(
   layer: DraftingCanvasLayer,
   direction: ResizeDirection,
   geometry: Pick<DraftingCanvasLayer, "height" | "width" | "x" | "y">,
@@ -289,8 +289,8 @@ function anchorSquareLayerResize(
   const affectsNorth = direction.includes("n")
   const affectsSouth = direction.includes("s")
   const size = Math.max(24, Math.max(geometry.width, geometry.height))
-  const right = geometry.x + geometry.width
-  const bottom = geometry.y + geometry.height
+  const right = layer.x + layer.width
+  const bottom = layer.y + layer.height
 
   return {
     height: size,

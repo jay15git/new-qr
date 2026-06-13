@@ -2079,7 +2079,7 @@ function DesktopLogoInspector({
                       <DropdownMenuRadioItem
                         key={option.value}
                         className={cn(
-                          "h-8 rounded-full px-3 text-[12px] font-semibold transition [&_[data-slot=dropdown-menu-radio-item-indicator]]:hidden",
+                          "h-8 rounded-[7px] px-3 text-[12px] font-semibold transition [&_[data-slot=dropdown-menu-radio-item-indicator]]:hidden",
                           desktopTheme === "light"
                             ? "text-slate-700 focus:bg-slate-950/[0.08] focus:text-slate-950 data-[state=checked]:bg-transparent data-[state=checked]:text-slate-950 data-[state=checked]:focus:bg-slate-950/[0.08]"
                             : "text-white/72 focus:bg-white/[0.1] focus:text-white data-[state=checked]:bg-transparent data-[state=checked]:text-white data-[state=checked]:focus:bg-white/[0.1]",
@@ -3322,7 +3322,7 @@ function DesktopContentInspector({
                   <button
                     aria-label="Filter QR types"
                     className={cn(
-                      "flex h-full min-w-[84px] max-w-24 shrink-0 items-center justify-between gap-2 rounded-full px-3 text-[12px] font-semibold transition hover:bg-[var(--desktop-inspector-control-hover-bg)]",
+                      "flex h-full min-w-[84px] max-w-24 shrink-0 items-center justify-between gap-2 rounded-[7px] px-3 text-[12px] font-semibold transition hover:bg-[var(--desktop-inspector-control-hover-bg)]",
                       DESKTOP_INSPECTOR_INPUT_CLASS,
                     )}
                     data-slot="desktop-content-type-filter-trigger"
@@ -3351,7 +3351,7 @@ function DesktopContentInspector({
                       <DropdownMenuRadioItem
                         key={collection.id}
                         className={cn(
-                          "h-8 rounded-full px-3 text-[12px] font-semibold transition [&_[data-slot=dropdown-menu-radio-item-indicator]]:hidden",
+                          "h-8 rounded-[7px] px-3 text-[12px] font-semibold transition [&_[data-slot=dropdown-menu-radio-item-indicator]]:hidden",
                           desktopTheme === "light"
                             ? "text-slate-700 focus:bg-slate-950/[0.08] focus:text-slate-950 data-[state=checked]:bg-transparent data-[state=checked]:text-slate-950 data-[state=checked]:focus:bg-slate-950/[0.08]"
                             : "text-white/72 focus:bg-white/[0.1] focus:text-white data-[state=checked]:bg-transparent data-[state=checked]:text-white data-[state=checked]:focus:bg-white/[0.1]",
@@ -3369,7 +3369,7 @@ function DesktopContentInspector({
                 aria-label="Search QR types"
                 className="h-full min-w-0 flex-1 shrink self-stretch"
                 iconClassName="left-2.5"
-                inputClassName="rounded-full pr-3"
+                inputClassName="rounded-[7px] pr-3"
                 placeholder="Search"
                 value={query}
                 onValueChange={setQuery}
@@ -3377,36 +3377,62 @@ function DesktopContentInspector({
             </div>
           </div>
 
-          <div className="mt-3 grid max-h-32 grid-cols-3 gap-1.5 overflow-y-auto pr-1" data-slot="desktop-content-type-collection">
-            {visibleTypes.map((type) => {
-            const option = QR_INPUT_OPTIONS[type]
-            const Icon = option.icon
-            const isSelected = contentType === type
+          <ScrollArea
+            className="mt-3 h-[180px] overflow-hidden"
+            data-scrollbar-visibility="while-scrolling"
+            data-slot="desktop-content-type-collection-scroll-area"
+            scrollHideDelay={500}
+            type="scroll"
+          >
+            <ScrollAreaViewport
+              className="h-full w-full overflow-x-hidden overflow-y-auto pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              data-slot="desktop-content-type-collection-scroll"
+            >
+              <div className="grid grid-cols-3 gap-1.5" data-slot="desktop-content-type-collection">
+                {visibleTypes.map((type) => {
+                const option = QR_INPUT_OPTIONS[type]
+                const Icon = option.icon
+                const isSelected = contentType === type
 
-            return (
-              <button
-                key={type}
-                aria-label={`Use ${option.label} content`}
-                aria-pressed={isSelected}
+                return (
+                  <button
+                    key={type}
+                    aria-label={`Use ${option.label} content`}
+                    aria-pressed={isSelected}
+                    className={cn(
+                      "relative flex h-[54px] min-w-0 flex-col items-center justify-center gap-1 rounded-[7px] border-2 border-transparent bg-transparent px-1 text-[10px] font-semibold text-white/62 transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35",
+                      isSelected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
+                    )}
+                    data-desktop-content-type-option="true"
+                    type="button"
+                    onClick={() => onContentTypeChange(type)}
+                  >
+                    <Icon className="size-4 shrink-0" />
+                    <span className="max-w-full truncate">{option.label}</span>
+                  </button>
+                )
+              })}
+                {visibleTypes.length === 0 ? (
+                  <p className="col-span-3 px-1 py-3 text-center text-[11px] text-white/45">
+                    No QR types found
+                  </p>
+                ) : null}
+              </div>
+            </ScrollAreaViewport>
+            <ScrollAreaScrollbar
+              className="w-2 border-none p-[1px]"
+              data-slot="desktop-content-type-collection-scrollbar"
+            >
+              <ScrollAreaThumb
                 className={cn(
-                  "relative flex h-[54px] min-w-0 flex-col items-center justify-center gap-1 rounded-[7px] border-2 border-transparent bg-transparent px-1 text-[10px] font-semibold text-white/62 transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35",
-                  isSelected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
+                  desktopTheme === "light"
+                    ? "bg-slate-950/15 hover:bg-slate-950/25"
+                    : "bg-white/24 hover:bg-white/38",
                 )}
-                data-desktop-content-type-option="true"
-                type="button"
-                onClick={() => onContentTypeChange(type)}
-              >
-                <Icon className="size-4 shrink-0" />
-                <span className="max-w-full truncate">{option.label}</span>
-              </button>
-            )
-          })}
-            {visibleTypes.length === 0 ? (
-              <p className="col-span-3 px-1 py-3 text-center text-[11px] text-white/45">
-                No QR types found
-              </p>
-            ) : null}
-          </div>
+                data-slot="desktop-content-type-collection-scroll-thumb"
+              />
+            </ScrollAreaScrollbar>
+          </ScrollArea>
         </DesktopInspectorSection>
 
         <div className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
