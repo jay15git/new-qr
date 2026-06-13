@@ -30,7 +30,7 @@ export function DraftingQrBackground({
   layer: DraftingCanvasLayer
   state: QrStudioState
 }) {
-  const frame = getDraftingQrBackgroundFrame(layer, state)
+  const frame = getDraftingQrBackgroundFrame(layer)
   const shape = getQrBackgroundShapeDefinition(state.backgroundShapeId)
   const ids = getDraftingQrBackgroundIds(layer.id)
   const fill = getDraftingQrBackgroundFill(state, ids)
@@ -87,7 +87,7 @@ export function getDraftingQrBackgroundSvgMarkup(
   layer: DraftingCanvasLayer,
   state: QrStudioState,
 ) {
-  const frame = getDraftingQrBackgroundFrame(layer, state)
+  const frame = getDraftingQrBackgroundFrame(layer)
   const shape = getQrBackgroundShapeDefinition(state.backgroundShapeId)
   const ids = getDraftingQrBackgroundIds(layer.id)
   const defs = getDraftingQrBackgroundDefsMarkup(ids, state)
@@ -117,7 +117,7 @@ export function getDraftingQrBackgroundBounds(
   layer: DraftingCanvasLayer,
   state: QrStudioState,
 ) {
-  const frame = getDraftingQrBackgroundFrame(layer, state)
+  const frame = getDraftingQrBackgroundFrame(layer)
   const overflow = getDraftingQrBackgroundOverflow(state)
 
   return {
@@ -223,15 +223,12 @@ function getDraftingQrBackgroundIds(layerId: string): DraftingQrBackgroundIds {
 
 function getDraftingQrBackgroundFrame(
   layer: DraftingCanvasLayer,
-  state: QrStudioState,
 ): DraftingQrBackgroundFrame {
-  const padding = Math.max(0, state.backgroundShapeOptions.paddingPx)
-
   return {
-    height: layer.height + padding * 2,
-    width: layer.width + padding * 2,
-    x: -padding,
-    y: -padding,
+    height: layer.height,
+    width: layer.width,
+    x: 0,
+    y: 0,
   }
 }
 
