@@ -122,7 +122,7 @@ describe("ControlsPanel", () => {
     expect(cornerDotMarkup).not.toContain('data-slot="style-preview-fragment"')
   })
 
-  it("renders distinct corner-dot preview markup for filled and fallback-grid styles", () => {
+  it("renders distinct corner-dot preview markup sourced from a real qr code", () => {
     const markup = renderToStaticMarkup(
       <ControlsPanel {...baseProps} activeSection="corner-dot" />,
     )
@@ -132,18 +132,13 @@ describe("ControlsPanel", () => {
     const heartMarkup = getStylePreviewMarkup(markup, "heart")
     const leafMarkup = getStylePreviewMarkup(markup, "leaf")
 
-    expect(circleMarkup).toContain('data-slot="style-preview-corner-dot"')
-    expect(circleMarkup).toContain('data-corner-dot-renderer="filled"')
-    expect(circleMarkup).toContain("<circle")
-    expect(squareMarkup).toContain('data-slot="style-preview-corner-dot"')
-    expect(squareMarkup).toContain('data-corner-dot-renderer="filled"')
-    expect(squareMarkup).toContain("<rect")
-    expect(heartMarkup).toContain('data-slot="style-preview-corner-dot"')
-    expect(heartMarkup).toContain('data-corner-dot-renderer="filled"')
-    expect(heartMarkup).toContain('data-slot="style-preview-corner-dot-shape"')
-    expect(leafMarkup).toContain('data-slot="style-preview-corner-dot"')
-    expect(leafMarkup).toContain('data-corner-dot-renderer="grid"')
-    expect(leafMarkup).toContain("<path")
+    for (const preview of [circleMarkup, squareMarkup, heartMarkup, leafMarkup]) {
+      expect(preview).toContain('data-slot="style-preview-corner-dot"')
+      expect(preview).toContain('data-corner-dot-renderer="real-qr"')
+      expect(preview).toContain('viewBox="0 0 7 7"')
+      expect(preview).toContain('data-testid="finder-patterns-inner"')
+    }
+
     expect(circleMarkup).not.toBe(squareMarkup)
     expect(squareMarkup).not.toBe(heartMarkup)
     expect(heartMarkup).not.toBe(leafMarkup)

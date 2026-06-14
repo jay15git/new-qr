@@ -32,21 +32,32 @@ describe("StylePreview", () => {
     expect(heartMarkup).toContain('data-slot="style-preview-custom-module"')
   })
 
-  it("renders dedicated corner-dot previews without the generic icon path", () => {
-    const filledMarkup = renderToStaticMarkup(
+  it("renders corner-dot previews from a real qr code, cropped to the top-left finder", () => {
+    const circleMarkup = renderToStaticMarkup(
       <StylePreview previewKind="corner-dot" value="circle" />,
     )
-    const gridMarkup = renderToStaticMarkup(
+    const leafMarkup = renderToStaticMarkup(
       <StylePreview previewKind="corner-dot" value="leaf" />,
     )
+    const squareMarkup = renderToStaticMarkup(
+      <StylePreview previewKind="corner-dot" value="square" />,
+    )
 
-    expect(filledMarkup).toContain('data-slot="style-preview-corner-dot"')
-    expect(filledMarkup).toContain('data-corner-dot-renderer="filled"')
-    expect(filledMarkup).toContain('data-slot="style-preview-corner-dot-shape"')
-    expect(filledMarkup).not.toContain('data-slot="style-preview-icon"')
-    expect(gridMarkup).toContain('data-corner-dot-renderer="grid"')
-    expect(gridMarkup).toContain('data-slot="style-preview-native-module"')
-    expect(gridMarkup).not.toContain('data-slot="style-preview-icon"')
+    for (const markup of [circleMarkup, leafMarkup, squareMarkup]) {
+      expect(markup).toContain('data-slot="style-preview-corner-dot"')
+      expect(markup).toContain('data-corner-dot-renderer="real-qr"')
+      expect(markup).toContain('viewBox="0 0 7 7"')
+      expect(markup).not.toContain('data-slot="style-preview-icon"')
+      expect(markup).toContain('data-testid="finder-patterns-inner"')
+    }
+
+    // circle renders a rounded rect (the lib maps style="circle" to a square rect
+    // with rx=3 inside the 3x3 finder block).
+    expect(circleMarkup).toContain("<rect")
+    // leaf renders a real <path> from the library's leaf helper.
+    expect(leafMarkup).toContain("<path")
+    expect(circleMarkup).not.toBe(leafMarkup)
+    expect(leafMarkup).not.toBe(squareMarkup)
   })
 
   it("renders dedicated ring and fallback-grid corner-square previews without cutout masks", () => {

@@ -1,3 +1,7 @@
+import type { SVGProps } from "react"
+
+import { ReactQRCode } from "@lglab/react-qr-code"
+
 import {
   DOT_STYLE_PREVIEW_ROWS,
   isDotStylePreviewDark,
@@ -6,7 +10,6 @@ import {
 export type StylePreviewKind = "corner-dot" | "corner-square" | "dots"
 
 const PREVIEW_ICON_CLASS_NAME = "size-[5.5rem] text-foreground/80 dark:text-white"
-const CORNER_DOT_PREVIEW_ROWS = Object.freeze(["111", "111", "111"])
 const CORNER_SQUARE_PREVIEW_ROWS = Object.freeze([
   "1111111",
   "1000001",
@@ -18,14 +21,27 @@ const CORNER_SQUARE_PREVIEW_ROWS = Object.freeze([
 ])
 
 export function StylePreview({
+  color,
+  frameColor,
+  frameStyle,
   previewKind,
   value,
 }: {
+  color?: string
+  frameColor?: string
+  frameStyle?: string
   previewKind: StylePreviewKind
   value: string
 }) {
   if (previewKind === "corner-dot") {
-    return <CornerDotStylePreview value={value} />
+    return (
+      <CornerDotStylePreview
+        color={color}
+        frameColor={frameColor}
+        frameStyle={frameStyle}
+        value={value}
+      />
+    )
   }
 
   if (previewKind === "corner-square") {
@@ -75,51 +91,47 @@ export function StylePreview({
 }
 
 function CornerDotStylePreview({
+  color,
+  frameColor,
+  frameStyle,
   value,
 }: {
+  color?: string
+  frameColor?: string
+  frameStyle?: string
   value: string
 }) {
-  const filledSize = 15
-  const filledStart = (48 - filledSize) / 2
-  const usesFilledShape =
-    value === "circle" ||
-    value === "diamond" ||
-    value === "hashtag" ||
-    value === "heart" ||
-    value === "microchip" ||
-    value === "square" ||
-    value === "star"
+  // Render a real <ReactQRCode /> with the live finder settings and crop the
+  // resulting SVG to the top-left 7x7 finder block. This guarantees the
+  // preview is the exact same primitive/path the library draws in the live
+  // QR, with the same rounding, transforms, and per-corner orientation.
+  const previewColor = color ?? "currentColor"
+  const previewFrameColor = frameColor ?? previewColor
+  const previewFrameStyle = (frameStyle ?? "square") as never
 
   return (
-    <svg
-      aria-hidden="true"
-      className={PREVIEW_ICON_CLASS_NAME}
-      data-preview-kind="corner-dot"
-      data-preview-style={value}
-      data-corner-dot-renderer={usesFilledShape ? "filled" : "grid"}
-      data-slot="style-preview-corner-dot"
-      fill="none"
-      viewBox="0 0 48 48"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {usesFilledShape ? (
-        <PreviewShape
-          size={filledSize}
-          slotName="style-preview-corner-dot-shape"
-          value={value}
-          x={filledStart}
-          y={filledStart}
-        />
-      ) : (
-        renderPreviewMatrix({
-          rows: CORNER_DOT_PREVIEW_ROWS,
-          size: 5,
-          startX: 16.5,
-          startY: 16.5,
-          value,
-        })
-      )}
-    </svg>
+    <ReactQRCode
+      background="transparent"
+      boostLevel
+      finderPatternInnerSettings={{ color: previewColor, style: value as never }}
+      finderPatternOuterSettings={{ color: previewFrameColor, style: previewFrameStyle }}
+      level="L"
+      marginSize={0}
+      minVersion={1}
+      size={48}
+      svgProps={
+        {
+          "aria-hidden": "true",
+          className: PREVIEW_ICON_CLASS_NAME,
+          "data-corner-dot-renderer": "real-qr",
+          "data-preview-kind": "corner-dot",
+          "data-preview-style": value,
+          "data-slot": "style-preview-corner-dot",
+          viewBox: "0 0 7 7",
+        } as SVGProps<SVGSVGElement>
+      }
+      value="hi"
+    />
   )
 }
 

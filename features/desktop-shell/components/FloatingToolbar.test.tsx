@@ -145,7 +145,6 @@ describe("FloatingToolbar", () => {
     expect(scrollViewport).not.toBeNull()
     expect(source).toContain('data-slot="desktop-keyboard-shortcuts-scrollbar"')
     expect(source).toContain('[data-slot="desktop-keyboard-shortcuts-scroll-thumb"]')
-    expect(source).toContain("scrollbar-color: rgba(23, 23, 23, 0.38) transparent")
     expect(popover?.className).toContain("h-[min(44rem,calc(100dvh-7rem))]")
     expect(popover?.className).toContain("w-[min(27rem,calc(100vw-1rem))]")
     expect(popover?.className).toContain("bg-[#0a0a0a]")
@@ -154,7 +153,8 @@ describe("FloatingToolbar", () => {
     expect(source).toContain("background: #ffffff !important;")
     expect(source).toContain("--desktop-inspector-section-bg\": \"#181818\"")
     expect(scrollArea?.className).toContain("h-full")
-    expect(scrollViewport?.className).not.toContain("[scrollbar-width:none]")
+    expect(scrollViewport?.className).toContain("[scrollbar-width:none]")
+    expect(scrollViewport?.className).toContain("[&::-webkit-scrollbar]:hidden")
     expect(popover?.innerHTML).not.toContain("border-b border-white/[0.08]")
     expect(platformToggle?.className).not.toContain("bg-white")
     expect(platformToggle?.className).not.toContain("border")
@@ -801,7 +801,19 @@ describe("FloatingToolbar", () => {
       '[data-slot="desktop-floating-inspector"]',
     )
 
-    expect(inspector?.querySelector('[data-slot="desktop-shape-preset-shelf"]')).not.toBeNull()
+    const shapePresetScrollArea = inspector?.querySelector(
+      '[data-slot="desktop-shape-preset-shelf-scroll-area"]',
+    )
+    const shapePresetScrollViewport = inspector?.querySelector(
+      '[data-slot="desktop-shape-preset-shelf"]',
+    )
+
+    expect(shapePresetScrollArea).not.toBeNull()
+    expect(shapePresetScrollArea?.getAttribute("data-scrollbar-visibility")).toBe("while-scrolling")
+    expect(shapePresetScrollArea?.className).toContain("overflow-hidden")
+    expect(shapePresetScrollViewport).not.toBeNull()
+    expect(shapePresetScrollViewport?.className).toContain("[scrollbar-width:none]")
+    expect(shapePresetScrollViewport?.className).toContain("[&::-webkit-scrollbar]:hidden")
     expect(inspector?.querySelector('[data-slot="desktop-inspector-scroll-area"]')).not.toBeNull()
     expect(
       inspector?.querySelector('[data-slot="desktop-inspector-scroll"]')?.className,

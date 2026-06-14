@@ -1227,7 +1227,7 @@ export function FloatingToolbar({
                 type="scroll"
               >
                 <ScrollAreaViewport
-                  className="h-full w-full overflow-x-hidden overflow-y-auto px-3 pb-3 pt-1 scroll-fade-effect-y"
+                  className="h-full w-full overflow-x-hidden overflow-y-auto px-3 pb-3 pt-1 scroll-fade-effect-y [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                   data-slot="desktop-keyboard-shortcuts-scroll"
                 >
                   <div className="grid gap-2.5">
@@ -1589,43 +1589,14 @@ function DesktopThemeStyles() {
         color: rgba(23, 23, 23, 0.86) !important;
       }
 
-      [data-slot="desktop-keyboard-shortcuts-scroll"] {
-        scrollbar-color: rgba(255, 255, 255, 0.32) transparent;
-        scrollbar-width: thin !important;
+      [data-slot="desktop-keyboard-shortcuts-scrollbar"][data-state="hidden"],
+      [data-slot="desktop-shape-preset-shelf-scrollbar"][data-state="hidden"] {
+        opacity: 0;
       }
 
-      [data-slot="desktop-keyboard-shortcuts-scroll"]::-webkit-scrollbar {
-        width: 10px;
-      }
-
-      [data-slot="desktop-keyboard-shortcuts-scroll"]::-webkit-scrollbar-track {
-        background: transparent;
-      }
-
-      [data-slot="desktop-keyboard-shortcuts-scroll"]::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.32);
-        background-clip: content-box;
-        border: 3px solid transparent;
-        border-radius: 999px;
-      }
-
-      [data-slot="desktop-keyboard-shortcuts-scroll"]::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 255, 255, 0.46);
-        background-clip: content-box;
-      }
-
-      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-scroll"] {
-        scrollbar-color: rgba(23, 23, 23, 0.38) transparent;
-      }
-
-      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-scroll"]::-webkit-scrollbar-thumb {
-        background: rgba(23, 23, 23, 0.38);
-        background-clip: content-box;
-      }
-
-      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-scroll"]::-webkit-scrollbar-thumb:hover {
-        background: rgba(23, 23, 23, 0.52);
-        background-clip: content-box;
+      [data-slot="desktop-keyboard-shortcuts-scrollbar"],
+      [data-slot="desktop-shape-preset-shelf-scrollbar"] {
+        transition: opacity 150ms ease;
       }
 
       body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-scroll-thumb"] {
@@ -2319,7 +2290,18 @@ function DesktopCornersInspector({
               >
                 {CORNER_DOT_STYLE_OPTIONS.map((option) => (
                   <DesktopCornerStyleButton
+                    color={
+                      settings.cornerDotColorMode === "solid"
+                        ? settings.cornerDotSolidColor
+                        : "currentColor"
+                    }
                     desktopTheme={desktopTheme}
+                    frameColor={
+                      settings.cornerSquareColorMode === "solid"
+                        ? settings.cornerSquareSolidColor
+                        : "currentColor"
+                    }
+                    frameStyle={settings.cornerSquareType}
                     key={option.value}
                     label={option.label}
                     previewKind="corner-dot"
@@ -2458,7 +2440,10 @@ function DesktopCornerColorSection({
 }
 
 function DesktopCornerStyleButton({
+  color,
   desktopTheme,
+  frameColor,
+  frameStyle,
   label,
   onClick,
   previewKind,
@@ -2466,7 +2451,10 @@ function DesktopCornerStyleButton({
   target,
   value,
 }: {
+  color?: string
   desktopTheme: DesktopThemeMode
+  frameColor?: string
+  frameStyle?: QrFinderPatternOuterStyle
   label: string
   onClick: () => void
   previewKind: Extract<StylePreviewKind, "corner-dot" | "corner-square">
@@ -2503,7 +2491,13 @@ function DesktopCornerStyleButton({
                 "desktop-corner-dot-preview-glyph",
             )}
           >
-            <StylePreview previewKind={previewKind} value={value} />
+            <StylePreview
+              color={color}
+              frameColor={frameColor}
+              frameStyle={frameStyle}
+              previewKind={previewKind}
+              value={value}
+            />
           </span>
         </span>
       </button>
@@ -2532,31 +2526,50 @@ function DesktopShapeInspector({
           <div className="mb-2 min-w-0">
             <p className="truncate text-[12px] font-semibold text-white">Shape Options</p>
           </div>
-          <div
-            aria-label="Shape options"
-            data-slot="desktop-shape-preset-shelf"
-            className="grid max-h-40 grid-cols-3 gap-2 overflow-y-auto pr-1"
+          <ScrollArea
+            className="h-40 overflow-hidden"
+            data-scrollbar-visibility="while-scrolling"
+            data-slot="desktop-shape-preset-shelf-scroll-area"
+            scrollHideDelay={500}
+            type="scroll"
           >
-              <DesktopShapePresetButton
-                desktopTheme={desktopTheme}
-                label="None"
-                selected={settings.backgroundShapeId === "none"}
-                settings={settings}
-              shapeId="none"
-              onClick={() => onShapeSettingsChange({ backgroundShapeId: "none" })}
-            />
-            {QR_BACKGROUND_SHAPES.map((shape) => (
-              <DesktopShapePresetButton
-                desktopTheme={desktopTheme}
-                key={shape.id}
-                label={shape.label}
-                selected={settings.backgroundShapeId === shape.id}
-                settings={settings}
-                shapeId={shape.id}
-                onClick={() => onShapeSettingsChange({ backgroundShapeId: shape.id })}
+            <ScrollAreaViewport
+              aria-label="Shape options"
+              className="h-full w-full overflow-x-hidden overflow-y-auto pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              data-slot="desktop-shape-preset-shelf"
+            >
+              <div className="grid grid-cols-3 gap-2">
+                <DesktopShapePresetButton
+                  desktopTheme={desktopTheme}
+                  label="None"
+                  selected={settings.backgroundShapeId === "none"}
+                  settings={settings}
+                  shapeId="none"
+                  onClick={() => onShapeSettingsChange({ backgroundShapeId: "none" })}
+                />
+                {QR_BACKGROUND_SHAPES.map((shape) => (
+                  <DesktopShapePresetButton
+                    desktopTheme={desktopTheme}
+                    key={shape.id}
+                    label={shape.label}
+                    selected={settings.backgroundShapeId === shape.id}
+                    settings={settings}
+                    shapeId={shape.id}
+                    onClick={() => onShapeSettingsChange({ backgroundShapeId: shape.id })}
+                  />
+                ))}
+              </div>
+            </ScrollAreaViewport>
+            <ScrollAreaScrollbar
+              className="w-2 border-none p-[1px]"
+              data-slot="desktop-shape-preset-shelf-scrollbar"
+            >
+              <ScrollAreaThumb
+                className="bg-neutral-500/45 hover:bg-neutral-500/60"
+                data-slot="desktop-shape-preset-shelf-scroll-thumb"
               />
-            ))}
-          </div>
+            </ScrollAreaScrollbar>
+          </ScrollArea>
         </section>
 
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)} data-slot="desktop-shape-color">
