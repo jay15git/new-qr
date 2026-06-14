@@ -208,8 +208,8 @@ const DESKTOP_SHORTCUT_PLATFORMS: Array<{
   label: string
   value: DesktopShortcutPlatform
 }> = [
-  { icon: WindowsOldIcon, label: "Windows", value: "windows" },
   { icon: AppleIcon, label: "Apple", value: "apple" },
+  { icon: WindowsOldIcon, label: "Windows", value: "windows" },
 ]
 
 function getDefaultShortcutPlatform(): DesktopShortcutPlatform {
@@ -1915,10 +1915,6 @@ function DesktopThemeStyles() {
         filter: none !important;
       }
 
-      [data-slot="desktop-floating-inspector"] .desktop-corner-dot-preview-glyph [data-preview-kind="corner-dot"] {
-        transform: scale(1.7) !important;
-      }
-
       [data-slot="desktop-floating-inspector"] [data-slot="desktop-color-picker"] {
         background-color: transparent !important;
         border-color: rgba(255, 255, 255, 0.18) !important;
@@ -2321,18 +2317,7 @@ function DesktopCornersInspector({
                   <div className="grid grid-cols-3 gap-2">
                     {CORNER_DOT_STYLE_OPTIONS.map((option) => (
                       <DesktopCornerStyleButton
-                        color={
-                          settings.cornerDotColorMode === "solid"
-                            ? settings.cornerDotSolidColor
-                            : "currentColor"
-                        }
                         desktopTheme={desktopTheme}
-                        frameColor={
-                          settings.cornerSquareColorMode === "solid"
-                            ? settings.cornerSquareSolidColor
-                            : "currentColor"
-                        }
-                        frameStyle={settings.cornerSquareType}
                         key={option.value}
                         label={option.label}
                         previewKind="corner-dot"
@@ -2527,11 +2512,7 @@ function DesktopCornerStyleButton({
           style={getDesktopAdaptiveOptionPreviewStyle(desktopTheme)}
         >
           <span
-            className={cn(
-              "grid size-[92%] place-items-center [&_svg]:size-full [&_svg]:text-current",
-              previewKind === "corner-dot" &&
-                "desktop-corner-dot-preview-glyph",
-            )}
+            className="grid size-[68%] place-items-center [&_svg]:size-full [&_svg]:text-current"
           >
             <StylePreview
               color={color}

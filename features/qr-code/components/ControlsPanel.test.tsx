@@ -113,7 +113,7 @@ describe("ControlsPanel", () => {
 
     expect(cornerSquareMarkup).toContain('data-preview-kind="corner-square"')
     expect(cornerSquareMarkup).toContain('data-slot="style-preview-corner-square"')
-    expect(cornerSquareMarkup).toContain('data-corner-square-renderer="ring"')
+    expect(cornerSquareMarkup).toContain('data-corner-frame-renderer="real-qr"')
     expect(cornerSquareMarkup).not.toContain('data-slot="style-preview-icon"')
     expect(cornerSquareMarkup).not.toContain('data-slot="style-preview-fragment"')
     expect(cornerDotMarkup).toContain('data-slot="style-preview-corner-dot"')
@@ -135,7 +135,7 @@ describe("ControlsPanel", () => {
     for (const preview of [circleMarkup, squareMarkup, heartMarkup, leafMarkup]) {
       expect(preview).toContain('data-slot="style-preview-corner-dot"')
       expect(preview).toContain('data-corner-dot-renderer="real-qr"')
-      expect(preview).toContain('viewBox="0 0 7 7"')
+      expect(preview).toContain('viewBox="1.65 1.65 3.7 3.7"')
       expect(preview).toContain('data-testid="finder-patterns-inner"')
     }
 
@@ -144,7 +144,7 @@ describe("ControlsPanel", () => {
     expect(heartMarkup).not.toBe(leafMarkup)
   })
 
-  it("renders distinct corner-square preview markup for ring and fallback-grid styles", () => {
+  it("renders distinct corner-square preview markup sourced from a real qr code", () => {
     const markup = renderToStaticMarkup(
       <ControlsPanel {...baseProps} activeSection="corner-square" />,
     )
@@ -154,21 +154,15 @@ describe("ControlsPanel", () => {
     const roundedLargeMarkup = getStylePreviewMarkup(markup, "rounded-lg")
     const leafMarkup = getStylePreviewMarkup(markup, "leaf")
 
-    expect(circleMarkup).toContain('data-slot="style-preview-corner-square-frame"')
-    expect(circleMarkup).toContain('data-corner-square-renderer="ring"')
-    expect(circleMarkup).toContain('data-corner-frame-variant="circle"')
-    expect(circleMarkup).toContain("<path")
-    expect(squareMarkup).toContain('data-slot="style-preview-corner-square-frame"')
-    expect(squareMarkup).toContain('data-corner-square-renderer="ring"')
-    expect(squareMarkup).toContain('data-corner-frame-variant="square"')
-    expect(squareMarkup).toContain("<path")
-    expect(roundedLargeMarkup).toContain('data-slot="style-preview-corner-square-frame"')
-    expect(roundedLargeMarkup).toContain('data-corner-square-renderer="ring"')
-    expect(roundedLargeMarkup).toContain('data-corner-frame-variant="rounded-lg"')
-    expect(roundedLargeMarkup).toContain('fill-rule="evenodd"')
-    expect(leafMarkup).toContain('data-corner-square-renderer="grid"')
-    expect(leafMarkup).toContain('data-slot="style-preview-corner-square-grid"')
-    expect(leafMarkup).toContain('data-slot="style-preview-native-module"')
+    for (const preview of [circleMarkup, squareMarkup, roundedLargeMarkup, leafMarkup]) {
+      expect(preview).toContain('data-slot="style-preview-corner-square"')
+      expect(preview).toContain('data-corner-frame-renderer="real-qr"')
+      expect(preview).toContain('viewBox="0 0 7 7"')
+      expect(preview).toContain('data-testid="finder-patterns-outer"')
+      expect(preview).not.toContain('style-preview-corner-square-grid')
+    }
+
+    expect(leafMarkup).toContain("<path")
     expect(circleMarkup).not.toBe(squareMarkup)
     expect(squareMarkup).not.toBe(roundedLargeMarkup)
     expect(roundedLargeMarkup).not.toBe(leafMarkup)

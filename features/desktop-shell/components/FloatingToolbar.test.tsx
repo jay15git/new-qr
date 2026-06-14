@@ -416,8 +416,6 @@ describe("FloatingToolbar", () => {
     expect(source).toContain("DESKTOP_INSPECTOR_FOOTER_CLASS")
     expect(source).toContain("DESKTOP_INSPECTOR_RESET_CLASS")
     expect(source).toContain("--desktop-inspector-section-bg: rgba(255, 255, 255, 0.055)")
-    expect(source).toContain(".desktop-corner-dot-preview-glyph")
-    expect(source).toContain("transform: scale(1.7) !important")
     expect(source).not.toContain('className="border-t border-white/[0.09] bg-black/20 p-3"')
     expect(source).not.toContain('className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.045] p-3"')
     expect(source).not.toContain("[data-slot=\"desktop-floating-inspector\"] [class*=\"bg-white/\"]")
@@ -638,6 +636,11 @@ describe("FloatingToolbar", () => {
     expect(frameSurface?.style.color).toBe("rgb(248, 250, 252)")
     expect(dotSurface?.style.backgroundColor).toBe("transparent")
     expect(dotSurface?.style.color).toBe("rgb(248, 250, 252)")
+    expect(
+      squareDot
+        .querySelector('[data-slot="style-preview-corner-dot"] [data-testid="finder-patterns-inner"]')
+        ?.getAttribute("fill"),
+    ).toBe("currentColor")
   })
 
   it("renders larger corner previews inside square options", async () => {
@@ -652,10 +655,8 @@ describe("FloatingToolbar", () => {
     const dotGlyph = squareDot.querySelector<HTMLElement>(
       '[data-desktop-adaptive-option-preview="true"] > span',
     )
-    expect(frameGlyph?.className).toContain("size-[92%]")
-    expect(dotGlyph?.className).toContain("size-[92%]")
-    expect(frameGlyph?.className).not.toContain("desktop-corner-dot-preview-glyph")
-    expect(dotGlyph?.className).toContain("desktop-corner-dot-preview-glyph")
+    expect(frameGlyph?.className).toContain("size-[68%]")
+    expect(dotGlyph?.className).toContain("size-[68%]")
   })
 
   it("keeps corner frame and dot option cards on compact three-column shelves", async () => {

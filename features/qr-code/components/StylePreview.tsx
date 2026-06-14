@@ -10,15 +10,12 @@ import {
 export type StylePreviewKind = "corner-dot" | "corner-square" | "dots"
 
 const PREVIEW_ICON_CLASS_NAME = "size-[5.5rem] text-foreground/80 dark:text-white"
-const CORNER_SQUARE_PREVIEW_ROWS = Object.freeze([
-  "1111111",
-  "1000001",
-  "1000001",
-  "1000001",
-  "1000001",
-  "1000001",
-  "1111111",
-])
+const FINDER_FRAME_PREVIEW_VIEW_BOX = "0 0 7 7"
+// The library draws several inner styles larger than the 3x3 finder cell (star at
+// 1.2x, diamond as a rotated inset square). A strict 2 2 3 3 crop clips their
+// tips and reads as blunt corners in the option tiles.
+const FINDER_DOT_PREVIEW_VIEW_BOX = "1.65 1.65 3.7 3.7"
+const FINDER_PREVIEW_SIZE = 64
 
 export function StylePreview({
   color,
@@ -34,18 +31,11 @@ export function StylePreview({
   value: string
 }) {
   if (previewKind === "corner-dot") {
-    return (
-      <CornerDotStylePreview
-        color={color}
-        frameColor={frameColor}
-        frameStyle={frameStyle}
-        value={value}
-      />
-    )
+    return <CornerDotStylePreview color={color} value={value} />
   }
 
   if (previewKind === "corner-square") {
-    return <CornerSquareStylePreview value={value} />
+    return <CornerFrameStylePreview color={color} value={value} />
   }
 
   const modulePitch = 4
@@ -90,44 +80,42 @@ export function StylePreview({
   )
 }
 
-function CornerDotStylePreview({
-  color,
-  frameColor,
-  frameStyle,
-  value,
+function FinderPatternPreview({
+  finderPatternInnerSettings,
+  finderPatternOuterSettings,
+  previewKind,
+  rendererDataAttribute,
+  slotName,
+  style,
+  viewBox,
 }: {
-  color?: string
-  frameColor?: string
-  frameStyle?: string
-  value: string
+  finderPatternInnerSettings: { color: string; style: never }
+  finderPatternOuterSettings: { color: string; style: never }
+  previewKind: "corner-dot" | "corner-square"
+  rendererDataAttribute: "data-corner-dot-renderer" | "data-corner-frame-renderer"
+  slotName: "style-preview-corner-dot" | "style-preview-corner-square"
+  style: string
+  viewBox: string
 }) {
-  // Render a real <ReactQRCode /> with the live finder settings and crop the
-  // resulting SVG to the top-left 7x7 finder block. This guarantees the
-  // preview is the exact same primitive/path the library draws in the live
-  // QR, with the same rounding, transforms, and per-corner orientation.
-  const previewColor = color ?? "currentColor"
-  const previewFrameColor = frameColor ?? previewColor
-  const previewFrameStyle = (frameStyle ?? "square") as never
-
   return (
     <ReactQRCode
       background="transparent"
       boostLevel
-      finderPatternInnerSettings={{ color: previewColor, style: value as never }}
-      finderPatternOuterSettings={{ color: previewFrameColor, style: previewFrameStyle }}
+      finderPatternInnerSettings={finderPatternInnerSettings}
+      finderPatternOuterSettings={finderPatternOuterSettings}
       level="L"
       marginSize={0}
       minVersion={1}
-      size={48}
+      size={FINDER_PREVIEW_SIZE}
       svgProps={
         {
           "aria-hidden": "true",
           className: PREVIEW_ICON_CLASS_NAME,
-          "data-corner-dot-renderer": "real-qr",
-          "data-preview-kind": "corner-dot",
-          "data-preview-style": value,
-          "data-slot": "style-preview-corner-dot",
-          viewBox: "0 0 7 7",
+          [rendererDataAttribute]: "real-qr",
+          "data-preview-kind": previewKind,
+          "data-preview-style": style,
+          "data-slot": slotName,
+          viewBox,
         } as SVGProps<SVGSVGElement>
       }
       value="hi"
@@ -135,140 +123,47 @@ function CornerDotStylePreview({
   )
 }
 
-function CornerSquareStylePreview({
+function CornerDotStylePreview({
+  color,
   value,
 }: {
+  color?: string
   value: string
 }) {
-  const usesRingRenderer =
-    value === "circle" ||
-    value === "rounded" ||
-    value === "rounded-lg" ||
-    value === "rounded-sm" ||
-    value === "square"
+  const previewColor = color ?? "currentColor"
 
   return (
-    <svg
-      aria-hidden="true"
-      className={PREVIEW_ICON_CLASS_NAME}
-      data-preview-kind="corner-square"
-      data-preview-style={value}
-      data-corner-square-renderer={usesRingRenderer ? "ring" : "grid"}
-      data-slot="style-preview-corner-square"
-      fill="none"
-      viewBox="0 0 48 48"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {usesRingRenderer ? (
-        <CornerSquareRing value={value} x={13.5} y={13.5} size={21} />
-      ) : (
-        <g data-slot="style-preview-corner-square-grid">
-          {renderPreviewMatrix({
-            rows: CORNER_SQUARE_PREVIEW_ROWS,
-            size: 3,
-            startX: 13.5,
-            startY: 13.5,
-            value,
-          })}
-        </g>
-      )}
-    </svg>
+    <FinderPatternPreview
+      finderPatternInnerSettings={{ color: previewColor, style: value as never }}
+      finderPatternOuterSettings={{ color: "transparent", style: "square" as never }}
+      previewKind="corner-dot"
+      rendererDataAttribute="data-corner-dot-renderer"
+      slotName="style-preview-corner-dot"
+      style={value}
+      viewBox={FINDER_DOT_PREVIEW_VIEW_BOX}
+    />
   )
 }
 
-function CornerSquareRing({
-  value,
-  x,
-  y,
-  size,
-}: {
-  value: string
-  x: number
-  y: number
-  size: number
-}) {
-  const unit = size / 7
-
-  switch (value) {
-    case "circle":
-      return (
-        <path
-          clipRule="evenodd"
-          d={`M ${x + size / 2} ${y}a ${size / 2} ${size / 2} 0 1 0 0.1 0zm 0 ${unit}a ${size / 2 - unit} ${size / 2 - unit} 0 1 1 -0.1 0Z`}
-          data-corner-frame-variant={value}
-          data-slot="style-preview-corner-square-frame"
-          fill="currentColor"
-          fillRule="evenodd"
-        />
-      )
-    case "rounded-lg":
-    case "rounded":
-    case "rounded-sm":
-      {
-        const radiusFactor = value === "rounded-lg" ? 2.5 : value === "rounded" ? 1.5 : 0.75
-        return (
-          <path
-            clipRule="evenodd"
-            d={[
-              `M ${x} ${y + radiusFactor * unit}v ${size - 2 * radiusFactor * unit}a ${radiusFactor * unit} ${radiusFactor * unit}, 0, 0, 0, ${radiusFactor * unit} ${radiusFactor * unit}h ${size - 2 * radiusFactor * unit}a ${radiusFactor * unit} ${radiusFactor * unit}, 0, 0, 0, ${radiusFactor * unit} ${-radiusFactor * unit}v ${2 * radiusFactor * unit - size}a ${radiusFactor * unit} ${radiusFactor * unit}, 0, 0, 0, ${-radiusFactor * unit} ${-radiusFactor * unit}h ${2 * radiusFactor * unit - size}a ${radiusFactor * unit} ${radiusFactor * unit}, 0, 0, 0, ${-radiusFactor * unit} ${radiusFactor * unit}`,
-              `M ${x + 2 * unit} ${y + 2 * unit}h ${3 * unit}v ${3 * unit}h ${-3 * unit}z`,
-            ].join("")}
-            data-corner-frame-variant={value}
-            data-slot="style-preview-corner-square-frame"
-            fill="currentColor"
-            fillRule="evenodd"
-          />
-        )
-      }
-    case "square":
-    default:
-      return (
-        <path
-          clipRule="evenodd"
-          d={`M ${x} ${y}v ${size}h ${size}v ${-size}zM ${x + unit} ${y + unit}h ${size - 2 * unit}v ${size - 2 * unit}h ${2 * unit - size}z`}
-          data-corner-frame-variant={value}
-          data-slot="style-preview-corner-square-frame"
-          fill="currentColor"
-          fillRule="evenodd"
-        />
-      )
-  }
-}
-
-function renderPreviewMatrix({
-  rows,
-  size,
-  startX,
-  startY,
+function CornerFrameStylePreview({
+  color,
   value,
 }: {
-  rows: ReadonlyArray<string>
-  size: number
-  startX: number
-  startY: number
+  color?: string
   value: string
 }) {
-  return rows.flatMap((row, rowIndex) =>
-    [...row].map((cell, columnIndex) => {
-      if (cell !== "1") {
-        return null
-      }
+  const previewColor = color ?? "currentColor"
 
-      return (
-        <MatrixPreviewShape
-          key={`${value}-${rowIndex}-${columnIndex}`}
-          columnIndex={columnIndex}
-          isDark={(targetRow, targetColumn) =>
-            rows[targetRow]?.[targetColumn] === "1"
-          }
-          rowIndex={rowIndex}
-          size={size}
-          value={value}
-          x={startX + columnIndex * size}
-          y={startY + rowIndex * size}
-        />
-      )
-    }),
+  return (
+    <FinderPatternPreview
+      finderPatternInnerSettings={{ color: "transparent", style: "square" as never }}
+      finderPatternOuterSettings={{ color: previewColor, style: value as never }}
+      previewKind="corner-square"
+      rendererDataAttribute="data-corner-frame-renderer"
+      slotName="style-preview-corner-square"
+      style={value}
+      viewBox={FINDER_FRAME_PREVIEW_VIEW_BOX}
+    />
   )
 }
 

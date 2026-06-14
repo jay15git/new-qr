@@ -32,7 +32,7 @@ describe("StylePreview", () => {
     expect(heartMarkup).toContain('data-slot="style-preview-custom-module"')
   })
 
-  it("renders corner-dot previews from a real qr code, cropped to the top-left finder", () => {
+  it("renders corner-dot previews from a real qr code, cropped to the inner finder dot", () => {
     const circleMarkup = renderToStaticMarkup(
       <StylePreview previewKind="corner-dot" value="circle" />,
     )
@@ -46,9 +46,11 @@ describe("StylePreview", () => {
     for (const markup of [circleMarkup, leafMarkup, squareMarkup]) {
       expect(markup).toContain('data-slot="style-preview-corner-dot"')
       expect(markup).toContain('data-corner-dot-renderer="real-qr"')
-      expect(markup).toContain('viewBox="0 0 7 7"')
+      expect(markup).toContain('viewBox="1.65 1.65 3.7 3.7"')
       expect(markup).not.toContain('data-slot="style-preview-icon"')
       expect(markup).toContain('data-testid="finder-patterns-inner"')
+      expect(markup).toContain('fill="transparent"')
+      expect(markup).toContain('data-testid="finder-patterns-outer"')
     }
 
     // circle renders a rounded rect (the lib maps style="circle" to a square rect
@@ -60,21 +62,30 @@ describe("StylePreview", () => {
     expect(leafMarkup).not.toBe(squareMarkup)
   })
 
-  it("renders dedicated ring and fallback-grid corner-square previews without cutout masks", () => {
-    const ringMarkup = renderToStaticMarkup(
+  it("renders corner-square previews from a real qr code, cropped to the top-left finder", () => {
+    const roundedMarkup = renderToStaticMarkup(
       <StylePreview previewKind="corner-square" value="rounded-lg" />,
     )
-    const gridMarkup = renderToStaticMarkup(
+    const leafMarkup = renderToStaticMarkup(
       <StylePreview previewKind="corner-square" value="leaf" />,
     )
+    const circleMarkup = renderToStaticMarkup(
+      <StylePreview previewKind="corner-square" value="circle" />,
+    )
 
-    expect(ringMarkup).toContain('data-slot="style-preview-corner-square"')
-    expect(ringMarkup).toContain('data-corner-square-renderer="ring"')
-    expect(ringMarkup).toContain('data-slot="style-preview-corner-square-frame"')
-    expect(ringMarkup).not.toContain('style-preview-corner-square-cutout')
-    expect(gridMarkup).toContain('data-corner-square-renderer="grid"')
-    expect(gridMarkup).toContain('data-slot="style-preview-corner-square-grid"')
-    expect(gridMarkup).toContain('data-slot="style-preview-native-module"')
-    expect(gridMarkup).not.toContain('style-preview-corner-square-cutout')
+    for (const markup of [roundedMarkup, leafMarkup, circleMarkup]) {
+      expect(markup).toContain('data-slot="style-preview-corner-square"')
+      expect(markup).toContain('data-corner-frame-renderer="real-qr"')
+      expect(markup).toContain('viewBox="0 0 7 7"')
+      expect(markup).not.toContain('data-slot="style-preview-icon"')
+      expect(markup).toContain('data-testid="finder-patterns-outer"')
+      expect(markup).not.toContain('style-preview-corner-square-grid')
+      expect(markup).not.toContain('style-preview-corner-square-frame')
+    }
+
+    expect(leafMarkup).toContain("<path")
+    expect(circleMarkup).toContain("<path")
+    expect(roundedMarkup).not.toBe(leafMarkup)
+    expect(leafMarkup).not.toBe(circleMarkup)
   })
 })
