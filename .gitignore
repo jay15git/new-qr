@@ -48,3 +48,9 @@ next-env.d.ts
 /.codex-screenshots/
 /designs/image-import*.png
 /designs/image-import*.jpg
+
+# graphify (generated knowledge graph; updated locally via hooks/CLI)
+/graphify-out/
+
+# codedb local index snapshot
+/codedb.snapshot
