@@ -338,6 +338,7 @@
   display: none;
 }
 
+
 [data-slot="desktop-page"] {
   min-height: 100dvh;
   --drafting-ink-rgb: 17 17 17;
@@ -353,6 +354,7 @@
   --drafting-panel-bg-hover: rgb(var(--drafting-paper-rgb) / 0.95);
   --drafting-panel-bg-active: oklch(1 0 0);
   --drafting-ink: oklch(0.18 0 0);
+  --drafting-resize-frame: #18a0fb;
   --drafting-ink-muted: rgb(var(--drafting-ink-rgb) / 0.45);
   --drafting-ink-strong-muted: rgb(var(--drafting-ink-rgb) / 0.65);
   --drafting-ink-subtle: rgb(var(--drafting-ink-rgb) / 0.32);
@@ -542,6 +544,7 @@
   --drafting-panel-bg-hover: var(--drafting-dark-surface-subtle);
   --drafting-panel-bg-active: var(--drafting-dark-shell-bg);
   --drafting-ink: var(--drafting-dark-text-primary);
+  --drafting-resize-frame: #4ab8ff;
   --drafting-ink-muted: var(--drafting-dark-text-muted);
   --drafting-ink-strong-muted: var(--drafting-dark-text-secondary);
   --drafting-ink-subtle: var(--drafting-dark-ink-muted);

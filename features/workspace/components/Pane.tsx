@@ -2038,7 +2038,7 @@ export const Pane = memo(function Pane({
 
     return (
       <div
-        className="pointer-events-none absolute left-1/2 top-1/2 touch-none border border-[var(--drafting-ink)]"
+        className="pointer-events-none absolute left-1/2 top-1/2 touch-none border border-[var(--drafting-resize-frame)]"
         data-layer-id={layer.id}
         data-slot="drafting-layer-resize-frame"
         key={`${layer.id}:controls`}
@@ -2122,7 +2122,7 @@ export const Pane = memo(function Pane({
 
     return (
       <div
-        className="pointer-events-none absolute left-1/2 top-1/2 touch-none border border-[var(--drafting-ink)]"
+        className="pointer-events-none absolute left-1/2 top-1/2 touch-none border border-[var(--drafting-resize-frame)]"
         data-layer-ids={activeSelectedLayerIds.join(" ")}
         data-slot="drafting-layer-multi-select-frame"
         style={{

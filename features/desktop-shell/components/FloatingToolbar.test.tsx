@@ -663,10 +663,10 @@ describe("FloatingToolbar", () => {
     await openTool(surface.container, "corners")
 
     const frameShelf = surface.container.querySelector<HTMLElement>(
-      '[data-slot="desktop-corner-frame-preset-shelf"]',
+      '[data-slot="desktop-corner-frame-preset-shelf"] .grid',
     )
     const dotShelf = surface.container.querySelector<HTMLElement>(
-      '[data-slot="desktop-corner-dot-preset-shelf"]',
+      '[data-slot="desktop-corner-dot-preset-shelf"] .grid',
     )
     expect(frameShelf?.className).toContain("grid-cols-3")
     expect(frameShelf?.className).not.toContain("grid-cols-2")

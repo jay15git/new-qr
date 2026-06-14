@@ -1590,12 +1590,16 @@ function DesktopThemeStyles() {
       }
 
       [data-slot="desktop-keyboard-shortcuts-scrollbar"][data-state="hidden"],
-      [data-slot="desktop-shape-preset-shelf-scrollbar"][data-state="hidden"] {
+      [data-slot="desktop-shape-preset-shelf-scrollbar"][data-state="hidden"],
+      [data-slot="desktop-corner-frame-preset-shelf-scrollbar"][data-state="hidden"],
+      [data-slot="desktop-corner-dot-preset-shelf-scrollbar"][data-state="hidden"] {
         opacity: 0;
       }
 
       [data-slot="desktop-keyboard-shortcuts-scrollbar"],
-      [data-slot="desktop-shape-preset-shelf-scrollbar"] {
+      [data-slot="desktop-shape-preset-shelf-scrollbar"],
+      [data-slot="desktop-corner-frame-preset-shelf-scrollbar"],
+      [data-slot="desktop-corner-dot-preset-shelf-scrollbar"] {
         transition: opacity 150ms ease;
       }
 
@@ -2241,24 +2245,43 @@ function DesktopCornersInspector({
               <div className="mb-2 min-w-0">
                 <p className="truncate text-[12px] font-semibold text-white">Corner Frame</p>
               </div>
-              <div
-                aria-label="Corner frame presets"
-                data-slot="desktop-corner-frame-preset-shelf"
-                className="grid grid-cols-3 gap-2"
+              <ScrollArea
+                className="h-80 overflow-hidden"
+                data-scrollbar-visibility="while-scrolling"
+                data-slot="desktop-corner-frame-preset-shelf-scroll-area"
+                scrollHideDelay={500}
+                type="scroll"
               >
-                {CORNER_SQUARE_STYLE_OPTIONS.map((option) => (
-                  <DesktopCornerStyleButton
-                    desktopTheme={desktopTheme}
-                    key={option.value}
-                    label={option.label}
-                    previewKind="corner-square"
-                    selected={settings.cornerSquareType === option.value}
-                    target="corner frame"
-                    value={option.value}
-                    onClick={() => onCornersSettingsChange({ cornerSquareType: option.value })}
+                <ScrollAreaViewport
+                  aria-label="Corner frame presets"
+                  className="h-full w-full overflow-x-hidden overflow-y-auto pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                  data-slot="desktop-corner-frame-preset-shelf"
+                >
+                  <div className="grid grid-cols-3 gap-2">
+                    {CORNER_SQUARE_STYLE_OPTIONS.map((option) => (
+                      <DesktopCornerStyleButton
+                        desktopTheme={desktopTheme}
+                        key={option.value}
+                        label={option.label}
+                        previewKind="corner-square"
+                        selected={settings.cornerSquareType === option.value}
+                        target="corner frame"
+                        value={option.value}
+                        onClick={() => onCornersSettingsChange({ cornerSquareType: option.value })}
+                      />
+                    ))}
+                  </div>
+                </ScrollAreaViewport>
+                <ScrollAreaScrollbar
+                  className="w-2 border-none p-[1px]"
+                  data-slot="desktop-corner-frame-preset-shelf-scrollbar"
+                >
+                  <ScrollAreaThumb
+                    className="bg-neutral-500/45 hover:bg-neutral-500/60"
+                    data-slot="desktop-corner-frame-preset-shelf-scroll-thumb"
                   />
-                ))}
-              </div>
+                </ScrollAreaScrollbar>
+              </ScrollArea>
             </section>
 
             <DesktopCornerColorSection
@@ -2283,35 +2306,54 @@ function DesktopCornersInspector({
               <div className="mb-2 min-w-0">
                 <p className="truncate text-[12px] font-semibold text-white">Corner Dot</p>
               </div>
-              <div
-                aria-label="Corner dot presets"
-                data-slot="desktop-corner-dot-preset-shelf"
-                className="grid grid-cols-3 gap-2"
+              <ScrollArea
+                className="h-80 overflow-hidden"
+                data-scrollbar-visibility="while-scrolling"
+                data-slot="desktop-corner-dot-preset-shelf-scroll-area"
+                scrollHideDelay={500}
+                type="scroll"
               >
-                {CORNER_DOT_STYLE_OPTIONS.map((option) => (
-                  <DesktopCornerStyleButton
-                    color={
-                      settings.cornerDotColorMode === "solid"
-                        ? settings.cornerDotSolidColor
-                        : "currentColor"
-                    }
-                    desktopTheme={desktopTheme}
-                    frameColor={
-                      settings.cornerSquareColorMode === "solid"
-                        ? settings.cornerSquareSolidColor
-                        : "currentColor"
-                    }
-                    frameStyle={settings.cornerSquareType}
-                    key={option.value}
-                    label={option.label}
-                    previewKind="corner-dot"
-                    selected={settings.cornerDotType === option.value}
-                    target="corner dot"
-                    value={option.value}
-                    onClick={() => onCornersSettingsChange({ cornerDotType: option.value })}
+                <ScrollAreaViewport
+                  aria-label="Corner dot presets"
+                  className="h-full w-full overflow-x-hidden overflow-y-auto pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                  data-slot="desktop-corner-dot-preset-shelf"
+                >
+                  <div className="grid grid-cols-3 gap-2">
+                    {CORNER_DOT_STYLE_OPTIONS.map((option) => (
+                      <DesktopCornerStyleButton
+                        color={
+                          settings.cornerDotColorMode === "solid"
+                            ? settings.cornerDotSolidColor
+                            : "currentColor"
+                        }
+                        desktopTheme={desktopTheme}
+                        frameColor={
+                          settings.cornerSquareColorMode === "solid"
+                            ? settings.cornerSquareSolidColor
+                            : "currentColor"
+                        }
+                        frameStyle={settings.cornerSquareType}
+                        key={option.value}
+                        label={option.label}
+                        previewKind="corner-dot"
+                        selected={settings.cornerDotType === option.value}
+                        target="corner dot"
+                        value={option.value}
+                        onClick={() => onCornersSettingsChange({ cornerDotType: option.value })}
+                      />
+                    ))}
+                  </div>
+                </ScrollAreaViewport>
+                <ScrollAreaScrollbar
+                  className="w-2 border-none p-[1px]"
+                  data-slot="desktop-corner-dot-preset-shelf-scrollbar"
+                >
+                  <ScrollAreaThumb
+                    className="bg-neutral-500/45 hover:bg-neutral-500/60"
+                    data-slot="desktop-corner-dot-preset-shelf-scroll-thumb"
                   />
-                ))}
-              </div>
+                </ScrollAreaScrollbar>
+              </ScrollArea>
             </section>
 
             <DesktopCornerColorSection
@@ -2527,7 +2569,7 @@ function DesktopShapeInspector({
             <p className="truncate text-[12px] font-semibold text-white">Shape Options</p>
           </div>
           <ScrollArea
-            className="h-40 overflow-hidden"
+            className="h-80 overflow-hidden"
             data-scrollbar-visibility="while-scrolling"
             data-slot="desktop-shape-preset-shelf-scroll-area"
             scrollHideDelay={500}
