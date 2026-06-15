@@ -1307,11 +1307,6 @@ export function FloatingToolbar({
               </ScrollArea>
             </PopoverContent>
           </Popover>
-          <span
-            aria-hidden="true"
-            data-slot="desktop-utility-toolbar-separator"
-            className="h-7 w-px bg-white/[0.1]"
-          />
           <button
             aria-label={`Switch to ${actualDesktopTheme === "light" ? "dark" : "light"} mode`}
             data-slot="desktop-theme-toggle"
@@ -1541,10 +1536,6 @@ function DesktopThemeStyles() {
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] [class*="border-white"] {
         border-color: rgba(15, 23, 42, 0.11) !important;
-      }
-
-      [data-desktop-theme="light"] [data-slot="desktop-utility-toolbar-separator"] {
-        background: rgba(15, 23, 42, 0.12) !important;
       }
 
       body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-popover"] {

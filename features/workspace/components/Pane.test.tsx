@@ -688,6 +688,28 @@ describe("Pane", () => {
     expect(sizeValue.style.transform).toBe("translate(-50%, calc(100% + 10px))")
   })
 
+  it("keeps the size label on one line when the selected layer is very small", async () => {
+    const state = createDefaultQrStudioState()
+    const cardState = createDefaultDraftingCardState()
+    const layers = createDefaultDraftingLayers("preview", state, cardState).map((layer) =>
+      layer.id === "preview:qr" ? { ...layer, height: 24, width: 24 } : layer,
+    )
+    const { container } = renderPane(state, true, cardState, {
+      layers,
+      onLayerChange: () => undefined,
+      selectedLayerId: "preview:qr",
+    })
+
+    await waitForQrPaneRender()
+
+    const sizeValue = container.querySelector('[data-slot="drafting-layer-size-value"]') as HTMLElement
+
+    expect(sizeValue).not.toBeNull()
+    expect(sizeValue.textContent).toBe("24 x 24")
+    expect(sizeValue.className).toContain("whitespace-nowrap")
+    expect(sizeValue.className).toContain("w-max")
+  })
+
   it("renders and edits Avnac-style text layers inline", async () => {
     const onLayerChange = vi.fn()
     const onLayerSelect = vi.fn()
