@@ -1,10 +1,25 @@
 // @vitest-environment jsdom
 
 import { act, type ReactElement } from "react"
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { ElasticSlider } from "@/components/ui/elastic-slider"
 import { renderWithJsdomRoot } from "@/test-utils/jsdom-react-root"
+
+beforeEach(() => {
+  vi.stubGlobal(
+    "ResizeObserver",
+    class ResizeObserver {
+      disconnect() {}
+      observe() {}
+      unobserve() {}
+    },
+  )
+})
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
 
 describe("ElasticSlider", () => {
   it("renders accessible slider state and formatted value text", () => {
@@ -27,7 +42,25 @@ describe("ElasticSlider", () => {
     expect(slider.getAttribute("aria-valuenow")).toBe("0.5")
     expect(slider.getAttribute("aria-valuetext")).toBe("50%")
     expect(container.textContent).toContain("Opacity")
-    expect(container.textContent).toContain("50%")
+    expect(slider.getAttribute("aria-valuenow")).toBe("0.5")
+  })
+
+  it("uses slots animation for formatted numeric labels", () => {
+    const { container } = renderSlider(
+      <ElasticSlider
+        label="Opacity"
+        max={100}
+        min={0}
+        step={1}
+        value={50}
+        formatValue={(nextValue) => `${Math.round(nextValue)}%`}
+        onValueChange={vi.fn()}
+      />,
+    )
+
+    const valueSlot = container.querySelector('[data-slot="elastic-slider-value"]')
+
+    expect(valueSlot?.querySelectorAll('[aria-hidden="true"]').length).toBeGreaterThan(0)
   })
 
   it("nudges controlled values from keyboard input", () => {
@@ -77,6 +110,38 @@ describe("ElasticSlider", () => {
     expect(root?.className).toContain("--elastic-slider-handle")
     expect(root?.className).toContain("--elastic-slider-label")
     expect(root?.className).toContain("desktop-elastic-slider")
+  })
+
+  it("updates the animated value readout when the controlled value changes", () => {
+    const { container, rerender } = renderSlider(
+      <ElasticSlider
+        label="Radius"
+        max={100}
+        min={0}
+        step={1}
+        value={12}
+        onValueChange={vi.fn()}
+      />,
+    )
+
+    const slider = getRequiredSlider(container, "Radius")
+
+    expect(slider.getAttribute("aria-valuenow")).toBe("12")
+    expect(slider.getAttribute("aria-valuetext")).toBe("12")
+
+    rerender(
+      <ElasticSlider
+        label="Radius"
+        max={100}
+        min={0}
+        step={1}
+        value={24}
+        onValueChange={vi.fn()}
+      />,
+    )
+
+    expect(slider.getAttribute("aria-valuenow")).toBe("24")
+    expect(slider.getAttribute("aria-valuetext")).toBe("24")
   })
 })
 

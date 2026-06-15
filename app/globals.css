@@ -914,3 +914,29 @@
     top: 0;
   }
 }
+
+/* Calligraph slots: hide reel fade/peek — show active digit only */
+[data-slot="elastic-slider-value"].elastic-slider-calligraph-value,
+[data-slot="elastic-slider-value"].elastic-slider-calligraph-value .elastic-slider-calligraph {
+  overflow: hidden;
+  line-height: 1;
+}
+
+[data-slot="elastic-slider-value"].elastic-slider-calligraph-value .elastic-slider-calligraph > span {
+  display: inline-flex !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+
+[data-slot="elastic-slider-value"].elastic-slider-calligraph-value
+  .elastic-slider-calligraph span[style*="vertical-align: top"] {
+  display: inline-block !important;
+  overflow: hidden !important;
+  height: 1em !important;
+  max-height: 1em !important;
+  line-height: 1 !important;
+  vertical-align: top !important;
+}

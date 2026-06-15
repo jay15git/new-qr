@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { Calligraph } from "calligraph"
 import {
   animate,
   motion,
@@ -505,9 +506,21 @@ export function ElasticSlider({
           className={cn(
             "pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 font-mono text-sm/none font-medium transition-colors",
             "text-(--elastic-slider-label) group-data-[active=true]/elastic-slider:text-(--elastic-slider-focus)",
+            "elastic-slider-calligraph-value",
           )}
         >
-          {displayValue}
+          {shouldReduceMotion ? (
+            displayValue
+          ) : (
+            <Calligraph
+              variant="slots"
+              animation="snappy"
+              autoSize={false}
+              className="elastic-slider-calligraph inline-flex leading-none"
+            >
+              {displayValue}
+            </Calligraph>
+          )}
         </span>
       </motion.div>
     </div>

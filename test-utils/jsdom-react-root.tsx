@@ -31,7 +31,14 @@ export function renderWithJsdomRoot(element: ReactElement) {
     container.remove()
   })
 
-  return { container }
+  return {
+    container,
+    rerender(nextElement: ReactElement) {
+      act(() => {
+        root?.render(nextElement)
+      })
+    },
+  }
 }
 
 export async function renderWithAsyncJsdomRoot(element: ReactElement) {
