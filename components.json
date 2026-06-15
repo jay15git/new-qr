@@ -28,6 +28,7 @@
     "@unlumen-ui": "https://ui.unlumen.com/r/{name}.json",
     "@cardcn": "https://cardcn.dev/r/{name}.json",
     "@animate-ui": "https://animate-ui.com/r/{name}.json",
-    "@jalco": "https://ui.justinlevine.me/r/{name}.json"
+    "@jalco": "https://ui.justinlevine.me/r/{name}.json",
+    "@shadcn-space": "https://shadcnspace.com/r/{name}.json"
   }
 }
