@@ -19,7 +19,6 @@ export function mapLibraryDesignsToAnimatedCollectionItems(
     id: design.id,
     title: design.title,
     subtitle: getQrInputTypeLabel(design.inputType),
-    idNumber: design.id.replace(/^qr-/, ""),
     image: designThumbnailDataUrl(design.thumbnailHue),
     icon: LIBRARY_ITEM_ICONS[index % LIBRARY_ITEM_ICONS.length],
     href: getDesktopLibraryUrl(design.id),

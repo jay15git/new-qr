@@ -128,6 +128,7 @@ export function DesktopInspectorTextarea({
 
 type DesktopInspectorNativeSelectProps<TValue extends string> =
   Omit<ComponentProps<"select">, "onChange" | "value"> & {
+    iconClassName?: string
     options: Array<{ label: string; value: TValue }>
     onValueChange: (value: TValue) => void
     rootClassName?: string
@@ -137,6 +138,7 @@ type DesktopInspectorNativeSelectProps<TValue extends string> =
 
 export function DesktopInspectorNativeSelect<TValue extends string>({
   className,
+  iconClassName,
   onValueChange,
   options,
   rootClassName,
@@ -163,7 +165,13 @@ export function DesktopInspectorNativeSelect<TValue extends string>({
         ))}
       </select>
       {showIcon ? (
-        <ChevronDownIcon className={cn("pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2", DESKTOP_INSPECTOR_FG_MUTED)} />
+        <ChevronDownIcon
+          className={cn(
+            "pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2",
+            DESKTOP_INSPECTOR_FG_MUTED,
+            iconClassName,
+          )}
+        />
       ) : null}
     </div>
   )

@@ -2,7 +2,12 @@
 
 import * as React from "react"
 
-import { AnimatedCollection } from "@/components/ui/animated-collection"
+import {
+  AnimatedCollection,
+  CollectionViewTabs,
+  LIBRARY_LIFTED_SURFACE_CLASS,
+  type CollectionViewMode,
+} from "@/components/ui/animated-collection"
 import {
   DESKTOP_INSPECTOR_FG_MUTED,
   DESKTOP_INSPECTOR_RESET_CLASS,
@@ -25,6 +30,7 @@ type AllTabContentProps = {
 export function AllTabContent({ designs }: AllTabContentProps) {
   const [query, setQuery] = React.useState("")
   const [sort, setSort] = React.useState<LibrarySort>("recent")
+  const [view, setView] = React.useState<CollectionViewMode>("card")
 
   const visibleDesigns = React.useMemo(() => {
     return sortLibraryDesigns(filterLibraryDesigns(designs, query), sort)
@@ -47,25 +53,14 @@ export function AllTabContent({ designs }: AllTabContentProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex h-9 w-full min-w-0 items-center gap-2">
-        <DesktopInspectorSearchInput
-          aria-label="Search library"
-          className="min-w-0 flex-1"
-          placeholder="Search by name or type"
-          value={query}
-          onValueChange={setQuery}
-        />
-        <DesktopInspectorNativeSelect
-          aria-label="Sort library"
-          className="w-32 shrink-0"
-          options={[
-            { label: "Recent", value: "recent" },
-            { label: "Name A–Z", value: "name" },
-          ]}
-          value={sort}
-          onValueChange={setSort}
-        />
-      </div>
+      <LibraryCollectionToolbar
+        query={query}
+        sort={sort}
+        view={view}
+        onQueryChange={setQuery}
+        onSortChange={setSort}
+        onViewChange={setView}
+      />
 
       {visibleDesigns.length === 0 ? (
         <div className="flex min-h-40 flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[var(--desktop-inspector-control-border-hover)] bg-[var(--desktop-inspector-field-bg)] px-6 py-10 text-center">
@@ -82,8 +77,60 @@ export function AllTabContent({ designs }: AllTabContentProps) {
           </button>
         </div>
       ) : (
-        <AnimatedCollection items={collectionItems} />
+        <AnimatedCollection items={collectionItems} view={view} />
       )}
+    </div>
+  )
+}
+
+type LibraryCollectionToolbarProps = {
+  query: string
+  sort: LibrarySort
+  view: CollectionViewMode
+  onQueryChange: (query: string) => void
+  onSortChange: (sort: LibrarySort) => void
+  onViewChange: (view: CollectionViewMode) => void
+}
+
+function LibraryCollectionToolbar({
+  query,
+  sort,
+  view,
+  onQueryChange,
+  onSortChange,
+  onViewChange,
+}: LibraryCollectionToolbarProps) {
+  return (
+    <div className="flex w-full min-w-0 items-center gap-3">
+      <div className="flex min-w-0 items-center gap-3">
+        <div
+          data-slot="library-sort-select"
+          className={cn("w-24 shrink-0", LIBRARY_LIFTED_SURFACE_CLASS)}
+        >
+          <DesktopInspectorNativeSelect
+            aria-label="Sort library"
+            className="h-10 rounded-full border-0 bg-transparent px-7 text-sm font-medium shadow-none focus-visible:ring-0"
+            iconClassName="right-2.5 size-3.5"
+            rootClassName="w-full"
+            options={[
+              { label: "Recent", value: "recent" },
+              { label: "Name A–Z", value: "name" },
+            ]}
+            value={sort}
+            onValueChange={onSortChange}
+          />
+        </div>
+        <DesktopInspectorSearchInput
+          aria-label="Search library"
+          className={cn("h-10 w-52 shrink-0", LIBRARY_LIFTED_SURFACE_CLASS)}
+          iconClassName="left-3.5"
+          inputClassName="rounded-full border-0 bg-transparent pl-9 pr-4 text-sm shadow-none focus-visible:ring-0"
+          placeholder="Search by name or type"
+          value={query}
+          onValueChange={onQueryChange}
+        />
+      </div>
+      <CollectionViewTabs className="ml-auto" view={view} onViewChange={onViewChange} />
     </div>
   )
 }

@@ -60,6 +60,35 @@ export function LibraryPageStyles() {
         background: rgba(15, 23, 42, 0.08) !important;
         color: var(--desktop-toolbar-fg-hover) !important;
       }
+
+      [data-slot="library-scrollbar"][data-state="hidden"] {
+        opacity: 0;
+      }
+
+      [data-slot="library-scrollbar"] {
+        transition: opacity 150ms ease;
+      }
+
+      [data-slot="library-scroll-thumb"] {
+        background: rgba(255, 255, 255, 0.24);
+      }
+
+      [data-slot="library-scroll-thumb"]:hover {
+        background: rgba(255, 255, 255, 0.38);
+      }
+
+      [data-slot="library-page"][data-desktop-theme="light"] [data-slot="library-scroll-thumb"] {
+        background: rgba(15, 23, 42, 0.24);
+      }
+
+      [data-slot="library-page"][data-desktop-theme="light"] [data-slot="library-scroll-thumb"]:hover {
+        background: rgba(15, 23, 42, 0.38);
+      }
+
+      [data-slot="library-sort-select"] select {
+        text-align: center;
+        text-align-last: center;
+      }
     `}</style>
   )
 }
