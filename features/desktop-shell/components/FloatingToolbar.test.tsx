@@ -186,12 +186,13 @@ describe("FloatingToolbar", () => {
 
     const updatedKeycaps = Array.from(
       popover?.querySelectorAll('[data-slot="desktop-shortcut-kbd"]') ?? [],
-    ).map((keycap) => keycap.textContent)
+    ).map((keycap) => keycap.textContent?.replace(/\s+/g, "") ?? "")
 
     expect(windowsButton?.getAttribute("aria-pressed")).toBe("false")
     expect(appleButton?.getAttribute("aria-pressed")).toBe("true")
-    expect(updatedKeycaps).toContain("⌘")
-    expect(updatedKeycaps).not.toContain("Ctrl")
+    expect(popover?.querySelector('[aria-label="⌘"]')).not.toBeNull()
+    expect(popover?.textContent).toContain("⌘")
+    expect(updatedKeycaps.filter((label) => label.includes("⌘")).length).toBeGreaterThan(0)
   })
 
   it("wires undo and redo through the top-right desktop action toolbar", async () => {

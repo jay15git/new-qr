@@ -119,6 +119,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Kbd } from "@/components/kbd"
+import { CalligraphText } from "@/components/ui/calligraph-text"
 import {
   ScrollArea,
   ScrollAreaScrollbar,
@@ -1271,7 +1272,7 @@ export function FloatingToolbar({
                                     {combo.map((key, keyIndex) => (
                                       <span
                                         className="inline-flex items-center gap-1"
-                                        key={`${keys}-${comboIndex}-${key}-${keyIndex}`}
+                                        key={`${keys}-${comboIndex}-${keyIndex}`}
                                       >
                                         {keyIndex > 0 ? (
                                           <span
@@ -1288,7 +1289,7 @@ export function FloatingToolbar({
                                           size="md"
                                           variant="sculpted"
                                         >
-                                          {key}
+                                          <CalligraphText>{key}</CalligraphText>
                                         </Kbd>
                                       </span>
                                     ))}
