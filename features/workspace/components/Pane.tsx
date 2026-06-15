@@ -2079,7 +2079,7 @@ export const Pane = memo(function Pane({
         onContextMenu={(event) => openLayerContextMenu(event, [layer.id])}
       >
         <div
-          className="pointer-events-none absolute left-1/2 top-0 w-px -translate-x-1/2 -translate-y-full bg-[var(--drafting-ink)]"
+          className="pointer-events-none absolute left-1/2 top-0 w-px -translate-x-1/2 -translate-y-full bg-[var(--drafting-resize-frame)]"
           style={{ height: ROTATE_HANDLE_OFFSET_PX }}
         />
         {isRotating ? (
@@ -2162,7 +2162,7 @@ export const Pane = memo(function Pane({
         onContextMenu={(event) => openLayerContextMenu(event, activeSelectedLayerIds)}
       >
         <div
-          className="pointer-events-none absolute left-1/2 top-0 w-px -translate-x-1/2 -translate-y-full bg-[var(--drafting-ink)]"
+          className="pointer-events-none absolute left-1/2 top-0 w-px -translate-x-1/2 -translate-y-full bg-[var(--drafting-resize-frame)]"
           style={{ height: ROTATE_HANDLE_OFFSET_PX }}
         />
         {isRotating ? (

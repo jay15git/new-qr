@@ -52,5 +52,11 @@ next-env.d.ts
 # graphify (generated knowledge graph; updated locally via hooks/CLI)
 /graphify-out/
 
+# cursor IDE local artifacts (keep shared rules/hooks in repo)
+.cursor/*
+!.cursor/rules/
+!.cursor/hooks/
+!.cursor/hooks.json
+
 # codedb local index snapshot
 /codedb.snapshot
