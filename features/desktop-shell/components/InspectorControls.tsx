@@ -9,6 +9,18 @@ import { ChevronDownIcon, SearchIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 
+export const DESKTOP_INSPECTOR_FG_PRIMARY =
+  "text-[var(--desktop-inspector-fg-primary)]"
+export const DESKTOP_INSPECTOR_FG_SECONDARY =
+  "text-[var(--desktop-inspector-fg-secondary)]"
+export const DESKTOP_INSPECTOR_FG_TERTIARY =
+  "text-[var(--desktop-inspector-fg-tertiary)]"
+export const DESKTOP_INSPECTOR_FG_MUTED =
+  "text-[var(--desktop-inspector-fg-muted)]"
+export const DESKTOP_INSPECTOR_SECTION_HEADING_CLASS =
+  "truncate text-[12px] font-semibold text-[var(--desktop-inspector-fg-secondary)]"
+export const DESKTOP_INSPECTOR_PANEL_TITLE_CLASS =
+  "truncate text-[15px] font-semibold leading-5 text-[var(--desktop-inspector-fg-primary)]"
 export const DESKTOP_INSPECTOR_SECTION_CLASS =
   "rounded-[10px] bg-[var(--desktop-inspector-section-bg)] p-3"
 export const DESKTOP_INSPECTOR_SECTION_GAP_CLASS = "mt-2.5"
@@ -19,17 +31,17 @@ export const DESKTOP_INSPECTOR_ROW_CLASS =
 export const DESKTOP_INSPECTOR_FIELD_ROW_CLASS =
   "min-w-0 border-b border-white/[0.07] py-2.5 last:border-b-0"
 export const DESKTOP_INSPECTOR_LABEL_CLASS =
-  "truncate text-[12px] font-semibold text-white/74"
+  "truncate text-[12px] font-semibold text-[var(--desktop-inspector-fg-secondary)]"
 export const DESKTOP_INSPECTOR_SCROLL_CLASS =
   "min-h-0 flex-1 overflow-y-auto px-3 py-3 scroll-fade-effect-y"
 export const DESKTOP_INSPECTOR_CONTROL_CLASS =
-  "rounded-[6px] border border-transparent bg-transparent text-white/58 transition hover:border-[var(--desktop-inspector-control-border-hover)] hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-white active:bg-[var(--desktop-inspector-control-active-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
+  "rounded-[6px] border border-transparent bg-transparent text-[var(--desktop-inspector-fg-tertiary)] transition hover:border-[var(--desktop-inspector-control-border-hover)] hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)] active:bg-[var(--desktop-inspector-control-active-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
 export const DESKTOP_INSPECTOR_SELECTED_CLASS =
   "border-transparent bg-[var(--desktop-inspector-option-selected-bg)] text-[var(--desktop-inspector-option-selected-fg)] hover:border-transparent hover:bg-[var(--desktop-inspector-option-selected-bg)] hover:text-[var(--desktop-inspector-option-selected-fg)]"
 export const DESKTOP_OPTION_CARD_SELECTED_CLASS =
   "border-[var(--desktop-inspector-option-selected-border)] bg-[var(--desktop-inspector-option-selected-bg)] text-[var(--desktop-inspector-option-selected-fg)] hover:bg-[var(--desktop-inspector-option-selected-bg)] hover:text-[var(--desktop-inspector-option-selected-fg)]"
 export const DESKTOP_INSPECTOR_INPUT_CLASS =
-  "desktop-inspector-input-bg bg-[var(--desktop-inspector-field-bg)] text-white outline-none placeholder:text-white/32 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
+  "desktop-inspector-input-bg bg-[var(--desktop-inspector-field-bg)] text-[var(--desktop-inspector-fg-primary)] outline-none placeholder:text-[var(--desktop-inspector-fg-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
 export const DESKTOP_INSPECTOR_FOCUS_CLASS =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
 export const DESKTOP_INSPECTOR_HEADER_CLASS =
@@ -37,7 +49,13 @@ export const DESKTOP_INSPECTOR_HEADER_CLASS =
 export const DESKTOP_INSPECTOR_FOOTER_CLASS =
   "bg-[var(--desktop-inspector-footer-bg)] p-2.5"
 export const DESKTOP_INSPECTOR_RESET_CLASS =
-  "flex h-9 w-full items-center justify-center gap-2 rounded-[6px] border border-transparent bg-transparent px-3 text-[12px] font-semibold text-white/82 transition hover:border-[var(--desktop-inspector-control-border-hover)] hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-white active:bg-[var(--desktop-inspector-control-active-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
+  "flex h-9 w-full items-center justify-center gap-2 rounded-[6px] border border-transparent bg-transparent px-3 text-[12px] font-semibold text-[var(--desktop-inspector-fg-secondary)] transition hover:border-[var(--desktop-inspector-control-border-hover)] hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)] active:bg-[var(--desktop-inspector-control-active-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
+export const DESKTOP_INSPECTOR_DROPDOWN_MENU_CLASS =
+  "desktop-inspector-dropdown-menu z-50 min-w-0 rounded-[10px] border border-[var(--desktop-inspector-dropdown-border)] bg-[var(--desktop-inspector-dropdown-bg)] p-1 text-[var(--desktop-inspector-fg-secondary)] shadow-[0_10px_28px_rgba(0,0,0,0.14)] ring-0 backdrop-blur-xl"
+export const DESKTOP_INSPECTOR_DROPDOWN_TRIGGER_CLASS =
+  "desktop-inspector-input-bg bg-[var(--desktop-inspector-field-bg)] text-[var(--desktop-inspector-fg-tertiary)] outline-none transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)] data-[state=open]:bg-[var(--desktop-inspector-control-hover-bg)] data-[state=open]:text-[var(--desktop-inspector-fg-secondary)]"
+export const DESKTOP_INSPECTOR_DROPDOWN_ITEM_CLASS =
+  "h-8 rounded-[6px] px-3 text-[12px] font-semibold text-[var(--desktop-inspector-fg-tertiary)] outline-none transition focus:bg-[var(--desktop-inspector-control-hover-bg)] focus:text-[var(--desktop-inspector-fg-secondary)] focus:**:text-[var(--desktop-inspector-fg-secondary)] data-[highlighted]:bg-[var(--desktop-inspector-control-hover-bg)] data-[highlighted]:text-[var(--desktop-inspector-fg-secondary)] data-[highlighted]:**:text-[var(--desktop-inspector-fg-secondary)] data-[state=checked]:bg-[var(--desktop-inspector-option-selected-bg)] data-[state=checked]:text-[var(--desktop-inspector-fg-secondary)] data-[state=checked]:focus:bg-[var(--desktop-inspector-option-selected-bg)] data-[state=checked]:focus:text-[var(--desktop-inspector-fg-secondary)] data-[state=checked]:data-[highlighted]:bg-[var(--desktop-inspector-option-selected-bg)] data-[state=checked]:data-[highlighted]:text-[var(--desktop-inspector-fg-secondary)] [&_[data-slot=dropdown-menu-radio-item-indicator]]:hidden"
 
 type DesktopInspectorSectionProps = ComponentProps<"section"> & {
   dataSlot?: string
@@ -68,7 +86,7 @@ export function DesktopInspectorLabel({
 }: DesktopInspectorLabelProps) {
   return (
     <p
-      className={cn("mb-2", DESKTOP_INSPECTOR_LABEL_CLASS, "text-white", className)}
+      className={cn("mb-2", DESKTOP_INSPECTOR_LABEL_CLASS, className)}
       {...props}
     />
   )
@@ -145,7 +163,7 @@ export function DesktopInspectorNativeSelect<TValue extends string>({
         ))}
       </select>
       {showIcon ? (
-        <ChevronDownIcon className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-white/55" />
+        <ChevronDownIcon className={cn("pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2", DESKTOP_INSPECTOR_FG_MUTED)} />
       ) : null}
     </div>
   )
@@ -226,7 +244,8 @@ export function DesktopInspectorSearchInput({
     <div className={cn("relative h-8 w-24 shrink-0", className)}>
       <SearchIcon
         className={cn(
-          "pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-white/45",
+          "pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2",
+          DESKTOP_INSPECTOR_FG_MUTED,
           iconClassName,
         )}
       />
