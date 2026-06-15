@@ -193,6 +193,7 @@ function DesktopWorkspaceStyles() {
         translate: none !important;
         scale: none !important;
         rotate: none !important;
+        color: rgba(255, 255, 255, 0.78) !important;
         transition: color 180ms ease !important;
       }
 
