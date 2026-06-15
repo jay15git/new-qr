@@ -214,6 +214,7 @@ describe("FloatingToolbar", () => {
     expect(actionToolbar?.className).toContain("min-h-14")
     expect(utilityToolbar?.className).toContain("min-h-14")
     expect(getRequiredButton(utilityToolbar as HTMLElement, "Open keyboard shortcuts").className).toContain("size-10")
+    expect(getRequiredButton(utilityToolbar as HTMLElement, "Save").className).toContain("size-10")
     expect(getRequiredButton(utilityToolbar as HTMLElement, "Switch to light mode").className).toContain("size-10")
     expect(getRequiredButton(actionToolbar as HTMLElement, "Reset defaults").className).toContain("size-8")
     expect(getRequiredButton(actionToolbar as HTMLElement, "Undo").className).toContain("size-8")

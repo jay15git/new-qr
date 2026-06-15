@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function LibraryPage() {
   return (
-    <LibraryPageShell fontClassName={satoshi.className}>
+    <LibraryPageShell fontClassName={satoshi.className} toolbarTitle="Library">
       <LibraryShell />
     </LibraryPageShell>
   )

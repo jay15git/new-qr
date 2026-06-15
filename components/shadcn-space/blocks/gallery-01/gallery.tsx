@@ -2,7 +2,7 @@ import Link from "next/link"
 
 import { Card } from "@/components/ui/card"
 import {
-  formatLibraryRelativeDate,
+  formatLibraryShortDate,
   getQrInputTypeLabel,
 } from "@/features/library/model/library-query"
 import { getDesktopLibraryUrl } from "@/features/library/model/storage"
@@ -18,11 +18,11 @@ function GalleryPreview({ design }: { design: LibraryQrDesign }) {
   return (
     <div
       className="flex h-full w-full items-center justify-center transition-transform duration-500 group-hover:scale-105"
-      style={{ backgroundColor: `hsl(${design.thumbnailHue} 28% 42%)` }}
+      style={{ backgroundColor: `hsl(${design.thumbnailHue ?? 200} 28% 42%)` }}
     >
       <div
         className="grid aspect-square w-[42%] grid-cols-5 grid-rows-5 gap-[3px] rounded-sm bg-white/95 p-2 shadow-sm"
-        style={{ color: `hsl(${design.thumbnailHue} 42% 22%)` }}
+        style={{ color: `hsl(${design.thumbnailHue ?? 200} 42% 22%)` }}
       >
         {Array.from({ length: 25 }, (_, index) => (
           <span
@@ -38,6 +38,10 @@ function GalleryPreview({ design }: { design: LibraryQrDesign }) {
   )
 }
 
+function formatGalleryTags(design: LibraryQrDesign): string {
+  return design.contentTags.map((tag) => getQrInputTypeLabel(tag)).join(" · ")
+}
+
 function GalleryCard({ design }: { design: LibraryQrDesign }) {
   return (
     <Link href={getDesktopLibraryUrl(design.id)} className="group block h-full">
@@ -47,9 +51,14 @@ function GalleryCard({ design }: { design: LibraryQrDesign }) {
           <h3 className="line-clamp-1 text-base font-semibold text-white sm:text-lg">
             {design.title}
           </h3>
-          <p className="text-xs text-white/80 sm:text-sm">
-            {getQrInputTypeLabel(design.inputType)} · {formatLibraryRelativeDate(design.updatedAt)}
+          <p className="line-clamp-1 text-xs text-white/80 sm:text-sm">
+            {formatGalleryTags(design)} · {formatLibraryShortDate(design.updatedAt)}
           </p>
+          {design.destinationPreview ? (
+            <p className="line-clamp-1 text-xs text-white/70 sm:text-sm">
+              {design.destinationPreview}
+            </p>
+          ) : null}
         </div>
       </Card>
     </Link>

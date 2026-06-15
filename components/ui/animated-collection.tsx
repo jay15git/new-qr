@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { AnimatePresence, LayoutGroup, motion, type Transition } from "motion/react"
+import { LayoutGroup, motion, type Transition } from "motion/react"
 import {
   GridViewIcon,
   Menu01Icon,
@@ -12,18 +12,19 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import {
   DESKTOP_INSPECTOR_FG_MUTED,
   DESKTOP_INSPECTOR_FG_PRIMARY,
-  DESKTOP_INSPECTOR_FG_TERTIARY,
 } from "@/features/desktop-shell/components/InspectorControls"
 import { cn } from "@/lib/utils"
 
 type CollectionIcon = typeof QrCodeIcon
 
 export type AnimatedCollectionItem = {
+  destinationPreview?: string
+  editedLabel?: string
   href?: string
   icon?: CollectionIcon
   id: string
   image: string
-  subtitle: string
+  tags: string[]
   title: string
 }
 
@@ -33,6 +34,11 @@ export type CollectionViewMode = ViewMode
 
 export const LIBRARY_LIFTED_SURFACE_CLASS =
   "rounded-full bg-[var(--desktop-inspector-option-selected-bg)] shadow-[var(--drafting-shadow-rest)]"
+
+const MAX_VISIBLE_TAGS = 3
+
+const LIBRARY_LIST_ROW_GRID =
+  "grid w-full grid-cols-[4rem_minmax(0,1.15fr)_minmax(9rem,13rem)_minmax(0,1fr)_7.25rem] items-center gap-x-6"
 
 type AnimatedCollectionProps = {
   className?: string
@@ -47,11 +53,6 @@ const snappySpring: Transition = {
   mass: 1,
 }
 
-const fastFade: Transition = {
-  duration: 0.1,
-  ease: "linear",
-}
-
 export function AnimatedCollection({ className, items, view }: AnimatedCollectionProps) {
   return (
     <div
@@ -59,13 +60,13 @@ export function AnimatedCollection({ className, items, view }: AnimatedCollectio
       className={cn("w-full selection:bg-[var(--desktop-inspector-control-hover-bg)]", className)}
     >
       <div className="relative flex min-h-[350px] flex-col items-center">
-        <LayoutGroup>
+        <LayoutGroup id="library-animated-collection">
           <motion.div
             layout
             transition={snappySpring}
             className={cn(
               "relative w-full",
-              view === "list" && "flex flex-col gap-4",
+              view === "list" && "flex flex-col gap-3",
               view === "card" && "grid grid-cols-4 gap-4",
             )}
           >
@@ -113,15 +114,16 @@ function CollectionItemRow({
   item: AnimatedCollectionItem
   view: ViewMode
 }) {
-  const icon = item.icon ?? QrCodeIcon
+  const isList = view === "list"
+
   const content = (
     <motion.div
       layout
       transition={snappySpring}
       className={cn(
-        "relative z-10 flex items-center",
-        view === "list" && "w-full flex-row gap-4",
-        view === "card" && "w-full flex-col items-start gap-3",
+        "relative z-10 w-full",
+        isList && cn(LIBRARY_LIST_ROW_GRID, "py-0.5"),
+        !isList && "flex flex-col items-start gap-3",
       )}
     >
       <motion.div
@@ -129,9 +131,9 @@ function CollectionItemRow({
         transition={snappySpring}
         className={cn(
           "relative shrink-0 overflow-hidden bg-[var(--drafting-option-card-bg)]",
-          view === "list" &&
+          isList &&
             "h-16 w-16 rounded-2xl border border-[var(--drafting-option-card-border)]",
-          view === "card" &&
+          !isList &&
             "aspect-square w-full rounded-[1.8rem] border border-[var(--drafting-option-card-border)] shadow-[var(--drafting-option-card-shadow-rest)]",
         )}
       >
@@ -142,62 +144,117 @@ function CollectionItemRow({
           alt={item.title}
           className={cn(
             "m-0! block h-full w-full object-cover p-0!",
-            view === "list" && "rounded-2xl",
-            view === "card" && "rounded-[1.8rem]",
+            isList && "rounded-2xl",
+            !isList && "rounded-[1.8rem]",
           )}
         />
       </motion.div>
 
-      <AnimatePresence initial={false} mode="popLayout">
-        <motion.div
-          key={`${item.id}-info`}
-          layout
-          initial={{
-            opacity: 0,
-            scale: 0.9,
-            filter: "blur(4px)",
-          }}
-          animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-          exit={{ opacity: 0, scale: 0.9, filter: "blur(4px)" }}
-          transition={fastFade}
-          className={cn(
-            "flex min-w-0 flex-1 flex-col gap-0.5",
-            view === "card" ? "w-full px-1" : "px-0",
-          )}
-        >
-          <motion.h3
-            layout
-            className={cn(
-              "truncate text-[15px] leading-tight font-medium",
-              DESKTOP_INSPECTOR_FG_PRIMARY,
-            )}
-          >
-            {item.title}
-          </motion.h3>
-          <motion.div
-            layout
-            className={cn(
-              "flex items-center gap-1.5 text-xs font-medium",
-              DESKTOP_INSPECTOR_FG_MUTED,
-            )}
-          >
-            <HugeiconsIcon icon={icon} size={12} className={DESKTOP_INSPECTOR_FG_TERTIARY} />
-            <span className="truncate">{item.subtitle}</span>
-          </motion.div>
-        </motion.div>
-      </AnimatePresence>
+      <motion.h3
+        layout
+        transition={snappySpring}
+        className={cn(
+          "min-w-0 truncate text-[15px] leading-tight font-medium",
+          DESKTOP_INSPECTOR_FG_PRIMARY,
+          !isList && "w-full px-1",
+        )}
+      >
+        {item.title}
+      </motion.h3>
+
+      <motion.div
+        layout
+        transition={snappySpring}
+        className={cn("min-w-0", !isList && "w-full px-1")}
+      >
+        {item.tags.length > 0 ? (
+          <CollectionTagRow className={cn(isList && "flex-nowrap")} tags={item.tags} />
+        ) : isList ? (
+          <span className={cn("text-xs", DESKTOP_INSPECTOR_FG_MUTED)}>—</span>
+        ) : null}
+      </motion.div>
+
+      <motion.p
+        layout
+        transition={snappySpring}
+        className={cn(
+          "min-w-0 truncate text-xs font-medium",
+          DESKTOP_INSPECTOR_FG_MUTED,
+          isList ? "block" : "w-full px-1",
+          !isList && !item.destinationPreview && "hidden",
+        )}
+      >
+        {item.destinationPreview || (isList ? "—" : "")}
+      </motion.p>
+
+      <motion.p
+        layout
+        transition={snappySpring}
+        className={cn(
+          "text-xs font-medium",
+          DESKTOP_INSPECTOR_FG_MUTED,
+          isList && "text-right whitespace-nowrap",
+          !isList && "w-full px-1",
+          !isList && !item.editedLabel && "hidden",
+        )}
+      >
+        {item.editedLabel || (isList ? "—" : "")}
+      </motion.p>
     </motion.div>
   )
 
   if (item.href) {
     return (
-      <Link href={item.href} className="block w-full">
+      <Link
+        href={item.href}
+        className={cn(
+          "block w-full outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]",
+          isList && "rounded-lg",
+        )}
+      >
         {content}
       </Link>
     )
   }
 
   return content
+}
+
+function CollectionTagRow({
+  tags,
+  className,
+}: {
+  tags: string[]
+  className?: string
+}) {
+  const visibleTags = tags.slice(0, MAX_VISIBLE_TAGS)
+  const overflowCount = tags.length - visibleTags.length
+
+  return (
+    <motion.div layout className={cn("flex min-w-0 items-center gap-1", className)}>
+      {visibleTags.map((tag) => (
+        <span
+          key={tag}
+          className={cn(
+            "inline-flex max-w-full items-center rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase",
+            "bg-[var(--desktop-inspector-control-hover-bg)] text-[var(--desktop-inspector-fg-muted)]",
+          )}
+        >
+          <span className="truncate">{tag}</span>
+        </span>
+      ))}
+      {overflowCount > 0 ? (
+        <span
+          className={cn(
+            "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
+            "bg-[var(--desktop-inspector-control-hover-bg)] text-[var(--desktop-inspector-fg-muted)]",
+          )}
+        >
+          +{overflowCount}
+        </span>
+      ) : null}
+    </motion.div>
+  )
 }
 
 function CollectionViewTab({

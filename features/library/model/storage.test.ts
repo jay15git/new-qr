@@ -21,6 +21,32 @@ describe("library storage", () => {
     expect(parseLibraryIndex({ version: 2 })).toBeNull()
   })
 
+  it("migrates legacy library designs", () => {
+    const parsed = parseLibraryIndex({
+      version: 1,
+      designs: [
+        {
+          id: "qr-legacy",
+          title: "Legacy",
+          inputType: "wifi",
+          updatedAt: 100,
+          collectionIds: [],
+          thumbnailHue: 120,
+        },
+      ],
+      collections: [],
+      updatedAt: 100,
+    })
+
+    expect(parsed?.designs[0]).toMatchObject({
+      id: "qr-legacy",
+      contentTags: ["wifi"],
+      qrCount: 1,
+      createdAt: 100,
+      destinationPreview: "",
+    })
+  })
+
   it("builds desktop open urls", () => {
     expect(getDesktopLibraryUrl("qr-1")).toBe("/desktop?id=qr-1")
   })

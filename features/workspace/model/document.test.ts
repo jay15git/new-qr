@@ -28,6 +28,10 @@ describe("drafting workspace document", () => {
         }),
       ) ?? []
     document.selectedContentType = "wifi"
+    document.contentTypeByNodeId = {
+      [DASHBOARD_QR_NODE_ID]: "auto",
+      "qr-code-extra": "wifi",
+    }
     document.contentValuesByType = {
       wifi: {
         encryption: "WPA",
@@ -77,6 +81,7 @@ describe("drafting workspace document", () => {
     const parsed = parseDraftingWorkspaceDocument({
       activeQrNodeId: "missing-pane",
       cardStateByNodeId: {},
+      contentTypeByNodeId: {},
       contentValuesByType: {},
       qrOrder: [],
       qrStateByNodeId: {},

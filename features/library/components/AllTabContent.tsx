@@ -105,7 +105,7 @@ function LibraryCollectionToolbar({
       <div className="flex min-w-0 items-center gap-3">
         <div
           data-slot="library-sort-select"
-          className={cn("w-24 shrink-0", LIBRARY_LIFTED_SURFACE_CLASS)}
+          className={cn("w-32 shrink-0", LIBRARY_LIFTED_SURFACE_CLASS)}
         >
           <DesktopInspectorNativeSelect
             aria-label="Sort library"
@@ -115,6 +115,9 @@ function LibraryCollectionToolbar({
             options={[
               { label: "Recent", value: "recent" },
               { label: "Name A–Z", value: "name" },
+              { label: "Oldest", value: "oldest" },
+              { label: "Newest", value: "newest" },
+              { label: "Most codes", value: "qr-count" },
             ]}
             value={sort}
             onValueChange={onSortChange}
@@ -125,7 +128,7 @@ function LibraryCollectionToolbar({
           className={cn("h-10 w-52 shrink-0", LIBRARY_LIFTED_SURFACE_CLASS)}
           iconClassName="left-3.5"
           inputClassName="rounded-full border-0 bg-transparent pl-9 pr-4 text-sm shadow-none focus-visible:ring-0"
-          placeholder="Search by name or type"
+          placeholder="Search by name, type, or destination"
           value={query}
           onValueChange={onQueryChange}
         />

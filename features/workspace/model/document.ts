@@ -38,6 +38,7 @@ export type DraftingContentValuesByType = Partial<Record<QrInputType, StaticQrCo
 export type DraftingWorkspaceDocumentV1 = {
   activeQrNodeId: string
   cardStateByNodeId: DraftingCardStateByNodeId
+  contentTypeByNodeId: Record<string, QrInputType>
   contentValuesByType: DraftingContentValuesByType
   layerStateByNodeId: DraftingLayerStateByNodeId
   qrOrder: string[]
@@ -59,6 +60,7 @@ export function cloneDraftingWorkspaceDocument(
         cloneDraftingCardState(state),
       ]),
     ),
+    contentTypeByNodeId: structuredClone(document.contentTypeByNodeId),
     contentValuesByType: structuredClone(document.contentValuesByType),
     layerStateByNodeId: cloneDraftingLayerStateByNodeId(document.layerStateByNodeId),
     qrOrder: [...document.qrOrder],
@@ -81,6 +83,9 @@ export function createDefaultDraftingWorkspaceDocument(): DraftingWorkspaceDocum
     activeQrNodeId: DASHBOARD_QR_NODE_ID,
     cardStateByNodeId: {
       [DASHBOARD_QR_NODE_ID]: cardState,
+    },
+    contentTypeByNodeId: {
+      [DASHBOARD_QR_NODE_ID]: DEFAULT_QR_INPUT_TYPE,
     },
     contentValuesByType: {
       [DEFAULT_QR_INPUT_TYPE]: {
@@ -176,9 +181,16 @@ export function parseDraftingWorkspaceDocument(
         : getDefaultStaticQrValues(selectedContentType)
   }
 
+  const contentTypeByNodeId = parseContentTypeByNodeId(
+    value.contentTypeByNodeId,
+    orderedNodeIds,
+    selectedContentType,
+  )
+
   return {
     activeQrNodeId,
     cardStateByNodeId,
+    contentTypeByNodeId,
     contentValuesByType,
     layerStateByNodeId,
     qrOrder: orderedNodeIds,
@@ -316,6 +328,21 @@ function parseContentValuesByType(value: unknown): DraftingContentValuesByType {
   }
 
   return structuredClone(value) as DraftingContentValuesByType
+}
+
+function parseContentTypeByNodeId(
+  value: unknown,
+  nodeIds: string[],
+  fallbackType: QrInputType,
+): Record<string, QrInputType> {
+  const raw = isRecord(value) ? value : {}
+  const contentTypeByNodeId: Record<string, QrInputType> = {}
+
+  for (const nodeId of nodeIds) {
+    contentTypeByNodeId[nodeId] = parseQrInputType(raw[nodeId] ?? fallbackType)
+  }
+
+  return contentTypeByNodeId
 }
 
 function parseQrInputType(value: unknown): QrInputType {

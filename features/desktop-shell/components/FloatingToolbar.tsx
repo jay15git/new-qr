@@ -1,6 +1,6 @@
 "use client"
 
-import { AppleIcon, Image02Icon, KeyboardIcon, WindowsOldIcon } from "@hugeicons/core-free-icons"
+import { AppleIcon, Image02Icon, KeyboardIcon, SaveIcon, WindowsOldIcon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useEffect, useId, useMemo, useState, type CSSProperties, type ReactNode } from "react"
 import type {
@@ -598,6 +598,7 @@ export type DesktopToolbarController = {
   textSettings: DesktopTextSettings
   onActiveToolChange: (toolId: DesktopToolbarToolId) => void
   onRedo?: () => void
+  onSave?: () => void
   onUndo?: () => void
   onResetDefaults?: () => void
   onContentReset: () => void
@@ -1316,6 +1317,21 @@ export function FloatingToolbar({
               </ScrollArea>
             </PopoverContent>
           </Popover>
+          <button
+            aria-label="Save"
+            data-slot="desktop-save-trigger"
+            className="grid size-10 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35 max-md:size-9"
+            disabled={!controller?.onSave}
+            type="button"
+            onClick={controller?.onSave}
+          >
+            <HugeiconsIcon
+              icon={SaveIcon}
+              size={18}
+              color="currentColor"
+              strokeWidth={1.8}
+            />
+          </button>
           <button
             aria-label={`Switch to ${actualDesktopTheme === "light" ? "dark" : "light"} mode`}
             data-slot="desktop-theme-toggle"

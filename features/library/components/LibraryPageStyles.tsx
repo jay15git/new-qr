@@ -1,7 +1,8 @@
 export function LibraryPageStyles() {
   return (
     <style>{`
-      [data-slot="library-page"][data-desktop-theme="dark"] [data-slot="library-shell"] {
+      [data-slot="library-page"][data-desktop-theme="dark"] [data-slot="library-shell"],
+      [data-slot="library-page"][data-desktop-theme="dark"] [data-slot="library-page-header"] {
         --desktop-inspector-fg-primary: rgba(255, 255, 255, 0.94);
         --desktop-inspector-fg-secondary: rgba(255, 255, 255, 0.72);
         --desktop-inspector-fg-tertiary: rgba(255, 255, 255, 0.56);
@@ -21,7 +22,8 @@ export function LibraryPageStyles() {
         color: var(--desktop-inspector-fg-secondary);
       }
 
-      [data-slot="library-page"][data-desktop-theme="light"] [data-slot="library-shell"] {
+      [data-slot="library-page"][data-desktop-theme="light"] [data-slot="library-shell"],
+      [data-slot="library-page"][data-desktop-theme="light"] [data-slot="library-page-header"] {
         --desktop-inspector-fg-primary: rgba(15, 23, 42, 0.90);
         --desktop-inspector-fg-secondary: rgba(15, 23, 42, 0.62);
         --desktop-inspector-fg-tertiary: rgba(15, 23, 42, 0.48);

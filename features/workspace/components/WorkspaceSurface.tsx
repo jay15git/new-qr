@@ -652,6 +652,11 @@ export function WorkspaceSurface({
         text: DEFAULT_DRAFTING_STUDIO_STATE.data,
       },
     }))
+  const [contentTypeByNodeId, setContentTypeByNodeId] = useState<Record<string, QrInputType>>(
+    () => ({
+      [DASHBOARD_QR_NODE_ID]: DEFAULT_QR_INPUT_TYPE,
+    }),
+  )
   const [selectedQrMargin, setSelectedQrMargin] = useState(
     DEFAULT_DRAFTING_STUDIO_STATE.margin,
   )
@@ -1105,6 +1110,7 @@ export function WorkspaceSurface({
     [
       activeQrNodeId,
       cardStateByNodeId,
+      contentTypeByNodeId,
       contentValuesByType,
       draftingStudioState,
       layerStateByNodeId,
@@ -1256,6 +1262,10 @@ export function WorkspaceSurface({
 
   function handleDraftingContentTypeChange(type: QrInputType) {
     setSelectedContentType(type)
+    setContentTypeByNodeId((current) => ({
+      ...current,
+      [activeQrNodeId]: type,
+    }))
     setContentValuesByType((current) => {
       if (current[type]) {
         return current
@@ -1393,9 +1403,20 @@ export function WorkspaceSurface({
       )
     }
 
+    const nextContentTypeByNodeId: Record<string, QrInputType> = {
+      ...contentTypeByNodeId,
+      [activeQrNodeId]: selectedContentType,
+    }
+    for (const nodeId of qrOrder) {
+      if (!nextContentTypeByNodeId[nodeId]) {
+        nextContentTypeByNodeId[nodeId] = DEFAULT_QR_INPUT_TYPE
+      }
+    }
+
     return {
       activeQrNodeId,
       cardStateByNodeId: nextCardStateByNodeId,
+      contentTypeByNodeId: nextContentTypeByNodeId,
       contentValuesByType: structuredClone(contentValuesByType),
       layerStateByNodeId: nextLayerStateByNodeId,
       qrOrder,
@@ -1443,6 +1464,7 @@ export function WorkspaceSurface({
     setQrStateByNodeId(nextQrStateByNodeId)
     setCardStateByNodeId(nextCardStateByNodeId)
     setLayerStateByNodeId(nextLayerStateByNodeId)
+    setContentTypeByNodeId(structuredClone(nextDocument.contentTypeByNodeId))
     applyDraftingQrStateToControls(activeState)
     setSelectedContentType(nextDocument.selectedContentType)
     setContentValuesByType(structuredClone(nextDocument.contentValuesByType))
@@ -1491,6 +1513,15 @@ export function WorkspaceSurface({
     )
   }
 
+  function handleSaveDraftingWorkspace() {
+    if (draftingWorkspaceAutosaveTimerRef.current !== null) {
+      window.clearTimeout(draftingWorkspaceAutosaveTimerRef.current)
+      draftingWorkspaceAutosaveTimerRef.current = null
+    }
+
+    void writeDraftingWorkspaceDraft(draftingWorkspaceDocument)
+  }
+
   function handlePaneSelection(paneId: string) {
     draftingSurfaceRef.current?.focus({ preventScroll: true })
 
@@ -1501,6 +1532,10 @@ export function WorkspaceSurface({
     shouldReplaceCurrentDraftingHistoryEntryRef.current = true
 
     // Save current controls state to the old active pane
+    setContentTypeByNodeId((current) => ({
+      ...current,
+      [activeQrNodeId]: selectedContentType,
+    }))
     setQrStateByNodeId((current) => ({
       ...current,
       [activeQrNodeId]: cloneDraftingQrState(draftingStudioState),
@@ -1513,8 +1548,10 @@ export function WorkspaceSurface({
     // Load the new pane's state into controls
     const nextState = qrStateByNodeId[paneId] ?? draftingStudioState
     const nextCardState = cardStateByNodeId[paneId] ?? selectedCardState
+    const nextContentType = contentTypeByNodeId[paneId] ?? DEFAULT_QR_INPUT_TYPE
     setActiveQrNodeId(paneId)
     applyDraftingQrStateToControls(nextState)
+    setSelectedContentType(nextContentType)
     setSelectedCardState(cloneDraftingCardState(nextCardState))
     selectSingleLayer(getDraftingQrLayerId(paneId))
   }
@@ -1533,6 +1570,9 @@ export function WorkspaceSurface({
     setBrandIconQuery("")
     setBrandIconCategory("all")
     setActiveQrNodeId(DASHBOARD_QR_NODE_ID)
+    setContentTypeByNodeId({
+      [DASHBOARD_QR_NODE_ID]: DEFAULT_QR_INPUT_TYPE,
+    })
     setQrStateByNodeId({
       [DASHBOARD_QR_NODE_ID]: cloneDraftingQrState(nextState),
     })
@@ -2005,6 +2045,11 @@ export function WorkspaceSurface({
       ...current,
       [activeQrNodeId]: cloneDraftingCardState(selectedCardState),
       [nextNodeId]: cloneDraftingCardState(selectedCardState),
+    }))
+    setContentTypeByNodeId((current) => ({
+      ...current,
+      [activeQrNodeId]: selectedContentType,
+      [nextNodeId]: selectedContentType,
     }))
     setLayerStateByNodeId((current) => ({
       ...current,
@@ -4056,6 +4101,7 @@ export function WorkspaceSurface({
     },
     onRedo: handleRedoDraftingWorkspace,
     onResetDefaults: resetDraftingWorkspace,
+    onSave: handleSaveDraftingWorkspace,
     onUndo: handleUndoDraftingWorkspace,
     onContentReset: resetDesktopContent,
     onContentTypeChange: handleDraftingContentTypeChange,

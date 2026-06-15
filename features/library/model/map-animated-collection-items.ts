@@ -1,7 +1,10 @@
 import { BrushIcon, Camera01Icon, QrCodeIcon } from "@hugeicons/core-free-icons"
 
 import type { AnimatedCollectionItem } from "@/components/ui/animated-collection"
-import { getQrInputTypeLabel } from "@/features/library/model/library-query"
+import {
+  formatLibraryShortDate,
+  getQrInputTypeLabel,
+} from "@/features/library/model/library-query"
 import { getDesktopLibraryUrl } from "@/features/library/model/storage"
 import type { LibraryQrDesign } from "@/features/library/model/types"
 
@@ -18,8 +21,10 @@ export function mapLibraryDesignsToAnimatedCollectionItems(
   return designs.map((design, index) => ({
     id: design.id,
     title: design.title,
-    subtitle: getQrInputTypeLabel(design.inputType),
-    image: designThumbnailDataUrl(design.thumbnailHue),
+    tags: design.contentTags.map((tag) => getQrInputTypeLabel(tag)),
+    destinationPreview: design.destinationPreview,
+    editedLabel: formatLibraryShortDate(design.updatedAt),
+    image: design.thumbnailDataUrl ?? designThumbnailDataUrl(design.thumbnailHue ?? 200),
     icon: LIBRARY_ITEM_ICONS[index % LIBRARY_ITEM_ICONS.length],
     href: getDesktopLibraryUrl(design.id),
   }))

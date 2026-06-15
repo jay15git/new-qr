@@ -1,4 +1,7 @@
-import type { LibraryIndexV1 } from "@/features/library/model/types"
+import {
+  migrateLibraryDesignRecord,
+  type LibraryIndexV1,
+} from "@/features/library/model/types"
 
 const DB_NAME = "new-qr-library"
 const DB_VERSION = 1
@@ -35,7 +38,15 @@ export function parseLibraryIndex(value: unknown): LibraryIndexV1 | null {
     return null
   }
 
-  return value as LibraryIndexV1
+  const raw = value as LibraryIndexV1
+  const designs = raw.designs
+    .map((design) => migrateLibraryDesignRecord(design))
+    .filter((design): design is NonNullable<typeof design> => design !== null)
+
+  return {
+    ...raw,
+    designs,
+  }
 }
 
 export async function readLibraryIndex(): Promise<LibraryIndexV1 | null> {
@@ -75,10 +86,15 @@ export async function upsertLibraryDesign(
   design: LibraryIndexV1["designs"][number],
 ): Promise<LibraryIndexV1> {
   const existingIndex = index.designs.findIndex((entry) => entry.id === design.id)
+  const existingDesign = existingIndex === -1 ? null : index.designs[existingIndex]
+  const nextDesign =
+    existingDesign && existingDesign.createdAt
+      ? { ...design, createdAt: existingDesign.createdAt }
+      : design
   const designs =
     existingIndex === -1
-      ? [...index.designs, design]
-      : index.designs.map((entry, entryIndex) => (entryIndex === existingIndex ? design : entry))
+      ? [...index.designs, nextDesign]
+      : index.designs.map((entry, entryIndex) => (entryIndex === existingIndex ? nextDesign : entry))
 
   const nextIndex: LibraryIndexV1 = {
     ...index,
