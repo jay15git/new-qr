@@ -15,10 +15,15 @@ export function StudioHubStyles() {
         --desktop-inspector-option-selected-fg: rgba(255, 255, 255, 0.96);
         --desktop-inspector-field-bg: rgba(0, 0, 0, 0.22);
         --desktop-inspector-focus: rgba(255, 255, 255, 0.36);
-        --desktop-inspector-dropdown-bg: rgba(12, 12, 16, 0.9);
+        --desktop-inspector-dropdown-bg: rgb(23, 24, 29);
         --desktop-inspector-dropdown-border: rgba(255, 255, 255, 0.08);
         --desktop-toolbar-fg: rgba(255, 255, 255, 0.72);
         --desktop-toolbar-fg-hover: rgba(255, 255, 255, 0.94);
+        --drafting-shadow-rest: 0 0 18px 2px #00000010, 0 3px 8px 1px #00000009;
+        --drafting-shadow-hover: 0 0 24px 3px #00000016, 0 4px 10px 1px #0000000e;
+        --drafting-option-card-bg: #101216;
+        --drafting-option-card-shadow-rest: 0 0 10px 0 #00000010, 0 2px 4px 0 #00000009;
+        --drafting-option-card-shadow-hover: 0 0 16px 1px #00000014, 0 3px 8px 0 #0000000c;
         color: var(--desktop-inspector-fg-secondary);
       }
 
@@ -36,10 +41,15 @@ export function StudioHubStyles() {
         --desktop-inspector-option-selected-fg: rgba(15, 23, 42, 0.94);
         --desktop-inspector-field-bg: rgba(255, 255, 255, 0.62);
         --desktop-inspector-focus: rgba(15, 23, 42, 0.36);
-        --desktop-inspector-dropdown-bg: rgba(255, 255, 255, 0.84);
+        --desktop-inspector-dropdown-bg: rgb(255, 255, 255);
         --desktop-inspector-dropdown-border: rgba(15, 23, 42, 0.09);
         --desktop-toolbar-fg: rgba(15, 23, 42, 0.68);
         --desktop-toolbar-fg-hover: rgba(15, 23, 42, 0.9);
+        --drafting-shadow-rest: 0 0 10px 0 rgb(0 0 0 / 0.05), 0 2px 4px 0 rgb(0 0 0 / 0.03);
+        --drafting-shadow-hover: 0 0 18px 1px rgb(0 0 0 / 0.07), 0 4px 10px 0 rgb(0 0 0 / 0.04);
+        --drafting-option-card-bg: #ffffff;
+        --drafting-option-card-shadow-rest: 0 0 10px 0 rgb(0 0 0 / 0.08), 0 2px 4px 0 rgb(0 0 0 / 0.06);
+        --drafting-option-card-shadow-hover: 0 0 16px 1px rgb(0 0 0 / 0.1), 0 3px 8px 0 rgb(0 0 0 / 0.08);
         color: var(--desktop-inspector-fg-secondary);
       }
 
@@ -50,6 +60,20 @@ export function StudioHubStyles() {
           transparent 0
         );
         background-size: 24px 24px;
+      }
+
+      [data-slot="studio-hub"] [data-slot="hub-dropdown-menu"] {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
+
+      [data-slot="studio-hub"] [data-slot="studio-library-empty"],
+      [data-slot="studio-hub"] [data-slot="library-empty-state"],
+      [data-slot="studio-hub"] [data-slot="library-no-matches"] {
+        border-color: transparent !important;
+        border-style: solid !important;
+        background: var(--desktop-inspector-section-bg) !important;
+        box-shadow: var(--drafting-shadow-rest) !important;
       }
 
       [data-slot="studio-library-strip"] {

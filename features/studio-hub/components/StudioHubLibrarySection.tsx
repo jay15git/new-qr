@@ -9,9 +9,9 @@ import { CollectionFolders } from "@/features/library/components/CollectionFolde
 import {
   DESKTOP_INSPECTOR_FG_MUTED,
   DESKTOP_INSPECTOR_FG_PRIMARY,
-  DESKTOP_INSPECTOR_FG_SECONDARY,
   DESKTOP_INSPECTOR_RESET_CLASS,
 } from "@/features/desktop-shell/components/InspectorControls"
+import { HUB_CARD_SURFACE } from "@/features/studio-hub/components/hub-surfaces"
 import { sortLibraryDesigns } from "@/features/library/model/library-query"
 import type { LibraryQrDesign } from "@/features/library/model/types"
 import { useLibraryIndex } from "@/features/studio-hub/hooks/useLibraryIndex"
@@ -40,7 +40,7 @@ function LibraryStripCard({
       className="group flex w-[9.25rem] shrink-0 snap-start flex-col gap-2.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
       onClick={() => onOpen(design)}
     >
-      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl border border-[var(--desktop-inspector-control-border-hover)] bg-[var(--desktop-inspector-field-bg)] shadow-[var(--drafting-shadow-rest)] transition-all duration-300 group-hover:border-[var(--desktop-inspector-control-border-hover)] group-hover:shadow-[var(--drafting-shadow-elevated)]">
+      <div className={cn("relative aspect-[4/5] w-full overflow-hidden", HUB_CARD_SURFACE)}>
         {design.thumbnailDataUrl ? (
           <Image
             src={design.thumbnailDataUrl}
@@ -55,7 +55,6 @@ function LibraryStripCard({
             No preview
           </div>
         )}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       </div>
       <span className={cn("truncate px-0.5 text-sm font-medium", DESKTOP_INSPECTOR_FG_PRIMARY)}>
         {design.title}
@@ -66,38 +65,24 @@ function LibraryStripCard({
 
 function LibraryExpandedContent({
   index,
-  isMockFallback,
   onOpenDesign,
 }: {
   index: ReturnType<typeof useLibraryIndex>["index"]
-  isMockFallback: boolean
   onOpenDesign: (design: LibraryQrDesign) => void
 }) {
   return (
     <div className="space-y-8 pt-2">
       <div className="space-y-4">
-        <div className="space-y-1">
-          <h3 className={cn("drafting-type-control-label font-semibold", DESKTOP_INSPECTOR_FG_PRIMARY)}>
-            Collections
-          </h3>
-          <p className={cn("drafting-type-caption", DESKTOP_INSPECTOR_FG_MUTED)}>
-            Group related designs into folders.
-          </p>
-        </div>
+        <h3 className={cn("drafting-type-control-label font-semibold", DESKTOP_INSPECTOR_FG_PRIMARY)}>
+          Collections
+        </h3>
         <CollectionFolders collections={index.collections} />
       </div>
 
       <div className="space-y-4">
-        <div className="space-y-1">
-          <h3 className={cn("drafting-type-control-label font-semibold", DESKTOP_INSPECTOR_FG_PRIMARY)}>
-            All designs
-          </h3>
-          {isMockFallback ? (
-            <p className={cn("drafting-type-caption", DESKTOP_INSPECTOR_FG_MUTED)}>
-              Showing sample designs until you save your first QR.
-            </p>
-          ) : null}
-        </div>
+        <h3 className={cn("drafting-type-control-label font-semibold", DESKTOP_INSPECTOR_FG_PRIMARY)}>
+          All designs
+        </h3>
         <AllTabContent designs={index.designs} onDesignClick={onOpenDesign} />
       </div>
     </div>
@@ -105,7 +90,7 @@ function LibraryExpandedContent({
 }
 
 export function StudioHubLibrarySection({ initialExpanded = false }: StudioHubLibrarySectionProps) {
-  const { index, isLoading, isMockFallback } = useLibraryIndex()
+  const { index, isLoading } = useLibraryIndex()
   const { openEditor } = useStudioNavigation()
   const [isExpanded, setIsExpanded] = React.useState(initialExpanded)
 
@@ -164,19 +149,9 @@ export function StudioHubLibrarySection({ initialExpanded = false }: StudioHubLi
   return (
     <section data-slot="studio-library-section" className="space-y-5">
       <div className="flex items-end justify-between gap-4">
-        <div className="space-y-1">
-          <p className={cn("drafting-type-nav-label uppercase tracking-[0.16em]", DESKTOP_INSPECTOR_FG_MUTED)}>
-            Library
-          </p>
-          <h2 className={cn("drafting-type-section-title font-semibold", DESKTOP_INSPECTOR_FG_PRIMARY)}>
-            Your designs
-          </h2>
-          {!isExpanded && hasDesigns ? (
-            <p className={cn("drafting-type-caption", DESKTOP_INSPECTOR_FG_SECONDARY)}>
-              Recent work — open any design to keep editing.
-            </p>
-          ) : null}
-        </div>
+        <h2 className={cn("drafting-type-section-title font-semibold", DESKTOP_INSPECTOR_FG_PRIMARY)}>
+          Your designs
+        </h2>
         {showToggle ? (
           <button
             type="button"
@@ -199,11 +174,10 @@ export function StudioHubLibrarySection({ initialExpanded = false }: StudioHubLi
             ))}
           </div>
         ) : (
-          <div className="flex min-h-[6.5rem] items-center justify-center rounded-2xl border border-dashed border-[var(--desktop-inspector-control-border-hover)] bg-[var(--desktop-inspector-section-bg)] px-6 py-5 text-center backdrop-blur-sm">
-            <p className={cn("drafting-type-caption max-w-sm", DESKTOP_INSPECTOR_FG_MUTED)}>
-              Create your first QR — saved designs will appear here.
-            </p>
-          </div>
+          <div
+            data-slot="studio-library-empty"
+            className="flex min-h-[6.5rem] items-center justify-center rounded-2xl bg-[var(--desktop-inspector-section-bg)] px-6 py-5 shadow-[var(--drafting-shadow-rest)]"
+          />
         )
       ) : null}
 
@@ -218,11 +192,7 @@ export function StudioHubLibrarySection({ initialExpanded = false }: StudioHubLi
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <LibraryExpandedContent
-              index={index}
-              isMockFallback={isMockFallback}
-              onOpenDesign={handleOpenDesign}
-            />
+            <LibraryExpandedContent index={index} onOpenDesign={handleOpenDesign} />
           </motion.div>
         ) : null}
       </AnimatePresence>

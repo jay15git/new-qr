@@ -25,7 +25,7 @@ describe("home page", () => {
     const markup = renderToStaticMarkup(<Home />)
 
     expect(markup).toContain('data-slot="studio-hub"')
-    expect(markup).toContain('aria-label="Auto"')
+    expect(markup).toContain('aria-label="Switch to dark mode"')
     expect(markup).toContain('data-testid="qr-category-browser"')
     expect(markup).toContain(">Popular<")
     expect(markup).toContain(">Socials<")

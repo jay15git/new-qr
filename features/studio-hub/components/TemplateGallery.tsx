@@ -3,10 +3,9 @@
 import * as React from "react"
 import { AnimatePresence, LayoutGroup, motion } from "motion/react"
 
+import { LIBRARY_LIFTED_SURFACE_CLASS } from "@/components/ui/animated-collection"
 import {
-  DESKTOP_INSPECTOR_FG_MUTED,
   DESKTOP_INSPECTOR_FG_PRIMARY,
-  DESKTOP_INSPECTOR_FG_SECONDARY,
 } from "@/features/desktop-shell/components/InspectorControls"
 import { TemplateCard } from "@/features/studio-hub/components/TemplateCard"
 import { useStudioNavigation } from "@/features/studio-hub/hooks/useStudioNavigation"
@@ -54,15 +53,9 @@ export function TemplateGallery() {
   return (
     <div className="space-y-8">
       <div className="space-y-1">
-        <p className={cn("drafting-type-nav-label uppercase tracking-[0.16em]", DESKTOP_INSPECTOR_FG_MUTED)}>
-          Gallery
-        </p>
         <h2 className={cn("drafting-type-section-title font-semibold", DESKTOP_INSPECTOR_FG_PRIMARY)}>
           Templates
         </h2>
-        <p className={cn("drafting-type-caption max-w-2xl", DESKTOP_INSPECTOR_FG_SECONDARY)}>
-          Curated starter designs with QR styling, card frames, and default content.
-        </p>
       </div>
 
       <div className="space-y-4">
@@ -99,7 +92,7 @@ export function TemplateGallery() {
                   <motion.span
                     layoutId="template-category-pill"
                     transition={{ type: "spring", stiffness: 320, damping: 28 }}
-                    className="absolute inset-0 rounded-full border border-[var(--desktop-inspector-control-border-hover)] bg-[var(--desktop-inspector-option-selected-bg)] shadow-[var(--drafting-shadow-rest)]"
+                    className={cn("absolute inset-0", LIBRARY_LIFTED_SURFACE_CLASS)}
                   />
                 ) : null}
                 <span className="relative z-10">{entry.label}</span>

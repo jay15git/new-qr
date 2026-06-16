@@ -21,7 +21,10 @@ export function LibraryEmptyState({
   actionHref = "/",
 }: LibraryEmptyStateProps) {
   return (
-    <div className="flex min-h-40 flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[var(--desktop-inspector-control-border-hover)] bg-[var(--desktop-inspector-field-bg)] px-6 py-10 text-center">
+    <div
+      data-slot="library-empty-state"
+      className="flex min-h-40 flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[var(--desktop-inspector-control-border-hover)] bg-[var(--desktop-inspector-field-bg)] px-6 py-10 text-center"
+    >
       <div className="space-y-1">
         <h2 className={cn("drafting-type-control-label font-semibold", DESKTOP_INSPECTOR_FG_SECONDARY)}>
           {title}

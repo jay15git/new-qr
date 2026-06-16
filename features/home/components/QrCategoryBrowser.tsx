@@ -13,10 +13,13 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {
   DESKTOP_INSPECTOR_DROPDOWN_ITEM_CLASS,
-  DESKTOP_INSPECTOR_DROPDOWN_MENU_CLASS,
   DESKTOP_INSPECTOR_FG_SECONDARY,
   DESKTOP_INSPECTOR_SELECTED_CLASS,
 } from "@/features/desktop-shell/components/InspectorControls"
+import {
+  HUB_CATEGORY_PILL_SURFACE,
+  HUB_DROPDOWN_MENU_CLASS,
+} from "@/features/studio-hub/components/hub-surfaces"
 import { cn } from "@/lib/utils"
 
 import {
@@ -80,16 +83,16 @@ export function QrCategoryBrowser({
           >
             <DropdownMenuTrigger asChild>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 className={cn(
-                  "h-8 rounded-full border border-[var(--desktop-inspector-control-border-hover)] bg-[var(--desktop-inspector-field-bg)] px-3 text-xs shadow-none transition-colors",
+                  "h-8 px-3 text-xs",
+                  HUB_CATEGORY_PILL_SURFACE,
                   DESKTOP_INSPECTOR_FG_SECONDARY,
-                  "hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)]",
                   (isOpen || isSelectedCategory) &&
                     cn(
                       DESKTOP_INSPECTOR_SELECTED_CLASS,
-                      "border-transparent hover:border-transparent",
+                      "shadow-[var(--drafting-shadow-rest)] hover:shadow-[var(--drafting-shadow-hover)]",
                     ),
                 )}
               >
@@ -103,8 +106,9 @@ export function QrCategoryBrowser({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
+              data-slot="hub-dropdown-menu"
               className={cn(
-                DESKTOP_INSPECTOR_DROPDOWN_MENU_CLASS,
+                HUB_DROPDOWN_MENU_CLASS,
                 "w-[22rem] max-w-[calc(100vw-2rem)] rounded-2xl p-2",
               )}
             >
