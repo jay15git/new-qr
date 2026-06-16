@@ -199,23 +199,30 @@ describe("FloatingToolbar", () => {
     const onUndo = vi.fn()
     const onRedo = vi.fn()
     const onResetDefaults = vi.fn()
+    const onExportDownload = vi.fn()
     const surface = await renderPrototype({
       controller: {
         canRedo: true,
         canUndo: true,
+        onExportDownload,
         onRedo,
         onResetDefaults,
         onUndo,
       },
     })
     const actionToolbar = surface.container.querySelector('[data-slot="desktop-action-toolbar"]')
+    const documentToolbar = surface.container.querySelector('[data-slot="desktop-document-toolbar"]')
     const utilityToolbar = surface.container.querySelector('[data-slot="desktop-utility-toolbar"]')
 
     expect(actionToolbar?.className).toContain("min-h-14")
+    expect(documentToolbar?.className).toContain("left-[25rem]")
+    expect(documentToolbar?.className).toContain("top-5")
     expect(utilityToolbar?.className).toContain("min-h-14")
+    expect(getRequiredButton(documentToolbar as HTMLElement, "Save").className).toContain("size-10")
+    expect(getRequiredButton(documentToolbar as HTMLElement, "Download").className).toContain("size-10")
     expect(getRequiredButton(utilityToolbar as HTMLElement, "Open keyboard shortcuts").className).toContain("size-10")
-    expect(getRequiredButton(utilityToolbar as HTMLElement, "Save").className).toContain("size-10")
     expect(getRequiredButton(utilityToolbar as HTMLElement, "Switch to light mode").className).toContain("size-10")
+    expect(utilityToolbar?.querySelector('[data-slot="desktop-save-trigger"]')).toBeNull()
     expect(getRequiredButton(actionToolbar as HTMLElement, "Reset defaults").className).toContain("size-8")
     expect(getRequiredButton(actionToolbar as HTMLElement, "Undo").className).toContain("size-8")
     expect(getRequiredButton(actionToolbar as HTMLElement, "Redo").className).toContain("size-8")
@@ -224,11 +231,13 @@ describe("FloatingToolbar", () => {
       getRequiredButton(actionToolbar as HTMLElement, "Reset defaults").dispatchEvent(new MouseEvent("click", { bubbles: true }))
       getRequiredButton(actionToolbar as HTMLElement, "Undo").dispatchEvent(new MouseEvent("click", { bubbles: true }))
       getRequiredButton(actionToolbar as HTMLElement, "Redo").dispatchEvent(new MouseEvent("click", { bubbles: true }))
+      getRequiredButton(documentToolbar as HTMLElement, "Download").dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
     expect(onResetDefaults).toHaveBeenCalledTimes(1)
     expect(onUndo).toHaveBeenCalledTimes(1)
     expect(onRedo).toHaveBeenCalledTimes(1)
+    expect(onExportDownload).toHaveBeenCalledTimes(1)
   })
 
   it("keeps the desktop workspace chrome contract for tool states and light tooltips", () => {

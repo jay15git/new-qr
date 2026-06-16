@@ -23,7 +23,6 @@ import {
   LockIcon,
   MoreHorizontalIcon,
   PaletteIcon,
-  RotateCwIcon,
   Trash2Icon,
   TypeIcon,
   UnderlineIcon,
@@ -2108,9 +2107,7 @@ export const Pane = memo(function Pane({
             transform: `translate(-50%, calc(-${ROTATE_HANDLE_OFFSET_PX}px - 50%))`,
           }}
           type="button"
-        >
-          <RotateCwIcon aria-hidden="true" className="size-3" strokeWidth={2.2} />
-        </button>
+        />
         {RESIZE_HANDLES.map((handle) => (
           <button
             aria-label={`Resize ${layer.name} from ${handle.label}`}
@@ -2191,9 +2188,7 @@ export const Pane = memo(function Pane({
             transform: `translate(-50%, calc(-${ROTATE_HANDLE_OFFSET_PX}px - 50%))`,
           }}
           type="button"
-        >
-          <RotateCwIcon aria-hidden="true" className="size-3" strokeWidth={2.2} />
-        </button>
+        />
         {RESIZE_HANDLES.map((handle) => (
           <button
             aria-label={`Resize selection from ${handle.label}`}

@@ -655,7 +655,7 @@ describe("Pane", () => {
     const rotateHandle = container.querySelector('[data-slot="drafting-layer-rotate-handle"]')
 
     expect(rotateHandle).not.toBeNull()
-    expect(rotateHandle?.querySelector("svg")).not.toBeNull()
+    expect(rotateHandle?.querySelector("svg")).toBeNull()
     expect(rotateHandle?.className).toContain("rounded-full")
     expect(rotateHandle?.className).toContain("border-[#a8b0bb]")
     expect(rotateHandle?.className).toContain("bg-white")

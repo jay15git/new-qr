@@ -1,6 +1,13 @@
 "use client"
 
-import { AppleIcon, Image02Icon, KeyboardIcon, SaveIcon, WindowsOldIcon } from "@hugeicons/core-free-icons"
+import {
+  AppleIcon,
+  Download02Icon,
+  Image02Icon,
+  KeyboardIcon,
+  SaveIcon,
+  WindowsOldIcon,
+} from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useEffect, useId, useMemo, useState, type CSSProperties, type ReactNode } from "react"
 import type {
@@ -57,6 +64,10 @@ import {
   type DraftingTextFontStyle,
   type DraftingTextFontWeight,
 } from "@/features/workspace/model/layers"
+import {
+  DesktopUtilityToolbar,
+  DesktopUtilityToolbarButton,
+} from "@/features/desktop-shell/components/DesktopUtilityToolbar"
 import { DRAFTING_KEYBOARD_SHORTCUT_GROUPS } from "@/features/workspace/model/keyboard-shortcuts"
 import {
   DRAFTING_FONT_REGISTRY,
@@ -1157,18 +1168,44 @@ export function FloatingToolbar({
         )}
       >
         <DesktopThemeStyles />
-        <div
+        <DesktopUtilityToolbar
+          data-slot="desktop-document-toolbar"
+          className="fixed left-[25rem] top-5 z-30 max-md:left-4 max-md:top-4"
+        >
+          <DesktopUtilityToolbarButton
+            aria-label="Save"
+            data-slot="desktop-save-trigger"
+            onClick={() => controller?.onSave?.()}
+          >
+            <HugeiconsIcon
+              icon={SaveIcon}
+              size={18}
+              color="currentColor"
+              strokeWidth={1.8}
+            />
+          </DesktopUtilityToolbarButton>
+          <DesktopUtilityToolbarButton
+            aria-label="Download"
+            data-slot="desktop-download-trigger"
+            onClick={() => controller?.onExportDownload?.()}
+          >
+            <HugeiconsIcon
+              icon={Download02Icon}
+              size={18}
+              color="currentColor"
+              strokeWidth={1.8}
+            />
+          </DesktopUtilityToolbarButton>
+        </DesktopUtilityToolbar>
+        <DesktopUtilityToolbar
           data-slot="desktop-utility-toolbar"
-          data-toolbar-appearance="desktop-glass"
-          className="fixed right-5 top-5 z-30 inline-flex min-h-14 items-center gap-1 rounded-full border border-white/[0.12] bg-black/55 px-2 py-1.5 text-white/72 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl max-md:right-4 max-md:top-4"
+          className="fixed right-5 top-5 z-30 max-md:right-4 max-md:top-4"
         >
           <Popover>
             <PopoverTrigger asChild>
-              <button
+              <DesktopUtilityToolbarButton
                 aria-label="Open keyboard shortcuts"
                 data-slot="desktop-keyboard-shortcuts-trigger"
-                className="grid size-10 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 max-md:size-9"
-                type="button"
               >
                 <HugeiconsIcon
                   icon={KeyboardIcon}
@@ -1176,7 +1213,7 @@ export function FloatingToolbar({
                   color="currentColor"
                   strokeWidth={1.8}
                 />
-              </button>
+              </DesktopUtilityToolbarButton>
             </PopoverTrigger>
             <PopoverContent
               align="end"
@@ -1317,26 +1354,9 @@ export function FloatingToolbar({
               </ScrollArea>
             </PopoverContent>
           </Popover>
-          <button
-            aria-label="Save"
-            data-slot="desktop-save-trigger"
-            className="grid size-10 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35 max-md:size-9"
-            disabled={!controller?.onSave}
-            type="button"
-            onClick={controller?.onSave}
-          >
-            <HugeiconsIcon
-              icon={SaveIcon}
-              size={18}
-              color="currentColor"
-              strokeWidth={1.8}
-            />
-          </button>
-          <button
+          <DesktopUtilityToolbarButton
             aria-label={`Switch to ${actualDesktopTheme === "light" ? "dark" : "light"} mode`}
             data-slot="desktop-theme-toggle"
-            className="grid size-10 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 max-md:size-9"
-            type="button"
             onClick={handleDesktopThemeToggle}
           >
             {actualDesktopTheme === "light" ? (
@@ -1344,8 +1364,8 @@ export function FloatingToolbar({
             ) : (
               <SunIcon className="size-4" />
             )}
-          </button>
-        </div>
+          </DesktopUtilityToolbarButton>
+        </DesktopUtilityToolbar>
         <div
           data-slot="desktop-action-toolbar"
           data-toolbar-appearance="desktop-glass"
@@ -1597,6 +1617,7 @@ function DesktopThemeStyles() {
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-left-toolbar-shell"],
+      [data-desktop-theme="light"] [data-slot="desktop-document-toolbar"],
       [data-desktop-theme="light"] [data-slot="desktop-utility-toolbar"],
       [data-desktop-theme="light"] [data-slot="desktop-action-toolbar"] {
         background: rgba(255, 255, 255, 0.72) !important;
@@ -1606,6 +1627,7 @@ function DesktopThemeStyles() {
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] button:hover,
+      [data-desktop-theme="light"] [data-slot="desktop-document-toolbar"] button:hover,
       [data-desktop-theme="light"] [data-slot="desktop-utility-toolbar"] button:hover,
       [data-desktop-theme="light"] [data-slot="desktop-action-toolbar"] button:hover {
         background: rgba(15, 23, 42, 0.08) !important;

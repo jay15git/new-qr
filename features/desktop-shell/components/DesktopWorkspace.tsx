@@ -122,6 +122,7 @@ function DesktopWorkspaceStyles() {
       [data-slot="desktop-workspace"] [data-slot="desktop-action-toolbar"],
       [data-slot="desktop-workspace"] [data-slot="desktop-resize-toolbar"],
       [data-slot="desktop-workspace"] [data-slot="desktop-text-format-toolbar"],
+      [data-slot="desktop-workspace"] [data-slot="desktop-document-toolbar"],
       [data-slot="desktop-workspace"] [data-slot="desktop-utility-toolbar"],
       [data-slot="desktop-workspace"] [data-slot="desktop-theme-toggle"] {
         pointer-events: auto;
@@ -255,6 +256,7 @@ function DesktopWorkspaceStyles() {
       }
 
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-resize-toolbar"],
+      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-document-toolbar"],
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-utility-toolbar"],
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-action-toolbar"],
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"],
@@ -287,6 +289,7 @@ function DesktopWorkspaceStyles() {
       }
 
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-resize-toolbar"] button,
+      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-document-toolbar"] button,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-utility-toolbar"] button,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-theme-toggle"],
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-action-toolbar"] button,
@@ -311,6 +314,7 @@ function DesktopWorkspaceStyles() {
       }
 
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-resize-toolbar"] button:hover,
+      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-document-toolbar"] button:hover,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-utility-toolbar"] button:hover,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-theme-toggle"]:hover,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-action-toolbar"] button:hover,
