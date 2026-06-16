@@ -4,16 +4,28 @@ import { WorkspaceSurface } from "@/features/workspace/components/WorkspaceSurfa
 import {
   FloatingToolbar,
   type DesktopThemeMode,
+  type DesktopToolbarToolId,
 } from "@/features/desktop-shell/components/FloatingToolbar"
+import { saveDesignToLibrary } from "@/features/studio-hub/model/save-library-design"
+import { readStudioSession } from "@/features/studio-hub/model/navigation"
 import { cn } from "@/lib/utils"
-import { useState, type CSSProperties } from "react"
+import { useCallback, useState, type CSSProperties } from "react"
+import type { DraftingWorkspaceDocumentV1 } from "@/features/workspace/model/document"
 
 type DesktopWorkspaceProps = {
   fontClassName?: string
+  initialTheme?: DesktopThemeMode
+  initialActiveTool?: DesktopToolbarToolId
+  onBack?: () => void
 }
 
-export function DesktopWorkspace({ fontClassName }: DesktopWorkspaceProps) {
-  const [desktopTheme, setDesktopTheme] = useState<DesktopThemeMode>("light")
+export function DesktopWorkspace({
+  fontClassName,
+  initialTheme = "light",
+  initialActiveTool,
+  onBack,
+}: DesktopWorkspaceProps) {
+  const [desktopTheme, setDesktopTheme] = useState<DesktopThemeMode>(initialTheme)
   const workspaceTone = {
     "--workspace-shell": "#1f1f1f",
     "--workspace-page": "#171717",
@@ -22,6 +34,13 @@ export function DesktopWorkspace({ fontClassName }: DesktopWorkspaceProps) {
     "--drafting-canvas-bg": "#1f1f1f",
     "--drafting-surface-bg": "#1f1f1f",
   } as CSSProperties
+
+  const handleSaveToLibrary = useCallback(async (document: DraftingWorkspaceDocumentV1) => {
+    const session = readStudioSession()
+    await saveDesignToLibrary(document, {
+      designId: session?.designId,
+    })
+  }, [])
 
   return (
     <section
@@ -38,6 +57,8 @@ export function DesktopWorkspace({ fontClassName }: DesktopWorkspaceProps) {
       <WorkspaceSurface
         chrome="canvas-only"
         fontClassName={fontClassName}
+        initialActiveTool={initialActiveTool}
+        onSaveToLibrary={handleSaveToLibrary}
         paneToolbarVariant="desktop-zoom"
         sliderVariant="desktop-elastic"
         renderOverlay={(controller) => (
@@ -45,6 +66,7 @@ export function DesktopWorkspace({ fontClassName }: DesktopWorkspaceProps) {
             controller={controller}
             theme={desktopTheme}
             onThemeChange={setDesktopTheme}
+            onBack={onBack}
           />
         )}
       />

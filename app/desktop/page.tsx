@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 import localFont from "next/font/local"
+import { Suspense } from "react"
 
-import { DesktopWorkspace } from "@/features/desktop-shell/components/DesktopWorkspace"
+import { DesktopPageClient } from "@/features/studio-hub/components/DesktopPageClient"
 
 const satoshi = localFont({
   src: "../../public/Satoshi_Complete/Fonts/WEB/fonts/Satoshi-Variable.woff2",
@@ -21,7 +22,9 @@ export default function DesktopPage() {
       data-slot="desktop-page"
       className={`${satoshi.className} min-h-dvh overflow-hidden bg-workspace-page text-white`}
     >
-      <DesktopWorkspace fontClassName={satoshi.className} />
+      <Suspense fallback={null}>
+        <DesktopPageClient fontClassName={satoshi.className} />
+      </Suspense>
     </main>
   )
 }

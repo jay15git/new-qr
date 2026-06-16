@@ -239,6 +239,8 @@ type DraftingWorkspaceController = DesktopToolbarController
 type WorkspaceSurfaceProps = {
   chrome?: WorkspaceSurfaceChrome
   fontClassName?: string
+  initialActiveTool?: DesktopToolbarToolId
+  onSaveToLibrary?: (document: DraftingWorkspaceDocumentV1) => Promise<void>
   paneToolbarVariant?: DraftingPaneToolbarVariant
   renderOverlay?: (controller: DraftingWorkspaceController) => ReactNode
   sliderVariant?: DraftingSliderVariant
@@ -635,12 +637,14 @@ function DraftingCardObjectInspectorNav({
 export function WorkspaceSurface({
   chrome = "full",
   fontClassName,
+  initialActiveTool,
+  onSaveToLibrary,
   paneToolbarVariant = "default",
   renderOverlay,
   sliderVariant = "default",
 }: WorkspaceSurfaceProps = {}) {
-  const [activeTool, setActiveTool] = useState<DraftingToolId>(
-    DEFAULT_DRAFTING_TOOL_ID,
+  const [activeTool, setActiveTool] = useState<DraftingToolId>(() =>
+    initialActiveTool ? getDraftingToolIdFromDesktop(initialActiveTool) : DEFAULT_DRAFTING_TOOL_ID,
   )
   const [selectedContentType, setSelectedContentType] = useState<QrInputType>(
     DEFAULT_QR_INPUT_TYPE,
@@ -1520,6 +1524,7 @@ export function WorkspaceSurface({
     }
 
     void writeDraftingWorkspaceDraft(draftingWorkspaceDocument)
+    void onSaveToLibrary?.(draftingWorkspaceDocument)
   }
 
   function handlePaneSelection(paneId: string) {

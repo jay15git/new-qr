@@ -25,9 +25,10 @@ import { cn } from "@/lib/utils"
 
 type AllTabContentProps = {
   designs: LibraryQrDesign[]
+  onDesignClick?: (design: LibraryQrDesign) => void
 }
 
-export function AllTabContent({ designs }: AllTabContentProps) {
+export function AllTabContent({ designs, onDesignClick }: AllTabContentProps) {
   const [query, setQuery] = React.useState("")
   const [sort, setSort] = React.useState<LibrarySort>("recent")
   const [view, setView] = React.useState<CollectionViewMode>("card")
@@ -37,8 +38,21 @@ export function AllTabContent({ designs }: AllTabContentProps) {
   }, [designs, query, sort])
 
   const collectionItems = React.useMemo(
-    () => mapLibraryDesignsToAnimatedCollectionItems(visibleDesigns),
-    [visibleDesigns],
+    () =>
+      mapLibraryDesignsToAnimatedCollectionItems(visibleDesigns, {
+        includeHref: !onDesignClick,
+      }),
+    [visibleDesigns, onDesignClick],
+  )
+
+  const handleItemClick = React.useCallback(
+    (itemId: string) => {
+      const design = visibleDesigns.find((entry) => entry.id === itemId)
+      if (design) {
+        onDesignClick?.(design)
+      }
+    },
+    [onDesignClick, visibleDesigns],
   )
 
   if (designs.length === 0) {
@@ -77,7 +91,11 @@ export function AllTabContent({ designs }: AllTabContentProps) {
           </button>
         </div>
       ) : (
-        <AnimatedCollection items={collectionItems} view={view} />
+        <AnimatedCollection
+          items={collectionItems}
+          view={view}
+          onItemClick={onDesignClick ? handleItemClick : undefined}
+        />
       )}
     </div>
   )

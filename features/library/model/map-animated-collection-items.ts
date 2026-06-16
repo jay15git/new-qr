@@ -17,7 +17,10 @@ function designThumbnailDataUrl(hue: number): string {
 
 export function mapLibraryDesignsToAnimatedCollectionItems(
   designs: LibraryQrDesign[],
+  options?: { includeHref?: boolean },
 ): AnimatedCollectionItem[] {
+  const includeHref = options?.includeHref ?? true
+
   return designs.map((design, index) => ({
     id: design.id,
     title: design.title,
@@ -26,6 +29,6 @@ export function mapLibraryDesignsToAnimatedCollectionItems(
     editedLabel: formatLibraryShortDate(design.updatedAt),
     image: design.thumbnailDataUrl ?? designThumbnailDataUrl(design.thumbnailHue ?? 200),
     icon: LIBRARY_ITEM_ICONS[index % LIBRARY_ITEM_ICONS.length],
-    href: getDesktopLibraryUrl(design.id),
+    href: includeHref ? getDesktopLibraryUrl(design.id) : undefined,
   }))
 }

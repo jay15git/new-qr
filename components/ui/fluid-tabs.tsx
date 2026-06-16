@@ -13,8 +13,11 @@ interface TabItem {
 
 interface FluidTabsProps {
   tabs?: TabItem[];
+  active?: string;
   defaultActive?: string;
   onChange?: (id: string) => void;
+  layoutId?: string;
+  className?: string;
 }
 
 const DEFAULT_TABS: TabItem[] = [
@@ -32,18 +35,25 @@ const DEFAULT_TABS: TabItem[] = [
 
 export const FluidTabs: FC<FluidTabsProps> = ({
   tabs = DEFAULT_TABS,
+  active: activeProp,
   defaultActive = tabs[0]?.id,
   onChange,
+  layoutId = "active-pill",
+  className,
 }) => {
-  const [active, setActive] = useState<string>(defaultActive);
+  const [internalActive, setInternalActive] = useState<string>(defaultActive ?? tabs[0]?.id ?? "");
+  const isControlled = activeProp !== undefined;
+  const active = isControlled ? activeProp : internalActive;
 
   const handleChange = (id: string) => {
-    setActive(id);
+    if (!isControlled) {
+      setInternalActive(id);
+    }
     onChange?.(id);
   };
 
   return (
-    <div className="relative flex h-16 w-1/2 min-w-48 items-center gap-1 rounded-full border-[1.6px] border-[#f5f1ebf4] bg-[#F5F1EB] px-1 py-1 transition-colors sm:gap-2 dark:border-neutral-800 dark:bg-neutral-900">
+    <div className={`relative flex h-16 w-full max-w-xl items-center gap-1 rounded-full border-[1.6px] border-[#f5f1ebf4] bg-[#F5F1EB] px-1 py-1 transition-colors sm:gap-2 dark:border-neutral-800 dark:bg-neutral-900 ${className ?? ""}`}>
       {tabs.map((tab) => {
         const isActive = active === tab.id;
 
@@ -55,7 +65,7 @@ export const FluidTabs: FC<FluidTabsProps> = ({
           >
             {isActive && (
               <motion.div
-                layoutId="active-pill"
+                layoutId={layoutId}
                 transition={{
                   type: "spring",
                   stiffness: 280,

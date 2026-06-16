@@ -44,6 +44,7 @@ type AnimatedCollectionProps = {
   className?: string
   items: AnimatedCollectionItem[]
   view: ViewMode
+  onItemClick?: (itemId: string) => void
 }
 
 const snappySpring: Transition = {
@@ -53,7 +54,7 @@ const snappySpring: Transition = {
   mass: 1,
 }
 
-export function AnimatedCollection({ className, items, view }: AnimatedCollectionProps) {
+export function AnimatedCollection({ className, items, view, onItemClick }: AnimatedCollectionProps) {
   return (
     <div
       data-slot="library-animated-collection"
@@ -71,7 +72,7 @@ export function AnimatedCollection({ className, items, view }: AnimatedCollectio
             )}
           >
             {items.map((item) => (
-              <CollectionItemRow key={item.id} item={item} view={view} />
+              <CollectionItemRow key={item.id} item={item} view={view} onItemClick={onItemClick} />
             ))}
           </motion.div>
         </LayoutGroup>
@@ -110,9 +111,11 @@ export function CollectionViewTabs({
 function CollectionItemRow({
   item,
   view,
+  onItemClick,
 }: {
   item: AnimatedCollectionItem
   view: ViewMode
+  onItemClick?: (itemId: string) => void
 }) {
   const isList = view === "list"
 
@@ -128,6 +131,7 @@ function CollectionItemRow({
     >
       <motion.div
         layout
+        layoutId={onItemClick ? `hub-item-${item.id}` : undefined}
         transition={snappySpring}
         className={cn(
           "relative shrink-0 overflow-hidden bg-[var(--drafting-option-card-bg)]",
@@ -202,6 +206,21 @@ function CollectionItemRow({
       </motion.p>
     </motion.div>
   )
+
+  if (onItemClick) {
+    return (
+      <button
+        type="button"
+        onClick={() => onItemClick(item.id)}
+        className={cn(
+          "block w-full cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]",
+          isList && "rounded-lg",
+        )}
+      >
+        {content}
+      </button>
+    )
+  }
 
   if (item.href) {
     return (

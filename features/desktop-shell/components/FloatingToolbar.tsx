@@ -2,6 +2,7 @@
 
 import {
   AppleIcon,
+  ArrowLeft01Icon,
   Download02Icon,
   Image02Icon,
   KeyboardIcon,
@@ -986,10 +987,12 @@ export function FloatingToolbar({
   controller,
   theme,
   onThemeChange,
+  onBack,
 }: {
   controller?: DesktopToolbarController
   theme?: DesktopThemeMode
   onThemeChange?: (theme: DesktopThemeMode) => void
+  onBack?: () => void
 } = {}) {
   const [activeTool, setActiveTool] = useState<DesktopToolbarToolId | null>(null)
   const [desktopTheme, setDesktopTheme] = useState<DesktopThemeMode>("dark")
@@ -1172,6 +1175,20 @@ export function FloatingToolbar({
           data-slot="desktop-document-toolbar"
           className="fixed left-[25rem] top-5 z-30 max-md:left-4 max-md:top-4"
         >
+          {onBack ? (
+            <DesktopUtilityToolbarButton
+              aria-label="Back to studio hub"
+              data-slot="desktop-back-trigger"
+              onClick={onBack}
+            >
+              <HugeiconsIcon
+                icon={ArrowLeft01Icon}
+                size={18}
+                color="currentColor"
+                strokeWidth={1.8}
+              />
+            </DesktopUtilityToolbarButton>
+          ) : null}
           <DesktopUtilityToolbarButton
             aria-label="Save"
             data-slot="desktop-save-trigger"
