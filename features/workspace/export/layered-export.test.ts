@@ -68,4 +68,30 @@ describe("drafting layered export", () => {
     expect(payload.originalSvgMarkup).not.toContain('data-qr-layer="background-shape"')
     expect(payload.originalSvgMarkup).not.toContain("clip-path-background-color")
   })
+
+  it("includes layer tilt skew in exported layer transforms", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue({
+      markup: '<svg width="240" height="240" viewBox="0 0 240 240"><path d="M0 0"/></svg>',
+      naturalHeight: 240,
+      naturalWidth: 240,
+    })
+    const state = createDefaultQrStudioState()
+    const cardState = createDefaultDraftingCardState()
+    const layers = createDefaultDraftingLayers("preview", state, cardState).map((layer) =>
+      layer.kind === "qr"
+        ? { ...layer, tiltX: 18, tiltY: -12 }
+        : layer,
+    )
+
+    const payload = await buildDraftingLayeredNodePayload({
+      cardState,
+      layers,
+      name: "QR Code",
+      nodeId: "preview",
+      state,
+    })
+
+    expect(payload.originalSvgMarkup).toContain("skewX")
+    expect(payload.originalSvgMarkup).toContain("skewY")
+  })
 })

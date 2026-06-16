@@ -3723,6 +3723,8 @@ export function WorkspaceSurface({
     shapeStrokeColor: selectedBackgroundShapeOptions.strokeColor,
     shapeStrokeOpacity: selectedBackgroundShapeOptions.strokeOpacity,
     shapeStrokeWidth: selectedBackgroundShapeOptions.strokeWidth,
+    shapeTiltX: selectedBackgroundShapeOptions.tiltX,
+    shapeTiltY: selectedBackgroundShapeOptions.tiltY,
     shadowBlur: selectedCardState.shadow.blur,
     shadowColor: selectedCardState.shadow.color,
     shadowOffsetX: selectedCardState.shadow.offsetX,
@@ -3928,6 +3930,8 @@ export function WorkspaceSurface({
     if (patch.shapeStrokeColor !== undefined) shapeOptionsPatch.strokeColor = patch.shapeStrokeColor
     if (patch.shapeStrokeOpacity !== undefined) shapeOptionsPatch.strokeOpacity = patch.shapeStrokeOpacity
     if (patch.shapeStrokeWidth !== undefined) shapeOptionsPatch.strokeWidth = patch.shapeStrokeWidth
+    if (patch.shapeTiltX !== undefined) shapeOptionsPatch.tiltX = patch.shapeTiltX
+    if (patch.shapeTiltY !== undefined) shapeOptionsPatch.tiltY = patch.shapeTiltY
     if (Object.keys(shapeOptionsPatch).length > 0) {
       setSelectedBackgroundShapeOptions((current) => ({ ...current, ...shapeOptionsPatch }))
     }
@@ -4050,6 +4054,8 @@ export function WorkspaceSurface({
             offsetY: row.shadowOffsetY,
             opacity: row.shadowOpacity,
           },
+          tiltX: row.tiltX,
+          tiltY: row.tiltY,
           width: row.width,
           x: row.x,
           y: row.y,
@@ -4806,6 +4812,8 @@ function toDesktopLayerRow(layer: DraftingCanvasLayer): DesktopLayerRow {
     shadowOffsetX: layer.shadow.offsetX,
     shadowOffsetY: layer.shadow.offsetY,
     shadowOpacity: layer.shadow.opacity,
+    tiltX: layer.tiltX ?? 0,
+    tiltY: layer.tiltY ?? 0,
     width: Math.round(layer.width),
     x: Math.round(layer.x),
     y: Math.round(layer.y),

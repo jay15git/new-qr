@@ -275,6 +275,26 @@ describe("drafting layer state actions", () => {
     expect(normalized.map((layer) => layer.kind)).toEqual(["qr", "card"])
   })
 
+  it("normalizes layer tilt values into the supported range", () => {
+    const normalized = normalizeDraftingCanvasLayers(
+      "preview",
+      [
+        {
+          ...createLayer("qr", 1),
+          tiltX: 90,
+          tiltY: -90,
+        },
+      ],
+      createDefaultQrStudioState(),
+      createDefaultDraftingCardState(),
+    )
+
+    expect(normalized.find((layer) => layer.kind === "qr")).toMatchObject({
+      tiltX: 60,
+      tiltY: -60,
+    })
+  })
+
   it("normalizes group children with shared layer defaults", () => {
     const normalized = normalizeDraftingCanvasLayers(
       "preview",
@@ -440,6 +460,8 @@ function createLayer(
     nodeId: "preview",
     opacity: 1,
     rotation: 0,
+    tiltX: 0,
+    tiltY: 0,
     shadow: {
       blur: 0,
       color: "#111827",

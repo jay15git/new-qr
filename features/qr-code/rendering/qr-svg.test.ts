@@ -143,6 +143,8 @@ describe("dashboard qr svg helpers", () => {
       strokeColor: "#111827",
       strokeOpacity: 50,
       strokeWidth: 6,
+      tiltX: 0,
+      tiltY: 0,
     }
 
     const payload = await buildDashboardQrNodePayload(state)

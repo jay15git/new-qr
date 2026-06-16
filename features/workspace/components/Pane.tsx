@@ -60,6 +60,7 @@ import {
 } from "@/features/workspace/rendering/qr-artwork"
 import { DraftingQrBackground } from "@/features/workspace/components/QrBackground"
 import { applyDraftingQrForegroundShadow } from "@/features/workspace/rendering/qr-layer-shadow"
+import { getLayerCssTransform } from "@/features/workspace/rendering/layer-transform"
 import { buildDashboardQrNodePayload } from "@/features/qr-code/rendering/qr-svg"
 import type { QrStudioState } from "@/features/qr-code/model/state"
 import { cn } from "@/lib/utils"
@@ -1757,6 +1758,8 @@ export const Pane = memo(function Pane({
             nodeId: "selection",
             opacity: 1,
             rotation: 0,
+            tiltX: 0,
+            tiltY: 0,
             shadow: { blur: 0, color: "#000000", offsetX: 0, offsetY: 0, opacity: 0 },
             zIndex: 0,
           },
@@ -1950,7 +1953,9 @@ export const Pane = memo(function Pane({
       left: nested ? 0 : "50%",
       opacity: layer.opacity,
       top: nested ? 0 : "50%",
-      transform: `translate3d(${layer.x}px, ${layer.y}px, 0) rotate(${layer.rotation}deg)`,
+      transform: nested
+        ? undefined
+        : getLayerCssTransform(layer),
       transformOrigin: "center center",
       width: layer.width,
       zIndex: layer.zIndex,

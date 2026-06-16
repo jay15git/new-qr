@@ -5,6 +5,7 @@ import {
   clampBackgroundShapeOffset,
   clampBackgroundShapeOpacity,
   clampBackgroundShapePaddingPx,
+  clampBackgroundShapeTilt,
   clampDotMatrixAnimationOpacity,
   clampDotMatrixAnimationOverlayScale,
   clampDotMatrixAnimationSpeed,
@@ -34,6 +35,8 @@ describe("qr studio state helpers", () => {
       strokeColor: "#f8fafc",
       strokeOpacity: 100,
       strokeWidth: 0,
+      tiltX: 0,
+      tiltY: 0,
     });
     expect(state.logo).toEqual({
       source: "none",
@@ -357,6 +360,13 @@ describe("qr studio state helpers", () => {
     expect(clampBackgroundShapeOffset(24)).toBe(24);
     expect(clampBackgroundShapeOffset(96)).toBe(64);
     expect(clampBackgroundShapeOffset(Number.NaN)).toBe(0);
+  });
+
+  it("clamps background shape tilt to the supported range", () => {
+    expect(clampBackgroundShapeTilt(-90)).toBe(-60);
+    expect(clampBackgroundShapeTilt(24)).toBe(24);
+    expect(clampBackgroundShapeTilt(90)).toBe(60);
+    expect(clampBackgroundShapeTilt(Number.NaN)).toBe(0);
   });
 
   it("uses the reference swatch colors as the default body palette", () => {

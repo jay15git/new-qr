@@ -101,6 +101,8 @@ export type BackgroundShapeOptions = {
   strokeColor: string;
   strokeOpacity: number;
   strokeWidth: number;
+  tiltX: number;
+  tiltY: number;
 };
 
 export type QrStudioState = {
@@ -173,6 +175,8 @@ const BACKGROUND_SHAPE_EDGE_BLUR_MAX = 32;
 const BACKGROUND_SHAPE_OPACITY_MAX = 100;
 const BACKGROUND_SHAPE_SHADOW_OFFSET_MIN = -64;
 const BACKGROUND_SHAPE_SHADOW_OFFSET_MAX = 64;
+export const BACKGROUND_SHAPE_TILT_MIN = -60;
+export const BACKGROUND_SHAPE_TILT_MAX = 60;
 
 const DEFAULT_GRADIENT: StudioGradient = {
   enabled: false,
@@ -275,6 +279,8 @@ export const DEFAULT_BACKGROUND_SHAPE_OPTIONS: BackgroundShapeOptions = {
   strokeColor: "#f8fafc",
   strokeOpacity: 100,
   strokeWidth: 0,
+  tiltX: 0,
+  tiltY: 0,
 };
 
 export function createDefaultQrStudioState(): QrStudioState {
@@ -466,6 +472,15 @@ export function clampBackgroundShapeEdgeBlur(value: number) {
     0,
     BACKGROUND_SHAPE_EDGE_BLUR_MAX,
     DEFAULT_BACKGROUND_SHAPE_OPTIONS.edgeBlur,
+  );
+}
+
+export function clampBackgroundShapeTilt(value: number) {
+  return coerceNumber(
+    value,
+    BACKGROUND_SHAPE_TILT_MIN,
+    BACKGROUND_SHAPE_TILT_MAX,
+    0,
   );
 }
 

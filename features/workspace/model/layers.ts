@@ -9,7 +9,10 @@ import {
   resolveDraftingFont,
 } from "@/features/workspace/model/fonts"
 import { getQrRenderedDimensions } from "@/features/qr-code/rendering/svg-extension"
-import type { QrStudioState } from "@/features/qr-code/model/state"
+import {
+  clampBackgroundShapeTilt,
+  type QrStudioState,
+} from "@/features/qr-code/model/state"
 
 export type DraftingCanvasLayerKind = "card" | "group" | "qr" | "text"
 export type DraftingTextAlign = "center" | "left" | "right"
@@ -45,6 +48,8 @@ export type DraftingCanvasLayer = {
   nodeId: string
   opacity: number
   rotation: number
+  tiltX: number
+  tiltY: number
   shadow: DraftingCardShadowState
   text?: string
   textAlign?: DraftingTextAlign
@@ -131,6 +136,8 @@ export function createDefaultDraftingLayers(
       nodeId,
       opacity: 1,
       rotation: 0,
+      tiltX: 0,
+      tiltY: 0,
       shadow: { ...cardState.shadow },
       width: cardWidth,
       x: cardX,
@@ -148,6 +155,8 @@ export function createDefaultDraftingLayers(
       nodeId,
       opacity: 1,
       rotation: 0,
+      tiltX: 0,
+      tiltY: 0,
       shadow: { ...DEFAULT_LAYER_SHADOW },
       width: qrDimensions.width,
       x: -qrDimensions.width / 2,
@@ -384,6 +393,8 @@ export function groupDraftingCanvasLayers(
       nodeId: selectedLayers[0]?.nodeId ?? layers[0]?.nodeId ?? "preview",
       opacity: 1,
       rotation: 0,
+      tiltX: 0,
+      tiltY: 0,
       shadow: { ...DEFAULT_LAYER_SHADOW },
       width: bounds.right - bounds.left,
       x: bounds.left,
@@ -577,6 +588,8 @@ function normalizeSharedDraftingCanvasLayerFields({
     nodeId,
     opacity: clamp(readFiniteNumber(value.opacity, fallback.opacity), 0, 1),
     rotation: readFiniteNumber(value.rotation, fallback.rotation),
+    tiltX: clampBackgroundShapeTilt(readFiniteNumber(value.tiltX, fallback.tiltX)),
+    tiltY: clampBackgroundShapeTilt(readFiniteNumber(value.tiltY, fallback.tiltY)),
     shadow: normalizeDraftingLayerShadow(value.shadow, fallback.shadow),
     text: undefined,
     textAlign: undefined,
@@ -729,6 +742,8 @@ function createFallbackLayer(
     nodeId,
     opacity: 1,
     rotation: 0,
+    tiltX: 0,
+    tiltY: 0,
     shadow: { ...DEFAULT_LAYER_SHADOW },
     text: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.text : undefined,
     textAlign: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.textAlign : undefined,

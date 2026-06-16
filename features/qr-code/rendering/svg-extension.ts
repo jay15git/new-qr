@@ -6,6 +6,7 @@ import {
   clampBackgroundShapeOffset,
   clampBackgroundShapeOpacity,
   clampBackgroundShapePaddingPx,
+  clampBackgroundShapeTilt,
   DEFAULT_BACKGROUND_SHAPE_OPTIONS,
   DEFAULT_DOT_MATRIX_ANIMATION,
   QR_DOT_MATRIX_ANIMATION_SPEED_MAX,
@@ -21,6 +22,7 @@ import {
   type QrStudioState,
   type StudioGradient,
 } from "@/features/qr-code/model/state"
+import { getBackgroundShapeSkewTransform } from "@/features/workspace/rendering/layer-transform"
 
 type QrAnimationRenderMode = "export" | "none" | "preview"
 export type QrSvgExtensionOptions = {
@@ -1950,6 +1952,7 @@ function createBackgroundShapeExtension(
     const transform = getBackgroundShapeTransform(
       shape,
       metrics.backingRegion,
+      shapeOptions,
     )
     const fill = getBackgroundShapeFill(svg, state, metrics.outerWidth, metrics.outerHeight)
 
@@ -2017,6 +2020,12 @@ function normalizeBackgroundShapeOptions(
     strokeWidth: coerceNonNegativeSvgNumber(
       options?.strokeWidth ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeWidth,
       DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeWidth,
+    ),
+    tiltX: clampBackgroundShapeTilt(
+      options?.tiltX ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.tiltX,
+    ),
+    tiltY: clampBackgroundShapeTilt(
+      options?.tiltY ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.tiltY,
     ),
   }
 }
@@ -2584,13 +2593,17 @@ function createBackgroundShapeGradient(
 function getBackgroundShapeTransform(
   shape: QrBackgroundShapeDefinition,
   region: BackgroundRenderMetrics["backingRegion"],
+  shapeOptions: QrStudioState["backgroundShapeOptions"],
 ) {
   const scale =
     Math.min(region.width / shape.viewBox.width, region.height / shape.viewBox.height)
   const x = region.x + (region.width - shape.viewBox.width * scale) / 2
   const y = region.y + (region.height - shape.viewBox.height * scale) / 2
+  const baseTransform = `translate(${formatSvgNumber(x)} ${formatSvgNumber(y)}) scale(${formatSvgNumber(scale)})`
+  const centerX = shape.viewBox.width / 2
+  const centerY = shape.viewBox.height / 2
 
-  return `translate(${formatSvgNumber(x)} ${formatSvgNumber(y)}) scale(${formatSvgNumber(scale)})`
+  return getBackgroundShapeSkewTransform(baseTransform, shapeOptions, centerX, centerY)
 }
 
 function formatSvgNumber(value: number) {

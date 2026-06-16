@@ -489,6 +489,8 @@ export type DesktopShapeSettings = {
   shapeStrokeColor: string
   shapeStrokeOpacity: number
   shapeStrokeWidth: number
+  shapeTiltX: number
+  shapeTiltY: number
   shadowBlur: number
   shadowColor: string
   shadowOffsetX: number
@@ -547,6 +549,8 @@ export type DesktopLayerRow = {
   shadowOffsetX: number
   shadowOffsetY: number
   shadowOpacity: number
+  tiltX: number
+  tiltY: number
   width: number
   x: number
   y: number
@@ -829,6 +833,8 @@ const DEFAULT_DESKTOP_SHAPE_SETTINGS: DesktopShapeSettings = {
   shapeStrokeColor: DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeColor,
   shapeStrokeOpacity: DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeOpacity,
   shapeStrokeWidth: DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeWidth,
+  shapeTiltX: DEFAULT_BACKGROUND_SHAPE_OPTIONS.tiltX,
+  shapeTiltY: DEFAULT_BACKGROUND_SHAPE_OPTIONS.tiltY,
   shadowBlur: DEFAULT_DRAFTING_CARD_STATE.shadow.blur,
   shadowColor: DEFAULT_DRAFTING_CARD_STATE.shadow.color,
   shadowOffsetX: DEFAULT_DRAFTING_CARD_STATE.shadow.offsetX,
@@ -887,6 +893,8 @@ const DEFAULT_DESKTOP_LAYERS: DesktopLayerRow[] = [
     shadowOffsetX: DEFAULT_DRAFTING_CARD_STATE.shadow.offsetX,
     shadowOffsetY: DEFAULT_DRAFTING_CARD_STATE.shadow.offsetY,
     shadowOpacity: DEFAULT_DRAFTING_CARD_STATE.shadow.opacity,
+    tiltX: 0,
+    tiltY: 0,
     width: 384,
     x: -192,
     y: -224,
@@ -905,6 +913,8 @@ const DEFAULT_DESKTOP_LAYERS: DesktopLayerRow[] = [
     shadowOffsetX: 0,
     shadowOffsetY: 0,
     shadowOpacity: 0,
+    tiltX: 0,
+    tiltY: 0,
     width: 300,
     x: -150,
     y: -180,
@@ -923,6 +933,8 @@ const DEFAULT_DESKTOP_LAYERS: DesktopLayerRow[] = [
     shadowOffsetX: 0,
     shadowOffsetY: 0,
     shadowOpacity: 0,
+    tiltX: 0,
+    tiltY: 0,
     width: 240,
     x: -120,
     y: 150,
@@ -2816,6 +2828,28 @@ function DesktopShapeInspector({
         </section>
 
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+          <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Tilt</p>
+          <div className="grid gap-2">
+            <DesktopElasticSliderRow
+              label="Horizontal tilt"
+              max={60}
+              min={-60}
+              value={settings.shapeTiltX}
+              valueLabel={`${Math.round(settings.shapeTiltX)}°`}
+              onChange={(shapeTiltX) => onShapeSettingsChange({ shapeTiltX })}
+            />
+            <DesktopElasticSliderRow
+              label="Vertical tilt"
+              max={60}
+              min={-60}
+              value={settings.shapeTiltY}
+              valueLabel={`${Math.round(settings.shapeTiltY)}°`}
+              onChange={(shapeTiltY) => onShapeSettingsChange({ shapeTiltY })}
+            />
+          </div>
+        </section>
+
+        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Fill</p>
           <DesktopColorInputRow
             label="Shape fill color"
@@ -3023,6 +3057,11 @@ function DesktopShapePreview({
         <svg
           className="size-[62%]"
           fill="none"
+          style={{
+            perspective: "600px",
+            transform: `rotateX(${settings.shapeTiltY}deg) rotateY(${settings.shapeTiltX}deg)`,
+            transformOrigin: "center center",
+          }}
           viewBox={`0 0 ${shape.viewBox.width} ${shape.viewBox.height}`}
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -4824,6 +4863,24 @@ function DesktopLayersInspector({
                 <DesktopNumberRow label="Y" value={selectedLayer.y} onChange={(y) => patchSelectedLayer({ y })} />
                 <DesktopNumberRow label="W" min={1} value={selectedLayer.width} onChange={(width) => patchSelectedLayer({ width })} />
                 <DesktopNumberRow label="H" min={1} value={selectedLayer.height} onChange={(height) => patchSelectedLayer({ height })} />
+              </div>
+              <div className="mt-2.5 grid gap-2">
+                <DesktopElasticSliderRow
+                  label="Horizontal tilt"
+                  max={60}
+                  min={-60}
+                  value={selectedLayer.tiltX}
+                  valueLabel={`${Math.round(selectedLayer.tiltX)}°`}
+                  onChange={(tiltX) => patchSelectedLayer({ tiltX })}
+                />
+                <DesktopElasticSliderRow
+                  label="Vertical tilt"
+                  max={60}
+                  min={-60}
+                  value={selectedLayer.tiltY}
+                  valueLabel={`${Math.round(selectedLayer.tiltY)}°`}
+                  onChange={(tiltY) => patchSelectedLayer({ tiltY })}
+                />
               </div>
             </section>
           </>

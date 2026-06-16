@@ -140,6 +140,8 @@ describe("Pane", () => {
       strokeColor: "#0f172a",
       strokeOpacity: 55,
       strokeWidth: 8,
+      tiltX: 0,
+      tiltY: 0,
     }
     const cardState = {
       ...createDefaultDraftingCardState(),
@@ -227,6 +229,8 @@ describe("Pane", () => {
       strokeColor: "#0f172a",
       strokeOpacity: 40,
       strokeWidth: 8,
+      tiltX: 0,
+      tiltY: 0,
     }
     const cardState = {
       ...createDefaultDraftingCardState(),
@@ -1505,6 +1509,8 @@ describe("Pane", () => {
       nodeId: "preview",
       opacity: 1,
       rotation: 0,
+      tiltX: 0,
+      tiltY: 0,
       shadow: {
         blur: 18,
         color: "#020617",
@@ -1990,6 +1996,8 @@ function createLayer(
     nodeId: "preview",
     opacity: 1,
     rotation: 0,
+    tiltX: 0,
+    tiltY: 0,
     shadow: {
       blur: 0,
       color: "#111827",

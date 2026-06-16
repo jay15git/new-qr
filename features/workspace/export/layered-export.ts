@@ -17,6 +17,7 @@ import {
   createDraftingQrArtworkState,
   sanitizeDraftingQrArtworkMarkup,
 } from "@/features/workspace/rendering/qr-artwork"
+import { getLayerSvgTransform } from "@/features/workspace/rendering/layer-transform"
 import {
   getDraftingQrBackgroundBounds,
   getDraftingQrBackgroundSvgMarkup,
@@ -306,10 +307,7 @@ function getDraftingTextRunSvg(layer: DraftingCanvasLayer, run: DraftingTextRun)
 }
 
 function getDraftingLayerSvgTransform(layer: DraftingCanvasLayer) {
-  const centerX = layer.width / 2
-  const centerY = layer.height / 2
-
-  return `translate(${layer.x} ${layer.y}) rotate(${layer.rotation} ${centerX} ${centerY})`
+  return getLayerSvgTransform(layer)
 }
 
 function scaleNestedSvgMarkup(markup: string, width: number, height: number) {

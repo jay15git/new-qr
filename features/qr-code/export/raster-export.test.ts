@@ -150,6 +150,8 @@ describe("dashboard raster export helper", () => {
       strokeColor: "#111827",
       strokeOpacity: 50,
       strokeWidth: 6,
+      tiltX: 0,
+      tiltY: 0,
     }
 
     expect(getDashboardRasterExportDimensions(state, 25)).toEqual({
@@ -185,6 +187,8 @@ describe("dashboard raster export helper", () => {
       strokeColor: "#111827",
       strokeOpacity: 50,
       strokeWidth: 6,
+      tiltX: 0,
+      tiltY: 0,
     }
 
     await downloadDashboardRasterExport({

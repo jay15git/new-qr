@@ -123,6 +123,8 @@ describe("drafting workspace document", () => {
       strokeColor: "#111827",
       strokeOpacity: 70,
       strokeWidth: 8,
+      tiltX: 0,
+      tiltY: 0,
     })
   })
 
@@ -152,6 +154,8 @@ describe("drafting workspace document", () => {
       strokeColor: "#111827",
       strokeOpacity: 100,
       strokeWidth: 0,
+      tiltX: 0,
+      tiltY: 0,
     })
   })
 
@@ -172,5 +176,25 @@ describe("drafting workspace document", () => {
     expect(
       parsed.qrStateByNodeId[DASHBOARD_QR_NODE_ID]?.backgroundShapeOptions.paddingPx,
     ).toBe(0)
+  })
+
+  it("round-trips background shape tilt through document serialization", () => {
+    const document = createDefaultDraftingWorkspaceDocument()
+    document.qrStateByNodeId[DASHBOARD_QR_NODE_ID]!.backgroundShapeOptions = {
+      ...document.qrStateByNodeId[DASHBOARD_QR_NODE_ID]!.backgroundShapeOptions,
+      tiltX: 18,
+      tiltY: -24,
+    }
+
+    const parsed = parseDraftingWorkspaceDocument(
+      serializeDraftingWorkspaceDocument(document),
+    )
+
+    expect(
+      parsed.qrStateByNodeId[DASHBOARD_QR_NODE_ID]?.backgroundShapeOptions,
+    ).toMatchObject({
+      tiltX: 18,
+      tiltY: -24,
+    })
   })
 })

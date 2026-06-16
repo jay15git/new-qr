@@ -20,6 +20,8 @@ function buildQrLayer(): DraftingCanvasLayer {
     nodeId: "node-1",
     opacity: 1,
     rotation: 0,
+    tiltX: 0,
+    tiltY: 0,
     shadow: { blur: 0, color: "#000000", offsetX: 0, offsetY: 0, opacity: 0 },
     width: 200,
     x: 100,

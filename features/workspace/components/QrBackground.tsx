@@ -8,6 +8,10 @@ import {
   type QrBackgroundShapeDefinition,
 } from "@/features/qr-code/styles/background-shapes"
 import type { QrStudioState, StudioGradient } from "@/features/qr-code/model/state"
+import {
+  getBackgroundShapeCssTiltTransform,
+  getBackgroundShapeSkewTransform,
+} from "@/features/workspace/rendering/layer-transform"
 
 type DraftingQrBackgroundFrame = {
   height: number
@@ -36,10 +40,15 @@ export function DraftingQrBackground({
   const fill = getDraftingQrBackgroundFill(state, ids)
   const filterId = getDraftingQrBackgroundFilterId(state, ids)
   const stroke = getDraftingQrBackgroundStroke(state)
+  const tiltTransform = getBackgroundShapeCssTiltTransform(state.backgroundShapeOptions)
   const style: CSSProperties = {
     height: frame.height,
     left: frame.x,
+    perspective: tiltTransform ? "600px" : undefined,
     top: frame.y,
+    transform: tiltTransform,
+    transformOrigin: "center center",
+    transformStyle: tiltTransform ? "preserve-3d" : undefined,
     width: frame.width,
   }
 
@@ -64,6 +73,7 @@ export function DraftingQrBackground({
           strokeLinejoin="round"
           strokeOpacity={stroke.width > 0 ? stroke.opacity : undefined}
           strokeWidth={stroke.width > 0 ? stroke.width : undefined}
+          transform={`scale(${frame.width / shape.viewBox.width} ${frame.height / shape.viewBox.height})`}
         />
       ) : (
         <rect
@@ -104,8 +114,14 @@ export function getDraftingQrBackgroundSvgMarkup(
   if (shape) {
     const scaleX = frame.width / shape.viewBox.width
     const scaleY = frame.height / shape.viewBox.height
+    const transform = getBackgroundShapeSkewTransform(
+      `translate(${frame.x} ${frame.y}) scale(${scaleX} ${scaleY})`,
+      state.backgroundShapeOptions,
+      shape.viewBox.width / 2,
+      shape.viewBox.height / 2,
+    )
 
-    return `<g data-drafting-qr-background="${escapeXml(shapeName)}"><defs>${defs}</defs><path d="${escapeXml(shape.path)}" fill="${escapeXml(fill)}"${strokeMarkup}${filter} transform="translate(${frame.x} ${frame.y}) scale(${scaleX} ${scaleY})"/></g>`
+    return `<g data-drafting-qr-background="${escapeXml(shapeName)}"><defs>${defs}</defs><path d="${escapeXml(shape.path)}" fill="${escapeXml(fill)}"${strokeMarkup}${filter} transform="${transform}"/></g>`
   }
 
   const radius = (Math.min(frame.width, frame.height) / 2) * state.backgroundOptions.round

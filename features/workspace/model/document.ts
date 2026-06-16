@@ -16,6 +16,7 @@ import {
   clampBackgroundShapeOpacity,
   clampBackgroundShapePaddingPx,
   clampBackgroundShapeStrokeWidth,
+  clampBackgroundShapeTilt,
   createDefaultQrStudioState,
   DEFAULT_BACKGROUND_SHAPE_OPTIONS,
   setDotMatrixAnimationOptions,
@@ -305,6 +306,16 @@ function parseBackgroundShapeOptions(
       typeof value?.strokeWidth === "number"
         ? value.strokeWidth
         : DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeWidth,
+    ),
+    tiltX: clampBackgroundShapeTilt(
+      typeof value?.tiltX === "number"
+        ? value.tiltX
+        : DEFAULT_BACKGROUND_SHAPE_OPTIONS.tiltX,
+    ),
+    tiltY: clampBackgroundShapeTilt(
+      typeof value?.tiltY === "number"
+        ? value.tiltY
+        : DEFAULT_BACKGROUND_SHAPE_OPTIONS.tiltY,
     ),
   }
 }

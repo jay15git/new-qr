@@ -27,6 +27,8 @@ describe("drafting qr artwork helpers", () => {
       strokeColor: "#0f172a",
       strokeOpacity: 42,
       strokeWidth: 6,
+      tiltX: 0,
+      tiltY: 0,
     }
     state.backgroundGradient = {
       enabled: true,
@@ -61,6 +63,8 @@ describe("drafting qr artwork helpers", () => {
       strokeColor: "#f8fafc",
       strokeOpacity: 100,
       strokeWidth: 0,
+      tiltX: 0,
+      tiltY: 0,
     })
     expect(artworkState.backgroundGradient.enabled).toBe(false)
     expect(artworkState.backgroundOptions.transparent).toBe(true)

@@ -1377,6 +1377,41 @@ describe("qr rendering helpers", () => {
     expect(svg.children[1]?.getAttribute("data-qr-layer")).toBe("background-shape")
   })
 
+  it("applies background shape tilt to the vector transform", () => {
+    const state = createDefaultQrStudioState()
+    state.backgroundShapeId = "hexagon"
+    state.backgroundOptions.color = "#d0bcff"
+    state.backgroundShapeOptions = {
+      ...state.backgroundShapeOptions,
+      tiltX: 20,
+      tiltY: -15,
+    }
+
+    const extension = buildQrExtension(state)
+    expect(extension).toBeTypeOf("function")
+
+    if (!extension) {
+      return
+    }
+
+    const svg = createStubElement("svg")
+    svg.appendChild(createStubElement("defs"))
+    svg.appendChild(createStubElement("rect"))
+    svg.appendChild(createStubElement("path"))
+
+    extension(svg as unknown as SVGElement, {
+      height: 320,
+      width: 320,
+    })
+
+    const backgroundShape = svg.querySelector('[data-qr-layer="background-shape"]')
+    const transform = backgroundShape?.getAttribute("transform") ?? ""
+
+    expect(transform).toContain("skewX")
+    expect(transform).toContain("skewY")
+    expect(transform).not.toBe("translate(0 33) scale(1)")
+  })
+
   it("expands vector background shape bounds with padding, stroke, and edge blur", () => {
     const state = createDefaultQrStudioState()
     state.backgroundShapeId = "circle"
@@ -1391,6 +1426,8 @@ describe("qr rendering helpers", () => {
       strokeColor: "#111827",
       strokeOpacity: 42,
       strokeWidth: 6,
+      tiltX: 0,
+      tiltY: 0,
     }
 
     const extension = buildQrExtension(state)
@@ -1459,6 +1496,8 @@ describe("qr rendering helpers", () => {
       strokeColor: "#0f172a",
       strokeOpacity: 55,
       strokeWidth: 8,
+      tiltX: 0,
+      tiltY: 0,
     }
 
     const extension = buildQrExtension(state)
@@ -1526,6 +1565,8 @@ describe("qr rendering helpers", () => {
       strokeColor: "#0f172a",
       strokeOpacity: 55,
       strokeWidth: 8,
+      tiltX: 0,
+      tiltY: 0,
     }
     const hiddenShadowState = {
       ...visibleShadowState,
