@@ -7,7 +7,7 @@ import {
   readLibraryIndex,
 } from "@/features/library/model/storage"
 import type { LibraryIndexV1 } from "@/features/library/model/types"
-import { MOCK_LIBRARY_COLLECTIONS, MOCK_LIBRARY_DESIGNS } from "@/features/library/model/mock-library"
+import { buildDemoLibraryDesigns } from "@/features/studio-hub/model/demo-library"
 
 type LibraryIndexState = {
   index: LibraryIndexV1
@@ -19,8 +19,8 @@ type LibraryIndexState = {
 export function useLibraryIndex(): LibraryIndexState {
   const [index, setIndex] = React.useState<LibraryIndexV1>(() => ({
     ...createEmptyLibraryIndex(),
-    designs: MOCK_LIBRARY_DESIGNS,
-    collections: MOCK_LIBRARY_COLLECTIONS,
+    designs: buildDemoLibraryDesigns(),
+    collections: [],
   }))
   const [isLoading, setIsLoading] = React.useState(true)
   const [isMockFallback, setIsMockFallback] = React.useState(true)
@@ -37,18 +37,15 @@ export function useLibraryIndex(): LibraryIndexState {
       }
 
       if (stored) {
-        setIndex({
-          ...stored,
-          collections: stored.collections.length > 0 ? stored.collections : MOCK_LIBRARY_COLLECTIONS,
-        })
+        setIndex(stored)
         setIsMockFallback(stored.designs.length === 0)
         return
       }
 
       setIndex({
         ...createEmptyLibraryIndex(),
-        designs: MOCK_LIBRARY_DESIGNS,
-        collections: MOCK_LIBRARY_COLLECTIONS,
+        designs: buildDemoLibraryDesigns(),
+        collections: [],
       })
       setIsMockFallback(true)
     } finally {

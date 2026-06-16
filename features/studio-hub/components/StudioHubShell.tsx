@@ -9,9 +9,6 @@ import {
   ScrollAreaViewport,
 } from "@/components/ui/scroll-area"
 import type { DesktopThemeMode } from "@/features/desktop-shell/components/FloatingToolbar"
-import {
-  DESKTOP_INSPECTOR_FG_MUTED,
-} from "@/features/desktop-shell/components/InspectorControls"
 import { LibraryThemeToggle } from "@/features/library/components/LibraryThemeToggle"
 import { StudioHubHome } from "@/features/studio-hub/components/StudioHubHome"
 import { StudioHubStyles } from "@/features/studio-hub/components/StudioHubStyles"
@@ -62,12 +59,7 @@ function StudioHubShellInner({ fontClassName }: StudioHubShellProps) {
           data-slot="studio-hub-header"
           className="fixed top-5 right-0 left-0 z-30 px-4 sm:px-6 max-md:top-4"
         >
-          <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4">
-            <div className="space-y-0.5">
-              <p className={cn("drafting-type-nav-label uppercase tracking-[0.18em]", DESKTOP_INSPECTOR_FG_MUTED)}>
-                QR Studio
-              </p>
-            </div>
+          <div className="mx-auto flex w-full max-w-5xl items-center justify-end gap-4">
             <LibraryThemeToggle theme={theme} onThemeChange={handleThemeChange} />
           </div>
         </header>

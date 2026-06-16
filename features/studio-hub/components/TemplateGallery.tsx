@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { AnimatePresence, LayoutGroup, motion } from "motion/react"
+import { LayoutGroup, motion } from "motion/react"
 
 import { LIBRARY_LIFTED_SURFACE_CLASS } from "@/components/ui/animated-collection"
 import {
@@ -12,7 +12,6 @@ import { useStudioNavigation } from "@/features/studio-hub/hooks/useStudioNaviga
 import {
   QR_DESIGN_TEMPLATES,
   TEMPLATE_CATEGORIES,
-  getFeaturedTemplates,
   type QrDesignTemplate,
   type QrDesignTemplateCategory,
 } from "@/features/studio-hub/model/templates"
@@ -30,8 +29,6 @@ export function TemplateGallery() {
     return QR_DESIGN_TEMPLATES.filter((template) => template.category === category)
   }, [category])
 
-  const featuredTemplates = React.useMemo(() => getFeaturedTemplates(), [])
-
   const handleUseTemplate = React.useCallback(
     (template: QrDesignTemplate) => {
       void openEditor(
@@ -42,7 +39,6 @@ export function TemplateGallery() {
         },
         {
           id: template.id,
-          thumbnailUrl: template.thumbnailUrl,
           title: template.title,
         },
       )
@@ -56,19 +52,6 @@ export function TemplateGallery() {
         <h2 className={cn("drafting-type-section-title font-semibold", DESKTOP_INSPECTOR_FG_PRIMARY)}>
           Templates
         </h2>
-      </div>
-
-      <div className="space-y-4">
-        <h3 className={cn("drafting-type-control-label font-semibold", DESKTOP_INSPECTOR_FG_PRIMARY)}>
-          Featured
-        </h3>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-          {featuredTemplates.map((template, index) => (
-            <div key={template.id} className="aspect-square">
-              <TemplateCard template={template} index={index} onUse={handleUseTemplate} />
-            </div>
-          ))}
-        </div>
       </div>
 
       <div className="flex flex-wrap gap-1.5">
@@ -102,17 +85,11 @@ export function TemplateGallery() {
         </LayoutGroup>
       </div>
 
-      <LayoutGroup id="template-gallery-grid">
-        <motion.div layout className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-          <AnimatePresence mode="popLayout">
-            {filteredTemplates.map((template, index) => (
-              <motion.div key={template.id} layout className="aspect-square">
-                <TemplateCard template={template} index={index} onUse={handleUseTemplate} />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
-      </LayoutGroup>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        {filteredTemplates.map((template) => (
+          <TemplateCard key={template.id} template={template} onUse={handleUseTemplate} />
+        ))}
+      </div>
     </div>
   )
 }

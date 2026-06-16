@@ -6,7 +6,7 @@ import {
   getQrInputTypeLabel,
 } from "@/features/library/model/library-query"
 import { getDesktopLibraryUrl } from "@/features/library/model/storage"
-import type { LibraryQrDesign } from "@/features/library/model/types"
+import type { LibraryQrDesign, LibraryQrDesignRecord } from "@/features/library/model/types"
 
 const LIBRARY_ITEM_ICONS = [QrCodeIcon, Camera01Icon, BrushIcon] as const
 
@@ -16,7 +16,7 @@ function designThumbnailDataUrl(hue: number): string {
 }
 
 export function mapLibraryDesignsToAnimatedCollectionItems(
-  designs: LibraryQrDesign[],
+  designs: Array<LibraryQrDesign | LibraryQrDesignRecord>,
   options?: { includeHref?: boolean },
 ): AnimatedCollectionItem[] {
   const includeHref = options?.includeHref ?? true
@@ -28,6 +28,7 @@ export function mapLibraryDesignsToAnimatedCollectionItems(
     destinationPreview: design.destinationPreview,
     editedLabel: formatLibraryShortDate(design.updatedAt),
     image: design.thumbnailDataUrl ?? designThumbnailDataUrl(design.thumbnailHue ?? 200),
+    document: "document" in design ? design.document : undefined,
     icon: LIBRARY_ITEM_ICONS[index % LIBRARY_ITEM_ICONS.length],
     href: includeHref ? getDesktopLibraryUrl(design.id) : undefined,
   }))

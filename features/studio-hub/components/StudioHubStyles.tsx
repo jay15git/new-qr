@@ -2,7 +2,8 @@ export function StudioHubStyles() {
   return (
     <style>{`
       [data-slot="studio-hub"][data-desktop-theme="dark"] [data-slot="studio-hub-shell"],
-      [data-slot="studio-hub"][data-desktop-theme="dark"] [data-slot="studio-hub-header"] {
+      [data-slot="studio-hub"][data-desktop-theme="dark"] [data-slot="studio-hub-header"],
+      body:has([data-slot="studio-hub"][data-desktop-theme="dark"]) {
         --desktop-inspector-fg-primary: rgba(255, 255, 255, 0.94);
         --desktop-inspector-fg-secondary: rgba(255, 255, 255, 0.72);
         --desktop-inspector-fg-tertiary: rgba(255, 255, 255, 0.56);
@@ -28,7 +29,8 @@ export function StudioHubStyles() {
       }
 
       [data-slot="studio-hub"][data-desktop-theme="light"] [data-slot="studio-hub-shell"],
-      [data-slot="studio-hub"][data-desktop-theme="light"] [data-slot="studio-hub-header"] {
+      [data-slot="studio-hub"][data-desktop-theme="light"] [data-slot="studio-hub-header"],
+      body:has([data-slot="studio-hub"][data-desktop-theme="light"]) {
         --desktop-inspector-fg-primary: rgba(15, 23, 42, 0.90);
         --desktop-inspector-fg-secondary: rgba(15, 23, 42, 0.62);
         --desktop-inspector-fg-tertiary: rgba(15, 23, 42, 0.48);
@@ -53,18 +55,41 @@ export function StudioHubStyles() {
         color: var(--desktop-inspector-fg-secondary);
       }
 
-      [data-slot="studio-hub"] {
-        background-image: radial-gradient(
-          circle at 1px 1px,
-          color-mix(in oklab, var(--desktop-inspector-fg-muted) 28%, transparent) 1px,
-          transparent 0
-        );
-        background-size: 24px 24px;
-      }
-
-      [data-slot="studio-hub"] [data-slot="hub-dropdown-menu"] {
+      body:has([data-slot="studio-hub"]) [data-slot="hub-dropdown-menu"] {
+        background: var(--drafting-option-card-bg) !important;
+        border-color: transparent !important;
+        color: var(--desktop-inspector-fg-secondary) !important;
+        box-shadow: var(--drafting-option-card-shadow-rest) !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
+        --tw-ring-color: transparent !important;
+      }
+
+      body:has([data-slot="studio-hub"]) [data-slot="hub-dropdown-menu"] [data-slot="dropdown-menu-item"] {
+        color: var(--desktop-inspector-fg-tertiary) !important;
+      }
+
+      body:has([data-slot="studio-hub"]) [data-slot="hub-dropdown-menu"] [data-slot="dropdown-menu-item"] svg {
+        color: currentColor !important;
+      }
+
+      body:has([data-slot="studio-hub"]) [data-slot="hub-dropdown-menu"] [data-slot="dropdown-menu-item"]:is(:focus, [data-highlighted]) {
+        background-color: var(--desktop-inspector-control-hover-bg) !important;
+        color: var(--desktop-inspector-fg-primary) !important;
+      }
+
+      body:has([data-slot="studio-hub"]) [data-slot="hub-dropdown-menu"] [data-slot="dropdown-menu-item"]:is(:focus, [data-highlighted]) * {
+        color: inherit !important;
+      }
+
+      body:has([data-slot="studio-hub"]) [data-slot="hub-dropdown-menu"] [data-slot="dropdown-menu-item"][data-hub-item-active] {
+        background-color: var(--desktop-inspector-option-selected-bg) !important;
+        color: var(--desktop-inspector-option-selected-fg) !important;
+      }
+
+      body:has([data-slot="studio-hub"]) [data-slot="hub-dropdown-menu"] [data-slot="dropdown-menu-item"][data-hub-item-active]:is(:focus, [data-highlighted]) {
+        background-color: var(--desktop-inspector-option-selected-bg) !important;
+        color: var(--desktop-inspector-option-selected-fg) !important;
       }
 
       [data-slot="studio-hub"] [data-slot="studio-library-empty"],

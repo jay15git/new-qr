@@ -1,19 +1,17 @@
 "use client"
 
 import * as React from "react"
-import Image from "next/image"
 import { AnimatePresence, motion } from "motion/react"
 
 import { AllTabContent } from "@/features/library/components/AllTabContent"
-import { CollectionFolders } from "@/features/library/components/CollectionFolders"
+import { QrDocumentPreview } from "@/features/qr-code/components/QrDocumentPreview"
 import {
-  DESKTOP_INSPECTOR_FG_MUTED,
   DESKTOP_INSPECTOR_FG_PRIMARY,
   DESKTOP_INSPECTOR_RESET_CLASS,
 } from "@/features/desktop-shell/components/InspectorControls"
 import { HUB_CARD_SURFACE } from "@/features/studio-hub/components/hub-surfaces"
 import { sortLibraryDesigns } from "@/features/library/model/library-query"
-import type { LibraryQrDesign } from "@/features/library/model/types"
+import type { LibraryQrDesignRecord } from "@/features/library/model/types"
 import { useLibraryIndex } from "@/features/studio-hub/hooks/useLibraryIndex"
 import { useStudioNavigation } from "@/features/studio-hub/hooks/useStudioNavigation"
 import { cn } from "@/lib/utils"
@@ -28,8 +26,8 @@ function LibraryStripCard({
   design,
   onOpen,
 }: {
-  design: LibraryQrDesign
-  onOpen: (design: LibraryQrDesign) => void
+  design: LibraryQrDesignRecord
+  onOpen: (design: LibraryQrDesignRecord) => void
 }) {
   return (
     <motion.button
@@ -41,20 +39,19 @@ function LibraryStripCard({
       onClick={() => onOpen(design)}
     >
       <div className={cn("relative aspect-[4/5] w-full overflow-hidden", HUB_CARD_SURFACE)}>
-        {design.thumbnailDataUrl ? (
-          <Image
+        {design.document ? (
+          <QrDocumentPreview
+            document={design.document}
+            className="transition-transform duration-500 group-hover:scale-[1.04]"
+          />
+        ) : design.thumbnailDataUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
             src={design.thumbnailDataUrl}
             alt=""
-            fill
-            unoptimized
-            sizes="148px"
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
           />
-        ) : (
-          <div className={cn("flex h-full items-center justify-center text-xs", DESKTOP_INSPECTOR_FG_MUTED)}>
-            No preview
-          </div>
-        )}
+        ) : null}
       </div>
       <span className={cn("truncate px-0.5 text-sm font-medium", DESKTOP_INSPECTOR_FG_PRIMARY)}>
         {design.title}
@@ -64,33 +61,17 @@ function LibraryStripCard({
 }
 
 function LibraryExpandedContent({
-  index,
+  designs,
   onOpenDesign,
 }: {
-  index: ReturnType<typeof useLibraryIndex>["index"]
-  onOpenDesign: (design: LibraryQrDesign) => void
+  designs: LibraryQrDesignRecord[]
+  onOpenDesign: (design: LibraryQrDesignRecord) => void
 }) {
-  return (
-    <div className="space-y-8 pt-2">
-      <div className="space-y-4">
-        <h3 className={cn("drafting-type-control-label font-semibold", DESKTOP_INSPECTOR_FG_PRIMARY)}>
-          Collections
-        </h3>
-        <CollectionFolders collections={index.collections} />
-      </div>
-
-      <div className="space-y-4">
-        <h3 className={cn("drafting-type-control-label font-semibold", DESKTOP_INSPECTOR_FG_PRIMARY)}>
-          All designs
-        </h3>
-        <AllTabContent designs={index.designs} onDesignClick={onOpenDesign} />
-      </div>
-    </div>
-  )
+  return <AllTabContent designs={designs} onDesignClick={onOpenDesign} />
 }
 
 export function StudioHubLibrarySection({ initialExpanded = false }: StudioHubLibrarySectionProps) {
-  const { index, isLoading } = useLibraryIndex()
+  const { index, isLoading, isMockFallback } = useLibraryIndex()
   const { openEditor } = useStudioNavigation()
   const [isExpanded, setIsExpanded] = React.useState(initialExpanded)
 
@@ -106,21 +87,28 @@ export function StudioHubLibrarySection({ initialExpanded = false }: StudioHubLi
   )
 
   const handleOpenDesign = React.useCallback(
-    (design: LibraryQrDesign) => {
+    (design: LibraryQrDesignRecord) => {
+      const usesTemplateDocument = isMockFallback && Boolean(design.document)
+
       void openEditor(
-        {
-          source: "library",
-          designId: design.id,
-          transitionId: design.id,
-        },
+        usesTemplateDocument
+          ? {
+              source: "template",
+              templateId: design.id,
+              transitionId: design.id,
+            }
+          : {
+              source: "library",
+              designId: design.id,
+              transitionId: design.id,
+            },
         {
           id: design.id,
-          thumbnailUrl: design.thumbnailDataUrl,
           title: design.title,
         },
       )
     },
-    [openEditor],
+    [isMockFallback, openEditor],
   )
 
   const toggleExpanded = React.useCallback(() => {
@@ -192,7 +180,7 @@ export function StudioHubLibrarySection({ initialExpanded = false }: StudioHubLi
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <LibraryExpandedContent index={index} onOpenDesign={handleOpenDesign} />
+            <LibraryExpandedContent designs={index.designs} onOpenDesign={handleOpenDesign} />
           </motion.div>
         ) : null}
       </AnimatePresence>

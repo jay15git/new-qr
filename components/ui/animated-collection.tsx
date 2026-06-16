@@ -13,12 +13,15 @@ import {
   DESKTOP_INSPECTOR_FG_MUTED,
   DESKTOP_INSPECTOR_FG_PRIMARY,
 } from "@/features/desktop-shell/components/InspectorControls"
+import { QrDocumentPreview } from "@/features/qr-code/components/QrDocumentPreview"
+import type { DraftingWorkspaceDocumentV1 } from "@/features/workspace/model/document"
 import { cn } from "@/lib/utils"
 
 type CollectionIcon = typeof QrCodeIcon
 
 export type AnimatedCollectionItem = {
   destinationPreview?: string
+  document?: DraftingWorkspaceDocumentV1
   editedLabel?: string
   href?: string
   icon?: CollectionIcon
@@ -141,17 +144,28 @@ function CollectionItemRow({
             "aspect-square w-full rounded-[1.8rem] border border-[var(--drafting-option-card-border)] shadow-[var(--drafting-option-card-shadow-rest)]",
         )}
       >
-        <motion.img
-          layout
-          transition={snappySpring}
-          src={item.image}
-          alt={item.title}
-          className={cn(
-            "m-0! block h-full w-full object-cover p-0!",
-            isList && "rounded-2xl",
-            !isList && "rounded-[1.8rem]",
-          )}
-        />
+        {item.document ? (
+          <QrDocumentPreview
+            document={item.document}
+            className={cn(
+              "h-full w-full",
+              isList && "rounded-2xl",
+              !isList && "rounded-[1.8rem]",
+            )}
+          />
+        ) : (
+          <motion.img
+            layout
+            transition={snappySpring}
+            src={item.image}
+            alt={item.title}
+            className={cn(
+              "m-0! block h-full w-full object-cover p-0!",
+              isList && "rounded-2xl",
+              !isList && "rounded-[1.8rem]",
+            )}
+          />
+        )}
       </motion.div>
 
       <motion.h3

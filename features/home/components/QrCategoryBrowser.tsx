@@ -109,7 +109,7 @@ export function QrCategoryBrowser({
               data-slot="hub-dropdown-menu"
               className={cn(
                 HUB_DROPDOWN_MENU_CLASS,
-                "w-[22rem] max-w-[calc(100vw-2rem)] rounded-2xl p-2",
+                "w-[22rem] max-w-[calc(100vw-2rem)]",
               )}
             >
               <DropdownMenuGroup className="grid gap-1 sm:grid-cols-2">
@@ -120,6 +120,7 @@ export function QrCategoryBrowser({
                   return (
                     <DropdownMenuItem
                       key={item.value}
+                      data-hub-item-active={isActive ? "" : undefined}
                       onSelect={() => {
                         onInputTypeChange(item.value)
                         setOpenCategory(null)
