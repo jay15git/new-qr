@@ -34,12 +34,12 @@ export function parseStudioHubTab(value: string | null | undefined): StudioHubTa
   return "create"
 }
 
-export function buildHubUrl(tab: StudioHubTab): string {
-  if (tab === "create") {
-    return "/"
+export function buildHubUrl(_tab?: StudioHubTab, options?: { libraryOpen?: boolean }): string {
+  if (options?.libraryOpen) {
+    return "/?library=open"
   }
 
-  return `/?tab=${tab}`
+  return "/"
 }
 
 export function buildDesktopEditorUrl(intent: StudioNavigationIntent): string {

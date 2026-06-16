@@ -2,9 +2,9 @@ import { readFileSync } from "node:fs"
 import { isValidElement } from "react"
 import { describe, expect, it, vi } from "vitest"
 
-vi.mock("@/features/desktop-shell/components/DesktopWorkspace", () => ({
-  DesktopWorkspace: ({ fontClassName }: { fontClassName?: string }) => (
-    <div data-font-class-name={fontClassName} data-testid="desktop-workspace" />
+vi.mock("@/features/studio-hub/components/DesktopPageClient", () => ({
+  DesktopPageClient: ({ fontClassName }: { fontClassName?: string }) => (
+    <div data-font-class-name={fontClassName} data-testid="desktop-page-client" />
   ),
 }))
 
@@ -14,7 +14,7 @@ vi.mock("next/font/local", () => ({
   }),
 }))
 
-import { DesktopWorkspace } from "@/features/desktop-shell/components/DesktopWorkspace"
+import { DesktopPageClient } from "@/features/studio-hub/components/DesktopPageClient"
 import DesktopPage, { metadata } from "./page"
 
 describe("desktop page", () => {
@@ -23,7 +23,7 @@ describe("desktop page", () => {
     expect(metadata.description).toContain("floating toolbar")
   })
 
-  it("renders the desktop workspace inside the route shell", () => {
+  it("renders the desktop page client inside the route shell", () => {
     const page = DesktopPage()
 
     expect(isValidElement(page)).toBe(true)
@@ -32,11 +32,16 @@ describe("desktop page", () => {
     expect(page.props.className).toContain("min-h-dvh")
     expect(page.props["data-slot"]).toBe("desktop-page")
 
-    const workspace = page.props.children
+    const suspense = page.props.children
 
-    expect(isValidElement(workspace)).toBe(true)
-    expect(workspace.type).toBe(DesktopWorkspace)
-    expect(workspace.props.fontClassName).toBe("mock-satoshi-font")
+    expect(isValidElement(suspense)).toBe(true)
+    expect(suspense.type).toBe(Symbol.for("react.suspense"))
+
+    const client = suspense.props.children
+
+    expect(isValidElement(client)).toBe(true)
+    expect(client.type).toBe(DesktopPageClient)
+    expect(client.props.fontClassName).toBe("mock-satoshi-font")
   })
 
   it("keeps portaled layer appearance popovers in sync with desktop light mode", () => {

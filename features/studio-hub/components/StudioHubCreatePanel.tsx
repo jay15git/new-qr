@@ -27,7 +27,6 @@ export function StudioHubCreatePanel() {
         source: "prompt",
         inputType: activeInputType ?? DEFAULT_QR_INPUT_TYPE,
         prompt: message,
-        returnTab: "create",
       })
     },
     [activeInputType, openEditor],
@@ -36,12 +35,11 @@ export function StudioHubCreatePanel() {
   const handleStartBlank = React.useCallback(() => {
     void openEditor({
       source: "blank",
-      returnTab: "create",
     })
   }, [openEditor])
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
       <div
         data-slot="studio-create-prompt"
         className="rounded-[1.35rem] border border-[var(--desktop-inspector-control-border-hover)] bg-[var(--desktop-inspector-field-bg)] p-1 shadow-[var(--drafting-shadow-rest)] backdrop-blur-sm"

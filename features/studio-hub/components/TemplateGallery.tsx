@@ -38,7 +38,6 @@ export function TemplateGallery() {
         {
           source: "template",
           templateId: template.id,
-          returnTab: "templates",
           transitionId: template.id,
         },
         {
@@ -55,23 +54,28 @@ export function TemplateGallery() {
     <div className="space-y-6">
       <div className="space-y-1">
         <h2 className={cn("drafting-type-section-title", DESKTOP_INSPECTOR_FG_PRIMARY)}>
-          Featured templates
+          Templates
         </h2>
         <p className={cn("drafting-type-caption", DESKTOP_INSPECTOR_FG_MUTED)}>
           Curated starter designs with QR styling, card frames, and default content.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {featuredTemplates.map((template, index) => (
-          <TemplateCard
-            key={template.id}
-            template={template}
-            featured
-            index={index}
-            onUse={handleUseTemplate}
-          />
-        ))}
+      <div className="space-y-3">
+        <h3 className={cn("drafting-type-control-label font-semibold", DESKTOP_INSPECTOR_FG_PRIMARY)}>
+          Featured
+        </h3>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {featuredTemplates.map((template, index) => (
+            <TemplateCard
+              key={template.id}
+              template={template}
+              featured
+              index={index}
+              onUse={handleUseTemplate}
+            />
+          ))}
+        </div>
       </div>
 
       <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

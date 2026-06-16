@@ -5,13 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 
 import { DesktopWorkspace } from "@/features/desktop-shell/components/DesktopWorkspace"
 import { HubToEditorTransition } from "@/features/studio-hub/components/HubToEditorTransition"
-import {
-  buildHubUrl,
-  parseStudioHubTab,
-  readStudioSession,
-  STUDIO_THEME_KEY,
-  type StudioHubTab,
-} from "@/features/studio-hub/model/navigation"
+import { STUDIO_THEME_KEY } from "@/features/studio-hub/model/navigation"
 import type { DesktopThemeMode } from "@/features/desktop-shell/components/FloatingToolbar"
 import type { DesktopToolbarToolId } from "@/features/desktop-shell/components/FloatingToolbar"
 
@@ -31,7 +25,6 @@ export function DesktopPageClient({ fontClassName }: DesktopPageClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const source = searchParams.get("source")
-  const returnTab = parseStudioHubTab(searchParams.get("returnTab"))
   const [initialTheme] = React.useState<DesktopThemeMode>(() => {
     if (typeof window === "undefined") {
       return "light"
@@ -46,10 +39,8 @@ export function DesktopPageClient({ fontClassName }: DesktopPageClientProps) {
   })
 
   const handleBack = React.useCallback(() => {
-    const session = readStudioSession()
-    const tab: StudioHubTab = session?.returnTab ?? returnTab
-    router.push(buildHubUrl(tab))
-  }, [router, returnTab])
+    router.push("/")
+  }, [router])
 
   return (
     <>

@@ -52,25 +52,21 @@ export function StudioHubStyles() {
         background-size: 24px 24px;
       }
 
-      [data-slot="studio-hub-panel"] {
-        animation: studio-hub-panel-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      [data-slot="studio-library-strip"] {
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        mask-image: linear-gradient(
+          to right,
+          transparent,
+          black 12px,
+          black calc(100% - 12px),
+          transparent
+        );
       }
 
-      @keyframes studio-hub-panel-enter {
-        from {
-          opacity: 0;
-          transform: translateY(12px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        [data-slot="studio-hub-panel"] {
-          animation: none;
-        }
+      [data-slot="studio-library-strip"]::-webkit-scrollbar {
+        display: none;
       }
     `}</style>
   )

@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation"
 import { writeDraftingWorkspaceDraft } from "@/features/workspace/model/storage"
 import {
   buildDesktopEditorUrl,
-  type StudioHubTab,
   type StudioNavigationIntent,
   writeStudioSession,
 } from "@/features/studio-hub/model/navigation"
@@ -82,16 +81,4 @@ export function useStudioNavigation() {
 
 export function useStudioNavigationOptional() {
   return React.useContext(StudioNavigationContext)
-}
-
-export function useStudioHubTabFromUrl(
-  searchParams: URLSearchParams | null,
-  defaultTab: StudioHubTab = "create",
-): StudioHubTab {
-  const tabParam = searchParams?.get("tab")
-  if (tabParam === "templates" || tabParam === "library" || tabParam === "create") {
-    return tabParam
-  }
-
-  return defaultTab
 }
