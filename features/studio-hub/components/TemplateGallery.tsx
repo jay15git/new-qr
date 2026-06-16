@@ -6,6 +6,7 @@ import { AnimatePresence, LayoutGroup, motion } from "motion/react"
 import {
   DESKTOP_INSPECTOR_FG_MUTED,
   DESKTOP_INSPECTOR_FG_PRIMARY,
+  DESKTOP_INSPECTOR_FG_SECONDARY,
 } from "@/features/desktop-shell/components/InspectorControls"
 import { TemplateCard } from "@/features/studio-hub/components/TemplateCard"
 import { useStudioNavigation } from "@/features/studio-hub/hooks/useStudioNavigation"
@@ -51,34 +52,33 @@ export function TemplateGallery() {
   )
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="space-y-1">
-        <h2 className={cn("drafting-type-section-title", DESKTOP_INSPECTOR_FG_PRIMARY)}>
+        <p className={cn("drafting-type-nav-label uppercase tracking-[0.16em]", DESKTOP_INSPECTOR_FG_MUTED)}>
+          Gallery
+        </p>
+        <h2 className={cn("drafting-type-section-title font-semibold", DESKTOP_INSPECTOR_FG_PRIMARY)}>
           Templates
         </h2>
-        <p className={cn("drafting-type-caption", DESKTOP_INSPECTOR_FG_MUTED)}>
+        <p className={cn("drafting-type-caption max-w-2xl", DESKTOP_INSPECTOR_FG_SECONDARY)}>
           Curated starter designs with QR styling, card frames, and default content.
         </p>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         <h3 className={cn("drafting-type-control-label font-semibold", DESKTOP_INSPECTOR_FG_PRIMARY)}>
           Featured
         </h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           {featuredTemplates.map((template, index) => (
-            <TemplateCard
-              key={template.id}
-              template={template}
-              featured
-              index={index}
-              onUse={handleUseTemplate}
-            />
+            <div key={template.id} className="aspect-square">
+              <TemplateCard template={template} index={index} onUse={handleUseTemplate} />
+            </div>
           ))}
         </div>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex flex-wrap gap-1.5">
         <LayoutGroup id="template-category-filters">
           {TEMPLATE_CATEGORIES.map((entry) => {
             const isActive = category === entry.id
@@ -88,7 +88,7 @@ export function TemplateGallery() {
                 key={entry.id}
                 type="button"
                 className={cn(
-                  "relative shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                  "relative shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
                   isActive
                     ? "text-[var(--desktop-inspector-option-selected-fg)]"
                     : "text-[var(--desktop-inspector-fg-muted)] hover:text-[var(--desktop-inspector-fg-secondary)]",
@@ -99,7 +99,7 @@ export function TemplateGallery() {
                   <motion.span
                     layoutId="template-category-pill"
                     transition={{ type: "spring", stiffness: 320, damping: 28 }}
-                    className="absolute inset-0 rounded-full bg-[var(--desktop-inspector-option-selected-bg)] shadow-[var(--drafting-shadow-rest)]"
+                    className="absolute inset-0 rounded-full border border-[var(--desktop-inspector-control-border-hover)] bg-[var(--desktop-inspector-option-selected-bg)] shadow-[var(--drafting-shadow-rest)]"
                   />
                 ) : null}
                 <span className="relative z-10">{entry.label}</span>
@@ -110,15 +110,12 @@ export function TemplateGallery() {
       </div>
 
       <LayoutGroup id="template-gallery-grid">
-        <motion.div layout className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <motion.div layout className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           <AnimatePresence mode="popLayout">
             {filteredTemplates.map((template, index) => (
-              <TemplateCard
-                key={template.id}
-                template={template}
-                index={index}
-                onUse={handleUseTemplate}
-              />
+              <motion.div key={template.id} layout className="aspect-square">
+                <TemplateCard template={template} index={index} onUse={handleUseTemplate} />
+              </motion.div>
             ))}
           </AnimatePresence>
         </motion.div>

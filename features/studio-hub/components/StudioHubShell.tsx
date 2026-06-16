@@ -9,7 +9,9 @@ import {
   ScrollAreaViewport,
 } from "@/components/ui/scroll-area"
 import type { DesktopThemeMode } from "@/features/desktop-shell/components/FloatingToolbar"
-import { DESKTOP_INSPECTOR_FG_PRIMARY } from "@/features/desktop-shell/components/InspectorControls"
+import {
+  DESKTOP_INSPECTOR_FG_MUTED,
+} from "@/features/desktop-shell/components/InspectorControls"
 import { LibraryThemeToggle } from "@/features/library/components/LibraryThemeToggle"
 import { StudioHubHome } from "@/features/studio-hub/components/StudioHubHome"
 import { StudioHubStyles } from "@/features/studio-hub/components/StudioHubStyles"
@@ -60,14 +62,11 @@ function StudioHubShellInner({ fontClassName }: StudioHubShellProps) {
           data-slot="studio-hub-header"
           className="fixed top-5 right-0 left-0 z-30 px-4 sm:px-6 max-md:top-4"
         >
-          <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4">
+          <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4">
             <div className="space-y-0.5">
-              <p className={cn("drafting-type-caption uppercase tracking-[0.18em]", DESKTOP_INSPECTOR_FG_PRIMARY)}>
+              <p className={cn("drafting-type-nav-label uppercase tracking-[0.18em]", DESKTOP_INSPECTOR_FG_MUTED)}>
                 QR Studio
               </p>
-              <h1 className={cn("drafting-type-display-data text-[1.65rem] leading-tight sm:text-[2rem]", DESKTOP_INSPECTOR_FG_PRIMARY)}>
-                Design. Share. Scan.
-              </h1>
             </div>
             <LibraryThemeToggle theme={theme} onThemeChange={handleThemeChange} />
           </div>
@@ -82,9 +81,9 @@ function StudioHubShellInner({ fontClassName }: StudioHubShellProps) {
         >
           <ScrollAreaViewport
             data-slot="studio-hub-scroll"
-            className="h-full w-full overflow-x-hidden overflow-y-auto px-4 pt-[7rem] pb-12 sm:px-6 sm:pt-[7.5rem] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="h-full w-full overflow-x-hidden overflow-y-auto px-4 pt-[5.5rem] pb-16 sm:px-6 sm:pt-[6rem] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
-            <div data-slot="studio-hub-shell" className="mx-auto flex w-full max-w-6xl flex-col">
+            <div data-slot="studio-hub-shell" className="mx-auto flex w-full max-w-5xl flex-col">
               <StudioHubHome />
             </div>
           </ScrollAreaViewport>

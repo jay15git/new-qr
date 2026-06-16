@@ -11,6 +11,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  DESKTOP_INSPECTOR_DROPDOWN_ITEM_CLASS,
+  DESKTOP_INSPECTOR_DROPDOWN_MENU_CLASS,
+  DESKTOP_INSPECTOR_FG_SECONDARY,
+  DESKTOP_INSPECTOR_SELECTED_CLASS,
+} from "@/features/desktop-shell/components/InspectorControls"
 import { cn } from "@/lib/utils"
 
 import {
@@ -50,7 +56,7 @@ export function QrCategoryBrowser({
   return (
     <div
       data-testid="qr-category-browser"
-      className="flex flex-wrap items-center gap-2 px-2"
+      className="flex flex-wrap items-center justify-center gap-1.5"
     >
       {QR_CATEGORIES.map((category) => {
         const CategoryIcon = category.icon
@@ -77,9 +83,14 @@ export function QrCategoryBrowser({
                 variant="outline"
                 size="sm"
                 className={cn(
-                  "h-8 rounded-full border-[#2E2F33] bg-[#16171A] px-3 text-xs text-[#9CA3AF] shadow-none hover:bg-[#202227] hover:text-[#F9FAFB]",
+                  "h-8 rounded-full border border-[var(--desktop-inspector-control-border-hover)] bg-[var(--desktop-inspector-field-bg)] px-3 text-xs shadow-none transition-colors",
+                  DESKTOP_INSPECTOR_FG_SECONDARY,
+                  "hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)]",
                   (isOpen || isSelectedCategory) &&
-                    "border-[#1EAEDB] bg-[#1EAEDB]/10 text-[#1EAEDB] hover:bg-[#1EAEDB]/15 hover:text-[#7DD3FC]"
+                    cn(
+                      DESKTOP_INSPECTOR_SELECTED_CLASS,
+                      "border-transparent hover:border-transparent",
+                    ),
                 )}
               >
                 <CategoryIcon data-icon="inline-start" />
@@ -92,7 +103,10 @@ export function QrCategoryBrowser({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="w-[22rem] max-w-[calc(100vw-2rem)] rounded-3xl border border-[#2E2F33] bg-[#16171A] p-2 text-[#F9FAFB] shadow-2xl"
+              className={cn(
+                DESKTOP_INSPECTOR_DROPDOWN_MENU_CLASS,
+                "w-[22rem] max-w-[calc(100vw-2rem)] rounded-2xl p-2",
+              )}
             >
               <DropdownMenuGroup className="grid gap-1 sm:grid-cols-2">
                 {category.items.map((item) => {
@@ -107,8 +121,9 @@ export function QrCategoryBrowser({
                         setOpenCategory(null)
                       }}
                       className={cn(
-                        "min-h-10 rounded-2xl border border-transparent px-3 py-2 text-xs text-[#D1D5DB] focus:bg-[#24262C] focus:text-white",
-                        isActive && "border-[#1EAEDB]/50 bg-[#1EAEDB]/12 text-[#7DD3FC]"
+                        DESKTOP_INSPECTOR_DROPDOWN_ITEM_CLASS,
+                        "min-h-10 rounded-xl px-3 py-2",
+                        isActive && DESKTOP_INSPECTOR_SELECTED_CLASS,
                       )}
                     >
                       <ItemIcon />

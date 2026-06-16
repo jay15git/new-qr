@@ -75,7 +75,7 @@ describe("theme contract", () => {
 
     expect(globalsSource).toContain("--drafting-page-bg: var(--drafting-dark-page-bg);")
     expect(globalsSource).toContain(
-      '.dark :is([data-slot="desktop-page"], [data-slot="drafting-download-popover"])',
+      '.dark :is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"])',
     )
     expect(qrPaneSource).toContain('data-drafting-dropdown-content="true"')
     expect(qrPaneSource).toContain("bg-[var(--drafting-dropdown-menu-surface-open)]")
@@ -149,8 +149,8 @@ describe("theme contract", () => {
       "--drafting-type-meta: 0.875rem;",
       "--drafting-type-caption: 0.75rem;",
       "--drafting-type-display-data: 1.5rem;",
-      ':is([data-slot="desktop-page"], [data-slot="drafting-download-popover"]) .drafting-type-body',
-      ':is([data-slot="desktop-page"], [data-slot="drafting-download-popover"]) .drafting-type-nav-label',
+      ':is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"], [data-slot="studio-hub"]) .drafting-type-body',
+      ':is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"], [data-slot="studio-hub"]) .drafting-type-nav-label',
     ]
 
     for (const token of requiredTypographyTokens) {

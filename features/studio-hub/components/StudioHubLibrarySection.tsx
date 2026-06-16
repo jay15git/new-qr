@@ -9,6 +9,7 @@ import { CollectionFolders } from "@/features/library/components/CollectionFolde
 import {
   DESKTOP_INSPECTOR_FG_MUTED,
   DESKTOP_INSPECTOR_FG_PRIMARY,
+  DESKTOP_INSPECTOR_FG_SECONDARY,
   DESKTOP_INSPECTOR_RESET_CLASS,
 } from "@/features/desktop-shell/components/InspectorControls"
 import { sortLibraryDesigns } from "@/features/library/model/library-query"
@@ -34,26 +35,27 @@ function LibraryStripCard({
     <motion.button
       type="button"
       layoutId={`hub-item-${design.id}`}
-      whileHover={{ y: -2 }}
+      whileHover={{ y: -3 }}
       whileTap={{ scale: 0.98 }}
-      className="group flex w-[9.5rem] shrink-0 snap-start flex-col gap-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
+      className="group flex w-[9.25rem] shrink-0 snap-start flex-col gap-2.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
       onClick={() => onOpen(design)}
     >
-      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl border border-[var(--desktop-inspector-control-border-hover)] bg-[var(--desktop-inspector-field-bg)] shadow-[var(--drafting-shadow-rest)] transition-shadow group-hover:shadow-[var(--drafting-shadow-elevated)]">
+      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl border border-[var(--desktop-inspector-control-border-hover)] bg-[var(--desktop-inspector-field-bg)] shadow-[var(--drafting-shadow-rest)] transition-all duration-300 group-hover:border-[var(--desktop-inspector-control-border-hover)] group-hover:shadow-[var(--drafting-shadow-elevated)]">
         {design.thumbnailDataUrl ? (
           <Image
             src={design.thumbnailDataUrl}
             alt=""
             fill
             unoptimized
-            sizes="152px"
-            className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            sizes="148px"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-xs text-[var(--desktop-inspector-fg-muted)]">
+          <div className={cn("flex h-full items-center justify-center text-xs", DESKTOP_INSPECTOR_FG_MUTED)}>
             No preview
           </div>
         )}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       </div>
       <span className={cn("truncate px-0.5 text-sm font-medium", DESKTOP_INSPECTOR_FG_PRIMARY)}>
         {design.title}
@@ -142,13 +144,13 @@ export function StudioHubLibrarySection({ initialExpanded = false }: StudioHubLi
 
   if (isLoading) {
     return (
-      <section data-slot="studio-library-section" className="space-y-4">
-        <div className="h-6 w-32 animate-pulse rounded bg-[var(--desktop-inspector-section-bg)]" />
+      <section data-slot="studio-library-section" className="space-y-5">
+        <div className="h-5 w-28 animate-pulse rounded-md bg-[var(--desktop-inspector-section-bg)]" />
         <div className="flex gap-3 overflow-hidden">
           {Array.from({ length: 5 }).map((_, index) => (
             <div
               key={index}
-              className="h-[11.5rem] w-[9.5rem] shrink-0 animate-pulse rounded-xl bg-[var(--desktop-inspector-section-bg)]"
+              className="h-[11.25rem] w-[9.25rem] shrink-0 animate-pulse rounded-2xl bg-[var(--desktop-inspector-section-bg)]"
             />
           ))}
         </div>
@@ -160,14 +162,17 @@ export function StudioHubLibrarySection({ initialExpanded = false }: StudioHubLi
   const showToggle = hasDesigns
 
   return (
-    <section data-slot="studio-library-section" className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="space-y-0.5">
-          <h2 className={cn("drafting-type-section-title", DESKTOP_INSPECTOR_FG_PRIMARY)}>
+    <section data-slot="studio-library-section" className="space-y-5">
+      <div className="flex items-end justify-between gap-4">
+        <div className="space-y-1">
+          <p className={cn("drafting-type-nav-label uppercase tracking-[0.16em]", DESKTOP_INSPECTOR_FG_MUTED)}>
+            Library
+          </p>
+          <h2 className={cn("drafting-type-section-title font-semibold", DESKTOP_INSPECTOR_FG_PRIMARY)}>
             Your designs
           </h2>
           {!isExpanded && hasDesigns ? (
-            <p className={cn("drafting-type-caption", DESKTOP_INSPECTOR_FG_MUTED)}>
+            <p className={cn("drafting-type-caption", DESKTOP_INSPECTOR_FG_SECONDARY)}>
               Recent work — open any design to keep editing.
             </p>
           ) : null}
@@ -175,7 +180,7 @@ export function StudioHubLibrarySection({ initialExpanded = false }: StudioHubLi
         {showToggle ? (
           <button
             type="button"
-            className={cn(DESKTOP_INSPECTOR_RESET_CLASS, "shrink-0 rounded-full px-3 py-1.5 text-sm")}
+            className={cn(DESKTOP_INSPECTOR_RESET_CLASS, "w-auto shrink-0 rounded-full px-3 py-1.5 text-sm")}
             onClick={toggleExpanded}
           >
             {isExpanded ? "Show less" : "See all"}
@@ -194,8 +199,8 @@ export function StudioHubLibrarySection({ initialExpanded = false }: StudioHubLi
             ))}
           </div>
         ) : (
-          <div className="flex min-h-[5.5rem] items-center justify-center rounded-xl border border-dashed border-[var(--desktop-inspector-control-border-hover)] bg-[var(--desktop-inspector-field-bg)] px-6 py-4 text-center">
-            <p className={cn("drafting-type-caption", DESKTOP_INSPECTOR_FG_MUTED)}>
+          <div className="flex min-h-[6.5rem] items-center justify-center rounded-2xl border border-dashed border-[var(--desktop-inspector-control-border-hover)] bg-[var(--desktop-inspector-section-bg)] px-6 py-5 text-center backdrop-blur-sm">
+            <p className={cn("drafting-type-caption max-w-sm", DESKTOP_INSPECTOR_FG_MUTED)}>
               Create your first QR — saved designs will appear here.
             </p>
           </div>

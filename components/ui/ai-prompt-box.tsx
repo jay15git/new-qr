@@ -281,12 +281,13 @@ const ImageViewDialog: React.FC<ImageViewDialogProps> = ({ imageUrl, onClose }) 
 
 // PromptInput Context and Components
 interface PromptInputContextType {
-  isLoading: boolean;
-  value: string;
-  setValue: (value: string) => void;
-  maxHeight: number | string;
-  onSubmit?: () => void;
-  disabled?: boolean;
+  isLoading: boolean
+  value: string
+  setValue: (value: string) => void
+  maxHeight: number | string
+  onSubmit?: () => void
+  disabled?: boolean
+  variant?: "default" | "studio"
 }
 const PromptInputContext = React.createContext<PromptInputContextType>({
   isLoading: false,
@@ -295,7 +296,8 @@ const PromptInputContext = React.createContext<PromptInputContextType>({
   maxHeight: 240,
   onSubmit: undefined,
   disabled: false,
-});
+  variant: "default",
+})
 function usePromptInput() {
   const context = React.useContext(PromptInputContext);
   if (!context) throw new Error("usePromptInput must be used within a PromptInput");
@@ -303,17 +305,18 @@ function usePromptInput() {
 }
 
 interface PromptInputProps {
-  isLoading?: boolean;
-  value?: string;
-  onValueChange?: (value: string) => void;
-  maxHeight?: number | string;
-  onSubmit?: () => void;
-  children: React.ReactNode;
-  className?: string;
-  disabled?: boolean;
-  onDragOver?: (e: React.DragEvent) => void;
-  onDragLeave?: (e: React.DragEvent) => void;
-  onDrop?: (e: React.DragEvent) => void;
+  isLoading?: boolean
+  value?: string
+  onValueChange?: (value: string) => void
+  maxHeight?: number | string
+  onSubmit?: () => void
+  children: React.ReactNode
+  className?: string
+  disabled?: boolean
+  variant?: "default" | "studio"
+  onDragOver?: (e: React.DragEvent) => void
+  onDragLeave?: (e: React.DragEvent) => void
+  onDrop?: (e: React.DragEvent) => void
 }
 const PromptInput = React.forwardRef<HTMLDivElement, PromptInputProps>(
   (
@@ -326,6 +329,7 @@ const PromptInput = React.forwardRef<HTMLDivElement, PromptInputProps>(
       onSubmit,
       children,
       disabled = false,
+      variant = "default",
       onDragOver,
       onDragLeave,
       onDrop,
@@ -337,6 +341,7 @@ const PromptInput = React.forwardRef<HTMLDivElement, PromptInputProps>(
       setInternalValue(newValue);
       onValueChange?.(newValue);
     };
+    const isStudio = variant === "studio";
     return (
       <TooltipProvider>
         <PromptInputContext.Provider
@@ -347,12 +352,16 @@ const PromptInput = React.forwardRef<HTMLDivElement, PromptInputProps>(
             maxHeight,
             onSubmit,
             disabled,
+            variant,
           }}
         >
           <div
             ref={ref}
             className={cn(
-              "rounded-3xl border border-[#444444] bg-[#1F2023] p-2 shadow-[0_8px_30px_rgba(0,0,0,0.24)] transition-all duration-300",
+              "transition-all duration-300",
+              isStudio
+                ? "rounded-[1.1rem] border border-[var(--desktop-inspector-control-border-hover)] bg-transparent p-2 shadow-none"
+                : "rounded-3xl border border-[#444444] bg-[#1F2023] p-2 shadow-[0_8px_30px_rgba(0,0,0,0.24)]",
               isLoading && "border-red-500/70",
               className
             )}
@@ -380,8 +389,9 @@ const PromptInputTextarea: React.FC<PromptInputTextareaProps & React.ComponentPr
   placeholder,
   ...props
 }) => {
-  const { value, setValue, maxHeight, onSubmit, disabled } = usePromptInput();
+  const { value, setValue, maxHeight, onSubmit, disabled, variant } = usePromptInput();
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+  const isStudio = variant === "studio";
 
   React.useEffect(() => {
     if (disableAutosize || !textareaRef.current) return;
@@ -406,7 +416,12 @@ const PromptInputTextarea: React.FC<PromptInputTextareaProps & React.ComponentPr
       value={value}
       onChange={(e) => setValue(e.target.value)}
       onKeyDown={handleKeyDown}
-      className={cn("text-base", className)}
+      className={cn(
+        "text-base",
+        isStudio &&
+          "text-[var(--desktop-inspector-fg-primary)] placeholder:text-[var(--desktop-inspector-fg-muted)]",
+        className
+      )}
       disabled={disabled}
       placeholder={placeholder}
       {...props}
@@ -449,12 +464,13 @@ const PromptInputAction: React.FC<PromptInputActionProps> = ({
 
 // Main PromptInputBox Component
 interface PromptInputBoxProps {
-  onSend?: (message: string, files?: File[]) => void;
-  isLoading?: boolean;
-  placeholder?: string;
-  className?: string;
-  activeInputType?: QrInputType | null;
-  onInputTypeChange?: (value: QrInputType | null) => void;
+  onSend?: (message: string, files?: File[]) => void
+  isLoading?: boolean
+  placeholder?: string
+  className?: string
+  variant?: "default" | "studio"
+  activeInputType?: QrInputType | null
+  onInputTypeChange?: (value: QrInputType | null) => void
 }
 export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref: React.Ref<HTMLDivElement>) => {
   const {
@@ -462,6 +478,7 @@ export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref:
     isLoading = false,
     placeholder = "Type your message here...",
     className,
+    variant = "default",
     activeInputType: activeInputTypeProp,
     onInputTypeChange,
   } = props;
@@ -574,6 +591,7 @@ export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref:
   };
 
   const hasContent = input.trim() !== "" || files.length > 0;
+  const isStudio = variant === "studio";
 
   return (
     <>
@@ -582,8 +600,10 @@ export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref:
         onValueChange={setInput}
         isLoading={isLoading}
         onSubmit={handleSubmit}
+        variant={variant}
         className={cn(
-          "w-full bg-[#1F2023] border-[#444444] shadow-[0_8px_30px_rgba(0,0,0,0.24)] transition-all duration-300 ease-in-out",
+          "w-full transition-all duration-300 ease-in-out",
+          !isStudio && "bg-[#1F2023] border-[#444444] shadow-[0_8px_30px_rgba(0,0,0,0.24)]",
           isRecording && "border-red-500/70",
           className
         )}
@@ -668,9 +688,13 @@ export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref:
                     onClick={() => handleQuickOptionToggle(option.value)}
                     className={cn(
                       "rounded-full transition-all flex items-center gap-1 px-2 py-1 border h-8",
-                      isActive
-                        ? "bg-[#1EAEDB]/15 border-[#1EAEDB] text-[#1EAEDB]"
-                        : "bg-transparent border-transparent text-[#9CA3AF] hover:text-[#D1D5DB]"
+                      isStudio
+                        ? isActive
+                          ? "border-[var(--desktop-inspector-control-border-hover)] bg-[var(--desktop-inspector-option-selected-bg)] text-[var(--desktop-inspector-option-selected-fg)]"
+                          : "border-transparent bg-transparent text-[var(--desktop-inspector-fg-muted)] hover:text-[var(--desktop-inspector-fg-secondary)]"
+                        : isActive
+                          ? "bg-[#1EAEDB]/15 border-[#1EAEDB] text-[#1EAEDB]"
+                          : "bg-transparent border-transparent text-[#9CA3AF] hover:text-[#D1D5DB]"
                     )}
                   >
                     <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
@@ -692,7 +716,12 @@ export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref:
                           animate={{ width: "auto", opacity: 1 }}
                           exit={{ width: 0, opacity: 0 }}
                           transition={{ duration: 0.2 }}
-                          className="text-xs overflow-hidden whitespace-nowrap text-[#1EAEDB] flex-shrink-0"
+                          className={cn(
+                            "text-xs overflow-hidden whitespace-nowrap flex-shrink-0",
+                            isStudio
+                              ? "text-[var(--desktop-inspector-option-selected-fg)]"
+                              : "text-[#1EAEDB]"
+                          )}
                         >
                           {option.label}
                         </motion.span>
@@ -721,10 +750,16 @@ export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref:
               className={cn(
                 "h-8 w-8 rounded-full transition-all duration-200",
                 isRecording
-                  ? "bg-transparent hover:bg-gray-600/30 text-red-500 hover:text-red-400"
+                  ? isStudio
+                    ? "bg-transparent hover:bg-[var(--desktop-inspector-control-hover-bg)] text-red-500 hover:text-red-400"
+                    : "bg-transparent hover:bg-gray-600/30 text-red-500 hover:text-red-400"
                   : hasContent
-                  ? "bg-white hover:bg-white/80 text-[#1F2023]"
-                  : "bg-transparent hover:bg-gray-600/30 text-[#9CA3AF] hover:text-[#D1D5DB]"
+                    ? isStudio
+                      ? "bg-[var(--desktop-inspector-option-selected-bg)] text-[var(--desktop-inspector-option-selected-fg)] hover:opacity-90"
+                      : "bg-white hover:bg-white/80 text-[#1F2023]"
+                    : isStudio
+                      ? "bg-transparent hover:bg-[var(--desktop-inspector-control-hover-bg)] text-[var(--desktop-inspector-fg-muted)] hover:text-[var(--desktop-inspector-fg-secondary)]"
+                      : "bg-transparent hover:bg-gray-600/30 text-[#9CA3AF] hover:text-[#D1D5DB]"
               )}
               onClick={() => {
                 if (isRecording) setIsRecording(false);
@@ -734,13 +769,13 @@ export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref:
               disabled={isLoading && !hasContent}
             >
               {isLoading ? (
-                <Square className="h-4 w-4 fill-[#1F2023] animate-pulse" />
+                <Square className={cn("h-4 w-4 animate-pulse", isStudio ? "fill-current" : "fill-[#1F2023]")} />
               ) : isRecording ? (
                 <StopCircle className="h-5 w-5 text-red-500" />
               ) : hasContent ? (
-                <ArrowUp className="h-4 w-4 text-[#1F2023]" />
+                <ArrowUp className={cn("h-4 w-4", isStudio ? "text-current" : "text-[#1F2023]")} />
               ) : (
-                <Mic className="h-5 w-5 text-[#1F2023] transition-colors" />
+                <Mic className={cn("h-5 w-5 transition-colors", isStudio ? "text-current" : "text-[#1F2023]")} />
               )}
             </Button>
           </PromptInputAction>

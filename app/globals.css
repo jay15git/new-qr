@@ -639,7 +639,7 @@
   isolation: isolate;
 }
 
-:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"]) {
+:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"], [data-slot="studio-hub"]) {
   --drafting-type-panel-tab: 0.875rem;
   --drafting-type-section-title: 0.875rem;
   --drafting-type-control-label: 0.875rem;
@@ -653,25 +653,25 @@
   font-optical-sizing: auto;
 }
 
-:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"]) .drafting-type-panel-tab {
+:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"], [data-slot="studio-hub"]) .drafting-type-panel-tab {
   font-size: var(--drafting-type-panel-tab);
   line-height: 1.1;
   letter-spacing: 0;
 }
 
-:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"]) .drafting-type-section-title {
+:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"], [data-slot="studio-hub"]) .drafting-type-section-title {
   font-size: var(--drafting-type-section-title);
   line-height: 1.15;
   letter-spacing: 0.01em;
 }
 
-:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"]) .drafting-type-control-label {
+:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"], [data-slot="studio-hub"]) .drafting-type-control-label {
   font-size: var(--drafting-type-control-label);
   line-height: 1.2;
   letter-spacing: 0.005em;
 }
 
-:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"]) .drafting-type-body {
+:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"], [data-slot="studio-hub"]) .drafting-type-body {
   max-width: 65ch;
   font-size: var(--drafting-type-body);
   line-height: 1.55;
@@ -679,38 +679,38 @@
   text-wrap: pretty;
 }
 
-:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"]) .drafting-type-input {
+:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"], [data-slot="studio-hub"]) .drafting-type-input {
   font-size: var(--drafting-type-input);
   line-height: 1.45;
   letter-spacing: 0;
 }
 
-:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"]) .drafting-type-nav-label {
+:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"], [data-slot="studio-hub"]) .drafting-type-nav-label {
   font-size: var(--drafting-type-nav-label);
   line-height: 1.05;
   letter-spacing: 0.015em;
 }
 
-:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"]) .drafting-type-meta {
+:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"], [data-slot="studio-hub"]) .drafting-type-meta {
   font-size: var(--drafting-type-meta);
   line-height: 1.35;
   letter-spacing: 0.01em;
 }
 
-:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"]) .drafting-type-caption {
+:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"], [data-slot="studio-hub"]) .drafting-type-caption {
   font-size: var(--drafting-type-caption);
   line-height: 1.25;
   letter-spacing: 0;
 }
 
-:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"]) .drafting-type-data {
+:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"], [data-slot="studio-hub"]) .drafting-type-data {
   font-size: var(--drafting-type-meta);
   line-height: 1.35;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
 }
 
-:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"]) .drafting-type-display-data {
+:is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"], [data-slot="studio-hub"]) .drafting-type-display-data {
   font-size: var(--drafting-type-display-data);
   line-height: 1;
   letter-spacing: 0;
@@ -718,7 +718,7 @@
 }
 
 @media (min-width: 64rem) {
-  :is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"]) .drafting-type-nav-label {
+  :is([data-slot="desktop-page"], [data-slot="library-page"], [data-slot="drafting-download-popover"], [data-slot="studio-hub"]) .drafting-type-nav-label {
     font-size: var(--drafting-type-nav-label);
     line-height: 1.18;
     letter-spacing: 0.015em;

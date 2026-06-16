@@ -68,6 +68,30 @@ export function StudioHubStyles() {
       [data-slot="studio-library-strip"]::-webkit-scrollbar {
         display: none;
       }
+
+      [data-slot="studio-hub-scrollbar"][data-state="hidden"] {
+        opacity: 0;
+      }
+
+      [data-slot="studio-hub-scrollbar"] {
+        transition: opacity 150ms ease;
+      }
+
+      [data-slot="studio-hub-scroll-thumb"] {
+        background: rgba(255, 255, 255, 0.24);
+      }
+
+      [data-slot="studio-hub-scroll-thumb"]:hover {
+        background: rgba(255, 255, 255, 0.38);
+      }
+
+      [data-slot="studio-hub"][data-desktop-theme="light"] [data-slot="studio-hub-scroll-thumb"] {
+        background: rgba(15, 23, 42, 0.24);
+      }
+
+      [data-slot="studio-hub"][data-desktop-theme="light"] [data-slot="studio-hub-scroll-thumb"]:hover {
+        background: rgba(15, 23, 42, 0.38);
+      }
     `}</style>
   )
 }
