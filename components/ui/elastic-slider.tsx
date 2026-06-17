@@ -59,6 +59,14 @@ export type ElasticSliderProps = {
   "aria-label"?: string
 }
 
+function splitSignedDisplayValue(value: string) {
+  if (value.startsWith("-")) {
+    return { sign: "-", body: value.slice(1) }
+  }
+
+  return { sign: "", body: value }
+}
+
 export function ElasticSlider({
   label,
   value: valueProp,
@@ -102,6 +110,8 @@ export function ElasticSlider({
   const displayValue = formatValue
     ? formatValue(value)
     : value.toFixed(decimalsForStep(step))
+  const { sign: displaySign, body: displayBody } = splitSignedDisplayValue(displayValue)
+  const useCalligraphAnimation = !shouldReduceMotion
 
   const fillPercent = useMotionValue(percentage)
   const fillWidth = useTransform(fillPercent, (pct) => `${pct}%`)
@@ -509,17 +519,22 @@ export function ElasticSlider({
             "elastic-slider-calligraph-value",
           )}
         >
-          {shouldReduceMotion ? (
-            displayValue
-          ) : (
+          {displaySign ? (
+            <span aria-hidden="true" className="inline-block leading-none">
+              {displaySign}
+            </span>
+          ) : null}
+          {useCalligraphAnimation ? (
             <Calligraph
               variant="slots"
               animation="snappy"
               autoSize={false}
               className="elastic-slider-calligraph inline-flex leading-none"
             >
-              {displayValue}
+              {displayBody}
             </Calligraph>
+          ) : (
+            displayBody
           )}
         </span>
       </motion.div>

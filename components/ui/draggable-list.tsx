@@ -1,7 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { Reorder, useDragControls, type DragControls } from "framer-motion"
+import {
+  Reorder,
+  useDragControls,
+  type DragControls,
+  type TargetAndTransition,
+} from "framer-motion"
 import { GripVertical } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -45,11 +50,17 @@ export function DraggableList<T extends DraggableValue>({
   )
 }
 
+const DEFAULT_DRAG_STYLE: TargetAndTransition = {
+  boxShadow: "0 18px 40px rgba(15, 23, 42, 0.18)",
+  scale: 1.01,
+}
+
 type DraggableListItemProps<T extends DraggableValue> = {
   children: React.ReactNode
   className?: string
   disabled?: boolean
   value: T
+  whileDrag?: TargetAndTransition | false
 }
 
 export function DraggableListItem<T extends DraggableValue>({
@@ -57,6 +68,7 @@ export function DraggableListItem<T extends DraggableValue>({
   className,
   disabled = false,
   value,
+  whileDrag = DEFAULT_DRAG_STYLE,
 }: DraggableListItemProps<T>) {
   const dragControls = useDragControls()
 
@@ -70,14 +82,7 @@ export function DraggableListItem<T extends DraggableValue>({
         dragControls={dragControls}
         dragListener={false}
         value={value}
-        whileDrag={
-          disabled
-            ? undefined
-            : {
-                boxShadow: "0 18px 40px rgba(15, 23, 42, 0.18)",
-                scale: 1.01,
-              }
-        }
+        whileDrag={disabled || whileDrag === false ? undefined : whileDrag}
       >
         {children}
       </Reorder.Item>

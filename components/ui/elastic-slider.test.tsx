@@ -112,6 +112,27 @@ describe("ElasticSlider", () => {
     expect(root?.className).toContain("desktop-elastic-slider")
   })
 
+  it("renders signed formatted values without animating the minus sign in slots mode", () => {
+    const { container } = renderSlider(
+      <ElasticSlider
+        label="Rotation"
+        max={360}
+        min={-360}
+        step={1}
+        value={-18}
+        formatValue={(nextValue) => `${Math.round(nextValue)}°`}
+        onValueChange={vi.fn()}
+      />,
+    )
+
+    const valueSlot = container.querySelector('[data-slot="elastic-slider-value"]')
+    const calligraph = valueSlot?.querySelector(".elastic-slider-calligraph")
+
+    expect(valueSlot?.textContent?.startsWith("-")).toBe(true)
+    expect(calligraph?.getAttribute("aria-label")).toBe("18°")
+    expect(valueSlot?.querySelector(':scope > span[aria-hidden="true"]')?.textContent).toBe("-")
+  })
+
   it("updates the animated value readout when the controlled value changes", () => {
     const { container, rerender } = renderSlider(
       <ElasticSlider

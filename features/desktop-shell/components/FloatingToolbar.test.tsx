@@ -9,14 +9,16 @@ import {
   DESKTOP_TOOLBAR_TOOLS,
   FloatingToolbar,
 } from "@/features/desktop-shell/components/FloatingToolbar"
+import { createDraftingTextLayer } from "@/features/workspace/model/layers"
 import { renderWithAsyncJsdomRoot } from "@/test-utils/jsdom-react-root"
+
+const NODE_ID = "test-node"
 
 describe("FloatingToolbar", () => {
   it("renders every drafting left rail tool as an accessible icon button", async () => {
     const surface = await renderPrototype()
     const buttons = getToolButtons(surface.container)
 
-    expect(buttons).toHaveLength(13)
     expect(buttons).toHaveLength(DESKTOP_TOOLBAR_TOOLS.length)
 
     for (const tool of DESKTOP_TOOLBAR_TOOLS) {
@@ -296,6 +298,7 @@ describe("FloatingToolbar", () => {
     const surface = await renderPrototype()
     const expectedSlots = [
       ["logo", "desktop-logo-inspector"],
+      ["motion", "desktop-motion-inspector"],
       ["encoding", "desktop-encoding-inspector"],
       ["image", "desktop-image-inspector"],
       ["decorations", "desktop-decorations-inspector"],
@@ -325,8 +328,8 @@ describe("FloatingToolbar", () => {
     const layersInspector = surface.container.querySelector('[data-slot="desktop-layers-inspector"]')
 
     expect(layersInspector?.textContent).toContain("Layer Stack")
-    expect(layersInspector?.textContent).toContain("Geometry")
-    expect(layersInspector?.querySelector('input[aria-label="Layer name"]')).not.toBeNull()
+    expect(layersInspector?.querySelector('[data-slot="desktop-transform-section"]')).toBeNull()
+    expect(layersInspector?.querySelector('input[aria-label="Layer name"]')).toBeNull()
     expect(layersInspector?.querySelector('input[aria-label="Layer opacity"]')).toBeNull()
     expect(layersInspector?.querySelector('input[aria-label="Layer blur"]')).toBeNull()
     expect(layersInspector?.querySelector('input[aria-label="Layer shadow color"]')).toBeNull()
@@ -955,6 +958,29 @@ describe("FloatingToolbar", () => {
     expect(getRequiredSlider(surface.container, "Border opacity").getAttribute("aria-valuenow")).toBe("0")
     expect(getRequiredSlider(surface.container, "Shape shadow X").getAttribute("aria-valuenow")).toBe("64")
     expect(getRequiredSlider(surface.container, "Corner radius").getAttribute("aria-valuenow")).toBe("64")
+  })
+
+  it("renders transform controls below the layer stack in the layers inspector", async () => {
+    const layer = createDraftingTextLayer(NODE_ID, { text: "Selected" })
+    const surface = await renderPrototype({
+      controller: {
+        activeTool: "layers",
+        selectedTransformLayer: layer,
+        onTransformLayerPatch: vi.fn(),
+      },
+    })
+
+    const layersInspector = surface.container.querySelector('[data-slot="desktop-layers-inspector"]')
+    const stackSection = layersInspector?.querySelector('[data-slot="desktop-layer-list"]')
+    const transformSection = layersInspector?.querySelector('[data-slot="desktop-transform-section"]')
+
+    expect(layersInspector).not.toBeNull()
+    expect(stackSection).not.toBeNull()
+    expect(transformSection).not.toBeNull()
+    expect(surface.container.querySelector('[data-tool-id="transform"]')).toBeNull()
+    expect(
+      stackSection?.compareDocumentPosition(transformSection!) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
   })
 
   it("renders a compact Pixelmator-style motion inspector without placeholder copy", async () => {

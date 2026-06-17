@@ -3,10 +3,14 @@
 import {
   AppleIcon,
   ArrowLeft01Icon,
+  CircleLock01Icon,
+  CircleUnlock02Icon,
   Download02Icon,
+  EyeIcon,
   Image02Icon,
   KeyboardIcon,
   SaveIcon,
+  ViewOffSlashIcon,
   WindowsOldIcon,
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
@@ -149,6 +153,7 @@ import {
   DESKTOP_INSPECTOR_DROPDOWN_MENU_CLASS,
   DESKTOP_INSPECTOR_DROPDOWN_TRIGGER_CLASS,
   DESKTOP_INSPECTOR_FG_MUTED,
+  DESKTOP_INSPECTOR_FG_PRIMARY,
   DESKTOP_INSPECTOR_FG_SECONDARY,
   DESKTOP_INSPECTOR_FG_TERTIARY,
   DESKTOP_INSPECTOR_FIELD_ROW_CLASS,
@@ -187,6 +192,11 @@ import {
   type QrInputType,
 } from "@/features/qr-code/content/input-options"
 import { DownloadIcon as AnimatedDownloadIcon } from "@/components/ui/download"
+import {
+  DraggableList,
+  DraggableListHandle,
+  DraggableListItem,
+} from "@/components/ui/draggable-list"
 import { ElasticSlider } from "@/components/ui/elastic-slider"
 import { GalleryVerticalEndIcon } from "@/components/ui/gallery-vertical-end"
 import { GripIcon } from "@/components/ui/grip"
@@ -197,7 +207,7 @@ import { PlayIcon } from "@/components/ui/play"
 import { ReceiptTextIcon } from "@/components/ui/receipt-text"
 import { cn } from "@/lib/utils"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
-import { DesktopElementInspector } from "@/features/desktop-shell/components/DesktopElementInspector"
+import { DesktopElementInspector, DesktopTransformSection } from "@/features/desktop-shell/components/DesktopElementInspector"
 
 type DesktopToolbarGroup = "QR" | "Add" | "Manage"
 export type DesktopToolbarToolId =
@@ -592,8 +602,10 @@ export type DesktopToolbarController = {
   textSettings: DesktopTextSettings
   insertNodeId?: string
   selectedElementLayer?: DraftingCanvasLayer | null
+  selectedTransformLayer?: DraftingCanvasLayer | null
   onInsertLayer?: (layer: DraftingCanvasLayer) => void
   onElementLayerPatch?: (patch: Partial<DraftingCanvasLayer>) => void
+  onTransformLayerPatch?: (patch: Partial<DraftingCanvasLayer>) => void
   onActiveToolChange: (toolId: DesktopToolbarToolId) => void
   onRedo?: () => void
   onSave?: () => void
@@ -622,6 +634,7 @@ export type DesktopToolbarController = {
   onEffectsSettingsChange: (patch: Partial<DesktopEffectsSettings>) => void
   onLayersReset: () => void
   onLayersSettingsChange: (patch: Partial<DesktopLayersSettings>) => void
+  onLayersReorder?: (orderedIds: string[]) => void
   onExportReset: () => void
   onExportSettingsChange: (patch: Partial<DesktopExportSettings>) => void
   onExportDownload: () => void
@@ -1135,6 +1148,19 @@ export function FloatingToolbar({
     controller?.onLayersSettingsChange ??
     ((patch: Partial<DesktopLayersSettings>) =>
       setLayersSettings((current) => ({ ...current, ...patch })))
+  const onLayersReorder =
+    controller?.onLayersReorder ??
+    ((orderedIds: string[]) =>
+      setLayersSettings((current) => {
+        const layerById = new Map(current.layers.map((layer) => [layer.id, layer]))
+
+        return {
+          ...current,
+          layers: orderedIds
+            .map((layerId) => layerById.get(layerId))
+            .filter((layer): layer is DesktopLayerRow => layer != null),
+        }
+      }))
   const onExportSettingsChange =
     controller?.onExportSettingsChange ??
     ((patch: Partial<DesktopExportSettings>) =>
@@ -1469,19 +1495,16 @@ export function FloatingToolbar({
           {activeToolConfig || controller?.selectedElementLayer ? (
             <aside
               aria-label={
-                controller?.selectedElementLayer
-                  ? `${controller.selectedElementLayer.kind} element settings`
-                  : `${activeToolConfig?.title ?? "Tool"} settings`
+                activeToolConfig
+                  ? `${activeToolConfig.title} settings`
+                  : controller?.selectedElementLayer
+                    ? `${controller.selectedElementLayer.kind} element settings`
+                    : "Tool settings"
               }
               data-slot="desktop-floating-inspector"
               className="flex min-h-0 min-w-0 flex-col overflow-hidden"
             >
-              {controller?.selectedElementLayer ? (
-                <DesktopElementInspector
-                  layer={controller.selectedElementLayer}
-                  onPatch={(patch) => controller.onElementLayerPatch?.(patch)}
-                />
-              ) : actualActiveTool === "content" ? (
+              {actualActiveTool === "content" ? (
                 <DesktopContentInspector
                   contentType={actualContentType}
                   contentValues={actualContentValues}
@@ -1547,14 +1570,31 @@ export function FloatingToolbar({
                 />
               ) : actualActiveTool === "layers" ? (
                 <DesktopLayersInspector
-                  settings={actualLayersSettings}
+                  onLayersReorder={onLayersReorder}
                   onLayersSettingsChange={onLayersSettingsChange}
+                  onTransformLayerPatch={(patch) => {
+                    if (controller?.onTransformLayerPatch) {
+                      controller.onTransformLayerPatch(patch)
+                      return
+                    }
+
+                    controller?.onElementLayerPatch?.(patch)
+                  }}
+                  settings={actualLayersSettings}
+                  transformLayer={
+                    controller?.selectedTransformLayer ?? controller?.selectedElementLayer ?? null
+                  }
                 />
               ) : actualActiveTool === "export" ? (
                 <DesktopExportInspector
                   settings={actualExportSettings}
                   onExportDownload={controller?.onExportDownload ?? (() => undefined)}
                   onExportSettingsChange={onExportSettingsChange}
+                />
+              ) : controller?.selectedElementLayer ? (
+                <DesktopElementInspector
+                  layer={controller.selectedElementLayer}
+                  onPatch={(patch) => controller.onElementLayerPatch?.(patch)}
                 />
               ) : activeToolConfig ? (
                 <DesktopPlaceholderInspector tool={activeToolConfig} />
@@ -1798,6 +1838,7 @@ function DesktopThemeStyles() {
         --desktop-inspector-control-hover-bg: rgba(255, 255, 255, 0.09);
         --desktop-inspector-control-active-bg: rgba(255, 255, 255, 0.13);
         --desktop-inspector-control-border-hover: rgba(255, 255, 255, 0.12);
+        --desktop-inspector-layer-selected-bg: rgba(255, 255, 255, 0.10);
         --desktop-inspector-option-selected-bg: rgba(255, 255, 255, 0.14);
         --desktop-inspector-option-selected-border: #f8fafc;
         --desktop-inspector-option-selected-fg: rgba(255, 255, 255, 0.96);
@@ -1818,6 +1859,7 @@ function DesktopThemeStyles() {
         --desktop-inspector-control-hover-bg: rgba(15, 23, 42, 0.1);
         --desktop-inspector-control-active-bg: rgba(15, 23, 42, 0.14);
         --desktop-inspector-control-border-hover: rgba(15, 23, 42, 0.16);
+        --desktop-inspector-layer-selected-bg: rgba(255, 255, 255, 0.96);
         --desktop-inspector-option-selected-bg: rgba(255, 255, 255, 0.96);
         --desktop-inspector-option-selected-border: #111827;
         --desktop-inspector-option-selected-fg: rgba(15, 23, 42, 0.94);
@@ -1916,14 +1958,14 @@ function DesktopThemeStyles() {
         border-color: transparent !important;
       }
 
-      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-slot="desktop-motion-toggle-row"]):not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]) {
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-slot="desktop-motion-toggle-row"]):not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) {
         background-color: var(--desktop-inspector-option-selected-bg) !important;
         border-color: transparent !important;
         color: var(--desktop-inspector-option-selected-fg) !important;
         box-shadow: none !important;
       }
 
-      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-slot="desktop-motion-toggle-row"]):not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):hover {
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-slot="desktop-motion-toggle-row"]):not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]):hover {
         background-color: var(--desktop-inspector-option-selected-bg) !important;
         border-color: transparent !important;
         color: var(--desktop-inspector-option-selected-fg) !important;
@@ -1935,8 +1977,88 @@ function DesktopThemeStyles() {
         border-color: var(--desktop-inspector-option-selected-border) !important;
       }
 
-      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-slot="desktop-motion-toggle-row"]):not([data-desktop-tool-button="true"]) :is(span, svg):not([data-desktop-preview-caption="true"]) {
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-slot="desktop-motion-toggle-row"]):not([data-desktop-tool-button="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) :is(span, svg):not([data-desktop-preview-caption="true"]) {
         color: var(--desktop-inspector-option-selected-fg) !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] button[data-slot="desktop-layer-row"] {
+        background-color: transparent !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+        color: inherit !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] button[data-slot="desktop-layer-row"]:hover,
+      [data-slot="desktop-floating-inspector"] button[data-slot="desktop-layer-row"]:active,
+      [data-slot="desktop-floating-inspector"] button[data-slot="desktop-layer-row"][aria-current="true"] {
+        background-color: transparent !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+        color: inherit !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] [data-slot="desktop-layer-row-shell"] {
+        background-color: transparent !important;
+        border-color: transparent !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] [data-slot="desktop-layer-row-shell"]:hover {
+        background-color: var(--desktop-inspector-control-hover-bg) !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] [data-slot="desktop-layer-row-shell"]:active {
+        background-color: var(--desktop-inspector-control-active-bg) !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] [data-slot="desktop-layer-row-shell"][data-selected="true"] {
+        background-color: var(--desktop-inspector-layer-selected-bg) !important;
+        border-color: transparent !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] [data-slot="desktop-layer-row-shell"][data-selected="true"]:hover {
+        background-color: var(--desktop-inspector-control-hover-bg) !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] [data-slot="desktop-layer-row-shell"][data-selected="true"]:active {
+        background-color: var(--desktop-inspector-control-active-bg) !important;
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [data-slot="desktop-layer-row-shell"][data-selected="true"]:hover,
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [data-slot="desktop-layer-row-shell"][data-selected="true"]:active {
+        background-color: var(--desktop-inspector-layer-selected-bg) !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] [data-slot="draggable-list-item"] {
+        background-color: transparent !important;
+        box-shadow: none !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] [data-slot="draggable-list-item"] [data-slot="desktop-layer-row-shell"] {
+        box-shadow: none !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] button[data-slot="desktop-layer-stack-icon-toggle"] {
+        background-color: transparent !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] button[data-slot="desktop-layer-stack-icon-toggle"]:hover,
+      [data-slot="desktop-floating-inspector"] button[data-slot="desktop-layer-stack-icon-toggle"]:active,
+      [data-slot="desktop-floating-inspector"] button[data-slot="desktop-layer-stack-icon-toggle"][aria-pressed="true"],
+      [data-slot="desktop-floating-inspector"] button[data-slot="desktop-layer-stack-icon-toggle"][aria-pressed="true"]:hover {
+        background-color: transparent !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] button[data-slot="desktop-layer-stack-icon-toggle"][aria-pressed="true"],
+      [data-slot="desktop-floating-inspector"] button[data-slot="desktop-layer-stack-icon-toggle"][aria-pressed="false"] {
+        color: var(--desktop-inspector-fg-primary) !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] button[data-slot="desktop-layer-stack-icon-toggle"] svg {
+        color: currentColor !important;
       }
 
       [data-slot="desktop-floating-inspector"] button[data-desktop-preview-option="true"][aria-pressed="true"]:hover [data-desktop-adaptive-option-preview="true"] {
@@ -1958,7 +2080,7 @@ function DesktopThemeStyles() {
         border-color: var(--desktop-inspector-option-selected-border) !important;
       }
 
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-slot="desktop-motion-toggle-row"]):not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]) {
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-slot="desktop-motion-toggle-row"]):not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) {
         background-color: var(--desktop-inspector-option-selected-bg) !important;
         border-color: transparent !important;
         color: var(--desktop-inspector-option-selected-fg) !important;
@@ -2025,13 +2147,13 @@ function DesktopThemeStyles() {
         color: #18181b !important;
       }
 
-      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-slot="desktop-motion-toggle-row"]):not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]) {
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-slot="desktop-motion-toggle-row"]):not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) {
         background-color: var(--desktop-inspector-option-selected-bg) !important;
         border-color: transparent !important;
         color: var(--desktop-inspector-option-selected-fg) !important;
       }
 
-      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-slot="desktop-motion-toggle-row"]):not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):hover {
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-slot="desktop-motion-toggle-row"]):not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]):hover {
         background-color: var(--desktop-inspector-option-selected-bg) !important;
         border-color: transparent !important;
         color: var(--desktop-inspector-option-selected-fg) !important;
@@ -4773,24 +4895,34 @@ function DesktopEffectsInspector({
   )
 }
 
+function getDesktopLayerKindLabel(kind: DesktopLayerKind) {
+  if (kind === "qr") {
+    return "QR"
+  }
+
+  return kind.charAt(0).toUpperCase() + kind.slice(1)
+}
+
 function DesktopLayersInspector({
+  onLayersReorder,
   onLayersSettingsChange,
+  onTransformLayerPatch,
   settings,
+  transformLayer,
 }: {
+  onLayersReorder?: (orderedIds: string[]) => void
   onLayersSettingsChange: (patch: Partial<DesktopLayersSettings>) => void
+  onTransformLayerPatch?: (patch: Partial<DraftingCanvasLayer>) => void
   settings: DesktopLayersSettings
+  transformLayer?: DraftingCanvasLayer | null
 }) {
-  const selectedLayer =
-    settings.layers.find((layer) => layer.id === settings.selectedLayerId) ?? settings.layers[0]
+  const layerItems = useMemo(() => settings.layers, [settings.layers])
+  const isSingleLayer = layerItems.length <= 1
 
-  function patchSelectedLayer(patch: Partial<DesktopLayerRow>) {
-    if (!selectedLayer) {
-      return
-    }
-
+  function patchLayer(layerId: string, patch: Partial<DesktopLayerRow>) {
     onLayersSettingsChange({
       layers: settings.layers.map((layer) =>
-        layer.id === selectedLayer.id ? { ...layer, ...patch } : layer,
+        layer.id === layerId ? { ...layer, ...patch } : layer,
       ),
     })
   }
@@ -4806,78 +4938,127 @@ function DesktopLayersInspector({
               {settings.layers.length} total
             </span>
           </div>
-          <div className="grid gap-1.5" data-slot="desktop-layer-list">
-            {settings.layers.map((layer, index) => (
-              <button
-                key={layer.id}
-                aria-label={`Select ${layer.name}`}
-                aria-pressed={settings.selectedLayerId === layer.id}
-                className={cn(
-                  "flex min-w-0 items-center gap-2 px-2.5 py-2 text-left",
-                  DESKTOP_INSPECTOR_CONTROL_CLASS,
-                  settings.selectedLayerId === layer.id && DESKTOP_INSPECTOR_SELECTED_CLASS,
-                )}
-                type="button"
-                onClick={() => onLayersSettingsChange({ selectedLayerId: layer.id })}
-              >
-                <span className={cn("shrink-0 text-[10px] font-bold", DESKTOP_INSPECTOR_FG_MUTED)}>{index + 1}</span>
-                <span className="min-w-0 flex-1">
-                  <span className={cn("block truncate text-[12px] font-semibold", DESKTOP_INSPECTOR_FG_SECONDARY)}>
-                    {layer.name}
-                  </span>
-                  <span className={cn("block truncate text-[10px] font-semibold", DESKTOP_INSPECTOR_FG_MUTED)}>
-                    {layer.kind} · {layer.width} x {layer.height}
-                  </span>
-                </span>
-                <span className={cn("shrink-0 text-[10px] font-bold", DESKTOP_INSPECTOR_FG_MUTED)}>
-                  {layer.isVisible ? "Shown" : "Hidden"}
-                </span>
-              </button>
-            ))}
+          <div data-slot="desktop-layer-list">
+            <DraggableList
+              className="gap-1.5"
+              items={layerItems}
+              onReorder={(nextLayers) => onLayersReorder?.(nextLayers.map((layer) => layer.id))}
+            >
+            {layerItems.map((layer) => {
+              const isSelected = settings.selectedLayerId === layer.id
+
+              return (
+                <DraggableListItem
+                  key={layer.id}
+                  className="min-w-0"
+                  disabled={isSingleLayer || !onLayersReorder}
+                  value={layer}
+                  whileDrag={false}
+                >
+                  <div
+                    className={cn(
+                      "flex min-w-0 items-center gap-1.5 px-1.5 py-1.5",
+                      DESKTOP_INSPECTOR_CONTROL_CLASS,
+                      isSelected && "text-[var(--desktop-inspector-fg-primary)]",
+                    )}
+                    data-selected={isSelected ? "true" : "false"}
+                    data-slot="desktop-layer-row-shell"
+                  >
+                    <DraggableListHandle
+                      className={cn(
+                        "size-8 shrink-0 rounded-[6px] border-transparent bg-transparent text-[var(--desktop-inspector-fg-muted)] shadow-none hover:border-[var(--desktop-inspector-control-border-hover)] hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-secondary)]",
+                      )}
+                      label={`Reorder ${layer.name}`}
+                    />
+                    <button
+                      aria-current={isSelected ? "true" : undefined}
+                      aria-label={`Select ${layer.name}`}
+                      className="flex min-w-0 flex-1 items-center bg-transparent px-1 text-left shadow-none hover:bg-transparent active:bg-transparent"
+                      data-slot="desktop-layer-row"
+                      type="button"
+                      onClick={() => onLayersSettingsChange({ selectedLayerId: layer.id })}
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span
+                          className={cn(
+                            "block truncate text-[12px] font-semibold",
+                            isSelected ? DESKTOP_INSPECTOR_FG_PRIMARY : DESKTOP_INSPECTOR_FG_SECONDARY,
+                          )}
+                        >
+                          {layer.name}
+                        </span>
+                        <span
+                          className={cn(
+                            "block truncate text-[10px] font-semibold",
+                            isSelected ? DESKTOP_INSPECTOR_FG_SECONDARY : DESKTOP_INSPECTOR_FG_MUTED,
+                          )}
+                        >
+                          {getDesktopLayerKindLabel(layer.kind)}
+                        </span>
+                      </span>
+                    </button>
+                    <div
+                      className="flex shrink-0 items-center gap-0.5"
+                      data-slot="desktop-layer-row-actions"
+                    >
+                      <DesktopLayerStackIconToggle
+                        active={layer.isVisible}
+                        icon={layer.isVisible ? EyeIcon : ViewOffSlashIcon}
+                        label={layer.isVisible ? "Visible" : "Hidden"}
+                        onClick={() => patchLayer(layer.id, { isVisible: !layer.isVisible })}
+                      />
+                      <DesktopLayerStackIconToggle
+                        active={layer.isLocked}
+                        icon={layer.isLocked ? CircleLock01Icon : CircleUnlock02Icon}
+                        label={layer.isLocked ? "Locked" : "Unlocked"}
+                        onClick={() => patchLayer(layer.id, { isLocked: !layer.isLocked })}
+                      />
+                    </div>
+                  </div>
+                </DraggableListItem>
+              )
+            })}
+            </DraggableList>
           </div>
         </section>
 
-        {selectedLayer ? (
-          <>
-            <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
-              <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Inspector</p>
-              <DesktopInspectorTextInput
-                aria-label="Layer name"
-                value={selectedLayer.name}
-                onChange={(event) => patchSelectedLayer({ name: event.currentTarget.value })}
-              />
-            </section>
-            <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
-              <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Geometry</p>
-              <div className="grid grid-cols-2 gap-2">
-                <DesktopNumberRow label="X" value={selectedLayer.x} onChange={(x) => patchSelectedLayer({ x })} />
-                <DesktopNumberRow label="Y" value={selectedLayer.y} onChange={(y) => patchSelectedLayer({ y })} />
-                <DesktopNumberRow label="W" min={1} value={selectedLayer.width} onChange={(width) => patchSelectedLayer({ width })} />
-                <DesktopNumberRow label="H" min={1} value={selectedLayer.height} onChange={(height) => patchSelectedLayer({ height })} />
-              </div>
-              <div className="mt-2.5 grid gap-2">
-                <DesktopElasticSliderRow
-                  label="Horizontal tilt"
-                  max={60}
-                  min={-60}
-                  value={selectedLayer.tiltX}
-                  valueLabel={`${Math.round(selectedLayer.tiltX)}°`}
-                  onChange={(tiltX) => patchSelectedLayer({ tiltX })}
-                />
-                <DesktopElasticSliderRow
-                  label="Vertical tilt"
-                  max={60}
-                  min={-60}
-                  value={selectedLayer.tiltY}
-                  valueLabel={`${Math.round(selectedLayer.tiltY)}°`}
-                  onChange={(tiltY) => patchSelectedLayer({ tiltY })}
-                />
-              </div>
-            </section>
-          </>
+        {transformLayer && onTransformLayerPatch ? (
+          <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
+            <DesktopTransformSection layer={transformLayer} onPatch={onTransformLayerPatch} />
+          </div>
         ) : null}
       </DesktopInspectorScrollArea>
     </div>
+  )
+}
+
+function DesktopLayerStackIconToggle({
+  active,
+  icon,
+  label,
+  onClick,
+}: {
+  active: boolean
+  icon: typeof EyeIcon
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      aria-label={label}
+      aria-pressed={active}
+      className={cn(
+        "grid size-7 place-items-center rounded-[6px] border border-transparent bg-transparent text-[var(--desktop-inspector-fg-primary)] shadow-none transition-colors outline-none hover:bg-transparent hover:text-[var(--desktop-inspector-fg-primary)] active:bg-transparent focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]",
+      )}
+      data-slot="desktop-layer-stack-icon-toggle"
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation()
+        onClick()
+      }}
+    >
+      <HugeiconsIcon icon={icon} size={14} color="currentColor" strokeWidth={1.8} />
+    </button>
   )
 }
 

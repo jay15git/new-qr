@@ -114,11 +114,11 @@ export function DesktopInspectorNumberField({
   value: number
 }) {
   return (
-    <label className="min-w-0">
-      <span className={cn("mb-1 block text-[11px]", DESKTOP_INSPECTOR_LABEL_CLASS)}>{label}</span>
+    <label className="flex min-w-0 items-center gap-1.5">
+      <span className={cn("w-3 shrink-0 text-[11px]", DESKTOP_INSPECTOR_LABEL_CLASS)}>{label}</span>
       <DesktopInspectorTextInput
         aria-label={label}
-        className="h-8 rounded-[6px] px-2 text-[12px] font-semibold"
+        className="h-8 min-w-0 flex-1 rounded-[6px] px-2 text-[12px] font-semibold"
         disabled={disabled}
         max={max}
         min={min}

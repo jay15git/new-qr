@@ -8,13 +8,13 @@ import {
   BoldIcon,
   ChevronDownIcon,
   ItalicIcon,
-  RotateCcwIcon,
   UnderlineIcon,
 } from "lucide-react"
 
 import FileUpload from "@/components/vendor/kokonutui/file-upload"
 import {
   DESKTOP_INSPECTOR_CONTROL_CLASS,
+  DESKTOP_INSPECTOR_SECTION_CLASS,
   DESKTOP_INSPECTOR_SECTION_GAP_CLASS,
   DESKTOP_INSPECTOR_SECTION_HEADING_CLASS,
   DESKTOP_INSPECTOR_SELECTED_CLASS,
@@ -96,7 +96,6 @@ export function DesktopElementInspector({
     >
       <DesktopInspectorHeader title={getElementInspectorTitle(layer)} />
       <DesktopInspectorScrollArea>
-        <DesktopTransformSection layer={layer} onPatch={onPatch} />
         {layer.kind === "text" ? (
           <DesktopLayerTextInspector layer={layer} onPatch={onPatch} />
         ) : null}
@@ -112,7 +111,35 @@ export function DesktopElementInspector({
   )
 }
 
-function DesktopTransformSection({
+export function DesktopTransformInspector({
+  layer,
+  onPatch,
+}: {
+  layer: DraftingCanvasLayer | null | undefined
+  onPatch: (patch: Partial<DraftingCanvasLayer>) => void
+}) {
+  return (
+    <div
+      data-slot="desktop-transform-inspector"
+      className="flex min-h-0 min-w-0 flex-1 flex-col"
+    >
+      <DesktopInspectorHeader title="Transform" />
+      <DesktopInspectorScrollArea>
+        {layer ? (
+          <DesktopTransformSection layer={layer} onPatch={onPatch} />
+        ) : (
+          <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
+            <p className="text-center text-[12px] font-semibold text-[var(--desktop-inspector-fg-muted)]">
+              Select a layer to edit position, size, and rotation.
+            </p>
+          </section>
+        )}
+      </DesktopInspectorScrollArea>
+    </div>
+  )
+}
+
+export function DesktopTransformSection({
   layer,
   onPatch,
 }: {
@@ -156,27 +183,15 @@ function DesktopTransformSection({
         />
       </DesktopInspectorValueGrid>
 
-      <div className="mt-2 flex items-end gap-2">
-        <div className="min-w-0 flex-1">
-          <DesktopInspectorNumberField
-            label="Rotation"
-            max={360}
-            min={-360}
-            value={Math.round(layer.rotation)}
-            onChange={(rotation) => onPatch({ rotation })}
-          />
-        </div>
-        <button
-          aria-label="Reset rotation"
-          className={cn(
-            "mb-0.5 grid size-8 shrink-0 place-items-center",
-            DESKTOP_INSPECTOR_CONTROL_CLASS,
-          )}
-          type="button"
-          onClick={() => onPatch({ rotation: 0 })}
-        >
-          <RotateCcwIcon className="size-3.5" />
-        </button>
+      <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
+        <DesktopInspectorElasticSliderRow
+          label="Rotation"
+          max={360}
+          min={-360}
+          value={Math.round(layer.rotation)}
+          valueLabel={`${Math.round(layer.rotation)}°`}
+          onChange={(rotation) => onPatch({ rotation })}
+        />
       </div>
 
       <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
@@ -190,26 +205,22 @@ function DesktopTransformSection({
         />
       </div>
 
-      <div className={cn("mt-2 grid grid-cols-2 gap-1.5", DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
-        <DesktopToggleButton
-          active={layer.isVisible}
-          label="Visible"
-          onClick={() => onPatch({ isVisible: !layer.isVisible })}
+      <div className={cn("mt-2 grid gap-2", DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
+        <DesktopInspectorElasticSliderRow
+          label="Horizontal tilt"
+          max={60}
+          min={-60}
+          value={layer.tiltX ?? 0}
+          valueLabel={`${Math.round(layer.tiltX ?? 0)}°`}
+          onChange={(tiltX) => onPatch({ tiltX })}
         />
-        <DesktopToggleButton
-          active={layer.isLocked}
-          label="Locked"
-          onClick={() => onPatch({ isLocked: !layer.isLocked })}
-        />
-        <DesktopToggleButton
-          active={(layer.scaleX ?? 1) < 0}
-          label="Flip H"
-          onClick={() => onPatch({ scaleX: (layer.scaleX ?? 1) < 0 ? 1 : -1 })}
-        />
-        <DesktopToggleButton
-          active={(layer.scaleY ?? 1) < 0}
-          label="Flip V"
-          onClick={() => onPatch({ scaleY: (layer.scaleY ?? 1) < 0 ? 1 : -1 })}
+        <DesktopInspectorElasticSliderRow
+          label="Vertical tilt"
+          max={60}
+          min={-60}
+          value={layer.tiltY ?? 0}
+          valueLabel={`${Math.round(layer.tiltY ?? 0)}°`}
+          onChange={(tiltY) => onPatch({ tiltY })}
         />
       </div>
     </DesktopInspectorSection>
@@ -715,32 +726,6 @@ function DesktopLayerImageInspector({
   )
 }
 
-function DesktopToggleButton({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean
-  label: string
-  onClick: () => void
-}) {
-  return (
-    <button
-      aria-label={label}
-      aria-pressed={active}
-      className={cn(
-        "h-8 px-2 text-[11px] font-semibold",
-        DESKTOP_INSPECTOR_CONTROL_CLASS,
-        active && DESKTOP_INSPECTOR_SELECTED_CLASS,
-      )}
-      type="button"
-      onClick={onClick}
-    >
-      {label}
-    </button>
-  )
-}
-
 function DesktopIconToggleButton({
   active,
   icon,
@@ -754,17 +739,17 @@ function DesktopIconToggleButton({
 }) {
   return (
     <button
-      aria-label={`${label} text`}
+      aria-label={label}
       aria-pressed={active}
       className={cn(
-        "h-8 px-2 text-[11px] font-semibold",
+        "grid h-8 place-items-center px-2 text-[11px] font-semibold",
         DESKTOP_INSPECTOR_CONTROL_CLASS,
         active && DESKTOP_INSPECTOR_SELECTED_CLASS,
       )}
       type="button"
       onClick={onClick}
     >
-      <span className="grid place-items-center">{icon}</span>
+      {icon}
     </button>
   )
 }

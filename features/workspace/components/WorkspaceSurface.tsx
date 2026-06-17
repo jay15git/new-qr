@@ -2085,7 +2085,7 @@ export function WorkspaceSurface({
   function handleLayerSelect(
     paneId: string,
     layerId: string | null,
-    options?: { additive?: boolean },
+    options?: { additive?: boolean; preserveActiveTool?: boolean },
   ) {
     draftingSurfaceRef.current?.focus({ preventScroll: true })
 
@@ -2107,6 +2107,10 @@ export function WorkspaceSurface({
     }
 
     if (layerId === null) {
+      return
+    }
+
+    if (options?.preserveActiveTool) {
       return
     }
 
@@ -2631,6 +2635,8 @@ export function WorkspaceSurface({
       selectedTextLayer.kind === "image")
       ? selectedTextLayer
       : null
+  const selectedTransformLayer =
+    selectedLayerIds.length === 1 && selectedTextLayer ? selectedTextLayer : null
 
   const renderPanelContent = (toolId: string, tabId: string) => {
     const renderWithSliderVariant = (content: ReactNode) => (
@@ -3884,7 +3890,7 @@ export function WorkspaceSurface({
 
   function updateDesktopLayersSettings(patch: Partial<DesktopLayersSettings>) {
     if (patch.selectedLayerId !== undefined) {
-      handleLayerSelect(activeQrNodeId, patch.selectedLayerId)
+      handleLayerSelect(activeQrNodeId, patch.selectedLayerId, { preserveActiveTool: true })
     }
     if (patch.layers) {
       const currentLayersById = new Map(activeCanvasLayers.map((layer) => [layer.id, layer]))
@@ -3959,10 +3965,16 @@ export function WorkspaceSurface({
     textSettings: desktopTextSettings,
     insertNodeId: activeQrNodeId,
     selectedElementLayer,
+    selectedTransformLayer,
     onInsertLayer: handleInsertLayer,
     onElementLayerPatch: (patch) => {
       if (selectedElementLayer) {
         handleLayerChange(activeQrNodeId, selectedElementLayer.id, patch)
+      }
+    },
+    onTransformLayerPatch: (patch) => {
+      if (selectedTransformLayer) {
+        handleLayerChange(activeQrNodeId, selectedTransformLayer.id, patch)
       }
     },
     onActiveToolChange: (toolId) => {
@@ -4034,6 +4046,7 @@ export function WorkspaceSurface({
         [activeQrNodeId]: createDefaultDraftingLayers(activeQrNodeId, draftingStudioState, selectedCardState),
       })),
     onLayersSettingsChange: updateDesktopLayersSettings,
+    onLayersReorder: handleLayerReorder,
     onLogoReset: resetDesktopLogoSettings,
     onLogoSettingsChange: updateDesktopLogoSettings,
     onMotionReset: () => setSelectedDotMatrixAnimation({ ...DEFAULT_DRAFTING_STUDIO_STATE.dotMatrixAnimation }),
