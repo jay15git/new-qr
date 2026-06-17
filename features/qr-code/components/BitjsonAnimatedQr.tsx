@@ -21,6 +21,20 @@ function ensureBitjsonElements() {
   bitjsonElementsDefined = true;
 }
 
+if (typeof window !== "undefined") {
+  ensureBitjsonElements();
+}
+
+function whenQrCodeElementReady(element: BitjsonQrCodeElement) {
+  return customElements.whenDefined("qr-code").then(() => element.componentOnReady?.() ?? null);
+}
+
+function startQrCodeAnimation(element: BitjsonQrCodeElement, animationPreset: string) {
+  if (typeof element.animateQRCode === "function") {
+    element.animateQRCode(animationPreset);
+  }
+}
+
 type BitjsonQrCodeElement = HTMLElement & {
   animateQRCode: (animation?: string) => void;
   animationSpeed: number;
@@ -90,10 +104,6 @@ export function BitjsonAnimatedQr({
   const motionEnabled = state.dotMatrixAnimation.enabled && state.dotMatrixAnimation.animated;
 
   useEffect(() => {
-    ensureBitjsonElements();
-  }, []);
-
-  useEffect(() => {
     const element = elementRef.current;
 
     if (!element) {
@@ -110,34 +120,23 @@ export function BitjsonAnimatedQr({
       return;
     }
 
-    const handleRendered = () => {
-      element.animateQRCode(config.animationPreset);
-    };
-
-    element.addEventListener("codeRendered", handleRendered);
-
-    return () => {
-      element.removeEventListener("codeRendered", handleRendered);
-    };
-  }, [config.animationPreset, motionEnabled]);
-
-  useEffect(() => {
-    const element = elementRef.current;
-
-    if (!element || !motionEnabled) {
-      return;
-    }
-
     let cancelled = false;
 
-    void element.componentOnReady?.().then(() => {
+    const handleAnimation = () => {
       if (!cancelled) {
-        element.animateQRCode(config.animationPreset);
+        startQrCodeAnimation(element, config.animationPreset);
       }
+    };
+
+    element.addEventListener("codeRendered", handleAnimation);
+
+    void whenQrCodeElementReady(element).then(() => {
+      handleAnimation();
     });
 
     return () => {
       cancelled = true;
+      element.removeEventListener("codeRendered", handleAnimation);
     };
   }, [config, motionEnabled]);
 
