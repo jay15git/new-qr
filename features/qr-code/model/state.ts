@@ -59,8 +59,56 @@ export type QrDotMatrixColorPreset =
 export type QrDotMatrixPattern = "cross" | "diamond" | "full" | "outline" | "rings" | "rose";
 export type QrDotMatrixDotShape = "circle" | "diamond" | "hearts" | "square";
 
+export type QrMotionPresetCategory = "dotMatrix" | "standard";
+
+export type QrMotionStandardPreset =
+  | "ApertureReveal"
+  | "AuroraSweep"
+  | "BubbleCascade"
+  | "CenterBloom"
+  | "ConfettiPop"
+  | "ConstellationTrace"
+  | "CornerSweep"
+  | "DiamondGlint"
+  | "FadeInCenterOut"
+  | "FadeInTopDown"
+  | "FinderPing"
+  | "FireflyTwinkle"
+  | "FlipClock"
+  | "GlassSweep"
+  | "KaleidoPulse"
+  | "LensFocus"
+  | "LumenWave"
+  | "MagneticRipple"
+  | "MaterializeIn"
+  | "NeonTrace"
+  | "OrbitReveal"
+  | "ParallaxTiles"
+  | "PrismRipple"
+  | "RadialRipple"
+  | "RadialRippleIn"
+  | "ReceiptPrint"
+  | "SignalScan"
+  | "SoftMaterialize"
+  | "SpiralBloom"
+  | "SubtlePulse"
+  | "VelvetBreath";
+
+export type QrMotionHoverEffect =
+  | ""
+  | "DotField"
+  | "MagneticModules"
+  | "RadialAura"
+  | "RadiusRecolor";
+
+export type QrMotionHoverColorMode = "both" | "modules" | "overlay";
+
+export type QrMotionIntensity = "dramatic" | "premium" | "subtle";
+
 export type QrDotMatrixAnimationOptions = {
   animated: boolean;
+  autoAnimate: QrMotionStandardPreset | QrDotMatrixSquareLoader | "";
+  autoAnimateInterval: number;
   colorPreset: QrDotMatrixColorPreset;
   customColor: string;
   customColorBase: string;
@@ -69,19 +117,26 @@ export type QrDotMatrixAnimationOptions = {
   dotShape: QrDotMatrixDotShape;
   enabled: boolean;
   exportAnimatedSvg: boolean;
+  hoverColorMode: QrMotionHoverColorMode;
+  hoverEffect: QrMotionHoverEffect;
   loader: QrDotMatrixSquareLoader;
   matrixSize: number;
+  motionIntensity: QrMotionIntensity;
   opacityBase: number;
   opacityMid: number;
   opacityPeak: number;
   overlayScale: number;
   pattern: QrDotMatrixPattern;
+  preset: QrMotionStandardPreset | QrDotMatrixSquareLoader;
+  presetCategory: QrMotionPresetCategory;
+  respectReducedMotion: boolean;
   speed: number;
 };
 
 export type QrDotMatrixAnimationPatch =
-  Partial<Omit<QrDotMatrixAnimationOptions, "loader">> & {
+  Partial<Omit<QrDotMatrixAnimationOptions, "loader" | "preset">> & {
     loader?: QrDotMatrixSquareLoader | string;
+    preset?: QrMotionStandardPreset | QrDotMatrixSquareLoader | string;
   };
 
 export type StudioAsset = {
@@ -195,6 +250,87 @@ const DEFAULT_DOTS_PALETTE = [
   "#f30a49",
 ];
 
+export const QR_MOTION_STANDARD_PRESET_OPTIONS: Array<{
+  label: string;
+  value: QrMotionStandardPreset;
+}> = [
+  { label: "Fade In Top Down", value: "FadeInTopDown" },
+  { label: "Fade In Center Out", value: "FadeInCenterOut" },
+  { label: "Materialize In", value: "MaterializeIn" },
+  { label: "Radial Ripple", value: "RadialRipple" },
+  { label: "Radial Ripple In", value: "RadialRippleIn" },
+  { label: "Subtle Pulse", value: "SubtlePulse" },
+  { label: "Finder Ping", value: "FinderPing" },
+  { label: "Soft Materialize", value: "SoftMaterialize" },
+  { label: "Center Bloom", value: "CenterBloom" },
+  { label: "Corner Sweep", value: "CornerSweep" },
+  { label: "Prism Ripple", value: "PrismRipple" },
+  { label: "Orbit Reveal", value: "OrbitReveal" },
+  { label: "Lumen Wave", value: "LumenWave" },
+  { label: "Diamond Glint", value: "DiamondGlint" },
+  { label: "Neon Trace", value: "NeonTrace" },
+  { label: "Glass Sweep", value: "GlassSweep" },
+  { label: "Velvet Breath", value: "VelvetBreath" },
+  { label: "Signal Scan", value: "SignalScan" },
+  { label: "Confetti Pop", value: "ConfettiPop" },
+  { label: "Spiral Bloom", value: "SpiralBloom" },
+  { label: "Bubble Cascade", value: "BubbleCascade" },
+  { label: "Kaleido Pulse", value: "KaleidoPulse" },
+  { label: "Firefly Twinkle", value: "FireflyTwinkle" },
+  { label: "Aurora Sweep", value: "AuroraSweep" },
+  { label: "Magnetic Ripple", value: "MagneticRipple" },
+  { label: "Parallax Tiles", value: "ParallaxTiles" },
+  { label: "Constellation Trace", value: "ConstellationTrace" },
+  { label: "Aperture Reveal", value: "ApertureReveal" },
+  { label: "Lens Focus", value: "LensFocus" },
+  { label: "Receipt Print", value: "ReceiptPrint" },
+  { label: "Flip Clock", value: "FlipClock" },
+];
+
+export const QR_MOTION_HOVER_EFFECT_OPTIONS: Array<{
+  label: string;
+  value: QrMotionHoverEffect;
+}> = [
+  { label: "Off", value: "" },
+  { label: "Radial Aura", value: "RadialAura" },
+  { label: "Magnetic Modules", value: "MagneticModules" },
+  { label: "Radius Recolor", value: "RadiusRecolor" },
+  { label: "Dot Field", value: "DotField" },
+];
+
+export const QR_MOTION_HOVER_COLOR_MODE_OPTIONS: Array<{
+  label: string;
+  value: QrMotionHoverColorMode;
+}> = [
+  { label: "Dot aura", value: "overlay" },
+  { label: "Dot recolor", value: "modules" },
+  { label: "Both", value: "both" },
+];
+
+export const QR_MOTION_INTENSITY_OPTIONS: Array<{
+  label: string;
+  value: QrMotionIntensity;
+}> = [
+  { label: "Subtle", value: "subtle" },
+  { label: "Premium", value: "premium" },
+  { label: "Dramatic", value: "dramatic" },
+];
+
+export const QR_MOTION_AUTO_ANIMATE_INTERVAL_MIN = 1000;
+export const QR_MOTION_AUTO_ANIMATE_INTERVAL_MAX = 15000;
+export const QR_MOTION_AUTO_ANIMATE_INTERVAL_STEP = 500;
+
+export const MOTION_COLOR_SWATCHES: Record<QrDotMatrixColorPreset, [string, string, string]> = {
+  aurora: ["#67e8f9", "#a78bfa", "#f0abfc"],
+  fire: ["#f97316", "#ef4444", "#facc15"],
+  mint: ["#34d399", "#6ee7b7", "#d9f99d"],
+  neon: ["#22d3ee", "#a855f7", "#f8fafc"],
+  ocean: ["#38bdf8", "#2563eb", "#0f172a"],
+  prism: ["#64748b", "#eab308", "#22c55e"],
+  sunset: ["#f59e0b", "#f97316", "#fde047"],
+  theme: ["#22d3ee", "#22d3ee", "#22d3ee"],
+};
+
 export const QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS: Array<{
   label: string;
   value: QrDotMatrixSquareLoader;
@@ -221,8 +357,29 @@ export const QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS: Array<{
   { label: "Mobius Run", value: "mobius-run" },
 ];
 
+export const QR_MOTION_DOT_MATRIX_PRESET_OPTIONS: Array<{
+  label: string;
+  value: QrDotMatrixSquareLoader;
+}> = QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS;
+
 const QR_DOT_MATRIX_SQUARE_LOADER_VALUES = new Set<string>(
   QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS.map((option) => option.value),
+);
+
+const QR_MOTION_STANDARD_PRESET_VALUES = new Set<string>(
+  QR_MOTION_STANDARD_PRESET_OPTIONS.map((option) => option.value),
+);
+
+const QR_MOTION_HOVER_EFFECT_VALUES = new Set<string>(
+  QR_MOTION_HOVER_EFFECT_OPTIONS.map((option) => option.value),
+);
+
+const QR_MOTION_HOVER_COLOR_MODE_VALUES = new Set<string>(
+  QR_MOTION_HOVER_COLOR_MODE_OPTIONS.map((option) => option.value),
+);
+
+const QR_MOTION_INTENSITY_VALUES = new Set<string>(
+  QR_MOTION_INTENSITY_OPTIONS.map((option) => option.value),
 );
 
 export const QR_DOT_MATRIX_COLOR_PRESET_OPTIONS: Array<{
@@ -251,6 +408,8 @@ export const QR_DOT_MATRIX_PATTERN_OPTIONS: Array<{
   { label: "Rings", value: "rings" },
 ];export const DEFAULT_DOT_MATRIX_ANIMATION: QrDotMatrixAnimationOptions = {
   animated: true,
+  autoAnimate: "",
+  autoAnimateInterval: 5000,
   colorPreset: "theme",
   customColor: "#22d3ee",
   customColorBase: "#22d3ee",
@@ -259,13 +418,19 @@ export const QR_DOT_MATRIX_PATTERN_OPTIONS: Array<{
   dotShape: "circle",
   enabled: false,
   exportAnimatedSvg: false,
+  hoverColorMode: "both",
+  hoverEffect: "",
   loader: "neon-drift",
   matrixSize: QR_DOT_MATRIX_MATRIX_SIZE_MIN,
+  motionIntensity: "premium",
   opacityBase: 0.2,
   opacityMid: 0.55,
   opacityPeak: 1,
   overlayScale: 100,
   pattern: "full",
+  preset: "neon-drift",
+  presetCategory: "dotMatrix",
+  respectReducedMotion: true,
   speed: 3,
 };
 
@@ -426,6 +591,103 @@ function coerceDotMatrixSquareLoader(value: string | undefined) {
     : DEFAULT_DOT_MATRIX_ANIMATION.loader;
 }
 
+export function dotMatrixLoaderToBitjsonPreset(loader: QrDotMatrixSquareLoader) {
+  return loader
+    .split("-")
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join("") as QrMotionStandardPreset;
+}
+
+function coerceMotionPreset(
+  value: string | undefined,
+  loader: QrDotMatrixSquareLoader,
+): QrDotMatrixAnimationOptions["preset"] {
+  if (value && QR_DOT_MATRIX_SQUARE_LOADER_VALUES.has(value)) {
+    return value as QrDotMatrixSquareLoader;
+  }
+
+  if (value && QR_MOTION_STANDARD_PRESET_VALUES.has(value)) {
+    return value as QrMotionStandardPreset;
+  }
+
+  return loader;
+}
+
+function coerceMotionAutoAnimate(value: string | undefined) {
+  if (!value) {
+    return "" as const;
+  }
+
+  if (QR_DOT_MATRIX_SQUARE_LOADER_VALUES.has(value)) {
+    return value as QrDotMatrixSquareLoader;
+  }
+
+  if (QR_MOTION_STANDARD_PRESET_VALUES.has(value)) {
+    return value as QrMotionStandardPreset;
+  }
+
+  return "" as const;
+}
+
+function coerceMotionHoverEffect(value: string | undefined) {
+  return value && QR_MOTION_HOVER_EFFECT_VALUES.has(value)
+    ? (value as QrMotionHoverEffect)
+    : DEFAULT_DOT_MATRIX_ANIMATION.hoverEffect;
+}
+
+function coerceMotionHoverColorMode(value: string | undefined) {
+  return value && QR_MOTION_HOVER_COLOR_MODE_VALUES.has(value)
+    ? (value as QrMotionHoverColorMode)
+    : DEFAULT_DOT_MATRIX_ANIMATION.hoverColorMode;
+}
+
+function coerceMotionIntensity(value: string | undefined) {
+  return value && QR_MOTION_INTENSITY_VALUES.has(value)
+    ? (value as QrMotionIntensity)
+    : DEFAULT_DOT_MATRIX_ANIMATION.motionIntensity;
+}
+
+function coerceMotionAutoAnimateInterval(value: number | undefined) {
+  return coerceNumber(
+    value ?? DEFAULT_DOT_MATRIX_ANIMATION.autoAnimateInterval,
+    QR_MOTION_AUTO_ANIMATE_INTERVAL_MIN,
+    QR_MOTION_AUTO_ANIMATE_INTERVAL_MAX,
+    DEFAULT_DOT_MATRIX_ANIMATION.autoAnimateInterval,
+  );
+}
+
+export function resolveBitjsonMotionPreset(animation: QrDotMatrixAnimationOptions) {
+  if (animation.presetCategory === "dotMatrix") {
+    const loader =
+      typeof animation.preset === "string" && QR_DOT_MATRIX_SQUARE_LOADER_VALUES.has(animation.preset)
+        ? (animation.preset as QrDotMatrixSquareLoader)
+        : animation.loader;
+
+    return dotMatrixLoaderToBitjsonPreset(loader);
+  }
+
+  if (
+    typeof animation.preset === "string" &&
+    QR_MOTION_STANDARD_PRESET_VALUES.has(animation.preset)
+  ) {
+    return animation.preset;
+  }
+
+  return "SpiralBloom";
+}
+
+export function resolveBitjsonAutoAnimatePreset(animation: QrDotMatrixAnimationOptions) {
+  if (!animation.autoAnimate) {
+    return "";
+  }
+
+  if (QR_DOT_MATRIX_SQUARE_LOADER_VALUES.has(animation.autoAnimate)) {
+    return dotMatrixLoaderToBitjsonPreset(animation.autoAnimate as QrDotMatrixSquareLoader);
+  }
+
+  return animation.autoAnimate;
+}
+
 function coerceDotMatrixAnimationColor(value: unknown, fallback: string) {
   return typeof value === "string" && value.trim() ? value : fallback;
 }
@@ -533,8 +795,17 @@ export function setDotMatrixAnimationOptions(
     patch.customColor ?? state.dotMatrixAnimation.customColor,
     DEFAULT_DOT_MATRIX_ANIMATION.customColor,
   );
+  const nextLoader = coerceDotMatrixSquareLoader(
+    patch.loader ?? state.dotMatrixAnimation.loader,
+  );
   const nextAnimation: QrDotMatrixAnimationOptions = {
     animated: patch.animated ?? state.dotMatrixAnimation.animated,
+    autoAnimate: coerceMotionAutoAnimate(
+      patch.autoAnimate ?? state.dotMatrixAnimation.autoAnimate,
+    ),
+    autoAnimateInterval: coerceMotionAutoAnimateInterval(
+      patch.autoAnimateInterval ?? state.dotMatrixAnimation.autoAnimateInterval,
+    ),
     colorPreset: patch.colorPreset ?? state.dotMatrixAnimation.colorPreset,
     customColor: nextCustomColor,
     customColorBase: coerceDotMatrixAnimationColor(
@@ -553,11 +824,18 @@ export function setDotMatrixAnimationOptions(
     enabled: patch.enabled ?? state.dotMatrixAnimation.enabled,
     exportAnimatedSvg:
       patch.exportAnimatedSvg ?? state.dotMatrixAnimation.exportAnimatedSvg,
-    loader: coerceDotMatrixSquareLoader(
-      patch.loader ?? state.dotMatrixAnimation.loader,
+    hoverColorMode: coerceMotionHoverColorMode(
+      patch.hoverColorMode ?? state.dotMatrixAnimation.hoverColorMode,
     ),
+    hoverEffect: coerceMotionHoverEffect(
+      patch.hoverEffect ?? state.dotMatrixAnimation.hoverEffect,
+    ),
+    loader: nextLoader,
     matrixSize: clampDotMatrixAnimationMatrixSize(
       patch.matrixSize ?? state.dotMatrixAnimation.matrixSize,
+    ),
+    motionIntensity: coerceMotionIntensity(
+      patch.motionIntensity ?? state.dotMatrixAnimation.motionIntensity,
     ),
     opacityBase: clampDotMatrixAnimationOpacity(
       patch.opacityBase ?? state.dotMatrixAnimation.opacityBase,
@@ -575,6 +853,14 @@ export function setDotMatrixAnimationOptions(
       patch.overlayScale ?? state.dotMatrixAnimation.overlayScale,
     ),
     pattern: patch.pattern ?? state.dotMatrixAnimation.pattern,
+    preset: coerceMotionPreset(
+      patch.preset ?? state.dotMatrixAnimation.preset,
+      nextLoader,
+    ),
+    presetCategory:
+      patch.presetCategory ?? state.dotMatrixAnimation.presetCategory ?? "dotMatrix",
+    respectReducedMotion:
+      patch.respectReducedMotion ?? state.dotMatrixAnimation.respectReducedMotion,
     speed: clampDotMatrixAnimationSpeed(
       patch.speed ?? state.dotMatrixAnimation.speed,
     ),
@@ -584,19 +870,27 @@ export function setDotMatrixAnimationOptions(
     state.dotMatrixAnimation.enabled === nextAnimation.enabled &&
     state.dotMatrixAnimation.exportAnimatedSvg === nextAnimation.exportAnimatedSvg &&
     state.dotMatrixAnimation.animated === nextAnimation.animated &&
+    state.dotMatrixAnimation.autoAnimate === nextAnimation.autoAnimate &&
+    state.dotMatrixAnimation.autoAnimateInterval === nextAnimation.autoAnimateInterval &&
     state.dotMatrixAnimation.colorPreset === nextAnimation.colorPreset &&
     state.dotMatrixAnimation.customColor === nextAnimation.customColor &&
     state.dotMatrixAnimation.customColorBase === nextAnimation.customColorBase &&
     state.dotMatrixAnimation.customColorMid === nextAnimation.customColorMid &&
     state.dotMatrixAnimation.customColorPeak === nextAnimation.customColorPeak &&
     state.dotMatrixAnimation.dotShape === nextAnimation.dotShape &&
+    state.dotMatrixAnimation.hoverColorMode === nextAnimation.hoverColorMode &&
+    state.dotMatrixAnimation.hoverEffect === nextAnimation.hoverEffect &&
     state.dotMatrixAnimation.loader === nextAnimation.loader &&
     state.dotMatrixAnimation.matrixSize === nextAnimation.matrixSize &&
+    state.dotMatrixAnimation.motionIntensity === nextAnimation.motionIntensity &&
     state.dotMatrixAnimation.opacityBase === nextAnimation.opacityBase &&
     state.dotMatrixAnimation.opacityMid === nextAnimation.opacityMid &&
     state.dotMatrixAnimation.opacityPeak === nextAnimation.opacityPeak &&
     state.dotMatrixAnimation.overlayScale === nextAnimation.overlayScale &&
     state.dotMatrixAnimation.pattern === nextAnimation.pattern &&
+    state.dotMatrixAnimation.preset === nextAnimation.preset &&
+    state.dotMatrixAnimation.presetCategory === nextAnimation.presetCategory &&
+    state.dotMatrixAnimation.respectReducedMotion === nextAnimation.respectReducedMotion &&
     state.dotMatrixAnimation.speed === nextAnimation.speed &&
     !hasRemovedAnimationOptions &&
     !hasMissingMatrixSize

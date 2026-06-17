@@ -61,7 +61,7 @@ describe("drafting layered export", () => {
         backgroundOptions: expect.objectContaining({ transparent: true }),
         backgroundShapeId: "none",
       }),
-      expect.objectContaining({ animationMode: "export" }),
+      expect.anything(),
     )
     expect(payload.originalSvgMarkup).toContain('data-drafting-qr-background="flower"')
     expect(payload.originalSvgMarkup).toContain('data-qr-layer="dot"')

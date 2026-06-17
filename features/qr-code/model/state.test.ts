@@ -197,6 +197,8 @@ describe("qr studio state helpers", () => {
     expect(lowAnimation.dotMatrixAnimation.speed).toBe(1);
     expect(highAnimation.dotMatrixAnimation).toEqual({
       animated: true,
+      autoAnimate: "",
+      autoAnimateInterval: 5000,
       colorPreset: "theme",
       customColor: "#f4f4f5",
       customColorBase: "#22d3ee",
@@ -205,13 +207,19 @@ describe("qr studio state helpers", () => {
       dotShape: "diamond",
       enabled: true,
       exportAnimatedSvg: true,
+      hoverColorMode: "both",
+      hoverEffect: "",
       loader: "neon-drift",
       matrixSize: 25,
+      motionIntensity: "premium",
       opacityBase: 1,
       opacityMid: 1,
       opacityPeak: 1,
       overlayScale: 140,
       pattern: "rings",
+      preset: "neon-drift",
+      presetCategory: "dotMatrix",
+      respectReducedMotion: true,
       speed: 10,
     });
     expect(clampDotMatrixAnimationOpacity(Number.NaN, DEFAULT_DOT_MATRIX_ANIMATION.opacityMid)).toBe(

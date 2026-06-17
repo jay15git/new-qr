@@ -70,6 +70,8 @@ import {
   DraftingImageLayerContent,
   DraftingShapeLayerContent,
 } from "@/features/workspace/rendering/shape-layer"
+import { BitjsonAnimatedQr } from "@/features/qr-code/components/BitjsonAnimatedQr"
+import { shouldUseBitjsonMotionPreview } from "@/features/qr-code/motion/bitjson-bridge"
 import { buildDashboardQrNodePayload } from "@/features/qr-code/rendering/qr-svg"
 import { getDraftingQrLayerLayout } from "@/features/qr-code/rendering/svg-extension"
 import type { QrStudioState } from "@/features/qr-code/model/state"
@@ -1199,22 +1201,40 @@ function renderDraftingQrLayerContent({
   const scaledQrMarkup = qrMarkup
     ? scaleNestedSvgMarkup(qrMarkup, layout.innerWidth, layout.innerHeight)
     : ""
+  const useAnimatedQr = shouldUseBitjsonMotionPreview(state)
 
   return (
     <div className="relative h-full w-full" style={shapeTiltPerspectiveStyle}>
       <div className="relative h-full w-full" style={shapeTiltInnerStyle}>
         <DraftingQrBackground layer={layer} state={state} />
-        <div
-          className="absolute z-10 max-h-none max-w-none [&_svg]:h-full [&_svg]:w-full"
-          dangerouslySetInnerHTML={{ __html: scaledQrMarkup }}
-          style={{
-            height: layout.innerHeight,
-            left: layout.metrics.translateX,
-            top: layout.metrics.translateY,
-            transformStyle: shapeTiltInnerStyle.transformStyle,
-            width: layout.innerWidth,
-          }}
-        />
+        {useAnimatedQr ? (
+          <BitjsonAnimatedQr
+            height={layout.innerHeight}
+            state={state}
+            style={{
+              height: layout.innerHeight,
+              left: layout.metrics.translateX,
+              position: "absolute",
+              top: layout.metrics.translateY,
+              transformStyle: shapeTiltInnerStyle.transformStyle,
+              width: layout.innerWidth,
+              zIndex: 10,
+            }}
+            width={layout.innerWidth}
+          />
+        ) : (
+          <div
+            className="absolute z-10 max-h-none max-w-none [&_svg]:h-full [&_svg]:w-full"
+            dangerouslySetInnerHTML={{ __html: scaledQrMarkup }}
+            style={{
+              height: layout.innerHeight,
+              left: layout.metrics.translateX,
+              top: layout.metrics.translateY,
+              transformStyle: shapeTiltInnerStyle.transformStyle,
+              width: layout.innerWidth,
+            }}
+          />
+        )}
       </div>
     </div>
   )
@@ -1291,8 +1311,13 @@ export const Pane = memo(function Pane({
   const markupCacheRef = useRef(new Map<string, string>())
   const qrArtworkState = useMemo(() => createDraftingQrArtworkState(state), [state])
   const stateCacheKey = useMemo(() => JSON.stringify(qrArtworkState), [qrArtworkState])
+  const motionPreviewActive = shouldUseBitjsonMotionPreview(state)
 
   useEffect(() => {
+    if (motionPreviewActive) {
+      return
+    }
+
     const requestId = ++requestRef.current
     const cachedMarkup = markupCacheRef.current.get(stateCacheKey)
 
@@ -1302,7 +1327,7 @@ export const Pane = memo(function Pane({
       return
     }
 
-    void buildDashboardQrNodePayload(qrArtworkState, { animationMode: "preview" })
+    void buildDashboardQrNodePayload(qrArtworkState)
       .then((payload) => {
         if (requestRef.current !== requestId) return
         const nextMarkup = sanitizeDraftingQrArtworkMarkup(payload.markup)
@@ -1315,7 +1340,7 @@ export const Pane = memo(function Pane({
         setMarkup(null)
         setHasError(true)
       })
-  }, [qrArtworkState, stateCacheKey])
+  }, [motionPreviewActive, qrArtworkState, stateCacheKey])
 
   useEffect(
     () => () => {
@@ -1375,7 +1400,7 @@ export const Pane = memo(function Pane({
     }
   }, [contextMenu])
 
-  const isLoading = markup === null && !hasError
+  const isLoading = !motionPreviewActive && markup === null && !hasError
   const resolvedLayers = useMemo(
     () =>
       layers && layers.length > 0

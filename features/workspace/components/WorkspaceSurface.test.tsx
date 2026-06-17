@@ -1168,7 +1168,6 @@ describe("WorkspaceSurface", () => {
           loader: "mobius-run",
         }),
       }),
-      { animationMode: "preview" },
     )
 
     const loaderPanel = getRequiredElement(
@@ -1192,7 +1191,6 @@ describe("WorkspaceSurface", () => {
           customColorBase: "#111111",
         }),
       }),
-      { animationMode: "preview" },
     )
   })
 
@@ -1224,7 +1222,6 @@ describe("WorkspaceSurface", () => {
           enabled: true,
         }),
       }),
-      { animationMode: "preview" },
     )
   })
 
@@ -1337,7 +1334,7 @@ describe("WorkspaceSurface", () => {
         dataModulesSettings: expect.objectContaining({ color: "#123456" }),
         dotsColorMode: "solid",
       }),
-      expect.objectContaining({ animationMode: "preview" }),
+      expect.anything(),
     )
 
     act(() => {
@@ -2774,7 +2771,6 @@ describe("WorkspaceSurface", () => {
           strokeWidth: 0,
         }),
       }),
-      { animationMode: "preview" },
     )
   })
 
@@ -2825,7 +2821,6 @@ describe("WorkspaceSurface", () => {
           strokeWidth: 0,
         }),
       }),
-      { animationMode: "preview" },
     )
   })
 
@@ -3507,7 +3502,6 @@ describe("WorkspaceSurface", () => {
       expect.objectContaining({
         data: "https://new-qr-studio.local/launch",
       }),
-      { animationMode: "preview" },
     )
   })
 

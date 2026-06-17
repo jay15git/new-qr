@@ -101,15 +101,22 @@ import { StylePreview, type StylePreviewKind } from "@/features/qr-code/componen
 import {
   DEFAULT_DOT_MATRIX_ANIMATION,
   DEFAULT_BACKGROUND_SHAPE_OPTIONS,
+  MOTION_COLOR_SWATCHES,
   QR_DOT_MATRIX_ANIMATION_SPEED_MAX,
   QR_DOT_MATRIX_ANIMATION_SPEED_MIN,
   QR_DOT_MATRIX_COLOR_PRESET_OPTIONS,
-  QR_DOT_MATRIX_MATRIX_SIZE_MAX,
-  QR_DOT_MATRIX_MATRIX_SIZE_MIN,
-  QR_DOT_MATRIX_MATRIX_SIZE_STEP,
-  QR_DOT_MATRIX_OVERLAY_SCALE_MAX,
-  QR_DOT_MATRIX_OVERLAY_SCALE_MIN,
-  QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS,
+  QR_DOT_MATRIX_OPACITY_MAX,
+  QR_DOT_MATRIX_OPACITY_MIN,
+  QR_MOTION_AUTO_ANIMATE_INTERVAL_MAX,
+  QR_MOTION_AUTO_ANIMATE_INTERVAL_MIN,
+  QR_MOTION_AUTO_ANIMATE_INTERVAL_STEP,
+  QR_MOTION_DOT_MATRIX_PRESET_OPTIONS,
+  QR_MOTION_HOVER_COLOR_MODE_OPTIONS,
+  QR_MOTION_HOVER_EFFECT_OPTIONS,
+  QR_MOTION_INTENSITY_OPTIONS,
+  QR_MOTION_STANDARD_PRESET_OPTIONS,
+  createDefaultQrStudioState,
+  setDotMatrixAnimationOptions,
   type DotsColorMode,
   type QrDotMatrixAnimationOptions,
   type QrDotMatrixAnimationPatch,
@@ -979,16 +986,8 @@ const DESKTOP_TEXT_ALIGN_OPTIONS: Array<{ label: string; value: DraftingTextAlig
   { label: "Right", value: "right" },
 ]
 
-const DESKTOP_MOTION_COLOR_SWATCHES: Record<DesktopMotionSettings["colorPreset"], string[]> = {
-  aurora: ["#67e8f9", "#a78bfa", "#f0abfc"],
-  fire: ["#f97316", "#ef4444", "#facc15"],
-  mint: ["#34d399", "#6ee7b7", "#d9f99d"],
-  neon: ["#22d3ee", "#a855f7", "#f8fafc"],
-  ocean: ["#38bdf8", "#2563eb", "#0f172a"],
-  prism: ["#64748b", "#eab308", "#22c55e"],
-  sunset: ["#f59e0b", "#f97316", "#fde047"],
-  theme: ["#22d3ee", "#22d3ee", "#22d3ee"],
-}
+const DESKTOP_MOTION_COLOR_SWATCHES: Record<DesktopMotionSettings["colorPreset"], string[]> =
+  MOTION_COLOR_SWATCHES
 
 export function FloatingToolbar({
   controller,
@@ -1123,11 +1122,12 @@ export function FloatingToolbar({
   const onMotionSettingsChange =
     controller?.onMotionSettingsChange ??
     ((patch: QrDotMatrixAnimationPatch) =>
-      setMotionSettings((current) => ({
-        ...current,
-        ...patch,
-        loader: (patch.loader ?? current.loader) as DesktopMotionSettings["loader"],
-      })))
+      setMotionSettings((current) =>
+        setDotMatrixAnimationOptions(
+          { ...createDefaultQrStudioState(), dotMatrixAnimation: current },
+          patch,
+        ).dotMatrixAnimation,
+      ))
   const onEncodingSettingsChange =
     controller?.onEncodingSettingsChange ??
     ((patch: Partial<DesktopEncodingSettings>) =>
@@ -3170,11 +3170,6 @@ function DesktopShapePreview({
         <svg
           className="size-[62%]"
           fill="none"
-          style={{
-            perspective: "600px",
-            transform: `rotateX(${settings.shapeTiltY}deg) rotateY(${settings.shapeTiltX}deg)`,
-            transformOrigin: "center center",
-          }}
           viewBox={`0 0 ${shape.viewBox.width} ${shape.viewBox.height}`}
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -3220,6 +3215,18 @@ function DesktopMotionInspector({
   onMotionSettingsChange: (patch: QrDotMatrixAnimationPatch) => void
   settings: DesktopMotionSettings
 }) {
+  const autoAnimateOptions = [
+    { label: "Off", value: "" },
+    ...QR_MOTION_STANDARD_PRESET_OPTIONS.map((option) => ({
+      label: `Auto: ${option.label}`,
+      value: option.value,
+    })),
+    ...QR_MOTION_DOT_MATRIX_PRESET_OPTIONS.map((option) => ({
+      label: `Auto: ${option.label}`,
+      value: option.value,
+    })),
+  ]
+
   return (
     <div data-slot="desktop-motion-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Motion" />
@@ -3228,34 +3235,112 @@ function DesktopMotionInspector({
         <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <DesktopMotionToggleRow
             checked={settings.enabled}
-            label="Dot matrix motion"
+            label="Motion"
             onChange={(enabled) => onMotionSettingsChange({ enabled })}
           />
         </section>
 
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <div className="mb-2 min-w-0">
-            <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Loader</p>
+            <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>QR Animations</p>
           </div>
           <div
-            aria-label="Motion loader presets"
-            data-slot="desktop-motion-loader-shelf"
+            aria-label="Standard motion presets"
+            data-slot="desktop-motion-standard-shelf"
             className="grid max-h-40 grid-cols-2 gap-1.5 overflow-y-auto pr-1"
           >
-            {QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS.map((loader) => (
+            {QR_MOTION_STANDARD_PRESET_OPTIONS.map((preset) => (
               <DesktopMotionLoaderButton
-                key={loader.value}
-                label={loader.label}
-                selected={settings.loader === loader.value}
-                onClick={() => onMotionSettingsChange({ loader: loader.value })}
+                key={preset.value}
+                label={preset.label}
+                selected={
+                  settings.presetCategory === "standard" && settings.preset === preset.value
+                }
+                onClick={() =>
+                  onMotionSettingsChange({
+                    preset: preset.value,
+                    presetCategory: "standard",
+                  })
+                }
               />
             ))}
           </div>
         </section>
 
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
-          <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Timing</p>
+          <div className="mb-2 min-w-0">
+            <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Dot Matrix Animations</p>
+          </div>
+          <div
+            aria-label="Dot matrix motion presets"
+            data-slot="desktop-motion-loader-shelf"
+            className="grid max-h-40 grid-cols-2 gap-1.5 overflow-y-auto pr-1"
+          >
+            {QR_MOTION_DOT_MATRIX_PRESET_OPTIONS.map((loader) => (
+              <DesktopMotionLoaderButton
+                key={loader.value}
+                label={loader.label}
+                selected={
+                  settings.presetCategory === "dotMatrix" &&
+                  (settings.preset === loader.value || settings.loader === loader.value)
+                }
+                onClick={() =>
+                  onMotionSettingsChange({
+                    loader: loader.value,
+                    preset: loader.value,
+                    presetCategory: "dotMatrix",
+                  })
+                }
+              />
+            ))}
+          </div>
+        </section>
+
+        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+          <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Playback</p>
           <div className="grid gap-3">
+            <DesktopMotionSelectRow
+              label="Auto animate"
+              value={settings.autoAnimate}
+              options={autoAnimateOptions}
+              onChange={(autoAnimate) => onMotionSettingsChange({ autoAnimate })}
+            />
+            <DesktopMotionSliderRow
+              label="Auto interval"
+              max={QR_MOTION_AUTO_ANIMATE_INTERVAL_MAX}
+              min={QR_MOTION_AUTO_ANIMATE_INTERVAL_MIN}
+              step={QR_MOTION_AUTO_ANIMATE_INTERVAL_STEP}
+              value={settings.autoAnimateInterval}
+              valueLabel={`${Math.round(settings.autoAnimateInterval)}ms`}
+              onChange={(autoAnimateInterval) => onMotionSettingsChange({ autoAnimateInterval })}
+            />
+            <DesktopMotionSelectRow
+              label="Hover effect"
+              value={settings.hoverEffect}
+              options={QR_MOTION_HOVER_EFFECT_OPTIONS.map((option) => ({
+                label: option.label,
+                value: option.value,
+              }))}
+              onChange={(hoverEffect) => onMotionSettingsChange({ hoverEffect })}
+            />
+            <DesktopMotionSelectRow
+              label="Hover color"
+              value={settings.hoverColorMode}
+              options={QR_MOTION_HOVER_COLOR_MODE_OPTIONS.map((option) => ({
+                label: option.label,
+                value: option.value,
+              }))}
+              onChange={(hoverColorMode) => onMotionSettingsChange({ hoverColorMode })}
+            />
+            <DesktopMotionSelectRow
+              label="Intensity"
+              value={settings.motionIntensity}
+              options={QR_MOTION_INTENSITY_OPTIONS.map((option) => ({
+                label: option.label,
+                value: option.value,
+              }))}
+              onChange={(motionIntensity) => onMotionSettingsChange({ motionIntensity })}
+            />
             <DesktopMotionSliderRow
               label="Speed"
               max={QR_DOT_MATRIX_ANIMATION_SPEED_MAX}
@@ -3265,21 +3350,31 @@ function DesktopMotionInspector({
               onChange={(speed) => onMotionSettingsChange({ speed })}
             />
             <DesktopMotionSliderRow
-              label="Matrix density"
-              max={QR_DOT_MATRIX_MATRIX_SIZE_MAX}
-              min={QR_DOT_MATRIX_MATRIX_SIZE_MIN}
-              step={QR_DOT_MATRIX_MATRIX_SIZE_STEP}
-              value={settings.matrixSize}
-              valueLabel={`${Math.round(settings.matrixSize)}x${Math.round(settings.matrixSize)}`}
-              onChange={(matrixSize) => onMotionSettingsChange({ matrixSize })}
+              label="Opacity base"
+              max={QR_DOT_MATRIX_OPACITY_MAX}
+              min={QR_DOT_MATRIX_OPACITY_MIN}
+              step={0.01}
+              value={settings.opacityBase}
+              valueLabel={settings.opacityBase.toFixed(2)}
+              onChange={(opacityBase) => onMotionSettingsChange({ opacityBase })}
             />
             <DesktopMotionSliderRow
-              label="Overlay scale"
-              max={QR_DOT_MATRIX_OVERLAY_SCALE_MAX}
-              min={QR_DOT_MATRIX_OVERLAY_SCALE_MIN}
-              value={settings.overlayScale}
-              valueLabel={`${Math.round(settings.overlayScale)}%`}
-              onChange={(overlayScale) => onMotionSettingsChange({ overlayScale })}
+              label="Opacity mid"
+              max={QR_DOT_MATRIX_OPACITY_MAX}
+              min={QR_DOT_MATRIX_OPACITY_MIN}
+              step={0.01}
+              value={settings.opacityMid}
+              valueLabel={settings.opacityMid.toFixed(2)}
+              onChange={(opacityMid) => onMotionSettingsChange({ opacityMid })}
+            />
+            <DesktopMotionSliderRow
+              label="Opacity peak"
+              max={QR_DOT_MATRIX_OPACITY_MAX}
+              min={QR_DOT_MATRIX_OPACITY_MIN}
+              step={0.01}
+              value={settings.opacityPeak}
+              valueLabel={settings.opacityPeak.toFixed(2)}
+              onChange={(opacityPeak) => onMotionSettingsChange({ opacityPeak })}
             />
           </div>
         </section>
@@ -3338,11 +3433,47 @@ function DesktopMotionInspector({
               label="Animated SVG export"
               onChange={(exportAnimatedSvg) => onMotionSettingsChange({ exportAnimatedSvg })}
             />
+            <DesktopMotionToggleRow
+              checked={settings.respectReducedMotion}
+              label="Respect reduced motion"
+              onChange={(respectReducedMotion) => onMotionSettingsChange({ respectReducedMotion })}
+            />
           </div>
         </section>
       </DesktopInspectorScrollArea>
 
     </div>
+  )
+}
+
+function DesktopMotionSelectRow<T extends string>({
+  label,
+  onChange,
+  options,
+  value,
+}: {
+  label: string
+  onChange: (value: T) => void
+  options: Array<{ label: string; value: T }>
+  value: T
+}) {
+  return (
+    <label className={cn("grid gap-1.5", DESKTOP_INSPECTOR_ROW_CLASS)}>
+      <span className={cn("text-[12px] font-semibold", DESKTOP_INSPECTOR_FG_SECONDARY)}>{label}</span>
+      <select
+        className={cn(
+          "h-9 w-full rounded-[6px] border border-white/[0.12] bg-white/[0.06] px-2.5 text-[12px] font-medium text-[var(--desktop-inspector-fg-primary)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]",
+        )}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {options.map((option) => (
+          <option key={`${option.value}-${option.label}`} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
   )
 }
 

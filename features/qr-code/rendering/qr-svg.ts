@@ -23,12 +23,9 @@ export function stripXmlDeclaration(markup: string) {
 
 export async function buildDashboardQrNodePayload(
   state: QrStudioState,
-  options: { animationMode?: "export" | "none" | "preview" } = {},
 ): Promise<DashboardQrNodePayload> {
   const dashboardState = createDashboardSurfaceQrState(state)
-  const extension = buildQrExtension(dashboardState, {
-    animationMode: options.animationMode ?? "none",
-  })
+  const extension = buildQrExtension(dashboardState)
   const markup = stripXmlDeclaration(
     renderToStaticMarkup(createElement(ReactQRCode, toReactQrCodeProps(dashboardState))),
   )

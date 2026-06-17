@@ -279,7 +279,6 @@ describe("Pane", () => {
         backgroundOptions: expect.objectContaining({ transparent: true }),
         backgroundShapeId: "none",
       }),
-      expect.objectContaining({ animationMode: "preview" }),
     )
     expect(qrSvg?.querySelector('[data-qr-layer="background-shape"]')).toBeNull()
     expect(qrSvg?.querySelector('[data-qr-layer="background-shape-blur"]')).toBeNull()

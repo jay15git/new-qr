@@ -40,12 +40,7 @@ const QR_MODULE_CLIP_PATH_PREFIXES = [DOTS_CLIP_PATH_PREFIX]
 const DEFAULT_DOT_MATRIX_TILE_SIZE = 5
 const DOT_MATRIX_QUIET_TRACK_INDEX = -1
 
-export function buildQrExtension(
-  state: QrStudioState,
-  _options: { animationMode?: QrAnimationRenderMode } = {},
-) {
-  void _options
-
+export function buildQrExtension(state: QrStudioState) {
   const extensions: QrSvgExtensionFunction[] = []
   const backgroundImage = getAssetValue(state.backgroundImage)
   const backgroundShape = backgroundImage
@@ -89,16 +84,9 @@ export function buildQrExtension(
   }
 }
 
-export function getQrExtensionKey(
-  state: QrStudioState,
-  options: { animationMode?: QrAnimationRenderMode } = {},
-) {
-  const animationMode = options.animationMode ?? "none"
-
+export function getQrExtensionKey(state: QrStudioState) {
   return JSON.stringify({
-    animation:
-      null,
-    animationMode,
+    animation: null,
     backgroundImage: getAssetValue(state.backgroundImage),
     backgroundRound: state.backgroundOptions.round,
     backgroundShapeGradient: getBackgroundShapeGradientKey(state),
@@ -119,164 +107,12 @@ export function getQrExtensionKey(
 }
 
 export function createDotMatrixAnimationExtension(
-  state: QrStudioState,
-  mode: QrAnimationRenderMode,
+  _state: QrStudioState,
+  _mode: QrAnimationRenderMode,
 ): QrSvgExtensionFunction | null {
-  if (!shouldApplyDotMatrixAnimation(state, mode)) {
-    return null
-  }
-
-  return (svg, options) => {
-    const document = svg.ownerDocument
-
-    if (!document) {
-      return
-    }
-
-    svg.querySelectorAll('[data-qr-layer="dot-matrix-animation"]').forEach((node) => {
-      node.remove()
-    })
-
-    const dotLayers = getQrModuleClipLayers(svg)
-
-    if (dotLayers.length === 0) {
-      return
-    }
-
-    const dotShapes = dotLayers.flatMap((layer) => layer.shapes)
-    const metrics = collectDotMatrixMetrics(dotShapes)
-
-    if (!metrics) {
-      return
-    }
-
-    const animationColors = resolveDotMatrixColors(state)
-    const matrixSize = getDotMatrixTileSize(state.dotMatrixAnimation)
-    const modules: DotMatrixModule[] = []
-
-    for (const layer of dotLayers) {
-      for (const shape of layer.shapes) {
-        const coordinates = resolveDotMatrixCoordinates(shape, metrics)
-
-        if (!coordinates) {
-          continue
-        }
-
-        modules.push(createDotMatrixModule(shape, coordinates, metrics, matrixSize))
-      }
-    }
-
-    if (modules.length === 0) {
-      return
-    }
-
-    const tracks = createDotMatrixLoaderTracks(
-      modules,
-      state.dotMatrixAnimation,
-      matrixSize,
-    )
-
-    if (tracks.size === 0) {
-      return
-    }
-
-    suppressDotMatrixBaseLayers(dotLayers)
-
-    const group = document.createElementNS(SVG_NS, "g")
-    group.setAttribute("data-qr-layer", "dot-matrix-animation")
-    group.setAttribute(
-      "class",
-      [
-        "qr-dot-matrix-layer",
-        `qr-dot-loader-${state.dotMatrixAnimation.loader}`,
-        `qr-dot-pattern-${state.dotMatrixAnimation.pattern}`,
-      ].filter(Boolean).join(" "),
-    )
-    group.setAttribute("data-qr-dot-loader", state.dotMatrixAnimation.loader)
-    group.appendChild(createDotMatrixAnimationStyle(document, Array.from(tracks.values())))
-    const defs = document.createElementNS(SVG_NS, "defs")
-    defs.setAttribute("data-qr-layer", "dot-matrix-animation-defs")
-    group.appendChild(defs)
-    group.setAttribute(
-      "style",
-      [
-        `--qr-dot-matrix-color:${animationColors.base}`,
-        `--qr-dot-matrix-color-base:${animationColors.base}`,
-        `--qr-dot-matrix-color-mid:${animationColors.mid}`,
-        `--qr-dot-matrix-color-peak:${animationColors.peak}`,
-        `--qr-dot-matrix-duration:${getDotMatrixAnimationDuration(state.dotMatrixAnimation)}s`,
-        `--qr-dot-matrix-opacity-base:${formatSvgOpacity(getDotMatrixBaseOpacity(state.dotMatrixAnimation))}`,
-        `--qr-dot-matrix-opacity-mid:${formatSvgOpacity(state.dotMatrixAnimation.opacityMid)}`,
-        `--qr-dot-matrix-opacity-peak:${formatSvgOpacity(state.dotMatrixAnimation.opacityPeak)}`,
-        `--qr-dot-matrix-scale:${formatSvgNumber(getDotMatrixOverlayScale(state.dotMatrixAnimation) / 100)}`,
-      ].join(";"),
-    )
-
-    const coverRect = getDotMatrixCoverRect(svg, options, metrics)
-
-    const sortedTracks = Array.from(tracks.values()).sort(
-      (left, right) => left.index - right.index || left.topology.localeCompare(right.topology),
-    )
-
-    for (const [trackOffset, track] of sortedTracks.entries()) {
-      const clipPath = document.createElementNS(SVG_NS, "clipPath")
-      const clipPathId = `qr-dot-matrix-animation-clip-${trackOffset}`
-
-      clipPath.setAttribute("id", clipPathId)
-      clipPath.setAttribute("data-qr-layer", "dot-matrix-animation-clip")
-
-      for (const qrModule of track.modules) {
-        const shape = qrModule.shape.cloneNode(true) as SVGElement
-        shape.removeAttribute("clip-path")
-        applyDotMatrixOverlayScale(
-          shape,
-          metrics,
-          getDotMatrixOverlayScale(state.dotMatrixAnimation),
-        )
-        clipPath.appendChild(shape)
-      }
-
-      defs.appendChild(clipPath)
-
-      const animatedLayer = document.createElementNS(SVG_NS, "rect")
-      animatedLayer.setAttribute("x", formatSvgNumber(coverRect.x))
-      animatedLayer.setAttribute("y", formatSvgNumber(coverRect.y))
-      animatedLayer.setAttribute("width", formatSvgNumber(coverRect.width))
-      animatedLayer.setAttribute("height", formatSvgNumber(coverRect.height))
-      animatedLayer.setAttribute("clip-path", `url('#${clipPathId}')`)
-      animatedLayer.setAttribute("fill", animationColors.base)
-      animatedLayer.setAttribute("data-qr-dot-loader", state.dotMatrixAnimation.loader)
-      animatedLayer.setAttribute("data-qr-dot-track", String(track.index))
-      animatedLayer.setAttribute("data-qr-dot-keyframes", track.keyframes)
-      animatedLayer.setAttribute("data-qr-dot-duration-ms", String(track.durationMs))
-      animatedLayer.setAttribute("data-qr-dot-easing", track.timingFunction)
-      animatedLayer.setAttribute("data-qr-dot-topology", track.topology)
-      animatedLayer.setAttribute("data-qr-dot-upstream-loader", track.upstreamLoader)
-      if (track.upstreamClass) {
-        animatedLayer.setAttribute("data-qr-dot-upstream-class", track.upstreamClass)
-      }
-      animatedLayer.setAttribute("data-qr-dot-grid", `${matrixSize}x${matrixSize}`)
-      animatedLayer.setAttribute("data-qr-dot-region", track.region)
-      animatedLayer.setAttribute("data-qr-dot-state", track.state)
-      animatedLayer.setAttribute(
-        "class",
-        track.state === "quiet"
-          ? "qr-dot-matrix-track qr-dot-matrix-track-quiet"
-          : "qr-dot-matrix-track",
-      )
-      animatedLayer.setAttribute(
-        "style",
-        getDotMatrixTrackStyle(track),
-      )
-      group.appendChild(animatedLayer)
-    }
-
-    if (group.children.length <= 2) {
-      return
-    }
-
-    svg.insertBefore(group, findDotMatrixLayerAnchor(svg))
-  }
+  void _state
+  void _mode
+  return null
 }
 
 function createDotsPaletteExtension(

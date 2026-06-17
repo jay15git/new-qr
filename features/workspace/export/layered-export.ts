@@ -35,7 +35,7 @@ export async function downloadDraftingSvgExport({
   name: string
   state: QrStudioState
 }) {
-  const payload = await buildDashboardQrNodePayload(state, { animationMode: "export" })
+  const payload = await buildDashboardQrNodePayload(state)
   const blob = new Blob([payload.markup], { type: "image/svg+xml;charset=utf-8" })
 
   downloadBlob(blob, `${name}.svg`)
@@ -56,9 +56,7 @@ export async function buildDraftingLayeredNodePayload({
 }) {
   await ensureDraftingFontsForLayers(layers)
 
-  const qrPayload = await buildDashboardQrNodePayload(createDraftingQrArtworkState(state), {
-    animationMode: "export",
-  })
+  const qrPayload = await buildDashboardQrNodePayload(createDraftingQrArtworkState(state))
   const qrArtworkMarkup = sanitizeDraftingQrArtworkMarkup(qrPayload.markup)
   const visibleLayers = layers
     .filter((layer) => layer.isVisible)
