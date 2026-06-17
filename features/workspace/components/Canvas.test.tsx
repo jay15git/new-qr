@@ -493,7 +493,7 @@ describe("Canvas", () => {
       "Disable snapping",
       "Hide canvas grid",
       "Add text on canvas",
-      "Add QR code",
+      "Add content",
       "Layer appearance",
     ])
   })
@@ -650,6 +650,8 @@ function renderWorkspace({
   onRedo,
   onAddTextLayerAt,
   onAddQrCode,
+  onInsertLayer = vi.fn(),
+  insertNodeId = "pane-1",
   desktopLayerToolbarControls,
   onLayerSelect,
   onSwapPanes = vi.fn(),
@@ -669,6 +671,8 @@ function renderWorkspace({
   onRedo?: () => void
   onAddTextLayerAt?: ComponentProps<typeof Canvas>["onAddTextLayerAt"]
   onAddQrCode?: ComponentProps<typeof Canvas>["onAddQrCode"]
+  onInsertLayer?: ComponentProps<typeof Canvas>["onInsertLayer"]
+  insertNodeId?: ComponentProps<typeof Canvas>["insertNodeId"]
   desktopLayerToolbarControls?: ComponentProps<typeof Canvas>["desktopLayerToolbarControls"]
   onLayerSelect?: (paneId: string, layerId: string | null) => void
   onSwapPanes?: (sourcePaneId: string, targetPaneId: string) => void
@@ -698,6 +702,8 @@ function renderWorkspace({
         onCanvasGridChange={onCanvasGridChange}
         onCanvasToolChange={onCanvasToolChange}
         onAddQrCode={onAddQrCode}
+        onInsertLayer={onInsertLayer}
+        insertNodeId={insertNodeId}
         onAddTextLayerAt={onAddTextLayerAt}
         onSwapPanes={onSwapPanes}
         onUndo={onUndo}

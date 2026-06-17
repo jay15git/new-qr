@@ -198,7 +198,6 @@ import { ReceiptTextIcon } from "@/components/ui/receipt-text"
 import { cn } from "@/lib/utils"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
 import { ElementInspector } from "@/features/workspace/components/ElementInspector"
-import { InsertMenu } from "@/features/workspace/components/InsertMenu"
 
 type DesktopToolbarGroup = "QR" | "Add" | "Manage"
 export type DesktopToolbarToolId =
@@ -1465,20 +1464,6 @@ export function FloatingToolbar({
                 </div>
               )
             })}
-            {controller?.onInsertLayer && controller.insertNodeId ? (
-              <div className="flex flex-col items-center gap-1.5">
-                <span
-                  aria-hidden="true"
-                  data-slot="desktop-toolbar-separator"
-                  className="my-1 h-px w-7 bg-white/[0.13]"
-                />
-                <InsertMenu
-                  nodeId={controller.insertNodeId}
-                  variant="toolbar"
-                  onInsertLayer={controller.onInsertLayer}
-                />
-              </div>
-            ) : null}
           </nav>
 
           {activeToolConfig || controller?.selectedElementLayer ? (

@@ -35,6 +35,7 @@ import {
 import type { DraftingCardState } from "@/features/workspace/model/card-state"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
 import { Pane, type DraftingLayerMenuAction } from "@/features/workspace/components/Pane"
+import { InsertMenu } from "@/features/workspace/components/InsertMenu"
 import { getQrLayout } from "@/features/workspace/model/layout-engine"
 import type { QrStudioState } from "@/features/qr-code/model/state"
 import { Button } from "@/components/ui/button"
@@ -101,6 +102,8 @@ type CanvasProps = {
   canRedo?: boolean
   canUndo?: boolean
   onAddQrCode?: () => void
+  onInsertLayer?: (layer: DraftingCanvasLayer) => void
+  insertNodeId?: string
   onRedo?: () => void
   onRemoveQrCode?: (paneId: string) => void
   onUndo?: () => void
@@ -756,6 +759,8 @@ export function Canvas({
   canRedo = false,
   canUndo = false,
   onAddQrCode,
+  onInsertLayer,
+  insertNodeId,
   onRedo,
   onRemoveQrCode,
   onUndo,
@@ -1363,7 +1368,7 @@ export function Canvas({
               </>
             ) : null}
 
-            {onAddQrCode ? (
+            {onAddQrCode || onInsertLayer ? (
               <>
                 {isDesktopZoomToolbar ? (
                   <>
@@ -1393,24 +1398,34 @@ export function Canvas({
                   </>
                 ) : null}
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      aria-label="Add QR code"
-                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] disabled:opacity-40"
-                      onClick={onAddQrCode}
-                      disabled={!canAddQrCode}
-                      size="icon"
-                      type="button"
-                      variant="ghost"
-                    >
-                      <CopyPlusIcon />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {canAddQrCode ? "Add QR code" : "Maximum 10 QR codes reached"}
-                  </TooltipContent>
-                </Tooltip>
+                {onInsertLayer && insertNodeId ? (
+                  <InsertMenu
+                    canAddQrCode={canAddQrCode}
+                    nodeId={insertNodeId}
+                    variant="bottom-toolbar"
+                    onAddQrCode={onAddQrCode}
+                    onInsertLayer={onInsertLayer}
+                  />
+                ) : onAddQrCode ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        aria-label="Add QR code"
+                        className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] disabled:opacity-40"
+                        onClick={onAddQrCode}
+                        disabled={!canAddQrCode}
+                        size="icon"
+                        type="button"
+                        variant="ghost"
+                      >
+                        <CopyPlusIcon />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {canAddQrCode ? "Add QR code" : "Maximum 10 QR codes reached"}
+                    </TooltipContent>
+                  </Tooltip>
+                ) : null}
 
                 {canRemove ? (
                   <Tooltip>

@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { FrameIcon, ImageIcon, TypeIcon } from "lucide-react"
+import { useState, type ReactNode } from "react"
+import { CopyPlusIcon, FrameIcon, ImageIcon, TypeIcon } from "lucide-react"
 
 import { OptionCard } from "@/components/ui/option-card"
 import { Button } from "@/components/ui/button"
@@ -20,6 +20,7 @@ import {
   type DraftingElementShapeId,
 } from "@/features/workspace/model/layers"
 import { QR_BACKGROUND_SHAPES } from "@/features/qr-code/styles/background-shapes"
+import { cn } from "@/lib/utils"
 
 const INSERT_SHAPE_PRIMITIVES: Array<{ id: DraftingElementShapeId; label: string }> = [
   { id: "rect", label: "Rectangle" },
@@ -28,16 +29,26 @@ const INSERT_SHAPE_PRIMITIVES: Array<{ id: DraftingElementShapeId; label: string
   { id: "arrow", label: "Arrow" },
 ]
 
+const DESKTOP_INSERT_POPOVER_SHELL =
+  "w-[min(18rem,calc(100vw-2rem))] rounded-[20px] border border-white/[0.12] bg-black/70 p-2 text-white/84 shadow-[0_24px_64px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
+
+const DESKTOP_INSERT_MENU_ITEM =
+  "flex h-10 w-full items-center gap-2 rounded-[10px] px-2 text-left text-sm font-semibold text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-40"
+
 type InsertMenuProps = {
   nodeId: string
   onInsertLayer: (layer: ReturnType<typeof createDraftingTextLayer>) => void
+  canAddQrCode?: boolean
+  onAddQrCode?: () => void
   triggerClassName?: string
-  variant?: "rail" | "toolbar"
+  variant?: "rail" | "toolbar" | "bottom-toolbar"
 }
 
 export function InsertMenu({
   nodeId,
   onInsertLayer,
+  canAddQrCode = true,
+  onAddQrCode,
   triggerClassName,
   variant = "rail",
 }: InsertMenuProps) {
@@ -71,8 +82,68 @@ export function InsertMenu({
     closeMenu()
   }
 
+  function addQrCode() {
+    onAddQrCode?.()
+    closeMenu()
+  }
+
+  const isDesktopPopover = variant === "bottom-toolbar"
+
+  function renderMenuAction({
+    children,
+    disabled,
+    onClick,
+    slot,
+  }: {
+    children: ReactNode
+    disabled?: boolean
+    onClick: () => void
+    slot?: string
+  }) {
+    if (isDesktopPopover) {
+      return (
+        <button
+          className={DESKTOP_INSERT_MENU_ITEM}
+          data-slot={slot}
+          disabled={disabled}
+          type="button"
+          onClick={onClick}
+        >
+          {children}
+        </button>
+      )
+    }
+
+    return (
+      <SecondaryButton
+        className="h-10 w-full justify-start"
+        data-slot={slot}
+        disabled={disabled}
+        type="button"
+        onClick={onClick}
+      >
+        {children}
+      </SecondaryButton>
+    )
+  }
+
   const trigger =
-    variant === "toolbar" ? (
+    variant === "bottom-toolbar" ? (
+      <Button
+        aria-label="Add content"
+        className={
+          triggerClassName ??
+          "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+        }
+        data-slot="drafting-insert-menu-trigger"
+        size="icon-md"
+        title="Add content"
+        type="button"
+        variant="ghost"
+      >
+        <CopyPlusIcon />
+      </Button>
+    ) : variant === "toolbar" ? (
       <Button
         className={triggerClassName}
         data-slot="drafting-insert-menu-trigger"
@@ -104,42 +175,78 @@ export function InsertMenu({
     >
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
       <PopoverContent
-        align={variant === "toolbar" ? "start" : "center"}
-        className="w-[min(24rem,calc(100vw-2rem))] space-y-3 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] p-3"
-        data-slot="drafting-insert-menu"
+        align={variant === "bottom-toolbar" ? "center" : variant === "toolbar" ? "start" : "center"}
+        className={cn(
+          isDesktopPopover
+            ? DESKTOP_INSERT_POPOVER_SHELL
+            : "w-[min(24rem,calc(100vw-2rem))] space-y-3 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg)] p-3",
+        )}
+        data-slot={isDesktopPopover ? "desktop-insert-menu-popover" : "drafting-insert-menu"}
+        side={variant === "bottom-toolbar" ? "top" : undefined}
+        sideOffset={variant === "bottom-toolbar" ? 12 : undefined}
       >
         {panel === "root" ? (
-          <div className="grid gap-2">
-            <SecondaryButton className="h-10 w-full justify-start" type="button" onClick={insertText}>
-              <TypeIcon data-icon="inline-start" />
-              Text
-            </SecondaryButton>
-            <SecondaryButton
-              className="h-10 w-full justify-start"
-              type="button"
-              onClick={() => setPanel("shape")}
-            >
-              <FrameIcon data-icon="inline-start" />
-              Shape
-            </SecondaryButton>
-            <SecondaryButton
-              className="h-10 w-full justify-start"
-              type="button"
-              onClick={() => setPanel("image")}
-            >
-              <ImageIcon data-icon="inline-start" />
-              Image
-            </SecondaryButton>
+          <div className={cn("grid", isDesktopPopover ? "gap-0.5" : "gap-2")}>
+            {renderMenuAction({ onClick: insertText, children: (
+              <>
+                <TypeIcon className="size-4 shrink-0" data-icon="inline-start" />
+                Text
+              </>
+            ) })}
+            {renderMenuAction({
+              onClick: () => setPanel("shape"),
+              children: (
+                <>
+                  <FrameIcon className="size-4 shrink-0" data-icon="inline-start" />
+                  Shape
+                </>
+              ),
+            })}
+            {renderMenuAction({
+              onClick: () => setPanel("image"),
+              children: (
+                <>
+                  <ImageIcon className="size-4 shrink-0" data-icon="inline-start" />
+                  Image
+                </>
+              ),
+            })}
+            {onAddQrCode
+              ? renderMenuAction({
+                  disabled: !canAddQrCode,
+                  onClick: addQrCode,
+                  slot: "drafting-insert-menu-add-qr",
+                  children: (
+                    <>
+                      <CopyPlusIcon className="size-4 shrink-0" data-icon="inline-start" />
+                      {canAddQrCode ? "QR code" : "Maximum 10 QR codes reached"}
+                    </>
+                  ),
+                })
+              : null}
           </div>
         ) : null}
 
         {panel === "shape" ? (
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+              <p
+                className={cn(
+                  "font-semibold",
+                  isDesktopPopover
+                    ? "text-sm text-white/72"
+                    : "drafting-type-control-label text-[var(--drafting-ink)]",
+                )}
+              >
                 Choose shape
               </p>
-              <Button size="sm" type="button" variant="ghost" onClick={() => setPanel("root")}>
+              <Button
+                className={isDesktopPopover ? "text-white/70 hover:bg-white/[0.11] hover:text-white" : undefined}
+                size="sm"
+                type="button"
+                variant="ghost"
+                onClick={() => setPanel("root")}
+              >
                 Back
               </Button>
             </div>
@@ -193,28 +300,57 @@ export function InsertMenu({
         {panel === "image" ? (
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <p className="drafting-type-control-label font-semibold text-[var(--drafting-ink)]">
+              <p
+                className={cn(
+                  "font-semibold",
+                  isDesktopPopover
+                    ? "text-sm text-white/72"
+                    : "drafting-type-control-label text-[var(--drafting-ink)]",
+                )}
+              >
                 Add image
               </p>
-              <Button size="sm" type="button" variant="ghost" onClick={() => setPanel("root")}>
+              <Button
+                className={isDesktopPopover ? "text-white/70 hover:bg-white/[0.11] hover:text-white" : undefined}
+                size="sm"
+                type="button"
+                variant="ghost"
+                onClick={() => setPanel("root")}
+              >
                 Back
               </Button>
             </div>
             <Input
               aria-label="Image URL"
-              className="drafting-type-input h-10 min-w-0 border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-3 text-[var(--drafting-ink)] shadow-none"
+              className={cn(
+                "h-10 min-w-0 px-3 shadow-none",
+                isDesktopPopover
+                  ? "border-white/[0.12] bg-white/[0.08] text-white placeholder:text-white/40"
+                  : "drafting-type-input border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] text-[var(--drafting-ink)]",
+              )}
               placeholder="https://example.com/photo.png"
               value={imageUrl}
               onChange={(event) => setImageUrl(event.currentTarget.value)}
             />
-            <SecondaryButton
-              className="h-9 w-full"
-              disabled={!imageUrl.trim()}
-              type="button"
-              onClick={() => insertImage(imageUrl.trim(), "url")}
-            >
-              Use URL
-            </SecondaryButton>
+            {isDesktopPopover ? (
+              <button
+                className={DESKTOP_INSERT_MENU_ITEM}
+                disabled={!imageUrl.trim()}
+                type="button"
+                onClick={() => insertImage(imageUrl.trim(), "url")}
+              >
+                Use URL
+              </button>
+            ) : (
+              <SecondaryButton
+                className="h-9 w-full"
+                disabled={!imageUrl.trim()}
+                type="button"
+                onClick={() => insertImage(imageUrl.trim(), "url")}
+              >
+                Use URL
+              </SecondaryButton>
+            )}
             <FileUpload
               acceptedFileTypes={["image/*"]}
               className="mx-0 max-w-full"

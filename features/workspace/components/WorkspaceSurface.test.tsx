@@ -1375,7 +1375,7 @@ describe("WorkspaceSurface", () => {
       "Disable snapping",
       "Hide canvas grid",
       "Add text on canvas",
-      "Add QR code",
+      "Add content",
       "Layer appearance",
     ])
 	    const actionToolbar = getRequiredElement(surface.container, '[data-slot="desktop-action-toolbar"]')
@@ -2256,10 +2256,7 @@ describe("WorkspaceSurface", () => {
       changeInputValue(getRadiusInput(), "36")
     })
 
-    await act(async () => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add QR code"]'))
-      await flushPromises()
-    })
+    await addQrCode(surface.container)
 
     act(() => {
       changeInputValue(getRadiusInput(), "72")
@@ -4265,9 +4262,7 @@ describe("WorkspaceSurface", () => {
 
     await advanceDraftingTimers()
 
-    act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Add QR code"]'))
-    })
+    await addQrCode(surface.container)
     await advanceDraftingTimers()
 
     expect(surface.container.querySelectorAll('[data-slot="dashboard-compose-surface"]')).toHaveLength(2)
@@ -4601,7 +4596,11 @@ async function waitForDraftingSurface() {
 
 async function addQrCode(parent: ParentNode) {
   await act(async () => {
-    activateElement(getRequiredElement(parent, 'button[aria-label="Add QR code"]'))
+    activateElement(getRequiredElement(parent, 'button[aria-label="Add content"]'))
+    await flushPromises()
+  })
+  await act(async () => {
+    activateElement(getRequiredElement(parent, '[data-slot="drafting-insert-menu-add-qr"]'))
     await flushPromises()
     await flushPromises()
   })

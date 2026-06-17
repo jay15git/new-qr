@@ -4573,9 +4573,11 @@ export function WorkspaceSurface({
               canRedo={canRedoDraftingWorkspace}
               canAddQrCode={qrNodeIds.length < 10}
               canUndo={canUndoDraftingWorkspace}
+              insertNodeId={activeQrNodeId}
               onAddQrCode={() => {
                 void handleAddQrCode()
               }}
+              onInsertLayer={handleInsertLayer}
               onLayerChange={handleLayerChange}
               onLayerAction={handleLayerAction}
               onLayerCopy={(_paneId, layerIds) => {
