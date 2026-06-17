@@ -196,6 +196,9 @@ import { MessageCircleIcon } from "@/components/ui/message-circle"
 import { PlayIcon } from "@/components/ui/play"
 import { ReceiptTextIcon } from "@/components/ui/receipt-text"
 import { cn } from "@/lib/utils"
+import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
+import { ElementInspector } from "@/features/workspace/components/ElementInspector"
+import { InsertMenu } from "@/features/workspace/components/InsertMenu"
 
 type DesktopToolbarGroup = "QR" | "Add" | "Manage"
 export type DesktopToolbarToolId =
@@ -307,7 +310,7 @@ const DESKTOP_TOOLBAR_TOOLS: DesktopToolbarTool[] = [
   {
     group: "QR",
     id: "shape",
-    title: "Shape",
+    title: "Frame",
     renderIcon: () => (
       <HugeiconsIcon icon={Image02Icon} size={18} color="currentColor" strokeWidth={1.8} />
     ),
@@ -323,30 +326,6 @@ const DESKTOP_TOOLBAR_TOOLS: DesktopToolbarTool[] = [
     id: "encoding",
     title: "Encoding",
     renderIcon: () => <Settings className="size-[18px]" />,
-  },
-  {
-    group: "Add",
-    id: "text",
-    title: "Text",
-    renderIcon: () => <LetterTIcon size={18} />,
-  },
-  {
-    group: "Add",
-    id: "image",
-    title: "Image",
-    renderIcon: () => <GalleryVerticalEndIcon size={18} />,
-  },
-  {
-    group: "Add",
-    id: "decorations",
-    title: "Decorations",
-    renderIcon: () => <ShapesIcon className="size-[18px]" />,
-  },
-  {
-    group: "Add",
-    id: "effects",
-    title: "Effects",
-    renderIcon: () => <Sparkles className="size-[18px]" />,
   },
   {
     group: "Manage",
@@ -534,7 +513,7 @@ export type DesktopEffectsSettings = {
   frame: number
 }
 
-export type DesktopLayerKind = "card" | "qr" | "text"
+export type DesktopLayerKind = "card" | "image" | "qr" | "shape" | "text"
 export type DesktopLayerRow = {
   blur: number
   height: number
@@ -612,6 +591,10 @@ export type DesktopToolbarController = {
   layersSettings: DesktopLayersSettings
   exportSettings: DesktopExportSettings
   textSettings: DesktopTextSettings
+  insertNodeId?: string
+  selectedElementLayer?: DraftingCanvasLayer | null
+  onInsertLayer?: (layer: DraftingCanvasLayer) => void
+  onElementLayerPatch?: (patch: Partial<DraftingCanvasLayer>) => void
   onActiveToolChange: (toolId: DesktopToolbarToolId) => void
   onRedo?: () => void
   onSave?: () => void
@@ -1482,15 +1465,41 @@ export function FloatingToolbar({
                 </div>
               )
             })}
+            {controller?.onInsertLayer && controller.insertNodeId ? (
+              <div className="flex flex-col items-center gap-1.5">
+                <span
+                  aria-hidden="true"
+                  data-slot="desktop-toolbar-separator"
+                  className="my-1 h-px w-7 bg-white/[0.13]"
+                />
+                <InsertMenu
+                  nodeId={controller.insertNodeId}
+                  variant="toolbar"
+                  onInsertLayer={controller.onInsertLayer}
+                />
+              </div>
+            ) : null}
           </nav>
 
-          {activeToolConfig ? (
+          {activeToolConfig || controller?.selectedElementLayer ? (
             <aside
-              aria-label={`${activeToolConfig.title} settings`}
+              aria-label={
+                controller?.selectedElementLayer
+                  ? `${controller.selectedElementLayer.kind} element settings`
+                  : `${activeToolConfig?.title ?? "Tool"} settings`
+              }
               data-slot="desktop-floating-inspector"
               className="flex min-h-0 min-w-0 flex-col overflow-hidden"
             >
-              {actualActiveTool === "content" ? (
+              {controller?.selectedElementLayer ? (
+                <div className="min-h-0 flex-1 overflow-y-auto p-3">
+                  <ElementInspector
+                    layer={controller.selectedElementLayer}
+                    sliderVariant="desktop-elastic"
+                    onPatch={(patch) => controller.onElementLayerPatch?.(patch)}
+                  />
+                </div>
+              ) : actualActiveTool === "content" ? (
                 <DesktopContentInspector
                   contentType={actualContentType}
                   contentValues={actualContentValues}
@@ -1565,9 +1574,9 @@ export function FloatingToolbar({
                   onExportDownload={controller?.onExportDownload ?? (() => undefined)}
                   onExportSettingsChange={onExportSettingsChange}
                 />
-              ) : (
+              ) : activeToolConfig ? (
                 <DesktopPlaceholderInspector tool={activeToolConfig} />
-              )}
+              ) : null}
             </aside>
           ) : null}
         </div>

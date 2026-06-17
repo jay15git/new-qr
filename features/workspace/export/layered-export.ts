@@ -19,6 +19,8 @@ import {
   scaleNestedSvgMarkup,
 } from "@/features/workspace/rendering/qr-artwork"
 import { getLayerSvgTransform } from "@/features/workspace/rendering/layer-transform"
+import { getShapeSvgPath } from "@/features/workspace/rendering/shape-layer"
+import { QR_BACKGROUND_SHAPES } from "@/features/qr-code/styles/background-shapes"
 import {
   getDraftingQrBackgroundBounds,
   getDraftingQrBackgroundSvgMarkup,
@@ -103,18 +105,39 @@ function buildDraftingLayeredSvgMarkup({
     .filter(Boolean)
     .join("")
   const body = layers
-    .map((layer) =>
-      layer.kind === "group"
-        ? getDraftingGroupLayerSvg(layer, cardState, qrMarkup, state)
-        : layer.kind === "card"
-          ? getDraftingCardLayerSvg(layer, cardState)
-          : layer.kind === "text"
-            ? getDraftingTextLayerSvg(layer)
-            : getDraftingQrLayerSvg(layer, qrMarkup, state),
-    )
+    .map((layer) => getDraftingLayerSvg(layer, cardState, qrMarkup, state))
     .join("")
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${bounds.width}" height="${bounds.height}" viewBox="${bounds.minX} ${bounds.minY} ${bounds.width} ${bounds.height}"><defs>${defs}</defs>${body}</svg>`
+}
+
+function getDraftingLayerSvg(
+  layer: DraftingCanvasLayer,
+  cardState: DraftingCardState,
+  qrMarkup: string,
+  state: QrStudioState,
+) {
+  if (layer.kind === "group") {
+    return getDraftingGroupLayerSvg(layer, cardState, qrMarkup, state)
+  }
+
+  if (layer.kind === "card") {
+    return getDraftingCardLayerSvg(layer, cardState)
+  }
+
+  if (layer.kind === "text") {
+    return getDraftingTextLayerSvg(layer)
+  }
+
+  if (layer.kind === "image") {
+    return getDraftingImageLayerSvg(layer)
+  }
+
+  if (layer.kind === "shape") {
+    return getDraftingShapeLayerSvg(layer)
+  }
+
+  return getDraftingQrLayerSvg(layer, qrMarkup, state)
 }
 
 function getDraftingLayerBounds(
@@ -201,18 +224,51 @@ function getDraftingGroupLayerSvg(
   const body: string = (layer.children ?? [])
     .filter((child) => child.isVisible)
     .sort((a, b) => a.zIndex - b.zIndex)
-    .map((child) =>
-      child.kind === "group"
-        ? getDraftingGroupLayerSvg(child, cardState, qrMarkup, state)
-        : child.kind === "card"
-          ? getDraftingCardLayerSvg(child, cardState)
-          : child.kind === "text"
-            ? getDraftingTextLayerSvg(child)
-            : getDraftingQrLayerSvg(child, qrMarkup, state),
-    )
+    .map((child) => getDraftingLayerSvg(child, cardState, qrMarkup, state))
     .join("")
 
   return `<g opacity="${layer.opacity}" transform="${getDraftingLayerSvgTransform(layer)}"${filter}>${body}</g>`
+}
+
+function getDraftingImageLayerSvg(layer: DraftingCanvasLayer) {
+  const filter = getDraftingLayerFilterMarkup(layer)
+    ? ` filter="url(#${getSvgId(layer.id)}-filter)"`
+    : ""
+  const imageValue = layer.imageValue ?? ""
+
+  if (!imageValue) {
+    return `<g opacity="${layer.opacity}" transform="${getDraftingLayerSvgTransform(layer)}"${filter}><rect x="0" y="0" width="${layer.width}" height="${layer.height}" fill="none" stroke="#d4d4d8"/></g>`
+  }
+
+  const preserveAspectRatio = layer.imageFit === "contain" ? "xMidYMid meet" : "xMidYMid slice"
+  const radius = layer.cornerRadius ?? 0
+  const clip = radius > 0 ? `<clipPath id="${getSvgId(layer.id)}-clip"><rect x="0" y="0" width="${layer.width}" height="${layer.height}" rx="${radius}"/></clipPath>` : ""
+  const clipRef = radius > 0 ? ` clip-path="url(#${getSvgId(layer.id)}-clip)"` : ""
+
+  return `<g opacity="${layer.opacity}" transform="${getDraftingLayerSvgTransform(layer)}"${filter}>${clip}<image href="${escapeXml(imageValue)}" x="0" y="0" width="${layer.width}" height="${layer.height}" preserveAspectRatio="${preserveAspectRatio}"${clipRef}/></g>`
+}
+
+function getDraftingShapeLayerSvg(layer: DraftingCanvasLayer) {
+  const filter = getDraftingLayerFilterMarkup(layer)
+    ? ` filter="url(#${getSvgId(layer.id)}-filter)"`
+    : ""
+  const shapeId = layer.shapeId ?? "rounded-square"
+  const definition = QR_BACKGROUND_SHAPES.find((shape) => shape.id === shapeId)
+  const fill =
+    layer.fillMode === "none" ? "none" : escapeXml(layer.fill ?? "#E8E8E8")
+  const strokeWidth = layer.strokeWidth ?? 0
+  const strokeAttrs =
+    strokeWidth > 0
+      ? ` stroke="${escapeXml(layer.stroke ?? "#171717")}" stroke-width="${strokeWidth}" stroke-opacity="${(layer.strokeOpacity ?? 100) / 100}"`
+      : ""
+  const innerMarkup = definition
+    ? `<path d="${definition.path}" fill="${fill}"${strokeAttrs}/>`
+    : getShapeSvgPath(shapeId).replace("/>", ` fill="${fill}"${strokeAttrs}/>`)
+  const viewBox = definition
+    ? `0 0 ${definition.viewBox.width} ${definition.viewBox.height}`
+    : "0 0 100 100"
+
+  return `<g opacity="${layer.opacity}" transform="${getDraftingLayerSvgTransform(layer)}"${filter}><svg x="0" y="0" width="${layer.width}" height="${layer.height}" viewBox="${viewBox}" preserveAspectRatio="none">${innerMarkup}</svg></g>`
 }
 
 function getDraftingQrLayerSvg(

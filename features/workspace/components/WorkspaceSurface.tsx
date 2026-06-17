@@ -105,6 +105,8 @@ import {
   type DraftingPaneToolbarVariant,
 } from "@/features/workspace/components/Canvas"
 import { DraftingTextLayerTab } from "@/features/workspace/components/TextPanel"
+import { ElementInspector } from "@/features/workspace/components/ElementInspector"
+import { InsertMenu } from "@/features/workspace/components/InsertMenu"
 import type {
   DesktopAssetSourceMode,
   DesktopCornersSettings,
@@ -179,17 +181,13 @@ import {
   type StaticQrContentValue,
 } from "@/features/qr-code/content/static-payload"
 import {
-  CircleIcon,
   DownloadIcon,
   FrameIcon,
   LinkIcon,
   PieChart,
-  RectangleHorizontalIcon,
   Settings,
-  ShapesIcon,
   SlidersHorizontal,
   Sparkles,
-  TypeIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SecondaryButton } from "@/components/ui/secondary-button"
@@ -383,7 +381,7 @@ const DRAFTING_TOOLS: DraftingTool[] = [
   {
     group: "QR",
     id: "shape",
-    title: "Shape",
+    title: "Frame",
     renderIcon: () => (
       <HugeiconsIcon icon={Image02Icon} size={16} color="currentColor" strokeWidth={1.8} />
     ),
@@ -399,32 +397,6 @@ const DRAFTING_TOOLS: DraftingTool[] = [
     id: "encoding",
     title: "Encoding",
     renderIcon: () => <Settings className="size-4 shrink-0" />,
-  },
-  {
-    group: "Add",
-    id: "text",
-    title: "Text",
-    renderIcon: () => <TypeIcon className="size-4 shrink-0" />,
-  },
-  {
-    group: "Add",
-    id: "image",
-    title: "Image",
-    renderIcon: () => (
-      <HugeiconsIcon icon={Image02Icon} size={16} color="currentColor" strokeWidth={1.8} />
-    ),
-  },
-  {
-    group: "Add",
-    id: "decorations",
-    title: "Decorations",
-    renderIcon: () => <ShapesIcon className="size-4 shrink-0" />,
-  },
-  {
-    group: "Add",
-    id: "effects",
-    title: "Effects",
-    renderIcon: () => <Sparkles className="size-4 shrink-0" />,
   },
   {
     group: "Manage",
@@ -470,11 +442,11 @@ function getDraftingRailToolId(toolId: DraftingToolId) {
   }
 
   if (toolId === "card-surface") {
-    return "decorations" satisfies DraftingToolId
+    return "shape" satisfies DraftingToolId
   }
 
   if (toolId === "card-shaders") {
-    return "effects" satisfies DraftingToolId
+    return "shape" satisfies DraftingToolId
   }
 
   return toolId
@@ -507,97 +479,6 @@ function PlusMarker({ className }: { className: string }) {
     >
       <path d="M12 2v20M2 12h20" stroke="currentColor" strokeWidth="2.25" />
     </svg>
-  )
-}
-
-function DraftingImageIntentTab({
-  onUseAsImageObject,
-  onUseAsLogo,
-  onUseAsShapeFill,
-}: {
-  onUseAsImageObject: () => void
-  onUseAsLogo: () => void
-  onUseAsShapeFill: () => void
-}) {
-  return (
-    <section data-slot="drafting-image-intent-tab" className="min-w-0 space-y-4">
-      <div>
-        <p className="drafting-type-section-title font-bold text-[var(--drafting-ink)]">
-          Use image as
-        </p>
-        <p className="drafting-type-body mt-1 text-[var(--drafting-ink-muted)]">
-          Pick the image role first so it is clear what will change.
-        </p>
-      </div>
-      <div className="grid gap-2">
-        <ElementAddButton
-          icon={<HugeiconsIcon icon={SignalIcon} size={15} color="currentColor" strokeWidth={1.8} />}
-          label="Logo inside QR"
-          onClick={onUseAsLogo}
-        />
-        <ElementAddButton
-          icon={<FrameIcon data-icon="inline-start" />}
-          label="Shape fill behind QR"
-          onClick={onUseAsShapeFill}
-        />
-        <ElementAddButton
-          disabled
-          icon={<RectangleHorizontalIcon data-icon="inline-start" />}
-          label="Image object on canvas"
-          onClick={onUseAsImageObject}
-        />
-      </div>
-    </section>
-  )
-}
-
-function DraftingDecorationsIntro({ onAddShape }: { onAddShape: () => void }) {
-  return (
-    <section data-slot="drafting-decorations-intro" className="min-w-0 space-y-4">
-      <div>
-        <p className="drafting-type-section-title font-bold text-[var(--drafting-ink)]">
-          Decorations
-        </p>
-        <p className="drafting-type-body mt-1 text-[var(--drafting-ink-muted)]">
-          Add supporting patterns and simple visual objects around the QR.
-        </p>
-      </div>
-      <div className="grid gap-2">
-        <ElementAddButton icon={<FrameIcon data-icon="inline-start" />} label="Shape" onClick={onAddShape} />
-        <ElementAddButton disabled icon={<CircleIcon data-icon="inline-start" />} label="Icon or sticker" />
-      </div>
-    </section>
-  )
-}
-
-function ElementAddButton({
-  disabled = false,
-  icon,
-  label,
-  onClick,
-}: {
-  disabled?: boolean
-  icon: ReactNode
-  label: string
-  onClick?: () => void
-}) {
-  return (
-    <SecondaryButton
-      aria-label={`Add ${label}`}
-      className="h-10 w-full justify-start"
-      data-slot="drafting-element-add-button"
-      disabled={disabled}
-      type="button"
-      onClick={onClick}
-    >
-      {icon}
-      <span className="min-w-0 truncate">{label}</span>
-      {disabled ? (
-        <span className="drafting-type-caption ml-auto text-[var(--drafting-ink-muted)]">
-          Soon
-        </span>
-      ) : null}
-    </SecondaryButton>
   )
 }
 
@@ -2071,23 +1952,31 @@ export function WorkspaceSurface({
     selectSingleLayer(getDraftingQrLayerId(nextNodeId))
   }
 
-  function handleAddTextLayer() {
+  function handleInsertLayer(layer: DraftingCanvasLayer) {
     const layers =
       layerStateByNodeId[activeQrNodeId] ??
       createDefaultDraftingLayers(activeQrNodeId, draftingStudioState, selectedCardState)
-    const maxZIndex = layers.reduce((max, layer) => Math.max(max, layer.zIndex), -1)
-    const textLayer = createDraftingTextLayer(activeQrNodeId, {
-      id: `${activeQrNodeId}:text:${Date.now()}`,
-      zIndex: maxZIndex + 1,
-    })
+    const maxZIndex = layers.reduce((max, currentLayer) => Math.max(max, currentLayer.zIndex), -1)
+    const nextLayer = patchDraftingCanvasLayer(
+      {
+        ...cloneDraftingCanvasLayer(layer),
+        id: `${activeQrNodeId}:${layer.kind}:${Date.now()}`,
+        nodeId: activeQrNodeId,
+        zIndex: maxZIndex + 1,
+      },
+      {},
+    )
 
     setLayerStateByNodeId((current) => ({
       ...current,
-      [activeQrNodeId]: [...layers.map(cloneDraftingCanvasLayer), textLayer],
+      [activeQrNodeId]: [...layers.map(cloneDraftingCanvasLayer), nextLayer],
     }))
-    selectSingleLayer(textLayer.id)
-    setActiveTool("text")
+    selectSingleLayer(nextLayer.id)
     draftingSurfaceRef.current?.focus({ preventScroll: true })
+  }
+
+  function handleAddTextLayer() {
+    handleInsertLayer(createDraftingTextLayer(activeQrNodeId))
   }
 
   function handleAddTextLayerAt(paneId: string, point: { x: number; y: number }) {
@@ -2132,7 +2021,6 @@ export function WorkspaceSurface({
       [paneId]: [...layers.map(cloneDraftingCanvasLayer), textLayer],
     }))
     selectSingleLayer(textLayer.id)
-    setActiveTool("text")
     draftingSurfaceRef.current?.focus({ preventScroll: true })
   }
 
@@ -2736,6 +2624,13 @@ export function WorkspaceSurface({
   )
   const selectedTextLayer =
     selectedLayerId ? findDraftingLayerById(activeCanvasLayers, selectedLayerId) : null
+  const selectedElementLayer =
+    selectedLayerIds.length === 1 && selectedTextLayer &&
+    (selectedTextLayer.kind === "text" ||
+      selectedTextLayer.kind === "shape" ||
+      selectedTextLayer.kind === "image")
+      ? selectedTextLayer
+      : null
 
   const renderPanelContent = (toolId: string, tabId: string) => {
     const renderWithSliderVariant = (content: ReactNode) => (
@@ -2749,7 +2644,6 @@ export function WorkspaceSurface({
         <DraftingTextLayerTab
           layer={selectedTextLayer?.kind === "text" ? selectedTextLayer : null}
           sliderVariant={sliderVariant}
-          onAddText={handleAddTextLayer}
           onLayerPatch={(patch) => {
             if (selectedTextLayer?.kind === "text") {
               handleLayerChange(activeQrNodeId, selectedTextLayer.id, patch)
@@ -3411,6 +3305,18 @@ export function WorkspaceSurface({
   }
 
   const renderStackedInspectorContent = (toolId: DraftingToolId) => {
+    if (selectedElementLayer) {
+      return (
+        <DraftingSliderVariantProvider value={sliderVariant}>
+          <ElementInspector
+            layer={selectedElementLayer}
+            sliderVariant={sliderVariant}
+            onPatch={(patch) => handleLayerChange(activeQrNodeId, selectedElementLayer.id, patch)}
+          />
+        </DraftingSliderVariantProvider>
+      )
+    }
+
     if (toolId === "content") {
       return (
         <InspectorPanel
@@ -3474,8 +3380,8 @@ export function WorkspaceSurface({
         <InspectorPanel
           dataSlot="drafting-stacked-inspector"
           description="Build the container and background behind the QR."
-          eyebrow="Add"
-          title="Shape"
+          eyebrow="QR"
+          title="Frame"
         >
           <DraftingInspectorSection title="Frame">
             {renderPanelContent("card-frame", "frame")}
@@ -3531,59 +3437,6 @@ export function WorkspaceSurface({
       )
     }
 
-    if (toolId === "image") {
-      return (
-        <InspectorPanel
-          dataSlot="drafting-stacked-inspector"
-          description="Choose where an imported image should apply."
-          eyebrow="Add"
-          title="Image"
-        >
-          <DraftingImageIntentTab
-            onUseAsImageObject={() => undefined}
-            onUseAsLogo={() => setActiveTool("logo")}
-            onUseAsShapeFill={() => setActiveTool("shape")}
-          />
-        </InspectorPanel>
-      )
-    }
-
-    if (toolId === "decorations") {
-      return (
-        <InspectorPanel
-          dataSlot="drafting-stacked-inspector"
-          description="Add and tune support objects around the QR."
-          eyebrow="Add"
-          title="Decorations"
-        >
-          <DraftingInspectorSection title="Add">
-            <DraftingDecorationsIntro onAddShape={handleAddFrameCardLayer} />
-          </DraftingInspectorSection>
-          <DraftingInspectorSection title="Fill">
-            {renderPanelContent("card-surface", "surface")}
-          </DraftingInspectorSection>
-        </InspectorPanel>
-      )
-    }
-
-    if (toolId === "effects") {
-      return (
-        <InspectorPanel
-          dataSlot="drafting-stacked-inspector"
-          description="Apply generated effects and image filters to the active shape."
-          eyebrow="Add"
-          title="Effects"
-        >
-          <DraftingInspectorSection title="Generated effects">
-            {renderPanelContent("card-shaders", "all")}
-          </DraftingInspectorSection>
-          <DraftingInspectorSection title="Image filters">
-            {renderPanelContent("card-image", "filters")}
-          </DraftingInspectorSection>
-        </InspectorPanel>
-      )
-    }
-
     if (toolId === "card-frame" || toolId === "card-surface" || toolId === "card-image" || toolId === "card-shaders") {
       return (
         <InspectorPanel
@@ -3602,7 +3455,6 @@ export function WorkspaceSurface({
     }
 
     const defaultPanelByTool: Partial<Record<DraftingToolId, string>> = {
-      text: "text",
       encoding: "encoding",
       layers: "layers",
       export: "export",
@@ -3617,13 +3469,12 @@ export function WorkspaceSurface({
       encoding: "Encoding",
       export: "Export",
       layers: "Layers",
-      text: "Text",
     }
 
     return (
       <InspectorPanel
         dataSlot="drafting-stacked-inspector"
-        eyebrow={toolId === "text" ? "Add" : "Manage"}
+        eyebrow="Manage"
         title={defaultTitleByTool[toolId] ?? activeToolConfig.title}
       >
         {renderPanelContent(toolId, tabId)}
@@ -4106,6 +3957,14 @@ export function WorkspaceSurface({
     patternSettings: desktopPatternSettings,
     shapeSettings: desktopShapeSettings,
     textSettings: desktopTextSettings,
+    insertNodeId: activeQrNodeId,
+    selectedElementLayer,
+    onInsertLayer: handleInsertLayer,
+    onElementLayerPatch: (patch) => {
+      if (selectedElementLayer) {
+        handleLayerChange(activeQrNodeId, selectedElementLayer.id, patch)
+      }
+    },
     onActiveToolChange: (toolId) => {
       setDesktopCanvasTool(null)
       setActiveTool(getDraftingToolIdFromDesktop(toolId))
@@ -4641,6 +4500,15 @@ export function WorkspaceSurface({
                     </div>
                   )
                 })}
+                <div className="flex min-w-20 flex-col items-center gap-1 px-2 lg:min-w-0 lg:gap-2">
+                  <span
+                    data-slot="drafting-tool-group-label"
+                    className="drafting-type-caption w-full px-2 text-left font-bold tracking-[0.04em] text-[var(--drafting-ink-subtle)] lg:text-center"
+                  >
+                    Insert
+                  </span>
+                  <InsertMenu nodeId={activeQrNodeId} onInsertLayer={handleInsertLayer} />
+                </div>
               </div>
             </ScrollAreaViewport>
             <ScrollAreaScrollbar
@@ -4765,8 +4633,7 @@ export function WorkspaceSurface({
 function getDesktopToolbarToolId(toolId: DraftingToolId): DesktopToolbarToolId | null {
   if (toolId === "style") return "pattern"
   if (toolId === "card-frame" || toolId === "card-image") return "shape"
-  if (toolId === "card-surface") return "decorations"
-  if (toolId === "card-shaders") return "effects"
+  if (toolId === "card-surface" || toolId === "card-shaders") return "shape"
   return DRAFTING_RAIL_TOOLS.some((tool) => tool.id === toolId)
     ? (toolId as DesktopToolbarToolId)
     : null
@@ -4804,7 +4671,16 @@ function toDesktopLayerRow(layer: DraftingCanvasLayer): DesktopLayerRow {
     id: layer.id,
     isLocked: layer.isLocked,
     isVisible: layer.isVisible,
-    kind: layer.kind === "text" ? "text" : layer.kind === "card" ? "card" : "qr",
+    kind:
+      layer.kind === "text"
+        ? "text"
+        : layer.kind === "card"
+          ? "card"
+          : layer.kind === "image"
+            ? "image"
+            : layer.kind === "shape"
+              ? "shape"
+              : "qr",
     name: layer.name,
     opacity: Math.round(layer.opacity * 100),
     shadowBlur: layer.shadow.blur,

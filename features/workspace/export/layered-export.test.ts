@@ -69,6 +69,78 @@ describe("drafting layered export", () => {
     expect(payload.originalSvgMarkup).not.toContain("clip-path-background-color")
   })
 
+  it("exports image and shape layers in the layered svg", async () => {
+    buildDashboardQrNodePayloadSpy.mockResolvedValue({
+      markup: '<svg width="240" height="240" viewBox="0 0 240 240"><path d="M0 0"/></svg>',
+      naturalHeight: 240,
+      naturalWidth: 240,
+    })
+    const state = createDefaultQrStudioState()
+    const cardState = createDefaultDraftingCardState()
+    const layers = [
+      ...createDefaultDraftingLayers("preview", state, cardState),
+      {
+        blur: 0,
+        cornerRadius: 12,
+        height: 120,
+        id: "preview:image:1",
+        imageFit: "cover",
+        imageSource: "url",
+        imageValue: "https://example.com/photo.png",
+        isLocked: false,
+        isVisible: true,
+        kind: "image",
+        name: "Photo",
+        nodeId: "preview",
+        opacity: 1,
+        rotation: 0,
+        shadow: { blur: 0, color: "#111827", offsetX: 0, offsetY: 0, opacity: 0 },
+        tiltX: 0,
+        tiltY: 0,
+        width: 120,
+        x: 40,
+        y: 40,
+        zIndex: 3,
+      },
+      {
+        blur: 0,
+        fill: "#abcdef",
+        fillMode: "solid",
+        height: 80,
+        id: "preview:shape:1",
+        isLocked: false,
+        isVisible: true,
+        kind: "shape",
+        name: "Badge",
+        nodeId: "preview",
+        opacity: 1,
+        rotation: 0,
+        shapeId: "hexagon",
+        shadow: { blur: 0, color: "#111827", offsetX: 0, offsetY: 0, opacity: 0 },
+        stroke: "#171717",
+        strokeOpacity: 100,
+        strokeWidth: 0,
+        tiltX: 0,
+        tiltY: 0,
+        width: 80,
+        x: -40,
+        y: -40,
+        zIndex: 4,
+      },
+    ]
+
+    const payload = await buildDraftingLayeredNodePayload({
+      cardState,
+      layers,
+      name: "QR Code",
+      nodeId: "preview",
+      state,
+    })
+
+    expect(payload.originalSvgMarkup).toContain('href="https://example.com/photo.png"')
+    expect(payload.originalSvgMarkup).toContain('fill="#abcdef"')
+  })
+
   it("includes layer tilt skew in exported layer transforms", async () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue({
       markup: '<svg width="240" height="240" viewBox="0 0 240 240"><path d="M0 0"/></svg>',

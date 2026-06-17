@@ -9,12 +9,21 @@ import {
   resolveDraftingFont,
 } from "@/features/workspace/model/fonts"
 import { getQrRenderedDimensions } from "@/features/qr-code/rendering/svg-extension"
+import type { QrBackgroundShapeId } from "@/features/qr-code/styles/background-shapes"
 import {
   clampBackgroundShapeTilt,
   type QrStudioState,
+  type StudioGradient,
 } from "@/features/qr-code/model/state"
 
-export type DraftingCanvasLayerKind = "card" | "group" | "qr" | "text"
+export type DraftingCanvasLayerKind = "card" | "group" | "image" | "qr" | "shape" | "text"
+export type DraftingImageSourceMode = "none" | "upload" | "url"
+export type DraftingImageFit = "contain" | "cover"
+export type DraftingShapeFillMode = "gradient" | "image" | "none" | "solid"
+export type DraftingShapePrimitiveId = "arrow" | "ellipse" | "line" | "rect"
+export type DraftingElementShapeId =
+  | DraftingShapePrimitiveId
+  | Exclude<QrBackgroundShapeId, "none">
 export type DraftingTextAlign = "center" | "left" | "right"
 export type DraftingTextFontStyle = "italic" | "normal"
 export type DraftingTextFontWeight = "bold" | "normal" | number
@@ -36,18 +45,30 @@ export type DraftingCanvasLayer = {
   isLocked: boolean
   isVisible: boolean
   kind: DraftingCanvasLayerKind
+  cornerRadius?: number
   fill?: string
+  fillGradient?: StudioGradient
+  fillMode?: DraftingShapeFillMode
   fontFamily?: string
   fontId?: string
   fontSize?: number
   fontStyle?: DraftingTextFontStyle
   fontWeight?: DraftingTextFontWeight
+  imageFit?: DraftingImageFit
+  imageSource?: DraftingImageSourceMode
+  imageValue?: string
   letterSpacing?: number
   lineHeight?: number
   name: string
   nodeId: string
   opacity: number
   rotation: number
+  scaleX?: number
+  scaleY?: number
+  shapeId?: DraftingElementShapeId
+  stroke?: string
+  strokeOpacity?: number
+  strokeWidth?: number
   tiltX: number
   tiltY: number
   shadow: DraftingCardShadowState
@@ -96,6 +117,23 @@ export const DEFAULT_DRAFTING_TEXT_LAYER = {
   textAlign: "left",
   underline: false,
 } as const
+
+export const DEFAULT_DRAFTING_IMAGE_LAYER = {
+  cornerRadius: 0,
+  imageFit: "cover",
+  imageSource: "none",
+  imageValue: "",
+} as const satisfies Partial<DraftingCanvasLayer>
+
+export const DEFAULT_DRAFTING_SHAPE_LAYER = {
+  cornerRadius: 16,
+  fill: "#E8E8E8",
+  fillMode: "solid",
+  shapeId: "rounded-square",
+  stroke: "#171717",
+  strokeOpacity: 100,
+  strokeWidth: 0,
+} as const satisfies Partial<DraftingCanvasLayer>
 
 export function getDraftingCardLayerId(nodeId: string) {
   return `${nodeId}${DRAFTING_CARD_LAYER_SUFFIX}`
@@ -182,6 +220,36 @@ export function createDraftingTextLayer(
       ...options,
       ...fontOptions,
       kind: "text",
+    },
+    {},
+  )
+}
+
+export function createDraftingImageLayer(
+  nodeId: string,
+  options: Partial<DraftingCanvasLayer> = {},
+): DraftingCanvasLayer {
+  return patchDraftingCanvasLayer(
+    {
+      ...createFallbackLayer(nodeId, "image"),
+      ...options,
+      kind: "image",
+    },
+    {},
+  )
+}
+
+export function createDraftingShapeLayer(
+  nodeId: string,
+  shapeId: DraftingElementShapeId = DEFAULT_DRAFTING_SHAPE_LAYER.shapeId,
+  options: Partial<DraftingCanvasLayer> = {},
+): DraftingCanvasLayer {
+  return patchDraftingCanvasLayer(
+    {
+      ...createFallbackLayer(nodeId, "shape"),
+      ...options,
+      kind: "shape",
+      shapeId,
     },
     {},
   )
@@ -529,6 +597,14 @@ function normalizeDraftingCanvasLayer(
     return normalizeTextDraftingCanvasLayer({ ...context, kind })
   }
 
+  if (kind === "image") {
+    return normalizeImageDraftingCanvasLayer({ ...context, kind })
+  }
+
+  if (kind === "shape") {
+    return normalizeShapeDraftingCanvasLayer({ ...context, kind })
+  }
+
   if (kind === "group") {
     return normalizeGroupDraftingCanvasLayer({ ...context, kind })
   }
@@ -547,7 +623,12 @@ type NormalizeDraftingLayerContext = {
 }
 
 function getDraftingCanvasLayerKind(value: unknown): DraftingCanvasLayerKind | null {
-  return value === "card" || value === "group" || value === "qr" || value === "text"
+  return value === "card" ||
+    value === "group" ||
+    value === "image" ||
+    value === "qr" ||
+    value === "shape" ||
+    value === "text"
     ? value
     : null
 }
@@ -588,6 +669,8 @@ function normalizeSharedDraftingCanvasLayerFields({
     nodeId,
     opacity: clamp(readFiniteNumber(value.opacity, fallback.opacity), 0, 1),
     rotation: readFiniteNumber(value.rotation, fallback.rotation),
+    scaleX: normalizeFlipScale(value.scaleX, fallback.scaleX ?? 1),
+    scaleY: normalizeFlipScale(value.scaleY, fallback.scaleY ?? 1),
     tiltX: clampBackgroundShapeTilt(readFiniteNumber(value.tiltX, fallback.tiltX)),
     tiltY: clampBackgroundShapeTilt(readFiniteNumber(value.tiltY, fallback.tiltY)),
     shadow: normalizeDraftingLayerShadow(value.shadow, fallback.shadow),
@@ -648,6 +731,68 @@ function normalizeDraftingGroupChildren({
       normalizeDraftingCanvasLayer(nodeId, child, fallbackLayers),
     )
     .filter((child): child is DraftingCanvasLayer => Boolean(child))
+}
+
+function normalizeImageDraftingCanvasLayer(
+  context: NormalizeDraftingLayerContext & { kind: "image" },
+): DraftingCanvasLayer {
+  const { fallback, value } = context
+
+  return {
+    ...normalizeSharedDraftingCanvasLayerFields(context),
+    cornerRadius: clamp(
+      readFiniteNumber(value.cornerRadius, fallback.cornerRadius ?? DEFAULT_DRAFTING_IMAGE_LAYER.cornerRadius),
+      0,
+      512,
+    ),
+    imageFit:
+      value.imageFit === "contain" || value.imageFit === "cover"
+        ? value.imageFit
+        : (fallback.imageFit ?? DEFAULT_DRAFTING_IMAGE_LAYER.imageFit),
+    imageSource: normalizeImageSourceMode(value.imageSource, fallback.imageSource),
+    imageValue:
+      typeof value.imageValue === "string"
+        ? value.imageValue
+        : (fallback.imageValue ?? DEFAULT_DRAFTING_IMAGE_LAYER.imageValue),
+    kind: "image",
+  } satisfies DraftingCanvasLayer
+}
+
+function normalizeShapeDraftingCanvasLayer(
+  context: NormalizeDraftingLayerContext & { kind: "shape" },
+): DraftingCanvasLayer {
+  const { fallback, value } = context
+
+  return {
+    ...normalizeSharedDraftingCanvasLayerFields(context),
+    cornerRadius: clamp(
+      readFiniteNumber(value.cornerRadius, fallback.cornerRadius ?? DEFAULT_DRAFTING_SHAPE_LAYER.cornerRadius),
+      0,
+      512,
+    ),
+    fill: normalizeHexColor(value.fill, fallback.fill ?? DEFAULT_DRAFTING_SHAPE_LAYER.fill),
+    fillGradient: normalizeShapeFillGradient(value.fillGradient, fallback.fillGradient),
+    fillMode: normalizeShapeFillMode(value.fillMode, fallback.fillMode),
+    imageFit:
+      value.imageFit === "contain" || value.imageFit === "cover"
+        ? value.imageFit
+        : fallback.imageFit,
+    imageSource: normalizeImageSourceMode(value.imageSource, fallback.imageSource),
+    imageValue: typeof value.imageValue === "string" ? value.imageValue : fallback.imageValue,
+    kind: "shape",
+    shapeId: normalizeElementShapeId(value.shapeId, fallback.shapeId),
+    stroke: normalizeHexColor(value.stroke, fallback.stroke ?? DEFAULT_DRAFTING_SHAPE_LAYER.stroke),
+    strokeOpacity: clamp(
+      readFiniteNumber(value.strokeOpacity, fallback.strokeOpacity ?? DEFAULT_DRAFTING_SHAPE_LAYER.strokeOpacity),
+      0,
+      100,
+    ),
+    strokeWidth: clamp(
+      readFiniteNumber(value.strokeWidth, fallback.strokeWidth ?? DEFAULT_DRAFTING_SHAPE_LAYER.strokeWidth),
+      0,
+      64,
+    ),
+  } satisfies DraftingCanvasLayer
 }
 
 function normalizeTextDraftingCanvasLayer(
@@ -718,19 +863,26 @@ function createFallbackLayer(
 ): DraftingCanvasLayer {
   return {
     blur: 0,
-    height: kind === "text" ? 48 : 240,
+    cornerRadius:
+      kind === "image"
+        ? DEFAULT_DRAFTING_IMAGE_LAYER.cornerRadius
+        : kind === "shape"
+          ? DEFAULT_DRAFTING_SHAPE_LAYER.cornerRadius
+          : undefined,
+    fill: kind === "shape" ? DEFAULT_DRAFTING_SHAPE_LAYER.fill : kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.fill : undefined,
+    fillMode: kind === "shape" ? DEFAULT_DRAFTING_SHAPE_LAYER.fillMode : undefined,
+    height: kind === "text" ? 48 : kind === "image" || kind === "shape" ? 180 : 240,
     id:
       kind === "card"
         ? getDraftingCardLayerId(nodeId)
         : kind === "qr"
           ? getDraftingQrLayerId(nodeId)
-          : kind === "text"
-            ? createDraftingLayerInstanceId(nodeId, "text")
+          : kind === "text" || kind === "image" || kind === "shape"
+            ? createDraftingLayerInstanceId(nodeId, kind)
             : `${nodeId}:group`,
     isLocked: false,
     isVisible: true,
     kind,
-    fill: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.fill : undefined,
     fontFamily: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.fontFamily : undefined,
     fontId: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.fontId : undefined,
     fontSize: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.fontSize : undefined,
@@ -738,19 +890,37 @@ function createFallbackLayer(
     fontWeight: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.fontWeight : undefined,
     letterSpacing: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.letterSpacing : undefined,
     lineHeight: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.lineHeight : undefined,
-    name: kind === "card" ? "Card" : kind === "qr" ? "QR code" : kind === "text" ? "Text" : "Group",
+    name:
+      kind === "card"
+        ? "Card"
+        : kind === "qr"
+          ? "QR code"
+          : kind === "text"
+            ? "Text"
+            : kind === "image"
+              ? "Image"
+              : kind === "shape"
+                ? "Shape"
+                : "Group",
     nodeId,
     opacity: 1,
     rotation: 0,
     tiltX: 0,
     tiltY: 0,
     shadow: { ...DEFAULT_LAYER_SHADOW },
+    imageFit: kind === "image" ? DEFAULT_DRAFTING_IMAGE_LAYER.imageFit : undefined,
+    imageSource: kind === "image" ? DEFAULT_DRAFTING_IMAGE_LAYER.imageSource : undefined,
+    imageValue: kind === "image" ? DEFAULT_DRAFTING_IMAGE_LAYER.imageValue : undefined,
+    shapeId: kind === "shape" ? DEFAULT_DRAFTING_SHAPE_LAYER.shapeId : undefined,
+    stroke: kind === "shape" ? DEFAULT_DRAFTING_SHAPE_LAYER.stroke : undefined,
+    strokeOpacity: kind === "shape" ? DEFAULT_DRAFTING_SHAPE_LAYER.strokeOpacity : undefined,
+    strokeWidth: kind === "shape" ? DEFAULT_DRAFTING_SHAPE_LAYER.strokeWidth : undefined,
     text: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.text : undefined,
     textAlign: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.textAlign : undefined,
     underline: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.underline : undefined,
-    width: 240,
-    x: -120,
-    y: kind === "text" ? -24 : -120,
+    width: kind === "image" || kind === "shape" ? 180 : 240,
+    x: kind === "image" || kind === "shape" ? -90 : -120,
+    y: kind === "text" ? -24 : kind === "image" || kind === "shape" ? -90 : -120,
     zIndex: kind === "card" ? 0 : 1,
   }
 }
@@ -807,6 +977,117 @@ function readFiniteNumber(value: unknown, fallback: number) {
 
 function normalizeHexColor(value: unknown, fallback: string) {
   return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value) ? value : fallback
+}
+
+function normalizeFlipScale(value: unknown, fallback: number) {
+  const raw = typeof value === "number" && Number.isFinite(value) ? value : fallback
+  return raw < 0 ? -1 : 1
+}
+
+function normalizeImageSourceMode(
+  value: unknown,
+  fallback: DraftingImageSourceMode | undefined,
+): DraftingImageSourceMode {
+  if (value === "none" || value === "upload" || value === "url") {
+    return value
+  }
+
+  return fallback ?? DEFAULT_DRAFTING_IMAGE_LAYER.imageSource
+}
+
+function normalizeShapeFillMode(
+  value: unknown,
+  fallback: DraftingShapeFillMode | undefined,
+): DraftingShapeFillMode {
+  if (value === "gradient" || value === "image" || value === "none" || value === "solid") {
+    return value
+  }
+
+  return fallback ?? DEFAULT_DRAFTING_SHAPE_LAYER.fillMode
+}
+
+const DRAFTING_SHAPE_PRIMITIVE_IDS = new Set<DraftingShapePrimitiveId>([
+  "arrow",
+  "ellipse",
+  "line",
+  "rect",
+])
+
+const DRAFTING_ELEMENT_SHAPE_IDS = new Set<DraftingElementShapeId>([
+  "arrow",
+  "arch",
+  "atom",
+  "circle",
+  "diagonal-pill",
+  "eight-point-star",
+  "ellipse",
+  "flower",
+  "folded-pentagon",
+  "four-lobes",
+  "gear-bloom",
+  "ghost",
+  "hexagon",
+  "hourglass",
+  "line",
+  "notched-badge",
+  "organic-seal",
+  "ornate-star",
+  "propeller",
+  "rect",
+  "rounded-square",
+  "scallop-seal",
+  "skew-card",
+  "soft-cross",
+  "spark",
+  "wavy-badge",
+])
+
+function normalizeElementShapeId(
+  value: unknown,
+  fallback: DraftingElementShapeId | undefined,
+): DraftingElementShapeId {
+  if (typeof value === "string" && DRAFTING_ELEMENT_SHAPE_IDS.has(value as DraftingElementShapeId)) {
+    return value as DraftingElementShapeId
+  }
+
+  return fallback ?? DEFAULT_DRAFTING_SHAPE_LAYER.shapeId
+}
+
+function normalizeShapeFillGradient(
+  value: unknown,
+  fallback: StudioGradient | undefined,
+): StudioGradient | undefined {
+  if (!isRecord(value)) {
+    return fallback
+  }
+
+  const colorStops = Array.isArray(value.colorStops) ? value.colorStops : null
+  if (!colorStops || colorStops.length < 2) {
+    return fallback
+  }
+
+  const firstStop = colorStops[0]
+  const secondStop = colorStops[1]
+
+  if (!isRecord(firstStop) || !isRecord(secondStop)) {
+    return fallback
+  }
+
+  return {
+    colorStops: [
+      {
+        color: typeof firstStop.color === "string" ? firstStop.color : "#111111",
+        offset: clamp(readFiniteNumber(firstStop.offset, 0), 0, 1),
+      },
+      {
+        color: typeof secondStop.color === "string" ? secondStop.color : "#ffffff",
+        offset: clamp(readFiniteNumber(secondStop.offset, 1), 0, 1),
+      },
+    ],
+    enabled: typeof value.enabled === "boolean" ? value.enabled : true,
+    rotation: readFiniteNumber(value.rotation, 0),
+    type: value.type === "radial" ? "radial" : "linear",
+  }
 }
 
 function normalizeTextAlign(value: unknown, fallback: unknown): DraftingTextAlign {

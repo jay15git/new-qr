@@ -66,6 +66,10 @@ import {
   getBackgroundShapeTiltPerspectiveStyle,
   getLayerCssTransform,
 } from "@/features/workspace/rendering/layer-transform"
+import {
+  DraftingImageLayerContent,
+  DraftingShapeLayerContent,
+} from "@/features/workspace/rendering/shape-layer"
 import { buildDashboardQrNodePayload } from "@/features/qr-code/rendering/qr-svg"
 import { getDraftingQrLayerLayout } from "@/features/qr-code/rendering/svg-extension"
 import type { QrStudioState } from "@/features/qr-code/model/state"
@@ -2391,6 +2395,60 @@ export const Pane = memo(function Pane({
       )
     }
 
+    if (layer.kind === "image") {
+      return (
+        <div
+          key={layer.id}
+          data-slot="drafting-image-layer"
+          data-layer-id={layer.id}
+          data-selected={isLayerSelected ? "true" : "false"}
+          className={cn(
+            "absolute max-h-none max-w-none cursor-move touch-none overflow-hidden",
+            layer.isLocked && "cursor-default",
+          )}
+          style={{
+            ...getLayerPlacementStyle(layer),
+            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+          }}
+          onClick={(event) => selectLayerFromClick(event, layer)}
+          onPointerDown={(event) => startLayerInteraction(event, layer, "move")}
+          onPointerMove={updateLayerInteraction}
+          onPointerUp={endLayerInteraction}
+          onPointerCancel={endLayerInteraction}
+          onContextMenu={(event) => openLayerContextMenu(event, [layer.id])}
+        >
+          <DraftingImageLayerContent layer={layer} />
+        </div>
+      )
+    }
+
+    if (layer.kind === "shape") {
+      return (
+        <div
+          key={layer.id}
+          data-slot="drafting-shape-layer"
+          data-layer-id={layer.id}
+          data-selected={isLayerSelected ? "true" : "false"}
+          className={cn(
+            "absolute max-h-none max-w-none cursor-move touch-none overflow-visible",
+            layer.isLocked && "cursor-default",
+          )}
+          style={{
+            ...getLayerPlacementStyle(layer),
+            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+          }}
+          onClick={(event) => selectLayerFromClick(event, layer)}
+          onPointerDown={(event) => startLayerInteraction(event, layer, "move")}
+          onPointerMove={updateLayerInteraction}
+          onPointerUp={endLayerInteraction}
+          onPointerCancel={endLayerInteraction}
+          onContextMenu={(event) => openLayerContextMenu(event, [layer.id])}
+        >
+          <DraftingShapeLayerContent layer={layer} />
+        </div>
+      )
+    }
+
     return (
       <div
         key={layer.id}
@@ -2519,6 +2577,42 @@ export const Pane = memo(function Pane({
           <div className="h-full w-full" data-slot="drafting-text-content" style={getTextLayerStyle(layer)}>
             {renderTextLayerContent(layer)}
           </div>
+        </div>
+      )
+    }
+
+    if (layer.kind === "image") {
+      return (
+        <div
+          key={layer.id}
+          data-slot="drafting-image-layer"
+          data-layer-id={layer.id}
+          data-selected={isLayerSelected ? "true" : "false"}
+          className="absolute max-h-none max-w-none overflow-hidden"
+          style={{
+            ...getLayerPlacementStyle(layer, true),
+            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+          }}
+        >
+          <DraftingImageLayerContent layer={layer} />
+        </div>
+      )
+    }
+
+    if (layer.kind === "shape") {
+      return (
+        <div
+          key={layer.id}
+          data-slot="drafting-shape-layer"
+          data-layer-id={layer.id}
+          data-selected={isLayerSelected ? "true" : "false"}
+          className="absolute max-h-none max-w-none overflow-visible"
+          style={{
+            ...getLayerPlacementStyle(layer, true),
+            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+          }}
+        >
+          <DraftingShapeLayerContent layer={layer} />
         </div>
       )
     }

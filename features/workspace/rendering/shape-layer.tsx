@@ -1,0 +1,195 @@
+import type { CSSProperties } from "react"
+
+import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
+import { QR_BACKGROUND_SHAPES } from "@/features/qr-code/styles/background-shapes"
+
+function getShapeDefinition(shapeId: NonNullable<DraftingCanvasLayer["shapeId"]>) {
+  if (shapeId === "rect" || shapeId === "ellipse" || shapeId === "line" || shapeId === "arrow") {
+    return null
+  }
+
+  return QR_BACKGROUND_SHAPES.find((shape) => shape.id === shapeId) ?? null
+}
+
+function getShapeFillStyle(layer: DraftingCanvasLayer): CSSProperties {
+  if (layer.fillMode === "none") {
+    return { backgroundColor: "transparent" }
+  }
+
+  if (layer.fillMode === "image" && layer.imageValue) {
+    return {
+      backgroundColor: "transparent",
+      backgroundImage: `url("${layer.imageValue}")`,
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+      backgroundSize: layer.imageFit ?? "cover",
+    }
+  }
+
+  return {
+    backgroundColor: layer.fill ?? "#E8E8E8",
+  }
+}
+
+function renderPrimitiveShape(
+  shapeId: "arrow" | "ellipse" | "line" | "rect",
+  layer: DraftingCanvasLayer,
+) {
+  const stroke = layer.stroke ?? "#171717"
+  const strokeWidth = layer.strokeWidth ?? 0
+  const strokeOpacity = (layer.strokeOpacity ?? 100) / 100
+  const fill = layer.fillMode === "none" ? "none" : (layer.fill ?? "#E8E8E8")
+  const radius = layer.cornerRadius ?? 0
+
+  if (shapeId === "line") {
+    return (
+      <svg aria-hidden="true" className="h-full w-full" viewBox="0 0 100 100">
+        <line
+          stroke={stroke}
+          strokeLinecap="round"
+          strokeOpacity={strokeOpacity}
+          strokeWidth={Math.max(1, strokeWidth || 4)}
+          x1="8"
+          x2="92"
+          y1="50"
+          y2="50"
+        />
+      </svg>
+    )
+  }
+
+  if (shapeId === "arrow") {
+    return (
+      <svg aria-hidden="true" className="h-full w-full" viewBox="0 0 100 100">
+        <path
+          d="M10 50 H62 M62 50 L44 34 M62 50 L44 66"
+          fill="none"
+          stroke={stroke}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeOpacity={strokeOpacity}
+          strokeWidth={Math.max(1, strokeWidth || 4)}
+        />
+      </svg>
+    )
+  }
+
+  if (shapeId === "ellipse") {
+    return (
+      <svg aria-hidden="true" className="h-full w-full" viewBox="0 0 100 100">
+        <ellipse
+          cx="50"
+          cy="50"
+          fill={fill}
+          rx="42"
+          ry="42"
+          stroke={stroke}
+          strokeOpacity={strokeOpacity}
+          strokeWidth={strokeWidth}
+        />
+      </svg>
+    )
+  }
+
+  return (
+    <svg aria-hidden="true" className="h-full w-full" viewBox="0 0 100 100">
+      <rect
+        fill={fill}
+        height="84"
+        rx={radius / 2}
+        ry={radius / 2}
+        stroke={stroke}
+        strokeOpacity={strokeOpacity}
+        strokeWidth={strokeWidth}
+        width="84"
+        x="8"
+        y="8"
+      />
+    </svg>
+  )
+}
+
+export function DraftingShapeLayerContent({ layer }: { layer: DraftingCanvasLayer }) {
+  const shapeId = layer.shapeId ?? "rounded-square"
+  const definition = getShapeDefinition(shapeId)
+  const fillStyle = getShapeFillStyle(layer)
+
+  if (definition) {
+    return (
+      <div className="relative h-full w-full" style={fillStyle}>
+        <svg
+          aria-hidden="true"
+          className="h-full w-full"
+          preserveAspectRatio="none"
+          viewBox={`0 0 ${definition.viewBox.width} ${definition.viewBox.height}`}
+        >
+          <path
+            d={definition.path}
+            fill={layer.fillMode === "none" ? "none" : (layer.fill ?? "#E8E8E8")}
+            stroke={layer.stroke ?? "#171717"}
+            strokeOpacity={(layer.strokeOpacity ?? 100) / 100}
+            strokeWidth={layer.strokeWidth ?? 0}
+          />
+        </svg>
+      </div>
+    )
+  }
+
+  if (shapeId === "rect" || shapeId === "ellipse" || shapeId === "line" || shapeId === "arrow") {
+    return <div className="h-full w-full">{renderPrimitiveShape(shapeId, layer)}</div>
+  }
+
+  return null
+}
+
+export function DraftingImageLayerContent({ layer }: { layer: DraftingCanvasLayer }) {
+  const imageValue = layer.imageValue
+  const cornerRadius = layer.cornerRadius ?? 0
+  const fit = layer.imageFit ?? "cover"
+
+  if (!imageValue) {
+    return (
+      <div
+        aria-hidden="true"
+        className="grid h-full w-full place-items-center border border-dashed border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] text-[11px] font-semibold text-[var(--drafting-ink-muted)]"
+        style={{ borderRadius: cornerRadius }}
+      >
+        Image
+      </div>
+    )
+  }
+
+  return (
+    <img
+      alt=""
+      className="h-full w-full"
+      draggable={false}
+      src={imageValue}
+      style={{
+        borderRadius: cornerRadius,
+        objectFit: fit,
+      }}
+    />
+  )
+}
+
+export function getShapeSvgPath(shapeId: NonNullable<DraftingCanvasLayer["shapeId"]>) {
+  if (shapeId === "rect") {
+    return '<rect x="8" y="8" width="84" height="84" rx="8" ry="8" />'
+  }
+
+  if (shapeId === "ellipse") {
+    return '<ellipse cx="50" cy="50" rx="42" ry="42" />'
+  }
+
+  if (shapeId === "line") {
+    return '<line x1="8" y1="50" x2="92" y2="50" stroke-linecap="round" />'
+  }
+
+  if (shapeId === "arrow") {
+    return '<path d="M10 50 H62 M62 50 L44 34 M62 50 L44 66" fill="none" stroke-linecap="round" stroke-linejoin="round" />'
+  }
+
+  const definition = QR_BACKGROUND_SHAPES.find((shape) => shape.id === shapeId)
+  return definition ? `<path d="${definition.path}" />` : ""
+}

@@ -3,7 +3,11 @@ import { describe, expect, it } from "vitest"
 import {
   alignDraftingCanvasLayers,
   cloneDraftingCanvasLayersForPaste,
+  createDraftingImageLayer,
+  createDraftingShapeLayer,
   createDraftingTextLayer,
+  DEFAULT_DRAFTING_IMAGE_LAYER,
+  DEFAULT_DRAFTING_SHAPE_LAYER,
   DEFAULT_DRAFTING_TEXT_LAYER,
   distributeDraftingCanvasLayers,
   getDraftingMarqueeSelection,
@@ -405,6 +409,88 @@ describe("drafting layer state actions", () => {
       { fontWeight: 700, text: "Scan" },
       { fontStyle: "italic", text: " here" },
     ])
+  })
+
+  it("creates image and shape layers with defaults", () => {
+    const imageLayer = createDraftingImageLayer("preview", {
+      imageSource: "url",
+      imageValue: "https://example.com/photo.png",
+    })
+    const shapeLayer = createDraftingShapeLayer("preview", "hexagon", {
+      fill: "#abcdef",
+    })
+
+    expect(imageLayer).toMatchObject({
+      cornerRadius: DEFAULT_DRAFTING_IMAGE_LAYER.cornerRadius,
+      imageFit: "cover",
+      imageSource: "url",
+      imageValue: "https://example.com/photo.png",
+      kind: "image",
+      name: "Image",
+    })
+    expect(shapeLayer).toMatchObject({
+      fill: "#abcdef",
+      fillMode: "solid",
+      kind: "shape",
+      name: "Shape",
+      shapeId: "hexagon",
+    })
+  })
+
+  it("normalizes image and shape layers from persisted payloads", () => {
+    const normalized = normalizeDraftingCanvasLayers(
+      "preview",
+      [
+        {
+          height: 120,
+          id: "preview:image:1",
+          imageFit: "contain",
+          imageSource: "upload",
+          imageValue: "data:image/png;base64,abc",
+          kind: "image",
+          name: "Photo",
+          width: 200,
+          x: 10,
+          y: 20,
+          zIndex: 3,
+        },
+        {
+          cornerRadius: 8,
+          fill: "#ff00aa",
+          height: 80,
+          id: "preview:shape:1",
+          kind: "shape",
+          scaleX: -1,
+          shapeId: "rect",
+          strokeWidth: 2,
+          width: 80,
+          x: 0,
+          y: 0,
+          zIndex: 4,
+        },
+      ],
+      createDefaultQrStudioState(),
+      createDefaultDraftingCardState(),
+    )
+
+    const image = normalized.find((layer) => layer.kind === "image")
+    const shape = normalized.find((layer) => layer.kind === "shape")
+
+    expect(image).toMatchObject({
+      imageFit: "contain",
+      imageSource: "upload",
+      kind: "image",
+      name: "Photo",
+    })
+    expect(shape).toMatchObject({
+      cornerRadius: 8,
+      fill: "#ff00aa",
+      kind: "shape",
+      scaleX: -1,
+      scaleY: 1,
+      shapeId: "rect",
+      strokeWidth: 2,
+    })
   })
 
   it("preserves text fields through copy, paste, group, and ungroup", () => {

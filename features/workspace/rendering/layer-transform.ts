@@ -84,17 +84,22 @@ export function getBackgroundShapeTiltInnerStyle(
   }
 }
 
-export function getLayerCssTransform(layer: LayerTransformInput) {
+export function getLayerCssTransform(
+  layer: LayerTransformInput & Pick<DraftingCanvasLayer, "scaleX" | "scaleY">,
+) {
   const tiltX = clampBackgroundShapeTilt(layer.tiltX ?? 0)
   const tiltY = clampBackgroundShapeTilt(layer.tiltY ?? 0)
   const rotation = Number.isFinite(layer.rotation) ? layer.rotation : 0
+  const scaleX = layer.scaleX ?? 1
+  const scaleY = layer.scaleY ?? 1
   const translation = `translate3d(${layer.x}px, ${layer.y}px, 0)`
+  const scale = scaleX === 1 && scaleY === 1 ? "" : ` scale(${scaleX}, ${scaleY})`
 
   if (tiltX === 0 && tiltY === 0) {
-    return `${translation} rotate(${rotation}deg)`
+    return `${translation}${scale} rotate(${rotation}deg)`
   }
 
-  return `${translation} rotate(${rotation}deg) skewY(${tiltX}deg) skewX(${tiltY}deg)`
+  return `${translation}${scale} rotate(${rotation}deg) skewY(${tiltX}deg) skewX(${tiltY}deg)`
 }
 
 export function appendTiltSkewToSvgTransform(

@@ -240,7 +240,7 @@ function findLayerPane(layers: DraftingLayerPane[], layerId: string | null): Dra
 
 function getLayerDisplayName(layer: DraftingLayerPane) {
   if (layer.kind === "card" && layer.name.trim().toLowerCase() === "card") {
-    return "QR Shape"
+    return "QR Frame"
   }
 
   if (layer.kind === "qr" && layer.name.trim().toLowerCase() === "qr code") {
@@ -455,6 +455,14 @@ function getLayerRoleLabel(node: DraftingLayerPane) {
 
   if (node.kind === "text") {
     return "Text"
+  }
+
+  if (node.kind === "image") {
+    return "Image"
+  }
+
+  if (node.kind === "shape") {
+    return "Shape"
   }
 
   if (node.kind === "group") {
