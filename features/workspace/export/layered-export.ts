@@ -16,6 +16,7 @@ import {
 import {
   createDraftingQrArtworkState,
   sanitizeDraftingQrArtworkMarkup,
+  scaleNestedSvgMarkup,
 } from "@/features/workspace/rendering/qr-artwork"
 import { getLayerSvgTransform } from "@/features/workspace/rendering/layer-transform"
 import {
@@ -308,37 +309,6 @@ function getDraftingTextRunSvg(layer: DraftingCanvasLayer, run: DraftingTextRun)
 
 function getDraftingLayerSvgTransform(layer: DraftingCanvasLayer) {
   return getLayerSvgTransform(layer)
-}
-
-function scaleNestedSvgMarkup(markup: string, width: number, height: number) {
-  const withScaledSelfClosingSvg = markup.replace(
-    /<svg\b([^>]*)\/>/i,
-    (_match, attributes: string) => {
-      const nextAttributes = cleanNestedSvgAttributes(attributes)
-
-      return `<svg${nextAttributes} width="${width}" height="${height}" preserveAspectRatio="none"></svg>`
-    },
-  )
-
-  if (withScaledSelfClosingSvg !== markup) {
-    return withScaledSelfClosingSvg
-  }
-
-  return markup.replace(
-    /<svg\b([^>]*)>/i,
-    (_match, attributes: string) => {
-      const nextAttributes = cleanNestedSvgAttributes(attributes)
-
-      return `<svg${nextAttributes} width="${width}" height="${height}" preserveAspectRatio="none">`
-    },
-  )
-}
-
-function cleanNestedSvgAttributes(attributes: string) {
-  return String(attributes)
-    .replace(/\swidth="[^"]*"/i, "")
-    .replace(/\sheight="[^"]*"/i, "")
-    .replace(/\spreserveAspectRatio="[^"]*"/i, "")
 }
 
 function getSvgId(value: string) {

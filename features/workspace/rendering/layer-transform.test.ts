@@ -2,11 +2,37 @@ import { describe, expect, it } from "vitest"
 
 import {
   appendTiltSkewToSvgTransform,
+  getBackgroundShapeTiltContainerStyle,
+  getBackgroundShapeTiltInnerStyle,
+  getBackgroundShapeTiltPerspectiveStyle,
   getLayerCssTransform,
   getLayerSvgTransform,
 } from "@/features/workspace/rendering/layer-transform"
 
 describe("layer transform helpers", () => {
+  it("builds split css tilt styles for nested preview containers", () => {
+    expect(getBackgroundShapeTiltPerspectiveStyle({ tiltX: 0, tiltY: 0 })).toEqual({})
+    expect(getBackgroundShapeTiltInnerStyle({ tiltX: 0, tiltY: 0 })).toEqual({})
+    expect(getBackgroundShapeTiltPerspectiveStyle({ tiltX: 12, tiltY: -8 })).toEqual({
+      perspective: "600px",
+    })
+    expect(getBackgroundShapeTiltInnerStyle({ tiltX: 12, tiltY: -8 })).toEqual({
+      transform: "rotateX(-8deg) rotateY(12deg)",
+      transformOrigin: "center center",
+      transformStyle: "preserve-3d",
+    })
+  })
+
+  it("builds shared css tilt container styles for background shapes", () => {
+    expect(getBackgroundShapeTiltContainerStyle({ tiltX: 0, tiltY: 0 })).toEqual({})
+    expect(getBackgroundShapeTiltContainerStyle({ tiltX: 12, tiltY: -8 })).toEqual({
+      perspective: "600px",
+      transform: "rotateX(-8deg) rotateY(12deg)",
+      transformOrigin: "center center",
+      transformStyle: "preserve-3d",
+    })
+  })
+
   it("builds css transforms with skew tilt and rotation", () => {
     expect(
       getLayerCssTransform({

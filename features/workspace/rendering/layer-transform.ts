@@ -30,6 +30,60 @@ export function getBackgroundShapeCssTiltTransform(
   return `rotateX(${tiltY}deg) rotateY(${tiltX}deg)`
 }
 
+export type BackgroundShapeTiltContainerStyle = {
+  perspective?: string
+  transform?: string
+  transformOrigin?: string
+  transformStyle?: "preserve-3d"
+}
+
+export function getBackgroundShapeTiltContainerStyle(
+  shapeOptions: Pick<BackgroundShapeOptions, "tiltX" | "tiltY">,
+): BackgroundShapeTiltContainerStyle {
+  const tiltTransform = getBackgroundShapeCssTiltTransform(shapeOptions)
+
+  if (!tiltTransform) {
+    return {}
+  }
+
+  return {
+    perspective: "600px",
+    transform: tiltTransform,
+    transformOrigin: "center center",
+    transformStyle: "preserve-3d",
+  }
+}
+
+export function getBackgroundShapeTiltPerspectiveStyle(
+  shapeOptions: Pick<BackgroundShapeOptions, "tiltX" | "tiltY">,
+): Pick<BackgroundShapeTiltContainerStyle, "perspective"> {
+  const tiltTransform = getBackgroundShapeCssTiltTransform(shapeOptions)
+
+  if (!tiltTransform) {
+    return {}
+  }
+
+  return {
+    perspective: "600px",
+  }
+}
+
+export function getBackgroundShapeTiltInnerStyle(
+  shapeOptions: Pick<BackgroundShapeOptions, "tiltX" | "tiltY">,
+): Pick<BackgroundShapeTiltContainerStyle, "transform" | "transformOrigin" | "transformStyle"> {
+  const tiltTransform = getBackgroundShapeCssTiltTransform(shapeOptions)
+
+  if (!tiltTransform) {
+    return {}
+  }
+
+  return {
+    transform: tiltTransform,
+    transformOrigin: "center center",
+    transformStyle: "preserve-3d",
+  }
+}
+
 export function getLayerCssTransform(layer: LayerTransformInput) {
   const tiltX = clampBackgroundShapeTilt(layer.tiltX ?? 0)
   const tiltY = clampBackgroundShapeTilt(layer.tiltY ?? 0)

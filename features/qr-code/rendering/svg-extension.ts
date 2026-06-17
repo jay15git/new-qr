@@ -2160,6 +2160,53 @@ function getBackgroundRenderMetrics(
   }
 }
 
+export type DraftingQrLayerLayout = {
+  innerHeight: number
+  innerWidth: number
+  metrics: BackgroundRenderMetrics
+  scale: number
+  shapeOptions: QrStudioState["backgroundShapeOptions"]
+}
+
+export function getDraftingQrLayerLayout(
+  layerWidth: number,
+  state: Pick<
+    QrStudioState,
+    "backgroundImage" | "backgroundShapeId" | "backgroundShapeOptions" | "height" | "width"
+  >,
+): DraftingQrLayerLayout {
+  const naturalOuter = getQrRenderedDimensions(state)
+  const scale = naturalOuter.width > 0 ? layerWidth / naturalOuter.width : 1
+  const innerWidth = clampQrSize(state.width * scale)
+  const innerHeight = clampQrSize(state.height * scale)
+  const shapeOptions = scaleQrBackgroundShapeOptions(state.backgroundShapeOptions, scale)
+  const metrics = getBackgroundRenderMetrics(
+    innerWidth,
+    innerHeight,
+    normalizeBackgroundShapeOptions(shapeOptions),
+  )
+
+  return {
+    innerHeight,
+    innerWidth,
+    metrics,
+    scale,
+    shapeOptions,
+  }
+}
+
+export function getDraftingQrBackgroundPathTransform(
+  shape: QrBackgroundShapeDefinition,
+  backingRegion: BackgroundRenderMetrics["backingRegion"],
+  shapeOptions: QrStudioState["backgroundShapeOptions"],
+) {
+  return getBackgroundShapeTransform(
+    shape,
+    backingRegion,
+    normalizeBackgroundShapeOptions(shapeOptions),
+  )
+}
+
 export function scaleQrBackgroundShapeOptions(
   options: QrStudioState["backgroundShapeOptions"],
   scale: number,

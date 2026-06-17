@@ -65,6 +65,34 @@ export function sanitizeDraftingQrArtworkMarkup(markup: string) {
   return new XMLSerializer().serializeToString(svg)
 }
 
+export function scaleNestedSvgMarkup(markup: string, width: number, height: number) {
+  const withScaledSelfClosingSvg = markup.replace(
+    /<svg\b([^>]*)\/>/i,
+    (_match, attributes: string) => {
+      const nextAttributes = cleanNestedSvgAttributes(attributes)
+
+      return `<svg${nextAttributes} width="${width}" height="${height}" preserveAspectRatio="none"></svg>`
+    },
+  )
+
+  if (withScaledSelfClosingSvg !== markup) {
+    return withScaledSelfClosingSvg
+  }
+
+  return markup.replace(/<svg\b([^>]*)>/i, (_match, attributes: string) => {
+    const nextAttributes = cleanNestedSvgAttributes(attributes)
+
+    return `<svg${nextAttributes} width="${width}" height="${height}" preserveAspectRatio="none">`
+  })
+}
+
+function cleanNestedSvgAttributes(attributes: string) {
+  return String(attributes)
+    .replace(/\swidth="[^"]*"/i, "")
+    .replace(/\sheight="[^"]*"/i, "")
+    .replace(/\spreserveAspectRatio="[^"]*"/i, "")
+}
+
 function isLegacyQrBackingNode(node: Element) {
   const layer = node.getAttribute("data-qr-layer")
 

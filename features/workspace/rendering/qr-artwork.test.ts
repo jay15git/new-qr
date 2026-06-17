@@ -5,11 +5,43 @@ import { describe, expect, it } from "vitest"
 import { toReactQrCodeProps } from "@/features/qr-code/adapters/react-qr-adapter"
 import { createDefaultQrStudioState } from "@/features/qr-code/model/state"
 import {
+  getDraftingQrLayerLayout,
+  getQrRenderedDimensions,
+} from "@/features/qr-code/rendering/svg-extension"
+import {
   createDraftingQrArtworkState,
   sanitizeDraftingQrArtworkMarkup,
+  scaleNestedSvgMarkup,
 } from "@/features/workspace/rendering/qr-artwork"
 
 describe("drafting qr artwork helpers", () => {
+  it("scales nested svg markup to the target layer size", () => {
+    expect(
+      scaleNestedSvgMarkup('<svg width="320" height="320" viewBox="0 0 57 57"></svg>', 240, 240),
+    ).toBe('<svg viewBox="0 0 57 57" width="240" height="240" preserveAspectRatio="none"></svg>')
+  })
+
+  it("derives resized qr layout metrics from the layer width", () => {
+    const state = createDefaultQrStudioState()
+    state.backgroundShapeId = "ghost"
+    state.backgroundShapeOptions = {
+      ...state.backgroundShapeOptions,
+      edgeBlur: 8,
+      shadowOffsetX: 12,
+      shadowOffsetY: -10,
+    }
+
+    const naturalOuter = getQrRenderedDimensions(state)
+    const layout = getDraftingQrLayerLayout(naturalOuter.width * 0.75, state)
+
+    expect(layout.innerWidth).toBe(Math.round(state.width * 0.75))
+    expect(layout.metrics.outerWidth).toBeCloseTo(naturalOuter.width * 0.75, 4)
+    expect(layout.metrics.translateX).toBeGreaterThan(0)
+    expect(layout.metrics.backingRegion.width).toBeGreaterThanOrEqual(layout.innerWidth)
+  })
+})
+
+describe("drafting qr artwork helpers (legacy)", () => {
   it("creates foreground-only ReactQRCode state for drafting artwork", () => {
     const state = createDefaultQrStudioState()
     state.backgroundImage = {

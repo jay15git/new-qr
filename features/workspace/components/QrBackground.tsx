@@ -9,7 +9,10 @@ import {
 } from "@/features/qr-code/styles/background-shapes"
 import type { QrStudioState, StudioGradient } from "@/features/qr-code/model/state"
 import {
-  getBackgroundShapeCssTiltTransform,
+  getDraftingQrBackgroundPathTransform,
+  getDraftingQrLayerLayout,
+} from "@/features/qr-code/rendering/svg-extension"
+import {
   getBackgroundShapeSkewTransform,
 } from "@/features/workspace/rendering/layer-transform"
 
@@ -36,19 +39,21 @@ export function DraftingQrBackground({
 }) {
   const frame = getDraftingQrBackgroundFrame(layer)
   const shape = getQrBackgroundShapeDefinition(state.backgroundShapeId)
+  const layout = getDraftingQrLayerLayout(layer.width, state)
+  const { metrics, shapeOptions } = layout
   const ids = getDraftingQrBackgroundIds(layer.id)
   const fill = getDraftingQrBackgroundFill(state, ids)
-  const filterId = getDraftingQrBackgroundFilterId(state, ids)
-  const stroke = getDraftingQrBackgroundStroke(state)
-  const tiltTransform = getBackgroundShapeCssTiltTransform(state.backgroundShapeOptions)
+  const filterId = getDraftingQrBackgroundFilterId(state, ids, shapeOptions)
+  const stroke = getDraftingQrBackgroundStroke(shapeOptions)
+  const pathShapeOptions = {
+    ...shapeOptions,
+    tiltX: 0,
+    tiltY: 0,
+  }
   const style: CSSProperties = {
     height: frame.height,
     left: frame.x,
-    perspective: tiltTransform ? "600px" : undefined,
     top: frame.y,
-    transform: tiltTransform,
-    transformOrigin: "center center",
-    transformStyle: tiltTransform ? "preserve-3d" : undefined,
     width: frame.width,
   }
 
@@ -60,10 +65,10 @@ export function DraftingQrBackground({
       data-slot="drafting-qr-background"
       preserveAspectRatio="none"
       style={style}
-      viewBox={getDraftingQrBackgroundViewBox(frame, shape)}
+      viewBox={`0 0 ${metrics.outerWidth} ${metrics.outerHeight}`}
       xmlns="http://www.w3.org/2000/svg"
     >
-      <DraftingQrBackgroundDefs ids={ids} state={state} />
+      <DraftingQrBackgroundDefs ids={ids} shapeOptions={shapeOptions} state={state} />
       {shape ? (
         <path
           d={shape.path}
@@ -73,20 +78,23 @@ export function DraftingQrBackground({
           strokeLinejoin="round"
           strokeOpacity={stroke.width > 0 ? stroke.opacity : undefined}
           strokeWidth={stroke.width > 0 ? stroke.width : undefined}
-          transform={`scale(${frame.width / shape.viewBox.width} ${frame.height / shape.viewBox.height})`}
+          transform={getDraftingQrBackgroundPathTransform(shape, metrics.backingRegion, pathShapeOptions)}
         />
       ) : (
         <rect
           fill={fill}
           filter={filterId ? `url(#${filterId})` : undefined}
-          height={frame.height}
-          rx={(Math.min(frame.width, frame.height) / 2) * state.backgroundOptions.round}
+          height={metrics.backingRegion.height}
+          rx={
+            (Math.min(metrics.backingRegion.width, metrics.backingRegion.height) / 2) *
+            state.backgroundOptions.round
+          }
           stroke={stroke.width > 0 ? stroke.color : undefined}
           strokeOpacity={stroke.width > 0 ? stroke.opacity : undefined}
           strokeWidth={stroke.width > 0 ? stroke.width : undefined}
-          width={frame.width}
-          x="0"
-          y="0"
+          width={metrics.backingRegion.width}
+          x={metrics.backingRegion.x}
+          y={metrics.backingRegion.y}
         />
       )}
     </svg>
@@ -104,7 +112,7 @@ export function getDraftingQrBackgroundSvgMarkup(
   const fill = getDraftingQrBackgroundFill(state, ids)
   const filterId = getDraftingQrBackgroundFilterId(state, ids)
   const filter = filterId ? ` filter="url(#${filterId})"` : ""
-  const stroke = getDraftingQrBackgroundStroke(state)
+  const stroke = getDraftingQrBackgroundStroke(state.backgroundShapeOptions)
   const strokeMarkup =
     stroke.width > 0
       ? ` stroke="${escapeXml(stroke.color)}" stroke-opacity="${stroke.opacity}" stroke-width="${stroke.width}" stroke-linejoin="round"`
@@ -146,12 +154,14 @@ export function getDraftingQrBackgroundBounds(
 
 function DraftingQrBackgroundDefs({
   ids,
+  shapeOptions,
   state,
 }: {
   ids: DraftingQrBackgroundIds
+  shapeOptions: QrStudioState["backgroundShapeOptions"]
   state: QrStudioState
 }) {
-  const filterId = getDraftingQrBackgroundFilterId(state, ids)
+  const filterId = getDraftingQrBackgroundFilterId(state, ids, shapeOptions)
   const imageHref = getDraftingQrBackgroundImageHref(state)
 
   if (!state.backgroundGradient.enabled && !filterId && !imageHref) {
@@ -176,11 +186,11 @@ function DraftingQrBackgroundDefs({
       {filterId ? (
         <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
           <feDropShadow
-            dx={state.backgroundShapeOptions.shadowOffsetX}
-            dy={state.backgroundShapeOptions.shadowOffsetY}
-            stdDeviation={state.backgroundShapeOptions.edgeBlur / 2}
-            floodColor={state.backgroundShapeOptions.shadowColor}
-            floodOpacity={state.backgroundShapeOptions.shadowOpacity / 100}
+            dx={shapeOptions.shadowOffsetX}
+            dy={shapeOptions.shadowOffsetY}
+            stdDeviation={shapeOptions.edgeBlur / 2}
+            floodColor={shapeOptions.shadowColor}
+            floodOpacity={shapeOptions.shadowOpacity / 100}
           />
         </filter>
       ) : null}
@@ -287,12 +297,12 @@ function getDraftingQrBackgroundFill(state: QrStudioState, ids: DraftingQrBackgr
   return state.backgroundOptions.color
 }
 
-function getDraftingQrBackgroundStroke(state: QrStudioState) {
-  const width = Math.max(0, state.backgroundShapeOptions.strokeWidth)
+function getDraftingQrBackgroundStroke(shapeOptions: QrStudioState["backgroundShapeOptions"]) {
+  const width = Math.max(0, shapeOptions.strokeWidth)
 
   return {
-    color: state.backgroundShapeOptions.strokeColor,
-    opacity: Math.max(0, Math.min(100, state.backgroundShapeOptions.strokeOpacity)) / 100,
+    color: shapeOptions.strokeColor,
+    opacity: Math.max(0, Math.min(100, shapeOptions.strokeOpacity)) / 100,
     width,
   }
 }
@@ -300,16 +310,20 @@ function getDraftingQrBackgroundStroke(state: QrStudioState) {
 function getDraftingQrBackgroundFilterId(
   state: QrStudioState,
   ids: DraftingQrBackgroundIds,
+  shapeOptions: QrStudioState["backgroundShapeOptions"] = state.backgroundShapeOptions,
 ) {
-  return hasDraftingQrBackgroundShadow(state) ? ids.filterId : null
+  return hasDraftingQrBackgroundShadow(state, shapeOptions) ? ids.filterId : null
 }
 
-function hasDraftingQrBackgroundShadow(state: QrStudioState) {
+function hasDraftingQrBackgroundShadow(
+  state: QrStudioState,
+  shapeOptions: QrStudioState["backgroundShapeOptions"] = state.backgroundShapeOptions,
+) {
   return (
-    state.backgroundShapeOptions.shadowOpacity > 0 &&
-    (state.backgroundShapeOptions.edgeBlur > 0 ||
-      state.backgroundShapeOptions.shadowOffsetX !== 0 ||
-      state.backgroundShapeOptions.shadowOffsetY !== 0)
+    shapeOptions.shadowOpacity > 0 &&
+    (shapeOptions.edgeBlur > 0 ||
+      shapeOptions.shadowOffsetX !== 0 ||
+      shapeOptions.shadowOffsetY !== 0)
   )
 }
 

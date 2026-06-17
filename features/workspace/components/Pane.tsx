@@ -56,12 +56,18 @@ import {
 } from "@/features/workspace/rendering/text-layout"
 import {
   createDraftingQrArtworkState,
+  scaleNestedSvgMarkup,
   sanitizeDraftingQrArtworkMarkup,
 } from "@/features/workspace/rendering/qr-artwork"
 import { DraftingQrBackground } from "@/features/workspace/components/QrBackground"
 import { applyDraftingQrForegroundShadow } from "@/features/workspace/rendering/qr-layer-shadow"
-import { getLayerCssTransform } from "@/features/workspace/rendering/layer-transform"
+import {
+  getBackgroundShapeTiltInnerStyle,
+  getBackgroundShapeTiltPerspectiveStyle,
+  getLayerCssTransform,
+} from "@/features/workspace/rendering/layer-transform"
 import { buildDashboardQrNodePayload } from "@/features/qr-code/rendering/qr-svg"
+import { getDraftingQrLayerLayout } from "@/features/qr-code/rendering/svg-extension"
 import type { QrStudioState } from "@/features/qr-code/model/state"
 import { cn } from "@/lib/utils"
 
@@ -1172,6 +1178,44 @@ function getTextRunKey(layerId: string, run: DraftingTextRun, index: number) {
   return `${layerId}:run:${index}:${run.text.length}`
 }
 
+function renderDraftingQrLayerContent({
+  layer,
+  qrMarkup,
+  shapeTiltInnerStyle,
+  shapeTiltPerspectiveStyle,
+  state,
+}: {
+  layer: DraftingCanvasLayer
+  qrMarkup: string
+  shapeTiltInnerStyle: ReturnType<typeof getBackgroundShapeTiltInnerStyle>
+  shapeTiltPerspectiveStyle: ReturnType<typeof getBackgroundShapeTiltPerspectiveStyle>
+  state: QrStudioState
+}) {
+  const layout = getDraftingQrLayerLayout(layer.width, state)
+  const scaledQrMarkup = qrMarkup
+    ? scaleNestedSvgMarkup(qrMarkup, layout.innerWidth, layout.innerHeight)
+    : ""
+
+  return (
+    <div className="relative h-full w-full" style={shapeTiltPerspectiveStyle}>
+      <div className="relative h-full w-full" style={shapeTiltInnerStyle}>
+        <DraftingQrBackground layer={layer} state={state} />
+        <div
+          className="absolute z-10 max-h-none max-w-none [&_svg]:h-full [&_svg]:w-full"
+          dangerouslySetInnerHTML={{ __html: scaledQrMarkup }}
+          style={{
+            height: layout.innerHeight,
+            left: layout.metrics.translateX,
+            top: layout.metrics.translateY,
+            transformStyle: shapeTiltInnerStyle.transformStyle,
+            width: layout.innerWidth,
+          }}
+        />
+      </div>
+    </div>
+  )
+}
+
 export const Pane = memo(function Pane({
   cardState = DEFAULT_DRAFTING_CARD_STATE,
   interactionScale = 1,
@@ -2252,6 +2296,8 @@ export const Pane = memo(function Pane({
 
     if (layer.kind === "qr") {
       const qrMarkup = markup ? applyDraftingQrForegroundShadow(markup, layer) : ""
+      const shapeTiltPerspectiveStyle = getBackgroundShapeTiltPerspectiveStyle(state.backgroundShapeOptions)
+      const shapeTiltInnerStyle = getBackgroundShapeTiltInnerStyle(state.backgroundShapeOptions)
 
       return (
         <div
@@ -2275,11 +2321,13 @@ export const Pane = memo(function Pane({
           onPointerCancel={endLayerInteraction}
           onContextMenu={(event) => openLayerContextMenu(event, [layer.id])}
         >
-          <DraftingQrBackground layer={layer} state={state} />
-          <div
-            className="relative z-10 h-full w-full max-h-full max-w-full [&_svg]:h-full [&_svg]:w-full"
-            dangerouslySetInnerHTML={{ __html: qrMarkup }}
-          />
+          {renderDraftingQrLayerContent({
+            layer,
+            qrMarkup,
+            shapeTiltInnerStyle,
+            shapeTiltPerspectiveStyle,
+            state,
+          })}
         </div>
       )
     }
@@ -2429,6 +2477,8 @@ export const Pane = memo(function Pane({
 
     if (layer.kind === "qr") {
       const qrMarkup = markup ? applyDraftingQrForegroundShadow(markup, layer) : ""
+      const shapeTiltPerspectiveStyle = getBackgroundShapeTiltPerspectiveStyle(state.backgroundShapeOptions)
+      const shapeTiltInnerStyle = getBackgroundShapeTiltInnerStyle(state.backgroundShapeOptions)
 
       return (
         <div
@@ -2442,11 +2492,13 @@ export const Pane = memo(function Pane({
             filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
           }}
         >
-          <DraftingQrBackground layer={layer} state={state} />
-          <div
-            className="relative z-10 h-full w-full max-h-full max-w-full [&_svg]:h-full [&_svg]:w-full"
-            dangerouslySetInnerHTML={{ __html: qrMarkup }}
-          />
+          {renderDraftingQrLayerContent({
+            layer,
+            qrMarkup,
+            shapeTiltInnerStyle,
+            shapeTiltPerspectiveStyle,
+            state,
+          })}
         </div>
       )
     }
