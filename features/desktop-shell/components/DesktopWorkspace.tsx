@@ -8,6 +8,7 @@ import {
 } from "@/features/desktop-shell/components/FloatingToolbar"
 import { saveDesignToLibrary } from "@/features/studio-hub/model/save-library-design"
 import { readStudioSession } from "@/features/studio-hub/model/navigation"
+import { useDesktopSoundClicks } from "@/hooks/use-desktop-sound-clicks"
 import { cn } from "@/lib/utils"
 import { useCallback, useState, type CSSProperties } from "react"
 import type { DraftingWorkspaceDocumentV1 } from "@/features/workspace/model/document"
@@ -26,6 +27,7 @@ export function DesktopWorkspace({
   onBack,
 }: DesktopWorkspaceProps) {
   const [desktopTheme, setDesktopTheme] = useState<DesktopThemeMode>(initialTheme)
+  useDesktopSoundClicks()
   const workspaceTone = {
     "--workspace-shell": "#1f1f1f",
     "--workspace-page": "#171717",

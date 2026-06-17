@@ -1,0 +1,128 @@
+import { click001Sound } from "@/lib/click-001"
+import { click003Sound } from "@/lib/click-003"
+import { clickSoftSound } from "@/lib/click-soft"
+import { playSound, type SoundPlayback } from "@/lib/sound-engine"
+import type { SoundAsset } from "@/lib/sound-types"
+
+export type DesktopSoundZone = "panel" | "toolbar" | "slider"
+
+const DESKTOP_SOUNDS_ENABLED_KEY = "desktop-sounds-enabled"
+
+const SOUND_ASSETS: Record<DesktopSoundZone, SoundAsset> = {
+  panel: click001Sound,
+  toolbar: click003Sound,
+  slider: clickSoftSound,
+}
+
+const ZONE_OPTIONS: Record<
+  DesktopSoundZone,
+  { volume: number; playbackRate?: number; interrupt?: boolean; minIntervalMs?: number }
+> = {
+  panel: { volume: 0.35 },
+  toolbar: { volume: 0.5, interrupt: true },
+  slider: { volume: 0.4, interrupt: true },
+}
+
+const TOOLBAR_ZONE_SELECTOR = [
+  '[data-slot="desktop-document-toolbar"]',
+  '[data-slot="desktop-utility-toolbar"]',
+  '[data-slot="desktop-action-toolbar"]',
+  '[data-slot="dashboard-compose-toolbar"]',
+  '[data-slot="desktop-resize-toolbar"]',
+  '[data-slot="desktop-text-format-toolbar"]',
+  '[data-slot="drafting-layer-floating-toolbar"]',
+  '[data-slot="desktop-insert-menu-popover"]',
+  '[data-slot="desktop-zoom-popover"]',
+  '[data-slot="desktop-keyboard-shortcuts-popover"]',
+].join(",")
+
+const activePlayback = new Map<DesktopSoundZone, SoundPlayback>()
+const lastPlayedAt = new Map<DesktopSoundZone, number>()
+
+function prefersReducedMotion(): boolean {
+  if (typeof window === "undefined") return true
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches
+}
+
+export function areDesktopSoundsEnabled(): boolean {
+  if (typeof window === "undefined") return false
+  if (prefersReducedMotion()) return false
+  return window.localStorage.getItem(DESKTOP_SOUNDS_ENABLED_KEY) !== "false"
+}
+
+export function setDesktopSoundsEnabled(enabled: boolean): void {
+  if (typeof window === "undefined") return
+  window.localStorage.setItem(DESKTOP_SOUNDS_ENABLED_KEY, enabled ? "true" : "false")
+}
+
+export function playDesktopSound(zone: DesktopSoundZone): void {
+  if (typeof window === "undefined") return
+  if (!areDesktopSoundsEnabled()) return
+
+  const options = ZONE_OPTIONS[zone]
+  const now = Date.now()
+  const lastPlayed = lastPlayedAt.get(zone) ?? 0
+  if (options.minIntervalMs && now - lastPlayed < options.minIntervalMs) {
+    return
+  }
+
+  if (options.interrupt) {
+    activePlayback.get(zone)?.stop()
+  }
+
+  lastPlayedAt.set(zone, now)
+
+  void playSound(SOUND_ASSETS[zone].dataUri, {
+    volume: options.volume,
+    playbackRate: options.playbackRate,
+  }).then((playback) => {
+    if (options.interrupt) {
+      activePlayback.set(zone, playback)
+    }
+  })
+}
+
+function isInteractiveClickTarget(target: Element): boolean {
+  const interactive = target.closest(
+    'button:not([disabled]), [role="button"]:not([aria-disabled="true"]), [role="menuitem"], [role="radio"], [role="switch"], [role="tab"], input[type="checkbox"]:not([disabled]), label[for], a[href]',
+  )
+  if (!interactive) return false
+  if (interactive instanceof HTMLButtonElement && interactive.disabled) return false
+  if (interactive.getAttribute("aria-disabled") === "true") return false
+  if (interactive.closest('[data-slot="elastic-slider"]')) return false
+  return true
+}
+
+export function resolveDesktopSoundZone(target: Element): DesktopSoundZone | null {
+  if (typeof document === "undefined") return null
+  if (!document.querySelector('[data-slot="desktop-workspace"]')) return null
+  if (!isInteractiveClickTarget(target)) return null
+
+  if (target.closest('[data-slot="drafting-layer-context-menu"]')) {
+    return "panel"
+  }
+
+  if (target.closest(TOOLBAR_ZONE_SELECTOR)) {
+    return "toolbar"
+  }
+
+  if (
+    target.closest('[data-slot="desktop-workspace"]') &&
+    target.closest('[data-slot="desktop-left-toolbar-shell"]')
+  ) {
+    return "panel"
+  }
+
+  return null
+}
+
+export function handleDesktopSoundPointerDown(event: PointerEvent): void {
+  if (event.button !== 0) return
+  const target = event.target
+  if (!(target instanceof Element)) return
+
+  const zone = resolveDesktopSoundZone(target)
+  if (!zone) return
+
+  playDesktopSound(zone)
+}

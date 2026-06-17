@@ -3809,6 +3809,7 @@ function DraftingSliderField({
             label={label}
             max={max}
             min={min}
+            scrubSound
             step={step}
             value={value}
             onValueChange={onChange}

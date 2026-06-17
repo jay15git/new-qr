@@ -3662,6 +3662,7 @@ function DesktopElasticSliderRow({
           label={label}
           max={max}
           min={min}
+          scrubSound
           step={step}
           value={value}
           onValueChange={onChange}
@@ -5703,6 +5704,7 @@ function DesktopTextInlineSlider({
           label={label}
           max={max}
           min={min}
+          scrubSound
           step={step}
           value={value}
           onValueChange={onChange}

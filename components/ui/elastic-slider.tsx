@@ -11,6 +11,7 @@ import {
 } from "motion/react"
 
 import { useControllableState } from "@/hooks/use-controllable-state"
+import { playDesktopSound } from "@/lib/desktop-interaction-sound"
 import { cn } from "@/lib/utils"
 
 const CLICK_THRESHOLD = 3
@@ -56,6 +57,7 @@ export type ElasticSliderProps = {
   step?: number
   formatValue?: (value: number) => string
   className?: string
+  scrubSound?: boolean
   "aria-label"?: string
 }
 
@@ -77,6 +79,7 @@ export function ElasticSlider({
   step = 0.01,
   formatValue,
   className,
+  scrubSound = false,
   "aria-label": ariaLabel,
 }: ElasticSliderProps) {
   const [value = min, setValue] = useControllableState({
@@ -132,6 +135,20 @@ export function ElasticSlider({
       fillPercent.jump(percentage)
     }
   }, [percentage, isInteracting, fillPercent])
+
+  const previousScrubValueRef = React.useRef(value)
+
+  React.useEffect(() => {
+    if (!scrubSound) {
+      previousScrubValueRef.current = value
+      return
+    }
+
+    if (value === previousScrubValueRef.current) return
+
+    playDesktopSound("slider")
+    previousScrubValueRef.current = value
+  }, [value, scrubSound])
 
   const positionToValue = React.useCallback(
     (clientX: number) => {

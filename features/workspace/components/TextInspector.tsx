@@ -280,6 +280,7 @@ function TextWeightSlider({
           label="Weight"
           max={max}
           min={min}
+          scrubSound
           step={step}
           value={value}
           onValueChange={(nextValue) => {
