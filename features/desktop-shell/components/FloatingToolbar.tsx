@@ -197,7 +197,7 @@ import { PlayIcon } from "@/components/ui/play"
 import { ReceiptTextIcon } from "@/components/ui/receipt-text"
 import { cn } from "@/lib/utils"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
-import { ElementInspector } from "@/features/workspace/components/ElementInspector"
+import { DesktopElementInspector } from "@/features/desktop-shell/components/DesktopElementInspector"
 
 type DesktopToolbarGroup = "QR" | "Add" | "Manage"
 export type DesktopToolbarToolId =
@@ -1477,13 +1477,10 @@ export function FloatingToolbar({
               className="flex min-h-0 min-w-0 flex-col overflow-hidden"
             >
               {controller?.selectedElementLayer ? (
-                <div className="min-h-0 flex-1 overflow-y-auto p-3">
-                  <ElementInspector
-                    layer={controller.selectedElementLayer}
-                    sliderVariant="desktop-elastic"
-                    onPatch={(patch) => controller.onElementLayerPatch?.(patch)}
-                  />
-                </div>
+                <DesktopElementInspector
+                  layer={controller.selectedElementLayer}
+                  onPatch={(patch) => controller.onElementLayerPatch?.(patch)}
+                />
               ) : actualActiveTool === "content" ? (
                 <DesktopContentInspector
                   contentType={actualContentType}

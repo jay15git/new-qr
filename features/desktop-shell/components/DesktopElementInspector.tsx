@@ -1,0 +1,810 @@
+"use client"
+
+import { useEffect, useState, type ReactNode } from "react"
+import {
+  AlignCenterIcon,
+  AlignLeftIcon,
+  AlignRightIcon,
+  BoldIcon,
+  ChevronDownIcon,
+  ItalicIcon,
+  RotateCcwIcon,
+  UnderlineIcon,
+} from "lucide-react"
+
+import FileUpload from "@/components/vendor/kokonutui/file-upload"
+import {
+  DESKTOP_INSPECTOR_CONTROL_CLASS,
+  DESKTOP_INSPECTOR_SECTION_GAP_CLASS,
+  DESKTOP_INSPECTOR_SECTION_HEADING_CLASS,
+  DESKTOP_INSPECTOR_SELECTED_CLASS,
+  DesktopInspectorLabel,
+  DesktopInspectorSection,
+  DesktopInspectorSegmentedControl,
+  DesktopInspectorTextarea,
+  DesktopInspectorTextInput,
+} from "@/features/desktop-shell/components/InspectorControls"
+import {
+  DesktopInspectorColorRow,
+  DesktopInspectorElasticSliderRow,
+  DesktopInspectorHeader,
+  DesktopInspectorNumberField,
+  DesktopInspectorScrollArea,
+  DesktopInspectorValueGrid,
+} from "@/features/desktop-shell/components/DesktopInspectorShell"
+import {
+  getDesktopFontWeightSliderStep,
+  getDesktopLayerFontWeight,
+  getNearestDesktopFontWeight,
+} from "@/features/desktop-shell/model/font-weight"
+import { QR_BACKGROUND_SHAPES } from "@/features/qr-code/styles/background-shapes"
+import {
+  DEFAULT_DRAFTING_IMAGE_LAYER,
+  DEFAULT_DRAFTING_SHAPE_LAYER,
+  DEFAULT_DRAFTING_TEXT_LAYER,
+  type DraftingCanvasLayer,
+  type DraftingElementShapeId,
+  type DraftingShapeFillMode,
+  type DraftingTextAlign,
+} from "@/features/workspace/model/layers"
+import {
+  DRAFTING_FONT_REGISTRY,
+  getDraftingFontCssFamily,
+  loadDraftingFont,
+  resolveDraftingFont,
+} from "@/features/workspace/model/fonts"
+import { cn } from "@/lib/utils"
+
+const DEFAULT_SHADOW_COLOR = "#111827"
+
+const DESKTOP_TEXT_ALIGN_OPTIONS: Array<{ label: string; value: DraftingTextAlign }> = [
+  { label: "Left", value: "left" },
+  { label: "Center", value: "center" },
+  { label: "Right", value: "right" },
+]
+
+const DESKTOP_SHAPE_PRIMITIVES: Array<{ id: DraftingElementShapeId; label: string }> = [
+  { id: "rect", label: "Rectangle" },
+  { id: "ellipse", label: "Ellipse" },
+  { id: "line", label: "Line" },
+  { id: "arrow", label: "Arrow" },
+]
+
+function getElementInspectorTitle(layer: DraftingCanvasLayer) {
+  if (layer.kind === "text") {
+    return "Text"
+  }
+
+  if (layer.kind === "image") {
+    return "Image"
+  }
+
+  return "Shape"
+}
+
+export function DesktopElementInspector({
+  layer,
+  onPatch,
+}: {
+  layer: DraftingCanvasLayer
+  onPatch: (patch: Partial<DraftingCanvasLayer>) => void
+}) {
+  return (
+    <div
+      data-slot="desktop-element-inspector"
+      className="flex min-h-0 min-w-0 flex-1 flex-col"
+    >
+      <DesktopInspectorHeader title={getElementInspectorTitle(layer)} />
+      <DesktopInspectorScrollArea>
+        <DesktopTransformSection layer={layer} onPatch={onPatch} />
+        {layer.kind === "text" ? (
+          <DesktopLayerTextInspector layer={layer} onPatch={onPatch} />
+        ) : null}
+        {layer.kind === "shape" ? (
+          <DesktopLayerShapeInspector layer={layer} onPatch={onPatch} />
+        ) : null}
+        {layer.kind === "image" ? (
+          <DesktopLayerImageInspector layer={layer} onPatch={onPatch} />
+        ) : null}
+        <DesktopEffectsSection layer={layer} onPatch={onPatch} />
+      </DesktopInspectorScrollArea>
+    </div>
+  )
+}
+
+function DesktopTransformSection({
+  layer,
+  onPatch,
+}: {
+  layer: DraftingCanvasLayer
+  onPatch: (patch: Partial<DraftingCanvasLayer>) => void
+}) {
+  const lockAspect = layer.kind === "image" || layer.kind === "shape" || layer.kind === "qr"
+
+  return (
+    <DesktopInspectorSection dataSlot="desktop-transform-section">
+      <DesktopInspectorLabel>Transform</DesktopInspectorLabel>
+      <DesktopInspectorValueGrid>
+        <DesktopInspectorNumberField
+          label="X"
+          value={Math.round(layer.x)}
+          onChange={(x) => onPatch({ x })}
+        />
+        <DesktopInspectorNumberField
+          label="Y"
+          value={Math.round(layer.y)}
+          onChange={(y) => onPatch({ y })}
+        />
+        <DesktopInspectorNumberField
+          label="W"
+          min={1}
+          value={Math.round(layer.width)}
+          onChange={(width) =>
+            onPatch({
+              width,
+              ...(lockAspect ? { height: width } : {}),
+              ...(layer.kind === "qr" ? { height: width } : {}),
+            })
+          }
+        />
+        <DesktopInspectorNumberField
+          disabled={layer.kind === "qr" || lockAspect}
+          label="H"
+          min={1}
+          value={Math.round(layer.height)}
+          onChange={(height) => onPatch({ height })}
+        />
+      </DesktopInspectorValueGrid>
+
+      <div className="mt-2 flex items-end gap-2">
+        <div className="min-w-0 flex-1">
+          <DesktopInspectorNumberField
+            label="Rotation"
+            max={360}
+            min={-360}
+            value={Math.round(layer.rotation)}
+            onChange={(rotation) => onPatch({ rotation })}
+          />
+        </div>
+        <button
+          aria-label="Reset rotation"
+          className={cn(
+            "mb-0.5 grid size-8 shrink-0 place-items-center",
+            DESKTOP_INSPECTOR_CONTROL_CLASS,
+          )}
+          type="button"
+          onClick={() => onPatch({ rotation: 0 })}
+        >
+          <RotateCcwIcon className="size-3.5" />
+        </button>
+      </div>
+
+      <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
+        <DesktopInspectorElasticSliderRow
+          label="Opacity"
+          max={100}
+          min={0}
+          value={Math.round(layer.opacity * 100)}
+          valueLabel={`${Math.round(layer.opacity * 100)}%`}
+          onChange={(opacity) => onPatch({ opacity: opacity / 100 })}
+        />
+      </div>
+
+      <div className={cn("mt-2 grid grid-cols-2 gap-1.5", DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
+        <DesktopToggleButton
+          active={layer.isVisible}
+          label="Visible"
+          onClick={() => onPatch({ isVisible: !layer.isVisible })}
+        />
+        <DesktopToggleButton
+          active={layer.isLocked}
+          label="Locked"
+          onClick={() => onPatch({ isLocked: !layer.isLocked })}
+        />
+        <DesktopToggleButton
+          active={(layer.scaleX ?? 1) < 0}
+          label="Flip H"
+          onClick={() => onPatch({ scaleX: (layer.scaleX ?? 1) < 0 ? 1 : -1 })}
+        />
+        <DesktopToggleButton
+          active={(layer.scaleY ?? 1) < 0}
+          label="Flip V"
+          onClick={() => onPatch({ scaleY: (layer.scaleY ?? 1) < 0 ? 1 : -1 })}
+        />
+      </div>
+    </DesktopInspectorSection>
+  )
+}
+
+function DesktopEffectsSection({
+  layer,
+  onPatch,
+}: {
+  layer: DraftingCanvasLayer
+  onPatch: (patch: Partial<DraftingCanvasLayer>) => void
+}) {
+  const shadow = layer.shadow
+
+  return (
+    <DesktopInspectorSection
+      className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}
+      dataSlot="desktop-effects-section"
+    >
+      <DesktopInspectorLabel>Effects</DesktopInspectorLabel>
+      <DesktopInspectorElasticSliderRow
+        label="Blur"
+        max={96}
+        min={0}
+        value={layer.blur}
+        valueLabel={`${Math.round(layer.blur)}`}
+        onChange={(blur) => onPatch({ blur })}
+      />
+      <DesktopInspectorColorRow
+        label="Shadow color"
+        value={shadow.color}
+        onChange={(color) => onPatch({ shadow: { ...shadow, color: color || DEFAULT_SHADOW_COLOR } })}
+      />
+      <DesktopInspectorValueGrid>
+        <DesktopInspectorNumberField
+          label="Shadow blur"
+          max={128}
+          min={0}
+          value={shadow.blur}
+          onChange={(blur) => onPatch({ shadow: { ...shadow, blur } })}
+        />
+        <DesktopInspectorNumberField
+          label="Shadow %"
+          max={100}
+          min={0}
+          value={shadow.opacity}
+          onChange={(opacity) => onPatch({ shadow: { ...shadow, opacity } })}
+        />
+        <DesktopInspectorNumberField
+          label="Offset X"
+          max={256}
+          min={-256}
+          value={shadow.offsetX}
+          onChange={(offsetX) => onPatch({ shadow: { ...shadow, offsetX } })}
+        />
+        <DesktopInspectorNumberField
+          label="Offset Y"
+          max={256}
+          min={-256}
+          value={shadow.offsetY}
+          onChange={(offsetY) => onPatch({ shadow: { ...shadow, offsetY } })}
+        />
+      </DesktopInspectorValueGrid>
+    </DesktopInspectorSection>
+  )
+}
+
+function DesktopLayerTextInspector({
+  layer,
+  onPatch,
+}: {
+  layer: DraftingCanvasLayer
+  onPatch: (patch: Partial<DraftingCanvasLayer>) => void
+}) {
+  const selectedFont = resolveDraftingFont({
+    fontFamily: layer.fontFamily,
+    fontId: layer.fontId,
+  })
+  const supportedWeights = selectedFont.weights
+  const fontWeight = getDesktopLayerFontWeight(layer.fontWeight, supportedWeights)
+  const [fontMenuOpen, setFontMenuOpen] = useState(false)
+
+  useEffect(() => {
+    void loadDraftingFont(selectedFont.id)
+  }, [selectedFont.id])
+
+  function patchTextLayer(patch: Partial<DraftingCanvasLayer>) {
+    onPatch({ ...patch, textRuns: undefined })
+  }
+
+  return (
+    <>
+      <DesktopInspectorSection
+        className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}
+        dataSlot="desktop-layer-text-content"
+      >
+        <DesktopInspectorLabel>Content</DesktopInspectorLabel>
+        <DesktopInspectorTextarea
+          aria-label="Text layer content"
+          className="min-h-16 py-2"
+          value={layer.text ?? ""}
+          onChange={(event) => patchTextLayer({ text: event.currentTarget.value })}
+        />
+      </DesktopInspectorSection>
+
+      <DesktopInspectorSection
+        className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}
+        dataSlot="desktop-layer-text-inspector"
+      >
+        <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Typography</p>
+        <div className="grid grid-cols-[1fr_4.75rem] gap-1.5">
+          <div className="min-w-0" data-slot="desktop-layer-text-font-selector">
+            <button
+              aria-controls="desktop-layer-text-font-listbox"
+              aria-expanded={fontMenuOpen}
+              aria-haspopup="listbox"
+              aria-label="Text font"
+              className={cn(
+                "flex h-8 w-full min-w-0 items-center justify-between gap-2 px-2.5 text-left text-[12px] font-semibold",
+                DESKTOP_INSPECTOR_CONTROL_CLASS,
+              )}
+              style={{ fontFamily: getDraftingFontCssFamily({ fontId: selectedFont.id }) }}
+              type="button"
+              onClick={() => setFontMenuOpen((open) => !open)}
+            >
+              <span className="min-w-0 flex-1 truncate">{selectedFont.label}</span>
+              <ChevronDownIcon
+                className={cn("size-3.5 shrink-0 text-current transition-transform", fontMenuOpen && "rotate-180")}
+              />
+            </button>
+          </div>
+          <DesktopInspectorTextInput
+            aria-label="Text font size"
+            className="h-8 rounded-[6px] px-2 text-[12px] font-semibold"
+            max={300}
+            min={6}
+            type="number"
+            value={layer.fontSize ?? DEFAULT_DRAFTING_TEXT_LAYER.fontSize}
+            onChange={(event) => {
+              const fontSize = Number(event.currentTarget.value)
+
+              if (Number.isFinite(fontSize)) {
+                patchTextLayer({ fontSize })
+              }
+            }}
+          />
+        </div>
+        {fontMenuOpen ? (
+          <div
+            id="desktop-layer-text-font-listbox"
+            aria-label="Text font options"
+            className="mt-2 grid max-h-40 gap-1.5 overflow-y-auto pr-1"
+            data-slot="desktop-layer-text-font-listbox"
+            role="listbox"
+          >
+            {DRAFTING_FONT_REGISTRY.map((font) => (
+              <button
+                key={font.id}
+                aria-label={`Use ${font.label} text font`}
+                aria-selected={selectedFont.id === font.id}
+                className={cn(
+                  "flex h-8 min-w-0 items-center px-2.5 text-left text-[12px] font-semibold",
+                  DESKTOP_INSPECTOR_CONTROL_CLASS,
+                  selectedFont.id === font.id && DESKTOP_INSPECTOR_SELECTED_CLASS,
+                )}
+                role="option"
+                style={{ fontFamily: getDraftingFontCssFamily({ fontId: font.id }) }}
+                type="button"
+                onClick={() => {
+                  void loadDraftingFont(font.id)
+                  patchTextLayer({ fontFamily: font.family, fontId: font.id })
+                  setFontMenuOpen(false)
+                }}
+              >
+                <span className="min-w-0 flex-1 truncate">{font.label}</span>
+              </button>
+            ))}
+          </div>
+        ) : null}
+
+        <DesktopInspectorElasticSliderRow
+          label="Weight"
+          max={Math.max(...supportedWeights)}
+          min={Math.min(...supportedWeights)}
+          step={getDesktopFontWeightSliderStep(supportedWeights)}
+          value={fontWeight}
+          valueLabel={String(Math.round(fontWeight))}
+          onChange={(nextWeight) =>
+            patchTextLayer({
+              fontWeight: getNearestDesktopFontWeight(nextWeight, supportedWeights),
+            })
+          }
+        />
+
+        <div className="mt-2 grid grid-cols-3 gap-1.5" data-slot="desktop-layer-text-emphasis">
+          <DesktopIconToggleButton
+            active={fontWeight >= 700}
+            icon={<BoldIcon className="size-3.5" />}
+            label="Bold"
+            onClick={() =>
+              patchTextLayer({
+                fontWeight:
+                  fontWeight >= 700
+                    ? getNearestDesktopFontWeight(400, supportedWeights)
+                    : getNearestDesktopFontWeight(700, supportedWeights),
+              })
+            }
+          />
+          <DesktopIconToggleButton
+            active={(layer.fontStyle ?? DEFAULT_DRAFTING_TEXT_LAYER.fontStyle) === "italic"}
+            icon={<ItalicIcon className="size-3.5" />}
+            label="Italic"
+            onClick={() =>
+              patchTextLayer({
+                fontStyle:
+                  (layer.fontStyle ?? DEFAULT_DRAFTING_TEXT_LAYER.fontStyle) === "italic"
+                    ? "normal"
+                    : "italic",
+              })
+            }
+          />
+          <DesktopIconToggleButton
+            active={Boolean(layer.underline)}
+            icon={<UnderlineIcon className="size-3.5" />}
+            label="Underline"
+            onClick={() => patchTextLayer({ underline: !layer.underline })}
+          />
+        </div>
+      </DesktopInspectorSection>
+
+      <DesktopInspectorSection
+        className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}
+        dataSlot="desktop-layer-text-color"
+      >
+        <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Color</p>
+        <DesktopInspectorColorRow
+          label="Text fill"
+          value={layer.fill ?? DEFAULT_DRAFTING_TEXT_LAYER.fill}
+          onChange={(fill) => patchTextLayer({ fill })}
+        />
+      </DesktopInspectorSection>
+
+      <DesktopInspectorSection
+        className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}
+        dataSlot="desktop-layer-text-alignment"
+      >
+        <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Alignment</p>
+        <div className="grid grid-cols-3 gap-1.5">
+          {DESKTOP_TEXT_ALIGN_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              aria-label={`Align text ${option.value}`}
+              aria-pressed={(layer.textAlign ?? DEFAULT_DRAFTING_TEXT_LAYER.textAlign) === option.value}
+              className={cn(
+                "h-8 px-2 text-[11px] font-semibold",
+                DESKTOP_INSPECTOR_CONTROL_CLASS,
+                (layer.textAlign ?? DEFAULT_DRAFTING_TEXT_LAYER.textAlign) === option.value &&
+                  DESKTOP_INSPECTOR_SELECTED_CLASS,
+              )}
+              type="button"
+              onClick={() => patchTextLayer({ textAlign: option.value })}
+            >
+              <DesktopTextAlignIcon value={option.value} />
+            </button>
+          ))}
+        </div>
+      </DesktopInspectorSection>
+
+      <DesktopInspectorSection
+        className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}
+        dataSlot="desktop-layer-text-spacing"
+      >
+        <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Spacing</p>
+        <div className="grid gap-2">
+          <DesktopInspectorElasticSliderRow
+            label="Letter spacing"
+            max={200}
+            min={-50}
+            value={layer.letterSpacing ?? DEFAULT_DRAFTING_TEXT_LAYER.letterSpacing}
+            valueLabel={`${Math.round(layer.letterSpacing ?? DEFAULT_DRAFTING_TEXT_LAYER.letterSpacing)} px`}
+            onChange={(letterSpacing) => patchTextLayer({ letterSpacing })}
+          />
+          <DesktopInspectorElasticSliderRow
+            label="Line height"
+            max={4}
+            min={0.6}
+            step={0.05}
+            value={layer.lineHeight ?? DEFAULT_DRAFTING_TEXT_LAYER.lineHeight}
+            valueLabel={(layer.lineHeight ?? DEFAULT_DRAFTING_TEXT_LAYER.lineHeight).toFixed(2)}
+            onChange={(lineHeight) => patchTextLayer({ lineHeight })}
+          />
+        </div>
+      </DesktopInspectorSection>
+    </>
+  )
+}
+
+function DesktopLayerShapeInspector({
+  layer,
+  onPatch,
+}: {
+  layer: DraftingCanvasLayer
+  onPatch: (patch: Partial<DraftingCanvasLayer>) => void
+}) {
+  const shapeId = layer.shapeId ?? DEFAULT_DRAFTING_SHAPE_LAYER.shapeId
+  const fillMode = layer.fillMode ?? DEFAULT_DRAFTING_SHAPE_LAYER.fillMode
+
+  return (
+    <DesktopInspectorSection
+      className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}
+      dataSlot="desktop-layer-shape-inspector"
+    >
+      <DesktopInspectorLabel>Shape</DesktopInspectorLabel>
+      <div
+        aria-label="Shape options"
+        className="grid grid-cols-2 gap-1.5"
+        data-slot="desktop-layer-shape-options"
+        role="radiogroup"
+      >
+        {DESKTOP_SHAPE_PRIMITIVES.map((shape) => (
+          <DesktopShapeOptionButton
+            key={shape.id}
+            label={shape.label}
+            selected={shape.id === shapeId}
+            onClick={() => onPatch({ shapeId: shape.id })}
+          />
+        ))}
+        {QR_BACKGROUND_SHAPES.map((shape) => (
+          <DesktopShapeOptionButton
+            key={shape.id}
+            label={shape.label}
+            preview={
+              <svg
+                aria-hidden="true"
+                className="size-8"
+                fill="none"
+                viewBox={`0 0 ${shape.viewBox.width} ${shape.viewBox.height}`}
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d={shape.path} fill={layer.fill ?? DEFAULT_DRAFTING_SHAPE_LAYER.fill} />
+              </svg>
+            }
+            selected={shape.id === shapeId}
+            onClick={() => onPatch({ shapeId: shape.id })}
+          />
+        ))}
+      </div>
+
+      <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
+        <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Fill mode</p>
+        <DesktopInspectorSegmentedControl
+          columns={4}
+          itemClassName="h-8 px-1 text-[10px] capitalize"
+          items={(["solid", "gradient", "image", "none"] as const).map((mode) => ({
+            label: mode,
+            value: mode,
+          }))}
+          value={fillMode}
+          onValueChange={(mode) => onPatch({ fillMode: mode as DraftingShapeFillMode })}
+        />
+      </div>
+
+      {fillMode === "solid" || fillMode === "gradient" ? (
+        <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
+          <DesktopInspectorColorRow
+            label="Fill color"
+            value={layer.fill ?? DEFAULT_DRAFTING_SHAPE_LAYER.fill}
+            onChange={(fill) => onPatch({ fill })}
+          />
+        </div>
+      ) : null}
+
+      {fillMode === "image" ? (
+        <div className={cn("space-y-2", DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
+          <DesktopInspectorTextInput
+            aria-label="Shape fill image URL"
+            placeholder="https://example.com/texture.png"
+            value={layer.imageSource === "url" ? (layer.imageValue ?? "") : ""}
+            onChange={(event) =>
+              onPatch({
+                imageSource: event.currentTarget.value ? "url" : "none",
+                imageValue: event.currentTarget.value || undefined,
+              })
+            }
+          />
+          <FileUpload
+            acceptedFileTypes={["image/*"]}
+            className="mx-0 max-w-full"
+            onUploadError={() => undefined}
+            onUploadSuccess={(file) => {
+              onPatch({
+                imageSource: "upload",
+                imageValue: URL.createObjectURL(file),
+              })
+            }}
+            uploadDelay={0}
+          />
+        </div>
+      ) : null}
+
+      <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
+        <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Stroke</p>
+        <DesktopInspectorColorRow
+          label="Stroke color"
+          value={layer.stroke ?? DEFAULT_DRAFTING_SHAPE_LAYER.stroke}
+          onChange={(stroke) => onPatch({ stroke })}
+        />
+        <div className="mt-2 grid gap-2">
+          <DesktopInspectorElasticSliderRow
+            label="Stroke width"
+            max={64}
+            min={0}
+            value={layer.strokeWidth ?? DEFAULT_DRAFTING_SHAPE_LAYER.strokeWidth}
+            valueLabel={`${Math.round(layer.strokeWidth ?? DEFAULT_DRAFTING_SHAPE_LAYER.strokeWidth)}`}
+            onChange={(strokeWidth) => onPatch({ strokeWidth })}
+          />
+          <DesktopInspectorElasticSliderRow
+            label="Stroke opacity"
+            max={100}
+            min={0}
+            value={layer.strokeOpacity ?? DEFAULT_DRAFTING_SHAPE_LAYER.strokeOpacity}
+            valueLabel={`${Math.round(layer.strokeOpacity ?? DEFAULT_DRAFTING_SHAPE_LAYER.strokeOpacity)}%`}
+            onChange={(strokeOpacity) => onPatch({ strokeOpacity })}
+          />
+        </div>
+        {shapeId === "rect" ? (
+          <DesktopInspectorElasticSliderRow
+            label="Corner radius"
+            max={512}
+            min={0}
+            value={layer.cornerRadius ?? DEFAULT_DRAFTING_SHAPE_LAYER.cornerRadius}
+            valueLabel={`${Math.round(layer.cornerRadius ?? DEFAULT_DRAFTING_SHAPE_LAYER.cornerRadius)}`}
+            onChange={(cornerRadius) => onPatch({ cornerRadius })}
+          />
+        ) : null}
+      </div>
+    </DesktopInspectorSection>
+  )
+}
+
+function DesktopLayerImageInspector({
+  layer,
+  onPatch,
+}: {
+  layer: DraftingCanvasLayer
+  onPatch: (patch: Partial<DraftingCanvasLayer>) => void
+}) {
+  return (
+    <DesktopInspectorSection
+      className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}
+      dataSlot="desktop-layer-image-inspector"
+    >
+      <DesktopInspectorLabel>Source</DesktopInspectorLabel>
+      <DesktopInspectorTextInput
+        aria-label="Image URL"
+        placeholder="https://example.com/photo.png"
+        value={layer.imageSource === "url" ? (layer.imageValue ?? "") : ""}
+        onChange={(event) =>
+          onPatch({
+            imageSource: event.currentTarget.value ? "url" : "none",
+            imageValue: event.currentTarget.value || undefined,
+          })
+        }
+      />
+      <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
+        <FileUpload
+          acceptedFileTypes={["image/*"]}
+          className="mx-0 max-w-full"
+          onUploadError={() => undefined}
+          onUploadSuccess={(file) => {
+            onPatch({
+              imageSource: "upload",
+              imageValue: URL.createObjectURL(file),
+            })
+          }}
+          uploadDelay={0}
+        />
+      </div>
+
+      <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
+        <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Image fit</p>
+        <DesktopInspectorSegmentedControl
+          itemClassName="capitalize"
+          items={[
+            { label: "cover", value: "cover" },
+            { label: "contain", value: "contain" },
+          ]}
+          value={layer.imageFit ?? DEFAULT_DRAFTING_IMAGE_LAYER.imageFit}
+          onValueChange={(imageFit) => onPatch({ imageFit })}
+        />
+      </div>
+
+      <DesktopInspectorElasticSliderRow
+        label="Corner radius"
+        max={512}
+        min={0}
+        value={layer.cornerRadius ?? DEFAULT_DRAFTING_IMAGE_LAYER.cornerRadius}
+        valueLabel={`${Math.round(layer.cornerRadius ?? DEFAULT_DRAFTING_IMAGE_LAYER.cornerRadius)}`}
+        onChange={(cornerRadius) => onPatch({ cornerRadius })}
+      />
+    </DesktopInspectorSection>
+  )
+}
+
+function DesktopToggleButton({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      aria-label={label}
+      aria-pressed={active}
+      className={cn(
+        "h-8 px-2 text-[11px] font-semibold",
+        DESKTOP_INSPECTOR_CONTROL_CLASS,
+        active && DESKTOP_INSPECTOR_SELECTED_CLASS,
+      )}
+      type="button"
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  )
+}
+
+function DesktopIconToggleButton({
+  active,
+  icon,
+  label,
+  onClick,
+}: {
+  active: boolean
+  icon: ReactNode
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      aria-label={`${label} text`}
+      aria-pressed={active}
+      className={cn(
+        "h-8 px-2 text-[11px] font-semibold",
+        DESKTOP_INSPECTOR_CONTROL_CLASS,
+        active && DESKTOP_INSPECTOR_SELECTED_CLASS,
+      )}
+      type="button"
+      onClick={onClick}
+    >
+      <span className="grid place-items-center">{icon}</span>
+    </button>
+  )
+}
+
+function DesktopShapeOptionButton({
+  label,
+  onClick,
+  preview,
+  selected,
+}: {
+  label: string
+  onClick: () => void
+  preview?: ReactNode
+  selected: boolean
+}) {
+  return (
+    <button
+      aria-label={`Use ${label} shape`}
+      aria-pressed={selected}
+      className={cn(
+        "flex h-10 min-w-0 items-center justify-center gap-2 px-2 text-[10px] font-semibold",
+        DESKTOP_INSPECTOR_CONTROL_CLASS,
+        selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
+      )}
+      type="button"
+      onClick={onClick}
+    >
+      {preview ?? <span className="truncate">{label}</span>}
+    </button>
+  )
+}
+
+function DesktopTextAlignIcon({ value }: { value: DraftingTextAlign }) {
+  if (value === "center") {
+    return <AlignCenterIcon className="mx-auto size-3.5" />
+  }
+
+  if (value === "right") {
+    return <AlignRightIcon className="mx-auto size-3.5" />
+  }
+
+  return <AlignLeftIcon className="mx-auto size-3.5" />
+}
