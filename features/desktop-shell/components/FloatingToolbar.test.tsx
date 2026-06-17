@@ -338,8 +338,7 @@ describe("FloatingToolbar", () => {
 
     const shapeInspector = surface.container.querySelector('[data-slot="desktop-shape-inspector"]')
 
-    expect(shapeInspector?.querySelector('input[aria-label="Shape shadow color"]')).toBeNull()
-    expect(shapeInspector?.querySelector('input[aria-label="Shape backing shadow color"]')).not.toBeNull()
+    expect(shapeInspector?.querySelector('input[aria-label="Shape shadow color"]')).not.toBeNull()
   })
 
   it("renders the drafting content tab inside the floating inspector", async () => {
@@ -917,7 +916,7 @@ describe("FloatingToolbar", () => {
       "Bottom space",
       "Border width",
       "Border opacity",
-      "Shape padding",
+      "Shape inner padding",
       "Shape stroke width",
       "Shape stroke opacity",
       "Shape shadow blur",
@@ -936,8 +935,8 @@ describe("FloatingToolbar", () => {
     expect(getRequiredSliderRow(surface.container, "Bottom space").textContent).toBe("Bottom space128")
     expect(getRequiredSliderRow(surface.container, "Border width").textContent).toBe("Border width0")
     expect(getRequiredSliderRow(surface.container, "Border opacity").textContent).toBe("Border opacity100")
-    expect(getRequiredSliderRow(surface.container, "Shape padding").textContent).toBe("Shape padding0")
-    expect(getRequiredSliderRow(surface.container, "Shape stroke opacity").textContent).toBe("Shape stroke opacity100")
+    expect(getRequiredSliderRow(surface.container, "Shape inner padding").textContent).toBe("Amount0")
+    expect(getRequiredSliderRow(surface.container, "Shape stroke opacity").textContent).toBe("Opacity100")
 
     await act(async () => {
       getRequiredSlider(surface.container, "Border width").dispatchEvent(

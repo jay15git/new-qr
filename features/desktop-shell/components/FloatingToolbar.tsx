@@ -3041,7 +3041,8 @@ function DesktopShapeInspector({
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Border</p>
           <div className="grid gap-2">
             <DesktopColorInputRow
-              label="Shape border color"
+              ariaLabel="Shape border color"
+              label="Color"
               value={settings.borderColor}
               onChange={(borderColor) => onShapeSettingsChange({ borderColor })}
             />
@@ -3065,17 +3066,93 @@ function DesktopShapeInspector({
         </section>
 
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
-          <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Shape Details</p>
+          <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Inner Padding</p>
+          <DesktopElasticSliderRow
+            ariaLabel="Shape inner padding"
+            label="Amount"
+            max={192}
+            min={0}
+            value={settings.shapePadding}
+            valueLabel={`${Math.round(settings.shapePadding)}`}
+            onChange={(shapePadding) => onShapeSettingsChange({ shapePadding })}
+          />
+        </section>
+
+        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+          <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Stroke</p>
           <div className="grid gap-2">
-            <DesktopElasticSliderRow label="Shape padding" max={192} min={0} value={settings.shapePadding} valueLabel={`${Math.round(settings.shapePadding)}`} onChange={(shapePadding) => onShapeSettingsChange({ shapePadding })} />
-            <DesktopColorInputRow label="Shape stroke color" value={settings.shapeStrokeColor} onChange={(shapeStrokeColor) => onShapeSettingsChange({ shapeStrokeColor })} />
-            <DesktopElasticSliderRow label="Shape stroke width" max={24} min={0} value={settings.shapeStrokeWidth} valueLabel={`${Math.round(settings.shapeStrokeWidth)}`} onChange={(shapeStrokeWidth) => onShapeSettingsChange({ shapeStrokeWidth })} />
-            <DesktopElasticSliderRow label="Shape stroke opacity" max={100} min={0} value={settings.shapeStrokeOpacity} valueLabel={`${Math.round(settings.shapeStrokeOpacity)}`} onChange={(shapeStrokeOpacity) => onShapeSettingsChange({ shapeStrokeOpacity })} />
-            <DesktopColorInputRow label="Shape backing shadow color" value={settings.shapeShadowColor} onChange={(shapeShadowColor) => onShapeSettingsChange({ shapeShadowColor })} />
-            <DesktopElasticSliderRow label="Shape shadow blur" max={32} min={0} value={settings.shapeShadowBlur} valueLabel={`${Math.round(settings.shapeShadowBlur)}`} onChange={(shapeShadowBlur) => onShapeSettingsChange({ shapeShadowBlur })} />
-            <DesktopElasticSliderRow label="Shape shadow opacity" max={100} min={0} value={settings.shapeShadowOpacity} valueLabel={`${Math.round(settings.shapeShadowOpacity)}`} onChange={(shapeShadowOpacity) => onShapeSettingsChange({ shapeShadowOpacity })} />
-            <DesktopElasticSliderRow label="Shape shadow X" max={64} min={-64} value={settings.shapeShadowOffsetX} valueLabel={`${Math.round(settings.shapeShadowOffsetX)}`} onChange={(shapeShadowOffsetX) => onShapeSettingsChange({ shapeShadowOffsetX })} />
-            <DesktopElasticSliderRow label="Shape shadow Y" max={64} min={-64} value={settings.shapeShadowOffsetY} valueLabel={`${Math.round(settings.shapeShadowOffsetY)}`} onChange={(shapeShadowOffsetY) => onShapeSettingsChange({ shapeShadowOffsetY })} />
+            <DesktopColorInputRow
+              ariaLabel="Shape stroke color"
+              label="Color"
+              value={settings.shapeStrokeColor}
+              onChange={(shapeStrokeColor) => onShapeSettingsChange({ shapeStrokeColor })}
+            />
+            <DesktopElasticSliderRow
+              ariaLabel="Shape stroke width"
+              label="Width"
+              max={24}
+              min={0}
+              value={settings.shapeStrokeWidth}
+              valueLabel={`${Math.round(settings.shapeStrokeWidth)}`}
+              onChange={(shapeStrokeWidth) => onShapeSettingsChange({ shapeStrokeWidth })}
+            />
+            <DesktopElasticSliderRow
+              ariaLabel="Shape stroke opacity"
+              label="Opacity"
+              max={100}
+              min={0}
+              value={settings.shapeStrokeOpacity}
+              valueLabel={`${Math.round(settings.shapeStrokeOpacity)}`}
+              onChange={(shapeStrokeOpacity) => onShapeSettingsChange({ shapeStrokeOpacity })}
+            />
+          </div>
+        </section>
+
+        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+          <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Shadow</p>
+          <div className="grid gap-2">
+            <DesktopColorInputRow
+              ariaLabel="Shape shadow color"
+              label="Color"
+              value={settings.shapeShadowColor}
+              onChange={(shapeShadowColor) => onShapeSettingsChange({ shapeShadowColor })}
+            />
+            <DesktopElasticSliderRow
+              ariaLabel="Shape shadow blur"
+              label="Blur"
+              max={32}
+              min={0}
+              value={settings.shapeShadowBlur}
+              valueLabel={`${Math.round(settings.shapeShadowBlur)}`}
+              onChange={(shapeShadowBlur) => onShapeSettingsChange({ shapeShadowBlur })}
+            />
+            <DesktopElasticSliderRow
+              ariaLabel="Shape shadow opacity"
+              label="Opacity"
+              max={100}
+              min={0}
+              value={settings.shapeShadowOpacity}
+              valueLabel={`${Math.round(settings.shapeShadowOpacity)}`}
+              onChange={(shapeShadowOpacity) => onShapeSettingsChange({ shapeShadowOpacity })}
+            />
+            <DesktopElasticSliderRow
+              ariaLabel="Shape shadow X"
+              label="X"
+              max={64}
+              min={-64}
+              value={settings.shapeShadowOffsetX}
+              valueLabel={`${Math.round(settings.shapeShadowOffsetX)}`}
+              onChange={(shapeShadowOffsetX) => onShapeSettingsChange({ shapeShadowOffsetX })}
+            />
+            <DesktopElasticSliderRow
+              ariaLabel="Shape shadow Y"
+              label="Y"
+              max={64}
+              min={-64}
+              value={settings.shapeShadowOffsetY}
+              valueLabel={`${Math.round(settings.shapeShadowOffsetY)}`}
+              onChange={(shapeShadowOffsetY) => onShapeSettingsChange({ shapeShadowOffsetY })}
+            />
           </div>
         </section>
       </DesktopInspectorScrollArea>
