@@ -3,12 +3,7 @@
 import { type ReactNode } from "react"
 
 import { ElasticSlider } from "@/components/ui/elastic-slider"
-import {
-  ScrollArea,
-  ScrollAreaScrollbar,
-  ScrollAreaThumb,
-  ScrollAreaViewport,
-} from "@/components/ui/scroll-area"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   DESKTOP_INSPECTOR_HEADER_CLASS,
   DESKTOP_INSPECTOR_LABEL_CLASS,
@@ -16,10 +11,19 @@ import {
   DESKTOP_INSPECTOR_ROW_CLASS,
   DesktopInspectorTextInput,
 } from "@/features/desktop-shell/components/InspectorControls"
+import { SurfaceProvider } from "@/lib/surface-context"
 import { cn } from "@/lib/utils"
 
 export const DESKTOP_ELASTIC_SLIDER_CLASS =
   "desktop-elastic-slider [--elastic-slider-height:--spacing(8)] [--elastic-slider-radius:9999px] [--elastic-slider-bg:rgba(255,255,255,0.095)] [--elastic-slider-fill:rgba(255,255,255,0.13)] [--elastic-slider-fill-active:rgba(255,255,255,0.2)] [--elastic-slider-hash:rgba(255,255,255,0.24)] [--elastic-slider-handle:rgba(255,255,255,0.7)] [--elastic-slider-label:rgba(255,255,255,0.58)] [--elastic-slider-focus:rgba(255,255,255,0.82)]"
+
+const OPTION_GRID_VARIANT_CLASS = {
+  preset: "h-80",
+  compact: "max-h-40",
+  content: "h-[180px]",
+} as const
+
+export type DesktopInspectorOptionGridVariant = keyof typeof OPTION_GRID_VARIANT_CLASS
 
 export function DesktopInspectorHeader({ title }: { title: string }) {
   return (
@@ -32,25 +36,57 @@ export function DesktopInspectorHeader({ title }: { title: string }) {
 export function DesktopInspectorScrollArea({ children }: { children: ReactNode }) {
   return (
     <ScrollArea
-      data-scrollbar-visibility="while-scrolling"
+      chevron
+      cueSize="comfortable"
       data-slot="desktop-inspector-scroll-area"
-      scrollHideDelay={500}
-      type="scroll"
-      className="min-h-0 flex-1 overflow-hidden"
+      scrollFade
+      className="min-h-0 flex-1"
+      viewportClassName="px-3 py-3"
     >
-      <ScrollAreaViewport
-        data-slot="desktop-inspector-scroll"
-        className="h-full w-full overflow-x-hidden overflow-y-auto px-3 py-3 scroll-fade-effect-y [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {children}
-      </ScrollAreaViewport>
-      <ScrollAreaScrollbar
-        data-slot="desktop-inspector-scrollbar"
-        className="w-2 border-none p-[1px]"
-      >
-        <ScrollAreaThumb className="bg-white/24 hover:bg-white/38" />
-      </ScrollAreaScrollbar>
+      <div data-slot="desktop-inspector-scroll">{children}</div>
     </ScrollArea>
+  )
+}
+
+export function DesktopInspectorOptionGridScrollArea({
+  ariaLabel,
+  children,
+  className,
+  dataSlot,
+  role = "group",
+  shelfDataSlot,
+  shelfId,
+  variant,
+}: {
+  ariaLabel: string
+  children: ReactNode
+  className?: string
+  dataSlot: string
+  role?: "group" | "listbox"
+  shelfDataSlot?: string
+  shelfId?: string
+  variant: DesktopInspectorOptionGridVariant
+}) {
+  return (
+    <SurfaceProvider value={2}>
+      <ScrollArea
+        chevron
+        cueSize="tight"
+        data-slot={dataSlot}
+        scrollFade
+        className={cn("overflow-hidden", OPTION_GRID_VARIANT_CLASS[variant], className)}
+        viewportClassName="pr-1"
+      >
+        <div
+          aria-label={ariaLabel}
+          data-slot={shelfDataSlot ?? dataSlot.replace(/-scroll-area$/, "")}
+          id={shelfId}
+          role={role}
+        >
+          {children}
+        </div>
+      </ScrollArea>
+    </SurfaceProvider>
   )
 }
 

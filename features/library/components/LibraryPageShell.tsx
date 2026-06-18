@@ -2,12 +2,7 @@
 
 import { useState, type ReactNode } from "react"
 
-import {
-  ScrollArea,
-  ScrollAreaScrollbar,
-  ScrollAreaThumb,
-  ScrollAreaViewport,
-} from "@/components/ui/scroll-area"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import type { DesktopThemeMode } from "@/features/desktop-shell/components/FloatingToolbar"
 import { DESKTOP_INSPECTOR_PANEL_TITLE_CLASS } from "@/features/desktop-shell/components/InspectorControls"
 import { LibraryPageStyles } from "@/features/library/components/LibraryPageStyles"
@@ -54,27 +49,17 @@ export function LibraryPageShell({ children, fontClassName, toolbarTitle }: Libr
           <div className="fixed top-5 right-5 z-30 max-md:top-4 max-md:right-4">{themeToggle}</div>
         )}
         <ScrollArea
-          data-scrollbar-visibility="while-scrolling"
+          chevron
+          cueSize="comfortable"
           data-slot="library-scroll-area"
-          scrollHideDelay={500}
-          type="scroll"
+          scrollFade
           className="min-h-0 flex-1"
+          viewportClassName={cn(
+            "px-4 py-6 sm:px-6",
+            toolbarTitle && "pt-[7.5rem]",
+          )}
         >
-          <ScrollAreaViewport
-            data-slot="library-scroll"
-            className={cn(
-              "h-full w-full overflow-x-hidden overflow-y-auto px-4 py-6 sm:px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-              toolbarTitle && "pt-[7.5rem]",
-            )}
-          >
-            {children}
-          </ScrollAreaViewport>
-          <ScrollAreaScrollbar
-            data-slot="library-scrollbar"
-            className="w-2 border-none p-[1px]"
-          >
-            <ScrollAreaThumb data-slot="library-scroll-thumb" />
-          </ScrollAreaScrollbar>
+          <div data-slot="library-scroll">{children}</div>
         </ScrollArea>
       </main>
     </>

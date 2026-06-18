@@ -3646,21 +3646,10 @@ describe("WorkspaceSurface", () => {
     expect(navFrame.className).toContain("border-transparent")
     expect(navFrame.className).not.toContain("overflow-y-auto")
     expect(navFrame.className).not.toContain("py-4")
-    expect(navScrollArea.getAttribute("data-scrollbar-visibility")).toBe("while-scrolling")
-    expect(navScrollArea.className).toContain("overflow-hidden")
     expect(navScrollArea.className).toContain("h-[var(--new-mobile-rail-height)]")
-    expect(navScroll.className).toContain("overflow-x-auto")
-    expect(navScroll.className).toContain("lg:overflow-x-hidden")
-    expect(navScroll.className).toContain("lg:overflow-y-auto")
-    expect(navScroll.className).toContain("scroll-fade-effect-x")
-    expect(navScroll.className).toContain("scroll-fade-effect-y")
-    expect(navScroll.getAttribute("data-radix-scroll-area-viewport")).toBe("")
-    expect(
-      surface.container.querySelector('[data-slot="drafting-nav-scrollbar-horizontal"]'),
-    ).toBeNull()
-    expect(
-      surface.container.querySelector('[data-slot="drafting-nav-scrollbar-vertical"]'),
-    ).toBeNull()
+    expect(navScrollArea.querySelector('[data-slot="scroll-area-viewport"]')).not.toBeNull()
+    expect(navScrollArea.querySelector('[aria-hidden="true"] svg')).not.toBeNull()
+    expect(navScroll.className).toContain("min-h-0")
     expect(navScrollContent.className).toContain("flex-row")
     expect(navScrollContent.className).toContain("lg:flex-col")
     expect(navScrollContent.className).toContain("py-2")
@@ -3691,16 +3680,10 @@ describe("WorkspaceSurface", () => {
     expect(scrollFrame.className).not.toContain("order-3")
     expect(scrollFrame.className).not.toContain("overflow-y-auto")
     expect(panelScrollArea.getAttribute("data-slot")).toBe("drafting-tab-panel-scroll-area")
-    expect(panelScrollArea.getAttribute("data-scrollbar-visibility")).toBe("while-scrolling")
-    expect(panelScrollArea.className).toContain("overflow-hidden")
+    expect(panelScrollArea.className).toContain("h-full")
     expect(panelScroll.className).toContain("overflow-x-hidden")
-    expect(panelScroll.className).toContain("overflow-y-auto")
-    expect(panelScroll.className).not.toContain("overflow-y-scroll")
-    expect(panelScroll.className).toContain("scroll-fade-effect-y")
-    expect(panelScroll.getAttribute("data-radix-scroll-area-viewport")).toBe("")
-    expect(
-      surface.container.querySelector('[data-slot="drafting-tab-panel-scrollbar"]'),
-    ).toBeNull()
+    expect(panelScrollArea.querySelector('[data-slot="scroll-area-viewport"]')).not.toBeNull()
+    expect(panelScrollArea.querySelector('[aria-hidden="true"] svg')).not.toBeNull()
     expect(panelScroll.getAttribute("data-active-tool")).toBe("content")
     expect(panelScroll.getAttribute("data-active-tab")).toBeNull()
 

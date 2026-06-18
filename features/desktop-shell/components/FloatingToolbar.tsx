@@ -143,12 +143,12 @@ import {
 } from "@/components/ui/popover"
 import { Kbd } from "@/components/kbd"
 import { CalligraphText } from "@/components/ui/calligraph-text"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import {
-  ScrollArea,
-  ScrollAreaScrollbar,
-  ScrollAreaThumb,
-  ScrollAreaViewport,
-} from "@/components/ui/scroll-area"
+  DesktopInspectorOptionGridScrollArea,
+  DesktopInspectorScrollArea,
+} from "@/features/desktop-shell/components/DesktopInspectorShell"
+import { SurfaceProvider } from "@/lib/surface-context"
 import {
   ColorPicker as AmploColorPicker,
   parseColor,
@@ -1372,16 +1372,14 @@ export function FloatingToolbar({
                 <span aria-hidden="true" className="w-[3.75rem]" />
               </div>
               <ScrollArea
-                className="h-full min-h-0 flex-1 overflow-hidden"
-                data-scrollbar-visibility="while-scrolling"
+                chevron
+                cueSize="comfortable"
+                className="h-full min-h-0 flex-1"
                 data-slot="desktop-keyboard-shortcuts-scroll-area"
-                scrollHideDelay={500}
-                type="scroll"
+                scrollFade
+                viewportClassName="px-3 pb-3 pt-1"
               >
-                <ScrollAreaViewport
-                  className="h-full w-full overflow-x-hidden overflow-y-auto px-3 pb-3 pt-1 scroll-fade-effect-y [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-                  data-slot="desktop-keyboard-shortcuts-scroll"
-                >
+                <div data-slot="desktop-keyboard-shortcuts-scroll">
                   <div className="grid gap-2.5">
                     {DRAFTING_KEYBOARD_SHORTCUT_GROUPS.map((group) => (
                       <section
@@ -1446,16 +1444,7 @@ export function FloatingToolbar({
                       </section>
                     ))}
                   </div>
-                </ScrollAreaViewport>
-                <ScrollAreaScrollbar
-                  className="w-2 border-none p-[1px]"
-                  data-slot="desktop-keyboard-shortcuts-scrollbar"
-                >
-                  <ScrollAreaThumb
-                    className="bg-white/24 hover:bg-white/38"
-                    data-slot="desktop-keyboard-shortcuts-scroll-thumb"
-                  />
-                </ScrollAreaScrollbar>
+                </div>
               </ScrollArea>
             </PopoverContent>
           </Popover>
@@ -1789,6 +1778,8 @@ export function DesktopThemeStyles() {
       }
 
       [data-slot="desktop-floating-inspector"] {
+        --surface-1: rgba(0, 0, 0, 0.55);
+        --surface-2: var(--desktop-inspector-section-bg);
         --desktop-inspector-fg-primary: rgba(255, 255, 255, 0.94);
         --desktop-inspector-fg-secondary: rgba(255, 255, 255, 0.72);
         --desktop-inspector-fg-tertiary: rgba(255, 255, 255, 0.56);
@@ -1810,6 +1801,8 @@ export function DesktopThemeStyles() {
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] {
+        --surface-1: rgba(255, 255, 255, 0.72);
+        --surface-2: var(--desktop-inspector-section-bg);
         --desktop-inspector-fg-primary: rgba(15, 23, 42, 0.90);
         --desktop-inspector-fg-secondary: rgba(15, 23, 42, 0.62);
         --desktop-inspector-fg-tertiary: rgba(15, 23, 42, 0.48);
@@ -2150,35 +2143,6 @@ function DesktopInspectorHeader({
   )
 }
 
-function DesktopInspectorScrollArea({
-  children,
-}: {
-  children: ReactNode
-}) {
-  return (
-    <ScrollArea
-      data-scrollbar-visibility="while-scrolling"
-      data-slot="desktop-inspector-scroll-area"
-      scrollHideDelay={500}
-      type="scroll"
-      className="min-h-0 flex-1 overflow-hidden"
-    >
-      <ScrollAreaViewport
-        data-slot="desktop-inspector-scroll"
-        className="h-full w-full overflow-x-hidden overflow-y-auto px-3 py-3 scroll-fade-effect-y [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {children}
-      </ScrollAreaViewport>
-      <ScrollAreaScrollbar
-        data-slot="desktop-inspector-scrollbar"
-        className="w-2 border-none p-[1px]"
-      >
-        <ScrollAreaThumb className="bg-white/24 hover:bg-white/38" />
-      </ScrollAreaScrollbar>
-    </ScrollArea>
-  )
-}
-
 function getDesktopAdaptiveOptionPreviewStyle(
   desktopTheme: DesktopThemeMode,
 ): CSSProperties {
@@ -2272,20 +2236,24 @@ function DesktopLogoInspector({
               />
             </div>
 
-            <div
-              aria-label="Brand icons"
-              className="mt-2 grid max-h-40 grid-cols-4 gap-1.5 overflow-y-auto pr-1"
-              data-slot="desktop-logo-brand-icons"
+            <DesktopInspectorOptionGridScrollArea
+              ariaLabel="Brand icons"
+              className="mt-2"
+              dataSlot="desktop-logo-brand-icons-scroll-area"
+              shelfDataSlot="desktop-logo-brand-icons"
+              variant="compact"
             >
-              {brandIcons.map((brandIcon) => (
-                <DesktopBrandIconButton
-                  key={brandIcon.id}
-                  brandIcon={brandIcon}
-                  selected={settings.selectedBrandIconId === brandIcon.id}
-                  onClick={() => onLogoSettingsChange({ selectedBrandIconId: brandIcon.id })}
-                />
-              ))}
-            </div>
+              <div className="grid grid-cols-4 gap-1.5">
+                {brandIcons.map((brandIcon) => (
+                  <DesktopBrandIconButton
+                    key={brandIcon.id}
+                    brandIcon={brandIcon}
+                    selected={settings.selectedBrandIconId === brandIcon.id}
+                    onClick={() => onLogoSettingsChange({ selectedBrandIconId: brandIcon.id })}
+                  />
+                ))}
+              </div>
+            </DesktopInspectorOptionGridScrollArea>
           </DesktopInspectorSection>
         ) : null}
 
@@ -2442,43 +2410,26 @@ function DesktopCornersInspector({
               <div className="mb-2 min-w-0">
                 <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Corner Frame</p>
               </div>
-              <ScrollArea
-                className="h-80 overflow-hidden"
-                data-scrollbar-visibility="while-scrolling"
-                data-slot="desktop-corner-frame-preset-shelf-scroll-area"
-                scrollHideDelay={500}
-                type="scroll"
+              <DesktopInspectorOptionGridScrollArea
+                ariaLabel="Corner frame presets"
+                dataSlot="desktop-corner-frame-preset-shelf-scroll-area"
+                variant="preset"
               >
-                <ScrollAreaViewport
-                  aria-label="Corner frame presets"
-                  className="h-full w-full overflow-x-hidden overflow-y-auto pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-                  data-slot="desktop-corner-frame-preset-shelf"
-                >
-                  <div className="grid grid-cols-3 gap-2">
-                    {CORNER_SQUARE_STYLE_OPTIONS.map((option) => (
-                      <DesktopCornerStyleButton
-                        desktopTheme={desktopTheme}
-                        key={option.value}
-                        label={option.label}
-                        previewKind="corner-square"
-                        selected={settings.cornerSquareType === option.value}
-                        target="corner frame"
-                        value={option.value}
-                        onClick={() => onCornersSettingsChange({ cornerSquareType: option.value })}
-                      />
-                    ))}
-                  </div>
-                </ScrollAreaViewport>
-                <ScrollAreaScrollbar
-                  className="w-2 border-none p-[1px]"
-                  data-slot="desktop-corner-frame-preset-shelf-scrollbar"
-                >
-                  <ScrollAreaThumb
-                    className="bg-neutral-500/45 hover:bg-neutral-500/60"
-                    data-slot="desktop-corner-frame-preset-shelf-scroll-thumb"
-                  />
-                </ScrollAreaScrollbar>
-              </ScrollArea>
+                <div className="grid grid-cols-3 gap-2">
+                  {CORNER_SQUARE_STYLE_OPTIONS.map((option) => (
+                    <DesktopCornerStyleButton
+                      desktopTheme={desktopTheme}
+                      key={option.value}
+                      label={option.label}
+                      previewKind="corner-square"
+                      selected={settings.cornerSquareType === option.value}
+                      target="corner frame"
+                      value={option.value}
+                      onClick={() => onCornersSettingsChange({ cornerSquareType: option.value })}
+                    />
+                  ))}
+                </div>
+              </DesktopInspectorOptionGridScrollArea>
             </section>
 
             <DesktopCornerColorSection
@@ -2503,43 +2454,26 @@ function DesktopCornersInspector({
               <div className="mb-2 min-w-0">
                 <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Corner Dot</p>
               </div>
-              <ScrollArea
-                className="h-80 overflow-hidden"
-                data-scrollbar-visibility="while-scrolling"
-                data-slot="desktop-corner-dot-preset-shelf-scroll-area"
-                scrollHideDelay={500}
-                type="scroll"
+              <DesktopInspectorOptionGridScrollArea
+                ariaLabel="Corner dot presets"
+                dataSlot="desktop-corner-dot-preset-shelf-scroll-area"
+                variant="preset"
               >
-                <ScrollAreaViewport
-                  aria-label="Corner dot presets"
-                  className="h-full w-full overflow-x-hidden overflow-y-auto pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-                  data-slot="desktop-corner-dot-preset-shelf"
-                >
-                  <div className="grid grid-cols-3 gap-2">
-                    {CORNER_DOT_STYLE_OPTIONS.map((option) => (
-                      <DesktopCornerStyleButton
-                        desktopTheme={desktopTheme}
-                        key={option.value}
-                        label={option.label}
-                        previewKind="corner-dot"
-                        selected={settings.cornerDotType === option.value}
-                        target="corner dot"
-                        value={option.value}
-                        onClick={() => onCornersSettingsChange({ cornerDotType: option.value })}
-                      />
-                    ))}
-                  </div>
-                </ScrollAreaViewport>
-                <ScrollAreaScrollbar
-                  className="w-2 border-none p-[1px]"
-                  data-slot="desktop-corner-dot-preset-shelf-scrollbar"
-                >
-                  <ScrollAreaThumb
-                    className="bg-neutral-500/45 hover:bg-neutral-500/60"
-                    data-slot="desktop-corner-dot-preset-shelf-scroll-thumb"
-                  />
-                </ScrollAreaScrollbar>
-              </ScrollArea>
+                <div className="grid grid-cols-3 gap-2">
+                  {CORNER_DOT_STYLE_OPTIONS.map((option) => (
+                    <DesktopCornerStyleButton
+                      desktopTheme={desktopTheme}
+                      key={option.value}
+                      label={option.label}
+                      previewKind="corner-dot"
+                      selected={settings.cornerDotType === option.value}
+                      target="corner dot"
+                      value={option.value}
+                      onClick={() => onCornersSettingsChange({ cornerDotType: option.value })}
+                    />
+                  ))}
+                </div>
+              </DesktopInspectorOptionGridScrollArea>
             </section>
 
             <DesktopCornerColorSection
@@ -2753,50 +2687,33 @@ function DesktopShapeInspector({
           <div className="mb-2 min-w-0">
             <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Shape Options</p>
           </div>
-          <ScrollArea
-            className="h-80 overflow-hidden"
-            data-scrollbar-visibility="while-scrolling"
-            data-slot="desktop-shape-preset-shelf-scroll-area"
-            scrollHideDelay={500}
-            type="scroll"
+          <DesktopInspectorOptionGridScrollArea
+            ariaLabel="Shape options"
+            dataSlot="desktop-shape-preset-shelf-scroll-area"
+            variant="preset"
           >
-            <ScrollAreaViewport
-              aria-label="Shape options"
-              className="h-full w-full overflow-x-hidden overflow-y-auto pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              data-slot="desktop-shape-preset-shelf"
-            >
-              <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-2">
+              <DesktopShapePresetButton
+                desktopTheme={desktopTheme}
+                label="None"
+                selected={settings.backgroundShapeId === "none"}
+                settings={settings}
+                shapeId="none"
+                onClick={() => onShapeSettingsChange({ backgroundShapeId: "none" })}
+              />
+              {QR_BACKGROUND_SHAPES.map((shape) => (
                 <DesktopShapePresetButton
                   desktopTheme={desktopTheme}
-                  label="None"
-                  selected={settings.backgroundShapeId === "none"}
+                  key={shape.id}
+                  label={shape.label}
+                  selected={settings.backgroundShapeId === shape.id}
                   settings={settings}
-                  shapeId="none"
-                  onClick={() => onShapeSettingsChange({ backgroundShapeId: "none" })}
+                  shapeId={shape.id}
+                  onClick={() => onShapeSettingsChange({ backgroundShapeId: shape.id })}
                 />
-                {QR_BACKGROUND_SHAPES.map((shape) => (
-                  <DesktopShapePresetButton
-                    desktopTheme={desktopTheme}
-                    key={shape.id}
-                    label={shape.label}
-                    selected={settings.backgroundShapeId === shape.id}
-                    settings={settings}
-                    shapeId={shape.id}
-                    onClick={() => onShapeSettingsChange({ backgroundShapeId: shape.id })}
-                  />
-                ))}
-              </div>
-            </ScrollAreaViewport>
-            <ScrollAreaScrollbar
-              className="w-2 border-none p-[1px]"
-              data-slot="desktop-shape-preset-shelf-scrollbar"
-            >
-              <ScrollAreaThumb
-                className="bg-neutral-500/45 hover:bg-neutral-500/60"
-                data-slot="desktop-shape-preset-shelf-scroll-thumb"
-              />
-            </ScrollAreaScrollbar>
-          </ScrollArea>
+              ))}
+            </div>
+          </DesktopInspectorOptionGridScrollArea>
         </section>
 
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)} data-slot="desktop-shape-color">
@@ -2931,23 +2848,31 @@ function DesktopShapeInspector({
             value={settings.cardFill}
             onChange={(cardFill) => onShapeSettingsChange({ cardFill })}
           />
-          <div className="mt-2.5 grid max-h-40 grid-cols-2 gap-1.5 overflow-y-auto pr-1" data-slot="desktop-shape-patterns">
-            <DesktopPatternSwatchButton
-              label="None"
-              selected={settings.cardPatternId === DRAFTING_CARD_PATTERN_NONE_ID}
-              style={{ backgroundColor: settings.cardFill }}
-              onClick={() => onShapeSettingsChange({ cardPatternId: DRAFTING_CARD_PATTERN_NONE_ID })}
-            />
-            {DRAFTING_CARD_PATTERNS.slice(0, 8).map((pattern) => (
+          <DesktopInspectorOptionGridScrollArea
+            ariaLabel="Shape fill patterns"
+            className="mt-2.5"
+            dataSlot="desktop-shape-patterns-scroll-area"
+            shelfDataSlot="desktop-shape-patterns"
+            variant="compact"
+          >
+            <div className="grid grid-cols-2 gap-1.5">
               <DesktopPatternSwatchButton
-                key={pattern.id}
-                label={pattern.label}
-                selected={settings.cardPatternId === pattern.id}
-                style={getDraftingCardPatternStyle(pattern.id, {}) ?? pattern.style}
-                onClick={() => onShapeSettingsChange({ cardPatternId: pattern.id })}
+                label="None"
+                selected={settings.cardPatternId === DRAFTING_CARD_PATTERN_NONE_ID}
+                style={{ backgroundColor: settings.cardFill }}
+                onClick={() => onShapeSettingsChange({ cardPatternId: DRAFTING_CARD_PATTERN_NONE_ID })}
               />
-            ))}
-          </div>
+              {DRAFTING_CARD_PATTERNS.slice(0, 8).map((pattern) => (
+                <DesktopPatternSwatchButton
+                  key={pattern.id}
+                  label={pattern.label}
+                  selected={settings.cardPatternId === pattern.id}
+                  style={getDraftingCardPatternStyle(pattern.id, {}) ?? pattern.style}
+                  onClick={() => onShapeSettingsChange({ cardPatternId: pattern.id })}
+                />
+              ))}
+            </div>
+          </DesktopInspectorOptionGridScrollArea>
         </section>
 
         <DesktopInspectorSection className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
@@ -3283,56 +3208,62 @@ function DesktopMotionInspector({
           <div className="mb-2 min-w-0">
             <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>QR Animations</p>
           </div>
-          <div
-            aria-label="Standard motion presets"
-            data-slot="desktop-motion-standard-shelf"
-            className="grid max-h-40 grid-cols-2 gap-1.5 overflow-y-auto pr-1"
+          <DesktopInspectorOptionGridScrollArea
+            ariaLabel="Standard motion presets"
+            dataSlot="desktop-motion-standard-shelf-scroll-area"
+            shelfDataSlot="desktop-motion-standard-shelf"
+            variant="compact"
           >
-            {QR_MOTION_STANDARD_PRESET_OPTIONS.map((preset) => (
-              <DesktopMotionLoaderButton
-                key={preset.value}
-                label={preset.label}
-                selected={
-                  settings.presetCategory === "standard" && settings.preset === preset.value
-                }
-                onClick={() =>
-                  onMotionSettingsChange({
-                    preset: preset.value,
-                    presetCategory: "standard",
-                  })
-                }
-              />
-            ))}
-          </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {QR_MOTION_STANDARD_PRESET_OPTIONS.map((preset) => (
+                <DesktopMotionLoaderButton
+                  key={preset.value}
+                  label={preset.label}
+                  selected={
+                    settings.presetCategory === "standard" && settings.preset === preset.value
+                  }
+                  onClick={() =>
+                    onMotionSettingsChange({
+                      preset: preset.value,
+                      presetCategory: "standard",
+                    })
+                  }
+                />
+              ))}
+            </div>
+          </DesktopInspectorOptionGridScrollArea>
         </section>
 
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <div className="mb-2 min-w-0">
             <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Dot Matrix Animations</p>
           </div>
-          <div
-            aria-label="Dot matrix motion presets"
-            data-slot="desktop-motion-loader-shelf"
-            className="grid max-h-40 grid-cols-2 gap-1.5 overflow-y-auto pr-1"
+          <DesktopInspectorOptionGridScrollArea
+            ariaLabel="Dot matrix motion presets"
+            dataSlot="desktop-motion-loader-shelf-scroll-area"
+            shelfDataSlot="desktop-motion-loader-shelf"
+            variant="compact"
           >
-            {QR_MOTION_DOT_MATRIX_PRESET_OPTIONS.map((loader) => (
-              <DesktopMotionLoaderButton
-                key={loader.value}
-                label={loader.label}
-                selected={
-                  settings.presetCategory === "dotMatrix" &&
-                  (settings.preset === loader.value || settings.loader === loader.value)
-                }
-                onClick={() =>
-                  onMotionSettingsChange({
-                    loader: loader.value,
-                    preset: loader.value,
-                    presetCategory: "dotMatrix",
-                  })
-                }
-              />
-            ))}
-          </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {QR_MOTION_DOT_MATRIX_PRESET_OPTIONS.map((loader) => (
+                <DesktopMotionLoaderButton
+                  key={loader.value}
+                  label={loader.label}
+                  selected={
+                    settings.presetCategory === "dotMatrix" &&
+                    (settings.preset === loader.value || settings.loader === loader.value)
+                  }
+                  onClick={() =>
+                    onMotionSettingsChange({
+                      loader: loader.value,
+                      preset: loader.value,
+                      presetCategory: "dotMatrix",
+                    })
+                  }
+                />
+              ))}
+            </div>
+          </DesktopInspectorOptionGridScrollArea>
         </section>
 
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
@@ -3846,62 +3777,44 @@ function DesktopContentInspector({
             </div>
           </div>
 
-          <ScrollArea
-            className="mt-3 h-[180px] overflow-hidden"
-            data-scrollbar-visibility="while-scrolling"
-            data-slot="desktop-content-type-collection-scroll-area"
-            scrollHideDelay={500}
-            type="scroll"
+          <DesktopInspectorOptionGridScrollArea
+            ariaLabel="QR content types"
+            className="mt-3"
+            dataSlot="desktop-content-type-collection-scroll-area"
+            shelfDataSlot="desktop-content-type-collection-scroll"
+            variant="content"
           >
-            <ScrollAreaViewport
-              className="h-full w-full overflow-x-hidden overflow-y-auto pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              data-slot="desktop-content-type-collection-scroll"
-            >
-              <div className="grid grid-cols-3 gap-1.5" data-slot="desktop-content-type-collection">
-                {visibleTypes.map((type) => {
-                const option = QR_INPUT_OPTIONS[type]
-                const Icon = option.icon
-                const isSelected = contentType === type
+            <div className="grid grid-cols-3 gap-1.5" data-slot="desktop-content-type-collection">
+              {visibleTypes.map((type) => {
+              const option = QR_INPUT_OPTIONS[type]
+              const Icon = option.icon
+              const isSelected = contentType === type
 
-                return (
-                  <button
-                    key={type}
-                    aria-label={`Use ${option.label} content`}
-                    aria-pressed={isSelected}
-                    className={cn(
-                      "relative flex h-[54px] min-w-0 flex-col items-center justify-center gap-1 rounded-[7px] border-2 border-transparent bg-transparent px-1 text-[10px] font-semibold text-[var(--desktop-inspector-fg-tertiary)] transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35",
-                      isSelected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
-                    )}
-                    data-desktop-content-type-option="true"
-                    type="button"
-                    onClick={() => onContentTypeChange(type)}
-                  >
-                    <Icon className="size-4 shrink-0" />
-                    <span className="max-w-full truncate">{option.label}</span>
-                  </button>
-                )
-              })}
-                {visibleTypes.length === 0 ? (
-                  <p className={cn("col-span-3 px-1 py-3 text-center text-[11px]", DESKTOP_INSPECTOR_FG_MUTED)}>
-                    No QR types found
-                  </p>
-                ) : null}
-              </div>
-            </ScrollAreaViewport>
-            <ScrollAreaScrollbar
-              className="w-2 border-none p-[1px]"
-              data-slot="desktop-content-type-collection-scrollbar"
-            >
-              <ScrollAreaThumb
-                className={cn(
-                  desktopTheme === "light"
-                    ? "bg-slate-950/15 hover:bg-slate-950/25"
-                    : "bg-white/24 hover:bg-white/38",
-                )}
-                data-slot="desktop-content-type-collection-scroll-thumb"
-              />
-            </ScrollAreaScrollbar>
-          </ScrollArea>
+              return (
+                <button
+                  key={type}
+                  aria-label={`Use ${option.label} content`}
+                  aria-pressed={isSelected}
+                  className={cn(
+                    "relative flex h-[54px] min-w-0 flex-col items-center justify-center gap-1 rounded-[7px] border-2 border-transparent bg-transparent px-1 text-[10px] font-semibold text-[var(--desktop-inspector-fg-tertiary)] transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35",
+                    isSelected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
+                  )}
+                  data-desktop-content-type-option="true"
+                  type="button"
+                  onClick={() => onContentTypeChange(type)}
+                >
+                  <Icon className="size-4 shrink-0" />
+                  <span className="max-w-full truncate">{option.label}</span>
+                </button>
+              )
+            })}
+              {visibleTypes.length === 0 ? (
+                <p className={cn("col-span-3 px-1 py-3 text-center text-[11px]", DESKTOP_INSPECTOR_FG_MUTED)}>
+                  No QR types found
+                </p>
+              ) : null}
+            </div>
+          </DesktopInspectorOptionGridScrollArea>
         </DesktopInspectorSection>
 
         <div className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
@@ -3945,22 +3858,25 @@ function DesktopPatternInspector({
           <div className="mb-2 min-w-0">
             <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Module Pattern</p>
           </div>
-          <div
-            aria-label="Module pattern presets"
-            data-slot="desktop-pattern-preset-shelf"
-            className="grid grid-cols-3 gap-2"
+          <DesktopInspectorOptionGridScrollArea
+            ariaLabel="Module pattern presets"
+            dataSlot="desktop-pattern-preset-shelf-scroll-area"
+            shelfDataSlot="desktop-pattern-preset-shelf"
+            variant="preset"
           >
-            {DOT_STYLE_OPTIONS.map((option) => (
-              <DesktopModulePatternButton
-                desktopTheme={desktopTheme}
-                key={option.value}
-                label={option.label}
-                selected={settings.qrDotType === option.value}
-                value={option.value}
-                onClick={() => onPatternSettingsChange({ qrDotType: option.value })}
-              />
-            ))}
-          </div>
+            <div className="grid grid-cols-3 gap-2">
+              {DOT_STYLE_OPTIONS.map((option) => (
+                <DesktopModulePatternButton
+                  desktopTheme={desktopTheme}
+                  key={option.value}
+                  label={option.label}
+                  selected={settings.qrDotType === option.value}
+                  value={option.value}
+                  onClick={() => onPatternSettingsChange({ qrDotType: option.value })}
+                />
+              ))}
+            </div>
+          </DesktopInspectorOptionGridScrollArea>
         </section>
 
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)} data-slot="desktop-module-color">
@@ -4904,23 +4820,31 @@ function DesktopDecorationsInspector({
             value={settings.fill}
             onChange={(fill) => onDecorationsSettingsChange({ fill })}
           />
-          <div className="mt-2.5 grid max-h-40 grid-cols-2 gap-1.5 overflow-y-auto pr-1" data-slot="desktop-decoration-patterns">
-            <DesktopPatternSwatchButton
-              label="None"
-              selected={settings.patternId === DRAFTING_CARD_PATTERN_NONE_ID}
-              style={{ backgroundColor: settings.fill }}
-              onClick={() => onDecorationsSettingsChange({ patternId: DRAFTING_CARD_PATTERN_NONE_ID })}
-            />
-            {DRAFTING_CARD_PATTERNS.slice(0, 8).map((pattern) => (
+          <DesktopInspectorOptionGridScrollArea
+            ariaLabel="Decoration fill patterns"
+            className="mt-2.5"
+            dataSlot="desktop-decoration-patterns-scroll-area"
+            shelfDataSlot="desktop-decoration-patterns"
+            variant="compact"
+          >
+            <div className="grid grid-cols-2 gap-1.5">
               <DesktopPatternSwatchButton
-                key={pattern.id}
-                label={pattern.label}
-                selected={settings.patternId === pattern.id}
-                style={getDraftingCardPatternStyle(pattern.id, {}) ?? pattern.style}
-                onClick={() => onDecorationsSettingsChange({ patternId: pattern.id })}
+                label="None"
+                selected={settings.patternId === DRAFTING_CARD_PATTERN_NONE_ID}
+                style={{ backgroundColor: settings.fill }}
+                onClick={() => onDecorationsSettingsChange({ patternId: DRAFTING_CARD_PATTERN_NONE_ID })}
               />
-            ))}
-          </div>
+              {DRAFTING_CARD_PATTERNS.slice(0, 8).map((pattern) => (
+                <DesktopPatternSwatchButton
+                  key={pattern.id}
+                  label={pattern.label}
+                  selected={settings.patternId === pattern.id}
+                  style={getDraftingCardPatternStyle(pattern.id, {}) ?? pattern.style}
+                  onClick={() => onDecorationsSettingsChange({ patternId: pattern.id })}
+                />
+              ))}
+            </div>
+          </DesktopInspectorOptionGridScrollArea>
         </section>
 
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
@@ -4970,21 +4894,28 @@ function DesktopEffectsInspector({
       <DesktopInspectorScrollArea>
         <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Generated Effects</p>
-          <div className="grid max-h-40 grid-cols-2 gap-1.5 overflow-y-auto pr-1" data-slot="desktop-generated-effects">
-            {generatedShaders.slice(0, 12).map((shader) => (
-              <DesktopTextPresetButton
-                key={shader.id}
-                label={shader.label}
-                selected={settings.generatedShaderId === shader.id}
-                onClick={() =>
-                  onEffectsSettingsChange({
-                    generatedShaderId: shader.id,
-                    generatedShaderPresetName: shader.presets[0]?.name ?? "",
-                  })
-                }
-              />
-            ))}
-          </div>
+          <DesktopInspectorOptionGridScrollArea
+            ariaLabel="Generated effects"
+            dataSlot="desktop-generated-effects-scroll-area"
+            shelfDataSlot="desktop-generated-effects"
+            variant="compact"
+          >
+            <div className="grid grid-cols-2 gap-1.5">
+              {generatedShaders.slice(0, 12).map((shader) => (
+                <DesktopTextPresetButton
+                  key={shader.id}
+                  label={shader.label}
+                  selected={settings.generatedShaderId === shader.id}
+                  onClick={() =>
+                    onEffectsSettingsChange({
+                      generatedShaderId: shader.id,
+                      generatedShaderPresetName: shader.presets[0]?.name ?? "",
+                    })
+                  }
+                />
+              ))}
+            </div>
+          </DesktopInspectorOptionGridScrollArea>
         </section>
 
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
@@ -5431,36 +5362,40 @@ function DesktopTextInspector({
             />
           </div>
           {fontMenuOpen ? (
-            <div
-              id="desktop-text-font-listbox"
-              aria-label="Text font options"
-              className="mt-2 grid max-h-40 gap-1.5 overflow-y-auto pr-1"
-              data-slot="desktop-text-font-listbox"
+            <DesktopInspectorOptionGridScrollArea
+              ariaLabel="Text font options"
+              className="mt-2"
+              dataSlot="desktop-text-font-listbox-scroll-area"
               role="listbox"
+              shelfDataSlot="desktop-text-font-listbox"
+              shelfId="desktop-text-font-listbox"
+              variant="compact"
             >
-              {DRAFTING_FONT_REGISTRY.map((font) => (
-                <button
-                  key={font.id}
-                  aria-label={`Use ${font.label} text font`}
-                  aria-selected={selectedFont.id === font.id}
-                  className={cn(
-                    "flex h-8 min-w-0 items-center px-2.5 text-left text-[12px] font-semibold",
-                    DESKTOP_INSPECTOR_CONTROL_CLASS,
-                    selectedFont.id === font.id && DESKTOP_INSPECTOR_SELECTED_CLASS,
-                  )}
-                  role="option"
-                  style={{ fontFamily: getDraftingFontCssFamily({ fontId: font.id }) }}
-                  type="button"
-                  onClick={() => {
-                    void loadDraftingFont(font.id)
-                    onTextSettingsChange({ fontFamily: font.family, fontId: font.id })
-                    setFontMenuOpen(false)
-                  }}
-                >
-                  <span className="min-w-0 flex-1 truncate">{font.label}</span>
-                </button>
-              ))}
-            </div>
+              <div className="grid gap-1.5">
+                {DRAFTING_FONT_REGISTRY.map((font) => (
+                  <button
+                    key={font.id}
+                    aria-label={`Use ${font.label} text font`}
+                    aria-selected={selectedFont.id === font.id}
+                    className={cn(
+                      "flex h-8 min-w-0 items-center px-2.5 text-left text-[12px] font-semibold",
+                      DESKTOP_INSPECTOR_CONTROL_CLASS,
+                      selectedFont.id === font.id && DESKTOP_INSPECTOR_SELECTED_CLASS,
+                    )}
+                    role="option"
+                    style={{ fontFamily: getDraftingFontCssFamily({ fontId: font.id }) }}
+                    type="button"
+                    onClick={() => {
+                      void loadDraftingFont(font.id)
+                      onTextSettingsChange({ fontFamily: font.family, fontId: font.id })
+                      setFontMenuOpen(false)
+                    }}
+                  >
+                    <span className="min-w-0 flex-1 truncate">{font.label}</span>
+                  </button>
+                ))}
+              </div>
+            </DesktopInspectorOptionGridScrollArea>
           ) : null}
           <DesktopTextInlineSlider
             label="Size"
@@ -5788,7 +5723,8 @@ export function DesktopFloatingInspector({
   }
 
   return (
-    <aside
+    <SurfaceProvider value={1}>
+      <aside
       aria-label={
         resolvedToolConfig
           ? `${resolvedToolConfig.title} settings`
@@ -5895,6 +5831,7 @@ export function DesktopFloatingInspector({
         <DesktopPlaceholderInspector tool={resolvedToolConfig} />
       ) : null}
     </aside>
+    </SurfaceProvider>
   )
 }
 

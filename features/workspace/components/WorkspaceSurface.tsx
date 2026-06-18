@@ -200,9 +200,6 @@ import { ModeToggle } from "@/components/mode-toggle"
 import { OptionCard } from "@/components/ui/option-card"
 import {
   ScrollArea,
-  ScrollAreaScrollbar,
-  ScrollAreaThumb,
-  ScrollAreaViewport,
 } from "@/components/ui/scroll-area"
 import {
   DEFAULT_QR_INPUT_TYPE,
@@ -4444,15 +4441,16 @@ export function WorkspaceSurface({
           className="relative isolate order-2 min-h-0 min-w-0 overflow-hidden border-t border-transparent bg-[var(--drafting-panel-bg)] lg:order-none lg:border-t-0 lg:bg-transparent"
         >
           <ScrollArea
-            data-scrollbar-visibility="while-scrolling"
+            chevron
+            cueSize="comfortable"
             data-slot="drafting-nav-scroll-area"
-            scrollHideDelay={500}
-            type="scroll"
+            orientation="both"
+            scrollFade
             className="h-[var(--new-mobile-rail-height)] min-h-0 w-full min-w-0 lg:h-full"
           >
-            <ScrollAreaViewport
+            <div
               data-slot="drafting-nav-scroll"
-              className="h-full w-full overflow-x-auto overflow-y-hidden scroll-fade-effect-x lg:overflow-x-hidden lg:overflow-y-auto lg:scroll-fade-effect-y"
+              className="min-h-0 min-w-0"
             >
               <div
                 data-slot="drafting-nav-scroll-content"
@@ -4523,20 +4521,7 @@ export function WorkspaceSurface({
                   <InsertMenu nodeId={activeQrNodeId} onInsertLayer={handleInsertLayer} />
                 </div>
               </div>
-            </ScrollAreaViewport>
-            <ScrollAreaScrollbar
-              orientation="horizontal"
-              data-slot="drafting-nav-scrollbar-horizontal"
-              className="h-2 border-none p-[1px] lg:hidden"
-            >
-              <ScrollAreaThumb className="bg-[var(--drafting-line-hover)] hover:bg-[var(--drafting-line-strong)]" />
-            </ScrollAreaScrollbar>
-            <ScrollAreaScrollbar
-              data-slot="drafting-nav-scrollbar-vertical"
-              className="hidden w-2 border-none p-[1px] lg:flex"
-            >
-              <ScrollAreaThumb className="bg-[var(--drafting-line-hover)] hover:bg-[var(--drafting-line-strong)]" />
-            </ScrollAreaScrollbar>
+            </div>
           </ScrollArea>
         </nav> : null}
         {chrome === "full" ? <aside
@@ -4545,28 +4530,21 @@ export function WorkspaceSurface({
           className="hidden min-h-0 min-w-0 overflow-hidden bg-[var(--drafting-panel-bg)] lg:order-none lg:block lg:bg-transparent"
         >
           <ScrollArea
-            data-scrollbar-visibility="while-scrolling"
+            chevron
+            cueSize="comfortable"
             data-slot="drafting-tab-panel-scroll-area"
-            scrollHideDelay={500}
-            type="scroll"
-            className="h-full min-h-0 min-w-0 overflow-hidden"
+            scrollFade
+            className="h-full min-h-0 min-w-0"
+            viewportClassName="px-3 py-4 sm:px-4"
           >
-            <ScrollAreaViewport
+            <div
               aria-label={`${activeToolConfig.title} inspector panel`}
               data-active-tool={activeTool}
               data-slot="drafting-tab-panel-scroll"
-              className="h-full w-full overflow-x-hidden overflow-y-auto scroll-fade-effect-y"
+              className="min-w-0 max-w-full overflow-x-hidden"
             >
-              <div className="min-w-0 max-w-full overflow-x-hidden px-3 py-4 sm:px-4">
-                {renderStackedInspectorContent(activeTool)}
-              </div>
-            </ScrollAreaViewport>
-            <ScrollAreaScrollbar
-              data-slot="drafting-tab-panel-scrollbar"
-              className="w-2 border-none p-[1px]"
-            >
-              <ScrollAreaThumb className="bg-[var(--drafting-line-hover)] hover:bg-[var(--drafting-line-strong)]" />
-            </ScrollAreaScrollbar>
+              {renderStackedInspectorContent(activeTool)}
+            </div>
           </ScrollArea>
         </aside> : null}
         <section

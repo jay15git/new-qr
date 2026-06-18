@@ -2,12 +2,7 @@
 
 import * as React from "react"
 
-import {
-  ScrollArea,
-  ScrollAreaScrollbar,
-  ScrollAreaThumb,
-  ScrollAreaViewport,
-} from "@/components/ui/scroll-area"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import type { DesktopThemeMode } from "@/features/desktop-shell/components/FloatingToolbar"
 import { LibraryThemeToggle } from "@/features/library/components/LibraryThemeToggle"
 import { StudioHubHome } from "@/features/studio-hub/components/StudioHubHome"
@@ -65,23 +60,18 @@ function StudioHubShellInner({ fontClassName }: StudioHubShellProps) {
         </header>
 
         <ScrollArea
-          data-scrollbar-visibility="while-scrolling"
+          chevron
+          cueSize="comfortable"
           data-slot="studio-hub-scroll-area"
-          scrollHideDelay={500}
-          type="scroll"
+          scrollFade
           className="min-h-0 flex-1"
+          viewportClassName="px-4 pt-[5.5rem] pb-16 sm:px-6 sm:pt-[6rem]"
         >
-          <ScrollAreaViewport
-            data-slot="studio-hub-scroll"
-            className="h-full w-full overflow-x-hidden overflow-y-auto px-4 pt-[5.5rem] pb-16 sm:px-6 sm:pt-[6rem] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
-            <div data-slot="studio-hub-shell" className="mx-auto flex w-full max-w-5xl flex-col">
+          <div data-slot="studio-hub-scroll" className="mx-auto flex w-full max-w-5xl flex-col">
+            <div data-slot="studio-hub-shell">
               <StudioHubHome />
             </div>
-          </ScrollAreaViewport>
-          <ScrollAreaScrollbar data-slot="studio-hub-scrollbar" className="w-2 border-none p-[1px]">
-            <ScrollAreaThumb data-slot="studio-hub-scroll-thumb" />
-          </ScrollAreaScrollbar>
+          </div>
         </ScrollArea>
       </main>
     </>

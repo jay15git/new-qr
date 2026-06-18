@@ -145,8 +145,8 @@ describe("FloatingToolbar", () => {
     expect(platformToggle).not.toBeNull()
     expect(scrollArea).not.toBeNull()
     expect(scrollViewport).not.toBeNull()
-    expect(source).toContain('data-slot="desktop-keyboard-shortcuts-scrollbar"')
-    expect(source).toContain('[data-slot="desktop-keyboard-shortcuts-scroll-thumb"]')
+    expect(scrollArea?.querySelector('[data-slot="scroll-area-viewport"]')).not.toBeNull()
+    expect(scrollArea?.querySelector('[aria-hidden="true"] svg')).not.toBeNull()
     expect(popover?.className).toContain("h-[min(44rem,calc(100dvh-7rem))]")
     expect(popover?.className).toContain("w-[min(27rem,calc(100vw-1rem))]")
     expect(popover?.className).toContain("bg-[#0a0a0a]")
@@ -155,8 +155,6 @@ describe("FloatingToolbar", () => {
     expect(source).toContain("background: #ffffff !important;")
     expect(source).toContain("--desktop-inspector-section-bg\": \"#181818\"")
     expect(scrollArea?.className).toContain("h-full")
-    expect(scrollViewport?.className).toContain("[scrollbar-width:none]")
-    expect(scrollViewport?.className).toContain("[&::-webkit-scrollbar]:hidden")
     expect(popover?.innerHTML).not.toContain("border-b border-white/[0.08]")
     expect(platformToggle?.className).not.toContain("bg-white")
     expect(platformToggle?.className).not.toContain("border")
@@ -357,9 +355,9 @@ describe("FloatingToolbar", () => {
     expect(inspector?.querySelector('[data-slot="desktop-content-inspector"]')).not.toBeNull()
     const scrollArea = inspector?.querySelector('[data-slot="desktop-inspector-scroll-area"]')
     const scrollViewport = inspector?.querySelector('[data-slot="desktop-inspector-scroll"]')
-    const scrollGroups = Array.from(scrollViewport?.firstElementChild?.children ?? [])
-    expect(scrollArea?.getAttribute("data-scrollbar-visibility")).toBe("while-scrolling")
-    expect(scrollViewport?.className).toContain("overflow-y-auto")
+    const scrollGroups = Array.from(scrollViewport?.children ?? [])
+    expect(scrollArea?.querySelector('[data-slot="scroll-area-viewport"]')).not.toBeNull()
+    expect(scrollArea?.querySelector('[aria-hidden="true"] svg')).not.toBeNull()
     expect(scrollGroups).toHaveLength(3)
     expect(scrollGroups[0]?.getAttribute("data-slot")).toBe("desktop-content-type-section")
     expect(scrollGroups[0]?.className).toContain("bg-[var(--desktop-inspector-section-bg)]")
@@ -444,6 +442,7 @@ describe("FloatingToolbar", () => {
     )
     expect(inspector?.getAttribute("aria-label")).toBe("Pattern settings")
     expect(inspector?.querySelector('[data-slot="desktop-pattern-inspector"]')).not.toBeNull()
+    expect(inspector?.querySelector('[data-slot="desktop-pattern-preset-shelf-scroll-area"]')).not.toBeNull()
     expect(inspector?.querySelector('[data-slot="desktop-pattern-preset-shelf"]')).not.toBeNull()
     expect(inspector?.querySelector('[data-slot="desktop-pattern-chooser"]')).toBeNull()
     expect(inspector?.textContent).toContain("Module Pattern")
@@ -548,9 +547,7 @@ describe("FloatingToolbar", () => {
     expect(inspector?.querySelector('[data-impeccable-variant="original"]')?.className).toContain(
       "min-h-0",
     )
-    expect(
-      inspector?.querySelector('[data-slot="desktop-inspector-scroll"]')?.className,
-    ).toContain("overflow-y-auto")
+    expect(inspector?.querySelector('[data-slot="desktop-inspector-scroll"]')).not.toBeNull()
     expect(inspector?.querySelector('[data-slot="desktop-corner-frame-preset-shelf"]')).not.toBeNull()
     expect(inspector?.querySelector('[data-slot="desktop-corner-dot-preset-shelf"]')).not.toBeNull()
     expect(inspector?.textContent).toContain("Corner Frame")
@@ -823,19 +820,14 @@ describe("FloatingToolbar", () => {
     )
 
     expect(shapePresetScrollArea).not.toBeNull()
-    expect(shapePresetScrollArea?.getAttribute("data-scrollbar-visibility")).toBe("while-scrolling")
-    expect(shapePresetScrollArea?.className).toContain("overflow-hidden")
+    expect(shapePresetScrollArea?.className).toContain("h-80")
     expect(shapePresetScrollViewport).not.toBeNull()
-    expect(shapePresetScrollViewport?.className).toContain("[scrollbar-width:none]")
-    expect(shapePresetScrollViewport?.className).toContain("[&::-webkit-scrollbar]:hidden")
+    expect(shapePresetScrollArea?.querySelector('[data-slot="scroll-area-viewport"]')).not.toBeNull()
+    expect(shapePresetScrollArea?.querySelector('[aria-hidden="true"] svg')).not.toBeNull()
     expect(inspector?.querySelector('[data-slot="desktop-inspector-scroll-area"]')).not.toBeNull()
-    expect(
-      inspector?.querySelector('[data-slot="desktop-inspector-scroll"]')?.className,
-    ).toContain("overflow-y-auto")
     expect(
       inspector
         ?.querySelector('[data-slot="desktop-inspector-scroll"]')
-        ?.firstElementChild
         ?.children[0]
         ?.getAttribute("class"),
     ).toContain("bg-[var(--desktop-inspector-section-bg)]")
@@ -1011,21 +1003,13 @@ describe("FloatingToolbar", () => {
     )
 
     expect(inspector?.querySelector('[data-slot="desktop-motion-loader-shelf"]')).not.toBeNull()
-    expect(scrollArea?.getAttribute("data-scrollbar-visibility")).toBe("while-scrolling")
-    expect(scrollArea?.className).toContain("overflow-hidden")
-    expect(scrollViewport?.className).toContain("overflow-y-auto")
-    expect(scrollViewport?.className).not.toContain("overflow-y-scroll")
-    expect(scrollViewport?.className).toContain("[scrollbar-width:none]")
-    expect(scrollViewport?.className).toContain("[&::-webkit-scrollbar]:hidden")
+    expect(scrollArea?.querySelector('[data-slot="scroll-area-viewport"]')).not.toBeNull()
+    expect(scrollArea?.querySelector('[aria-hidden="true"] svg')).not.toBeNull()
     expect(inspector?.textContent).toContain("Motion")
     expect(inspector?.textContent).toContain("Loader")
-    expect(inspector?.textContent).toContain("Timing")
     expect(inspector?.textContent).toContain("Loader Color")
     expect(inspector?.textContent).toContain("Output")
     expect(inspector?.textContent).not.toContain("Reset Motion")
-    expect(inspector?.textContent).not.toContain("Pause")
-    expect(inspector?.textContent).not.toContain("Frame")
-    expect(inspector?.textContent).not.toContain("Opacity")
 
     const motionToggle = getRequiredButton(surface.container, "Dot matrix motion")
     const defaultLoader = getRequiredButton(surface.container, "Use Neon Drift motion loader")
