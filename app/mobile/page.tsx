@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 
-import { ExpandableTab } from "@/components/atomixui/expandable-tab"
+import { MobileSettingsShell } from "@/features/mobile/components/MobileSettingsShell"
 
 export const metadata: Metadata = {
   title: "Mobile",
@@ -12,7 +12,7 @@ export default function MobilePage() {
     <div className="relative min-h-dvh bg-background">
       <main className="min-h-dvh" />
       <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center pb-6">
-        <ExpandableTab />
+        <MobileSettingsShell />
       </div>
     </div>
   )
