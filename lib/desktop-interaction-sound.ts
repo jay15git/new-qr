@@ -1,27 +1,19 @@
-import { click001Sound } from "@/lib/click-001"
-import { click003Sound } from "@/lib/click-003"
-import { clickSoftSound } from "@/lib/click-soft"
-import { playSound, type SoundPlayback } from "@/lib/sound-engine"
-import type { SoundAsset } from "@/lib/sound-types"
+import type { PlayFunction } from "@/lib/sound-types"
 
 export type DesktopSoundZone = "panel" | "toolbar" | "slider"
 
 const DESKTOP_SOUNDS_ENABLED_KEY = "desktop-sounds-enabled"
 
-const SOUND_ASSETS: Record<DesktopSoundZone, SoundAsset> = {
-  panel: click001Sound,
-  toolbar: click003Sound,
-  slider: clickSoftSound,
-}
-
 const ZONE_OPTIONS: Record<
   DesktopSoundZone,
-  { volume: number; playbackRate?: number; interrupt?: boolean; minIntervalMs?: number }
+  { volume: number; playbackRate?: number; minIntervalMs?: number }
 > = {
   panel: { volume: 0.35 },
-  toolbar: { volume: 0.5, interrupt: true },
-  slider: { volume: 0.4, interrupt: true },
+  toolbar: { volume: 0.5 },
+  slider: { volume: 0.4 },
 }
+
+const zonePlayers = new Map<DesktopSoundZone, PlayFunction>()
 
 const TOOLBAR_ZONE_SELECTOR = [
   '[data-slot="desktop-document-toolbar"]',
@@ -36,8 +28,15 @@ const TOOLBAR_ZONE_SELECTOR = [
   '[data-slot="desktop-keyboard-shortcuts-popover"]',
 ].join(",")
 
-const activePlayback = new Map<DesktopSoundZone, SoundPlayback>()
 const lastPlayedAt = new Map<DesktopSoundZone, number>()
+
+export function registerDesktopZonePlayer(zone: DesktopSoundZone, play: PlayFunction): void {
+  zonePlayers.set(zone, play)
+}
+
+export function unregisterDesktopZonePlayer(zone: DesktopSoundZone): void {
+  zonePlayers.delete(zone)
+}
 
 function prefersReducedMotion(): boolean {
   if (typeof window === "undefined") return true
@@ -66,19 +65,14 @@ export function playDesktopSound(zone: DesktopSoundZone): void {
     return
   }
 
-  if (options.interrupt) {
-    activePlayback.get(zone)?.stop()
-  }
+  const play = zonePlayers.get(zone)
+  if (!play) return
 
   lastPlayedAt.set(zone, now)
 
-  void playSound(SOUND_ASSETS[zone].dataUri, {
+  play({
     volume: options.volume,
     playbackRate: options.playbackRate,
-  }).then((playback) => {
-    if (options.interrupt) {
-      activePlayback.set(zone, playback)
-    }
   })
 }
 

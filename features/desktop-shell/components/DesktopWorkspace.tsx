@@ -8,7 +8,7 @@ import {
 } from "@/features/desktop-shell/components/FloatingToolbar"
 import { saveDesignToLibrary } from "@/features/studio-hub/model/save-library-design"
 import { readStudioSession } from "@/features/studio-hub/model/navigation"
-import { useDesktopSoundClicks } from "@/hooks/use-desktop-sound-clicks"
+import { DesktopSoundProvider } from "@/features/desktop-shell/components/DesktopSoundProvider"
 import { cn } from "@/lib/utils"
 import { useCallback, useState, type CSSProperties } from "react"
 import type { DraftingWorkspaceDocumentV1 } from "@/features/workspace/model/document"
@@ -27,7 +27,6 @@ export function DesktopWorkspace({
   onBack,
 }: DesktopWorkspaceProps) {
   const [desktopTheme, setDesktopTheme] = useState<DesktopThemeMode>(initialTheme)
-  useDesktopSoundClicks()
   const workspaceTone = {
     "--workspace-shell": "#1f1f1f",
     "--workspace-page": "#171717",
@@ -45,17 +44,18 @@ export function DesktopWorkspace({
   }, [])
 
   return (
-    <section
-      aria-label="Desktop workspace"
-      data-desktop-theme={desktopTheme}
-      data-slot="desktop-workspace"
-      style={workspaceTone}
-      className={cn(
-        fontClassName,
-        "relative h-dvh min-h-dvh overflow-hidden transition-colors duration-200",
-        desktopTheme === "light" ? "bg-workspace-shell-light text-neutral-950" : "bg-workspace-shell text-white",
-      )}
-    >
+    <DesktopSoundProvider>
+      <section
+        aria-label="Desktop workspace"
+        data-desktop-theme={desktopTheme}
+        data-slot="desktop-workspace"
+        style={workspaceTone}
+        className={cn(
+          fontClassName,
+          "relative h-dvh min-h-dvh overflow-hidden transition-colors duration-200",
+          desktopTheme === "light" ? "bg-workspace-shell-light text-neutral-950" : "bg-workspace-shell text-white",
+        )}
+      >
       <WorkspaceSurface
         chrome="canvas-only"
         fontClassName={fontClassName}
@@ -74,6 +74,7 @@ export function DesktopWorkspace({
       />
       <DesktopWorkspaceStyles />
     </section>
+    </DesktopSoundProvider>
   )
 }
 
