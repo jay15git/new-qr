@@ -335,7 +335,7 @@ export function AdaptiveOffsetRangeSlider({
         <div
           ref={trackRef}
           data-slot="adaptive-offset-track"
-          className="relative h-full w-full touch-none"
+          className="relative h-full w-full cursor-ew-resize touch-none"
           onPointerDown={handleTrackPointerDown}
         >
           <SliderDecorativeTrack gradient={trackGradient} />
@@ -351,7 +351,7 @@ export function AdaptiveOffsetRangeSlider({
               aria-label={`${startLabel} offset`}
               aria-pressed={activeHandle === "start"}
               onPointerDown={handleThumbPointerDown("start")}
-              className="cursor-grab touch-none rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:cursor-grabbing"
+              className="cursor-ew-resize touch-none rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:cursor-ew-resize"
             >
               <SliderThumb accentColor={startColor} isActive={activeHandle === "start"} />
             </button>
@@ -368,7 +368,7 @@ export function AdaptiveOffsetRangeSlider({
               aria-label={`${endLabel} offset`}
               aria-pressed={activeHandle === "end"}
               onPointerDown={handleThumbPointerDown("end")}
-              className="cursor-grab touch-none rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:cursor-grabbing"
+              className="cursor-ew-resize touch-none rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:cursor-ew-resize"
             >
               <SliderThumb accentColor={endColor} isActive={activeHandle === "end"} />
             </button>

@@ -1,0 +1,27 @@
+/* Twilight Cursors — https://github.com/yeyushengfan258/Twilight-Cursors (GPL-3.0) */
+@theme inline {
+  --cursor-auto: url("/cursors/twilight/default.svg") 4 4, auto;
+  --cursor-default: url("/cursors/twilight/default.svg") 4 4, default;
+  --cursor-pointer: url("/cursors/twilight/pointer.svg") 16 4, pointer;
+  --cursor-text: url("/cursors/twilight/text.svg") 16 16, text;
+  --cursor-grab: url("/cursors/twilight/openhand.svg") 16 16, grab;
+  --cursor-grabbing: url("/cursors/twilight/closedhand.svg") 16 16, grabbing;
+  --cursor-move: url("/cursors/twilight/dnd-move.svg") 16 16, move;
+  --cursor-not-allowed: url("/cursors/twilight/not-allowed.svg") 16 16, not-allowed;
+  --cursor-crosshair: url("/cursors/twilight/crosshair.svg") 16 16, crosshair;
+  --cursor-help: url("/cursors/twilight/help.svg") 4 4, help;
+  --cursor-col-resize: url("/cursors/twilight/col-resize.svg") 16 16, col-resize;
+  --cursor-row-resize: url("/cursors/twilight/row-resize.svg") 16 16, row-resize;
+  --cursor-ew-resize: url("/cursors/twilight/size_hor.svg") 16 16, ew-resize;
+  --cursor-ns-resize: url("/cursors/twilight/size_ver.svg") 16 16, ns-resize;
+  --cursor-nesw-resize: url("/cursors/twilight/size_fdiag.svg") 16 16, nesw-resize;
+  --cursor-nwse-resize: url("/cursors/twilight/size_bdiag.svg") 16 16, nwse-resize;
+  --cursor-wait: url("/cursors/twilight/wait.svg") 16 16, wait;
+  --cursor-progress: url("/cursors/twilight/wait.svg") 16 16, progress;
+  --cursor-copy: url("/cursors/twilight/copy.svg") 4 4, copy;
+  --cursor-alias: url("/cursors/twilight/alias.svg") 4 4, alias;
+  --cursor-zoom-in: url("/cursors/twilight/zoom-in.svg") 16 16, zoom-in;
+  --cursor-zoom-out: url("/cursors/twilight/zoom-out.svg") 16 16, zoom-out;
+  --cursor-all-scroll: url("/cursors/twilight/all-scroll.svg") 16 16, all-scroll;
+  --cursor-no-drop: url("/cursors/twilight/no-drop.svg") 4 4, no-drop;
+}

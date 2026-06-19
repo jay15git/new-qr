@@ -787,14 +787,14 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
 
           <div
             ref={trackRef}
-            className="relative w-full cursor-pointer"
+            className="relative w-full cursor-ew-resize"
             style={{ height: THUMB_SIZE + 16 }}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
           >
             <div
-              className="absolute cursor-pointer"
+              className="absolute cursor-ew-resize"
               style={{ left: -8, right: -8, top: 0, bottom: 0 }}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}

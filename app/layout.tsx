@@ -47,7 +47,7 @@ export default function RootLayout({
       className={`${displayFont.variable} ${bodyFont.variable} ${monoFont.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="flex min-h-full flex-col">
+      <body className="flex min-h-full cursor-default flex-col">
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

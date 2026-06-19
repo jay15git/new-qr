@@ -205,6 +205,7 @@ import {
   DraggableListItem,
 } from "@/components/ui/draggable-list"
 import { ElasticSlider } from "@/components/ui/elastic-slider"
+import { FluidSwitch } from "@/components/ui/fluid-switch"
 import { GalleryVerticalEndIcon } from "@/components/ui/gallery-vertical-end"
 import { GripIcon } from "@/components/ui/grip"
 import { LayersIcon } from "@/components/ui/layers"
@@ -1874,30 +1875,6 @@ export function DesktopThemeStyles() {
         --elastic-slider-handle: rgba(15, 23, 42, 0.46);
       }
 
-      [data-slot="desktop-floating-inspector"] [data-slot="desktop-motion-toggle-track"][data-state="checked"] {
-        background: #ffffff !important;
-        border-color: #ffffff !important;
-      }
-
-      [data-slot="desktop-floating-inspector"] [data-slot="desktop-motion-toggle-track"][data-state="checked"] [data-slot="desktop-motion-toggle-thumb"] {
-        background: #020617 !important;
-      }
-
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [data-slot="desktop-motion-toggle-track"] {
-        background: rgba(15, 23, 42, 0.1) !important;
-        border-color: rgba(15, 23, 42, 0.12) !important;
-      }
-
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [data-slot="desktop-motion-toggle-track"][data-state="checked"] {
-        background: #020617 !important;
-        border-color: #020617 !important;
-      }
-
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [data-slot="desktop-motion-toggle-track"][data-state="checked"] [data-slot="desktop-motion-toggle-thumb"],
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] [data-slot="desktop-motion-toggle-track"][data-state="unchecked"] [data-slot="desktop-motion-toggle-thumb"] {
-        background: #ffffff !important;
-      }
-
       [data-slot="desktop-floating-inspector"] :is(input, textarea, select):focus,
       [data-slot="desktop-floating-inspector"] :is(input, textarea, select):focus-visible {
         border-color: transparent !important;
@@ -1913,14 +1890,14 @@ export function DesktopThemeStyles() {
         border-color: transparent !important;
       }
 
-      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-slot="desktop-motion-toggle-row"]):not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) {
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) {
         background-color: var(--desktop-inspector-option-selected-bg) !important;
         border-color: transparent !important;
         color: var(--desktop-inspector-option-selected-fg) !important;
         box-shadow: none !important;
       }
 
-      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-slot="desktop-motion-toggle-row"]):not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]):hover {
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]):hover {
         background-color: var(--desktop-inspector-option-selected-bg) !important;
         border-color: transparent !important;
         color: var(--desktop-inspector-option-selected-fg) !important;
@@ -1932,7 +1909,7 @@ export function DesktopThemeStyles() {
         border-color: var(--desktop-inspector-option-selected-border) !important;
       }
 
-      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-slot="desktop-motion-toggle-row"]):not([data-desktop-tool-button="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) :is(span, svg):not([data-desktop-preview-caption="true"]) {
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) :is(span, svg):not([data-desktop-preview-caption="true"]) {
         color: var(--desktop-inspector-option-selected-fg) !important;
       }
 
@@ -2035,7 +2012,7 @@ export function DesktopThemeStyles() {
         border-color: var(--desktop-inspector-option-selected-border) !important;
       }
 
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-slot="desktop-motion-toggle-row"]):not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) {
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) {
         background-color: var(--desktop-inspector-option-selected-bg) !important;
         border-color: transparent !important;
         color: var(--desktop-inspector-option-selected-fg) !important;
@@ -2102,13 +2079,13 @@ export function DesktopThemeStyles() {
         color: #18181b !important;
       }
 
-      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-slot="desktop-motion-toggle-row"]):not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) {
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) {
         background-color: var(--desktop-inspector-option-selected-bg) !important;
         border-color: transparent !important;
         color: var(--desktop-inspector-option-selected-fg) !important;
       }
 
-      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-slot="desktop-motion-toggle-row"]):not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]):hover {
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]):hover {
         background-color: var(--desktop-inspector-option-selected-bg) !important;
         border-color: transparent !important;
         color: var(--desktop-inspector-option-selected-fg) !important;
@@ -3457,38 +3434,20 @@ function DesktopMotionToggleRow({
   onChange: (checked: boolean) => void
 }) {
   return (
-	    <button
-	      aria-label={label}
-	      aria-pressed={checked}
-	      data-slot="desktop-motion-toggle-row"
-	      className={cn(
-	        DESKTOP_INSPECTOR_ROW_CLASS,
-	        "w-full rounded-[6px] bg-transparent text-left text-[var(--desktop-inspector-fg-secondary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]",
-	      )}
-	      type="button"
-	      onClick={() => onChange(!checked)}
-	    >
-	      <span className="min-w-0">
-        <span className={cn("block truncate text-[12px] font-semibold", DESKTOP_INSPECTOR_FG_SECONDARY)}>{label}</span>
-      </span>
-	      <span
-	        aria-hidden="true"
-	        data-state={checked ? "checked" : "unchecked"}
-	        data-slot="desktop-motion-toggle-track"
-	        className={cn(
-	          "relative h-5 w-9 shrink-0 rounded-full border border-white/[0.12] bg-white/[0.12] transition-colors",
-	          checked && "border-white bg-white",
-	        )}
-	      >
-	        <span
-	          data-slot="desktop-motion-toggle-thumb"
-	          className={cn(
-	            "absolute left-0.5 top-0.5 size-4 rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,0.24)] transition-[background-color,transform]",
-	            checked && "translate-x-4 bg-black",
-	          )}
-	        />
-	      </span>
-	    </button>
+    <FluidSwitch
+      checked={checked}
+      data-slot="desktop-motion-toggle-row"
+      label={label}
+      onToggle={() => onChange(!checked)}
+      className={cn(
+        DESKTOP_INSPECTOR_ROW_CLASS,
+        "w-full flex-row-reverse justify-between px-0 touch-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]",
+        "[&>span:last-child]:min-w-0 [&>span:last-child]:truncate [&>span:last-child]:text-[12px] [&>span:last-child]:font-semibold [&>span:last-child]:text-[var(--desktop-inspector-fg-secondary)]",
+        checked
+          ? "[&>span:last-child]:text-[var(--desktop-inspector-fg-primary)]"
+          : "[&>span:last-child]:text-[var(--desktop-inspector-fg-secondary)]",
+      )}
+    />
   )
 }
 

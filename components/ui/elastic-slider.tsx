@@ -452,7 +452,7 @@ export function ElasticSlider({
         aria-valuenow={value}
         aria-valuetext={displayValue}
         className={cn(
-          "group/elastic-slider absolute inset-0 cursor-pointer touch-none overflow-hidden rounded-(--elastic-slider-radius) bg-(--elastic-slider-bg) outline-none select-none",
+          "group/elastic-slider absolute inset-0 cursor-ew-resize touch-none overflow-hidden rounded-(--elastic-slider-radius) bg-(--elastic-slider-bg) outline-none select-none",
           "data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-ring/50 data-[focus-visible=true]:ring-offset-1 data-[focus-visible=true]:ring-offset-background",
         )}
         style={{ width: rubberWidth, x: rubberX }}
