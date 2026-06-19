@@ -26,7 +26,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
-import ColorPicker from "@/components/ui/color-picker"
+import { ColorPicker } from "@/components/ui/color-picker"
 import { Input } from "@/components/ui/input"
 import { KnobSlider } from "@/components/ui/knob-slider"
 import {
@@ -1757,8 +1757,8 @@ export function ControlsPanel({
                       <Field>
                         <FieldLabel htmlFor="logo-icon-color">Logo icon color</FieldLabel>
                         <ColorPicker
-                          onColorChange={handlePresetLogoColorChange}
-                          size={320}
+                          defaultFormat="hex"
+                          onValueChange={handlePresetLogoColorChange}
                           value={presetLogoColor}
                         />
                       </Field>

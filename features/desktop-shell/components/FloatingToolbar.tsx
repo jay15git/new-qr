@@ -149,11 +149,7 @@ import {
   DesktopInspectorScrollArea,
 } from "@/features/desktop-shell/components/DesktopInspectorShell"
 import { SurfaceProvider } from "@/lib/surface-context"
-import {
-  ColorPicker as AmploColorPicker,
-  parseColor,
-  type OklchColor,
-} from "@/components/ui/fill-picker/fill-picker"
+import { ColorPicker } from "@/components/ui/color-picker"
 import {
   DESKTOP_INSPECTOR_CONTROL_CLASS,
   DESKTOP_INSPECTOR_DROPDOWN_ITEM_CLASS,
@@ -287,17 +283,6 @@ function getShortcutKeyCombos(keys: string, platform: DesktopShortcutPlatform): 
     }),
   )
 }
-
-const DESKTOP_COLOR_PICKER_SWATCHES = [
-  "#111111",
-  "#4B4F56",
-  "#FFFFFF",
-  "#C19B1D",
-  "#151515",
-  "oklch(0.7 0.18 30)",
-  "oklch(0.7 0.18 150)",
-  "color(display-p3 0.85 0.45 0.15)",
-]
 
 const DESKTOP_TOOLBAR_TOOLS: DesktopToolbarTool[] = [
   {
@@ -1838,6 +1823,40 @@ export function DesktopThemeStyles() {
         --desktop-color-picker-popover-bg: rgba(23, 24, 29, 0.95);
         --desktop-color-picker-popover-border: rgba(255, 255, 255, 0.1);
         --desktop-color-picker-popover-fg: #ffffff;
+        --checker-a: #6b6b6b;
+        --checker-b: #9a9a9a;
+        --foreground: var(--desktop-color-picker-popover-fg);
+        --muted-foreground: var(--color-picker-muted-fg);
+        --background: var(--desktop-color-picker-popover-bg);
+        --border: var(--color-picker-control-border);
+      }
+
+      [data-slot="desktop-color-picker-popover"] [data-slot="color-picker"] {
+        background-color: var(--desktop-color-picker-popover-bg) !important;
+        color: var(--desktop-color-picker-popover-fg);
+        box-shadow: none !important;
+      }
+
+      [data-slot="desktop-color-picker-popover"] [data-slot="color-picker"] :is(button, input) {
+        color: var(--desktop-color-picker-popover-fg);
+      }
+
+      [data-slot="desktop-color-picker-popover"] [data-slot="color-picker"] button:hover,
+      [data-slot="desktop-color-picker-popover"] [data-slot="color-picker"] button:focus-visible,
+      [data-slot="desktop-color-picker-popover"] [data-slot="color-picker"] .bg-active,
+      [data-slot="desktop-color-picker-popover"] [data-slot="color-picker"] div:has(> input):hover,
+      [data-slot="desktop-color-picker-popover"] [data-slot="color-picker"] div:has(> input):focus-within {
+        background-color: var(--color-picker-control-hover-bg) !important;
+        color: var(--desktop-color-picker-popover-fg) !important;
+      }
+
+      [data-slot="desktop-color-picker-popover"] [data-slot="color-picker"] .text-muted-foreground {
+        color: var(--color-picker-muted-fg) !important;
+      }
+
+      [data-slot="desktop-color-picker-popover"] [data-slot="color-picker"] .text-foreground,
+      [data-slot="desktop-color-picker-popover"] [data-slot="color-picker"] .hover\:text-foreground:hover {
+        color: var(--desktop-color-picker-popover-fg) !important;
       }
 
       body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-color-picker-popover"] {
@@ -1854,6 +1873,17 @@ export function DesktopThemeStyles() {
         --desktop-color-picker-popover-bg: rgba(255, 255, 255, 0.96);
         --desktop-color-picker-popover-border: rgba(15, 23, 42, 0.12);
         --desktop-color-picker-popover-fg: #18181b;
+        --checker-a: #b8b8b8;
+        --checker-b: #e0e0e0;
+        --foreground: var(--desktop-color-picker-popover-fg);
+        --muted-foreground: var(--color-picker-muted-fg);
+        --background: var(--desktop-color-picker-popover-bg);
+        --border: var(--color-picker-control-border);
+      }
+
+      [data-slot="desktop-color-picker-popover"] [data-slot="color-picker-alpha"] .border-border {
+        border-color: var(--color-picker-control-border) !important;
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-picker-control-border) 65%, transparent);
       }
 
       [data-slot="desktop-floating-inspector"] :is(input, textarea, select) {
@@ -4074,7 +4104,6 @@ function DesktopColorPickerPopover({
   value: string
 }) {
   const triggerLabel = ariaLabel ?? ariaLabelProp ?? "Color swatch"
-  const color = parseDesktopColor(value)
 
   return (
     <Popover>
@@ -4099,39 +4128,21 @@ function DesktopColorPickerPopover({
       <PopoverContent
         align="center"
         data-slot="desktop-color-picker-popover"
-        className="w-[300px] border-0 bg-transparent p-0 shadow-none"
+        className="w-auto border-0 bg-transparent p-0 shadow-none"
         side="right"
         sideOffset={8}
       >
-        <AmploColorPicker.Root
-          backgroundColor="#111111"
+        <ColorPicker
           className={cn(
-            "max-w-none gap-3 border-[var(--desktop-color-picker-popover-border)] bg-[var(--desktop-color-picker-popover-bg)] p-3 text-[var(--desktop-color-picker-popover-fg)] shadow-2xl shadow-black/30 backdrop-blur-xl",
-            "data-[slot=color-picker]:rounded-xl",
+            "max-w-none !bg-[var(--desktop-color-picker-popover-bg)] !text-[var(--desktop-color-picker-popover-fg)] border-[var(--desktop-color-picker-popover-border)] shadow-2xl shadow-black/30 backdrop-blur-xl",
           )}
           defaultFormat="hex"
-          onValueChange={(_nextColor, _formatted, formats) => onChange(formats.hex)}
-          value={color}
-        >
-          <AmploColorPicker.Area mode="hsv-sv" />
-          <div className="flex flex-col gap-1.5">
-            <AmploColorPicker.Hue />
-            <AmploColorPicker.Alpha />
-          </div>
-          <div className="flex items-center gap-2">
-            <AmploColorPicker.FormatSwitcher className="flex-1" />
-            <AmploColorPicker.EyeDropper className="h-8 w-full flex-1" />
-          </div>
-          <AmploColorPicker.CssInput className="font-mono text-xs" />
-          <AmploColorPicker.Swatches presets={DESKTOP_COLOR_PICKER_SWATCHES} />
-        </AmploColorPicker.Root>
+          onValueChange={(nextValue) => onChange(nextValue)}
+          value={value}
+        />
       </PopoverContent>
     </Popover>
   )
-}
-
-function parseDesktopColor(value: string): OklchColor {
-  return parseColor(value) ?? { l: 0, c: 0, h: 0, alpha: 1 }
 }
 
 function DesktopNumberRow({

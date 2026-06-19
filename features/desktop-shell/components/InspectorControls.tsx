@@ -218,7 +218,7 @@ export function DesktopInspectorSegmentedControl<TValue extends string>({
     columns === 4 ? "px-1 [&_span]:text-[10px]" : columns === 3 ? "px-1.5 [&_span]:text-[10px]" : undefined
 
   return (
-    <ShapeProvider defaultShape="control">
+    <ShapeProvider defaultShape="rounded">
       <TabsSubtle
         className={cn("w-full gap-0 py-0 my-0", className)}
         data-slot={dataSlot ?? "desktop-inspector-segmented-control"}

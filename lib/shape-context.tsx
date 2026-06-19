@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 
-type ShapeVariant = "pill" | "rounded" | "control";
+type ShapeVariant = "pill" | "rounded";
 
 const shapeOrder: ShapeVariant[] = ["rounded", "pill"];
 
@@ -53,17 +53,6 @@ const shapeMap: Record<ShapeVariant, ShapeClasses> = {
     input: "rounded-lg",
     bgRadius: 8,
     mergedRadius: 8,
-  },
-  control: {
-    item: "rounded-[6px]",
-    bg: "rounded-[6px]",
-    focusRing: "rounded-[8px]",
-    mergedBg: "rounded-[6px]",
-    container: "rounded-[6px]",
-    button: "rounded-[6px]",
-    input: "rounded-[6px]",
-    bgRadius: 6,
-    mergedRadius: 6,
   },
 };
 
@@ -128,7 +117,9 @@ function ShapeProvider({
   }, []);
 
   return (
-    <ShapeContext.Provider value={{ shape, setShape, classes: shapeMap[shape] }}>
+    <ShapeContext.Provider
+      value={{ shape, setShape, classes: shapeMap[shape] ?? shapeMap.rounded }}
+    >
       {children}
     </ShapeContext.Provider>
   );

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 
-import ColorPicker from "@/components/ui/color-picker"
+import { ColorPicker } from "@/components/ui/color-picker"
 import {
   ColorPicker as FillColorPicker,
   parseColor,
@@ -53,9 +53,8 @@ export function EmbeddedColorPickerField({
       ) : (
         <ColorPicker
           className={pickerClassName}
-          chrome={pickerChrome ?? "embedded"}
-          onColorChange={onValueChange}
-          size={size ?? 320}
+          defaultFormat="hex"
+          onValueChange={onValueChange}
           value={value}
         />
       )}

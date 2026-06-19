@@ -747,23 +747,23 @@ describe("FloatingToolbar", () => {
     expect(document.body.querySelector('[data-slot="color-picker-area"]')).not.toBeNull()
   })
 
-  it("updates desktop swatch color from the Amplo color picker input as hex", async () => {
+  it("updates desktop swatch color from the color picker input as hex", async () => {
     const surface = await renderPrototype()
     await openTool(surface.container, "pattern")
 
     const swatch = getRequiredButton(surface.container, "Solid color swatch")
     await clickButton(swatch)
 
-    const pickerInput = getRequiredInput(document.body, "Color value")
+    const pickerInput = getRequiredInput(document.body, "Hex value")
     const solidInput = getRequiredInput(surface.container, "Solid color")
 
     await act(async () => {
-      setInputValue(pickerInput, "oklch(0.7 0.18 30)")
+      setInputValue(pickerInput, "ff5500")
       pickerInput.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Enter" }))
     })
 
     expect(solidInput.value).toMatch(/^#[0-9a-f]{6}$/i)
-    expect(solidInput.value.toLowerCase()).not.toBe("#111111")
+    expect(solidInput.value.toLowerCase()).toBe("#ff5500")
   })
 
   it("renders curated pattern palette presets and applies them", async () => {
