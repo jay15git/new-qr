@@ -1047,3 +1047,17 @@
   line-height: 1 !important;
   vertical-align: top !important;
 }
+
+body.drafting-canvas-panning,
+body.drafting-canvas-panning *,
+html.drafting-canvas-panning,
+html.drafting-canvas-panning * {
+  cursor: var(--cursor-move) !important;
+}
+
+body.drafting-layer-moving,
+body.drafting-layer-moving *,
+html.drafting-layer-moving,
+html.drafting-layer-moving * {
+  cursor: var(--cursor-move) !important;
+}

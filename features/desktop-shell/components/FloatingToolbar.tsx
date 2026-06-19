@@ -72,6 +72,7 @@ import {
 import {
   DesktopUtilityToolbar,
   DesktopUtilityToolbarButton,
+  DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS,
 } from "@/features/desktop-shell/components/DesktopUtilityToolbar"
 import { DRAFTING_KEYBOARD_SHORTCUT_GROUPS } from "@/features/workspace/model/keyboard-shortcuts"
 import {
@@ -166,6 +167,7 @@ import {
   DESKTOP_INSPECTOR_INPUT_CLASS,
   DESKTOP_INSPECTOR_LABEL_CLASS,
   DESKTOP_INSPECTOR_MAJOR_GAP_CLASS,
+  DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
   DESKTOP_INSPECTOR_PANEL_TITLE_CLASS,
   DESKTOP_INSPECTOR_RESET_CLASS,
   DESKTOP_INSPECTOR_ROW_CLASS,
@@ -1333,7 +1335,7 @@ export function FloatingToolbar({
 	                        aria-label={`Use ${platform.label} shortcuts`}
 	                        aria-pressed={isSelected}
 	                        className={cn(
-	                          "grid size-7 place-items-center rounded-full text-white/52 transition hover:bg-[#262626] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35",
+	                          "grid size-7 cursor-pointer place-items-center rounded-full text-white/52 transition hover:bg-[#262626] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35",
 	                          isSelected && "bg-[#303030] text-white",
 	                        )}
 	                        data-platform={platform.value}
@@ -1453,7 +1455,7 @@ export function FloatingToolbar({
         >
           <button
             aria-label="Reset defaults"
-            className="grid size-8 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
+            className={DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS}
             disabled={!controller?.onResetDefaults}
             type="button"
             onClick={controller?.onResetDefaults}
@@ -1462,7 +1464,7 @@ export function FloatingToolbar({
           </button>
           <button
             aria-label="Undo"
-            className="grid size-8 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
+            className={DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS}
             disabled={!controller?.canUndo || !controller.onUndo}
             type="button"
             onClick={controller?.onUndo}
@@ -1471,7 +1473,7 @@ export function FloatingToolbar({
           </button>
           <button
             aria-label="Redo"
-            className="grid size-8 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
+            className={DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS}
             disabled={!controller?.canRedo || !controller.onRedo}
             type="button"
             onClick={controller?.onRedo}
@@ -1512,7 +1514,7 @@ export function FloatingToolbar({
                         data-tool-id={tool.id}
                         type="button"
                         className={cn(
-                          "grid size-11 place-items-center rounded-full text-current transition-[background-color,color,box-shadow,transform] duration-150 ease-out outline-none hover:bg-white/[0.11] hover:text-[var(--desktop-toolbar-fg-hover)] focus-visible:ring-2 focus-visible:ring-white/45 active:scale-95 max-md:size-10",
+                          "grid size-11 cursor-pointer place-items-center rounded-full text-current transition-[background-color,color,box-shadow,transform] duration-150 ease-out outline-none hover:bg-white/[0.11] hover:text-[var(--desktop-toolbar-fg-hover)] focus-visible:ring-2 focus-visible:ring-white/45 active:scale-95 max-md:size-10",
                           isActive &&
                             "bg-white/[0.18] text-[var(--desktop-toolbar-fg-active)] shadow-none hover:bg-white/[0.2]",
                         )}
@@ -2403,6 +2405,7 @@ function DesktopBrandIconButton({
         data-desktop-option-tile="true"
         className={cn(
           "relative grid h-12 min-w-0 place-items-center rounded-[7px] border-2 border-transparent bg-transparent text-[var(--desktop-inspector-fg-tertiary)] transition hover:border-[var(--desktop-inspector-control-border-hover)] hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)]",
+          DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
           selected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
         )}
       type="button"
@@ -2644,7 +2647,8 @@ function DesktopCornerStyleButton({
         aria-pressed={selected}
         data-desktop-preview-option="true"
         className={cn(
-          "relative aspect-square w-full min-w-0 rounded-[7px] border-2 border-transparent bg-transparent p-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35",
+          "relative aspect-square w-full min-w-0 rounded-[7px] border-2 border-transparent bg-transparent p-0 transition",
+          DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
           selected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
         )}
         type="button"
@@ -3065,6 +3069,7 @@ function DesktopShapePresetButton({
         className={cn(
           "relative aspect-square w-full min-w-0 rounded-[7px] border-2 border-transparent bg-transparent p-0 transition",
           DESKTOP_INSPECTOR_FOCUS_CLASS,
+          DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
           selected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
         )}
         type="button"
@@ -3771,7 +3776,8 @@ function DesktopContentInspector({
                   aria-label={`Use ${option.label} content`}
                   aria-pressed={isSelected}
                   className={cn(
-                    "relative flex h-[54px] min-w-0 flex-col items-center justify-center gap-1 rounded-[7px] border-2 border-transparent bg-transparent px-1 text-[10px] font-semibold text-[var(--desktop-inspector-fg-tertiary)] transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35",
+                    "relative flex h-[54px] min-w-0 flex-col items-center justify-center gap-1 rounded-[7px] border-2 border-transparent bg-transparent px-1 text-[10px] font-semibold text-[var(--desktop-inspector-fg-tertiary)] transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)]",
+                    DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
                     isSelected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
                   )}
                   data-desktop-content-type-option="true"
@@ -3982,7 +3988,8 @@ function DesktopModulePatternButton({
         aria-pressed={selected}
         data-desktop-preview-option="true"
         className={cn(
-          "relative aspect-square w-full min-w-0 rounded-[7px] border-2 border-transparent bg-transparent p-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35",
+          "relative aspect-square w-full min-w-0 rounded-[7px] border-2 border-transparent bg-transparent p-0 transition",
+          DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
           selected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
         )}
         type="button"
@@ -4203,6 +4210,7 @@ function DesktopPatternSwatchButton({
         className={cn(
           "relative aspect-square w-full min-w-0 rounded-[7px] border-2 border-transparent bg-transparent p-0 transition",
           DESKTOP_INSPECTOR_FOCUS_CLASS,
+          DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
           selected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
         )}
         type="button"
@@ -5004,14 +5012,14 @@ function DesktopLayersInspector({
                   >
                     <DraggableListHandle
                       className={cn(
-                        "size-8 shrink-0 rounded-[6px] border-transparent bg-transparent text-[var(--desktop-inspector-fg-muted)] shadow-none hover:border-[var(--desktop-inspector-control-border-hover)] hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-secondary)]",
+                        "size-8 shrink-0 cursor-grab rounded-[6px] border-transparent bg-transparent text-[var(--desktop-inspector-fg-muted)] shadow-none hover:border-[var(--desktop-inspector-control-border-hover)] hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-secondary)] active:cursor-grabbing",
                       )}
                       label={`Reorder ${layer.name}`}
                     />
                     <button
                       aria-current={isSelected ? "true" : undefined}
                       aria-label={`Select ${layer.name}`}
-                      className="flex min-w-0 flex-1 items-center bg-transparent px-1 text-left shadow-none hover:bg-transparent active:bg-transparent"
+                      className="flex min-w-0 flex-1 cursor-pointer items-center bg-transparent px-1 text-left shadow-none hover:bg-transparent active:bg-transparent"
                       data-slot="desktop-layer-row"
                       type="button"
                       onClick={() => onLayersSettingsChange({ selectedLayerId: layer.id })}
@@ -5086,7 +5094,7 @@ function DesktopLayerStackIconToggle({
       aria-label={label}
       aria-pressed={active}
       className={cn(
-        "grid size-7 place-items-center rounded-[6px] border border-transparent bg-transparent text-[var(--desktop-inspector-fg-primary)] shadow-none transition-colors outline-none hover:bg-transparent hover:text-[var(--desktop-inspector-fg-primary)] active:bg-transparent focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]",
+        "grid size-7 cursor-pointer place-items-center rounded-[6px] border border-transparent bg-transparent text-[var(--desktop-inspector-fg-primary)] shadow-none transition-colors outline-none hover:bg-transparent hover:text-[var(--desktop-inspector-fg-primary)] active:bg-transparent focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]",
       )}
       data-slot="desktop-layer-stack-icon-toggle"
       type="button"

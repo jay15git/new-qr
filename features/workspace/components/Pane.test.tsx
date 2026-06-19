@@ -807,7 +807,7 @@ describe("Pane", () => {
     const editor = getRequiredElement(text, '[data-slot="drafting-text-editor"]') as HTMLTextAreaElement
 
     expect(text.className).toContain("cursor-text")
-    expect(text.className).not.toContain("cursor-move")
+    expect(text.className).not.toContain("cursor-all-scroll")
     expect(editor.className).toContain("cursor-text")
     expect(editor.value).toBe("Scan here")
 

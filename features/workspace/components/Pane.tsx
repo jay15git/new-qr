@@ -120,6 +120,19 @@ type TextRunStylePatch = Pick<
   "fill" | "fontFamily" | "fontId" | "fontSize" | "fontStyle" | "fontWeight" | "underline"
 >
 
+const LAYER_MOVE_CURSOR_LOCK_CLASS = "drafting-layer-moving"
+
+function lockLayerMoveCursor() {
+  document.documentElement.classList.add(LAYER_MOVE_CURSOR_LOCK_CLASS)
+  document.body.classList.add(LAYER_MOVE_CURSOR_LOCK_CLASS)
+}
+
+function unlockLayerMoveCursor() {
+  document.documentElement.classList.remove(LAYER_MOVE_CURSOR_LOCK_CLASS)
+  document.body.classList.remove(LAYER_MOVE_CURSOR_LOCK_CLASS)
+}
+
+const LAYER_MOVE_CURSOR_CLASS = "cursor-all-scroll"
 const RESIZE_CONTROL_PADDING_PX = 12
 const ROTATE_HANDLE_OFFSET_PX = 34
 const ROTATE_HANDLE_RADIUS_PX = 10
@@ -784,7 +797,7 @@ function LayerContextMenuButton({
   return (
     <button
       aria-label={label}
-      className="block h-8 w-full rounded-full px-3 text-left text-[12px] font-semibold text-current transition-[background-color,color] duration-150 hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+      className="block h-8 w-full cursor-pointer rounded-full px-3 text-left text-[12px] font-semibold text-current transition-[background-color,color] duration-150 hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
       role="menuitem"
       type="button"
       onClick={onClick}
@@ -878,7 +891,7 @@ function LayerFloatingToolbarButton({
   return (
     <button
       aria-label={label}
-      className="flex size-8 items-center justify-center rounded-full text-current transition-[background-color,color] duration-150 hover:bg-[var(--drafting-layer-toolbar-button-hover-bg,rgba(255,255,255,0.11))] hover:text-[var(--drafting-layer-toolbar-button-hover-text,white)] disabled:pointer-events-none disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+      className="flex size-8 cursor-pointer items-center justify-center rounded-full text-current transition-[background-color,color] duration-150 hover:bg-[var(--drafting-layer-toolbar-button-hover-bg,rgba(255,255,255,0.11))] hover:text-[var(--drafting-layer-toolbar-button-hover-text,white)] disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
       data-slot="drafting-layer-floating-toolbar-button"
       disabled={disabled}
       type="button"
@@ -1059,7 +1072,7 @@ function TextFormatButton({
       aria-label={label}
       aria-pressed={active}
       className={cn(
-        "grid size-8 shrink-0 place-items-center rounded-full transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45",
+        "grid size-8 shrink-0 cursor-pointer place-items-center rounded-full transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45",
         active && "bg-white/[0.16] text-white",
       )}
       type="button"
@@ -1261,6 +1274,7 @@ export const Pane = memo(function Pane({
   const [hasError, setHasError] = useState(false)
   const [rotatingLayerId, setRotatingLayerId] = useState<string | null>(null)
   const [isLayerInteracting, setIsLayerInteracting] = useState(false)
+  const [isMovingLayers, setIsMovingLayers] = useState(false)
   const [canvasHeight, setCanvasHeight] = useState(0)
   const [rotationPreviewDegrees, setRotationPreviewDegrees] = useState<number | null>(null)
   const [multiSelectionPreview, setMultiSelectionPreview] = useState<{
@@ -1423,6 +1437,24 @@ export const Pane = memo(function Pane({
     editor?.setSelectionRange(editor.value.length, editor.value.length)
   }, [editingTextLayerId])
 
+  useEffect(() => {
+    if (!isMovingLayers) {
+      return
+    }
+
+    lockLayerMoveCursor()
+
+    return () => {
+      unlockLayerMoveCursor()
+    }
+  }, [isMovingLayers])
+
+  useEffect(() => {
+    return () => {
+      unlockLayerMoveCursor()
+    }
+  }, [])
+
   const visibleLayers = resolvedLayers
     .filter((layer) => layer.isVisible)
     .sort((a, b) => a.zIndex - b.zIndex)
@@ -1515,6 +1547,10 @@ export const Pane = memo(function Pane({
       startY: event.clientY,
     }
     setIsLayerInteracting(true)
+    if (mode === "move") {
+      lockLayerMoveCursor()
+      setIsMovingLayers(true)
+    }
     if (mode === "rotate") {
       if (rotationLabelTimeoutRef.current !== null) {
         window.clearTimeout(rotationLabelTimeoutRef.current)
@@ -1732,6 +1768,10 @@ export const Pane = memo(function Pane({
       startY: event.clientY,
     }
     setIsLayerInteracting(true)
+    if (mode === "move") {
+      lockLayerMoveCursor()
+      setIsMovingLayers(true)
+    }
     if (mode === "rotate") {
       if (rotationLabelTimeoutRef.current !== null) {
         window.clearTimeout(rotationLabelTimeoutRef.current)
@@ -1953,6 +1993,8 @@ export const Pane = memo(function Pane({
         }, ROTATION_LABEL_HIDE_DELAY_MS)
       }
       setIsLayerInteracting(false)
+      setIsMovingLayers(false)
+      unlockLayerMoveCursor()
       interactionRef.current = null
     }
   }
@@ -2301,7 +2343,8 @@ export const Pane = memo(function Pane({
           data-layer-id={layer.id}
           data-selected={isLayerSelected ? "true" : "false"}
           className={cn(
-            "absolute max-h-none max-w-none cursor-move touch-none",
+            "absolute max-h-none max-w-none touch-none",
+            LAYER_MOVE_CURSOR_CLASS,
             layer.isLocked && "cursor-default",
           )}
           style={{
@@ -2336,7 +2379,8 @@ export const Pane = memo(function Pane({
           data-node-id={state.data}
           data-selected={isLayerSelected ? "true" : "false"}
           className={cn(
-            "absolute max-h-none max-w-none cursor-move touch-none",
+            "absolute max-h-none max-w-none touch-none",
+            LAYER_MOVE_CURSOR_CLASS,
             layer.isLocked && "cursor-default",
           )}
           style={{
@@ -2372,7 +2416,7 @@ export const Pane = memo(function Pane({
           data-selected={isLayerSelected ? "true" : "false"}
           className={cn(
             "absolute max-h-none max-w-none touch-none overflow-hidden",
-            isEditing ? "cursor-text" : "cursor-move",
+            isEditing ? "cursor-text" : LAYER_MOVE_CURSOR_CLASS,
             layer.isLocked && !isEditing && "cursor-default",
           )}
           style={{
@@ -2428,7 +2472,8 @@ export const Pane = memo(function Pane({
           data-layer-id={layer.id}
           data-selected={isLayerSelected ? "true" : "false"}
           className={cn(
-            "absolute max-h-none max-w-none cursor-move touch-none overflow-hidden",
+            "absolute max-h-none max-w-none touch-none overflow-hidden",
+          LAYER_MOVE_CURSOR_CLASS,
             layer.isLocked && "cursor-default",
           )}
           style={{
@@ -2455,7 +2500,8 @@ export const Pane = memo(function Pane({
           data-layer-id={layer.id}
           data-selected={isLayerSelected ? "true" : "false"}
           className={cn(
-            "absolute max-h-none max-w-none cursor-move touch-none overflow-visible",
+            "absolute max-h-none max-w-none touch-none overflow-visible",
+          LAYER_MOVE_CURSOR_CLASS,
             layer.isLocked && "cursor-default",
           )}
           style={{
@@ -2495,7 +2541,8 @@ export const Pane = memo(function Pane({
         data-card-border-width={cardState.border.width}
         data-selected={isLayerSelected ? "true" : "false"}
         className={cn(
-          "absolute max-h-none max-w-none cursor-move transition-[box-shadow,background-color,border-radius] duration-150",
+          "absolute max-h-none max-w-none transition-[box-shadow,background-color,border-radius] duration-150",
+          LAYER_MOVE_CURSOR_CLASS,
           "overflow-visible",
           layer.isLocked && "cursor-default",
         )}

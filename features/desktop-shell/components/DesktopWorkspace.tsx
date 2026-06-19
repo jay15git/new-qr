@@ -142,6 +142,25 @@ function DesktopWorkspaceStyles() {
         pointer-events: none;
       }
 
+      body:has([data-slot="desktop-workspace"]) button:not(:disabled):not([data-slot="draggable-list-handle"]):not([data-slot="drafting-layer-resize-handle"]),
+      body:has([data-slot="desktop-workspace"]) summary,
+      body:has([data-slot="desktop-workspace"]) select:not(:disabled),
+      body:has([data-slot="desktop-workspace"]) input[type="color"] {
+        cursor: var(--cursor-pointer);
+      }
+
+      body:has([data-slot="desktop-workspace"]) button:disabled {
+        cursor: var(--cursor-not-allowed);
+      }
+
+      body:has([data-slot="desktop-workspace"]) [data-slot="draggable-list-handle"]:not(:disabled) {
+        cursor: var(--cursor-grab);
+      }
+
+      body:has([data-slot="desktop-workspace"]) [data-slot="draggable-list-handle"]:not(:disabled):active {
+        cursor: var(--cursor-grabbing);
+      }
+
       [data-slot="desktop-workspace"] [data-slot="desktop-floating-toolbar"],
       [data-slot="desktop-workspace"] [data-slot="desktop-floating-inspector"],
       [data-slot="desktop-workspace"] [data-slot="desktop-action-toolbar"],

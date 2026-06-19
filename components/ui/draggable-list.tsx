@@ -109,7 +109,7 @@ export function DraggableListHandle({
     <Button
       aria-label={label}
       className={cn(
-        "rounded-full border border-white/8 bg-white/[0.03] text-foreground/45 shadow-none hover:bg-white/[0.06] hover:text-foreground/68",
+        "cursor-grab rounded-full border border-white/8 bg-white/[0.03] text-foreground/45 shadow-none hover:bg-white/[0.06] hover:text-foreground/68 active:cursor-grabbing",
         className,
       )}
       data-slot="draggable-list-handle"

@@ -4119,7 +4119,7 @@ describe("WorkspaceSurface", () => {
       dispatchBodyShortcut("l", { ctrlKey: true, shiftKey: true })
     })
 
-    expect(groupLayer.className).toContain("cursor-move")
+    expect(groupLayer.className).toContain("cursor-all-scroll")
 
     act(() => {
       dispatchBodyShortcut("h", { ctrlKey: true, shiftKey: true })

@@ -14,8 +14,8 @@
   --cursor-row-resize: url("/cursors/twilight/row-resize.svg") 16 16, row-resize;
   --cursor-ew-resize: url("/cursors/twilight/size_hor.svg") 16 16, ew-resize;
   --cursor-ns-resize: url("/cursors/twilight/size_ver.svg") 16 16, ns-resize;
-  --cursor-nesw-resize: url("/cursors/twilight/size_fdiag.svg") 16 16, nesw-resize;
-  --cursor-nwse-resize: url("/cursors/twilight/size_bdiag.svg") 16 16, nwse-resize;
+  --cursor-nesw-resize: url("/cursors/twilight/size_bdiag.svg") 16 16, nesw-resize;
+  --cursor-nwse-resize: url("/cursors/twilight/size_fdiag.svg") 16 16, nwse-resize;
   --cursor-wait: url("/cursors/twilight/wait.svg") 16 16, wait;
   --cursor-progress: url("/cursors/twilight/wait.svg") 16 16, progress;
   --cursor-copy: url("/cursors/twilight/copy.svg") 4 4, copy;

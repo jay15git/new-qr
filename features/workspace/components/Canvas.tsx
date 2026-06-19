@@ -34,6 +34,7 @@ import {
 
 import type { DraftingCardState } from "@/features/workspace/model/card-state"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
+import { DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS } from "@/features/desktop-shell/components/DesktopUtilityToolbar"
 import { Pane, type DraftingLayerMenuAction } from "@/features/workspace/components/Pane"
 import { InsertMenu } from "@/features/workspace/components/InsertMenu"
 import { getQrLayout } from "@/features/workspace/model/layout-engine"
@@ -87,6 +88,18 @@ type DesktopLayerToolbarLayer = {
 type DesktopLayerToolbarControls = {
   layer: DesktopLayerToolbarLayer | null
   onLayerChange: (patch: Partial<DesktopLayerToolbarLayer>) => void
+}
+
+const CANVAS_PAN_CURSOR_LOCK_CLASS = "drafting-canvas-panning"
+
+function lockCanvasPanCursor() {
+  document.documentElement.classList.add(CANVAS_PAN_CURSOR_LOCK_CLASS)
+  document.body.classList.add(CANVAS_PAN_CURSOR_LOCK_CLASS)
+}
+
+function unlockCanvasPanCursor() {
+  document.documentElement.classList.remove(CANVAS_PAN_CURSOR_LOCK_CLASS)
+  document.body.classList.remove(CANVAS_PAN_CURSOR_LOCK_CLASS)
 }
 
 const MIN_PREVIEW_ZOOM = 0.1
@@ -437,8 +450,10 @@ function DraftingPaneSurface({
   snapEnabled: boolean
 }) {
   const hideLayerSelectionChrome = activeCanvasTool === "pan"
+  const [isPanning, setIsPanning] = useState(false)
   const onPaneSelectRef = useRef(onPaneSelect)
   const onPaneQrClickRef = useRef(onPaneQrClick)
+  const panOverlayRef = useRef<HTMLDivElement>(null)
   const panInteractionRef = useRef<{
     pointerId: number
     startClientX: number
@@ -460,6 +475,12 @@ function DraftingPaneSurface({
   useEffect(() => {
     pinchZoomRef.current = paneZoom
   }, [paneZoom])
+
+  useEffect(() => {
+    return () => {
+      unlockCanvasPanCursor()
+    }
+  }, [])
 
   const handleSelect = useCallback(() => {
     onPaneSelectRef.current(pane.id)
@@ -529,7 +550,8 @@ function DraftingPaneSurface({
     (event: ReactPointerEvent<HTMLDivElement>) => {
       event.preventDefault()
       event.stopPropagation()
-      event.currentTarget.setPointerCapture(event.pointerId)
+      const captureTarget = panOverlayRef.current ?? event.currentTarget
+      captureTarget.setPointerCapture(event.pointerId)
       onPaneSelectRef.current(pane.id)
       panInteractionRef.current = {
         pointerId: event.pointerId,
@@ -538,18 +560,23 @@ function DraftingPaneSurface({
         startPanX: panePan.x,
         startPanY: panePan.y,
       }
+      lockCanvasPanCursor()
+      setIsPanning(true)
     },
     [pane.id, panePan.x, panePan.y],
   )
 
   const handlePanePointerDownCapture = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
-      if (
-        activeCanvasTool !== "pan" ||
-        event.button !== 0 ||
-        event.pointerType === "touch" ||
-        shouldIgnorePanToolTarget(event)
-      ) {
+      if (activeCanvasTool !== "pan" || event.button !== 0 || event.pointerType === "touch") {
+        return
+      }
+
+      if (shouldIgnorePanToolTarget(event)) {
+        return
+      }
+
+      if (event.target instanceof Element && event.target.closest("[data-slot='drafting-pan-overlay']")) {
         return
       }
 
@@ -579,12 +606,8 @@ function DraftingPaneSurface({
         onLayerSelect?.(pane.id, null)
         return
       }
-
-      onPaneSelectRef.current(pane.id)
-      onLayerSelect?.(pane.id, null)
-      beginPanePan(event)
     },
-    [activeCanvasTool, beginPanePan, isPlacementTarget, onAddTextLayerAt, onLayerSelect, pane.id],
+    [activeCanvasTool, isPlacementTarget, onAddTextLayerAt, onLayerSelect, pane.id],
   )
 
   const handlePanePointerMove = useCallback(
@@ -608,6 +631,8 @@ function DraftingPaneSurface({
   const handlePanePointerEnd = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
     if (panInteractionRef.current?.pointerId === event.pointerId) {
       panInteractionRef.current = null
+      unlockCanvasPanCursor()
+      setIsPanning(false)
     }
   }, [])
 
@@ -669,6 +694,7 @@ function DraftingPaneSurface({
       data-surface-appearance="neutral"
       data-dragging={draggingPaneId === pane.id ? "true" : "false"}
       data-grid-visible={showCanvasGrid ? "true" : "false"}
+      data-panning={isPanning ? "true" : "false"}
       data-snap-target={isSnapTarget ? "true" : "false"}
       draggable={canSwap}
       className={cn(
@@ -732,8 +758,10 @@ function DraftingPaneSurface({
       </div>
       {activeCanvasTool === "pan" ? (
         <div
+          ref={panOverlayRef}
           aria-hidden="true"
-          className="absolute inset-0 z-[1] cursor-grab touch-none active:cursor-grabbing"
+          className="absolute inset-0 z-[1] cursor-grab touch-none data-[panning=true]:cursor-move"
+          data-panning={isPanning ? "true" : "false"}
           data-slot="drafting-pan-overlay"
           onPointerCancel={handlePanePointerEnd}
           onPointerDown={beginPanePan}
@@ -1104,7 +1132,7 @@ export function Canvas({
             >
               <button
                 aria-label="Decrease canvas size"
-                className="grid size-8 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
+                className={DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS}
                 disabled={activeZoom <= MIN_PREVIEW_ZOOM}
                 type="button"
                 onClick={handleZoomOut}
@@ -1115,7 +1143,7 @@ export function Canvas({
                 <PopoverTrigger asChild>
 	                  <button
 	                    aria-label="Choose canvas size"
-	                    className="h-8 min-w-[3.75rem] rounded-full px-2 text-center text-[1rem] font-semibold tracking-normal text-white transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+	                    className="h-8 min-w-[3.75rem] cursor-pointer rounded-full px-2 text-center text-[1rem] font-semibold tracking-normal text-white transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
 	                    type="button"
                     onClick={() => setDesktopZoomPopoverOpen((open) => !open)}
                     onDoubleClick={() => {
@@ -1141,7 +1169,7 @@ export function Canvas({
                         <button
                           key={preset}
                           aria-checked={isSelected}
-                          className="grid h-10 grid-cols-[1.25rem_1fr] items-center rounded-[10px] px-2 text-left text-[1rem] font-semibold text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                          className="grid h-10 cursor-pointer grid-cols-[1.25rem_1fr] items-center rounded-[10px] px-2 text-left text-[1rem] font-semibold text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
                           role="menuitemradio"
                           type="button"
                           onClick={() => {
@@ -1161,7 +1189,7 @@ export function Canvas({
               </Popover>
               <button
                 aria-label="Increase canvas size"
-                className="grid size-8 place-items-center rounded-full text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-35"
+                className={DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS}
                 disabled={activeZoom >= MAX_PREVIEW_ZOOM}
                 type="button"
                 onClick={handleZoomIn}
