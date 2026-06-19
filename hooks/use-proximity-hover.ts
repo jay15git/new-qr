@@ -134,6 +134,8 @@ export function useProximityHover<T extends HTMLElement>(
           const itemStart = containerEdge + (borderOffset + contentPos - scrollOffset) * scale;
           const itemSize = (axis === "x" ? r.width : r.height) * scale;
           const itemEnd = itemStart + itemSize;
+          const itemCenter = itemStart + itemSize / 2;
+          const distance = Math.abs(mousePos - itemCenter);
 
           if (mousePos >= itemStart && mousePos <= itemEnd) {
             if (containingIndex === null || distance < containingDistance) {
@@ -141,9 +143,6 @@ export function useProximityHover<T extends HTMLElement>(
               containingDistance = distance;
             }
           }
-
-          const itemCenter = itemStart + itemSize / 2;
-          const distance = Math.abs(mousePos - itemCenter);
 
           if (distance < closestDistance) {
             closestDistance = distance;
