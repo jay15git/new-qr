@@ -111,6 +111,7 @@ export function useProximityHover<T extends HTMLElement>(
         let closestIndex: number | null = null;
         let closestDistance = Infinity;
         let containingIndex: number | null = null;
+        let containingDistance = Infinity;
 
         const rects = itemRectsRef.current;
         // Convert content-relative rects to viewport coords using live scroll
@@ -135,7 +136,10 @@ export function useProximityHover<T extends HTMLElement>(
           const itemEnd = itemStart + itemSize;
 
           if (mousePos >= itemStart && mousePos <= itemEnd) {
-            containingIndex = index;
+            if (containingIndex === null || distance < containingDistance) {
+              containingIndex = index;
+              containingDistance = distance;
+            }
           }
 
           const itemCenter = itemStart + itemSize / 2;

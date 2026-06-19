@@ -192,6 +192,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import {
+  TabsSubtleIconRail,
+  TabsSubtleIconRailItem,
+  TabsSubtleIconRailSeparator,
+} from "@/components/ui/tabs-subtle-icon-rail"
+import {
   DEFAULT_QR_INPUT_TYPE,
   QR_INPUT_OPTIONS,
   type QrInputType,
@@ -1486,42 +1491,39 @@ export function FloatingToolbar({
           data-toolbar-appearance="desktop-glass"
           className="fixed bottom-5 left-5 top-5 z-[25] grid w-[23.75rem] grid-cols-[4.5rem_minmax(0,1fr)] overflow-hidden rounded-[20px] border border-white/[0.1] bg-black/55 text-white shadow-[0_24px_65px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl max-md:bottom-4 max-md:left-3 max-md:top-4 max-md:w-[min(20rem,calc(100vw-1.5rem))] max-md:grid-cols-[3.5rem_minmax(0,1fr)] max-md:rounded-[18px]"
         >
-          <nav
+          <TabsSubtleIconRail
             aria-label="Desktop tools"
             data-slot="desktop-floating-toolbar"
-            className="relative flex min-h-0 min-w-0 flex-col items-center justify-start gap-1.5 overflow-x-hidden overflow-y-auto border-r border-white/[0.08] p-1.5 pt-14 text-[var(--desktop-toolbar-fg)] max-md:p-1 max-md:pt-12"
+            className="relative min-h-0 min-w-0 overflow-x-hidden overflow-y-auto border-r border-white/[0.08] p-1.5 pt-14 text-[var(--desktop-toolbar-fg)] max-md:p-1 max-md:pt-12"
+            selectedIndex={
+              actualActiveTool
+                ? DESKTOP_TOOLBAR_TOOLS.findIndex((tool) => tool.id === actualActiveTool)
+                : -1
+            }
+            onSelect={(index) => {
+              const toolId = DESKTOP_TOOLBAR_TOOLS[index]?.id
+              if (toolId) onActiveToolChange(toolId)
+            }}
+            selectedPillClassName="rounded-full bg-[var(--desktop-toolbar-pill-selected)]"
+            hoverPillClassName="rounded-full bg-[var(--desktop-toolbar-pill-hover)]"
           >
             {DESKTOP_TOOLBAR_TOOLS.map((tool, index) => {
-              const isActive = actualActiveTool === tool.id
               const previousGroup = DESKTOP_TOOLBAR_TOOLS[index - 1]?.group
               const startsGroup = index > 0 && tool.group !== previousGroup
 
               return (
-                <div key={tool.id} className="flex flex-col items-center gap-1.5">
-                  {startsGroup ? (
-                    <span
-                      aria-hidden="true"
-                      data-slot="desktop-toolbar-separator"
-                      className="my-1 h-px w-7 bg-white/[0.13]"
-                    />
-                  ) : null}
+                <div key={tool.id} className="contents">
+                  {startsGroup ? <TabsSubtleIconRailSeparator /> : null}
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button
+                      <TabsSubtleIconRailItem
                         aria-label={`Open ${tool.title}`}
-                        aria-pressed={isActive}
                         data-desktop-tool-button="true"
                         data-tool-id={tool.id}
-                        type="button"
-                        className={cn(
-                          "grid size-11 cursor-pointer place-items-center rounded-full text-current transition-[background-color,color,box-shadow,transform] duration-150 ease-out outline-none hover:bg-white/[0.11] hover:text-[var(--desktop-toolbar-fg-hover)] focus-visible:ring-2 focus-visible:ring-white/45 active:scale-95 max-md:size-10",
-                          isActive &&
-                            "bg-white/[0.18] text-[var(--desktop-toolbar-fg-active)] shadow-none hover:bg-white/[0.2]",
-                        )}
-                        onClick={() => onActiveToolChange(tool.id)}
+                        index={index}
                       >
                         {tool.renderIcon()}
-                      </button>
+                      </TabsSubtleIconRailItem>
                     </TooltipTrigger>
                     <TooltipContent
                       hideArrow
@@ -1535,7 +1537,7 @@ export function FloatingToolbar({
                 </div>
               )
             })}
-          </nav>
+          </TabsSubtleIconRail>
 
           {activeToolConfig || controller?.selectedElementLayer ? (
             <DesktopFloatingInspector activeTool={actualActiveTool} model={model} />
@@ -1625,7 +1627,7 @@ export function DesktopThemeStyles() {
         box-shadow: 0 24px 64px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.86) !important;
       }
 
-      [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] button:hover,
+      [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] button:not([data-proximity-index]):hover,
       [data-desktop-theme="light"] [data-slot="desktop-document-toolbar"] button:hover,
       [data-desktop-theme="light"] [data-slot="desktop-utility-toolbar"] button:hover,
       [data-desktop-theme="light"] [data-slot="desktop-action-toolbar"] button:hover {
@@ -1637,12 +1639,24 @@ export function DesktopThemeStyles() {
         --desktop-toolbar-fg: rgba(15, 23, 42, 0.48);
         --desktop-toolbar-fg-hover: rgba(15, 23, 42, 0.62);
         --desktop-toolbar-fg-active: rgba(15, 23, 42, 0.90);
+        --desktop-toolbar-pill-selected: rgba(15, 23, 42, 0.11);
+        --desktop-toolbar-pill-hover: rgba(15, 23, 42, 0.08);
         color: var(--desktop-toolbar-fg) !important;
       }
 
-      [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] button[aria-pressed="true"] {
+      [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] button:not([data-proximity-index])[aria-pressed="true"] {
         background: rgba(15, 23, 42, 0.11) !important;
         color: var(--desktop-toolbar-fg-active) !important;
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] button[data-proximity-index]:hover,
+      [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] button[data-proximity-index][aria-pressed="true"] {
+        background: transparent !important;
+        color: inherit !important;
+      }
+
+      [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] [data-slot="tabs-subtle-icon-rail-separator"] {
+        background-color: rgba(15, 23, 42, 0.11) !important;
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] [class*="border-white"] {
@@ -1754,14 +1768,42 @@ export function DesktopThemeStyles() {
         --desktop-toolbar-fg: rgba(255, 255, 255, 0.56);
         --desktop-toolbar-fg-hover: rgba(255, 255, 255, 0.72);
         --desktop-toolbar-fg-active: rgba(255, 255, 255, 0.94);
+        --desktop-toolbar-pill-selected: rgba(255, 255, 255, 0.18);
+        --desktop-toolbar-pill-hover: rgba(255, 255, 255, 0.11);
         color: var(--desktop-toolbar-fg);
       }
 
-      [data-slot="desktop-floating-toolbar"] button:hover {
+      [data-slot="desktop-floating-toolbar"] [data-proximity-index] [data-slot="tabs-subtle-icon-rail-icon"] {
+        color: var(--desktop-toolbar-fg);
+        transition: color 80ms;
+      }
+
+      [data-slot="desktop-floating-toolbar"] [data-proximity-index] [data-slot="tabs-subtle-icon-rail-icon"] svg,
+      [data-slot="desktop-floating-toolbar"] [data-proximity-index] [data-slot="tabs-subtle-icon-rail-icon"] svg * {
+        transition: color 80ms, stroke-width 80ms;
+      }
+
+      [data-slot="desktop-floating-toolbar"] [data-proximity-index]:not([data-active]) [data-slot="tabs-subtle-icon-rail-icon"] svg {
+        stroke-width: 1.5;
+      }
+
+      [data-slot="desktop-floating-toolbar"] [data-proximity-index][data-active] [data-slot="tabs-subtle-icon-rail-icon"] {
         color: var(--desktop-toolbar-fg-hover);
       }
 
-      [data-slot="desktop-floating-toolbar"] button[aria-pressed="true"] {
+      [data-slot="desktop-floating-toolbar"] [data-proximity-index][data-active] [data-slot="tabs-subtle-icon-rail-icon"] svg {
+        stroke-width: 2;
+      }
+
+      [data-slot="desktop-floating-toolbar"] [data-proximity-index][data-selected] [data-slot="tabs-subtle-icon-rail-icon"] {
+        color: var(--desktop-toolbar-fg-active);
+      }
+
+      [data-slot="desktop-floating-toolbar"] button:not([data-proximity-index]):hover {
+        color: var(--desktop-toolbar-fg-hover);
+      }
+
+      [data-slot="desktop-floating-toolbar"] button:not([data-proximity-index])[aria-pressed="true"] {
         color: var(--desktop-toolbar-fg-active);
       }
 

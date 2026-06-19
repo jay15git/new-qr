@@ -70,7 +70,8 @@ describe("FloatingToolbar", () => {
     expect(inspector?.className).not.toContain("rounded-[20px]")
     expect(inspector?.className).not.toContain("bg-black/55")
     expect(source).toContain('[data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] {')
-    expect(source).toContain("color: rgba(15, 23, 42, 0.58) !important;")
+    expect(source).toContain('--desktop-toolbar-fg: rgba(15, 23, 42, 0.48)')
+    expect(source).toContain('[data-slot="tabs-subtle-icon-rail-icon"]')
   })
 
   it("keeps settings panel headings transparent", () => {
