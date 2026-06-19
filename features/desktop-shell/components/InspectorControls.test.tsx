@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from "vitest"
 
 import {
   DESKTOP_INSPECTOR_INPUT_CLASS,
-  DESKTOP_INSPECTOR_SELECTED_CLASS,
   DesktopInspectorNativeSelect,
   DesktopInspectorSearchInput,
   DesktopInspectorSegmentedControl,
@@ -34,7 +33,7 @@ describe("desktop inspector controls", () => {
     expect(markup).toContain('aria-label="Search logo icons"')
   })
 
-  it("renders segmented controls with preserved selected state classes", () => {
+  it("renders segmented controls with tabs-subtle selected state", () => {
     const markup = renderToStaticMarkup(
       <DesktopInspectorSegmentedControl
         ariaLabelPrefix="Use"
@@ -48,9 +47,9 @@ describe("desktop inspector controls", () => {
       />,
     )
 
-    expect(markup).toContain('aria-pressed="true"')
-    expect(markup).toContain(DESKTOP_INSPECTOR_SELECTED_CLASS)
-    expect(markup).toContain("desktop-inspector-option-selected-bg")
-    expect(markup).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(markup).toContain('aria-selected="true"')
+    expect(markup).toContain('role="tablist"')
+    expect(markup).toContain('role="tab"')
+    expect(markup).not.toContain('aria-pressed="true"')
   })
 })

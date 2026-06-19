@@ -1,13 +1,16 @@
 "use client"
 
 import {
+  useId,
   type ComponentProps,
   type ReactNode,
 } from "react"
 import { ChevronDownIcon, SearchIcon } from "lucide-react"
 
-import { cn } from "@/lib/utils"
+import { TabsSubtle, TabsSubtleItem } from "@/components/ui/tabs-subtle"
 import { Input } from "@/components/ui/input"
+import { ShapeProvider } from "@/lib/shape-context"
+import { cn } from "@/lib/utils"
 
 export const DESKTOP_INSPECTOR_FG_PRIMARY =
   "text-[var(--desktop-inspector-fg-primary)]"
@@ -190,6 +193,9 @@ type DesktopInspectorSegmentedControlProps<TValue extends string> = {
   value: TValue
 }
 
+const DESKTOP_INSPECTOR_TAB_ITEM_CLASS =
+  "h-8 min-w-0 flex-1 justify-center px-2 py-0 [&_span]:text-[11px]"
+
 export function DesktopInspectorSegmentedControl<TValue extends string>({
   ariaLabelPrefix,
   className,
@@ -199,37 +205,44 @@ export function DesktopInspectorSegmentedControl<TValue extends string>({
   itemAriaLabel,
   items,
   onValueChange,
-  selectedClassName = DESKTOP_INSPECTOR_SELECTED_CLASS,
+  selectedClassName: _selectedClassName = DESKTOP_INSPECTOR_SELECTED_CLASS,
   value,
 }: DesktopInspectorSegmentedControlProps<TValue>) {
+  const generatedId = useId()
+  const idPrefix = (dataSlot ?? generatedId).replace(/:/g, "")
+  const selectedIndex = Math.max(
+    0,
+    items.findIndex((item) => item.value === value),
+  )
+  const compactItemClass =
+    columns === 4 ? "px-1 [&_span]:text-[10px]" : columns === 3 ? "px-1.5 [&_span]:text-[10px]" : undefined
+
   return (
-    <div
-      className={cn(
-        "grid gap-1.5",
-        columns === 4 ? "grid-cols-4" : columns === 3 ? "grid-cols-3" : "grid-cols-2",
-        className,
-      )}
-      data-slot={dataSlot}
-    >
-      {items.map((item) => (
-        <button
-          key={item.value}
-          aria-label={itemAriaLabel?.(item) ?? (ariaLabelPrefix ? `${ariaLabelPrefix} ${item.label}` : undefined)}
-          aria-pressed={value === item.value}
-          className={cn(
-            "h-8 truncate px-2 text-[11px] font-semibold",
-            DESKTOP_INSPECTOR_CONTROL_CLASS,
-            value === item.value && selectedClassName,
-            itemClassName,
-          )}
-          type="button"
-          onClick={() => onValueChange(item.value)}
-        >
-          {item.icon ? <span className="shrink-0">{item.icon}</span> : null}
-          {item.label}
-        </button>
-      ))}
-    </div>
+    <ShapeProvider defaultShape="control">
+      <TabsSubtle
+        className={cn("w-full gap-0 py-0 my-0", className)}
+        data-slot={dataSlot ?? "desktop-inspector-segmented-control"}
+        idPrefix={idPrefix}
+        selectedIndex={selectedIndex}
+        onSelect={(index) => {
+          const next = items[index]
+          if (next) onValueChange(next.value)
+        }}
+      >
+        {items.map((item, index) => (
+          <TabsSubtleItem
+            key={item.value}
+            aria-label={
+              itemAriaLabel?.(item) ??
+              (ariaLabelPrefix ? `${ariaLabelPrefix} ${item.label}` : undefined)
+            }
+            className={cn(DESKTOP_INSPECTOR_TAB_ITEM_CLASS, compactItemClass, itemClassName)}
+            index={index}
+            label={item.label}
+          />
+        ))}
+      </TabsSubtle>
+    </ShapeProvider>
   )
 }
 

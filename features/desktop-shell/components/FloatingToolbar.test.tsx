@@ -458,16 +458,14 @@ describe("FloatingToolbar", () => {
     await openTool(surface.container, "pattern")
 
     const colorMode = surface.container.querySelector('[data-slot="desktop-pattern-color-mode"]')
-    const solidMode = colorMode?.querySelector<HTMLButtonElement>('button[aria-pressed="true"]')
+    const solidMode = colorMode?.querySelector<HTMLButtonElement>('button[aria-selected="true"]')
     const gradientMode = getRequiredButton(surface.container, "Use Gradient module color")
     const patternsMode = getRequiredButton(surface.container, "Use Patterns module color")
 
-    expect(solidMode?.className).toContain("desktop-inspector-option-selected-bg")
+    expect(solidMode?.getAttribute("aria-selected")).toBe("true")
     expect(solidMode?.className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
-    expect(gradientMode.className).not.toContain("bg-black/22")
-    expect(gradientMode.className).not.toContain("desktop-inspector-control-bg")
-    expect(patternsMode.className).not.toContain("bg-black/22")
-    expect(patternsMode.className).not.toContain("desktop-inspector-control-bg")
+    expect(gradientMode.getAttribute("aria-selected")).toBe("false")
+    expect(patternsMode.getAttribute("aria-selected")).toBe("false")
   })
 
   it("updates the pattern inspector when a visual pattern is selected", async () => {
@@ -694,8 +692,8 @@ describe("FloatingToolbar", () => {
 
     await clickButton(frameGradient)
 
-    expect(frameGradient.getAttribute("aria-pressed")).toBe("true")
-    expect(dotSolid.getAttribute("aria-pressed")).toBe("true")
+    expect(frameGradient.getAttribute("aria-selected")).toBe("true")
+    expect(dotSolid.getAttribute("aria-selected")).toBe("true")
     expect(surface.container.querySelector('input[aria-label="Frame start color"]')).not.toBeNull()
     expect(surface.container.querySelector('input[aria-label="Dot solid color"]')).not.toBeNull()
   })
@@ -850,8 +848,7 @@ describe("FloatingToolbar", () => {
     expect(circleShape.getAttribute("data-desktop-option-tile")).toBe("true")
     expect(circleShape.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
     expect(circleShape.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
-    expect(solidMode.getAttribute("aria-pressed")).toBe("true")
-    expect(solidMode.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
+    expect(solidMode.getAttribute("aria-selected")).toBe("true")
     expect(solidMode.className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
     expect(surface.container.querySelector('input[aria-label="Shape solid color"]')).not.toBeNull()
   })
@@ -864,7 +861,7 @@ describe("FloatingToolbar", () => {
 
     await clickButton(gradientMode)
 
-    expect(gradientMode.getAttribute("aria-pressed")).toBe("true")
+    expect(gradientMode.getAttribute("aria-selected")).toBe("true")
     expect(surface.container.querySelector('input[aria-label="Shape start color"]')).not.toBeNull()
     expect(surface.container.querySelector('input[aria-label="Shape end color"]')).not.toBeNull()
     expect(surface.container.querySelector('input[aria-label="Shape solid color"]')).toBeNull()

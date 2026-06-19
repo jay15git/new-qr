@@ -2085,6 +2085,24 @@ export function DesktopThemeStyles() {
         color: var(--desktop-inspector-option-selected-fg) !important;
       }
 
+      [data-slot="desktop-floating-inspector"] [role="tablist"] > .bg-active {
+        background-color: var(--desktop-inspector-option-selected-bg) !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] [role="tablist"] [role="tab"][aria-selected="true"] .text-foreground,
+      [data-slot="desktop-floating-inspector"] [role="tablist"] [role="tab"][aria-selected="true"] .text-muted-foreground {
+        color: var(--desktop-inspector-option-selected-fg) !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] [role="tablist"] [role="tab"] .text-muted-foreground {
+        color: var(--desktop-inspector-fg-tertiary) !important;
+      }
+
+      [data-slot="desktop-floating-inspector"] [role="tablist"] [role="tab"][aria-selected="false"] .text-foreground,
+      [data-slot="desktop-floating-inspector"] [role="tablist"] [role="tab"][aria-selected="false"]:hover .text-muted-foreground {
+        color: var(--desktop-inspector-fg-primary) !important;
+      }
+
       [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]):hover {
         background-color: var(--desktop-inspector-option-selected-bg) !important;
         border-color: transparent !important;
@@ -2522,24 +2540,12 @@ function DesktopCornerColorSection({
     >
       <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>{title}</p>
 
-      <div className="grid grid-cols-2 gap-1.5">
-        {DESKTOP_CORNER_COLOR_MODES.map((option) => (
-          <button
-            key={option.value}
-            aria-label={`Use ${option.value} ${target} color`}
-            aria-pressed={mode === option.value}
-            className={cn(
-              "h-8 px-2 text-[11px] font-semibold",
-              DESKTOP_INSPECTOR_CONTROL_CLASS,
-              mode === option.value && DESKTOP_INSPECTOR_SELECTED_CLASS,
-            )}
-            type="button"
-            onClick={() => onModeChange(option.value)}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+      <DesktopInspectorSegmentedControl
+        itemAriaLabel={(option) => `Use ${option.value} ${target} color`}
+        items={DESKTOP_CORNER_COLOR_MODES}
+        value={mode}
+        onValueChange={onModeChange}
+      />
 
       {mode === "solid" ? (
         <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
@@ -2696,25 +2702,13 @@ function DesktopShapeInspector({
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)} data-slot="desktop-shape-color">
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Shape Color</p>
 
-          <div className="grid grid-cols-2 gap-1.5" data-slot="desktop-shape-color-mode">
-            {DESKTOP_SHAPE_COLOR_MODES.map((mode) => (
-              <button
-                key={mode.value}
-                aria-label={`Use ${mode.value} shape color`}
-                aria-pressed={settings.shapeColorMode === mode.value}
-                className={cn(
-                  "h-8 px-2 text-[11px] font-semibold",
-                  DESKTOP_INSPECTOR_CONTROL_CLASS,
-                  settings.shapeColorMode === mode.value &&
-                    DESKTOP_INSPECTOR_SELECTED_CLASS,
-                )}
-                type="button"
-                onClick={() => onShapeSettingsChange({ shapeColorMode: mode.value })}
-              >
-                {mode.label}
-              </button>
-            ))}
-          </div>
+          <DesktopInspectorSegmentedControl
+            dataSlot="desktop-shape-color-mode"
+            itemAriaLabel={(option) => `Use ${option.value} shape color`}
+            items={DESKTOP_SHAPE_COLOR_MODES}
+            value={settings.shapeColorMode}
+            onValueChange={(shapeColorMode) => onShapeSettingsChange({ shapeColorMode })}
+          />
 
           {settings.shapeColorMode === "solid" ? (
             <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
@@ -2870,25 +2864,17 @@ function DesktopShapeInspector({
             value={settings.cardImageUrl}
             onChange={(event) => onShapeSettingsChange({ cardImageUrl: event.currentTarget.value })}
           />
-          <div className="mt-2.5 grid grid-cols-2 gap-1.5">
-            {(["cover", "contain"] as const).map((fit) => (
-              <button
-                key={fit}
-                aria-label={`Use ${fit} shape image fit`}
-                aria-pressed={settings.cardImageFit === fit}
-                className={cn(
-                  "h-8 px-2 text-[11px] font-semibold capitalize",
-                  DESKTOP_INSPECTOR_CONTROL_CLASS,
-                  settings.cardImageFit === fit &&
-                    DESKTOP_INSPECTOR_SELECTED_CLASS,
-                )}
-                type="button"
-                onClick={() => onShapeSettingsChange({ cardImageFit: fit })}
-              >
-                {fit}
-              </button>
-            ))}
-          </div>
+          <DesktopInspectorSegmentedControl
+            className="mt-2.5"
+            itemAriaLabel={(option) => `Use ${option.value} shape image fit`}
+            itemClassName="capitalize"
+            items={[
+              { label: "cover", value: "cover" },
+              { label: "contain", value: "contain" },
+            ]}
+            value={settings.cardImageFit}
+            onValueChange={(cardImageFit) => onShapeSettingsChange({ cardImageFit })}
+          />
           <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
             <DesktopMotionSliderRow
               label="Image opacity"
@@ -3841,25 +3827,14 @@ function DesktopPatternInspector({
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)} data-slot="desktop-module-color">
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Module Color</p>
 
-          <div className="grid grid-cols-3 gap-1.5" data-slot="desktop-pattern-color-mode">
-            {DESKTOP_DOTS_COLOR_MODES.map((mode) => (
-              <button
-                key={mode.value}
-                aria-label={`Use ${mode.label} module color`}
-                aria-pressed={settings.dotsColorMode === mode.value}
-                className={cn(
-                  "h-8 px-2 text-[11px] font-semibold",
-                  DESKTOP_INSPECTOR_CONTROL_CLASS,
-                  settings.dotsColorMode === mode.value &&
-                    DESKTOP_INSPECTOR_SELECTED_CLASS,
-                )}
-                type="button"
-                onClick={() => onPatternSettingsChange({ dotsColorMode: mode.value })}
-              >
-                {mode.label}
-              </button>
-            ))}
-          </div>
+          <DesktopInspectorSegmentedControl
+            columns={3}
+            dataSlot="desktop-pattern-color-mode"
+            itemAriaLabel={(option) => `Use ${option.label} module color`}
+            items={DESKTOP_DOTS_COLOR_MODES}
+            value={settings.dotsColorMode}
+            onValueChange={(dotsColorMode) => onPatternSettingsChange({ dotsColorMode })}
+          />
 
           {settings.dotsColorMode === "solid" ? (
             <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
@@ -4752,24 +4727,15 @@ function DesktopDecorationsInspector({
       <DesktopInspectorScrollArea>
         <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Add</p>
-          <div className="grid grid-cols-2 gap-1.5" data-slot="desktop-decoration-kind">
-            {DESKTOP_DECORATION_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                aria-label={`Add ${option.label} decoration`}
-                aria-pressed={settings.kind === option.value}
-                className={cn(
-                  "h-9 px-2 text-[11px] font-semibold",
-                  DESKTOP_INSPECTOR_CONTROL_CLASS,
-                  settings.kind === option.value && DESKTOP_INSPECTOR_SELECTED_CLASS,
-                )}
-                type="button"
-                onClick={() => onDecorationsSettingsChange({ kind: option.value })}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
+          <DesktopInspectorSegmentedControl
+            columns={4}
+            dataSlot="desktop-decoration-kind"
+            itemAriaLabel={(option) => `Add ${option.label} decoration`}
+            itemClassName="h-9 px-1.5 [&_span]:text-[10px]"
+            items={DESKTOP_DECORATION_OPTIONS}
+            value={settings.kind}
+            onValueChange={(kind) => onDecorationsSettingsChange({ kind })}
+          />
         </section>
 
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
