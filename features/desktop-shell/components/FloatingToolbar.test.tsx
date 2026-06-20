@@ -398,8 +398,7 @@ describe("FloatingToolbar", () => {
 
     expect(linkPreset.getAttribute("aria-pressed")).toBe("true")
     expect(linkPreset.getAttribute("data-desktop-content-type-option")).toBe("true")
-    expect(linkPreset.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
-    expect(linkPreset.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
+    expectAnimatedOptionSelection(linkPreset)
     expect(linkPreset.className).not.toContain("border-white/55")
     expect(linkPreset.className).not.toContain("desktop-inspector-selected-bg")
     expect(linkPreset.className).not.toContain("desktop-inspector-selected-fg")
@@ -494,8 +493,7 @@ describe("FloatingToolbar", () => {
 
     const selectedSurface = dotsPattern.querySelector<HTMLElement>('[data-desktop-adaptive-option-preview="true"]')
     expect(dotsPattern.getAttribute("aria-pressed")).toBe("true")
-    expect(dotsPattern.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
-    expect(dotsPattern.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expectAnimatedOptionSelection(dotsPattern)
     expect(selectedSurface?.className).toContain("border-2")
     expect(selectedSurface?.className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
     expect(selectedSurface?.style.backgroundColor).toBe("transparent")
@@ -511,8 +509,7 @@ describe("FloatingToolbar", () => {
 
     const selectedSurface = dotsPattern.querySelector<HTMLElement>('[data-desktop-adaptive-option-preview="true"]')
     expect(dotsPattern.getAttribute("aria-pressed")).toBe("true")
-    expect(dotsPattern.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
-    expect(dotsPattern.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expectAnimatedOptionSelection(dotsPattern)
     expect(selectedSurface?.className).toContain("border-2")
     expect(selectedSurface?.className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
     expect(selectedSurface?.style.backgroundColor).toBe("transparent")
@@ -605,10 +602,8 @@ describe("FloatingToolbar", () => {
     const dotSurface = squareDot.querySelector<HTMLElement>('[data-desktop-adaptive-option-preview="true"]')
     expect(squareFrame.getAttribute("aria-pressed")).toBe("true")
     expect(squareDot.getAttribute("aria-pressed")).toBe("true")
-    expect(squareFrame.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
-    expect(squareDot.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
-    expect(squareFrame.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
-    expect(squareDot.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expectAnimatedOptionSelection(squareFrame)
+    expectAnimatedOptionSelection(squareDot)
     expect(frameSurface?.className).toContain("border-2")
     expect(dotSurface?.className).toContain("border-2")
     expect(frameSurface?.className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
@@ -633,10 +628,8 @@ describe("FloatingToolbar", () => {
     const dotSurface = squareDot.querySelector<HTMLElement>('[data-desktop-adaptive-option-preview="true"]')
     expect(squareFrame.getAttribute("aria-pressed")).toBe("true")
     expect(squareDot.getAttribute("aria-pressed")).toBe("true")
-    expect(squareFrame.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
-    expect(squareDot.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
-    expect(squareFrame.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
-    expect(squareDot.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expectAnimatedOptionSelection(squareFrame)
+    expectAnimatedOptionSelection(squareDot)
     expect(frameSurface?.className).toContain("border-2")
     expect(dotSurface?.className).toContain("border-2")
     expect(frameSurface?.className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
@@ -848,8 +841,7 @@ describe("FloatingToolbar", () => {
 
     expect(circleShape.getAttribute("aria-pressed")).toBe("true")
     expect(circleShape.getAttribute("data-desktop-option-tile")).toBe("true")
-    expect(circleShape.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
-    expect(circleShape.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
+    expectAnimatedOptionSelection(circleShape)
     expect(solidMode.getAttribute("aria-selected")).toBe("true")
     expect(solidMode.className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
     expect(surface.container.querySelector('input[aria-label="Shape solid color"]')).not.toBeNull()
@@ -1213,8 +1205,8 @@ describe("FloatingToolbar", () => {
     expect(textOption.className).toContain("border-transparent")
     expect(selectedOption?.className).not.toContain("desktop-inspector-selected-bg")
     expect(selectedOption?.className).not.toContain("bg-[var(--desktop-inspector-selected-bg)]")
-    expect(selectedOption?.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
-    expect(selectedOption?.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expect(selectedOption).not.toBeNull()
+    expectAnimatedOptionSelection(selectedOption!)
     expect(filterTrigger.className).toContain("rounded-[7px]")
 
     const source = readFileSync(
@@ -1411,6 +1403,21 @@ async function renderPrototype({
   return renderWithAsyncJsdomRoot(
     <FloatingToolbar controller={controller as NonNullable<ComponentProps<typeof FloatingToolbar>>["controller"]} />,
   )
+}
+
+function getOptionSelectionIndicator(button: HTMLElement | null) {
+  return button
+    ?.closest<HTMLElement>('[class*="grid-cols"]')
+    ?.querySelector<HTMLElement>('[data-slot="desktop-inspector-option-selection-indicator"]') ?? null
+}
+
+function expectAnimatedOptionSelection(button: HTMLElement) {
+  expect(button.getAttribute("data-desktop-animated-option-selection")).toBe("true")
+  const indicator = getOptionSelectionIndicator(button)
+  expect(indicator).not.toBeNull()
+  expect(indicator?.className).toContain("bg-[var(--desktop-inspector-option-selected-bg)]")
+  expect(indicator?.className).toContain("border-[var(--desktop-inspector-option-selected-border)]")
+  expect(button.className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
 }
 
 function getToolButtons(container: HTMLElement) {

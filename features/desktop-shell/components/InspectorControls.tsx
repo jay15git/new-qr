@@ -1,8 +1,10 @@
 "use client"
 
 import {
+  useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
   type ComponentProps,
@@ -11,6 +13,7 @@ import {
   type ReactNode,
 } from "react"
 import { ChevronDownIcon, SearchIcon } from "lucide-react"
+import { motion, type Transition } from "motion/react"
 
 import { TabsSubtle, TabsSubtleItem } from "@/components/ui/tabs-subtle"
 import { Input } from "@/components/ui/input"
@@ -89,6 +92,125 @@ export function desktopInspectorOptionGridClass(
   className?: string,
 ) {
   return cn("grid gap-0", DESKTOP_INSPECTOR_OPTION_GRID_COLS_CLASS[columns], className)
+}
+
+export const DESKTOP_INSPECTOR_OPTION_SELECTION_SPRING: Transition = {
+  type: "spring",
+  stiffness: 350,
+  damping: 30,
+  mass: 1,
+}
+
+type DesktopInspectorOptionSelectionRect = {
+  height: number
+  left: number
+  top: number
+  width: number
+}
+
+function measureDesktopInspectorOptionSelection(
+  container: HTMLElement,
+): DesktopInspectorOptionSelectionRect | null {
+  const selected = container.querySelector<HTMLElement>(
+    '[data-desktop-animated-option-selection="true"][aria-pressed="true"]',
+  )
+
+  if (!selected) {
+    return null
+  }
+
+  return {
+    left: selected.offsetLeft,
+    top: selected.offsetTop,
+    width: selected.offsetWidth,
+    height: selected.offsetHeight,
+  }
+}
+
+export function DesktopInspectorAnimatedOptionGrid({
+  className,
+  columns,
+  children,
+  selectedKey,
+  ...props
+}: {
+  className?: string
+  columns: DesktopInspectorOptionGridColumns
+  children: ReactNode
+  selectedKey?: string | number | boolean | null
+} & ComponentProps<"div">) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [selectedRect, setSelectedRect] = useState<DesktopInspectorOptionSelectionRect | null>(null)
+
+  const measureSelected = useCallback(() => {
+    const container = containerRef.current
+    if (!container) {
+      return
+    }
+
+    setSelectedRect(measureDesktopInspectorOptionSelection(container))
+  }, [])
+
+  useLayoutEffect(() => {
+    measureSelected()
+  }, [measureSelected, selectedKey, children])
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) {
+      return
+    }
+
+    const viewport = container.closest<HTMLElement>('[data-slot="scroll-area-viewport"]')
+    const resizeTarget = viewport ?? container
+
+    const handleChange = () => {
+      measureSelected()
+    }
+
+    let observer: ResizeObserver | undefined
+
+    if (typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(handleChange)
+      observer.observe(container)
+      container
+        .querySelectorAll('[data-desktop-animated-option-selection="true"]')
+        .forEach((node) => observer?.observe(node))
+    }
+
+    resizeTarget.addEventListener("scroll", handleChange, { passive: true })
+    window.addEventListener("resize", handleChange)
+
+    return () => {
+      observer?.disconnect()
+      resizeTarget.removeEventListener("scroll", handleChange)
+      window.removeEventListener("resize", handleChange)
+    }
+  }, [measureSelected, selectedKey])
+
+  return (
+    <div
+      ref={containerRef}
+      className={cn("relative", desktopInspectorOptionGridClass(columns, className))}
+      {...props}
+    >
+      {selectedRect ? (
+        <motion.div
+          data-slot="desktop-inspector-option-selection-indicator"
+          className="pointer-events-none absolute z-0 rounded-[7px] border-2 border-[var(--desktop-inspector-option-selected-border)] bg-[var(--desktop-inspector-option-selected-bg)]"
+          initial={false}
+          animate={{
+            left: selectedRect.left,
+            top: selectedRect.top,
+            width: selectedRect.width,
+            height: selectedRect.height,
+          }}
+          transition={DESKTOP_INSPECTOR_OPTION_SELECTION_SPRING}
+        />
+      ) : null}
+      {children}
+    </div>
+  )
 }
 
 export function desktopInspectorOptionStackClass(className?: string) {
