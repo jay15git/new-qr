@@ -168,6 +168,7 @@ import {
   DESKTOP_INSPECTOR_LABEL_CLASS,
   DESKTOP_INSPECTOR_MAJOR_GAP_CLASS,
   DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
+  DESKTOP_INSPECTOR_OPTION_TILE_SURFACE_CLASS,
   DESKTOP_INSPECTOR_PANEL_TITLE_CLASS,
   DESKTOP_INSPECTOR_RESET_CLASS,
   DESKTOP_INSPECTOR_ROW_CLASS,
@@ -184,6 +185,9 @@ import {
   DesktopInspectorSegmentedControl,
   DesktopInspectorTextarea,
   DesktopInspectorTextInput,
+  desktopInspectorOptionGridClass,
+  desktopInspectorOptionGridItemClass,
+  desktopInspectorOptionStackClass,
 } from "@/features/desktop-shell/components/InspectorControls"
 import {
   Tooltip,
@@ -1983,7 +1987,7 @@ export function DesktopThemeStyles() {
         border-color: var(--desktop-inspector-option-selected-border) !important;
       }
 
-      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) :is(span, svg):not([data-desktop-preview-caption="true"]) {
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) :is(span, svg):not([data-desktop-adaptive-option-preview="true"]) {
         color: var(--desktop-inspector-option-selected-fg) !important;
       }
 
@@ -2071,12 +2075,12 @@ export function DesktopThemeStyles() {
         filter: none !important;
       }
 
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[data-desktop-content-type-option="true"] {
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button:is([data-desktop-preview-option="true"], [data-desktop-content-type-option="true"], [data-desktop-option-tile="true"]) {
         border-color: transparent !important;
         color: var(--desktop-inspector-fg-tertiary) !important;
       }
 
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[data-desktop-content-type-option="true"]:hover {
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button:is([data-desktop-preview-option="true"], [data-desktop-content-type-option="true"], [data-desktop-option-tile="true"]):hover:not([aria-pressed="true"]) {
         background-color: rgba(15, 23, 42, 0.06) !important;
         color: var(--desktop-inspector-fg-secondary) !important;
       }
@@ -2312,7 +2316,7 @@ function DesktopLogoInspector({
               shelfDataSlot="desktop-logo-brand-icons"
               variant="compact"
             >
-              <div className="grid grid-cols-4 gap-1.5">
+              <div className={desktopInspectorOptionGridClass(4)}>
                 {brandIcons.map((brandIcon) => (
                   <DesktopBrandIconButton
                     key={brandIcon.id}
@@ -2447,6 +2451,7 @@ function DesktopBrandIconButton({
         data-desktop-option-tile="true"
         className={cn(
           "relative grid h-12 min-w-0 place-items-center rounded-[7px] border-2 border-transparent bg-transparent text-[var(--desktop-inspector-fg-tertiary)] transition hover:border-[var(--desktop-inspector-control-border-hover)] hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)]",
+          desktopInspectorOptionGridItemClass(),
           DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
           selected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
         )}
@@ -2485,7 +2490,7 @@ function DesktopCornersInspector({
                 dataSlot="desktop-corner-frame-preset-shelf-scroll-area"
                 variant="preset"
               >
-                <div className="grid grid-cols-3 gap-2">
+                <div className={desktopInspectorOptionGridClass(3)}>
                   {CORNER_SQUARE_STYLE_OPTIONS.map((option) => (
                     <DesktopCornerStyleButton
                       desktopTheme={desktopTheme}
@@ -2529,7 +2534,7 @@ function DesktopCornersInspector({
                 dataSlot="desktop-corner-dot-preset-shelf-scroll-area"
                 variant="preset"
               >
-                <div className="grid grid-cols-3 gap-2">
+                <div className={desktopInspectorOptionGridClass(3)}>
                   {CORNER_DOT_STYLE_OPTIONS.map((option) => (
                     <DesktopCornerStyleButton
                       desktopTheme={desktopTheme}
@@ -2683,48 +2688,40 @@ function DesktopCornerStyleButton({
   value: QrFinderPatternInnerStyle | QrFinderPatternOuterStyle
 }) {
   return (
-    <div className="group flex min-w-0 flex-col gap-1.5">
-      <button
-        aria-label={`Use ${label} ${target}`}
-        aria-pressed={selected}
-        data-desktop-preview-option="true"
-        className={cn(
-          "relative aspect-square w-full min-w-0 rounded-[7px] border-2 border-transparent bg-transparent p-0 transition",
-          DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
-          selected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
-        )}
-        type="button"
-        onClick={onClick}
-      >
-        <span
-          aria-hidden="true"
-          data-desktop-adaptive-option-preview="true"
-          data-slot="desktop-style-preview-surface"
-          className={cn(
-            "grid size-full place-items-center overflow-hidden rounded-[6px] border-2 border-transparent bg-[#15161a] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition group-hover:brightness-110",
-          )}
-          style={getDesktopAdaptiveOptionPreviewStyle(desktopTheme)}
-        >
-          <span
-            className="grid size-[68%] place-items-center [&_svg]:size-full [&_svg]:text-current"
-          >
-            <StylePreview
-              color={color}
-              frameColor={frameColor}
-              frameStyle={frameStyle}
-              previewKind={previewKind}
-              value={value}
-            />
-          </span>
-        </span>
-      </button>
+    <button
+      aria-label={`Use ${label} ${target}`}
+      aria-pressed={selected}
+      data-desktop-preview-option="true"
+      className={cn(
+        "group relative aspect-square w-full min-w-0 overflow-hidden p-0 text-center transition",
+        desktopInspectorOptionGridItemClass("loose"),
+        DESKTOP_INSPECTOR_OPTION_TILE_SURFACE_CLASS,
+        DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
+        selected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
+      )}
+      type="button"
+      onClick={onClick}
+    >
       <span
-        data-desktop-preview-caption="true"
-        className={cn("block w-full truncate px-0.5 text-center text-[10px] font-semibold", DESKTOP_INSPECTOR_FG_TERTIARY)}
+        aria-hidden="true"
+        data-desktop-adaptive-option-preview="true"
+        data-slot="desktop-style-preview-surface"
+        className={cn(
+          "grid size-full place-items-center overflow-hidden rounded-[6px] border-2 border-transparent bg-[#15161a] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition",
+        )}
+        style={getDesktopAdaptiveOptionPreviewStyle(desktopTheme)}
       >
-        {label}
+        <span className="grid size-[68%] place-items-center [&_svg]:size-full [&_svg]:text-current">
+          <StylePreview
+            color={color}
+            frameColor={frameColor}
+            frameStyle={frameStyle}
+            previewKind={previewKind}
+            value={value}
+          />
+        </span>
       </span>
-    </div>
+    </button>
   )
 }
 
@@ -2751,7 +2748,7 @@ function DesktopShapeInspector({
             dataSlot="desktop-shape-preset-shelf-scroll-area"
             variant="preset"
           >
-            <div className="grid grid-cols-3 gap-2">
+            <div className={desktopInspectorOptionGridClass(3)}>
               <DesktopShapePresetButton
                 desktopTheme={desktopTheme}
                 label="None"
@@ -2902,7 +2899,7 @@ function DesktopShapeInspector({
             shelfDataSlot="desktop-shape-patterns"
             variant="compact"
           >
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className={desktopInspectorOptionGridClass(2)}>
               <DesktopPatternSwatchButton
                 label="None"
                 selected={settings.cardPatternId === DRAFTING_CARD_PATTERN_NONE_ID}
@@ -3103,38 +3100,37 @@ function DesktopShapePresetButton({
   shapeId: QrBackgroundShapeId
 }) {
   return (
-    <div className="group flex min-w-0 flex-col gap-1.5">
-      <button
-        aria-label={`Use ${label} shape`}
-        aria-pressed={selected}
-        data-desktop-option-tile="true"
-        className={cn(
-          "relative aspect-square w-full min-w-0 rounded-[7px] border-2 border-transparent bg-transparent p-0 transition",
-          DESKTOP_INSPECTOR_FOCUS_CLASS,
-          DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
-          selected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
-        )}
-        type="button"
-        onClick={onClick}
-      >
+    <button
+      aria-label={`Use ${label} shape`}
+      aria-pressed={selected}
+      data-desktop-option-tile="true"
+      className={cn(
+        "group flex w-full min-w-0 flex-col items-center gap-1 text-center transition",
+        desktopInspectorOptionGridItemClass("loose"),
+        DESKTOP_INSPECTOR_OPTION_TILE_SURFACE_CLASS,
+        DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
+        selected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
+      )}
+      type="button"
+      onClick={onClick}
+    >
+      <span className="relative aspect-square w-full min-w-0 overflow-hidden rounded-[6px]">
         <DesktopShapePreview
           fillOverride="currentColor"
           label={label}
           previewStyle={getDesktopAdaptiveOptionPreviewStyle(desktopTheme)}
           settings={settings}
           shapeId={shapeId}
-          className={cn(
-            "size-full rounded-[6px] transition group-hover:brightness-110",
-          )}
+          className="size-full rounded-[6px] transition"
         />
-      </button>
+      </span>
       <span
         data-desktop-preview-caption="true"
-        className={cn("block w-full truncate px-0.5 text-center text-[10px] font-semibold", DESKTOP_INSPECTOR_FG_TERTIARY)}
+        className="block w-full truncate px-0.5 text-center text-inherit"
       >
         {label}
       </span>
-    </div>
+    </button>
   )
 }
 
@@ -3254,7 +3250,7 @@ function DesktopMotionInspector({
             shelfDataSlot="desktop-motion-standard-shelf"
             variant="compact"
           >
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className={desktopInspectorOptionGridClass(2)}>
               {QR_MOTION_STANDARD_PRESET_OPTIONS.map((preset) => (
                 <DesktopMotionLoaderButton
                   key={preset.value}
@@ -3284,7 +3280,7 @@ function DesktopMotionInspector({
             shelfDataSlot="desktop-motion-loader-shelf"
             variant="compact"
           >
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className={desktopInspectorOptionGridClass(2)}>
               {QR_MOTION_DOT_MATRIX_PRESET_OPTIONS.map((loader) => (
                 <DesktopMotionLoaderButton
                   key={loader.value}
@@ -3391,7 +3387,7 @@ function DesktopMotionInspector({
 
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Loader Color</p>
-          <div className="grid grid-cols-2 gap-1.5" data-slot="desktop-motion-color-presets">
+          <div className={desktopInspectorOptionGridClass(2)} data-slot="desktop-motion-color-presets">
             {QR_DOT_MATRIX_COLOR_PRESET_OPTIONS.map((preset) => (
               <DesktopMotionColorPresetButton
                 key={preset.value}
@@ -3602,6 +3598,7 @@ function DesktopMotionLoaderButton({
         aria-pressed={selected}
       className={cn(
         "relative h-10 min-w-0 px-2.5 text-left",
+        desktopInspectorOptionGridItemClass(),
         DESKTOP_INSPECTOR_CONTROL_CLASS,
         selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
       )}
@@ -3632,6 +3629,7 @@ function DesktopMotionColorPresetButton({
         aria-pressed={selected}
       className={cn(
         "relative flex h-9 min-w-0 items-center gap-2 px-2 text-left",
+        desktopInspectorOptionGridItemClass(),
         DESKTOP_INSPECTOR_CONTROL_CLASS,
         selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
       )}
@@ -3672,6 +3670,7 @@ function DesktopPatternPalettePresetButton({
       aria-pressed={selected}
       className={cn(
         "relative flex h-9 min-w-0 items-center gap-2 px-2 text-left",
+        desktopInspectorOptionGridItemClass(),
         DESKTOP_INSPECTOR_CONTROL_CLASS,
         selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
       )}
@@ -3806,7 +3805,7 @@ function DesktopContentInspector({
             shelfDataSlot="desktop-content-type-collection-scroll"
             variant="content"
           >
-            <div className="grid grid-cols-3 gap-1.5" data-slot="desktop-content-type-collection">
+            <div className={desktopInspectorOptionGridClass(3)} data-slot="desktop-content-type-collection">
               {visibleTypes.map((type) => {
               const option = QR_INPUT_OPTIONS[type]
               const Icon = option.icon
@@ -3818,7 +3817,9 @@ function DesktopContentInspector({
                   aria-label={`Use ${option.label} content`}
                   aria-pressed={isSelected}
                   className={cn(
-                    "relative flex h-[54px] min-w-0 flex-col items-center justify-center gap-1 rounded-[7px] border-2 border-transparent bg-transparent px-1 text-[10px] font-semibold text-[var(--desktop-inspector-fg-tertiary)] transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)]",
+                    "relative flex h-[54px] min-w-0 flex-col items-center justify-center gap-1 px-1",
+                    desktopInspectorOptionGridItemClass(),
+                    DESKTOP_INSPECTOR_OPTION_TILE_SURFACE_CLASS,
                     DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
                     isSelected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
                   )}
@@ -3887,7 +3888,7 @@ function DesktopPatternInspector({
             shelfDataSlot="desktop-pattern-preset-shelf"
             variant="preset"
           >
-            <div className="grid grid-cols-3 gap-2">
+            <div className={desktopInspectorOptionGridClass(3)}>
               {DOT_STYLE_OPTIONS.map((option) => (
                 <DesktopModulePatternButton
                   desktopTheme={desktopTheme}
@@ -3978,7 +3979,7 @@ function DesktopPatternInspector({
                   ))}
                 </span>
               </div>
-              <div className="grid grid-cols-2 gap-1.5" data-slot="desktop-pattern-palette-presets">
+              <div className={desktopInspectorOptionGridClass(2)} data-slot="desktop-pattern-palette-presets">
                 {DESKTOP_DOTS_PALETTE_PRESETS.map((preset) => (
                   <DesktopPatternPalettePresetButton
                     colors={preset.colors}
@@ -4024,34 +4025,26 @@ function DesktopModulePatternButton({
   value: StudioDataModulesStyle
 }) {
   return (
-    <div className="group flex min-w-0 flex-col gap-1.5">
-      <button
-        aria-label={`Use ${label} pattern`}
-        aria-pressed={selected}
-        data-desktop-preview-option="true"
-        className={cn(
-          "relative aspect-square w-full min-w-0 rounded-[7px] border-2 border-transparent bg-transparent p-0 transition",
-          DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
-          selected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
-        )}
-        type="button"
-        onClick={onClick}
-      >
-        <DesktopQrDotPreview
-          value={value}
-          className={cn(
-            "size-full rounded-[6px] transition group-hover:brightness-110",
-          )}
-          style={getDesktopAdaptiveOptionPreviewStyle(desktopTheme)}
-        />
-      </button>
-      <span
-        data-desktop-preview-caption="true"
-        className={cn("block w-full truncate px-0.5 text-center text-[10px] font-semibold", DESKTOP_INSPECTOR_FG_TERTIARY)}
-      >
-        {label}
-      </span>
-    </div>
+    <button
+      aria-label={`Use ${label} pattern`}
+      aria-pressed={selected}
+      data-desktop-preview-option="true"
+      className={cn(
+        "group relative aspect-square w-full min-w-0 overflow-hidden p-0 text-center transition",
+        desktopInspectorOptionGridItemClass("loose"),
+        DESKTOP_INSPECTOR_OPTION_TILE_SURFACE_CLASS,
+        DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
+        selected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
+      )}
+      type="button"
+      onClick={onClick}
+    >
+      <DesktopQrDotPreview
+        value={value}
+        className="size-full rounded-[6px] transition"
+        style={getDesktopAdaptiveOptionPreviewStyle(desktopTheme)}
+      />
+    </button>
   )
 }
 
@@ -4244,33 +4237,34 @@ function DesktopPatternSwatchButton({
   style: CSSProperties
 }) {
   return (
-    <div className="group flex min-w-0 flex-col gap-1.5">
-      <button
-        aria-label={`Use ${label} decoration pattern`}
-        aria-pressed={selected}
-        data-desktop-option-tile="true"
-        className={cn(
-          "relative aspect-square w-full min-w-0 rounded-[7px] border-2 border-transparent bg-transparent p-0 transition",
-          DESKTOP_INSPECTOR_FOCUS_CLASS,
-          DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
-          selected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
-        )}
-        type="button"
-        onClick={onClick}
-      >
+    <button
+      aria-label={`Use ${label} decoration pattern`}
+      aria-pressed={selected}
+      data-desktop-option-tile="true"
+      className={cn(
+        "group flex w-full min-w-0 flex-col items-center gap-1 text-center transition",
+        desktopInspectorOptionGridItemClass(),
+        DESKTOP_INSPECTOR_OPTION_TILE_SURFACE_CLASS,
+        DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
+        selected && DESKTOP_OPTION_CARD_SELECTED_CLASS,
+      )}
+      type="button"
+      onClick={onClick}
+    >
+      <span className="relative aspect-square w-full min-w-0 overflow-hidden rounded-[6px]">
         <span
           aria-hidden="true"
-          className="block size-full rounded-[6px] transition group-hover:brightness-110"
+          className="block size-full rounded-[6px] transition"
           style={style}
         />
-      </button>
+      </span>
       <span
         data-desktop-preview-caption="true"
-        className={cn("block w-full truncate px-0.5 text-center text-[10px] font-semibold", DESKTOP_INSPECTOR_FG_TERTIARY)}
+        className="block w-full truncate px-0.5 text-center text-inherit"
       >
         {label}
       </span>
-    </div>
+    </button>
   )
 }
 
@@ -4289,6 +4283,7 @@ function DesktopTextPresetButton({
       aria-pressed={selected}
       className={cn(
         "flex h-9 min-w-0 items-center justify-between gap-2 px-2.5 text-left",
+        desktopInspectorOptionGridItemClass(),
         DESKTOP_INSPECTOR_CONTROL_CLASS,
         selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
       )}
@@ -4443,7 +4438,7 @@ function DesktopContentFieldRow({
         </button>
       ) : null}
       {field.type === "segmented" ? (
-        <div id={controlId} className="grid grid-cols-3 gap-1.5">
+        <div id={controlId} className={desktopInspectorOptionGridClass(3)}>
           {field.options?.map((option) => {
             const selected = field.value === option.value
 
@@ -4453,6 +4448,7 @@ function DesktopContentFieldRow({
                 aria-pressed={selected}
                 className={cn(
                   "h-8 px-2 text-[11px] font-semibold",
+                  desktopInspectorOptionGridItemClass(),
                   DESKTOP_INSPECTOR_CONTROL_CLASS,
                   selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
@@ -4673,7 +4669,7 @@ function DesktopEncodingInspector({
 
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Error Correction</p>
-          <div className="grid gap-1.5" data-slot="desktop-error-correction-grid">
+          <div className={desktopInspectorOptionStackClass()} data-slot="desktop-error-correction-grid">
             {ERROR_CORRECTION_LEVEL_OPTIONS.map((option) => (
               <button
                 key={option.value}
@@ -4681,6 +4677,7 @@ function DesktopEncodingInspector({
                 aria-pressed={settings.errorCorrectionLevel === option.value}
                 className={cn(
                   "min-w-0 px-3 py-2 text-left",
+                  desktopInspectorOptionGridItemClass(),
                   DESKTOP_INSPECTOR_CONTROL_CLASS,
                   settings.errorCorrectionLevel === option.value &&
                     DESKTOP_INSPECTOR_SELECTED_CLASS,
@@ -4813,7 +4810,7 @@ function DesktopDecorationsInspector({
             shelfDataSlot="desktop-decoration-patterns"
             variant="compact"
           >
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className={desktopInspectorOptionGridClass(2)}>
               <DesktopPatternSwatchButton
                 label="None"
                 selected={settings.patternId === DRAFTING_CARD_PATTERN_NONE_ID}
@@ -4886,7 +4883,7 @@ function DesktopEffectsInspector({
             shelfDataSlot="desktop-generated-effects"
             variant="compact"
           >
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className={desktopInspectorOptionGridClass(2)}>
               {generatedShaders.slice(0, 12).map((shader) => (
                 <DesktopTextPresetButton
                   key={shader.id}
@@ -4950,7 +4947,7 @@ function DesktopEffectsInspector({
 
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Image Filters</p>
-          <div className="grid grid-cols-2 gap-1.5" data-slot="desktop-image-filters">
+          <div className={desktopInspectorOptionGridClass(2)} data-slot="desktop-image-filters">
             {imageFilters.map((filter) => (
               <DesktopTextPresetButton
                 key={filter.id}
@@ -5170,7 +5167,7 @@ function DesktopExportInspector({
       <DesktopInspectorScrollArea>
         <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Target</p>
-          <div className="grid gap-1.5" data-slot="desktop-export-target-list">
+          <div className={desktopInspectorOptionStackClass()} data-slot="desktop-export-target-list">
             {DESKTOP_EXPORT_TARGET_OPTIONS.map((option) => (
               <DesktopTextPresetButton
                 key={option.value}
@@ -5184,7 +5181,7 @@ function DesktopExportInspector({
 
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Format</p>
-          <div className="grid grid-cols-4 gap-1.5" data-slot="desktop-export-format-grid">
+          <div className={desktopInspectorOptionGridClass(4)} data-slot="desktop-export-format-grid">
             {DESKTOP_DOWNLOAD_EXTENSIONS.map((extension) => (
               <button
                 key={extension}
@@ -5192,6 +5189,7 @@ function DesktopExportInspector({
                 aria-pressed={settings.extension === extension}
                 className={cn(
                   "h-9 px-1.5 text-[11px] font-semibold",
+                  desktopInspectorOptionGridItemClass(),
                   DESKTOP_INSPECTOR_CONTROL_CLASS,
                   settings.extension === extension && DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
@@ -5207,7 +5205,7 @@ function DesktopExportInspector({
         {isRasterExport ? (
           <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
             <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Quality</p>
-            <div className="grid gap-1.5" data-slot="desktop-export-quality-grid">
+            <div className={desktopInspectorOptionStackClass()} data-slot="desktop-export-quality-grid">
               {DESKTOP_RASTER_EXPORT_PRESETS.map((preset) => (
                 <button
                   key={preset.id}
@@ -5215,6 +5213,7 @@ function DesktopExportInspector({
                   aria-pressed={settings.qualityPresetId === preset.id}
                   className={cn(
                     "min-w-0 px-3 py-2 text-left",
+                    desktopInspectorOptionGridItemClass(),
                     DESKTOP_INSPECTOR_CONTROL_CLASS,
                     settings.qualityPresetId === preset.id &&
                       DESKTOP_INSPECTOR_SELECTED_CLASS,
@@ -5282,7 +5281,7 @@ function DesktopTextInspector({
       <DesktopInspectorScrollArea>
         <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
           <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Preset</p>
-          <div className="grid grid-cols-3 gap-1.5" data-slot="desktop-text-preset-options">
+          <div className={desktopInspectorOptionGridClass(3)} data-slot="desktop-text-preset-options">
             {DESKTOP_TEXT_PRESETS.map((preset) => (
               <button
                 key={preset.id}
@@ -5290,6 +5289,7 @@ function DesktopTextInspector({
                 aria-pressed={selectedPreset === preset.id}
                 className={cn(
                   "h-8 px-2 text-[11px] font-semibold",
+                  desktopInspectorOptionGridItemClass(),
                   DESKTOP_INSPECTOR_CONTROL_CLASS,
                   selectedPreset === preset.id && DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
@@ -5357,7 +5357,7 @@ function DesktopTextInspector({
               shelfId="desktop-text-font-listbox"
               variant="compact"
             >
-              <div className="grid gap-1.5">
+              <div className={desktopInspectorOptionStackClass()}>
                 {DRAFTING_FONT_REGISTRY.map((font) => (
                   <button
                     key={font.id}
@@ -5365,6 +5365,7 @@ function DesktopTextInspector({
                     aria-selected={selectedFont.id === font.id}
                     className={cn(
                       "flex h-8 min-w-0 items-center px-2.5 text-left text-[12px] font-semibold",
+                      desktopInspectorOptionGridItemClass(),
                       DESKTOP_INSPECTOR_CONTROL_CLASS,
                       selectedFont.id === font.id && DESKTOP_INSPECTOR_SELECTED_CLASS,
                     )}
@@ -5404,7 +5405,7 @@ function DesktopTextInspector({
               })
             }
           />
-          <div className="mt-2 grid grid-cols-3 gap-1.5" data-slot="desktop-text-emphasis">
+          <div className={cn("mt-2", desktopInspectorOptionGridClass(3))} data-slot="desktop-text-emphasis">
             <DesktopTextToggleButton
               active={fontWeight >= 700}
               icon={<BoldIcon className="size-3.5" />}
@@ -5468,7 +5469,7 @@ function DesktopTextInspector({
 
         <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Alignment</p>
-          <div className="grid grid-cols-3 gap-1.5" data-slot="desktop-text-alignment">
+          <div className={desktopInspectorOptionGridClass(3)} data-slot="desktop-text-alignment">
             {DESKTOP_TEXT_ALIGN_OPTIONS.map((option) => (
               <button
                 key={option.value}
@@ -5476,6 +5477,7 @@ function DesktopTextInspector({
                 aria-pressed={settings.textAlign === option.value}
                 className={cn(
                   "h-8 px-2 text-[11px] font-semibold",
+                  desktopInspectorOptionGridItemClass(),
                   DESKTOP_INSPECTOR_CONTROL_CLASS,
                   settings.textAlign === option.value &&
                     DESKTOP_INSPECTOR_SELECTED_CLASS,
@@ -5534,6 +5536,7 @@ function DesktopTextToggleButton({
       aria-pressed={active}
       className={cn(
         "h-8 px-2 text-[11px] font-semibold",
+        desktopInspectorOptionGridItemClass(),
         DESKTOP_INSPECTOR_CONTROL_CLASS,
         active && DESKTOP_INSPECTOR_SELECTED_CLASS,
       )}

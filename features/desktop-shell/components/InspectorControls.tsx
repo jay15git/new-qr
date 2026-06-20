@@ -61,6 +61,40 @@ export const DESKTOP_INSPECTOR_DROPDOWN_ITEM_CLASS =
   "h-8 cursor-pointer rounded-[6px] px-3 text-[12px] font-semibold text-[var(--desktop-inspector-fg-tertiary)] outline-none transition focus:bg-[var(--desktop-inspector-control-hover-bg)] focus:text-[var(--desktop-inspector-fg-secondary)] focus:**:text-[var(--desktop-inspector-fg-secondary)] data-[highlighted]:bg-[var(--desktop-inspector-control-hover-bg)] data-[highlighted]:text-[var(--desktop-inspector-fg-secondary)] data-[highlighted]:**:text-[var(--desktop-inspector-fg-secondary)] data-[state=checked]:bg-[var(--desktop-inspector-option-selected-bg)] data-[state=checked]:text-[var(--desktop-inspector-fg-secondary)] data-[state=checked]:focus:bg-[var(--desktop-inspector-option-selected-bg)] data-[state=checked]:focus:text-[var(--desktop-inspector-fg-secondary)] data-[state=checked]:data-[highlighted]:bg-[var(--desktop-inspector-option-selected-bg)] data-[state=checked]:data-[highlighted]:text-[var(--desktop-inspector-fg-secondary)] [&_[data-slot=dropdown-menu-radio-item-indicator]]:hidden"
 export const DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS =
   "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
+export const DESKTOP_INSPECTOR_OPTION_TILE_SURFACE_CLASS =
+  "rounded-[7px] border-2 border-transparent bg-transparent text-[10px] font-semibold text-[var(--desktop-inspector-fg-tertiary)] transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)]"
+
+export const DESKTOP_INSPECTOR_OPTION_GRID_COLS_CLASS = {
+  2: "grid-cols-2",
+  3: "grid-cols-3",
+  4: "grid-cols-4",
+} as const
+
+export type DesktopInspectorOptionGridColumns = keyof typeof DESKTOP_INSPECTOR_OPTION_GRID_COLS_CLASS
+
+export const DESKTOP_INSPECTOR_OPTION_GRID_ITEM_PADDING_CLASS = {
+  tight: "p-[3px]",
+  loose: "p-1",
+} as const
+
+export type DesktopInspectorOptionGridSpacing = keyof typeof DESKTOP_INSPECTOR_OPTION_GRID_ITEM_PADDING_CLASS
+
+export function desktopInspectorOptionGridClass(
+  columns: DesktopInspectorOptionGridColumns,
+  className?: string,
+) {
+  return cn("grid gap-0", DESKTOP_INSPECTOR_OPTION_GRID_COLS_CLASS[columns], className)
+}
+
+export function desktopInspectorOptionStackClass(className?: string) {
+  return cn("grid gap-0", className)
+}
+
+export function desktopInspectorOptionGridItemClass(
+  spacing: DesktopInspectorOptionGridSpacing = "tight",
+) {
+  return cn("w-full min-w-0", DESKTOP_INSPECTOR_OPTION_GRID_ITEM_PADDING_CLASS[spacing])
+}
 
 type DesktopInspectorSectionProps = ComponentProps<"section"> & {
   dataSlot?: string

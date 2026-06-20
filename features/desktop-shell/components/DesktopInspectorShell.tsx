@@ -10,6 +10,7 @@ import {
   DESKTOP_INSPECTOR_PANEL_TITLE_CLASS,
   DESKTOP_INSPECTOR_ROW_CLASS,
   DesktopInspectorTextInput,
+  desktopInspectorOptionGridClass,
 } from "@/features/desktop-shell/components/InspectorControls"
 import { SurfaceProvider } from "@/lib/surface-context"
 import { cn } from "@/lib/utils"
@@ -130,7 +131,7 @@ export function DesktopInspectorElasticSliderRow({
 }
 
 export function DesktopInspectorValueGrid({ children }: { children: ReactNode }) {
-  return <div className="grid grid-cols-2 gap-2">{children}</div>
+  return <div className={desktopInspectorOptionGridClass(2)}>{children}</div>
 }
 
 export function DesktopInspectorNumberField({

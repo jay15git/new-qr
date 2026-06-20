@@ -23,6 +23,9 @@ import {
   DesktopInspectorSegmentedControl,
   DesktopInspectorTextarea,
   DesktopInspectorTextInput,
+  desktopInspectorOptionGridClass,
+  desktopInspectorOptionGridItemClass,
+  desktopInspectorOptionStackClass,
 } from "@/features/desktop-shell/components/InspectorControls"
 import {
   DesktopInspectorColorRow,
@@ -373,7 +376,7 @@ function DesktopLayerTextInspector({
           <div
             id="desktop-layer-text-font-listbox"
             aria-label="Text font options"
-            className="mt-2 grid max-h-40 gap-1.5 overflow-y-auto pr-1"
+            className={cn("mt-2 max-h-40 overflow-y-auto pr-1", desktopInspectorOptionStackClass())}
             data-slot="desktop-layer-text-font-listbox"
             role="listbox"
           >
@@ -384,6 +387,7 @@ function DesktopLayerTextInspector({
                 aria-selected={selectedFont.id === font.id}
                 className={cn(
                   "flex h-8 min-w-0 items-center px-2.5 text-left text-[12px] font-semibold",
+                  desktopInspectorOptionGridItemClass(),
                   DESKTOP_INSPECTOR_CONTROL_CLASS,
                   selectedFont.id === font.id && DESKTOP_INSPECTOR_SELECTED_CLASS,
                 )}
@@ -416,7 +420,7 @@ function DesktopLayerTextInspector({
           }
         />
 
-        <div className="mt-2 grid grid-cols-3 gap-1.5" data-slot="desktop-layer-text-emphasis">
+        <div className={cn("mt-2", desktopInspectorOptionGridClass(3))} data-slot="desktop-layer-text-emphasis">
           <DesktopIconToggleButton
             active={fontWeight >= 700}
             icon={<BoldIcon className="size-3.5" />}
@@ -469,7 +473,7 @@ function DesktopLayerTextInspector({
         dataSlot="desktop-layer-text-alignment"
       >
         <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Alignment</p>
-        <div className="grid grid-cols-3 gap-1.5">
+        <div className={desktopInspectorOptionGridClass(3)}>
           {DESKTOP_TEXT_ALIGN_OPTIONS.map((option) => (
             <button
               key={option.value}
@@ -477,6 +481,7 @@ function DesktopLayerTextInspector({
               aria-pressed={(layer.textAlign ?? DEFAULT_DRAFTING_TEXT_LAYER.textAlign) === option.value}
               className={cn(
                 "h-8 px-2 text-[11px] font-semibold",
+                desktopInspectorOptionGridItemClass(),
                 DESKTOP_INSPECTOR_CONTROL_CLASS,
                 (layer.textAlign ?? DEFAULT_DRAFTING_TEXT_LAYER.textAlign) === option.value &&
                   DESKTOP_INSPECTOR_SELECTED_CLASS,
@@ -537,7 +542,7 @@ function DesktopLayerShapeInspector({
       <DesktopInspectorLabel>Shape</DesktopInspectorLabel>
       <div
         aria-label="Shape options"
-        className="grid grid-cols-2 gap-1.5"
+        className={desktopInspectorOptionGridClass(2)}
         data-slot="desktop-layer-shape-options"
         role="radiogroup"
       >
@@ -743,6 +748,7 @@ function DesktopIconToggleButton({
       aria-pressed={active}
       className={cn(
         "grid h-8 place-items-center px-2 text-[11px] font-semibold",
+        desktopInspectorOptionGridItemClass(),
         DESKTOP_INSPECTOR_CONTROL_CLASS,
         active && DESKTOP_INSPECTOR_SELECTED_CLASS,
       )}
@@ -771,6 +777,7 @@ function DesktopShapeOptionButton({
       aria-pressed={selected}
       className={cn(
         "flex h-10 min-w-0 items-center justify-center gap-2 px-2 text-[10px] font-semibold",
+        desktopInspectorOptionGridItemClass(),
         DESKTOP_INSPECTOR_CONTROL_CLASS,
         selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
       )}
