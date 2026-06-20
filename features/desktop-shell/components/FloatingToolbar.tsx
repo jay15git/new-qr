@@ -3115,7 +3115,7 @@ function DesktopShapePresetButton({
       aria-pressed={selected}
       data-desktop-option-tile="true"
       className={cn(
-        "group flex w-full min-w-0 flex-col items-center gap-1 text-center transition",
+        "group flex w-full min-w-0 items-center justify-center transition",
         desktopInspectorOptionGridItemClass("loose"),
         DESKTOP_INSPECTOR_OPTION_TILE_SURFACE_CLASS,
         DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
@@ -3133,12 +3133,6 @@ function DesktopShapePresetButton({
           shapeId={shapeId}
           className="size-full rounded-[6px] transition"
         />
-      </span>
-      <span
-        data-desktop-preview-caption="true"
-        className="block w-full truncate px-0.5 text-center text-inherit"
-      >
-        {label}
       </span>
     </button>
   )
