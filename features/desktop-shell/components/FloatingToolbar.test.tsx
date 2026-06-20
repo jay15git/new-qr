@@ -224,9 +224,9 @@ describe("FloatingToolbar", () => {
     expect(getRequiredButton(utilityToolbar as HTMLElement, "Open keyboard shortcuts").className).toContain("size-10")
     expect(getRequiredButton(utilityToolbar as HTMLElement, "Switch to light mode").className).toContain("size-10")
     expect(utilityToolbar?.querySelector('[data-slot="desktop-save-trigger"]')).toBeNull()
-    expect(getRequiredButton(actionToolbar as HTMLElement, "Reset defaults").className).toContain("size-8")
-    expect(getRequiredButton(actionToolbar as HTMLElement, "Undo").className).toContain("size-8")
-    expect(getRequiredButton(actionToolbar as HTMLElement, "Redo").className).toContain("size-8")
+    expect(getRequiredButton(actionToolbar as HTMLElement, "Reset defaults").className).toContain("size-10")
+    expect(getRequiredButton(actionToolbar as HTMLElement, "Undo").className).toContain("size-10")
+    expect(getRequiredButton(actionToolbar as HTMLElement, "Redo").className).toContain("size-10")
 
     await act(async () => {
       getRequiredButton(actionToolbar as HTMLElement, "Reset defaults").dispatchEvent(new MouseEvent("click", { bubbles: true }))

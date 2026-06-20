@@ -475,8 +475,9 @@ describe("Canvas", () => {
     })
     const bottomToolbar = workspace.container.querySelector('[data-slot="dashboard-compose-toolbar"]')
 
-    expect(bottomToolbar?.className).toContain("gap-1.5")
+    expect(bottomToolbar?.className).toContain("gap-0.5")
     expect(bottomToolbar?.className).toContain("px-2.5")
+    expect(bottomToolbar?.className).toContain("cursor-pointer")
     expect(
       Array.from(bottomToolbar?.children ?? []).filter((child) =>
         String((child as HTMLElement).className).includes("w-px"),
@@ -484,7 +485,7 @@ describe("Canvas", () => {
     ).toHaveLength(0)
     expect(
       Array.from(bottomToolbar?.querySelectorAll("button") ?? []).every((button) =>
-        String(button.className).includes("w-8") || String(button.className).includes("size-8"),
+        String(button.className).includes("size-10"),
       ),
     ).toBe(true)
     expect(Array.from(bottomToolbar?.querySelectorAll("button") ?? []).map((button) => button.getAttribute("aria-label"))).toEqual([

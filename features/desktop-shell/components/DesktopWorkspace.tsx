@@ -230,9 +230,23 @@ function DesktopWorkspaceStyles() {
         transform: scale(0.84) !important;
       }
 
+      [data-slot="desktop-workspace"] [data-slot="desktop-document-toolbar"][data-toolbar-appearance="desktop-glass"],
+      [data-slot="desktop-workspace"] [data-slot="desktop-utility-toolbar"][data-toolbar-appearance="desktop-glass"],
+      [data-slot="desktop-workspace"] [data-slot="desktop-action-toolbar"][data-toolbar-appearance="desktop-glass"],
+      [data-slot="desktop-workspace"] [data-slot="desktop-resize-toolbar"][data-toolbar-appearance="desktop-glass"],
+      [data-slot="desktop-workspace"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] {
+        cursor: var(--cursor-pointer);
+      }
+
+      [data-slot="desktop-workspace"] [data-slot="desktop-action-toolbar"][data-toolbar-appearance="desktop-glass"] button,
+      [data-slot="desktop-workspace"] [data-slot="desktop-resize-toolbar"][data-toolbar-appearance="desktop-glass"] button {
+        cursor: var(--cursor-pointer) !important;
+      }
+
       [data-slot="desktop-workspace"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button {
         position: relative !important;
         border-radius: 9999px !important;
+        cursor: var(--cursor-pointer) !important;
         overflow: hidden !important;
         transform: none !important;
         translate: none !important;

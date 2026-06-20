@@ -1390,9 +1390,9 @@ describe("WorkspaceSurface", () => {
     expect(resizeToolbar.getAttribute("data-toolbar-appearance")).toBe("desktop-glass")
     expect(resizeToolbar.className).toContain("min-h-14")
     expect(resizeToolbar.className).toContain("px-3")
-    expect(getRequiredElement(resizeToolbar, 'button[aria-label="Decrease canvas size"]').className).toContain("size-8")
-    expect(getRequiredElement(resizeToolbar, 'button[aria-label="Choose canvas size"]').className).toContain("h-8")
-    expect(getRequiredElement(resizeToolbar, 'button[aria-label="Increase canvas size"]').className).toContain("size-8")
+    expect(getRequiredElement(resizeToolbar, 'button[aria-label="Decrease canvas size"]').className).toContain("size-10")
+    expect(getRequiredElement(resizeToolbar, 'button[aria-label="Choose canvas size"]').className).toContain("h-10")
+    expect(getRequiredElement(resizeToolbar, 'button[aria-label="Increase canvas size"]').className).toContain("size-10")
     expect(resizeToolbar.textContent).toContain("100%")
 
     act(() => {

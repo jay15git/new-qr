@@ -34,7 +34,10 @@ import {
 
 import type { DraftingCardState } from "@/features/workspace/model/card-state"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
-import { DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS } from "@/features/desktop-shell/components/DesktopUtilityToolbar"
+import {
+  DESKTOP_COMPOSE_TOOLBAR_ICON_BUTTON_CLASS,
+  DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS,
+} from "@/features/desktop-shell/components/DesktopUtilityToolbar"
 import { Pane, type DraftingLayerMenuAction } from "@/features/workspace/components/Pane"
 import { InsertMenu } from "@/features/workspace/components/InsertMenu"
 import { getQrLayout } from "@/features/workspace/model/layout-engine"
@@ -107,6 +110,21 @@ const MAX_PREVIEW_ZOOM = 4
 const PREVIEW_ZOOM_STEP = 0.1
 const WHEEL_ZOOM_SENSITIVITY = 0.001
 const DESKTOP_ZOOM_PRESETS = [0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4] as const
+
+const COMPOSE_TOOLBAR_NEUTRAL_ICON_BUTTON_CLASS =
+  "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+
+function getComposeToolbarIconButtonClass(
+  isDesktopZoomToolbar: boolean,
+  ...extra: Array<string | false | null | undefined>
+) {
+  return cn(
+    isDesktopZoomToolbar
+      ? DESKTOP_COMPOSE_TOOLBAR_ICON_BUTTON_CLASS
+      : COMPOSE_TOOLBAR_NEUTRAL_ICON_BUTTON_CLASS,
+    ...extra,
+  )
+}
 
 type CanvasProps = {
   panes: DraftingPane[]
@@ -227,7 +245,7 @@ function DesktopLayerSettingsToolbar({ controls }: { controls: DesktopLayerToolb
             <PopoverTrigger asChild>
               <button
                 aria-label="Layer appearance"
-                className="flex size-8 shrink-0 items-center justify-center rounded-full text-current transition-[background-color,color] duration-150 hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-current transition-[background-color,color] duration-150 hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
                 type="button"
               >
                 <SlidersHorizontalIcon aria-hidden="true" className="size-4" />
@@ -1128,7 +1146,7 @@ export function Canvas({
             <div
               data-slot="desktop-resize-toolbar"
               data-toolbar-appearance="desktop-glass"
-              className="pointer-events-auto inline-flex min-h-14 items-center gap-1 rounded-full border border-white/[0.12] bg-black/55 px-3 py-1.5 text-white/78 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
+              className="pointer-events-auto inline-flex min-h-14 cursor-pointer items-center gap-0.5 rounded-full border border-white/[0.12] bg-black/55 px-3 py-1.5 text-white/78 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
             >
               <button
                 aria-label="Decrease canvas size"
@@ -1143,7 +1161,7 @@ export function Canvas({
                 <PopoverTrigger asChild>
 	                  <button
 	                    aria-label="Choose canvas size"
-	                    className="h-8 min-w-[3.75rem] cursor-pointer rounded-full px-2 text-center text-[1rem] font-semibold tracking-normal text-white transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+	                    className="h-10 min-w-[3.75rem] cursor-pointer rounded-full px-2 text-center text-[1rem] font-semibold tracking-normal text-white transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
 	                    type="button"
                     onClick={() => setDesktopZoomPopoverOpen((open) => !open)}
                     onDoubleClick={() => {
@@ -1214,7 +1232,7 @@ export function Canvas({
             className={cn(
               "pointer-events-auto inline-flex max-w-full flex-wrap items-center justify-center gap-1 rounded-[10px] bg-[var(--drafting-panel-bg-active)] px-2 py-1.5",
               isDesktopZoomToolbar &&
-                "min-h-14 gap-1.5 rounded-full border border-white/[0.12] bg-black/55 px-2.5 text-white/78 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl",
+                "min-h-14 cursor-pointer gap-0.5 rounded-full border border-white/[0.12] bg-black/55 px-2.5 text-white/78 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl",
             )}
           >
             {!isDesktopZoomToolbar ? (
@@ -1223,7 +1241,7 @@ export function Canvas({
                   <TooltipTrigger asChild>
                     <Button
                       aria-label="Zoom out preview"
-                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                      className={getComposeToolbarIconButtonClass(isDesktopZoomToolbar)}
                       onClick={handleZoomOut}
                       size="icon"
                       type="button"
@@ -1243,7 +1261,7 @@ export function Canvas({
                   <TooltipTrigger asChild>
                     <Button
                       aria-label="Zoom in preview"
-                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                      className={getComposeToolbarIconButtonClass(isDesktopZoomToolbar)}
                       onClick={handleZoomIn}
                       size="icon"
                       type="button"
@@ -1259,7 +1277,7 @@ export function Canvas({
                   <TooltipTrigger asChild>
                     <Button
                       aria-label="Reset view"
-                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                      className={getComposeToolbarIconButtonClass(isDesktopZoomToolbar)}
                       onClick={handleResetView}
                       size="icon"
                       type="button"
@@ -1282,8 +1300,8 @@ export function Canvas({
                     <Button
                       aria-label="Select and move elements"
                       aria-pressed={activeInteractionTool === "select"}
-                      className={cn(
-                        "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]",
+                      className={getComposeToolbarIconButtonClass(
+                        isDesktopZoomToolbar,
                         activeInteractionTool === "select" &&
                           "bg-[var(--drafting-ink)] text-[var(--drafting-paper)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-paper)]",
                       )}
@@ -1303,8 +1321,8 @@ export function Canvas({
                     <Button
                       aria-label="Pan canvas"
                       aria-pressed={activeInteractionTool === "pan"}
-                      className={cn(
-                        "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]",
+                      className={getComposeToolbarIconButtonClass(
+                        isDesktopZoomToolbar,
                         activeInteractionTool === "pan" &&
                           "bg-[var(--drafting-ink)] text-[var(--drafting-paper)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-paper)]",
                       )}
@@ -1326,8 +1344,8 @@ export function Canvas({
                 <Button
                   aria-label={snapEnabled ? "Disable snapping" : "Enable snapping"}
                   aria-pressed={snapEnabled}
-                  className={cn(
-                    "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]",
+                  className={getComposeToolbarIconButtonClass(
+                    isDesktopZoomToolbar,
                     snapEnabled &&
                       "bg-[var(--drafting-ink)] text-[var(--drafting-paper)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-paper)]",
                   )}
@@ -1349,7 +1367,7 @@ export function Canvas({
                   <TooltipTrigger asChild>
                     <Button
                       aria-label={isMaximized ? "Restore layout" : "Maximize pane"}
-                      className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                      className={getComposeToolbarIconButtonClass(isDesktopZoomToolbar)}
                       onClick={handleToggleMaximize}
                       size="icon"
                       type="button"
@@ -1378,8 +1396,8 @@ export function Canvas({
                     <Button
                       aria-label={showCanvasGrid ? "Hide canvas grid" : "Show canvas grid"}
                       aria-pressed={showCanvasGrid}
-                      className={cn(
-                        "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]",
+                      className={getComposeToolbarIconButtonClass(
+                        isDesktopZoomToolbar,
                         showCanvasGrid &&
                           "bg-[var(--drafting-ink)] text-[var(--drafting-paper)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-paper)]",
                       )}
@@ -1405,8 +1423,9 @@ export function Canvas({
                         <Button
                           aria-label="Add text on canvas"
                           aria-pressed={activeCanvasTool === "text"}
-                          className={cn(
-                            "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] disabled:opacity-40",
+                          className={getComposeToolbarIconButtonClass(
+                            isDesktopZoomToolbar,
+                            "disabled:opacity-40",
                             activeCanvasTool === "text" &&
                               "bg-[var(--drafting-ink)] text-[var(--drafting-paper)] hover:bg-[var(--drafting-ink)] hover:text-[var(--drafting-paper)]",
                           )}
@@ -1430,6 +1449,9 @@ export function Canvas({
                   <InsertMenu
                     canAddQrCode={canAddQrCode}
                     nodeId={insertNodeId}
+                    triggerClassName={
+                      isDesktopZoomToolbar ? DESKTOP_COMPOSE_TOOLBAR_ICON_BUTTON_CLASS : undefined
+                    }
                     variant="bottom-toolbar"
                     onAddQrCode={onAddQrCode}
                     onInsertLayer={onInsertLayer}
@@ -1439,7 +1461,10 @@ export function Canvas({
                     <TooltipTrigger asChild>
                       <Button
                         aria-label="Add QR code"
-                        className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] disabled:opacity-40"
+                        className={getComposeToolbarIconButtonClass(
+                          isDesktopZoomToolbar,
+                          "disabled:opacity-40",
+                        )}
                         onClick={onAddQrCode}
                         disabled={!canAddQrCode}
                         size="icon"
@@ -1460,7 +1485,7 @@ export function Canvas({
                     <TooltipTrigger asChild>
                       <Button
                         aria-label="Remove QR code"
-                        className="h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+                        className={getComposeToolbarIconButtonClass(isDesktopZoomToolbar)}
                         onClick={() => onRemoveQrCode?.(activePaneId)}
                         size="icon"
                         type="button"

@@ -1456,7 +1456,7 @@ export function FloatingToolbar({
         <div
           data-slot="desktop-action-toolbar"
           data-toolbar-appearance="desktop-glass"
-          className="fixed bottom-4 left-[25rem] z-30 inline-flex min-h-14 items-center gap-1 rounded-full border border-white/[0.12] bg-black/55 px-3 py-1.5 text-white/72 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl max-md:left-auto max-md:right-4"
+          className="fixed bottom-4 left-[25rem] z-30 inline-flex min-h-14 cursor-pointer items-center gap-0.5 rounded-full border border-white/[0.12] bg-black/55 px-3 py-1.5 text-white/72 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl max-md:left-auto max-md:right-4"
         >
           <button
             aria-label="Reset defaults"
