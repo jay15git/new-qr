@@ -182,6 +182,23 @@ export function applyAssetUrlValue(
   }
 }
 
+export function applyIconstackLogoPresetSelection(
+  state: QrStudioState,
+  presetId: string,
+  value: string,
+  presetColor: string,
+) {
+  return {
+    ...state,
+    logo: {
+      presetColor,
+      presetId,
+      source: "preset" as const,
+      value,
+    },
+  }
+}
+
 export function applyLogoPresetSelection(
   state: QrStudioState,
   brandIcon: BrandIconEntry,

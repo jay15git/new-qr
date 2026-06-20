@@ -132,9 +132,16 @@ import {
   filterBrandIcons,
   findBrandIconById,
   type BrandIconCategory,
-  type BrandIconId,
   type BrandIconEntry,
 } from "@/features/qr-code/assets/brand-icons"
+import {
+  fetchIconSvg,
+  parseIconstackSelectionId,
+} from "@/features/qr-code/assets/iconstack-api"
+import {
+  createIconstackIconDataUrl,
+  createIconstackIconGradientDataUrl,
+} from "@/features/qr-code/assets/iconstack-svg"
 import type { QrBackgroundShapeId } from "@/features/qr-code/styles/background-shapes"
 import {
   createBrandIconDataUrl,
@@ -148,6 +155,7 @@ import {
   applyLogoPresetGradient,
   applyLogoPresetSelection,
 } from "@/features/qr-code/components/ControlsPanel"
+import { applyIconstackLogoPresetSelection } from "@/features/qr-code/model/actions"
 import {
   downloadDashboardQrBatchZipExport,
   downloadDashboardQrNodeExport,
@@ -650,7 +658,7 @@ export function WorkspaceSurface({
   const [brandIconQuery, setBrandIconQuery] = useState("")
   const [brandIconCategory, setBrandIconCategory] =
     useState<DraftingBrandIconCategoryFilter>("all")
-  const [selectedLogoPresetId, setSelectedLogoPresetId] = useState<BrandIconId | undefined>(
+  const [selectedLogoPresetId, setSelectedLogoPresetId] = useState<string | undefined>(
     DEFAULT_DRAFTING_STUDIO_STATE.logo.presetId,
   )
   const [selectedLogoPresetValue, setSelectedLogoPresetValue] = useState<string | undefined>(
@@ -737,6 +745,7 @@ export function WorkspaceSurface({
   const isApplyingDraftingWorkspaceHistoryRef = useRef(false)
   const shouldReplaceCurrentDraftingHistoryEntryRef = useRef(false)
   const draftingSurfaceRef = useRef<HTMLElement | null>(null)
+  const iconstackSvgCacheRef = useRef<Map<string, string>>(new Map())
   const draftingLayerClipboardRef = useRef<string>("")
   const activeToolConfig =
     DRAFTING_TOOLS.find((section) => section.id === activeTool) ?? DRAFTING_TOOLS[0]
@@ -1020,7 +1029,7 @@ export function WorkspaceSurface({
     logoColor?: string
     logoColorMode?: DraftingBinaryColorMode
     logoGradient?: StudioGradient
-    logoPresetId?: BrandIconId
+    logoPresetId?: string
     logoPresetValue?: string
     logoRemoteUrl?: string
     logoSourceMode?: AssetSourceMode
@@ -1071,6 +1080,52 @@ export function WorkspaceSurface({
     }
   }
 
+  async function resolveIconstackSvgMarkup(selectionId: string) {
+    const cached = iconstackSvgCacheRef.current.get(selectionId)
+    if (cached) {
+      return cached
+    }
+
+    const parsed = parseIconstackSelectionId(selectionId)
+    if (!parsed) {
+      return undefined
+    }
+
+    const response = await fetchIconSvg({
+      library: parsed.library,
+      id: parsed.iconId,
+    })
+
+    iconstackSvgCacheRef.current.set(selectionId, response.svg)
+    return response.svg
+  }
+
+  async function handleDraftingIconstackIconSelection(selectionId: string) {
+    const svg = await resolveIconstackSvgMarkup(selectionId)
+    if (!svg) {
+      return
+    }
+
+    const nextValue =
+      selectedLogoColorMode === "gradient"
+        ? createIconstackIconGradientDataUrl(svg, {
+            ...structuredClone(selectedLogoGradient),
+            enabled: true,
+          })
+        : createIconstackIconDataUrl(svg, selectedLogoColor)
+    const nextState = applyIconstackLogoPresetSelection(
+      buildDraftingLogoStateSnapshot({
+        logoColorMode: selectedLogoColorMode,
+      }),
+      selectionId,
+      nextValue,
+      selectedLogoColor,
+    )
+
+    setSelectedLogoPresetId(selectionId)
+    syncDraftingLogoAsset(nextState)
+  }
+
   function handleDraftingBrandIconSelection(brandIcon: BrandIconEntry) {
     const nextValue =
       selectedLogoColorMode === "gradient"
@@ -1091,10 +1146,33 @@ export function WorkspaceSurface({
     syncDraftingLogoAsset(nextState)
   }
 
-  function handleDraftingLogoColorChange(value: string) {
+  async function handleDraftingLogoColorChange(value: string) {
     ensureLogoColorItemExpanded("solid")
     setSelectedLogoColorMode("solid")
     setSelectedLogoColor(value)
+
+    const iconstackSelectionId = parseIconstackSelectionId(selectedLogoPresetId)
+      ? selectedLogoPresetId
+      : undefined
+
+    if (iconstackSelectionId) {
+      const svg = await resolveIconstackSvgMarkup(iconstackSelectionId)
+      if (!svg) {
+        return
+      }
+
+      const nextState = applyLogoPresetColor(
+        buildDraftingLogoStateSnapshot({
+          logoColor: value,
+          logoColorMode: "solid",
+        }),
+        createIconstackIconDataUrl(svg, value),
+        value,
+      )
+
+      syncDraftingLogoAsset(nextState)
+      return
+    }
 
     const selectedIcon = findBrandIconById(selectedLogoPresetId)
 
@@ -1114,7 +1192,7 @@ export function WorkspaceSurface({
     syncDraftingLogoAsset(nextState)
   }
 
-  function handleDraftingLogoGradientChange(value: StudioGradient) {
+  async function handleDraftingLogoGradientChange(value: StudioGradient) {
     const nextGradient = {
       ...structuredClone(value),
       enabled: true,
@@ -1123,6 +1201,29 @@ export function WorkspaceSurface({
     ensureLogoColorItemExpanded("gradient")
     setSelectedLogoColorMode("gradient")
     setSelectedLogoGradient(nextGradient)
+
+    const iconstackSelectionId = parseIconstackSelectionId(selectedLogoPresetId)
+      ? selectedLogoPresetId
+      : undefined
+
+    if (iconstackSelectionId) {
+      const svg = await resolveIconstackSvgMarkup(iconstackSelectionId)
+      if (!svg) {
+        return
+      }
+
+      const nextState = applyLogoPresetGradient(
+        buildDraftingLogoStateSnapshot({
+          logoColorMode: "gradient",
+          logoGradient: nextGradient,
+        }),
+        createIconstackIconGradientDataUrl(svg, nextGradient),
+        nextGradient,
+      )
+
+      syncDraftingLogoAsset(nextState)
+      return
+    }
 
     const selectedIcon = findBrandIconById(selectedLogoPresetId)
 
@@ -3722,8 +3823,12 @@ export function WorkspaceSurface({
       syncDraftingLogoAsset(nextState)
     }
     if (patch.selectedBrandIconId) {
-      const brandIcon = findBrandIconById(patch.selectedBrandIconId as BrandIconId)
-      if (brandIcon) handleDraftingBrandIconSelection(brandIcon)
+      if (parseIconstackSelectionId(patch.selectedBrandIconId)) {
+        void handleDraftingIconstackIconSelection(patch.selectedBrandIconId)
+      } else {
+        const brandIcon = findBrandIconById(patch.selectedBrandIconId)
+        if (brandIcon) handleDraftingBrandIconSelection(brandIcon)
+      }
     }
     if (patch.colorMode) setSelectedLogoColorMode(patch.colorMode)
     if (patch.solidColor) handleDraftingLogoColorChange(patch.solidColor)

@@ -1393,6 +1393,20 @@ describe("FloatingToolbar", () => {
     expect(right.getAttribute("aria-pressed")).toBe("false")
   })
 
+  it("shows the iconstack search placeholder before a logo query is entered", async () => {
+    const surface = await renderPrototype()
+
+    await openTool(surface.container, "logo")
+
+    expect(surface.container.textContent).toContain("Search 51,000+ icons")
+    expect(
+      surface.container.querySelector('[aria-label="Search logo icons"]'),
+    ).not.toBeNull()
+    expect(
+      surface.container.querySelector('[data-slot*="desktop-logo-library-filter-trigger"]'),
+    ).not.toBeNull()
+  })
+
 })
 
 async function renderPrototype({

@@ -1,4 +1,3 @@
-import type { BrandIconId } from "@/features/qr-code/assets/brand-icons";
 import type { QrBackgroundShapeId } from "@/features/qr-code/styles/background-shapes";
 import type {
   QrDataModulesStyle,
@@ -141,7 +140,7 @@ export type QrDotMatrixAnimationPatch =
 
 export type StudioAsset = {
   presetColor?: string;
-  presetId?: BrandIconId;
+  presetId?: string;
   source: AssetSourceMode;
   value?: string;
 };

@@ -43,13 +43,14 @@ import {
 } from "lucide-react"
 
 import { BlocksIcon } from "@/components/vendor/animate-ui/icons/blocks"
-import {
-  BRAND_ICON_CATALOG,
-  filterBrandIcons,
-  type BrandIconCategory,
-  type BrandIconEntry,
-} from "@/features/qr-code/assets/brand-icons"
 import { DEFAULT_BRAND_ICON_COLOR } from "@/features/qr-code/assets/brand-icon-svg"
+import {
+  ICONSTACK_LIBRARIES,
+  toIconstackSelectionId,
+  type IconstackLibraryId,
+  type IconstackSearchResult,
+} from "@/features/qr-code/assets/iconstack-api"
+import { useIconstackIconSearch } from "@/features/qr-code/hooks/useIconstackIconSearch"
 import {
   DRAFTING_CARD_PATTERN_NONE_ID,
   DRAFTING_CARD_PATTERNS,
@@ -673,17 +674,15 @@ const DESKTOP_DOTS_PALETTE_PRESETS: Array<{
   { label: "Mono", colors: ["#020617", "#334155", "#94a3b8", "#f8fafc"] },
 ]
 
-const DESKTOP_BRAND_ICON_CATEGORY_OPTIONS: Array<{
+const DESKTOP_ICONSTACK_LIBRARY_OPTIONS: Array<{
   label: string
-  value: BrandIconCategory | "all"
+  value: IconstackLibraryId | "all"
 }> = [
-  { label: "All", value: "all" },
-  { label: "Social", value: "social" },
-  { label: "Business", value: "business" },
-  { label: "Payments", value: "payments" },
-  { label: "Travel", value: "travel" },
-  { label: "Media", value: "media" },
-  { label: "Web", value: "web" },
+  { label: "All libraries", value: "all" },
+  ...ICONSTACK_LIBRARIES.map((library) => ({
+    label: library.label,
+    value: library.id,
+  })),
 ]
 
 const DESKTOP_DOTS_COLOR_MODES: Array<{ label: string; value: DotsColorMode }> = [
@@ -766,7 +765,7 @@ const DEFAULT_DESKTOP_LOGO_SETTINGS: DesktopLogoSettings = {
   margin: 12,
   remoteUrl: "",
   saveAsBlob: true,
-  selectedBrandIconId: BRAND_ICON_CATALOG[0]?.id ?? "instagram",
+  selectedBrandIconId: "",
   size: 40,
   solidColor: DEFAULT_BRAND_ICON_COLOR,
   sourceMode: "brand",
@@ -2246,14 +2245,16 @@ function DesktopLogoInspector({
   onLogoSettingsChange: (patch: Partial<DesktopLogoSettings>) => void
   settings: DesktopLogoSettings
 }) {
-  const [category, setCategory] = useState<BrandIconCategory | "all">("all")
+  const [library, setLibrary] = useState<IconstackLibraryId | "all">("all")
   const [query, setQuery] = useState("")
-  const activeCategoryLabel =
-    DESKTOP_BRAND_ICON_CATEGORY_OPTIONS.find((option) => option.value === category)?.label ?? "All"
-  const brandIcons = useMemo(
-    () => filterBrandIcons(query, category).slice(0, 24),
-    [category, query],
-  )
+  const activeLibraryLabel =
+    DESKTOP_ICONSTACK_LIBRARY_OPTIONS.find((option) => option.value === library)?.label ??
+    "All libraries"
+  const { canSearch, error, isLoading, previewSvgs, results, total } = useIconstackIconSearch({
+    enabled: settings.sourceMode === "brand",
+    library,
+    query,
+  })
 
   return (
     <div data-slot="desktop-logo-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -2284,24 +2285,24 @@ function DesktopLogoInspector({
                       "flex h-8 min-w-[92px] flex-1 items-center justify-between gap-2 rounded-full px-3 text-[12px] font-semibold",
                       DESKTOP_INSPECTOR_DROPDOWN_TRIGGER_CLASS,
                     )}
-                    data-slot="desktop-inspector-filter-trigger desktop-logo-category-filter-trigger"
+                    data-slot="desktop-inspector-filter-trigger desktop-logo-library-filter-trigger"
                     type="button"
                   >
-                    <span className="min-w-0 truncate">{activeCategoryLabel}</span>
+                    <span className="min-w-0 truncate">{activeLibraryLabel}</span>
                     <ChevronDownIcon className={cn("size-3.5 shrink-0", DESKTOP_INSPECTOR_FG_MUTED)} />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
                   className={cn("w-36", DESKTOP_INSPECTOR_DROPDOWN_MENU_CLASS)}
-                  data-slot="desktop-inspector-filter-menu desktop-logo-category-filter-menu"
+                  data-slot="desktop-inspector-filter-menu desktop-logo-library-filter-menu"
                 >
                   <DropdownMenuRadioGroup
-                    aria-label="Logo icon categories"
-                    value={category}
-                    onValueChange={(value) => setCategory(value as BrandIconCategory | "all")}
+                    aria-label="Logo icon libraries"
+                    value={library}
+                    onValueChange={(value) => setLibrary(value as IconstackLibraryId | "all")}
                   >
-                    {DESKTOP_BRAND_ICON_CATEGORY_OPTIONS.map((option) => (
+                    {DESKTOP_ICONSTACK_LIBRARY_OPTIONS.map((option) => (
                       <DropdownMenuRadioItem
                         key={option.value}
                         className={DESKTOP_INSPECTOR_DROPDOWN_ITEM_CLASS}
@@ -2333,15 +2334,65 @@ function DesktopLogoInspector({
                 columns={4}
                 selectedKey={settings.selectedBrandIconId}
               >
-                {brandIcons.map((brandIcon) => (
-                  <DesktopBrandIconButton
-                    key={brandIcon.id}
-                    brandIcon={brandIcon}
-                    selected={settings.selectedBrandIconId === brandIcon.id}
-                    onClick={() => onLogoSettingsChange({ selectedBrandIconId: brandIcon.id })}
-                  />
-                ))}
+                {!canSearch ? (
+                  <p
+                    className={cn(
+                      "col-span-4 px-1 py-6 text-center text-[11px]",
+                      DESKTOP_INSPECTOR_FG_MUTED,
+                    )}
+                  >
+                    Search 51,000+ icons…
+                  </p>
+                ) : isLoading ? (
+                  <p
+                    className={cn(
+                      "col-span-4 px-1 py-6 text-center text-[11px]",
+                      DESKTOP_INSPECTOR_FG_MUTED,
+                    )}
+                  >
+                    Searching icons…
+                  </p>
+                ) : error ? (
+                  <p
+                    className={cn(
+                      "col-span-4 px-1 py-6 text-center text-[11px]",
+                      DESKTOP_INSPECTOR_FG_MUTED,
+                    )}
+                  >
+                    {error}
+                  </p>
+                ) : results.length === 0 ? (
+                  <p
+                    className={cn(
+                      "col-span-4 px-1 py-6 text-center text-[11px]",
+                      DESKTOP_INSPECTOR_FG_MUTED,
+                    )}
+                  >
+                    No matches
+                  </p>
+                ) : (
+                  results.map((result) => (
+                    <DesktopIconstackIconButton
+                      key={result.id}
+                      previewSvg={previewSvgs[result.id]}
+                      result={result}
+                      selected={
+                        settings.selectedBrandIconId === toIconstackSelectionId(result)
+                      }
+                      onClick={() =>
+                        onLogoSettingsChange({
+                          selectedBrandIconId: toIconstackSelectionId(result),
+                        })
+                      }
+                    />
+                  ))
+                )}
               </DesktopInspectorAnimatedOptionGrid>
+              {canSearch && !isLoading && !error && total > results.length ? (
+                <p className={cn("mt-2 px-1 text-center text-[10px]", DESKTOP_INSPECTOR_FG_MUTED)}>
+                  Showing {results.length} of {total}. Refine your search for more.
+                </p>
+              ) : null}
             </DesktopInspectorOptionGridScrollArea>
           </DesktopInspectorSection>
         ) : null}
@@ -2449,33 +2500,42 @@ function DesktopLogoInspector({
   )
 }
 
-function DesktopBrandIconButton({
-  brandIcon,
+function DesktopIconstackIconButton({
   onClick,
+  previewSvg,
+  result,
   selected,
 }: {
-  brandIcon: BrandIconEntry
   onClick: () => void
+  previewSvg?: string
+  result: IconstackSearchResult
   selected: boolean
 }) {
-  const Icon = brandIcon.icon
-
   return (
-      <button
-        aria-label={`Use ${brandIcon.label} logo icon`}
-        aria-pressed={selected}
-        data-desktop-animated-option-selection="true"
-        data-desktop-option-tile="true"
-        className={cn(
-          "relative grid h-12 min-w-0 place-items-center rounded-[7px] border-2 border-transparent bg-transparent text-[var(--desktop-inspector-fg-tertiary)] transition hover:border-[var(--desktop-inspector-control-border-hover)] hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)]",
-          desktopInspectorOptionGridItemClass(),
-          DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
-          selected && "text-[var(--desktop-inspector-option-selected-fg)]",
-        )}
+    <button
+      aria-label={`Use ${result.name} icon from ${result.libraryName}`}
+      aria-pressed={selected}
+      data-desktop-animated-option-selection="true"
+      data-desktop-option-tile="true"
+      className={cn(
+        "relative grid h-12 min-w-0 place-items-center rounded-[7px] border-2 border-transparent bg-transparent text-[var(--desktop-inspector-fg-tertiary)] transition hover:border-[var(--desktop-inspector-control-border-hover)] hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)]",
+        desktopInspectorOptionGridItemClass(),
+        DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
+        selected && "text-[var(--desktop-inspector-option-selected-fg)]",
+      )}
       type="button"
       onClick={onClick}
     >
-      <Icon className="relative z-10 size-4" />
+      {previewSvg ? (
+        <span
+          className="relative z-10 flex size-4 items-center justify-center [&_svg]:size-4"
+          dangerouslySetInnerHTML={{ __html: previewSvg }}
+        />
+      ) : (
+        <span className={cn("relative z-10 text-[9px] font-semibold", DESKTOP_INSPECTOR_FG_MUTED)}>
+          …
+        </span>
+      )}
     </button>
   )
 }

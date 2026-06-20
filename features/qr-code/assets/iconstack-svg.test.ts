@@ -1,0 +1,39 @@
+import { describe, expect, it } from "vitest"
+
+import {
+  createIconstackIconDataUrl,
+  createIconstackIconGradientDataUrl,
+  recolorSvgMarkup,
+} from "@/features/qr-code/assets/iconstack-svg"
+
+const strokeSvg =
+  '<svg xmlns="http://www.w3.org/2000/svg" stroke="currentColor" fill="none"><path d="M0 0"/></svg>'
+
+describe("iconstack-svg", () => {
+  it("recolors stroke-based svg markup", () => {
+    expect(recolorSvgMarkup(strokeSvg, "#ff4f00")).toContain('stroke="#ff4f00"')
+  })
+
+  it("creates solid data urls", () => {
+    const dataUrl = createIconstackIconDataUrl(strokeSvg, "#111827")
+
+    expect(dataUrl.startsWith("data:image/svg+xml,")).toBe(true)
+    expect(decodeURIComponent(dataUrl)).toContain("#111827")
+  })
+
+  it("creates gradient data urls", () => {
+    const dataUrl = createIconstackIconGradientDataUrl(strokeSvg, {
+      enabled: true,
+      type: "linear",
+      rotation: 0,
+      colorStops: [
+        { offset: 0, color: "#111827" },
+        { offset: 1, color: "#ff4f00" },
+      ],
+    })
+
+    expect(dataUrl.startsWith("data:image/svg+xml,")).toBe(true)
+    expect(decodeURIComponent(dataUrl)).toContain("iconstack-icon-gradient")
+    expect(decodeURIComponent(dataUrl)).toContain('stop-color="#ff4f00"')
+  })
+})
