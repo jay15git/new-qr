@@ -1,11 +1,6 @@
 "use client";
 
 import {
-  CircleArrowDown01Icon,
-  CircleArrowUp01Icon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import {
   useEffect,
   useState,
   type CSSProperties,
@@ -135,13 +130,8 @@ const CHEVRON_PATHS: Record<string, string> = {
   right: "M9 6l6 6-6 6",
 };
 
-// Band size presets along the scroll axis. The cue icon stays 16px in both.
+// Band size presets along the scroll axis. The chevron stays 16px in both.
 const CUE_SIZES = { tight: 32, comfortable: 60 } as const;
-
-const SCROLL_EDGE_CHEVRON_ICONS = {
-  top: CircleArrowUp01Icon,
-  bottom: CircleArrowDown01Icon,
-} as const;
 
 export type ScrollEdgeCueSize = keyof typeof CUE_SIZES;
 
@@ -213,50 +203,30 @@ export function ScrollEdgeCue({
           background: `linear-gradient(${dir}, transparent 0%, color-mix(in srgb, ${fadeColor} 16%, transparent) 38%, color-mix(in srgb, ${fadeColor} 42%, transparent) 64%, color-mix(in srgb, ${fadeColor} 72%, transparent) 86%, ${fadeColor} 100%)`,
         }}
       />
-      {chevron ? (
-        edge === "top" || edge === "bottom" ? (
-          <span
-            style={
-              {
-                position: "absolute",
-                left: "50%",
-                transform: "translateX(-50%)",
-                color: "var(--scroll-edge-chevron-color, var(--muted-foreground))",
-                [edge]: 8,
-              } as CSSProperties
-            }
-          >
-            <HugeiconsIcon
-              icon={SCROLL_EDGE_CHEVRON_ICONS[edge]}
-              size={16}
-              color="currentColor"
-              strokeWidth={1.8}
-            />
-          </span>
-        ) : (
-          <svg
-            width={16}
-            height={16}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={
-              {
-                position: "absolute",
-                color: "var(--scroll-edge-chevron-color, var(--muted-foreground))",
-                top: "50%",
-                transform: "translateY(-50%)",
-                [edge]: 8,
-              } as CSSProperties
-            }
-          >
-            <path d={CHEVRON_PATHS[edge]} />
-          </svg>
-        )
-      ) : null}
+      {chevron && (
+        <svg
+          width={16}
+          height={16}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={
+            {
+              position: "absolute",
+              color: "var(--scroll-edge-chevron-color, var(--muted-foreground))",
+              ...(vertical
+                ? { left: "50%", transform: "translateX(-50%)" }
+                : { top: "50%", transform: "translateY(-50%)" }),
+              [edge]: 8,
+            } as CSSProperties
+          }
+        >
+          <path d={CHEVRON_PATHS[edge]} />
+        </svg>
+      )}
     </div>
   );
 
