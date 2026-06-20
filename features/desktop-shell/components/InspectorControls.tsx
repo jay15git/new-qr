@@ -1,8 +1,13 @@
 "use client"
 
 import {
+  useEffect,
   useId,
+  useRef,
+  useState,
   type ComponentProps,
+  type CSSProperties,
+  type ElementType,
   type ReactNode,
 } from "react"
 import { ChevronDownIcon, SearchIcon } from "lucide-react"
@@ -96,24 +101,91 @@ export function desktopInspectorOptionGridItemClass(
   return cn("w-full min-w-0", DESKTOP_INSPECTOR_OPTION_GRID_ITEM_PADDING_CLASS[spacing])
 }
 
-type DesktopInspectorSectionProps = ComponentProps<"section"> & {
+type DesktopInspectorSectionElement = "section" | "div" | "details"
+
+type DesktopInspectorSectionProps = Omit<ComponentProps<"section">, "as"> & {
+  as?: DesktopInspectorSectionElement
   dataSlot?: string
+  resize?: boolean
+}
+
+function useTResizeHeight(enabled: boolean) {
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [height, setHeight] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!enabled) {
+      setHeight(null)
+      return
+    }
+
+    const element = contentRef.current
+
+    if (!element) {
+      return
+    }
+
+    const update = () => {
+      const element = contentRef.current
+      if (!element) {
+        return
+      }
+
+      const host = element.parentElement
+      if (!host) {
+        setHeight(element.offsetHeight)
+        return
+      }
+
+      const { paddingBottom, paddingTop } = getComputedStyle(host)
+      const paddingY =
+        (Number.parseFloat(paddingTop) || 0) + (Number.parseFloat(paddingBottom) || 0)
+
+      setHeight(element.offsetHeight + paddingY)
+    }
+
+    if (typeof ResizeObserver === "undefined") {
+      update()
+      return
+    }
+
+    const observer = new ResizeObserver(update)
+    observer.observe(element)
+    update()
+
+    return () => observer.disconnect()
+  }, [enabled])
+
+  return { contentRef, height }
 }
 
 export function DesktopInspectorSection({
+  as = "section",
   children,
   className,
   dataSlot,
+  resize = false,
+  style,
   ...props
 }: DesktopInspectorSectionProps) {
+  const Component = as as ElementType
+  const { contentRef, height } = useTResizeHeight(resize)
+  const resizeStyle: CSSProperties | undefined =
+    resize && height !== null ? { height } : undefined
+
   return (
-    <section
+    <Component
       data-slot={dataSlot}
-      className={cn(DESKTOP_INSPECTOR_SECTION_CLASS, className)}
+      className={cn(
+        DESKTOP_INSPECTOR_SECTION_CLASS,
+        resize && "t-resize overflow-hidden",
+        className,
+      )}
+      style={{ ...style, ...resizeStyle }}
       {...props}
     >
-      {children}
-    </section>
+      {resize ? <div ref={contentRef}>{children}</div> : children}
+    </Component>
   )
 }
 

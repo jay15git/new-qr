@@ -1061,3 +1061,20 @@ html.drafting-layer-moving,
 html.drafting-layer-moving * {
   cursor: var(--cursor-move) !important;
 }
+
+/* Transitions.dev — Card resize */
+:root {
+  --resize-dur: 300ms;
+  --resize-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.t-resize {
+  transition: height var(--resize-dur) var(--resize-ease);
+  will-change: height;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-resize {
+    transition: none !important;
+  }
+}

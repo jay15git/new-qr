@@ -14,7 +14,6 @@ import {
 import FileUpload from "@/components/vendor/kokonutui/file-upload"
 import {
   DESKTOP_INSPECTOR_CONTROL_CLASS,
-  DESKTOP_INSPECTOR_SECTION_CLASS,
   DESKTOP_INSPECTOR_SECTION_GAP_CLASS,
   DESKTOP_INSPECTOR_SECTION_HEADING_CLASS,
   DESKTOP_INSPECTOR_SELECTED_CLASS,
@@ -131,11 +130,11 @@ export function DesktopTransformInspector({
         {layer ? (
           <DesktopTransformSection layer={layer} onPatch={onPatch} />
         ) : (
-          <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
+          <DesktopInspectorSection>
             <p className="text-center text-[12px] font-semibold text-[var(--desktop-inspector-fg-muted)]">
               Select a layer to edit position, size, and rotation.
             </p>
-          </section>
+          </DesktopInspectorSection>
         )}
       </DesktopInspectorScrollArea>
     </div>
@@ -538,6 +537,7 @@ function DesktopLayerShapeInspector({
     <DesktopInspectorSection
       className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}
       dataSlot="desktop-layer-shape-inspector"
+      resize
     >
       <DesktopInspectorLabel>Shape</DesktopInspectorLabel>
       <div

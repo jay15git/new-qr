@@ -18,13 +18,60 @@ import { cn } from "@/lib/utils"
 export const DESKTOP_ELASTIC_SLIDER_CLASS =
   "desktop-elastic-slider [--elastic-slider-height:--spacing(8)] [--elastic-slider-radius:9999px] [--elastic-slider-bg:rgba(255,255,255,0.095)] [--elastic-slider-fill:rgba(255,255,255,0.13)] [--elastic-slider-fill-active:rgba(255,255,255,0.2)] [--elastic-slider-hash:rgba(255,255,255,0.24)] [--elastic-slider-handle:rgba(255,255,255,0.7)] [--elastic-slider-label:rgba(255,255,255,0.58)] [--elastic-slider-focus:rgba(255,255,255,0.82)]"
 
-const OPTION_GRID_VARIANT_CLASS = {
-  preset: "h-80",
-  compact: "max-h-40",
-  content: "h-[180px]",
-} as const
 
-export type DesktopInspectorOptionGridVariant = keyof typeof OPTION_GRID_VARIANT_CLASS
+export type DesktopInspectorOptionGridColumns = 2 | 3 | 4
+
+export type DesktopInspectorOptionGridRowKind =
+  | "square"
+  | "labeled"
+  | "h-12"
+  | "h-10"
+  | "h-9"
+  | "h-8"
+  | "content"
+
+function desktopOptionGridScrollHeightClass({
+  columns = 3,
+  rowKind,
+  variant,
+}: {
+  columns?: DesktopInspectorOptionGridColumns
+  rowKind?: DesktopInspectorOptionGridRowKind
+  variant: DesktopInspectorOptionGridVariant
+}): string {
+  const resolvedRowKind: DesktopInspectorOptionGridRowKind =
+    rowKind ??
+    (variant === "content"
+      ? "content"
+      : variant === "preset"
+        ? "square"
+        : columns === 4
+          ? "h-12"
+          : "h-10")
+
+  // Fixed three-row viewport heights tuned for the desktop inspector column widths.
+  // ScrollArea keeps a definite height so overflow scrolls inside the shelf.
+  switch (resolvedRowKind) {
+    case "square":
+      if (columns === 2) return "h-[24.75rem]"
+      if (columns === 4) return "h-[12.75rem]"
+      return "h-[16.5rem]"
+    case "labeled":
+      return columns === 2 ? "h-[20.25rem]" : "h-[16.5rem]"
+    case "h-12":
+      return "h-[10.5rem]"
+    case "h-10":
+      return "h-[7.125rem]"
+    case "h-9":
+      return "h-[6.75rem]"
+    case "h-8":
+      return "h-[6.375rem]"
+    case "content":
+      return "h-[11.625rem]"
+  }
+}
+
+export type DesktopInspectorOptionGridVariant = "preset" | "compact" | "content"
 
 export function DesktopInspectorHeader({ title }: { title: string }) {
   return (
@@ -53,8 +100,10 @@ export function DesktopInspectorOptionGridScrollArea({
   ariaLabel,
   children,
   className,
+  columns = 3,
   dataSlot,
   role = "group",
+  rowKind,
   shelfDataSlot,
   shelfId,
   variant,
@@ -62,8 +111,10 @@ export function DesktopInspectorOptionGridScrollArea({
   ariaLabel: string
   children: ReactNode
   className?: string
+  columns?: DesktopInspectorOptionGridColumns
   dataSlot: string
   role?: "group" | "listbox"
+  rowKind?: DesktopInspectorOptionGridRowKind
   shelfDataSlot?: string
   shelfId?: string
   variant: DesktopInspectorOptionGridVariant
@@ -75,7 +126,11 @@ export function DesktopInspectorOptionGridScrollArea({
         cueSize="tight"
         data-slot={dataSlot}
         scrollFade
-        className={cn("overflow-hidden", OPTION_GRID_VARIANT_CLASS[variant], className)}
+        className={cn(
+          "shrink-0 overflow-hidden",
+          desktopOptionGridScrollHeightClass({ columns, rowKind, variant }),
+          className,
+        )}
         viewportClassName="pr-1"
       >
         <div

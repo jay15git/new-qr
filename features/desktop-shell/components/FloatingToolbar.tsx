@@ -173,7 +173,6 @@ import {
   DESKTOP_INSPECTOR_RESET_CLASS,
   DESKTOP_INSPECTOR_ROW_CLASS,
   DESKTOP_INSPECTOR_ROW_GAP_CLASS,
-  DESKTOP_INSPECTOR_SECTION_CLASS,
   DESKTOP_INSPECTOR_SECTION_GAP_CLASS,
   DESKTOP_INSPECTOR_SECTION_HEADING_CLASS,
   DESKTOP_INSPECTOR_SELECTED_CLASS,
@@ -1379,11 +1378,8 @@ export function FloatingToolbar({
                 <div data-slot="desktop-keyboard-shortcuts-scroll">
                   <div className="grid gap-2.5">
                     {DRAFTING_KEYBOARD_SHORTCUT_GROUPS.map((group) => (
-                      <section
-                        key={group.title}
-                        aria-label={`${group.title} shortcuts`}
-                        className={cn(DESKTOP_INSPECTOR_SECTION_CLASS, "p-2.5")}
-                      >
+                      <DesktopInspectorSection className={cn("p-2.5")} key={group.title}
+                        aria-label={`${group.title} shortcuts`}>
                         <h3 className="px-1 pb-1.5 text-[11px] font-semibold text-white/64">
                           {group.title}
                         </h3>
@@ -1438,7 +1434,7 @@ export function FloatingToolbar({
                             </div>
                           ))}
                         </div>
-                      </section>
+                      </DesktopInspectorSection>
                     ))}
                   </div>
                 </div>
@@ -1498,7 +1494,7 @@ export function FloatingToolbar({
           <TabsSubtleIconRail
             aria-label="Desktop tools"
             data-slot="desktop-floating-toolbar"
-            className="relative min-h-0 min-w-0 overflow-x-hidden overflow-y-auto border-r border-white/[0.08] p-1.5 pt-14 text-[var(--desktop-toolbar-fg)] max-md:p-1 max-md:pt-12"
+            className="relative min-h-0 min-w-0 overflow-x-hidden overflow-y-auto p-1.5 pt-14 text-[var(--desktop-toolbar-fg)] max-md:p-1 max-md:pt-12"
             selectedIndex={
               actualActiveTool
                 ? DESKTOP_TOOLBAR_TOOLS.findIndex((tool) => tool.id === actualActiveTool)
@@ -1667,7 +1663,14 @@ export function DesktopThemeStyles() {
         border-color: rgba(15, 23, 42, 0.11) !important;
       }
 
+      [data-slot="desktop-keyboard-shortcuts-popover"] {
+        --scroll-edge-fade-color: #0a0a0a;
+        --scroll-edge-chevron-color: rgba(255, 255, 255, 0.45);
+      }
+
       body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-popover"] {
+        --scroll-edge-fade-color: rgba(255, 255, 255, 0.88);
+        --scroll-edge-chevron-color: rgba(15, 23, 42, 0.42);
         background: #ffffff !important;
         border-color: #dedede !important;
         color: rgba(23, 23, 23, 0.92) !important;
@@ -1814,6 +1817,8 @@ export function DesktopThemeStyles() {
       [data-slot="desktop-floating-inspector"] {
         --surface-1: rgba(0, 0, 0, 0.55);
         --surface-2: var(--desktop-inspector-section-bg);
+        --scroll-edge-fade-color: #1a1a1a;
+        --scroll-edge-chevron-color: rgba(255, 255, 255, 0.45);
         --desktop-inspector-fg-primary: rgba(255, 255, 255, 0.94);
         --desktop-inspector-fg-secondary: rgba(255, 255, 255, 0.72);
         --desktop-inspector-fg-tertiary: rgba(255, 255, 255, 0.56);
@@ -1837,6 +1842,8 @@ export function DesktopThemeStyles() {
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] {
         --surface-1: rgba(255, 255, 255, 0.72);
         --surface-2: var(--desktop-inspector-section-bg);
+        --scroll-edge-fade-color: rgba(255, 255, 255, 0.88);
+        --scroll-edge-chevron-color: rgba(15, 23, 42, 0.42);
         --desktop-inspector-fg-primary: rgba(15, 23, 42, 0.90);
         --desktop-inspector-fg-secondary: rgba(15, 23, 42, 0.62);
         --desktop-inspector-fg-tertiary: rgba(15, 23, 42, 0.48);
@@ -2312,6 +2319,7 @@ function DesktopLogoInspector({
             <DesktopInspectorOptionGridScrollArea
               ariaLabel="Brand icons"
               className="mt-2"
+              columns={4}
               dataSlot="desktop-logo-brand-icons-scroll-area"
               shelfDataSlot="desktop-logo-brand-icons"
               variant="compact"
@@ -2351,7 +2359,7 @@ function DesktopLogoInspector({
         ) : null}
 
         {settings.sourceMode === "brand" ? (
-          <DesktopInspectorSection className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS} dataSlot="desktop-logo-color">
+          <DesktopInspectorSection className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS} dataSlot="desktop-logo-color" resize>
             <DesktopInspectorLabel className="mb-3">
               Icon Color
             </DesktopInspectorLabel>
@@ -2396,7 +2404,7 @@ function DesktopLogoInspector({
         ) : null}
 
         {settings.sourceMode !== "none" ? (
-          <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+          <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
             <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Size</p>
             <DesktopMotionSliderRow
               label="Logo size"
@@ -2425,7 +2433,7 @@ function DesktopLogoInspector({
                 onChange={(saveAsBlob) => onLogoSettingsChange({ saveAsBlob })}
               />
             </div>
-          </section>
+          </DesktopInspectorSection>
         ) : null}
       </DesktopInspectorScrollArea>
 
@@ -2481,12 +2489,13 @@ function DesktopCornersInspector({
         {/* Original */}
         <div data-impeccable-variant="original" className="flex min-h-0 flex-1 flex-col">
           <DesktopInspectorScrollArea>
-            <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
+            <DesktopInspectorSection>
               <div className="mb-2 min-w-0">
                 <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Corner Frame</p>
               </div>
               <DesktopInspectorOptionGridScrollArea
                 ariaLabel="Corner frame presets"
+                columns={3}
                 dataSlot="desktop-corner-frame-preset-shelf-scroll-area"
                 variant="preset"
               >
@@ -2505,7 +2514,7 @@ function DesktopCornersInspector({
                   ))}
                 </div>
               </DesktopInspectorOptionGridScrollArea>
-            </section>
+            </DesktopInspectorSection>
 
             <DesktopCornerColorSection
               dataSlot="desktop-corner-frame-color"
@@ -2525,12 +2534,13 @@ function DesktopCornersInspector({
               }
             />
 
-            <section className={cn(DESKTOP_INSPECTOR_MAJOR_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+            <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_MAJOR_GAP_CLASS)}>
               <div className="mb-2 min-w-0">
                 <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Corner Dot</p>
               </div>
               <DesktopInspectorOptionGridScrollArea
                 ariaLabel="Corner dot presets"
+                columns={3}
                 dataSlot="desktop-corner-dot-preset-shelf-scroll-area"
                 variant="preset"
               >
@@ -2549,7 +2559,7 @@ function DesktopCornersInspector({
                   ))}
                 </div>
               </DesktopInspectorOptionGridScrollArea>
-            </section>
+            </DesktopInspectorSection>
 
             <DesktopCornerColorSection
               dataSlot="desktop-corner-dot-color"
@@ -2569,7 +2579,7 @@ function DesktopCornersInspector({
               }
             />
 
-            <div className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, "flex items-center justify-between gap-3 px-3 py-2.5", DESKTOP_INSPECTOR_SECTION_CLASS)}>
+            <DesktopInspectorSection as="div" className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, "flex items-center justify-between gap-3 px-3 py-2.5")}>
               <div className="flex min-w-0 items-center gap-2">
                 <ShieldCheckIcon className={cn("size-4 shrink-0", DESKTOP_INSPECTOR_FG_MUTED)} />
                 <div className="min-w-0">
@@ -2579,7 +2589,7 @@ function DesktopCornersInspector({
               <span className="shrink-0 rounded-full bg-emerald-400/15 px-2 py-1 text-[10px] font-bold text-emerald-200">
                 Valid
               </span>
-            </div>
+            </DesktopInspectorSection>
           </DesktopInspectorScrollArea>
         </div>
         {/* Variants: insert below this line */}
@@ -2614,10 +2624,7 @@ function DesktopCornerColorSection({
   const colorLabelPrefix = target === "corner frame" ? "Frame" : "Dot"
 
   return (
-    <section
-      className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}
-      data-slot={dataSlot}
-    >
+    <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)} data-slot={dataSlot} resize>
       <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>{title}</p>
 
       <DesktopInspectorSegmentedControl
@@ -2660,7 +2667,7 @@ function DesktopCornerColorSection({
           />
         </div>
       ) : null}
-    </section>
+    </DesktopInspectorSection>
   )
 }
 
@@ -2739,12 +2746,13 @@ function DesktopShapeInspector({
       <DesktopInspectorHeader title="Shape" />
 
       <DesktopInspectorScrollArea>
-        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
+        <DesktopInspectorSection>
           <div className="mb-2 min-w-0">
             <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Shape Options</p>
           </div>
           <DesktopInspectorOptionGridScrollArea
             ariaLabel="Shape options"
+            columns={3}
             dataSlot="desktop-shape-preset-shelf-scroll-area"
             variant="preset"
           >
@@ -2770,9 +2778,9 @@ function DesktopShapeInspector({
               ))}
             </div>
           </DesktopInspectorOptionGridScrollArea>
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)} data-slot="desktop-shape-color">
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)} data-slot="desktop-shape-color" resize>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Shape Color</p>
 
           <DesktopInspectorSegmentedControl
@@ -2826,9 +2834,9 @@ function DesktopShapeInspector({
               />
             </div>
           ) : null}
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Frame</p>
           <div className="grid gap-2">
             <DesktopMotionToggleRow
@@ -2861,9 +2869,9 @@ function DesktopShapeInspector({
               onChange={(bottomSpace) => onShapeSettingsChange({ bottomSpace })}
             />
           </div>
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Tilt</p>
           <div className="grid gap-2">
             <DesktopElasticSliderRow
@@ -2883,9 +2891,9 @@ function DesktopShapeInspector({
               onChange={(shapeTiltY) => onShapeSettingsChange({ shapeTiltY })}
             />
           </div>
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Fill</p>
           <DesktopColorInputRow
             label="Shape fill color"
@@ -2895,7 +2903,9 @@ function DesktopShapeInspector({
           <DesktopInspectorOptionGridScrollArea
             ariaLabel="Shape fill patterns"
             className="mt-2.5"
+            columns={2}
             dataSlot="desktop-shape-patterns-scroll-area"
+            rowKind="labeled"
             shelfDataSlot="desktop-shape-patterns"
             variant="compact"
           >
@@ -2917,7 +2927,7 @@ function DesktopShapeInspector({
               ))}
             </div>
           </DesktopInspectorOptionGridScrollArea>
-        </section>
+        </DesktopInspectorSection>
 
         <DesktopInspectorSection className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
           <DesktopInspectorLabel className="mb-3">Image</DesktopInspectorLabel>
@@ -2960,7 +2970,7 @@ function DesktopShapeInspector({
           </div>
         </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Border</p>
           <div className="grid gap-2">
             <DesktopColorInputRow
@@ -2986,9 +2996,9 @@ function DesktopShapeInspector({
               onChange={(borderOpacity) => onShapeSettingsChange({ borderOpacity })}
             />
           </div>
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Inner Padding</p>
           <DesktopElasticSliderRow
             ariaLabel="Shape inner padding"
@@ -2999,9 +3009,9 @@ function DesktopShapeInspector({
             valueLabel={`${Math.round(settings.shapePadding)}`}
             onChange={(shapePadding) => onShapeSettingsChange({ shapePadding })}
           />
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Stroke</p>
           <div className="grid gap-2">
             <DesktopColorInputRow
@@ -3029,9 +3039,9 @@ function DesktopShapeInspector({
               onChange={(shapeStrokeOpacity) => onShapeSettingsChange({ shapeStrokeOpacity })}
             />
           </div>
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Shadow</p>
           <div className="grid gap-2">
             <DesktopColorInputRow
@@ -3077,7 +3087,7 @@ function DesktopShapeInspector({
               onChange={(shapeShadowOffsetY) => onShapeSettingsChange({ shapeShadowOffsetY })}
             />
           </div>
-        </section>
+        </DesktopInspectorSection>
       </DesktopInspectorScrollArea>
 
     </div>
@@ -3232,21 +3242,23 @@ function DesktopMotionInspector({
       <DesktopInspectorHeader title="Motion" />
 
       <DesktopInspectorScrollArea>
-        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
+        <DesktopInspectorSection>
           <DesktopMotionToggleRow
             checked={settings.enabled}
             label="Motion"
             onChange={(enabled) => onMotionSettingsChange({ enabled })}
           />
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <div className="mb-2 min-w-0">
             <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>QR Animations</p>
           </div>
           <DesktopInspectorOptionGridScrollArea
             ariaLabel="Standard motion presets"
+            columns={2}
             dataSlot="desktop-motion-standard-shelf-scroll-area"
+            rowKind="h-10"
             shelfDataSlot="desktop-motion-standard-shelf"
             variant="compact"
           >
@@ -3268,15 +3280,17 @@ function DesktopMotionInspector({
               ))}
             </div>
           </DesktopInspectorOptionGridScrollArea>
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <div className="mb-2 min-w-0">
             <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Dot Matrix Animations</p>
           </div>
           <DesktopInspectorOptionGridScrollArea
             ariaLabel="Dot matrix motion presets"
+            columns={2}
             dataSlot="desktop-motion-loader-shelf-scroll-area"
+            rowKind="h-10"
             shelfDataSlot="desktop-motion-loader-shelf"
             variant="compact"
           >
@@ -3300,9 +3314,9 @@ function DesktopMotionInspector({
               ))}
             </div>
           </DesktopInspectorOptionGridScrollArea>
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Playback</p>
           <div className="grid gap-3">
             <DesktopMotionSelectRow
@@ -3383,9 +3397,9 @@ function DesktopMotionInspector({
               onChange={(opacityPeak) => onMotionSettingsChange({ opacityPeak })}
             />
           </div>
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Loader Color</p>
           <div className={desktopInspectorOptionGridClass(2)} data-slot="desktop-motion-color-presets">
             {QR_DOT_MATRIX_COLOR_PRESET_OPTIONS.map((preset) => (
@@ -3424,9 +3438,9 @@ function DesktopMotionInspector({
               />
             </div>
           ) : null}
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Output</p>
           <div className="grid gap-2">
             <DesktopMotionToggleRow
@@ -3445,7 +3459,7 @@ function DesktopMotionInspector({
               onChange={(respectReducedMotion) => onMotionSettingsChange({ respectReducedMotion })}
             />
           </div>
-        </section>
+        </DesktopInspectorSection>
       </DesktopInspectorScrollArea>
 
     </div>
@@ -3801,6 +3815,7 @@ function DesktopContentInspector({
           <DesktopInspectorOptionGridScrollArea
             ariaLabel="QR content types"
             className="mt-3"
+            columns={3}
             dataSlot="desktop-content-type-collection-scroll-area"
             shelfDataSlot="desktop-content-type-collection-scroll"
             variant="content"
@@ -3841,23 +3856,23 @@ function DesktopContentInspector({
           </DesktopInspectorOptionGridScrollArea>
         </DesktopInspectorSection>
 
-        <div className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection as="div" className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <DesktopContentFields
             contentType={contentType}
             contentValues={contentValues}
             validation={validation}
             onContentValueChange={onContentValueChange}
           />
-        </div>
+        </DesktopInspectorSection>
 
-        <details className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, "px-3 py-2.5", DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection as="details" className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, "px-3 py-2.5")}>
           <summary className={cn("cursor-pointer select-none text-[12px] font-semibold", DESKTOP_INSPECTOR_FG_SECONDARY)}>
             Encoded value
           </summary>
           <pre className={cn("mt-2 max-h-36 overflow-auto whitespace-pre-wrap break-words rounded-[6px] bg-black/24 p-2.5 text-[11px] leading-4", DESKTOP_INSPECTOR_FG_TERTIARY)}>
             {encodedValue || "No payload yet"}
           </pre>
-        </details>
+        </DesktopInspectorSection>
       </DesktopInspectorScrollArea>
 
     </div>
@@ -3878,12 +3893,13 @@ function DesktopPatternInspector({
       <DesktopInspectorHeader title="Pattern" />
 
       <DesktopInspectorScrollArea>
-        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
+        <DesktopInspectorSection>
           <div className="mb-2 min-w-0">
             <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Module Pattern</p>
           </div>
           <DesktopInspectorOptionGridScrollArea
             ariaLabel="Module pattern presets"
+            columns={3}
             dataSlot="desktop-pattern-preset-shelf-scroll-area"
             shelfDataSlot="desktop-pattern-preset-shelf"
             variant="preset"
@@ -3901,9 +3917,9 @@ function DesktopPatternInspector({
               ))}
             </div>
           </DesktopInspectorOptionGridScrollArea>
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)} data-slot="desktop-module-color">
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)} data-slot="desktop-module-color" resize>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Module Color</p>
 
           <DesktopInspectorSegmentedControl
@@ -3992,9 +4008,9 @@ function DesktopPatternInspector({
               </div>
             </div>
           ) : null}
-        </section>
+        </DesktopInspectorSection>
 
-        <div className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, "flex items-center justify-between gap-3 px-3 py-2.5", DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection as="div" className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, "flex items-center justify-between gap-3 px-3 py-2.5")}>
           <div className="flex min-w-0 items-center gap-2">
             <ShieldCheckIcon className={cn("size-4 shrink-0", DESKTOP_INSPECTOR_FG_MUTED)} />
             <div className="min-w-0">
@@ -4004,7 +4020,7 @@ function DesktopPatternInspector({
           <span className="shrink-0 rounded-full bg-emerald-400/15 px-2 py-1 text-[10px] font-bold text-emerald-200">
             Valid
           </span>
-        </div>
+        </DesktopInspectorSection>
       </DesktopInspectorScrollArea>
 
     </div>
@@ -4656,7 +4672,7 @@ function DesktopEncodingInspector({
     <div data-slot="desktop-encoding-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Encoding" />
       <DesktopInspectorScrollArea>
-        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
+        <DesktopInspectorSection>
           <DesktopMotionSliderRow
             label="Type number"
             max={TYPE_NUMBER_MAX}
@@ -4665,9 +4681,9 @@ function DesktopEncodingInspector({
             valueLabel={formatQrTypeNumberLabel(settings.typeNumber)}
             onChange={(typeNumber) => onEncodingSettingsChange({ typeNumber: typeNumber as QrTypeNumber })}
           />
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Error Correction</p>
           <div className={desktopInspectorOptionStackClass()} data-slot="desktop-error-correction-grid">
             {ERROR_CORRECTION_LEVEL_OPTIONS.map((option) => (
@@ -4696,7 +4712,7 @@ function DesktopEncodingInspector({
               </button>
             ))}
           </div>
-        </section>
+        </DesktopInspectorSection>
       </DesktopInspectorScrollArea>
     </div>
   )
@@ -4783,7 +4799,7 @@ function DesktopDecorationsInspector({
     <div data-slot="desktop-decorations-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Decorations" />
       <DesktopInspectorScrollArea>
-        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
+        <DesktopInspectorSection>
           <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Add</p>
           <DesktopInspectorSegmentedControl
             columns={4}
@@ -4794,9 +4810,9 @@ function DesktopDecorationsInspector({
             value={settings.kind}
             onValueChange={(kind) => onDecorationsSettingsChange({ kind })}
           />
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Fill</p>
           <DesktopColorInputRow
             label="Decoration fill color"
@@ -4806,7 +4822,9 @@ function DesktopDecorationsInspector({
           <DesktopInspectorOptionGridScrollArea
             ariaLabel="Decoration fill patterns"
             className="mt-2.5"
+            columns={2}
             dataSlot="desktop-decoration-patterns-scroll-area"
+            rowKind="labeled"
             shelfDataSlot="desktop-decoration-patterns"
             variant="compact"
           >
@@ -4828,9 +4846,9 @@ function DesktopDecorationsInspector({
               ))}
             </div>
           </DesktopInspectorOptionGridScrollArea>
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Frame</p>
           <div className="grid gap-2">
             <DesktopNumberRow
@@ -4853,7 +4871,7 @@ function DesktopDecorationsInspector({
               onChange={(strokeWidth) => onDecorationsSettingsChange({ strokeWidth })}
             />
           </div>
-        </section>
+        </DesktopInspectorSection>
       </DesktopInspectorScrollArea>
     </div>
   )
@@ -4875,11 +4893,13 @@ function DesktopEffectsInspector({
     <div data-slot="desktop-effects-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Effects" />
       <DesktopInspectorScrollArea>
-        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
+        <DesktopInspectorSection>
           <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Generated Effects</p>
           <DesktopInspectorOptionGridScrollArea
             ariaLabel="Generated effects"
+            columns={2}
             dataSlot="desktop-generated-effects-scroll-area"
+            rowKind="h-9"
             shelfDataSlot="desktop-generated-effects"
             variant="compact"
           >
@@ -4899,9 +4919,9 @@ function DesktopEffectsInspector({
               ))}
             </div>
           </DesktopInspectorOptionGridScrollArea>
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Preset</p>
           <DesktopInspectorNativeSelect
             aria-label="Generated effect preset"
@@ -4916,9 +4936,9 @@ function DesktopEffectsInspector({
               onEffectsSettingsChange({ generatedShaderPresetName })
             }
           />
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Motion</p>
           <div className="grid gap-2">
             <DesktopMotionToggleRow
@@ -4943,9 +4963,9 @@ function DesktopEffectsInspector({
               onChange={(frame) => onEffectsSettingsChange({ frame })}
             />
           </div>
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Image Filters</p>
           <div className={desktopInspectorOptionGridClass(2)} data-slot="desktop-image-filters">
             {imageFilters.map((filter) => (
@@ -4974,7 +4994,7 @@ function DesktopEffectsInspector({
             value={settings.filterPresetName}
             onValueChange={(filterPresetName) => onEffectsSettingsChange({ filterPresetName })}
           />
-        </section>
+        </DesktopInspectorSection>
       </DesktopInspectorScrollArea>
     </div>
   )
@@ -5016,7 +5036,7 @@ function DesktopLayersInspector({
     <div data-slot="desktop-layers-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Layers" />
       <DesktopInspectorScrollArea>
-        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
+        <DesktopInspectorSection>
           <div className="mb-2 flex min-w-0 items-center justify-between gap-3">
             <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Layer Stack</p>
             <span className={cn("shrink-0 text-[10px] font-bold", DESKTOP_INSPECTOR_FG_MUTED)}>
@@ -5105,7 +5125,7 @@ function DesktopLayersInspector({
             })}
             </DraggableList>
           </div>
-        </section>
+        </DesktopInspectorSection>
 
         {transformLayer && onTransformLayerPatch ? (
           <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
@@ -5165,7 +5185,7 @@ function DesktopExportInspector({
     <div data-slot="desktop-export-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
       <DesktopInspectorHeader title="Export" />
       <DesktopInspectorScrollArea>
-        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
+        <DesktopInspectorSection>
           <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Target</p>
           <div className={desktopInspectorOptionStackClass()} data-slot="desktop-export-target-list">
             {DESKTOP_EXPORT_TARGET_OPTIONS.map((option) => (
@@ -5177,9 +5197,9 @@ function DesktopExportInspector({
               />
             ))}
           </div>
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Format</p>
           <div className={desktopInspectorOptionGridClass(4)} data-slot="desktop-export-format-grid">
             {DESKTOP_DOWNLOAD_EXTENSIONS.map((extension) => (
@@ -5200,10 +5220,10 @@ function DesktopExportInspector({
               </button>
             ))}
           </div>
-        </section>
+        </DesktopInspectorSection>
 
         {isRasterExport ? (
-          <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+          <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
             <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Quality</p>
             <div className={desktopInspectorOptionStackClass()} data-slot="desktop-export-quality-grid">
               {DESKTOP_RASTER_EXPORT_PRESETS.map((preset) => (
@@ -5230,7 +5250,7 @@ function DesktopExportInspector({
                 </button>
               ))}
             </div>
-          </section>
+          </DesktopInspectorSection>
         ) : null}
       </DesktopInspectorScrollArea>
       <div className={DESKTOP_INSPECTOR_FOOTER_CLASS}>
@@ -5279,7 +5299,7 @@ function DesktopTextInspector({
       <DesktopInspectorHeader title="Text" />
 
       <DesktopInspectorScrollArea>
-        <section className={DESKTOP_INSPECTOR_SECTION_CLASS}>
+        <DesktopInspectorSection>
           <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Preset</p>
           <div className={desktopInspectorOptionGridClass(3)} data-slot="desktop-text-preset-options">
             {DESKTOP_TEXT_PRESETS.map((preset) => (
@@ -5306,9 +5326,9 @@ function DesktopTextInspector({
               </button>
             ))}
           </div>
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Font</p>
           <div className="grid grid-cols-[1fr_4.75rem] gap-1.5">
             <div className="min-w-0" data-slot="desktop-text-font-selector">
@@ -5353,6 +5373,7 @@ function DesktopTextInspector({
               className="mt-2"
               dataSlot="desktop-text-font-listbox-scroll-area"
               role="listbox"
+              rowKind="h-8"
               shelfDataSlot="desktop-text-font-listbox"
               shelfId="desktop-text-font-listbox"
               variant="compact"
@@ -5436,9 +5457,9 @@ function DesktopTextInspector({
               onClick={() => onTextSettingsChange({ underline: !settings.underline })}
             />
           </div>
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <div className="mb-2 flex min-w-0 items-center justify-between gap-3">
             <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Text</p>
             <button
@@ -5456,18 +5477,18 @@ function DesktopTextInspector({
             value={settings.text}
             onChange={(event) => onTextSettingsChange({ text: event.currentTarget.value })}
           />
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Color</p>
           <DesktopColorInputRow
             label="Text fill color"
             value={settings.fill}
             onChange={(fill) => onTextSettingsChange({ fill })}
           />
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Alignment</p>
           <div className={desktopInspectorOptionGridClass(3)} data-slot="desktop-text-alignment">
             {DESKTOP_TEXT_ALIGN_OPTIONS.map((option) => (
@@ -5489,9 +5510,9 @@ function DesktopTextInspector({
               </button>
             ))}
           </div>
-        </section>
+        </DesktopInspectorSection>
 
-        <section className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, DESKTOP_INSPECTOR_SECTION_CLASS)}>
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={cn("mb-3", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Spacing</p>
           <div className="grid gap-2">
             <DesktopTextInlineSlider
@@ -5512,7 +5533,7 @@ function DesktopTextInspector({
               onChange={(lineHeight) => onTextSettingsChange({ lineHeight })}
             />
           </div>
-        </section>
+        </DesktopInspectorSection>
       </DesktopInspectorScrollArea>
 
     </div>

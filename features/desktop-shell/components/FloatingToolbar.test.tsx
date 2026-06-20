@@ -819,7 +819,8 @@ describe("FloatingToolbar", () => {
     )
 
     expect(shapePresetScrollArea).not.toBeNull()
-    expect(shapePresetScrollArea?.className).toContain("h-80")
+    expect(shapePresetScrollArea?.className).toContain("h-[16.5rem]")
+    expect(shapePresetScrollArea?.querySelector('[data-slot="scroll-area-viewport"]')).not.toBeNull()
     expect(shapePresetScrollViewport).not.toBeNull()
     expect(shapePresetScrollArea?.querySelector('[data-slot="scroll-area-viewport"]')).not.toBeNull()
     expect(shapePresetScrollArea?.querySelector('[aria-hidden="true"] svg')).not.toBeNull()
