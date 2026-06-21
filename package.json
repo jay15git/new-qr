@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "sync:cursors": "node scripts/sync-bibata-cursors.mjs",
     "knip": "knip"
   },
   "dependencies": {
