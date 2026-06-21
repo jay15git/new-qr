@@ -8,8 +8,6 @@ import {
 import {
   DesktopInspectorColorRow,
   DesktopInspectorElasticSliderRow,
-  DesktopInspectorNumberField,
-  DesktopInspectorValueGrid,
 } from "@/features/desktop-shell/components/DesktopInspectorShell"
 import type { DesktopAppearanceSnapshot } from "@/features/desktop-shell/model/appearance"
 import {
@@ -45,36 +43,40 @@ export function AppearanceShadowControls({
           onPatch({ shadow: { ...shadow, color: color || DEFAULT_SHADOW_COLOR } })
         }
       />
-      <DesktopInspectorValueGrid>
-        <DesktopInspectorNumberField
+      <div className="mt-2 grid gap-2">
+        <DesktopInspectorElasticSliderRow
           label="Shadow blur"
           max={128}
           min={0}
           value={shadow.blur}
+          valueLabel={`${Math.round(shadow.blur)}`}
           onChange={(blur) => onPatch({ shadow: { ...shadow, blur } })}
         />
-        <DesktopInspectorNumberField
-          label="Shadow %"
+        <DesktopInspectorElasticSliderRow
+          label="Shadow opacity"
           max={100}
           min={0}
           value={shadow.opacity}
+          valueLabel={`${Math.round(shadow.opacity)}%`}
           onChange={(opacity) => onPatch({ shadow: { ...shadow, opacity } })}
         />
-        <DesktopInspectorNumberField
+        <DesktopInspectorElasticSliderRow
           label="Offset X"
-          max={256}
-          min={-256}
+          max={128}
+          min={-128}
           value={shadow.offsetX}
+          valueLabel={`${Math.round(shadow.offsetX)}`}
           onChange={(offsetX) => onPatch({ shadow: { ...shadow, offsetX } })}
         />
-        <DesktopInspectorNumberField
+        <DesktopInspectorElasticSliderRow
           label="Offset Y"
-          max={256}
-          min={-256}
+          max={128}
+          min={-128}
           value={shadow.offsetY}
+          valueLabel={`${Math.round(shadow.offsetY)}`}
           onChange={(offsetY) => onPatch({ shadow: { ...shadow, offsetY } })}
         />
-      </DesktopInspectorValueGrid>
+      </div>
     </DesktopInspectorSection>
   )
 }
@@ -146,20 +148,25 @@ export function AppearanceStrokeControls({
     return null
   }
 
+  const sectionLabel = appearance.usesBorderSemantics ? "Border" : "Stroke"
+  const colorLabel = appearance.usesBorderSemantics ? "Border color" : "Stroke color"
+  const widthLabel = appearance.usesBorderSemantics ? "Border width" : "Stroke width"
+  const opacityLabel = appearance.usesBorderSemantics ? "Border opacity" : "Stroke opacity"
+
   return (
     <DesktopInspectorSection
       className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, className)}
       dataSlot="desktop-appearance-stroke-controls"
     >
-      <DesktopInspectorLabel>Stroke</DesktopInspectorLabel>
+      <DesktopInspectorLabel>{sectionLabel}</DesktopInspectorLabel>
       <DesktopInspectorColorRow
-        label="Stroke color"
+        label={colorLabel}
         value={appearance.stroke ?? DEFAULT_DRAFTING_SHAPE_LAYER.stroke}
         onChange={(stroke) => onPatch({ stroke })}
       />
       <div className="mt-2 grid gap-2">
         <DesktopInspectorElasticSliderRow
-          label="Stroke width"
+          label={widthLabel}
           max={64}
           min={0}
           value={appearance.strokeWidth ?? DEFAULT_DRAFTING_SHAPE_LAYER.strokeWidth}
@@ -167,7 +174,7 @@ export function AppearanceStrokeControls({
           onChange={(strokeWidth) => onPatch({ strokeWidth })}
         />
         <DesktopInspectorElasticSliderRow
-          label="Stroke opacity"
+          label={opacityLabel}
           max={100}
           min={0}
           value={appearance.strokeOpacity ?? DEFAULT_DRAFTING_SHAPE_LAYER.strokeOpacity}

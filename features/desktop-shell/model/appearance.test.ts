@@ -28,6 +28,22 @@ describe("desktop appearance model", () => {
     expect(snapshot.strokeWidth).toBe(DEFAULT_DRAFTING_CARD_STATE.border.width)
     expect(snapshot.supportsStroke).toBe(true)
     expect(snapshot.supportsCornerRadius).toBe(true)
+    expect(snapshot.usesBorderSemantics).toBe(true)
+  })
+
+  it("maps qr frame shadow blur from edge blur", () => {
+    const layer = createDraftingTextLayer(NODE_ID)
+    const snapshot = getDesktopAppearanceSnapshot(
+      { ...layer, kind: "qr" },
+      {
+        qrBackgroundShapeOptions: {
+          ...DEFAULT_BACKGROUND_SHAPE_OPTIONS,
+          edgeBlur: 18,
+        },
+      },
+    )
+
+    expect(snapshot.shadow.blur).toBe(18)
   })
 
   it("maps qr frame options into a shared appearance snapshot", () => {
@@ -55,6 +71,7 @@ describe("desktop appearance model", () => {
 
     expect(qrPatch.qrBackgroundShapeOptions?.shadowOffsetX).toBe(4)
     expect(qrPatch.qrBackgroundShapeOptions?.strokeWidth).toBe(3)
+    expect(qrPatch.qrBackgroundShapeOptions?.edgeBlur).toBe(12)
 
     const cardLayer = { ...createDraftingShapeLayer(NODE_ID), kind: "card" as const }
     const cardPatch = buildDesktopAppearancePatch(
@@ -66,5 +83,14 @@ describe("desktop appearance model", () => {
     expect(cardPatch.cardBorder?.color).toBe("#ff00ff")
     expect(cardPatch.cardBorder?.width).toBe(8)
     expect(cardPatch.cardCornerRadius).toBe(24)
+
+    const cardShadowPatch = buildDesktopAppearancePatch(
+      cardLayer,
+      { shadow: { blur: 22, color: "#000000", offsetX: 4, offsetY: 6, opacity: 35 } },
+      { cardBorder: DEFAULT_DRAFTING_CARD_STATE.border },
+    )
+
+    expect(cardShadowPatch.cardShadow?.blur).toBe(22)
+    expect(cardShadowPatch.layerPatch.shadow?.blur).toBe(22)
   })
 })

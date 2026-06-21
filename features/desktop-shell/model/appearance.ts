@@ -16,6 +16,7 @@ export type DesktopAppearanceSnapshot = {
   strokeWidth?: number
   supportsCornerRadius: boolean
   supportsStroke: boolean
+  usesBorderSemantics?: boolean
 }
 
 export function getDesktopAppearanceSnapshot(
@@ -37,6 +38,7 @@ export function getDesktopAppearanceSnapshot(
       strokeWidth: options.cardBorder.width,
       supportsCornerRadius: true,
       supportsStroke: true,
+      usesBorderSemantics: true,
     }
   }
 
@@ -47,7 +49,7 @@ export function getDesktopAppearanceSnapshot(
       blur: layer.blur,
       opacity: layer.opacity,
       shadow: {
-        blur: layer.shadow.blur,
+        blur: shapeOptions.edgeBlur ?? layer.shadow.blur,
         color: shapeOptions.shadowColor || layer.shadow.color,
         offsetX: shapeOptions.shadowOffsetX ?? layer.shadow.offsetX,
         offsetY: shapeOptions.shadowOffsetY ?? layer.shadow.offsetY,
@@ -82,6 +84,7 @@ export function getDesktopAppearanceSnapshot(
 export type DesktopAppearancePatchResult = {
   cardBorder?: Partial<DraftingCardBorderState>
   cardCornerRadius?: number
+  cardShadow?: Partial<DraftingCardShadowState>
   layerPatch: Partial<DraftingCanvasLayer>
   qrBackgroundShapeOptions?: Partial<BackgroundShapeOptions>
 }
@@ -123,6 +126,12 @@ export function buildDesktopAppearancePatch(
         width: patch.strokeWidth ?? options.cardBorder.width,
       },
       cardCornerRadius: patch.cornerRadius,
+      cardShadow: patch.shadow
+        ? {
+            ...layer.shadow,
+            ...patch.shadow,
+          }
+        : undefined,
       layerPatch,
     }
   }
@@ -139,6 +148,10 @@ export function buildDesktopAppearancePatch(
       qrBackgroundShapeOptions.shadowOffsetX = nextShadow.offsetX
       qrBackgroundShapeOptions.shadowOffsetY = nextShadow.offsetY
       qrBackgroundShapeOptions.shadowOpacity = nextShadow.opacity
+
+      if (patch.shadow.blur !== undefined) {
+        qrBackgroundShapeOptions.edgeBlur = patch.shadow.blur
+      }
     }
 
     if (

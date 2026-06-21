@@ -3684,7 +3684,7 @@ export function WorkspaceSurface({
 
     if (
       selectedAppearanceLayer.kind === "card" &&
-      (result.cardBorder || result.cardCornerRadius !== undefined)
+      (result.cardBorder || result.cardCornerRadius !== undefined || result.cardShadow)
     ) {
       setSelectedCardState((current) => ({
         ...current,
@@ -3693,11 +3693,18 @@ export function WorkspaceSurface({
           ...(result.cardBorder ?? {}),
         },
         cornerRadius: result.cardCornerRadius ?? current.cornerRadius,
+        shadow: result.cardShadow
+          ? {
+              ...current.shadow,
+              ...result.cardShadow,
+            }
+          : current.shadow,
       }))
     }
 
     if (selectedAppearanceLayer.kind === "qr" && result.qrBackgroundShapeOptions) {
       updateDesktopShapeSettings({
+        shapeShadowBlur: result.qrBackgroundShapeOptions.edgeBlur,
         shapeShadowColor: result.qrBackgroundShapeOptions.shadowColor,
         shapeShadowOffsetX: result.qrBackgroundShapeOptions.shadowOffsetX,
         shapeShadowOffsetY: result.qrBackgroundShapeOptions.shadowOffsetY,

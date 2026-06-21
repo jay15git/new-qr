@@ -26,9 +26,26 @@ import { cn } from "@/lib/utils"
 
 type AppearancePopoverId = "shadow" | "blur" | "stroke" | "opacity" | "radius"
 
+function getAppearancePopoverLabel(
+  popoverId: AppearancePopoverId,
+  appearance: DesktopAppearanceSnapshot,
+): string {
+  switch (popoverId) {
+    case "shadow":
+      return "Shadow settings"
+    case "blur":
+      return "Blur settings"
+    case "stroke":
+      return appearance.usesBorderSemantics ? "Border settings" : "Stroke settings"
+    case "opacity":
+      return "Opacity settings"
+    case "radius":
+      return "Corner radius settings"
+  }
+}
+
 const APPEARANCE_POPOVERS: Array<{
   id: AppearancePopoverId
-  label: string
   renderIcon: () => ReactNode
   renderControls: (props: {
     appearance: DesktopAppearanceSnapshot
@@ -37,7 +54,6 @@ const APPEARANCE_POPOVERS: Array<{
 }> = [
   {
     id: "shadow",
-    label: "Shadow settings",
     renderIcon: () => <MoonIcon className="size-3.5" />,
     renderControls: ({ appearance, onPatch }) => (
       <AppearanceShadowControls appearance={appearance} onPatch={onPatch} />
@@ -45,7 +61,6 @@ const APPEARANCE_POPOVERS: Array<{
   },
   {
     id: "blur",
-    label: "Blur settings",
     renderIcon: () => <DropletsIcon className="size-3.5" />,
     renderControls: ({ appearance, onPatch }) => (
       <AppearanceBlurControls appearance={appearance} onPatch={onPatch} />
@@ -53,7 +68,6 @@ const APPEARANCE_POPOVERS: Array<{
   },
   {
     id: "stroke",
-    label: "Stroke settings",
     renderIcon: () => <PencilLineIcon className="size-3.5" />,
     renderControls: ({ appearance, onPatch }) => (
       <AppearanceStrokeControls appearance={appearance} onPatch={onPatch} />
@@ -61,7 +75,6 @@ const APPEARANCE_POPOVERS: Array<{
   },
   {
     id: "opacity",
-    label: "Opacity settings",
     renderIcon: () => <CircleDotIcon className="size-3.5" />,
     renderControls: ({ appearance, onPatch }) => (
       <AppearanceOpacityControls appearance={appearance} onPatch={onPatch} />
@@ -69,7 +82,6 @@ const APPEARANCE_POPOVERS: Array<{
   },
   {
     id: "radius",
-    label: "Corner radius settings",
     renderIcon: () => <SquareRoundCornerIcon className="size-3.5" />,
     renderControls: ({ appearance, onPatch }) => (
       <AppearanceRadiusControls appearance={appearance} onPatch={onPatch} />
@@ -156,7 +168,7 @@ export function DesktopAppearanceIsland({
         <DesktopAppearancePopover
           key={popover.id}
           appearance={appearance}
-          label={popover.label}
+          label={getAppearancePopoverLabel(popover.id, appearance)}
           onPatch={onPatch}
           popoverId={popover.id}
           renderControls={popover.renderControls}
