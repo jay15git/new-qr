@@ -127,6 +127,10 @@ import type {
   DesktopToolbarController,
   DesktopToolbarToolId,
 } from "@/features/desktop-shell/components/FloatingToolbar"
+import {
+  buildDesktopAppearancePatch,
+  getDesktopAppearanceSnapshot,
+} from "@/features/desktop-shell/model/appearance"
 import type { DraftingLayerMenuAction } from "@/features/workspace/components/Pane"
 import {
   filterBrandIcons,
@@ -531,6 +535,9 @@ export function WorkspaceSurface({
 }: WorkspaceSurfaceProps = {}) {
   const [activeTool, setActiveTool] = useState<DraftingToolId>(() =>
     initialActiveTool ? getDraftingToolIdFromDesktop(initialActiveTool) : DEFAULT_DRAFTING_TOOL_ID,
+  )
+  const [desktopRailTool, setDesktopRailTool] = useState<DesktopToolbarToolId | null>(
+    () => initialActiveTool ?? DEFAULT_DRAFTING_TOOL_ID,
   )
   const [selectedContentType, setSelectedContentType] = useState<QrInputType>(
     DEFAULT_QR_INPUT_TYPE,
@@ -2205,6 +2212,9 @@ export function WorkspaceSurface({
     }
 
     if (layerId === null) {
+      if (chrome === "canvas-only") {
+        setDesktopRailTool("content")
+      }
       return
     }
 
@@ -2218,13 +2228,32 @@ export function WorkspaceSurface({
       layerId,
     )
 
-    if (selectedLayer?.kind === "group") {
-      setActiveTool("layers")
+    if (chrome === "canvas-only") {
+      if (
+        selectedLayer?.kind === "text" ||
+        selectedLayer?.kind === "image" ||
+        selectedLayer?.kind === "shape"
+      ) {
+        setDesktopRailTool(null)
+        return
+      }
+
+      if (selectedLayer?.kind === "group") {
+        setDesktopRailTool("layers")
+        return
+      }
+
+      if (isDraftingCardLayerId(layerId)) {
+        setDesktopRailTool("shape")
+        return
+      }
+
+      setDesktopRailTool("content")
       return
     }
 
-    if (selectedLayer?.kind === "text") {
-      setActiveTool("text")
+    if (selectedLayer?.kind === "group") {
+      setActiveTool("layers")
       return
     }
 
@@ -3620,7 +3649,66 @@ export function WorkspaceSurface({
     ],
   )
 
-  const desktopActiveTool = getDesktopToolbarToolId(activeTool)
+  const desktopActiveTool = chrome === "canvas-only" ? desktopRailTool : getDesktopToolbarToolId(activeTool)
+  const selectedAppearanceLayer = selectedTransformLayer
+  const desktopAppearanceSnapshot = selectedAppearanceLayer
+    ? getDesktopAppearanceSnapshot(selectedAppearanceLayer, {
+        cardBorder:
+          selectedAppearanceLayer.kind === "card" ? selectedCardState.border : undefined,
+        cardCornerRadius:
+          selectedAppearanceLayer.kind === "card" ? selectedCardState.cornerRadius : undefined,
+        qrBackgroundShapeOptions:
+          selectedAppearanceLayer.kind === "qr"
+            ? draftingStudioState.backgroundShapeOptions
+            : undefined,
+      })
+    : null
+
+  function handleDesktopAppearancePatch(patch: Partial<DraftingCanvasLayer>) {
+    if (!selectedAppearanceLayer) {
+      return
+    }
+
+    const result = buildDesktopAppearancePatch(selectedAppearanceLayer, patch, {
+      cardBorder:
+        selectedAppearanceLayer.kind === "card" ? selectedCardState.border : undefined,
+      qrBackgroundShapeOptions:
+        selectedAppearanceLayer.kind === "qr"
+          ? draftingStudioState.backgroundShapeOptions
+          : undefined,
+    })
+
+    if (Object.keys(result.layerPatch).length > 0) {
+      handleLayerChange(activeQrNodeId, selectedAppearanceLayer.id, result.layerPatch)
+    }
+
+    if (
+      selectedAppearanceLayer.kind === "card" &&
+      (result.cardBorder || result.cardCornerRadius !== undefined)
+    ) {
+      setSelectedCardState((current) => ({
+        ...current,
+        border: {
+          ...current.border,
+          ...(result.cardBorder ?? {}),
+        },
+        cornerRadius: result.cardCornerRadius ?? current.cornerRadius,
+      }))
+    }
+
+    if (selectedAppearanceLayer.kind === "qr" && result.qrBackgroundShapeOptions) {
+      updateDesktopShapeSettings({
+        shapeShadowColor: result.qrBackgroundShapeOptions.shadowColor,
+        shapeShadowOffsetX: result.qrBackgroundShapeOptions.shadowOffsetX,
+        shapeShadowOffsetY: result.qrBackgroundShapeOptions.shadowOffsetY,
+        shapeShadowOpacity: result.qrBackgroundShapeOptions.shadowOpacity,
+        shapeStrokeColor: result.qrBackgroundShapeOptions.strokeColor,
+        shapeStrokeOpacity: result.qrBackgroundShapeOptions.strokeOpacity,
+        shapeStrokeWidth: result.qrBackgroundShapeOptions.strokeWidth,
+      })
+    }
+  }
+
   const desktopPatternSettings: DesktopPatternSettings = {
     dotsColorMode: selectedDotsColorMode,
     dataModulesGradient: selectedDotsGradient,
@@ -4068,12 +4156,15 @@ export function WorkspaceSurface({
     insertNodeId: activeQrNodeId,
     selectedElementLayer,
     selectedTransformLayer,
+    selectedAppearanceLayer,
+    appearanceSnapshot: desktopAppearanceSnapshot,
     onInsertLayer: handleInsertLayer,
     onElementLayerPatch: (patch) => {
       if (selectedElementLayer) {
         handleLayerChange(activeQrNodeId, selectedElementLayer.id, patch)
       }
     },
+    onAppearancePatch: handleDesktopAppearancePatch,
     onTransformLayerPatch: (patch) => {
       if (selectedTransformLayer) {
         handleLayerChange(activeQrNodeId, selectedTransformLayer.id, patch)
@@ -4081,6 +4172,9 @@ export function WorkspaceSurface({
     },
     onActiveToolChange: (toolId) => {
       setDesktopCanvasTool(null)
+      if (chrome === "canvas-only") {
+        setDesktopRailTool(toolId)
+      }
       setActiveTool(getDraftingToolIdFromDesktop(toolId))
     },
     onRedo: handleRedoDraftingWorkspace,

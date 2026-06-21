@@ -2,17 +2,46 @@
 
 import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
-import { act, type ComponentProps } from "react"
-import { describe, expect, it, vi } from "vitest"
+import { act, type ComponentProps, useState } from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import {
   DESKTOP_TOOLBAR_TOOLS,
   FloatingToolbar,
 } from "@/features/desktop-shell/components/FloatingToolbar"
-import { createDraftingTextLayer } from "@/features/workspace/model/layers"
+import { createDraftingTextLayer, type DraftingCanvasLayer } from "@/features/workspace/model/layers"
 import { renderWithAsyncJsdomRoot } from "@/test-utils/jsdom-react-root"
 
 const NODE_ID = "test-node"
+
+beforeEach(() => {
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      addEventListener: vi.fn(),
+      addListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+      matches: false,
+      media: query,
+      onchange: null,
+      removeEventListener: vi.fn(),
+      removeListener: vi.fn(),
+    })),
+  })
+
+  class MockResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+
+  Object.defineProperty(window, "ResizeObserver", {
+    configurable: true,
+    writable: true,
+    value: MockResizeObserver,
+  })
+})
 
 describe("FloatingToolbar", () => {
   it("renders every drafting left rail tool as an accessible icon button", async () => {
@@ -37,15 +66,15 @@ describe("FloatingToolbar", () => {
   it("updates the locally active tool when a toolbar button is clicked", async () => {
     const surface = await renderPrototype()
     const contentButton = getRequiredToolButton(surface.container, "content")
-    const imageButton = getRequiredToolButton(surface.container, "image")
+    const patternButton = getRequiredToolButton(surface.container, "pattern")
 
     expect(contentButton.getAttribute("aria-pressed")).toBe("false")
-    expect(imageButton.getAttribute("aria-pressed")).toBe("false")
+    expect(patternButton.getAttribute("aria-pressed")).toBe("false")
 
-    await clickButton(imageButton)
+    await clickButton(patternButton)
 
     expect(contentButton.getAttribute("aria-pressed")).toBe("false")
-    expect(imageButton.getAttribute("aria-pressed")).toBe("true")
+    expect(patternButton.getAttribute("aria-pressed")).toBe("true")
   })
 
   it("renders the icon rail inside the inspector shell as one left toolbar", async () => {
@@ -300,9 +329,6 @@ describe("FloatingToolbar", () => {
       ["logo", "desktop-logo-inspector"],
       ["motion", "desktop-motion-inspector"],
       ["encoding", "desktop-encoding-inspector"],
-      ["image", "desktop-image-inspector"],
-      ["decorations", "desktop-decorations-inspector"],
-      ["effects", "desktop-effects-inspector"],
       ["layers", "desktop-layers-inspector"],
       ["export", "desktop-export-inspector"],
     ] as const
@@ -1141,53 +1167,62 @@ describe("FloatingToolbar", () => {
   })
 
   it("renders a compact Pixelmator-style text inspector without placeholder copy", async () => {
-    const surface = await renderPrototype()
-    await openTool(surface.container, "text")
+    const layer = createDraftingTextLayer(NODE_ID, { text: "Hello" })
+    const surface = await renderPrototype({
+      controller: {
+        activeTool: null,
+        selectedElementLayer: layer,
+        onElementLayerPatch: vi.fn(),
+      },
+    })
 
     const inspector = surface.container.querySelector(
       '[data-slot="desktop-floating-inspector"]',
     )
 
-    expect(inspector?.getAttribute("aria-label")).toBe("Text settings")
-    expect(inspector?.querySelector('[data-slot="desktop-text-inspector"]')).not.toBeNull()
+    expect(inspector?.getAttribute("aria-label")).toBe("text element settings")
+    expect(inspector?.querySelector('[data-slot="desktop-element-inspector"]')).not.toBeNull()
     expect(inspector?.textContent).toContain("Text")
     expect(inspector?.textContent).not.toContain("Coming soon")
   })
 
   it("renders compact text sections", async () => {
-    const surface = await renderPrototype()
-    await openTool(surface.container, "text")
+    const layer = createDraftingTextLayer(NODE_ID, { text: "Hello" })
+    const surface = await renderPrototype({
+      controller: {
+        activeTool: null,
+        selectedElementLayer: layer,
+        onElementLayerPatch: vi.fn(),
+      },
+    })
 
     const inspector = surface.container.querySelector(
       '[data-slot="desktop-floating-inspector"]',
     )
 
-    expect(inspector?.querySelector('[data-slot="desktop-text-font-selector"]')).not.toBeNull()
-    expect(inspector?.querySelector('[data-slot="desktop-text-font-listbox"]')).toBeNull()
-    expect(inspector?.querySelector('[data-slot="desktop-text-alignment"]')).not.toBeNull()
+    expect(inspector?.querySelector('[data-slot="desktop-layer-text-font-selector"]')).not.toBeNull()
+    expect(inspector?.querySelector('[data-slot="desktop-layer-text-font-listbox"]')).toBeNull()
+    expect(inspector?.querySelector('[data-slot="desktop-layer-text-alignment"]')).not.toBeNull()
     expect(inspector?.querySelector('select[aria-label="Text preset"]')).toBeNull()
     expect(inspector?.querySelector('select[aria-label="Text font"]')).toBeNull()
     expect(inspector?.textContent).toContain("Text")
-    expect(inspector?.textContent).toContain("Preset")
-    expect(inspector?.textContent).toContain("Font")
-    expect(getRequiredButton(surface.container, "Use Body text preset").getAttribute("aria-pressed")).toBe("true")
-    expect(getRequiredButton(surface.container, "Use Title text preset").getAttribute("aria-pressed")).toBe("false")
-    expect(inspector?.querySelector('[data-slot="desktop-text-emphasis"]')).not.toBeNull()
-    expect(inspector?.textContent).not.toContain("Type")
+    expect(inspector?.textContent).toContain("Typography")
+    expect(inspector?.querySelector('[data-slot="desktop-layer-text-emphasis"]')).not.toBeNull()
+    expect(inspector?.textContent).not.toContain("Preset")
     expect(inspector?.textContent).toContain("Color")
     expect(inspector?.textContent).toContain("Alignment")
     expect(inspector?.textContent).toContain("Spacing")
-    expect(getRequiredSlider(surface.container, "Text font letter spacing")).not.toBeNull()
-    expect(getRequiredSlider(surface.container, "Text font line height")).not.toBeNull()
-    expect(inspector?.querySelector('input[type="range"][aria-label^="Text font"]')).toBeNull()
+    expect(getRequiredSlider(surface.container, "Letter spacing")).not.toBeNull()
+    expect(getRequiredSlider(surface.container, "Line height")).not.toBeNull()
     expect(getRequiredButton(surface.container, "Text font").className).not.toContain("desktop-inspector-control-bg")
     expect(getRequiredTextarea(surface.container, "Text layer content").className).toContain("desktop-inspector-field-bg")
     expect(getRequiredTextarea(surface.container, "Text layer content").className).not.toContain("border-white")
-    expect(getRequiredButton(surface.container, "Bold text").className).not.toContain("desktop-inspector-control-bg")
+    expect(getRequiredButton(surface.container, "Bold").className).not.toContain("desktop-inspector-control-bg")
     expect(getRequiredButton(surface.container, "Align text left").getAttribute("aria-pressed")).toBe("true")
     expect(getRequiredButton(surface.container, "Align text left").className).toContain("desktop-inspector-option-selected-bg")
     expect(getRequiredButton(surface.container, "Align text left").className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
     expect(inspector?.textContent).not.toContain("Reset Text")
+    expect(inspector?.querySelector('[data-slot="desktop-effects-section"]')).toBeNull()
   })
 
   it("keeps desktop content picker defaults flat with ring and fill selection", async () => {
@@ -1277,23 +1312,8 @@ describe("FloatingToolbar", () => {
     expect(logoColor?.querySelector('[data-slot="desktop-style-preview-surface"]')).toBeNull()
   })
 
-  it("updates text preset from neutral segmented buttons", async () => {
-    const surface = await renderPrototype()
-    await openTool(surface.container, "text")
-
-    const titlePreset = getRequiredButton(surface.container, "Use Title text preset")
-
-    await clickButton(titlePreset)
-
-    expect(getRequiredButton(surface.container, "Use Body text preset").getAttribute("aria-pressed")).toBe("false")
-    expect(getRequiredButton(surface.container, "Use Title text preset").getAttribute("aria-pressed")).toBe("true")
-    expect(getRequiredInput(surface.container, "Text font size").value).toBe("52")
-    expect(getRequiredSlider(surface.container, "Text font line height").getAttribute("aria-valuenow")).toBe("1.05")
-  })
-
   it("updates text content locally", async () => {
-    const surface = await renderPrototype()
-    await openTool(surface.container, "text")
+    const surface = await renderSelectedTextInspector()
 
     const textArea = getRequiredTextarea(surface.container, "Text layer content")
 
@@ -1305,8 +1325,7 @@ describe("FloatingToolbar", () => {
   })
 
   it("selects a text font from a compact selector without changing the text content", async () => {
-    const surface = await renderPrototype()
-    await openTool(surface.container, "text")
+    const surface = await renderSelectedTextInspector()
 
     await act(async () => {
       setTextareaValue(getRequiredTextarea(surface.container, "Text layer content"), "Keep this copy")
@@ -1316,7 +1335,7 @@ describe("FloatingToolbar", () => {
 
     await clickButton(fontTrigger)
 
-    const fontListbox = surface.container.querySelector('[data-slot="desktop-text-font-listbox"]')
+    const fontListbox = surface.container.querySelector('[data-slot="desktop-layer-text-font-listbox"]')
     const generalSansOption = getRequiredButton(surface.container, "Use General Sans text font")
 
     expect(fontListbox?.getAttribute("role")).toBe("listbox")
@@ -1325,32 +1344,30 @@ describe("FloatingToolbar", () => {
     await clickButton(generalSansOption)
 
     expect(getRequiredButton(surface.container, "Text font").textContent).toContain("General Sans")
-    expect(surface.container.querySelector('[data-slot="desktop-text-font-listbox"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="desktop-layer-text-font-listbox"]')).toBeNull()
     expect(getRequiredTextarea(surface.container, "Text layer content").value).toBe("Keep this copy")
   })
 
   it("updates text size and weight controls", async () => {
-    const surface = await renderPrototype()
-    await openTool(surface.container, "text")
+    const surface = await renderSelectedTextInspector()
 
     await act(async () => {
       setInputValue(getRequiredInput(surface.container, "Text font size"), "64")
-      getRequiredSlider(surface.container, "Text font weight").dispatchEvent(
+      getRequiredSlider(surface.container, "Weight").dispatchEvent(
         new KeyboardEvent("keydown", { bubbles: true, key: "End" }),
       )
     })
 
     expect(getRequiredInput(surface.container, "Text font size").value).toBe("64")
-    expect(getRequiredSlider(surface.container, "Text font weight").getAttribute("aria-valuenow")).toBe("900")
+    expect(getRequiredSlider(surface.container, "Weight").getAttribute("aria-valuenow")).toBe("900")
   })
 
   it("toggles text emphasis controls independently", async () => {
-    const surface = await renderPrototype()
-    await openTool(surface.container, "text")
+    const surface = await renderSelectedTextInspector()
 
-    const bold = getRequiredButton(surface.container, "Bold text")
-    const italic = getRequiredButton(surface.container, "Italic text")
-    const underline = getRequiredButton(surface.container, "Underline text")
+    const bold = getRequiredButton(surface.container, "Bold")
+    const italic = getRequiredButton(surface.container, "Italic")
+    const underline = getRequiredButton(surface.container, "Underline")
 
     expect(bold.getAttribute("aria-pressed")).toBe("false")
     expect(italic.getAttribute("aria-pressed")).toBe("false")
@@ -1367,19 +1384,17 @@ describe("FloatingToolbar", () => {
   })
 
   it("updates the text fill color input", async () => {
-    const surface = await renderPrototype()
-    await openTool(surface.container, "text")
+    const surface = await renderSelectedTextInspector()
 
     await act(async () => {
-      setInputValue(getRequiredInput(surface.container, "Text fill color"), "#ff0000")
+      setInputValue(getRequiredInput(surface.container, "Text fill"), "#ff0000")
     })
 
-    expect(getRequiredInput(surface.container, "Text fill color").value).toBe("#ff0000")
+    expect(getRequiredInput(surface.container, "Text fill").value).toBe("#ff0000")
   })
 
   it("updates text alignment selection", async () => {
-    const surface = await renderPrototype()
-    await openTool(surface.container, "text")
+    const surface = await renderSelectedTextInspector()
 
     const left = getRequiredButton(surface.container, "Align text left")
     const center = getRequiredButton(surface.container, "Align text center")
@@ -1392,6 +1407,32 @@ describe("FloatingToolbar", () => {
     expect(left.getAttribute("aria-pressed")).toBe("false")
     expect(center.getAttribute("aria-pressed")).toBe("true")
     expect(right.getAttribute("aria-pressed")).toBe("false")
+  })
+
+  it("renders appearance popovers in the dynamic island when a layer is selected", async () => {
+    const layer = createDraftingTextLayer(NODE_ID, { text: "Selected" })
+    const onAppearancePatch = vi.fn()
+    const surface = await renderPrototype({
+      controller: {
+        activeTool: null,
+        appearanceSnapshot: {
+          blur: layer.blur,
+          opacity: layer.opacity,
+          shadow: layer.shadow,
+          supportsCornerRadius: false,
+          supportsStroke: false,
+        },
+        onAppearancePatch,
+        selectedAppearanceLayer: layer,
+        selectedElementLayer: layer,
+      },
+    })
+
+    expect(surface.container.querySelector('[data-slot="desktop-appearance-island"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="desktop-appearance-shadow-trigger"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="desktop-appearance-blur-trigger"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="desktop-appearance-opacity-trigger"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="desktop-appearance-stroke-trigger"]')).toBeNull()
   })
 
   it("shows the iconstack search placeholder before a logo query is entered", async () => {
@@ -1409,6 +1450,37 @@ describe("FloatingToolbar", () => {
   })
 
 })
+
+async function renderSelectedTextInspector(
+  layer = createDraftingTextLayer(NODE_ID, { text: "Hello" }),
+) {
+  return renderWithAsyncJsdomRoot(<StatefulSelectedTextToolbar initialLayer={layer} />)
+}
+
+function StatefulSelectedTextToolbar({ initialLayer }: { initialLayer: DraftingCanvasLayer }) {
+  const [layer, setLayer] = useState(initialLayer)
+
+  return (
+    <FloatingToolbar
+      controller={
+        {
+          activeTool: null,
+          appearanceSnapshot: {
+            blur: layer.blur,
+            opacity: layer.opacity,
+            shadow: layer.shadow,
+            supportsCornerRadius: false,
+            supportsStroke: false,
+          },
+          onAppearancePatch: (patch) => setLayer((current) => ({ ...current, ...patch })),
+          onElementLayerPatch: (patch) => setLayer((current) => ({ ...current, ...patch })),
+          selectedAppearanceLayer: layer,
+          selectedElementLayer: layer,
+        } as ComponentProps<typeof FloatingToolbar>["controller"]
+      }
+    />
+  )
+}
 
 async function renderPrototype({
   controller,

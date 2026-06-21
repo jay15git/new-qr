@@ -61,6 +61,7 @@ import {
 } from "@/features/workspace/rendering/qr-artwork"
 import { DraftingQrBackground } from "@/features/workspace/components/QrBackground"
 import { applyDraftingQrForegroundShadow } from "@/features/workspace/rendering/qr-layer-shadow"
+import { getDraftingLayerBoxShadow } from "@/features/workspace/rendering/layer-appearance"
 import {
   getBackgroundShapeTiltInnerStyle,
   getBackgroundShapeTiltPerspectiveStyle,
@@ -2421,6 +2422,7 @@ export const Pane = memo(function Pane({
           )}
           style={{
             ...getLayerPlacementStyle(layer),
+            boxShadow: getDraftingLayerBoxShadow(layer.shadow),
             filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
           }}
           onClick={(event) => selectLayerFromClick(event, layer)}
@@ -2478,6 +2480,8 @@ export const Pane = memo(function Pane({
           )}
           style={{
             ...getLayerPlacementStyle(layer),
+            borderRadius: layer.cornerRadius ? `${layer.cornerRadius}px` : undefined,
+            boxShadow: getDraftingLayerBoxShadow(layer.shadow),
             filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
           }}
           onClick={(event) => selectLayerFromClick(event, layer)}
@@ -2506,6 +2510,7 @@ export const Pane = memo(function Pane({
           )}
           style={{
             ...getLayerPlacementStyle(layer),
+            boxShadow: getDraftingLayerBoxShadow(layer.shadow),
             filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
           }}
           onClick={(event) => selectLayerFromClick(event, layer)}

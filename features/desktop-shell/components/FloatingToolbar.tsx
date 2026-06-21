@@ -76,7 +76,9 @@ import {
   DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS,
   DESKTOP_UTILITY_TOOLBAR_SHELL_CLASS,
 } from "@/features/desktop-shell/components/DesktopUtilityToolbar"
-import DynamicIsland from "@/components/smoothui/dynamic-island"
+import { DesktopDynamicIslandChrome } from "@/features/desktop-shell/components/DesktopAppearanceIsland"
+import { DesktopElementInspector, DesktopTransformSection } from "@/features/desktop-shell/components/DesktopElementInspector"
+import type { DesktopAppearanceSnapshot } from "@/features/desktop-shell/model/appearance"
 import { DRAFTING_KEYBOARD_SHORTCUT_GROUPS } from "@/features/workspace/model/keyboard-shortcuts"
 import {
   DRAFTING_FONT_REGISTRY,
@@ -224,7 +226,6 @@ import { PlayIcon } from "@/components/ui/play"
 import { ReceiptTextIcon } from "@/components/ui/receipt-text"
 import { cn } from "@/lib/utils"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
-import { DesktopElementInspector, DesktopTransformSection } from "@/features/desktop-shell/components/DesktopElementInspector"
 
 type DesktopToolbarGroup = "QR" | "Add" | "Manage"
 export type DesktopToolbarToolId =
@@ -609,8 +610,11 @@ export type DesktopToolbarController = {
   insertNodeId?: string
   selectedElementLayer?: DraftingCanvasLayer | null
   selectedTransformLayer?: DraftingCanvasLayer | null
+  selectedAppearanceLayer?: DraftingCanvasLayer | null
+  appearanceSnapshot?: DesktopAppearanceSnapshot | null
   onInsertLayer?: (layer: DraftingCanvasLayer) => void
   onElementLayerPatch?: (patch: Partial<DraftingCanvasLayer>) => void
+  onAppearancePatch?: (patch: Partial<DraftingCanvasLayer>) => void
   onTransformLayerPatch?: (patch: Partial<DraftingCanvasLayer>) => void
   onActiveToolChange: (toolId: DesktopToolbarToolId) => void
   onRedo?: () => void
@@ -1311,7 +1315,15 @@ export function FloatingToolbar({
             data-slot="desktop-dynamic-island"
             data-toolbar-appearance="desktop-glass"
           >
-            <DynamicIsland appearance="desktop-glass" showViewControls={false} />
+            <DesktopDynamicIslandChrome
+              appearance={controller?.appearanceSnapshot}
+              layerLabel={
+                controller?.selectedAppearanceLayer
+                  ? `${controller.selectedAppearanceLayer.kind.charAt(0).toUpperCase()}${controller.selectedAppearanceLayer.kind.slice(1)}`
+                  : null
+              }
+              onPatch={controller?.onAppearancePatch}
+            />
           </div>
           <DesktopUtilityToolbar
             data-slot="desktop-utility-toolbar"
@@ -5836,6 +5848,10 @@ export function DesktopFloatingInspector({
   } = model
   const resolvedToolConfig =
     activeToolConfig ?? DESKTOP_TOOLBAR_TOOLS.find((tool) => tool.id === activeTool)
+  const showElementInspector =
+    Boolean(controller?.selectedElementLayer) &&
+    activeTool !== "layers" &&
+    !resolvedToolConfig
 
   if (!resolvedToolConfig && !controller?.selectedElementLayer) {
     return null
@@ -5845,16 +5861,21 @@ export function DesktopFloatingInspector({
     <SurfaceProvider value={1}>
       <aside
       aria-label={
-        resolvedToolConfig
-          ? `${resolvedToolConfig.title} settings`
-          : controller?.selectedElementLayer
-            ? `${controller.selectedElementLayer.kind} element settings`
+        showElementInspector
+          ? `${controller?.selectedElementLayer?.kind} element settings`
+          : resolvedToolConfig
+            ? `${resolvedToolConfig.title} settings`
             : "Tool settings"
       }
       data-slot="desktop-floating-inspector"
       className={cn("flex min-h-0 min-w-0 flex-col overflow-hidden", className)}
     >
-      {activeTool === "content" ? (
+      {showElementInspector && controller?.selectedElementLayer ? (
+        <DesktopElementInspector
+          layer={controller.selectedElementLayer}
+          onPatch={(patch) => controller.onElementLayerPatch?.(patch)}
+        />
+      ) : activeTool === "content" ? (
         <DesktopContentInspector
           contentType={actualContentType}
           contentValues={actualContentValues}
@@ -5898,26 +5919,6 @@ export function DesktopFloatingInspector({
           settings={actualEncodingSettings}
           onEncodingSettingsChange={onEncodingSettingsChange}
         />
-      ) : activeTool === "text" ? (
-        <DesktopTextInspector
-          settings={actualTextSettings}
-          onTextSettingsChange={onTextSettingsChange}
-        />
-      ) : activeTool === "image" ? (
-        <DesktopImageInspector
-          settings={actualImageSettings}
-          onImageSettingsChange={onImageSettingsChange}
-        />
-      ) : activeTool === "decorations" ? (
-        <DesktopDecorationsInspector
-          settings={actualDecorationsSettings}
-          onDecorationsSettingsChange={onDecorationsSettingsChange}
-        />
-      ) : activeTool === "effects" ? (
-        <DesktopEffectsInspector
-          settings={actualEffectsSettings}
-          onEffectsSettingsChange={onEffectsSettingsChange}
-        />
       ) : activeTool === "layers" ? (
         <DesktopLayersInspector
           onLayersReorder={onLayersReorder}
@@ -5940,11 +5941,6 @@ export function DesktopFloatingInspector({
           settings={actualExportSettings}
           onExportDownload={controller?.onExportDownload ?? (() => undefined)}
           onExportSettingsChange={onExportSettingsChange}
-        />
-      ) : controller?.selectedElementLayer ? (
-        <DesktopElementInspector
-          layer={controller.selectedElementLayer}
-          onPatch={(patch) => controller.onElementLayerPatch?.(patch)}
         />
       ) : resolvedToolConfig ? (
         <DesktopPlaceholderInspector tool={resolvedToolConfig} />

@@ -57,8 +57,6 @@ import {
 } from "@/features/workspace/model/fonts"
 import { cn } from "@/lib/utils"
 
-const DEFAULT_SHADOW_COLOR = "#111827"
-
 const DESKTOP_TEXT_ALIGN_OPTIONS: Array<{ label: string; value: DraftingTextAlign }> = [
   { label: "Left", value: "left" },
   { label: "Center", value: "center" },
@@ -107,7 +105,6 @@ export function DesktopElementInspector({
         {layer.kind === "image" ? (
           <DesktopLayerImageInspector layer={layer} onPatch={onPatch} />
         ) : null}
-        <DesktopEffectsSection layer={layer} onPatch={onPatch} />
       </DesktopInspectorScrollArea>
     </div>
   )
@@ -196,17 +193,6 @@ export function DesktopTransformSection({
         />
       </div>
 
-      <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
-        <DesktopInspectorElasticSliderRow
-          label="Opacity"
-          max={100}
-          min={0}
-          value={Math.round(layer.opacity * 100)}
-          valueLabel={`${Math.round(layer.opacity * 100)}%`}
-          onChange={(opacity) => onPatch({ opacity: opacity / 100 })}
-        />
-      </div>
-
       <div className={cn("mt-2 grid gap-2", DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
         <DesktopInspectorElasticSliderRow
           label="Horizontal tilt"
@@ -225,68 +211,6 @@ export function DesktopTransformSection({
           onChange={(tiltY) => onPatch({ tiltY })}
         />
       </div>
-    </DesktopInspectorSection>
-  )
-}
-
-function DesktopEffectsSection({
-  layer,
-  onPatch,
-}: {
-  layer: DraftingCanvasLayer
-  onPatch: (patch: Partial<DraftingCanvasLayer>) => void
-}) {
-  const shadow = layer.shadow
-
-  return (
-    <DesktopInspectorSection
-      className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}
-      dataSlot="desktop-effects-section"
-    >
-      <DesktopInspectorLabel>Effects</DesktopInspectorLabel>
-      <DesktopInspectorElasticSliderRow
-        label="Blur"
-        max={96}
-        min={0}
-        value={layer.blur}
-        valueLabel={`${Math.round(layer.blur)}`}
-        onChange={(blur) => onPatch({ blur })}
-      />
-      <DesktopInspectorColorRow
-        label="Shadow color"
-        value={shadow.color}
-        onChange={(color) => onPatch({ shadow: { ...shadow, color: color || DEFAULT_SHADOW_COLOR } })}
-      />
-      <DesktopInspectorValueGrid>
-        <DesktopInspectorNumberField
-          label="Shadow blur"
-          max={128}
-          min={0}
-          value={shadow.blur}
-          onChange={(blur) => onPatch({ shadow: { ...shadow, blur } })}
-        />
-        <DesktopInspectorNumberField
-          label="Shadow %"
-          max={100}
-          min={0}
-          value={shadow.opacity}
-          onChange={(opacity) => onPatch({ shadow: { ...shadow, opacity } })}
-        />
-        <DesktopInspectorNumberField
-          label="Offset X"
-          max={256}
-          min={-256}
-          value={shadow.offsetX}
-          onChange={(offsetX) => onPatch({ shadow: { ...shadow, offsetX } })}
-        />
-        <DesktopInspectorNumberField
-          label="Offset Y"
-          max={256}
-          min={-256}
-          value={shadow.offsetY}
-          onChange={(offsetY) => onPatch({ shadow: { ...shadow, offsetY } })}
-        />
-      </DesktopInspectorValueGrid>
     </DesktopInspectorSection>
   )
 }
@@ -627,42 +551,6 @@ function DesktopLayerShapeInspector({
         </div>
       ) : null}
 
-      <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
-        <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Stroke</p>
-        <DesktopInspectorColorRow
-          label="Stroke color"
-          value={layer.stroke ?? DEFAULT_DRAFTING_SHAPE_LAYER.stroke}
-          onChange={(stroke) => onPatch({ stroke })}
-        />
-        <div className="mt-2 grid gap-2">
-          <DesktopInspectorElasticSliderRow
-            label="Stroke width"
-            max={64}
-            min={0}
-            value={layer.strokeWidth ?? DEFAULT_DRAFTING_SHAPE_LAYER.strokeWidth}
-            valueLabel={`${Math.round(layer.strokeWidth ?? DEFAULT_DRAFTING_SHAPE_LAYER.strokeWidth)}`}
-            onChange={(strokeWidth) => onPatch({ strokeWidth })}
-          />
-          <DesktopInspectorElasticSliderRow
-            label="Stroke opacity"
-            max={100}
-            min={0}
-            value={layer.strokeOpacity ?? DEFAULT_DRAFTING_SHAPE_LAYER.strokeOpacity}
-            valueLabel={`${Math.round(layer.strokeOpacity ?? DEFAULT_DRAFTING_SHAPE_LAYER.strokeOpacity)}%`}
-            onChange={(strokeOpacity) => onPatch({ strokeOpacity })}
-          />
-        </div>
-        {shapeId === "rect" ? (
-          <DesktopInspectorElasticSliderRow
-            label="Corner radius"
-            max={512}
-            min={0}
-            value={layer.cornerRadius ?? DEFAULT_DRAFTING_SHAPE_LAYER.cornerRadius}
-            valueLabel={`${Math.round(layer.cornerRadius ?? DEFAULT_DRAFTING_SHAPE_LAYER.cornerRadius)}`}
-            onChange={(cornerRadius) => onPatch({ cornerRadius })}
-          />
-        ) : null}
-      </div>
     </DesktopInspectorSection>
   )
 }
@@ -719,14 +607,6 @@ function DesktopLayerImageInspector({
         />
       </div>
 
-      <DesktopInspectorElasticSliderRow
-        label="Corner radius"
-        max={512}
-        min={0}
-        value={layer.cornerRadius ?? DEFAULT_DRAFTING_IMAGE_LAYER.cornerRadius}
-        valueLabel={`${Math.round(layer.cornerRadius ?? DEFAULT_DRAFTING_IMAGE_LAYER.cornerRadius)}`}
-        onChange={(cornerRadius) => onPatch({ cornerRadius })}
-      />
     </DesktopInspectorSection>
   )
 }
