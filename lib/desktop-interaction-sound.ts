@@ -21,7 +21,6 @@ const TOOLBAR_ZONE_SELECTOR = [
   '[data-slot="desktop-action-toolbar"]',
   '[data-slot="dashboard-compose-toolbar"]',
   '[data-slot="desktop-resize-toolbar"]',
-  '[data-slot="desktop-text-format-toolbar"]',
   '[data-slot="drafting-layer-floating-toolbar"]',
   '[data-slot="desktop-insert-menu-popover"]',
   '[data-slot="desktop-zoom-popover"]',

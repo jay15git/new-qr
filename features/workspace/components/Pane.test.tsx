@@ -772,7 +772,7 @@ describe("Pane", () => {
     })
   })
 
-  it("applies text formatting to the whole selected text layer while keeping the editor active", async () => {
+  it("keeps the text editor active after double click without a floating format toolbar", async () => {
     let textLayer = createDraftingTextLayer("preview", {
       id: "preview:text",
       text: "Scan here",
@@ -810,17 +810,7 @@ describe("Pane", () => {
     expect(text.className).not.toContain("cursor-all-scroll")
     expect(editor.className).toContain("cursor-text")
     expect(editor.value).toBe("Scan here")
-
-    const toolbar = getRequiredElement(container, '[data-slot="desktop-text-format-toolbar"]')
-
-    act(() => {
-      clickElement(getRequiredElement(toolbar, 'button[aria-label="Bold text"]'))
-    })
-
-    expect(onLayerChange).toHaveBeenLastCalledWith("preview:text", {
-      fontWeight: 700,
-      textRuns: undefined,
-    })
+    expect(container.querySelector('[data-slot="desktop-text-format-toolbar"]')).toBeNull()
 
     act(() => {
       reactRoot.render(
@@ -840,66 +830,9 @@ describe("Pane", () => {
     const activeEditor = getRequiredElement(container, '[data-slot="drafting-text-editor"]') as HTMLTextAreaElement
 
     expect(activeEditor.value).toBe("Scan here")
-    expect(activeEditor.style.fontWeight).toBe("700")
   })
 
-  it("ignores stale DOM text selections when floating format buttons are pressed", async () => {
-    const textLayer = createDraftingTextLayer("preview", {
-      id: "preview:text",
-      text: "Scan here",
-      zIndex: 2,
-    })
-    const onLayerChange = vi.fn()
-    const defaultLayers = createDefaultDraftingLayers(
-      "preview",
-      createDefaultQrStudioState(),
-      createDefaultDraftingCardState(),
-    )
-    const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
-      layers: [...defaultLayers, textLayer],
-      onLayerChange,
-      selectedLayerId: "preview:text",
-    })
-
-    await act(async () => {
-      await flushPromises()
-    })
-
-    const text = getRequiredElement(container, '[data-slot="drafting-text-layer"]') as HTMLElement
-
-    act(() => {
-      text.dispatchEvent(new MouseEvent("dblclick", { bubbles: true, cancelable: true }))
-    })
-
-    const editor = getRequiredElement(text, '[data-slot="drafting-text-editor"]') as HTMLTextAreaElement
-
-    act(() => {
-      editor.setSelectionRange(0, 4)
-      const externalNode = document.createTextNode("outside selection")
-      document.body.appendChild(externalNode)
-      const externalRange = document.createRange()
-      externalRange.setStart(externalNode, 0)
-      externalRange.setEnd(externalNode, 7)
-      const selection = window.getSelection()
-      selection?.removeAllRanges()
-      selection?.addRange(externalRange)
-    })
-
-    const toolbar = getRequiredElement(container, '[data-slot="desktop-text-format-toolbar"]')
-
-    act(() => {
-      getRequiredElement(toolbar, 'button[aria-label="Italic text"]').dispatchEvent(
-        createPointerEvent("pointerdown", 0, 0),
-      )
-    })
-
-    expect(onLayerChange).toHaveBeenLastCalledWith("preview:text", {
-      fontStyle: "italic",
-      textRuns: undefined,
-    })
-  })
-
-  it("renders legacy text runs but clears them after object-level formatting", async () => {
+  it("renders legacy text runs for display", async () => {
     let textLayer = createDraftingTextLayer("preview", {
       id: "preview:text",
       text: "Scan here",
@@ -935,19 +868,7 @@ describe("Pane", () => {
     expect(runs.map((run) => run.textContent)).toEqual(["Scan", " here"])
     expect(runs[0].style.fontWeight).toBe("700")
     expect(runs[1].style.fontStyle).toBe("italic")
-
-    const toolbar = getRequiredElement(container, '[data-slot="desktop-text-format-toolbar"]')
-
-    act(() => {
-      getRequiredElement(toolbar, 'button[aria-label="Italic text"]').dispatchEvent(
-        createPointerEvent("pointerdown", 0, 0),
-      )
-    })
-
-    expect(onLayerChange).toHaveBeenLastCalledWith("preview:text", {
-      fontStyle: "italic",
-      textRuns: undefined,
-    })
+    expect(container.querySelector('[data-slot="desktop-text-format-toolbar"]')).toBeNull()
   })
 
   it("shows floating layer actions for a selected unlocked text layer", async () => {

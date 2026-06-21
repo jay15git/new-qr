@@ -165,7 +165,6 @@ function DesktopWorkspaceStyles() {
       [data-slot="desktop-workspace"] [data-slot="desktop-floating-inspector"],
       [data-slot="desktop-workspace"] [data-slot="desktop-action-toolbar"],
       [data-slot="desktop-workspace"] [data-slot="desktop-resize-toolbar"],
-      [data-slot="desktop-workspace"] [data-slot="desktop-text-format-toolbar"],
       [data-slot="desktop-workspace"] [data-slot="desktop-document-toolbar"],
       [data-slot="desktop-workspace"] [data-slot="desktop-utility-toolbar"],
       [data-slot="desktop-workspace"] [data-slot="desktop-top-chrome"],
@@ -321,7 +320,6 @@ function DesktopWorkspaceStyles() {
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-utility-toolbar"],
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-dynamic-island"],
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-action-toolbar"],
-      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"],
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="drafting-layer-context-menu"],
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="drafting-layer-size-value"],
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="drafting-layer-rotation-value"],
@@ -355,10 +353,6 @@ function DesktopWorkspaceStyles() {
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-utility-toolbar"] button,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-theme-toggle"],
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-action-toolbar"] button,
-      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"] button,
-      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"] label,
-      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"] input,
-      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"] select,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="drafting-layer-floating-toolbar"] button,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="drafting-layer-context-menu"] button,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="drafting-layer-size-value"],
@@ -367,8 +361,6 @@ function DesktopWorkspaceStyles() {
         color: rgba(15, 23, 42, 0.76) !important;
       }
 
-      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"] button:hover,
-      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"] label:hover,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="drafting-layer-context-menu"] button:hover,
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button:hover {
         background: transparent !important;
@@ -399,11 +391,6 @@ function DesktopWorkspaceStyles() {
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button[aria-pressed="true"]::before {
         background: rgba(15, 23, 42, 0.12);
         opacity: 1;
-      }
-
-      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"] div,
-      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"] input[type="number"] {
-        background: rgba(15, 23, 42, 0.06) !important;
       }
 
       body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="tooltip-content"] {

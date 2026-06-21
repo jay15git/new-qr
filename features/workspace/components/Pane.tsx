@@ -14,18 +14,10 @@ import {
 } from "react"
 import { createPortal } from "react-dom"
 import {
-  AlignCenterIcon,
-  AlignLeftIcon,
-  AlignRightIcon,
-  BoldIcon,
   CopyIcon,
-  ItalicIcon,
   LockIcon,
   MoreHorizontalIcon,
-  PaletteIcon,
   Trash2Icon,
-  TypeIcon,
-  UnderlineIcon,
   UnlockIcon,
 } from "lucide-react"
 
@@ -45,10 +37,8 @@ import {
   type DraftingTextRun,
 } from "@/features/workspace/model/layers"
 import {
-  DRAFTING_FONT_REGISTRY,
   ensureDraftingFontsForLayers,
   getDraftingFontCssFamily,
-  loadDraftingFont,
 } from "@/features/workspace/model/fonts"
 import {
   getDraftingTextFontFamily,
@@ -116,10 +106,6 @@ type SnapGuides = {
   vertical: number[]
 }
 type LayerBounds = Pick<DraftingCanvasLayer, "height" | "id" | "width" | "x" | "y">
-type TextRunStylePatch = Pick<
-  DraftingTextRun,
-  "fill" | "fontFamily" | "fontId" | "fontSize" | "fontStyle" | "fontWeight" | "underline"
->
 
 const LAYER_MOVE_CURSOR_LOCK_CLASS = "drafting-layer-moving"
 
@@ -141,7 +127,6 @@ const ROTATE_LABEL_GAP_PX = 8
 const SIZE_LABEL_GAP_PX = 10
 const FLOATING_TOOLBAR_GAP_PX = 14
 const FLOATING_TOOLBAR_HEIGHT_PX = 38
-const TEXT_FORMAT_TOOLBAR_HEIGHT_PX = 44
 const ROTATION_LABEL_HIDE_DELAY_MS = 2000
 const SNAP_THRESHOLD_PX = 6
 const RESIZE_SNAP_THRESHOLD_PX = 3
@@ -903,198 +888,6 @@ function LayerFloatingToolbarButton({
   )
 }
 
-function TextFormatFloatingToolbar({
-  layer,
-  onFormatSelection,
-  onPatch,
-  style,
-}: {
-  layer: DraftingCanvasLayer
-  onFormatSelection: (patch: TextRunStylePatch) => void
-  onPatch: (patch: Partial<DraftingCanvasLayer>) => void
-  style: CSSProperties
-}) {
-  const selectedStyle = getTextLayerFormat(layer)
-  const selectedFontWeight =
-    selectedStyle.fontWeight === "bold"
-      ? 700
-      : typeof selectedStyle.fontWeight === "number"
-        ? selectedStyle.fontWeight
-        : 400
-  const selectedFontId = selectedStyle.fontId ?? "local:satoshi"
-  const selectedTextAlign = layer.textAlign ?? "left"
-  const selectedTextColor = selectedStyle.fill ?? "#171717"
-  const selectedTextSize = selectedStyle.fontSize ?? 32
-  const fontOptions = DRAFTING_FONT_REGISTRY.slice(0, 8)
-  const visibleFontOptions = fontOptions.some((font) => font.id === selectedFontId)
-    ? fontOptions
-    : [
-        ...fontOptions,
-        DRAFTING_FONT_REGISTRY.find((font) => font.id === selectedFontId) ??
-          DRAFTING_FONT_REGISTRY[0],
-      ]
-  const fontInputId = `desktop-text-font-${layer.id}`
-  const sizeInputId = `desktop-text-size-${layer.id}`
-  const colorInputId = `desktop-text-color-${layer.id}`
-
-  function handleFontChange(fontId: string) {
-    const font = DRAFTING_FONT_REGISTRY.find((entry) => entry.id === fontId)
-    if (!font) return
-
-    void loadDraftingFont(font.id)
-    onFormatSelection({ fontFamily: font.family, fontId: font.id })
-  }
-
-  return (
-    <div
-      className="absolute left-1/2 top-1/2 z-[10002] inline-flex h-11 max-w-[min(560px,calc(100vw-2rem))] items-center gap-1 overflow-x-auto rounded-full border border-white/[0.12] bg-black/55 px-2 text-white/78 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
-      data-slot="desktop-text-format-toolbar"
-      data-toolbar-appearance="desktop-glass"
-      role="toolbar"
-      style={style}
-      tabIndex={-1}
-      onClick={(event) => event.stopPropagation()}
-      onContextMenu={(event) => event.preventDefault()}
-      onPointerDown={(event) => {
-        event.preventDefault()
-        event.stopPropagation()
-      }}
-    >
-      <label className="sr-only" htmlFor={fontInputId}>
-        Text font
-      </label>
-      <div className="flex h-8 items-center gap-1.5 rounded-full bg-white/[0.08] pl-2.5 pr-1.5">
-        <TypeIcon aria-hidden="true" className="size-3.5 shrink-0" />
-        <select
-          aria-label="Text font"
-          className="h-7 min-w-28 max-w-36 bg-transparent text-xs font-semibold text-current outline-none"
-          id={fontInputId}
-          value={selectedFontId}
-          onChange={(event) => handleFontChange(event.currentTarget.value)}
-        >
-          {visibleFontOptions.map((font) => (
-            <option key={font.id} value={font.id}>
-              {font.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <label className="sr-only" htmlFor={sizeInputId}>
-        Text size
-      </label>
-      <input
-        aria-label="Text size"
-        className="h-8 w-14 rounded-full border-0 bg-white/[0.08] px-2 text-center text-xs font-semibold text-current outline-none"
-        id={sizeInputId}
-        max={180}
-        min={8}
-        type="number"
-        value={selectedTextSize}
-        onChange={(event) => {
-          const fontSize = Number(event.currentTarget.value)
-          if (Number.isFinite(fontSize)) {
-            onFormatSelection({ fontSize })
-          }
-        }}
-      />
-
-      <TextFormatButton
-        active={selectedFontWeight >= 700}
-        label="Bold text"
-        onClick={() => onFormatSelection({ fontWeight: selectedFontWeight >= 700 ? "normal" : 700 })}
-      >
-        <BoldIcon aria-hidden="true" className="size-4" />
-      </TextFormatButton>
-      <TextFormatButton
-        active={selectedStyle.fontStyle === "italic"}
-        label="Italic text"
-        onClick={() => onFormatSelection({ fontStyle: selectedStyle.fontStyle === "italic" ? "normal" : "italic" })}
-      >
-        <ItalicIcon aria-hidden="true" className="size-4" />
-      </TextFormatButton>
-      <TextFormatButton
-        active={Boolean(selectedStyle.underline)}
-        label="Underline text"
-        onClick={() => onFormatSelection({ underline: !selectedStyle.underline })}
-      >
-        <UnderlineIcon aria-hidden="true" className="size-4" />
-      </TextFormatButton>
-
-      <div className="mx-1 h-5 w-px shrink-0 bg-white/[0.14]" />
-
-      {[
-        ["left", AlignLeftIcon, "Align text left"],
-        ["center", AlignCenterIcon, "Align text center"],
-        ["right", AlignRightIcon, "Align text right"],
-      ].map(([align, Icon, label]) => (
-        <TextFormatButton
-          active={selectedTextAlign === align}
-          key={align as string}
-          label={label as string}
-          onClick={() => onPatch({ textAlign: align as DraftingCanvasLayer["textAlign"] })}
-        >
-          <Icon aria-hidden="true" className="size-4" />
-        </TextFormatButton>
-      ))}
-
-      <label
-        className="grid size-8 shrink-0 cursor-pointer place-items-center rounded-full transition hover:bg-white/[0.11] hover:text-white"
-        htmlFor={colorInputId}
-      >
-        <span className="sr-only">Text color</span>
-        <PaletteIcon aria-hidden="true" className="size-4" />
-      </label>
-      <input
-        aria-label="Text color"
-        className="h-8 w-8 shrink-0 cursor-pointer rounded-full border-0 bg-transparent p-1"
-        id={colorInputId}
-        type="color"
-        value={selectedTextColor}
-        onChange={(event) => onFormatSelection({ fill: event.currentTarget.value })}
-      />
-    </div>
-  )
-}
-
-function TextFormatButton({
-  active,
-  children,
-  label,
-  onClick,
-}: {
-  active: boolean
-  children: ReactNode
-  label: string
-  onClick: () => void
-}) {
-  return (
-    <button
-      aria-label={label}
-      aria-pressed={active}
-      className={cn(
-        "grid size-8 shrink-0 cursor-pointer place-items-center rounded-full transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45",
-        active && "bg-white/[0.16] text-white",
-      )}
-      type="button"
-      onPointerDown={(event) => {
-        event.preventDefault()
-        event.stopPropagation()
-        onClick()
-      }}
-      onClick={(event) => {
-        event.preventDefault()
-        event.stopPropagation()
-        if (event.detail === 0) {
-          onClick()
-        }
-      }}
-    >
-      {children}
-    </button>
-  )
-}
-
 function LayerSizeValue({ height, width }: Pick<DraftingCanvasLayer, "height" | "width">) {
   return (
     <div
@@ -1180,18 +973,6 @@ function renderTextLayerContent(layer: DraftingCanvasLayer) {
       {line && index < layout.lines.length - 1 ? " " : null}
     </div>
   ))
-}
-
-function getTextLayerFormat(layer: DraftingCanvasLayer): TextRunStylePatch {
-  return {
-    fill: layer.fill,
-    fontFamily: layer.fontFamily,
-    fontId: layer.fontId,
-    fontSize: layer.fontSize,
-    fontStyle: layer.fontStyle,
-    fontWeight: layer.fontWeight,
-    underline: layer.underline,
-  }
 }
 
 function getTextRunKey(layerId: string, run: DraftingTextRun, index: number) {
@@ -2055,12 +1836,42 @@ export const Pane = memo(function Pane({
     setEditingTextLayerId(null)
   }
 
-  function patchSelectedTextLayer(layer: DraftingCanvasLayer, patch: TextRunStylePatch) {
-    onLayerChange?.(layer.id, { ...patch, textRuns: undefined })
-  }
+  function renderFloatingToolbar() {
+    const bounds = combinedLayerBounds
 
-  function patchTextLayer(layer: DraftingCanvasLayer, patch: Partial<DraftingCanvasLayer>) {
-    onLayerChange?.(layer.id, { ...patch, textRuns: undefined })
+    if (
+      !bounds ||
+      selectedVisibleLayers.length === 0 ||
+      isLayerInteracting ||
+      marquee ||
+      rotatingLayerId !== null
+    ) {
+      return null
+    }
+
+    const x = bounds.x + bounds.width / 2
+    const rawY =
+      bounds.y -
+      RESIZE_CONTROL_PADDING_PX -
+      ROTATE_HANDLE_OFFSET_PX -
+      ROTATE_HANDLE_RADIUS_PX -
+      FLOATING_TOOLBAR_GAP_PX -
+      FLOATING_TOOLBAR_HEIGHT_PX
+    const minY = canvasHeight > 0 ? -canvasHeight / 2 + FLOATING_TOOLBAR_GAP_PX : rawY
+    const y = Math.max(rawY, minY)
+    const layerToolbarStyle = {
+      transform: `translate3d(${x}px, ${y}px, 0) translateX(-50%)`,
+    }
+
+    return (
+      <LayerFloatingToolbar
+        layers={selectedVisibleLayers}
+        onAction={onLayerAction ? runSelectedLayerAction : undefined}
+        onCopy={onLayerCopy ? runSelectedLayerCopy : undefined}
+        onMore={(event) => openFloatingLayerContextMenu(event, selectedVisibleLayerIds)}
+        style={layerToolbarStyle}
+      />
+    )
   }
 
   function getLayerPlacementStyle(layer: DraftingCanvasLayer, nested = false): CSSProperties {
@@ -2094,77 +1905,6 @@ export const Pane = memo(function Pane({
           transform: `translate3d(${bounds.x}px, ${bounds.y}px, 0)`,
           width: bounds.width,
         }}
-      />
-    )
-  }
-
-  function renderFloatingToolbar() {
-    const bounds = combinedLayerBounds
-    const selectedTextLayer =
-      selectedVisibleLayers.length === 1 && selectedVisibleLayers[0]?.kind === "text"
-        ? selectedVisibleLayers[0]
-        : null
-
-    if (
-      !bounds ||
-      selectedVisibleLayers.length === 0 ||
-      isLayerInteracting ||
-      marquee ||
-      rotatingLayerId !== null
-    ) {
-      return null
-    }
-
-    const x = bounds.x + bounds.width / 2
-    const showTextFormatToolbar = Boolean(selectedTextLayer && !selectedTextLayer.isLocked)
-    const toolbarStackHeight = showTextFormatToolbar
-      ? TEXT_FORMAT_TOOLBAR_HEIGHT_PX + FLOATING_TOOLBAR_GAP_PX + FLOATING_TOOLBAR_HEIGHT_PX
-      : FLOATING_TOOLBAR_HEIGHT_PX
-    const rawY =
-      bounds.y -
-      RESIZE_CONTROL_PADDING_PX -
-      ROTATE_HANDLE_OFFSET_PX -
-      ROTATE_HANDLE_RADIUS_PX -
-      FLOATING_TOOLBAR_GAP_PX -
-      toolbarStackHeight
-    const minY = canvasHeight > 0 ? -canvasHeight / 2 + FLOATING_TOOLBAR_GAP_PX : rawY
-    const y = Math.max(rawY, minY)
-    const textToolbarStyle = {
-      transform: `translate3d(${x}px, ${y}px, 0) translateX(-50%)`,
-    }
-    const layerToolbarStyle = {
-      transform: `translate3d(${x}px, ${
-        showTextFormatToolbar ? y + TEXT_FORMAT_TOOLBAR_HEIGHT_PX + FLOATING_TOOLBAR_GAP_PX : y
-      }px, 0) translateX(-50%)`,
-    }
-
-    if (showTextFormatToolbar && selectedTextLayer) {
-      return (
-        <>
-          <TextFormatFloatingToolbar
-            layer={selectedTextLayer}
-            onFormatSelection={(patch) => patchSelectedTextLayer(selectedTextLayer, patch)}
-            onPatch={(patch) => patchTextLayer(selectedTextLayer, patch)}
-            style={textToolbarStyle}
-          />
-          <LayerFloatingToolbar
-            layers={selectedVisibleLayers}
-            onAction={onLayerAction ? runSelectedLayerAction : undefined}
-            onCopy={onLayerCopy ? runSelectedLayerCopy : undefined}
-            onMore={(event) => openFloatingLayerContextMenu(event, selectedVisibleLayerIds)}
-            style={layerToolbarStyle}
-          />
-        </>
-      )
-    }
-
-    return (
-      <LayerFloatingToolbar
-        layers={selectedVisibleLayers}
-        onAction={onLayerAction ? runSelectedLayerAction : undefined}
-        onCopy={onLayerCopy ? runSelectedLayerCopy : undefined}
-        onMore={(event) => openFloatingLayerContextMenu(event, selectedVisibleLayerIds)}
-        style={layerToolbarStyle}
       />
     )
   }
