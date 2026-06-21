@@ -168,6 +168,8 @@ function DesktopWorkspaceStyles() {
       [data-slot="desktop-workspace"] [data-slot="desktop-text-format-toolbar"],
       [data-slot="desktop-workspace"] [data-slot="desktop-document-toolbar"],
       [data-slot="desktop-workspace"] [data-slot="desktop-utility-toolbar"],
+      [data-slot="desktop-workspace"] [data-slot="desktop-top-chrome"],
+      [data-slot="desktop-workspace"] [data-slot="desktop-dynamic-island"],
       [data-slot="desktop-workspace"] [data-slot="desktop-theme-toggle"] {
         pointer-events: auto;
       }
@@ -232,6 +234,7 @@ function DesktopWorkspaceStyles() {
 
       [data-slot="desktop-workspace"] [data-slot="desktop-document-toolbar"][data-toolbar-appearance="desktop-glass"],
       [data-slot="desktop-workspace"] [data-slot="desktop-utility-toolbar"][data-toolbar-appearance="desktop-glass"],
+      [data-slot="desktop-workspace"] [data-slot="desktop-dynamic-island"][data-toolbar-appearance="desktop-glass"],
       [data-slot="desktop-workspace"] [data-slot="desktop-action-toolbar"][data-toolbar-appearance="desktop-glass"],
       [data-slot="desktop-workspace"] [data-slot="desktop-resize-toolbar"][data-toolbar-appearance="desktop-glass"],
       [data-slot="desktop-workspace"] [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] {
@@ -316,6 +319,7 @@ function DesktopWorkspaceStyles() {
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-resize-toolbar"],
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-document-toolbar"],
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-utility-toolbar"],
+      [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-dynamic-island"],
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-action-toolbar"],
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="desktop-text-format-toolbar"],
       [data-slot="desktop-workspace"][data-desktop-theme="light"] [data-slot="drafting-layer-context-menu"],

@@ -216,9 +216,10 @@ describe("FloatingToolbar", () => {
     const utilityToolbar = surface.container.querySelector('[data-slot="desktop-utility-toolbar"]')
 
     expect(actionToolbar?.className).toContain("min-h-14")
-    expect(documentToolbar?.className).toContain("left-[25rem]")
-    expect(documentToolbar?.className).toContain("top-5")
-    expect(utilityToolbar?.className).toContain("min-h-14")
+    const topChrome = surface.container.querySelector('[data-slot="desktop-top-chrome"]')
+    expect(topChrome?.className).toContain("left-[25rem]")
+    expect(topChrome?.className).toContain("top-5")
+    expect(documentToolbar?.className).toContain("min-h-14")
     expect(getRequiredButton(documentToolbar as HTMLElement, "Save").className).toContain("size-10")
     expect(getRequiredButton(documentToolbar as HTMLElement, "Download").className).toContain("size-10")
     expect(getRequiredButton(utilityToolbar as HTMLElement, "Open keyboard shortcuts").className).toContain("size-10")

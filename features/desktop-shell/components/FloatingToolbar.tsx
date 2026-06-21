@@ -74,7 +74,9 @@ import {
   DesktopUtilityToolbar,
   DesktopUtilityToolbarButton,
   DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS,
+  DESKTOP_UTILITY_TOOLBAR_SHELL_CLASS,
 } from "@/features/desktop-shell/components/DesktopUtilityToolbar"
+import DynamicIsland from "@/components/smoothui/dynamic-island"
 import { DRAFTING_KEYBOARD_SHORTCUT_GROUPS } from "@/features/workspace/model/keyboard-shortcuts"
 import {
   DRAFTING_FONT_REGISTRY,
@@ -1254,53 +1256,67 @@ export function FloatingToolbar({
         )}
       >
         <DesktopThemeStyles />
-        <DesktopUtilityToolbar
-          data-slot="desktop-document-toolbar"
-          className="fixed left-[25rem] top-5 z-30 max-md:left-4 max-md:top-4"
+        <div
+          className="pointer-events-none fixed top-5 right-5 left-[25rem] z-30 grid grid-cols-[1fr_auto_1fr] items-center gap-3 max-md:left-4 max-md:right-4 max-md:top-4"
+          data-slot="desktop-top-chrome"
         >
-          {onBack ? (
+          <DesktopUtilityToolbar
+            data-slot="desktop-document-toolbar"
+            className="pointer-events-auto shrink-0 justify-self-start"
+          >
+            {onBack ? (
+              <DesktopUtilityToolbarButton
+                aria-label="Back to studio hub"
+                data-slot="desktop-back-trigger"
+                onClick={onBack}
+              >
+                <HugeiconsIcon
+                  icon={ArrowLeft01Icon}
+                  size={18}
+                  color="currentColor"
+                  strokeWidth={1.8}
+                />
+              </DesktopUtilityToolbarButton>
+            ) : null}
             <DesktopUtilityToolbarButton
-              aria-label="Back to studio hub"
-              data-slot="desktop-back-trigger"
-              onClick={onBack}
+              aria-label="Save"
+              data-slot="desktop-save-trigger"
+              onClick={() => controller?.onSave?.()}
             >
               <HugeiconsIcon
-                icon={ArrowLeft01Icon}
+                icon={SaveIcon}
                 size={18}
                 color="currentColor"
                 strokeWidth={1.8}
               />
             </DesktopUtilityToolbarButton>
-          ) : null}
-          <DesktopUtilityToolbarButton
-            aria-label="Save"
-            data-slot="desktop-save-trigger"
-            onClick={() => controller?.onSave?.()}
+            <DesktopUtilityToolbarButton
+              aria-label="Download"
+              data-slot="desktop-download-trigger"
+              onClick={() => controller?.onExportDownload?.()}
+            >
+              <HugeiconsIcon
+                icon={Download02Icon}
+                size={18}
+                color="currentColor"
+                strokeWidth={1.8}
+              />
+            </DesktopUtilityToolbarButton>
+          </DesktopUtilityToolbar>
+          <div
+            className={cn(
+              DESKTOP_UTILITY_TOOLBAR_SHELL_CLASS,
+              "pointer-events-auto justify-self-center",
+            )}
+            data-slot="desktop-dynamic-island"
+            data-toolbar-appearance="desktop-glass"
           >
-            <HugeiconsIcon
-              icon={SaveIcon}
-              size={18}
-              color="currentColor"
-              strokeWidth={1.8}
-            />
-          </DesktopUtilityToolbarButton>
-          <DesktopUtilityToolbarButton
-            aria-label="Download"
-            data-slot="desktop-download-trigger"
-            onClick={() => controller?.onExportDownload?.()}
+            <DynamicIsland appearance="desktop-glass" showViewControls={false} />
+          </div>
+          <DesktopUtilityToolbar
+            data-slot="desktop-utility-toolbar"
+            className="pointer-events-auto shrink-0 justify-self-end"
           >
-            <HugeiconsIcon
-              icon={Download02Icon}
-              size={18}
-              color="currentColor"
-              strokeWidth={1.8}
-            />
-          </DesktopUtilityToolbarButton>
-        </DesktopUtilityToolbar>
-        <DesktopUtilityToolbar
-          data-slot="desktop-utility-toolbar"
-          className="fixed right-5 top-5 z-30 max-md:right-4 max-md:top-4"
-        >
           <Popover>
             <PopoverTrigger asChild>
               <DesktopUtilityToolbarButton
@@ -1452,6 +1468,7 @@ export function FloatingToolbar({
             )}
           </DesktopUtilityToolbarButton>
         </DesktopUtilityToolbar>
+        </div>
         <div
           data-slot="desktop-action-toolbar"
           data-toolbar-appearance="desktop-glass"
@@ -1619,6 +1636,7 @@ export function DesktopThemeStyles() {
       [data-desktop-theme="light"] [data-slot="desktop-left-toolbar-shell"],
       [data-desktop-theme="light"] [data-slot="desktop-document-toolbar"],
       [data-desktop-theme="light"] [data-slot="desktop-utility-toolbar"],
+      [data-desktop-theme="light"] [data-slot="desktop-dynamic-island"],
       [data-desktop-theme="light"] [data-slot="desktop-action-toolbar"] {
         background: rgba(255, 255, 255, 0.72) !important;
         border-color: rgba(15, 23, 42, 0.12) !important;
