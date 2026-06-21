@@ -17,8 +17,10 @@ import type { IconComponent } from "@/lib/icon-context";
 import { cn } from "@/lib/utils";
 import { spring } from "@/lib/springs";
 import { fontWeights } from "@/lib/font-weight";
-import { useShape } from "@/lib/shape-context";
 import { useProximityHover } from "@/hooks/use-proximity-hover";
+
+const TABS_SUBTLE_PILL_CLASS = "rounded-full";
+const TABS_SUBTLE_FOCUS_RING_CLASS = "rounded-full";
 
 interface TabsSubtleContextValue {
   registerTab: (index: number, element: HTMLElement | null) => void;
@@ -51,7 +53,6 @@ const TabsSubtle = forwardRef<HTMLDivElement, TabsSubtleProps>(
     const containerRef = useRef<HTMLDivElement>(null);
     const isMouseInside = useRef(false);
     const generatedId = useId();
-    const shape = useShape();
     const idPrefix = idPrefixProp || generatedId;
 
     const {
@@ -178,7 +179,7 @@ const TabsSubtle = forwardRef<HTMLDivElement, TabsSubtleProps>(
           {/* Selected pill */}
           {selectedRect && (
             <motion.div
-              className={cn("absolute bg-active pointer-events-none", shape.bg)}
+              className={cn("absolute bg-active pointer-events-none", TABS_SUBTLE_PILL_CLASS)}
               initial={false}
               animate={{
                 left: selectedRect.left,
@@ -198,7 +199,7 @@ const TabsSubtle = forwardRef<HTMLDivElement, TabsSubtleProps>(
           <AnimatePresence>
             {hoverRect && !isHoveringSelected && selectedRect && (
               <motion.div
-                className={cn("absolute bg-active pointer-events-none", shape.bg)}
+                className={cn("absolute bg-active pointer-events-none", TABS_SUBTLE_PILL_CLASS)}
                 initial={{
                   left: selectedRect.left,
                   width: selectedRect.width,
@@ -237,7 +238,10 @@ const TabsSubtle = forwardRef<HTMLDivElement, TabsSubtleProps>(
           <AnimatePresence>
             {focusRect && (
               <motion.div
-                className={cn("absolute pointer-events-none z-20 border border-[#6B97FF]", shape.focusRing)}
+                className={cn(
+                  "absolute pointer-events-none z-20 border border-[#6B97FF]",
+                  TABS_SUBTLE_FOCUS_RING_CLASS,
+                )}
                 initial={false}
                 animate={{
                   left: focusRect.left - 2,
@@ -272,7 +276,6 @@ interface TabsSubtleItemProps extends HTMLAttributes<HTMLButtonElement> {
 const TabsSubtleItem = forwardRef<HTMLButtonElement, TabsSubtleItemProps>(
   ({ icon: Icon, label, index, className, ...props }, ref) => {
     const internalRef = useRef<HTMLButtonElement>(null);
-    const shape = useShape();
     const { registerTab, hoveredIndex, selectedIndex, onSelect, idPrefix, activeLabel } =
       useTabsSubtle();
 
@@ -329,7 +332,7 @@ const TabsSubtleItem = forwardRef<HTMLButtonElement, TabsSubtleItemProps>(
         className={cn(
           "relative z-10 flex items-center px-3 py-2 cursor-pointer bg-transparent border-none outline-none",
           collapseLabel ? "h-8" : "gap-2",
-          shape.bg,
+          TABS_SUBTLE_PILL_CLASS,
           className
         )}
         {...props}

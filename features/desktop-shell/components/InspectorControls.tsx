@@ -17,7 +17,6 @@ import { motion, type Transition } from "motion/react"
 
 import { TabsSubtle, TabsSubtleItem } from "@/components/ui/tabs-subtle"
 import { Input } from "@/components/ui/input"
-import { ShapeProvider } from "@/lib/shape-context"
 import { cn } from "@/lib/utils"
 
 export const DESKTOP_INSPECTOR_FG_PRIMARY =
@@ -448,31 +447,29 @@ export function DesktopInspectorSegmentedControl<TValue extends string>({
     columns === 4 ? "px-1 [&_span]:text-[10px]" : columns === 3 ? "px-1.5 [&_span]:text-[10px]" : undefined
 
   return (
-    <ShapeProvider defaultShape="rounded">
-      <TabsSubtle
-        className={cn("w-full gap-0 py-0 my-0", className)}
-        data-slot={dataSlot ?? "desktop-inspector-segmented-control"}
-        idPrefix={idPrefix}
-        selectedIndex={selectedIndex}
-        onSelect={(index) => {
-          const next = items[index]
-          if (next) onValueChange(next.value)
-        }}
-      >
-        {items.map((item, index) => (
-          <TabsSubtleItem
-            key={item.value}
-            aria-label={
-              itemAriaLabel?.(item) ??
-              (ariaLabelPrefix ? `${ariaLabelPrefix} ${item.label}` : undefined)
-            }
-            className={cn(DESKTOP_INSPECTOR_TAB_ITEM_CLASS, compactItemClass, itemClassName)}
-            index={index}
-            label={item.label}
-          />
-        ))}
-      </TabsSubtle>
-    </ShapeProvider>
+    <TabsSubtle
+      className={cn("w-full gap-0 py-0 my-0", className)}
+      data-slot={dataSlot ?? "desktop-inspector-segmented-control"}
+      idPrefix={idPrefix}
+      selectedIndex={selectedIndex}
+      onSelect={(index) => {
+        const next = items[index]
+        if (next) onValueChange(next.value)
+      }}
+    >
+      {items.map((item, index) => (
+        <TabsSubtleItem
+          key={item.value}
+          aria-label={
+            itemAriaLabel?.(item) ??
+            (ariaLabelPrefix ? `${ariaLabelPrefix} ${item.label}` : undefined)
+          }
+          className={cn(DESKTOP_INSPECTOR_TAB_ITEM_CLASS, compactItemClass, itemClassName)}
+          index={index}
+          label={item.label}
+        />
+      ))}
+    </TabsSubtle>
   )
 }
 
