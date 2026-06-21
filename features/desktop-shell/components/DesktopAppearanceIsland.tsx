@@ -7,7 +7,7 @@ import {
   PencilLineIcon,
   SquareRoundCornerIcon,
 } from "lucide-react"
-import { type CSSProperties, type ReactNode } from "react"
+import { type ReactNode } from "react"
 
 import {
   AppearanceBlurControls,
@@ -16,17 +16,13 @@ import {
   AppearanceShadowControls,
   AppearanceStrokeControls,
 } from "@/features/desktop-shell/components/AppearancePopoverControls"
+import { DESKTOP_INSPECTOR_FG_SECONDARY } from "@/features/desktop-shell/components/InspectorControls"
 import { DesktopUtilityToolbarButton } from "@/features/desktop-shell/components/DesktopUtilityToolbar"
 import type { DesktopAppearanceSnapshot } from "@/features/desktop-shell/model/appearance"
 import DynamicIsland from "@/components/smoothui/dynamic-island"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
 import { cn } from "@/lib/utils"
-
-const DESKTOP_APPEARANCE_POPOVER_STYLE = {
-  "--desktop-inspector-field-bg": "#141414",
-  "--desktop-inspector-section-bg": "#181818",
-} as CSSProperties
 
 type AppearancePopoverId = "shadow" | "blur" | "stroke" | "opacity" | "radius"
 
@@ -121,10 +117,12 @@ function DesktopAppearancePopover({
         align="center"
         data-slot={`desktop-appearance-${popoverId}-popover`}
         sideOffset={12}
-        className="z-[20000] w-[min(18rem,calc(100vw-1rem))] overflow-hidden rounded-[16px] border border-[#242424] bg-[#0a0a0a] p-0 text-white shadow-[0_24px_70px_rgba(0,0,0,0.35)]"
-        style={DESKTOP_APPEARANCE_POPOVER_STYLE}
+        className="z-[20000] w-[min(18rem,calc(100vw-1rem))] overflow-hidden rounded-[16px] border border-[var(--desktop-appearance-popover-border)] bg-[var(--desktop-appearance-popover-bg)] p-0 text-[var(--desktop-inspector-fg-secondary)] shadow-[var(--desktop-appearance-popover-shadow)] backdrop-blur-xl"
       >
-        <div className="max-h-[min(28rem,calc(100dvh-8rem))] overflow-y-auto p-3">
+        <div
+          className="max-h-[min(28rem,calc(100dvh-8rem))] overflow-y-auto p-3"
+          data-slot="desktop-floating-inspector"
+        >
           {renderControls({ appearance, onPatch })}
         </div>
       </PopoverContent>
@@ -146,7 +144,12 @@ export function DesktopAppearanceIsland({
       className="flex min-w-0 items-center gap-1 px-1"
       data-slot="desktop-appearance-island"
     >
-      <div className="hidden min-w-0 max-w-[7rem] truncate px-1 text-[11px] font-semibold text-white/72 sm:block">
+      <div
+        className={cn(
+          "hidden min-w-0 max-w-[7rem] truncate px-1 text-[11px] font-semibold sm:block",
+          DESKTOP_INSPECTOR_FG_SECONDARY,
+        )}
+      >
         {layerLabel}
       </div>
       {APPEARANCE_POPOVERS.map((popover) => (

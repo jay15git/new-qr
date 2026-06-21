@@ -1484,7 +1484,7 @@ export function FloatingToolbar({
         <div
           data-slot="desktop-action-toolbar"
           data-toolbar-appearance="desktop-glass"
-          className="fixed bottom-4 left-[25rem] z-30 inline-flex min-h-14 cursor-pointer items-center gap-0.5 rounded-full border border-white/[0.12] bg-black/55 px-3 py-1.5 text-white/72 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl max-md:left-auto max-md:right-4"
+          className="fixed bottom-4 left-[25rem] z-30 inline-flex min-h-14 cursor-pointer items-center gap-0.5 rounded-full border border-[var(--desktop-glass-border)] bg-[var(--desktop-glass-bg)] px-3 py-1.5 text-[var(--desktop-glass-fg)] shadow-[var(--desktop-glass-shadow)] backdrop-blur-2xl max-md:left-auto max-md:right-4"
         >
           <button
             aria-label="Reset defaults"
@@ -1517,7 +1517,7 @@ export function FloatingToolbar({
         <div
           data-slot="desktop-left-toolbar-shell"
           data-toolbar-appearance="desktop-glass"
-          className="fixed bottom-5 left-5 top-5 z-[25] grid w-[23.75rem] grid-cols-[4.5rem_minmax(0,1fr)] overflow-hidden rounded-[20px] border border-white/[0.1] bg-black/55 text-white shadow-[0_24px_65px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl max-md:bottom-4 max-md:left-3 max-md:top-4 max-md:w-[min(20rem,calc(100vw-1.5rem))] max-md:grid-cols-[3.5rem_minmax(0,1fr)] max-md:rounded-[18px]"
+          className="fixed bottom-5 left-5 top-5 z-[25] grid w-[23.75rem] grid-cols-[4.5rem_minmax(0,1fr)] overflow-hidden rounded-[20px] border border-[var(--desktop-glass-panel-border)] bg-[var(--desktop-glass-bg)] text-[var(--desktop-glass-fg)] shadow-[var(--desktop-glass-panel-shadow)] backdrop-blur-2xl max-md:bottom-4 max-md:left-3 max-md:top-4 max-md:w-[min(20rem,calc(100vw-1.5rem))] max-md:grid-cols-[3.5rem_minmax(0,1fr)] max-md:rounded-[18px]"
         >
           <TabsSubtleIconRail
             aria-label="Desktop tools"
@@ -1580,6 +1580,18 @@ export function DesktopThemeStyles() {
   return (
     <style>{`
       body:has([data-slot="desktop-floating-toolbar-root"]) {
+        --desktop-glass-bg: rgba(0, 0, 0, 0.55);
+        --desktop-glass-border: rgba(255, 255, 255, 0.12);
+        --desktop-glass-fg: rgba(255, 255, 255, 0.72);
+        --desktop-glass-shadow: 0 16px 36px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+        --desktop-glass-panel-border: rgba(255, 255, 255, 0.1);
+        --desktop-glass-panel-shadow: 0 24px 65px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        --desktop-glass-button-hover-bg: rgba(255, 255, 255, 0.11);
+        --desktop-glass-button-hover-fg: rgba(255, 255, 255, 1);
+        --desktop-glass-button-focus-ring: rgba(255, 255, 255, 0.45);
+        --desktop-appearance-popover-bg: rgba(10, 10, 10, 0.96);
+        --desktop-appearance-popover-border: rgba(255, 255, 255, 0.1);
+        --desktop-appearance-popover-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
         --desktop-inspector-fg-primary: rgba(255, 255, 255, 0.94);
         --desktop-inspector-fg-secondary: rgba(255, 255, 255, 0.72);
         --desktop-inspector-fg-tertiary: rgba(255, 255, 255, 0.56);
@@ -1591,6 +1603,18 @@ export function DesktopThemeStyles() {
       }
 
       body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) {
+        --desktop-glass-bg: rgba(255, 255, 255, 0.72);
+        --desktop-glass-border: rgba(15, 23, 42, 0.12);
+        --desktop-glass-fg: rgba(15, 23, 42, 0.68);
+        --desktop-glass-shadow: 0 24px 64px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.86);
+        --desktop-glass-panel-border: rgba(15, 23, 42, 0.12);
+        --desktop-glass-panel-shadow: 0 24px 64px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.86);
+        --desktop-glass-button-hover-bg: rgba(15, 23, 42, 0.08);
+        --desktop-glass-button-hover-fg: rgba(15, 23, 42, 0.95);
+        --desktop-glass-button-focus-ring: rgba(15, 23, 42, 0.36);
+        --desktop-appearance-popover-bg: rgba(255, 255, 255, 0.96);
+        --desktop-appearance-popover-border: rgba(15, 23, 42, 0.12);
+        --desktop-appearance-popover-shadow: 0 24px 64px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.9);
         --desktop-inspector-fg-primary: rgba(15, 23, 42, 0.90);
         --desktop-inspector-fg-secondary: rgba(15, 23, 42, 0.62);
         --desktop-inspector-fg-tertiary: rgba(15, 23, 42, 0.48);
@@ -1659,6 +1683,7 @@ export function DesktopThemeStyles() {
       [data-desktop-theme="light"] [data-slot="desktop-floating-toolbar"] button:not([data-proximity-index]):hover,
       [data-desktop-theme="light"] [data-slot="desktop-document-toolbar"] button:hover,
       [data-desktop-theme="light"] [data-slot="desktop-utility-toolbar"] button:hover,
+      [data-desktop-theme="light"] [data-slot="desktop-dynamic-island"] button:hover,
       [data-desktop-theme="light"] [data-slot="desktop-action-toolbar"] button:hover {
         background: rgba(15, 23, 42, 0.08) !important;
         color: var(--desktop-toolbar-fg-hover) !important;
@@ -1891,6 +1916,39 @@ export function DesktopThemeStyles() {
         --desktop-inspector-field-bg: rgba(255, 255, 255, 0.62);
         --desktop-inspector-focus: rgba(15, 23, 42, 0.36);
         color: var(--desktop-inspector-fg-secondary);
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot^="desktop-appearance-"][data-slot$="-popover"] [data-slot="desktop-floating-inspector"] {
+        --surface-1: rgba(255, 255, 255, 0.72);
+        --surface-2: var(--desktop-inspector-section-bg);
+        --scroll-edge-fade-color: rgba(255, 255, 255, 0.88);
+        --scroll-edge-chevron-color: rgba(15, 23, 42, 0.42);
+        --desktop-inspector-fg-primary: rgba(15, 23, 42, 0.90);
+        --desktop-inspector-fg-secondary: rgba(15, 23, 42, 0.62);
+        --desktop-inspector-fg-tertiary: rgba(15, 23, 42, 0.48);
+        --desktop-inspector-fg-muted: rgba(15, 23, 42, 0.38);
+        --desktop-inspector-section-bg: rgba(15, 23, 42, 0.032);
+        --desktop-inspector-header-bg: rgba(15, 23, 42, 0.025);
+        --desktop-inspector-footer-bg: rgba(15, 23, 42, 0.045);
+        --desktop-inspector-control-bg: transparent;
+        --desktop-inspector-control-hover-bg: rgba(15, 23, 42, 0.1);
+        --desktop-inspector-control-active-bg: rgba(15, 23, 42, 0.14);
+        --desktop-inspector-control-border-hover: rgba(15, 23, 42, 0.16);
+        --desktop-inspector-layer-selected-bg: rgba(255, 255, 255, 0.96);
+        --desktop-inspector-option-selected-bg: rgba(255, 255, 255, 0.96);
+        --desktop-inspector-option-selected-border: #111827;
+        --desktop-inspector-option-selected-fg: rgba(15, 23, 42, 0.94);
+        --desktop-inspector-field-bg: rgba(255, 255, 255, 0.62);
+        --desktop-inspector-focus: rgba(15, 23, 42, 0.36);
+        color: var(--desktop-inspector-fg-secondary);
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot^="desktop-appearance-"][data-slot$="-popover"] [data-slot="elastic-slider"] {
+        --elastic-slider-bg: rgba(15, 23, 42, 0.035);
+        --elastic-slider-fill: rgba(15, 23, 42, 0.052);
+        --elastic-slider-fill-active: rgba(15, 23, 42, 0.085);
+        --elastic-slider-hash: rgba(15, 23, 42, 0.13);
+        --elastic-slider-handle: rgba(15, 23, 42, 0.46);
       }
 
       [data-slot="desktop-color-picker-popover"] {
