@@ -1,25 +1,5 @@
-import type { Metadata } from "next"
-import localFont from "next/font/local"
-import { Suspense } from "react"
-
-import { StudioHubShell } from "@/features/studio-hub/components/StudioHubShell"
-
-const satoshi = localFont({
-  src: "../public/Satoshi_Complete/Fonts/WEB/fonts/Satoshi-Variable.woff2",
-  display: "swap",
-  fallback: ["system-ui", "Arial", "sans-serif"],
-  weight: "300 900",
-})
-
-export const metadata: Metadata = {
-  title: "QR Studio",
-  description: "Create, browse templates, and manage your QR design library.",
-}
+import ParallaxFloatingDemo from "@/components/fancy/image/parallax-floating-demo"
 
 export default function Home() {
-  return (
-    <Suspense fallback={null}>
-      <StudioHubShell fontClassName={satoshi.className} />
-    </Suspense>
-  )
+  return <ParallaxFloatingDemo />
 }

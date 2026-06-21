@@ -2,7 +2,7 @@ import React from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 
-import "../test-utils/mock-framer-motion"
+import "../../test-utils/mock-framer-motion"
 
 vi.mock("next/font/local", () => ({
   default: () => ({
@@ -18,11 +18,11 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }))
 
-import Home from "./page"
+import LibraryPage from "./page"
 
-describe("home page", () => {
+describe("library page", () => {
   it("renders the studio hub with prompt and category browser", () => {
-    const markup = renderToStaticMarkup(<Home />)
+    const markup = renderToStaticMarkup(<LibraryPage />)
 
     expect(markup).toContain('data-slot="studio-hub"')
     expect(markup).toContain('aria-label="Switch to dark mode"')
