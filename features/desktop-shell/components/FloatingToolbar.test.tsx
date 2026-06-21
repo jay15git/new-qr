@@ -364,7 +364,9 @@ describe("FloatingToolbar", () => {
 
     const shapeInspector = surface.container.querySelector('[data-slot="desktop-shape-inspector"]')
 
-    expect(shapeInspector?.querySelector('input[aria-label="Shape shadow color"]')).not.toBeNull()
+    expect(shapeInspector?.querySelector('input[aria-label="Shape shadow color"]')).toBeNull()
+    expect(shapeInspector?.querySelector('input[aria-label="Shape border color"]')).toBeNull()
+    expect(shapeInspector?.querySelector('input[aria-label="Shape stroke color"]')).toBeNull()
   })
 
   it("renders the drafting content tab inside the floating inspector", async () => {
@@ -924,15 +926,7 @@ describe("FloatingToolbar", () => {
       "Corner radius",
       "Padding",
       "Bottom space",
-      "Border width",
-      "Border opacity",
       "Shape inner padding",
-      "Shape stroke width",
-      "Shape stroke opacity",
-      "Shape shadow blur",
-      "Shape shadow opacity",
-      "Shape shadow X",
-      "Shape shadow Y",
     ]
 
     for (const label of elasticLabels) {
@@ -943,29 +937,14 @@ describe("FloatingToolbar", () => {
     expect(getRequiredSliderRow(surface.container, "Corner radius").textContent).toBe("Corner radius28")
     expect(getRequiredSliderRow(surface.container, "Padding").textContent).toBe("Padding24")
     expect(getRequiredSliderRow(surface.container, "Bottom space").textContent).toBe("Bottom space128")
-    expect(getRequiredSliderRow(surface.container, "Border width").textContent).toBe("Border width0")
-    expect(getRequiredSliderRow(surface.container, "Border opacity").textContent).toBe("Border opacity100")
     expect(getRequiredSliderRow(surface.container, "Shape inner padding").textContent).toBe("Amount0")
-    expect(getRequiredSliderRow(surface.container, "Shape stroke opacity").textContent).toBe("Opacity100")
 
     await act(async () => {
-      getRequiredSlider(surface.container, "Border width").dispatchEvent(
-        new KeyboardEvent("keydown", { bubbles: true, key: "End" }),
-      )
-      getRequiredSlider(surface.container, "Border opacity").dispatchEvent(
-        new KeyboardEvent("keydown", { bubbles: true, key: "Home" }),
-      )
-      getRequiredSlider(surface.container, "Shape shadow X").dispatchEvent(
-        new KeyboardEvent("keydown", { bubbles: true, key: "End" }),
-      )
       getRequiredSlider(surface.container, "Corner radius").dispatchEvent(
         new KeyboardEvent("keydown", { bubbles: true, key: "End" }),
       )
     })
 
-    expect(getRequiredSlider(surface.container, "Border width").getAttribute("aria-valuenow")).toBe("24")
-    expect(getRequiredSlider(surface.container, "Border opacity").getAttribute("aria-valuenow")).toBe("0")
-    expect(getRequiredSlider(surface.container, "Shape shadow X").getAttribute("aria-valuenow")).toBe("64")
     expect(getRequiredSlider(surface.container, "Corner radius").getAttribute("aria-valuenow")).toBe("64")
   })
 

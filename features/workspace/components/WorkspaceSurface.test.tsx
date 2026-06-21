@@ -1791,45 +1791,13 @@ describe("WorkspaceSurface", () => {
       surface.container,
       '[data-slot="drafting-card-bottom-space-slider"] input[type="range"]',
     ) as HTMLInputElement
-    const borderWidthInput = getRequiredElement(
-      surface.container,
-      '[data-slot="drafting-card-border-width-slider"] input[type="range"]',
-    ) as HTMLInputElement
-    const borderOpacityInput = getRequiredElement(
-      surface.container,
-      '[data-slot="drafting-card-border-opacity-slider"] input[type="range"]',
-    ) as HTMLInputElement
-    const shadowBlurInput = getRequiredElement(
-      surface.container,
-      '[data-slot="drafting-card-shadow-blur-slider"] input[type="range"]',
-    ) as HTMLInputElement
-    const shadowOpacityInput = getRequiredElement(
-      surface.container,
-      '[data-slot="drafting-card-shadow-opacity-slider"] input[type="range"]',
-    ) as HTMLInputElement
-    const shadowOffsetXInput = getRequiredElement(
-      surface.container,
-      '[data-slot="drafting-card-shadow-offset-x-slider"] input[type="range"]',
-    ) as HTMLInputElement
-    const shadowOffsetYInput = getRequiredElement(
-      surface.container,
-      '[data-slot="drafting-card-shadow-offset-y-slider"] input[type="range"]',
-    ) as HTMLInputElement
 
-    expect(cardPanel.textContent).toContain("Shadow")
-    expect(cardPanel.textContent).toContain("Border")
     expect(cardPanel.textContent).not.toContain("Strong")
 
     act(() => {
       changeInputValue(radiusInput, "36")
       changeInputValue(paddingInput, "30")
       changeInputValue(bottomSpaceInput, "160")
-      changeInputValue(borderWidthInput, "8")
-      changeInputValue(borderOpacityInput, "40")
-      changeInputValue(shadowBlurInput, "22")
-      changeInputValue(shadowOpacityInput, "35")
-      changeInputValue(shadowOffsetXInput, "6")
-      changeInputValue(shadowOffsetYInput, "6")
     })
 
     const card = getSelectedPreviewCard(surface.container)
@@ -1838,12 +1806,6 @@ describe("WorkspaceSurface", () => {
     expect(card.style.padding).toBe("")
     expect(card.style.width).toBe("288px")
     expect(card.style.height).toBe("416px")
-    expect(card.getAttribute("data-card-border-width")).toBe("8")
-    expect(card.getAttribute("data-card-shadow-blur")).toBe("22")
-    expect(card.getAttribute("data-card-shadow-offset-x")).toBe("6")
-    expect(card.getAttribute("data-card-shadow-offset-y")).toBe("6")
-    expect(card.style.border).toContain("8px solid rgba(17, 24, 39, 0.4)")
-    expect(card.style.boxShadow).toContain("6px 6px 22px rgba(29, 22, 6, 0.35)")
   })
 
   it("renders card surface options and applies fill, pattern, and pattern color changes", async () => {
@@ -2689,60 +2651,13 @@ describe("WorkspaceSurface", () => {
         '[data-slot="drafting-background-shape-padding-settings"]',
       ).textContent,
     ).toContain("Shape")
-    expect(
-      getRequiredElement(
-        shapeSettings,
-        '[data-slot="drafting-background-shape-border-settings"]',
-      ).textContent,
-    ).toContain("Border")
-    expect(
-      getRequiredElement(
-        shapeSettings,
-        '[data-slot="drafting-background-shape-shadow-settings"]',
-      ).textContent,
-    ).toContain("Shadow")
     const shapeSizeInput = getRequiredElement(
       shapeSettings,
       '[data-slot="drafting-background-shape-size-slider"] input[type="range"]',
     ) as HTMLInputElement
-    const shapeStrokeWidthInput = getRequiredElement(
-      shapeSettings,
-      '[data-slot="drafting-background-shape-stroke-width-slider"] input[type="range"]',
-    ) as HTMLInputElement
-    const shapeStrokeOpacityInput = getRequiredElement(
-      shapeSettings,
-      '[data-slot="drafting-background-shape-stroke-opacity-slider"] input[type="range"]',
-    ) as HTMLInputElement
-    const shapeShadowColorInput = getRequiredElement(
-      shapeSettings,
-      '#drafting-background-shape-shadow-color',
-    ) as HTMLInputElement
-    const shapeEdgeBlurInput = getRequiredElement(
-      shapeSettings,
-      '[data-slot="drafting-background-shape-shadow-blur-slider"] input[type="range"]',
-    ) as HTMLInputElement
-    const shapeShadowOpacityInput = getRequiredElement(
-      shapeSettings,
-      '[data-slot="drafting-background-shape-shadow-opacity-slider"] input[type="range"]',
-    ) as HTMLInputElement
-    const shapeShadowOffsetXInput = getRequiredElement(
-      shapeSettings,
-      '[data-slot="drafting-background-shape-shadow-offset-x-slider"] input[type="range"]',
-    ) as HTMLInputElement
-    const shapeShadowOffsetYInput = getRequiredElement(
-      shapeSettings,
-      '[data-slot="drafting-background-shape-shadow-offset-y-slider"] input[type="range"]',
-    ) as HTMLInputElement
 
     await act(async () => {
       changeInputValue(shapeSizeInput, "24")
-      changeInputValue(shapeStrokeWidthInput, "7")
-      changeInputValue(shapeStrokeOpacityInput, "45")
-      changeInputValue(shapeShadowColorInput, "#020617")
-      changeInputValue(shapeEdgeBlurInput, "9")
-      changeInputValue(shapeShadowOpacityInput, "58")
-      changeInputValue(shapeShadowOffsetXInput, "12")
-      changeInputValue(shapeShadowOffsetYInput, "-10")
       await flushPromises()
       await flushPromises()
     })
@@ -2796,14 +2711,9 @@ describe("WorkspaceSurface", () => {
       shapeSettings,
       '[data-slot="drafting-background-shape-size-slider"] input[type="range"]',
     ) as HTMLInputElement
-    const shapeStrokeWidthInput = getRequiredElement(
-      shapeSettings,
-      '[data-slot="drafting-background-shape-stroke-width-slider"] input[type="range"]',
-    ) as HTMLInputElement
 
     await act(async () => {
       changeInputValue(shapeSizeInput, "16")
-      changeInputValue(shapeStrokeWidthInput, "5")
       await flushPromises()
       await flushPromises()
     })
