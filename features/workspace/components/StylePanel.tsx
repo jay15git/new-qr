@@ -2883,7 +2883,7 @@ export function DraftingBackgroundShapeTab({
         onModeChange,
         onSolidColorChange,
         solidColor,
-        solidLabel: "Logo icon color",
+        solidLabel: "Solid color",
       })}
       selectedId={mode}
       openItemIds={openItemIds}

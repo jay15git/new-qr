@@ -16,8 +16,15 @@ import { ChevronDownIcon, SearchIcon } from "lucide-react"
 import { motion, type Transition } from "motion/react"
 
 import { TabsSubtle, TabsSubtleItem } from "@/components/ui/tabs-subtle"
+import {
+  FileUpload,
+  FileUploadDropzone,
+  FileUploadTrigger,
+} from "@/components/ui/file-upload"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+
+const DESKTOP_INSPECTOR_IMAGE_UPLOAD_MAX_SIZE = 5 * 1024 * 1024
 
 export const DESKTOP_INSPECTOR_FG_PRIMARY =
   "text-[var(--desktop-inspector-fg-primary)]"
@@ -509,5 +516,54 @@ export function DesktopInspectorSearchInput({
         {...props}
       />
     </div>
+  )
+}
+
+export function DesktopInspectorImageFileUpload({
+  className,
+  "data-slot": dataSlot = "desktop-inspector-image-file-upload",
+  label = "Image file upload",
+  onFileAccept,
+}: {
+  className?: string
+  "data-slot"?: string
+  label?: string
+  onFileAccept: (file: File) => void
+}) {
+  return (
+    <FileUpload
+      accept="image/*"
+      className={cn("gap-2", className)}
+      data-slot={dataSlot}
+      label={label}
+      maxFiles={1}
+      maxSize={DESKTOP_INSPECTOR_IMAGE_UPLOAD_MAX_SIZE}
+      onFileAccept={onFileAccept}
+    >
+      <FileUploadDropzone
+        className={cn(
+          "rounded-[8px] border border-dashed border-white/[0.12] bg-[var(--desktop-inspector-field-bg)] p-4 text-center shadow-none outline-none transition-colors",
+          "hover:bg-[var(--desktop-inspector-control-hover-bg)]",
+          "data-[dragging]:border-[var(--desktop-inspector-focus)] data-[dragging]:bg-[var(--desktop-inspector-control-hover-bg)]",
+          "data-[invalid]:border-red-400/70",
+        )}
+      >
+        <p className={cn("text-[12px] font-semibold", DESKTOP_INSPECTOR_FG_SECONDARY)}>
+          Drag & drop image here
+        </p>
+        <p className={cn("mt-1 text-[10px]", DESKTOP_INSPECTOR_FG_MUTED)}>
+          Or click to browse (max 5MB)
+        </p>
+        <FileUploadTrigger
+          className={cn(
+            "mt-3 inline-flex h-8 cursor-pointer items-center justify-center rounded-[6px] px-3 text-[11px] font-semibold",
+            DESKTOP_INSPECTOR_CONTROL_CLASS,
+          )}
+          type="button"
+        >
+          Browse files
+        </FileUploadTrigger>
+      </FileUploadDropzone>
+    </FileUpload>
   )
 }

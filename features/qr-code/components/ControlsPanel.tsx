@@ -94,6 +94,7 @@ import {
 import { EmbeddedColorPickerField } from "@/features/qr-code/components/ColorField"
 import {
   applyAssetNoneSelection,
+  applyAssetUploadValue,
   applyAssetUrlValue,
   applyBackgroundGradient,
   applyBackgroundSolidColor,
@@ -2359,6 +2360,7 @@ export function GradientEditor({
 
 export {
   applyAssetNoneSelection,
+  applyAssetUploadValue,
   applyAssetUrlValue,
   applyBackgroundGradient,
   applyBackgroundSolidColor,

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import {
   applyAssetNoneSelection,
+  applyAssetUploadValue,
   applyAssetUrlValue,
   applyBackgroundGradient,
   applyBackgroundSolidColor,
@@ -145,6 +146,23 @@ describe("dashboard settings state helpers", () => {
     expect(nextState.backgroundImage.value).toBe(
       "https://example.com/background.png",
     )
+  })
+
+  it("applies upload asset value for logo", () => {
+    const state = createDefaultQrStudioState()
+
+    const nextState = applyAssetUploadValue(
+      state,
+      "logo",
+      "blob:https://new-qr-studio.local/logo.png",
+    )
+
+    expect(nextState.logo).toEqual({
+      source: "upload",
+      value: "blob:https://new-qr-studio.local/logo.png",
+      presetId: undefined,
+      presetColor: undefined,
+    })
   })
 
   it("applies none selection immediately for empty asset items", () => {

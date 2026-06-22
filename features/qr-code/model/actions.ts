@@ -182,6 +182,22 @@ export function applyAssetUrlValue(
   }
 }
 
+export function applyAssetUploadValue(
+  state: QrStudioState,
+  assetKey: DashboardAssetKey,
+  value: string,
+) {
+  return {
+    ...state,
+    [assetKey]: {
+      presetColor: undefined,
+      presetId: undefined,
+      source: "upload" as const,
+      value,
+    },
+  }
+}
+
 export function applyIconstackLogoPresetSelection(
   state: QrStudioState,
   presetId: string,

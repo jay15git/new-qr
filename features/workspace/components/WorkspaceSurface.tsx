@@ -119,6 +119,7 @@ import type {
   DesktopLayerRow,
   DesktopLayersSettings,
   DesktopLogoSettings,
+  DesktopLogoSettingsPatch,
   DesktopLogoSourceMode,
   DesktopMotionSettings,
   DesktopPatternSettings,
@@ -159,7 +160,7 @@ import {
   applyLogoPresetGradient,
   applyLogoPresetSelection,
 } from "@/features/qr-code/components/ControlsPanel"
-import { applyIconstackLogoPresetSelection } from "@/features/qr-code/model/actions"
+import { applyAssetUploadValue, applyIconstackLogoPresetSelection } from "@/features/qr-code/model/actions"
 import {
   downloadDashboardQrBatchZipExport,
   downloadDashboardQrNodeExport,
@@ -680,6 +681,11 @@ export function WorkspaceSurface({
       ? (DEFAULT_DRAFTING_STUDIO_STATE.logo.value ?? "")
       : "",
   )
+  const [selectedLogoUploadValue, setSelectedLogoUploadValue] = useState(
+    DEFAULT_DRAFTING_STUDIO_STATE.logo.source === "upload"
+      ? (DEFAULT_DRAFTING_STUDIO_STATE.logo.value ?? "")
+      : "",
+  )
   const [openLogoUploadItems, setOpenLogoUploadItems] = useState<string[]>(["upload"])
   const [selectedLogoSize, setSelectedLogoSize] = useState(
     DEFAULT_DRAFTING_STUDIO_STATE.imageOptions.imageSize * 100,
@@ -787,7 +793,9 @@ export function WorkspaceSurface({
             ? selectedLogoPresetValue
             : selectedLogoSourceMode === "url"
               ? selectedLogoRemoteUrl
-              : undefined,
+              : selectedLogoSourceMode === "upload"
+                ? selectedLogoUploadValue
+                : undefined,
       },
       backgroundImage: {
         presetColor: undefined,
@@ -888,6 +896,7 @@ export function WorkspaceSurface({
       selectedLogoPresetId,
       selectedLogoPresetValue,
       selectedLogoRemoteUrl,
+      selectedLogoUploadValue,
       selectedLogoSize,
       selectedLogoSourceMode,
       selectedRasterExportQualityPercent,
@@ -1032,6 +1041,7 @@ export function WorkspaceSurface({
     logoPresetValue = selectedLogoPresetValue,
     logoRemoteUrl = selectedLogoRemoteUrl,
     logoSourceMode = selectedLogoSourceMode,
+    logoUploadValue = selectedLogoUploadValue,
   }: {
     logoColor?: string
     logoColorMode?: DraftingBinaryColorMode
@@ -1040,6 +1050,7 @@ export function WorkspaceSurface({
     logoPresetValue?: string
     logoRemoteUrl?: string
     logoSourceMode?: AssetSourceMode
+    logoUploadValue?: string
   } = {}): QrStudioState {
     return {
       ...DEFAULT_DRAFTING_STUDIO_STATE,
@@ -1052,7 +1063,9 @@ export function WorkspaceSurface({
             ? logoPresetValue
             : logoSourceMode === "url"
               ? logoRemoteUrl
-              : undefined,
+              : logoSourceMode === "upload"
+                ? logoUploadValue
+                : undefined,
       },
       logoGradient: {
         ...structuredClone(logoGradient),
@@ -1071,6 +1084,11 @@ export function WorkspaceSurface({
     if (nextState.logo.source === "url") {
       setSelectedLogoAssetSourceMode("url")
       setSelectedLogoRemoteUrl(nextState.logo.value ?? "")
+      setSelectedLogoUploadValue("")
+    } else if (nextState.logo.source === "upload") {
+      setSelectedLogoAssetSourceMode("upload")
+      setSelectedLogoUploadValue(nextState.logo.value ?? "")
+      setSelectedLogoRemoteUrl("")
     }
   }
 
@@ -1084,6 +1102,7 @@ export function WorkspaceSurface({
 
     if (nextSourceMode === "upload") {
       setSelectedLogoRemoteUrl("")
+      setSelectedLogoUploadValue("")
     }
   }
 
@@ -1344,6 +1363,9 @@ export function WorkspaceSurface({
     setSelectedLogoAssetSourceMode(nextState.logo.source === "url" ? "url" : "upload")
     setSelectedLogoRemoteUrl(
       nextState.logo.source === "url" ? (nextState.logo.value ?? "") : "",
+    )
+    setSelectedLogoUploadValue(
+      nextState.logo.source === "upload" ? (nextState.logo.value ?? "") : "",
     )
     setOpenLogoUploadItems([nextState.logo.source === "url" ? "url" : "upload"])
     setSelectedLogoSize(nextState.imageOptions.imageSize * 100)
@@ -3866,7 +3888,20 @@ export function WorkspaceSurface({
     setSelectedDotsPalette([...DEFAULT_DRAFTING_STUDIO_STATE.dotsPalette])
   }
 
-  function updateDesktopLogoSettings(patch: Partial<DesktopLogoSettings>) {
+  function updateDesktopLogoSettings(patch: DesktopLogoSettingsPatch) {
+    if (patch.uploadedFile) {
+      ensureLogoUploadItemExpanded("upload")
+      const uploadValue = URL.createObjectURL(patch.uploadedFile)
+      const nextState = applyAssetUploadValue(
+        buildDraftingLogoStateSnapshot({
+          logoSourceMode: "upload",
+          logoUploadValue: uploadValue,
+        }),
+        "logo",
+        uploadValue,
+      )
+      syncDraftingLogoAsset(nextState)
+    }
     if (patch.sourceMode) {
       if (patch.sourceMode === "none") {
         const nextState = applyAssetNoneSelection(buildDraftingLogoStateSnapshot({ logoSourceMode: "none" }), "logo")
@@ -4844,8 +4879,7 @@ function getDraftingToolIdFromDesktop(toolId: DesktopToolbarToolId): DraftingToo
 
 function getDesktopLogoSourceMode(source: AssetSourceMode): DesktopLogoSourceMode {
   if (source === "preset") return "brand"
-  if (source === "url") return "url"
-  if (source === "upload") return "upload"
+  if (source === "url" || source === "upload") return "upload"
   return "none"
 }
 

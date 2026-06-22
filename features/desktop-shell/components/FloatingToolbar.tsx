@@ -182,6 +182,7 @@ import {
   DESKTOP_INSPECTOR_SECTION_HEADING_CLASS,
   DESKTOP_INSPECTOR_SELECTED_CLASS,
   DesktopInspectorAnimatedOptionGrid,
+  DesktopInspectorImageFileUpload,
   DesktopInspectorLabel,
   DesktopInspectorNativeSelect,
   DesktopInspectorSearchInput,
@@ -442,6 +443,10 @@ export type DesktopLogoSettings = {
   uploadMode: DesktopAssetSourceMode
 }
 
+export type DesktopLogoSettingsPatch = Partial<DesktopLogoSettings> & {
+  uploadedFile?: File
+}
+
 export type DesktopCornersSettings = {
   cornerDotColorMode: DesktopCornerColorMode
   cornerDotGradient: StudioGradient
@@ -627,7 +632,7 @@ export type DesktopToolbarController = {
   onPatternReset: () => void
   onPatternSettingsChange: (patch: Partial<DesktopPatternSettings>) => void
   onLogoReset: () => void
-  onLogoSettingsChange: (patch: Partial<DesktopLogoSettings>) => void
+  onLogoSettingsChange: (patch: DesktopLogoSettingsPatch) => void
   onCornersReset: () => void
   onCornersSettingsChange: (patch: Partial<DesktopCornersSettings>) => void
   onShapeReset: () => void
@@ -716,7 +721,6 @@ const DESKTOP_LOGO_SOURCE_OPTIONS: Array<{ label: string; value: DesktopLogoSour
   { label: "None", value: "none" },
   { label: "Brand", value: "brand" },
   { label: "Upload", value: "upload" },
-  { label: "URL", value: "url" },
 ]
 
 const DESKTOP_ASSET_SOURCE_OPTIONS: Array<{ label: string; value: DesktopAssetSourceMode }> = [
@@ -1016,7 +1020,7 @@ export type DesktopInspectorModel = {
   onContentTypeChange: (type: QrInputType) => void
   onContentValueChange: (field: string, value: StaticQrContentValue) => void
   onPatternSettingsChange: (patch: Partial<DesktopPatternSettings>) => void
-  onLogoSettingsChange: (patch: Partial<DesktopLogoSettings>) => void
+  onLogoSettingsChange: (patch: DesktopLogoSettingsPatch) => void
   onCornersSettingsChange: (patch: Partial<DesktopCornersSettings>) => void
   onShapeSettingsChange: (patch: Partial<DesktopShapeSettings>) => void
   onMotionSettingsChange: (patch: QrDotMatrixAnimationPatch) => void
@@ -1158,7 +1162,7 @@ export function useDesktopToolbarInspectorModel({
         setPatternSettings((current) => ({ ...current, ...patch }))),
     onLogoSettingsChange:
       controller?.onLogoSettingsChange ??
-      ((patch: Partial<DesktopLogoSettings>) =>
+      ((patch: DesktopLogoSettingsPatch) =>
         setLogoSettings((current) => ({ ...current, ...patch }))),
     onCornersSettingsChange:
       controller?.onCornersSettingsChange ??
@@ -2330,7 +2334,7 @@ function DesktopLogoInspector({
   settings,
 }: {
   desktopTheme: DesktopThemeMode
-  onLogoSettingsChange: (patch: Partial<DesktopLogoSettings>) => void
+  onLogoSettingsChange: (patch: DesktopLogoSettingsPatch) => void
   settings: DesktopLogoSettings
 }) {
   const [library, setLibrary] = useState<IconstackLibraryId | "all">("all")
@@ -2352,7 +2356,7 @@ function DesktopLogoInspector({
         <DesktopInspectorSection>
           <DesktopInspectorLabel>Source</DesktopInspectorLabel>
           <DesktopInspectorSegmentedControl
-            columns={4}
+            columns={3}
             dataSlot="desktop-logo-source-mode"
             itemAriaLabel={(option) => `Use ${option.label} logo source`}
             itemClassName="px-1.5 text-[10px]"
@@ -2485,7 +2489,7 @@ function DesktopLogoInspector({
           </DesktopInspectorSection>
         ) : null}
 
-        {settings.sourceMode === "upload" || settings.sourceMode === "url" ? (
+        {settings.sourceMode === "upload" ? (
           <DesktopInspectorSection className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
             <DesktopInspectorLabel>Upload</DesktopInspectorLabel>
             <DesktopInspectorSegmentedControl
@@ -2495,13 +2499,22 @@ function DesktopLogoInspector({
               value={settings.uploadMode}
               onValueChange={(uploadMode) => onLogoSettingsChange({ uploadMode })}
             />
-            <DesktopInspectorTextInput
-              aria-label="Remote logo URL"
-              className="mt-2"
-              placeholder="https://example.com/logo.png"
-              value={settings.remoteUrl}
-              onChange={(event) => onLogoSettingsChange({ remoteUrl: event.currentTarget.value })}
-            />
+            {settings.uploadMode === "upload" ? (
+              <DesktopInspectorImageFileUpload
+                className="mt-2"
+                data-slot="desktop-logo-file-upload"
+                label="Logo file upload"
+                onFileAccept={(file) => onLogoSettingsChange({ uploadedFile: file })}
+              />
+            ) : (
+              <DesktopInspectorTextInput
+                aria-label="Remote logo URL"
+                className="mt-2"
+                placeholder="https://example.com/logo.png"
+                value={settings.remoteUrl}
+                onChange={(event) => onLogoSettingsChange({ remoteUrl: event.currentTarget.value })}
+              />
+            )}
           </DesktopInspectorSection>
         ) : null}
 
@@ -2520,7 +2533,7 @@ function DesktopLogoInspector({
             {settings.colorMode === "solid" ? (
               <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
                 <DesktopColorInputRow
-                  label="Logo icon color"
+                  label="Solid color"
                   value={settings.solidColor}
                   onChange={(solidColor) => onLogoSettingsChange({ solidColor })}
                 />
@@ -2528,7 +2541,7 @@ function DesktopLogoInspector({
             ) : (
               <div className="mt-2.5 grid gap-2">
                 <DesktopColorInputRow
-                  label="Logo start color"
+                  label="Start color"
                   value={settings.gradient.colorStops[0].color}
                   onChange={(color) =>
                     onLogoSettingsChange({
@@ -2537,7 +2550,7 @@ function DesktopLogoInspector({
                   }
                 />
                 <DesktopColorInputRow
-                  label="Logo end color"
+                  label="End color"
                   value={settings.gradient.colorStops[1].color}
                   onChange={(color) =>
                     onLogoSettingsChange({
