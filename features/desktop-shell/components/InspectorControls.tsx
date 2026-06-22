@@ -34,21 +34,47 @@ export const DESKTOP_INSPECTOR_FG_TERTIARY =
   "text-[var(--desktop-inspector-fg-tertiary)]"
 export const DESKTOP_INSPECTOR_FG_MUTED =
   "text-[var(--desktop-inspector-fg-muted)]"
+export const DESKTOP_INSPECTOR_FG_LABEL =
+  "text-[var(--desktop-inspector-fg-label)]"
+export const DESKTOP_INSPECTOR_TYPE_PANEL_CLASS =
+  "text-[length:var(--desktop-inspector-type-panel)]"
+export const DESKTOP_INSPECTOR_TYPE_VALUE_CLASS =
+  "text-[length:var(--desktop-inspector-type-value)] leading-[1.45]"
+export const DESKTOP_INSPECTOR_TYPE_LABEL_CLASS =
+  "text-[length:var(--desktop-inspector-type-label)]"
+export const DESKTOP_INSPECTOR_TYPE_CAPTION_CLASS =
+  "text-[length:var(--desktop-inspector-type-caption)]"
 export const DESKTOP_INSPECTOR_SECTION_HEADING_CLASS =
-  "truncate text-[12px] font-semibold text-[var(--desktop-inspector-fg-secondary)]"
+  cn(
+    "mb-1.5 truncate font-medium tracking-[0.01em] text-[var(--desktop-inspector-fg-tertiary)]",
+    DESKTOP_INSPECTOR_TYPE_LABEL_CLASS,
+  )
 export const DESKTOP_INSPECTOR_PANEL_TITLE_CLASS =
-  "truncate text-[15px] font-semibold leading-5 text-[var(--desktop-inspector-fg-primary)]"
+  cn(
+    "truncate font-semibold leading-5 text-[var(--desktop-inspector-fg-primary)]",
+    DESKTOP_INSPECTOR_TYPE_PANEL_CLASS,
+  )
+export const DESKTOP_INSPECTOR_VALUE_CLASS = cn(
+  "font-medium tabular-nums text-[var(--desktop-inspector-fg-primary)]",
+  DESKTOP_INSPECTOR_TYPE_VALUE_CLASS,
+)
+export const DESKTOP_INSPECTOR_CAPTION_CLASS = cn(
+  "font-medium text-[var(--desktop-inspector-fg-muted)]",
+  DESKTOP_INSPECTOR_TYPE_CAPTION_CLASS,
+)
 export const DESKTOP_INSPECTOR_SECTION_CLASS =
   "rounded-[10px] bg-[var(--desktop-inspector-section-bg)] p-3"
 export const DESKTOP_INSPECTOR_SECTION_GAP_CLASS = "mt-2.5"
 export const DESKTOP_INSPECTOR_MAJOR_GAP_CLASS = "mt-4"
 export const DESKTOP_INSPECTOR_ROW_GAP_CLASS = "gap-2"
 export const DESKTOP_INSPECTOR_ROW_CLASS =
-  "flex min-w-0 items-center justify-between gap-3 border-b border-white/[0.07] py-2.5 last:border-b-0"
+  "flex min-w-0 items-center justify-between gap-3 py-2.5"
 export const DESKTOP_INSPECTOR_FIELD_ROW_CLASS =
-  "min-w-0 border-b border-white/[0.07] py-2.5 last:border-b-0"
-export const DESKTOP_INSPECTOR_LABEL_CLASS =
-  "truncate text-[12px] font-semibold text-[var(--desktop-inspector-fg-secondary)]"
+  "min-w-0 py-2.5"
+export const DESKTOP_INSPECTOR_LABEL_CLASS = cn(
+  "truncate font-medium text-[var(--desktop-inspector-fg-label)]",
+  DESKTOP_INSPECTOR_TYPE_LABEL_CLASS,
+)
 export const DESKTOP_INSPECTOR_SCROLL_CLASS =
   "min-h-0 flex-1 overflow-y-auto px-3 py-3 scroll-fade-effect-y"
 export const DESKTOP_INSPECTOR_CONTROL_CLASS =
@@ -57,26 +83,36 @@ export const DESKTOP_INSPECTOR_SELECTED_CLASS =
   "border-transparent bg-[var(--desktop-inspector-option-selected-bg)] text-[var(--desktop-inspector-option-selected-fg)] hover:border-transparent hover:bg-[var(--desktop-inspector-option-selected-bg)] hover:text-[var(--desktop-inspector-option-selected-fg)]"
 export const DESKTOP_OPTION_CARD_SELECTED_CLASS =
   "border-[var(--desktop-inspector-option-selected-border)] bg-[var(--desktop-inspector-option-selected-bg)] text-[var(--desktop-inspector-option-selected-fg)] hover:bg-[var(--desktop-inspector-option-selected-bg)] hover:text-[var(--desktop-inspector-option-selected-fg)]"
-export const DESKTOP_INSPECTOR_INPUT_CLASS =
-  "desktop-inspector-input-bg bg-[var(--desktop-inspector-field-bg)] text-[var(--desktop-inspector-fg-primary)] outline-none placeholder:text-[var(--desktop-inspector-fg-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
+export const DESKTOP_INSPECTOR_INPUT_CLASS = cn(
+  "desktop-inspector-input-bg bg-[var(--desktop-inspector-field-bg)] font-medium text-[var(--desktop-inspector-fg-primary)] outline-none placeholder:text-[var(--desktop-inspector-fg-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]",
+  DESKTOP_INSPECTOR_TYPE_VALUE_CLASS,
+)
 export const DESKTOP_INSPECTOR_FOCUS_CLASS =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
 export const DESKTOP_INSPECTOR_HEADER_CLASS =
   "flex min-w-0 items-center justify-center px-4 py-3 text-center"
 export const DESKTOP_INSPECTOR_FOOTER_CLASS =
   "bg-[var(--desktop-inspector-footer-bg)] p-2.5"
-export const DESKTOP_INSPECTOR_RESET_CLASS =
-  "flex h-9 w-full cursor-pointer items-center justify-center gap-2 rounded-[6px] border border-transparent bg-transparent px-3 text-[12px] font-semibold text-[var(--desktop-inspector-fg-secondary)] transition hover:border-[var(--desktop-inspector-control-border-hover)] hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)] active:bg-[var(--desktop-inspector-control-active-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
+export const DESKTOP_INSPECTOR_RESET_CLASS = cn(
+  "flex h-9 w-full cursor-pointer items-center justify-center gap-2 rounded-[6px] border border-transparent bg-transparent px-3 font-medium text-[var(--desktop-inspector-fg-secondary)] transition hover:border-[var(--desktop-inspector-control-border-hover)] hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)] active:bg-[var(--desktop-inspector-control-active-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]",
+  DESKTOP_INSPECTOR_TYPE_VALUE_CLASS,
+)
 export const DESKTOP_INSPECTOR_DROPDOWN_MENU_CLASS =
   "desktop-inspector-dropdown-menu z-50 min-w-0 rounded-[10px] border border-[var(--desktop-inspector-dropdown-border)] bg-[var(--desktop-inspector-dropdown-bg)] p-1 text-[var(--desktop-inspector-fg-secondary)] shadow-[0_10px_28px_rgba(0,0,0,0.14)] ring-0 backdrop-blur-xl"
-export const DESKTOP_INSPECTOR_DROPDOWN_TRIGGER_CLASS =
-  "desktop-inspector-input-bg cursor-pointer bg-[var(--desktop-inspector-field-bg)] text-[var(--desktop-inspector-fg-tertiary)] outline-none transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)] data-[state=open]:bg-[var(--desktop-inspector-control-hover-bg)] data-[state=open]:text-[var(--desktop-inspector-fg-secondary)]"
-export const DESKTOP_INSPECTOR_DROPDOWN_ITEM_CLASS =
-  "h-8 cursor-pointer rounded-[6px] px-3 text-[12px] font-semibold text-[var(--desktop-inspector-fg-tertiary)] outline-none transition focus:bg-[var(--desktop-inspector-control-hover-bg)] focus:text-[var(--desktop-inspector-fg-secondary)] focus:**:text-[var(--desktop-inspector-fg-secondary)] data-[highlighted]:bg-[var(--desktop-inspector-control-hover-bg)] data-[highlighted]:text-[var(--desktop-inspector-fg-secondary)] data-[highlighted]:**:text-[var(--desktop-inspector-fg-secondary)] data-[state=checked]:bg-[var(--desktop-inspector-option-selected-bg)] data-[state=checked]:text-[var(--desktop-inspector-fg-secondary)] data-[state=checked]:focus:bg-[var(--desktop-inspector-option-selected-bg)] data-[state=checked]:focus:text-[var(--desktop-inspector-fg-secondary)] data-[state=checked]:data-[highlighted]:bg-[var(--desktop-inspector-option-selected-bg)] data-[state=checked]:data-[highlighted]:text-[var(--desktop-inspector-fg-secondary)] [&_[data-slot=dropdown-menu-radio-item-indicator]]:hidden"
+export const DESKTOP_INSPECTOR_DROPDOWN_TRIGGER_CLASS = cn(
+  "desktop-inspector-input-bg cursor-pointer bg-[var(--desktop-inspector-field-bg)] font-medium text-[var(--desktop-inspector-fg-tertiary)] outline-none transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)] data-[state=open]:bg-[var(--desktop-inspector-control-hover-bg)] data-[state=open]:text-[var(--desktop-inspector-fg-primary)]",
+  DESKTOP_INSPECTOR_TYPE_VALUE_CLASS,
+)
+export const DESKTOP_INSPECTOR_DROPDOWN_ITEM_CLASS = cn(
+  "h-8 cursor-pointer rounded-[6px] px-3 font-medium text-[var(--desktop-inspector-fg-tertiary)] outline-none transition focus:bg-[var(--desktop-inspector-control-hover-bg)] focus:text-[var(--desktop-inspector-fg-primary)] focus:**:text-[var(--desktop-inspector-fg-primary)] data-[highlighted]:bg-[var(--desktop-inspector-control-hover-bg)] data-[highlighted]:text-[var(--desktop-inspector-fg-primary)] data-[highlighted]:**:text-[var(--desktop-inspector-fg-primary)] data-[state=checked]:bg-[var(--desktop-inspector-option-selected-bg)] data-[state=checked]:text-[var(--desktop-inspector-fg-primary)] data-[state=checked]:focus:bg-[var(--desktop-inspector-option-selected-bg)] data-[state=checked]:focus:text-[var(--desktop-inspector-fg-primary)] data-[state=checked]:data-[highlighted]:bg-[var(--desktop-inspector-option-selected-bg)] data-[state=checked]:data-[highlighted]:text-[var(--desktop-inspector-fg-primary)] [&_[data-slot=dropdown-menu-radio-item-indicator]]:hidden",
+  DESKTOP_INSPECTOR_TYPE_VALUE_CLASS,
+)
 export const DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS =
   "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
-export const DESKTOP_INSPECTOR_OPTION_TILE_SURFACE_CLASS =
-  "rounded-[7px] border-2 border-transparent bg-transparent text-[10px] font-semibold text-[var(--desktop-inspector-fg-tertiary)] transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)]"
+export const DESKTOP_INSPECTOR_OPTION_TILE_SURFACE_CLASS = cn(
+  "rounded-[7px] border-2 border-transparent bg-transparent font-medium text-[var(--desktop-inspector-fg-tertiary)] transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)]",
+  DESKTOP_INSPECTOR_TYPE_CAPTION_CLASS,
+)
 
 export const DESKTOP_INSPECTOR_OPTION_GRID_COLS_CLASS = {
   2: "grid-cols-2",
@@ -325,7 +361,7 @@ export function DesktopInspectorLabel({
 }: DesktopInspectorLabelProps) {
   return (
     <p
-      className={cn("mb-2", DESKTOP_INSPECTOR_LABEL_CLASS, className)}
+      className={cn("mb-1.5", DESKTOP_INSPECTOR_LABEL_CLASS, className)}
       {...props}
     />
   )
@@ -340,7 +376,7 @@ export function DesktopInspectorTextInput({
 }: DesktopInspectorTextInputProps) {
   return (
     <input
-      className={cn("h-9 w-full rounded-[7px] px-3 text-[12px]", DESKTOP_INSPECTOR_INPUT_CLASS, className)}
+      className={cn("h-9 w-full rounded-[7px] px-3", DESKTOP_INSPECTOR_INPUT_CLASS, className)}
       type={type}
       {...props}
     />
@@ -356,7 +392,7 @@ export function DesktopInspectorTextarea({
   return (
     <textarea
       className={cn(
-        "min-h-24 w-full resize-none rounded-[7px] px-3 py-2.5 text-[12px] leading-5",
+        "min-h-24 w-full resize-none rounded-[7px] px-3 py-2.5",
         DESKTOP_INSPECTOR_INPUT_CLASS,
         className,
       )}
@@ -389,7 +425,7 @@ export function DesktopInspectorNativeSelect<TValue extends string>({
     <div className={cn("relative min-w-0", rootClassName)}>
       <select
         className={cn(
-          "h-8 w-full cursor-pointer appearance-none rounded-[6px] px-2.5 pr-7 text-[12px] font-semibold transition",
+          "h-8 w-full cursor-pointer appearance-none rounded-[6px] px-2.5 pr-7 font-medium transition",
           DESKTOP_INSPECTOR_INPUT_CLASS,
           className,
         )}
@@ -429,8 +465,11 @@ type DesktopInspectorSegmentedControlProps<TValue extends string> = {
   value: TValue
 }
 
-const DESKTOP_INSPECTOR_TAB_ITEM_CLASS =
-  "h-8 min-w-0 flex-1 justify-center px-2 py-0 [&_span]:text-[11px]"
+const DESKTOP_INSPECTOR_TAB_ITEM_CLASS = cn(
+  "h-8 min-w-0 flex-1 justify-center px-2 py-0 [&_span]:font-medium [&_span]:text-[var(--desktop-inspector-fg-tertiary)]",
+  "[&_span]:text-[length:var(--desktop-inspector-type-label)]",
+  "[&[aria-selected=true]_span]:text-[length:var(--desktop-inspector-type-value)] [&[aria-selected=true]_span]:text-[var(--desktop-inspector-fg-primary)]",
+)
 
 export function DesktopInspectorSegmentedControl<TValue extends string>({
   ariaLabelPrefix,
@@ -451,7 +490,7 @@ export function DesktopInspectorSegmentedControl<TValue extends string>({
     items.findIndex((item) => item.value === value),
   )
   const compactItemClass =
-    columns === 4 ? "px-1 [&_span]:text-[10px]" : columns === 3 ? "px-1.5 [&_span]:text-[10px]" : undefined
+    columns === 4 ? "px-1 [&_span]:text-[length:var(--desktop-inspector-type-caption)]" : columns === 3 ? "px-1.5 [&_span]:text-[length:var(--desktop-inspector-type-caption)]" : undefined
 
   return (
     <TabsSubtle
@@ -506,7 +545,7 @@ export function DesktopInspectorSearchInput({
       />
       <Input
         className={cn(
-          "h-full w-full rounded-[6px] border-transparent pl-7 pr-2 text-[12px]",
+          "h-full w-full rounded-[6px] border-transparent pl-7 pr-2",
           DESKTOP_INSPECTOR_INPUT_CLASS,
           inputClassName,
           "focus-visible:ring-0 focus-visible:shadow-none",
@@ -548,15 +587,16 @@ export function DesktopInspectorImageFileUpload({
           "data-[invalid]:border-red-400/70",
         )}
       >
-        <p className={cn("text-[12px] font-semibold", DESKTOP_INSPECTOR_FG_SECONDARY)}>
+        <p className={DESKTOP_INSPECTOR_VALUE_CLASS}>
           Drag & drop image here
         </p>
-        <p className={cn("mt-1 text-[10px]", DESKTOP_INSPECTOR_FG_MUTED)}>
+        <p className={cn("mt-1", DESKTOP_INSPECTOR_CAPTION_CLASS)}>
           Or click to browse (max 5MB)
         </p>
         <FileUploadTrigger
           className={cn(
-            "mt-3 inline-flex h-8 cursor-pointer items-center justify-center rounded-[6px] px-3 text-[11px] font-semibold",
+            "mt-3 inline-flex h-8 cursor-pointer items-center justify-center rounded-[6px] px-3",
+            DESKTOP_INSPECTOR_TYPE_LABEL_CLASS,
             DESKTOP_INSPECTOR_CONTROL_CLASS,
           )}
           type="button"

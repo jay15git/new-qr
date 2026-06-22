@@ -4,13 +4,16 @@ import { cn } from "@/lib/utils"
 import type { ComponentProps } from "react"
 
 export const DESKTOP_UTILITY_TOOLBAR_SHELL_CLASS =
-  "inline-flex min-h-14 cursor-pointer items-center gap-0.5 rounded-full border border-[var(--desktop-glass-border)] bg-[var(--desktop-glass-bg)] px-2 py-1.5 text-[var(--desktop-glass-fg)] shadow-[var(--desktop-glass-shadow)] backdrop-blur-2xl"
+  "inline-flex min-h-12 cursor-pointer items-center gap-0.5 rounded-full border border-[var(--desktop-glass-border)] bg-[var(--desktop-glass-bg)] px-1.5 py-1 text-[var(--desktop-glass-fg)] shadow-[var(--desktop-glass-shadow)] backdrop-blur-2xl"
 
 export const DESKTOP_UTILITY_TOOLBAR_BUTTON_CLASS =
-  "grid size-10 cursor-pointer place-items-center rounded-full text-current transition hover:bg-[var(--desktop-glass-button-hover-bg)] hover:text-[var(--desktop-glass-button-hover-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-glass-button-focus-ring)] disabled:cursor-not-allowed max-md:size-9"
+  "grid size-9 cursor-pointer place-items-center rounded-full text-current transition hover:bg-[var(--desktop-glass-button-hover-bg)] hover:text-[var(--desktop-glass-button-hover-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-glass-button-focus-ring)] disabled:cursor-not-allowed max-md:size-8 [&_svg]:size-3.5"
 
 export const DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS =
-  "grid size-10 shrink-0 cursor-pointer place-items-center rounded-full text-current transition hover:bg-[var(--desktop-glass-button-hover-bg)] hover:text-[var(--desktop-glass-button-hover-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-glass-button-focus-ring)] disabled:cursor-not-allowed disabled:opacity-35"
+  "grid size-9 shrink-0 cursor-pointer place-items-center rounded-full text-current transition hover:bg-[var(--desktop-glass-button-hover-bg)] hover:text-[var(--desktop-glass-button-hover-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-glass-button-focus-ring)] disabled:cursor-not-allowed disabled:opacity-35 [&_svg]:size-3.5"
+
+export const DESKTOP_CANVAS_GLASS_TOOLBAR_SHELL_CLASS =
+  "inline-flex min-h-12 cursor-pointer items-center gap-0.5 rounded-full border border-white/[0.12] bg-black/55 px-2.5 py-1 text-white/78 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
 
 export const DESKTOP_COMPOSE_TOOLBAR_ICON_BUTTON_CLASS = DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS
 

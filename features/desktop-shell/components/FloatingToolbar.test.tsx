@@ -244,19 +244,19 @@ describe("FloatingToolbar", () => {
     const documentToolbar = surface.container.querySelector('[data-slot="desktop-document-toolbar"]')
     const utilityToolbar = surface.container.querySelector('[data-slot="desktop-utility-toolbar"]')
 
-    expect(actionToolbar?.className).toContain("min-h-14")
+    expect(actionToolbar?.className).toContain("min-h-12")
     const topChrome = surface.container.querySelector('[data-slot="desktop-top-chrome"]')
     expect(topChrome?.className).toContain("left-[25rem]")
     expect(topChrome?.className).toContain("top-5")
-    expect(documentToolbar?.className).toContain("min-h-14")
-    expect(getRequiredButton(documentToolbar as HTMLElement, "Save").className).toContain("size-10")
-    expect(getRequiredButton(documentToolbar as HTMLElement, "Download").className).toContain("size-10")
-    expect(getRequiredButton(utilityToolbar as HTMLElement, "Open keyboard shortcuts").className).toContain("size-10")
-    expect(getRequiredButton(utilityToolbar as HTMLElement, "Switch to light mode").className).toContain("size-10")
+    expect(documentToolbar?.className).toContain("min-h-12")
+    expect(getRequiredButton(documentToolbar as HTMLElement, "Save").className).toContain("size-9")
+    expect(getRequiredButton(documentToolbar as HTMLElement, "Download").className).toContain("size-9")
+    expect(getRequiredButton(utilityToolbar as HTMLElement, "Open keyboard shortcuts").className).toContain("size-9")
+    expect(getRequiredButton(utilityToolbar as HTMLElement, "Switch to light mode").className).toContain("size-9")
     expect(utilityToolbar?.querySelector('[data-slot="desktop-save-trigger"]')).toBeNull()
-    expect(getRequiredButton(actionToolbar as HTMLElement, "Reset defaults").className).toContain("size-10")
-    expect(getRequiredButton(actionToolbar as HTMLElement, "Undo").className).toContain("size-10")
-    expect(getRequiredButton(actionToolbar as HTMLElement, "Redo").className).toContain("size-10")
+    expect(getRequiredButton(actionToolbar as HTMLElement, "Reset defaults").className).toContain("size-9")
+    expect(getRequiredButton(actionToolbar as HTMLElement, "Undo").className).toContain("size-9")
+    expect(getRequiredButton(actionToolbar as HTMLElement, "Redo").className).toContain("size-9")
 
     await act(async () => {
       getRequiredButton(actionToolbar as HTMLElement, "Reset defaults").dispatchEvent(new MouseEvent("click", { bubbles: true }))
@@ -727,16 +727,14 @@ describe("FloatingToolbar", () => {
 
     const swatch = getRequiredButton(surface.container, "Solid color swatch")
     const hexInput = getRequiredInput(surface.container, "Solid color")
-    const swatchRing = swatch.parentElement
 
     expect(swatch.className).toContain("rounded-full")
-    expect(swatch.className).toContain("size-5")
+    expect(swatch.className).toContain("size-7")
+    expect(swatch.className).toContain("border-2")
     expect(swatch.className).not.toContain("w-12")
     expect(swatch.className).not.toContain("rounded-[6px]")
     expect(swatch.getAttribute("data-slot")).toBe("desktop-color-picker")
     expect(swatch.closest("label")).toBeNull()
-    expect(swatchRing?.className).toContain("size-7")
-    expect(swatchRing?.className).toContain("border-2")
     expect(hexInput.className).toContain("w-20")
     expect(surface.container.querySelector('input[type="color"]')).toBeNull()
 
@@ -748,18 +746,16 @@ describe("FloatingToolbar", () => {
     await clickButton(getRequiredButton(surface.container, "Use Patterns module color"))
 
     const patternSwatch = getRequiredButton(surface.container, "Pattern color 1")
-    const patternSwatchRing = patternSwatch.parentElement
     const patternPaletteRow = patternSwatch.closest(".justify-between")
     const patternPaletteLabel = Array.from(
       surface.container.querySelectorAll('[data-slot="desktop-module-color"] span'),
     ).find((element) => element.textContent === "Palette")
-    const patternPaletteControls = patternSwatchRing?.parentElement
+    const patternPaletteControls = patternSwatch.parentElement
     expect(patternSwatch.className).toContain("rounded-full")
-    expect(patternSwatch.className).toContain("size-5")
+    expect(patternSwatch.className).toContain("size-7")
+    expect(patternSwatch.className).toContain("border-2")
     expect(patternSwatch.className).not.toContain("border-white")
     expect(patternSwatch.getAttribute("data-slot")).toBe("desktop-color-picker")
-    expect(patternSwatchRing?.className).toContain("size-7")
-    expect(patternSwatchRing?.className).toContain("border-2")
     expect(patternPaletteLabel).not.toBeNull()
     expect(patternPaletteControls?.className).toContain("justify-end")
     expect(patternPaletteRow).not.toBeNull()

@@ -208,10 +208,10 @@ export function DesktopInspectorNumberField({
 }) {
   return (
     <label className="flex min-w-0 items-center gap-1.5">
-      <span className={cn("w-3 shrink-0 text-[11px]", DESKTOP_INSPECTOR_LABEL_CLASS)}>{label}</span>
+      <span className={cn("min-w-0 shrink-0", DESKTOP_INSPECTOR_LABEL_CLASS)}>{label}</span>
       <DesktopInspectorTextInput
         aria-label={label}
-        className="h-8 min-w-0 flex-1 rounded-[6px] px-2 text-[12px] font-semibold"
+        className="h-8 min-w-0 flex-1 rounded-[6px] px-2"
         disabled={disabled}
         max={max}
         min={min}
@@ -245,15 +245,15 @@ export function DesktopInspectorColorRow({
       <span className="flex items-center gap-2">
         <input
           aria-label={`${label} swatch`}
-          className="size-7 shrink-0 cursor-pointer rounded-full border-2 border-white/20 bg-transparent p-0.5"
-          style={{ borderColor: value }}
+          className="box-border size-7 shrink-0 cursor-pointer appearance-none rounded-full border-2 border-[var(--desktop-inspector-swatch-ring)] bg-transparent p-0.5"
+          data-slot="desktop-color-swatch-ring"
           type="color"
           value={value}
           onChange={(event) => onChange(event.currentTarget.value)}
         />
         <DesktopInspectorTextInput
           aria-label={label}
-          className="h-7 w-20 rounded-[5px] px-2 text-[11px] font-semibold"
+          className="h-7 w-20 rounded-[5px] px-2"
           value={value}
           onChange={(event) => onChange(event.currentTarget.value)}
         />

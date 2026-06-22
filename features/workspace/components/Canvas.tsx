@@ -35,6 +35,7 @@ import {
 import type { DraftingCardState } from "@/features/workspace/model/card-state"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
 import {
+  DESKTOP_CANVAS_GLASS_TOOLBAR_SHELL_CLASS,
   DESKTOP_COMPOSE_TOOLBAR_ICON_BUTTON_CLASS,
   DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS,
 } from "@/features/desktop-shell/components/DesktopUtilityToolbar"
@@ -112,7 +113,7 @@ const WHEEL_ZOOM_SENSITIVITY = 0.001
 const DESKTOP_ZOOM_PRESETS = [0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4] as const
 
 const COMPOSE_TOOLBAR_NEUTRAL_ICON_BUTTON_CLASS =
-  "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+  "h-7 w-7 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] [&_svg]:size-3.5"
 
 function getComposeToolbarIconButtonClass(
   isDesktopZoomToolbar: boolean,
@@ -245,10 +246,10 @@ function DesktopLayerSettingsToolbar({ controls }: { controls: DesktopLayerToolb
             <PopoverTrigger asChild>
               <button
                 aria-label="Layer appearance"
-                className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-current transition-[background-color,color] duration-150 hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-current transition-[background-color,color] duration-150 hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
                 type="button"
               >
-                <SlidersHorizontalIcon aria-hidden="true" className="size-4" />
+                <SlidersHorizontalIcon aria-hidden="true" className="size-3.5" />
               </button>
             </PopoverTrigger>
           </TooltipTrigger>
@@ -1146,7 +1147,7 @@ export function Canvas({
             <div
               data-slot="desktop-resize-toolbar"
               data-toolbar-appearance="desktop-glass"
-              className="pointer-events-auto inline-flex min-h-14 cursor-pointer items-center gap-0.5 rounded-full border border-white/[0.12] bg-black/55 px-3 py-1.5 text-white/78 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
+              className={cn("pointer-events-auto", DESKTOP_CANVAS_GLASS_TOOLBAR_SHELL_CLASS)}
             >
               <button
                 aria-label="Decrease canvas size"
@@ -1155,13 +1156,13 @@ export function Canvas({
                 type="button"
                 onClick={handleZoomOut}
               >
-                <MinusIcon className="size-4" strokeWidth={2.6} />
+                <MinusIcon className="size-3.5" strokeWidth={2.6} />
               </button>
               <Popover open={desktopZoomPopoverOpen} onOpenChange={setDesktopZoomPopoverOpen}>
                 <PopoverTrigger asChild>
 	                  <button
 	                    aria-label="Choose canvas size"
-	                    className="h-10 min-w-[3.75rem] cursor-pointer rounded-full px-2 text-center text-[1rem] font-semibold tracking-normal text-white transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+	                    className="h-9 min-w-[3.25rem] cursor-pointer rounded-full px-2 text-center text-[0.9375rem] font-semibold tracking-normal text-white transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
 	                    type="button"
                     onClick={() => setDesktopZoomPopoverOpen((open) => !open)}
                     onDoubleClick={() => {
@@ -1187,7 +1188,7 @@ export function Canvas({
                         <button
                           key={preset}
                           aria-checked={isSelected}
-                          className="grid h-10 cursor-pointer grid-cols-[1.25rem_1fr] items-center rounded-[10px] px-2 text-left text-[1rem] font-semibold text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                          className="grid h-9 cursor-pointer grid-cols-[1.125rem_1fr] items-center rounded-[10px] px-2 text-left text-[0.9375rem] font-semibold text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
                           role="menuitemradio"
                           type="button"
                           onClick={() => {
@@ -1196,7 +1197,7 @@ export function Canvas({
                           }}
                         >
                           <span className="grid place-items-center">
-                            {isSelected ? <CheckIcon className="size-4" strokeWidth={2.6} /> : null}
+                            {isSelected ? <CheckIcon className="size-3.5" strokeWidth={2.6} /> : null}
                           </span>
                           <span>{Math.round(preset * 100)}%</span>
                         </button>
@@ -1212,7 +1213,7 @@ export function Canvas({
                 type="button"
                 onClick={handleZoomIn}
               >
-                <PlusIcon className="size-4" strokeWidth={2.3} />
+                <PlusIcon className="size-3.5" strokeWidth={2.3} />
               </button>
             </div>
           </div>
@@ -1232,7 +1233,7 @@ export function Canvas({
             className={cn(
               "pointer-events-auto inline-flex max-w-full flex-wrap items-center justify-center gap-1 rounded-[10px] bg-[var(--drafting-panel-bg-active)] px-2 py-1.5",
               isDesktopZoomToolbar &&
-                "min-h-14 cursor-pointer gap-0.5 rounded-full border border-white/[0.12] bg-black/55 px-2.5 text-white/78 shadow-[0_16px_36px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl",
+                DESKTOP_CANVAS_GLASS_TOOLBAR_SHELL_CLASS,
             )}
           >
             {!isDesktopZoomToolbar ? (

@@ -5,9 +5,14 @@ export function StudioHubStyles() {
       [data-slot="studio-hub"][data-desktop-theme="dark"] [data-slot="studio-hub-header"],
       body:has([data-slot="studio-hub"][data-desktop-theme="dark"]) {
         --desktop-inspector-fg-primary: rgba(255, 255, 255, 0.94);
-        --desktop-inspector-fg-secondary: rgba(255, 255, 255, 0.72);
-        --desktop-inspector-fg-tertiary: rgba(255, 255, 255, 0.56);
+        --desktop-inspector-fg-secondary: rgba(255, 255, 255, 0.76);
+        --desktop-inspector-fg-tertiary: rgba(255, 255, 255, 0.50);
         --desktop-inspector-fg-muted: rgba(255, 255, 255, 0.42);
+        --desktop-inspector-fg-label: var(--desktop-inspector-fg-secondary);
+        --desktop-inspector-type-panel: 0.9375rem;
+        --desktop-inspector-type-value: 0.8125rem;
+        --desktop-inspector-type-label: 0.6875rem;
+        --desktop-inspector-type-caption: 0.625rem;
         --desktop-inspector-section-bg: rgba(255, 255, 255, 0.055);
         --desktop-inspector-control-hover-bg: rgba(255, 255, 255, 0.09);
         --desktop-inspector-control-active-bg: rgba(255, 255, 255, 0.13);
@@ -32,9 +37,14 @@ export function StudioHubStyles() {
       [data-slot="studio-hub"][data-desktop-theme="light"] [data-slot="studio-hub-header"],
       body:has([data-slot="studio-hub"][data-desktop-theme="light"]) {
         --desktop-inspector-fg-primary: rgba(15, 23, 42, 0.90);
-        --desktop-inspector-fg-secondary: rgba(15, 23, 42, 0.62);
-        --desktop-inspector-fg-tertiary: rgba(15, 23, 42, 0.48);
+        --desktop-inspector-fg-secondary: rgba(15, 23, 42, 0.66);
+        --desktop-inspector-fg-tertiary: rgba(15, 23, 42, 0.44);
         --desktop-inspector-fg-muted: rgba(15, 23, 42, 0.38);
+        --desktop-inspector-fg-label: rgba(15, 23, 42, 0.85);
+        --desktop-inspector-type-panel: 0.9375rem;
+        --desktop-inspector-type-value: 0.8125rem;
+        --desktop-inspector-type-label: 0.6875rem;
+        --desktop-inspector-type-caption: 0.625rem;
         --desktop-inspector-section-bg: rgba(15, 23, 42, 0.032);
         --desktop-inspector-control-hover-bg: rgba(15, 23, 42, 0.06);
         --desktop-inspector-control-active-bg: rgba(15, 23, 42, 0.1);

@@ -485,7 +485,7 @@ describe("Canvas", () => {
     ).toHaveLength(0)
     expect(
       Array.from(bottomToolbar?.querySelectorAll("button") ?? []).every((button) =>
-        String(button.className).includes("size-10"),
+        String(button.className).includes("size-9"),
       ),
     ).toBe(true)
     expect(Array.from(bottomToolbar?.querySelectorAll("button") ?? []).map((button) => button.getAttribute("aria-label"))).toEqual([
