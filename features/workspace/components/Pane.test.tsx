@@ -6,11 +6,29 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const buildDashboardQrNodePayloadSpy = vi.fn()
 
-vi.mock("@/features/qr-code/rendering/qr-svg", () => ({
-  buildDashboardQrNodePayload: (
-    ...args: Parameters<typeof buildDashboardQrNodePayloadSpy>
-  ) => buildDashboardQrNodePayloadSpy(...args),
+vi.mock("@/features/qr-code/components/BitjsonAnimatedQr", () => ({
+  BitjsonAnimatedQr: ({
+    canvasSvgMarkup,
+  }: {
+    canvasSvgMarkup?: string | null
+  }) => (
+    <div
+      data-canvas-markup={canvasSvgMarkup ?? ""}
+      data-testid="bitjson-animated-qr"
+    />
+  ),
 }))
+
+vi.mock("@/features/qr-code/rendering/qr-svg", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/features/qr-code/rendering/qr-svg")>()
+
+  return {
+    ...actual,
+    buildDashboardQrNodePayload: (
+      ...args: Parameters<typeof buildDashboardQrNodePayloadSpy>
+    ) => buildDashboardQrNodePayloadSpy(...args),
+  }
+})
 
 import { Pane } from "@/features/workspace/components/Pane"
 import {
@@ -26,8 +44,11 @@ import {
 } from "@/features/workspace/model/layers"
 import {
   createDefaultQrStudioState,
+  setDotMatrixAnimationOptions,
   setSquareQrSize,
 } from "@/features/qr-code/model/state"
+import { renderDashboardQrSvgMarkup } from "@/features/qr-code/rendering/qr-svg"
+import { createDraftingQrArtworkState } from "@/features/workspace/rendering/qr-artwork"
 
 const cleanupCallbacks: Array<() => void> = []
 
@@ -1793,6 +1814,48 @@ describe("Pane", () => {
     expect(container.querySelector('[data-slot="drafting-layer-size-value"]')?.textContent).toBe(
       "300 x 140",
     )
+  })
+
+  it("keeps building canvas markup and mounts bitjson preview when motion is enabled", async () => {
+    const baseState = setSquareQrSize(createDefaultQrStudioState(), 240)
+    const canvasMarkup = renderDashboardQrSvgMarkup(createDraftingQrArtworkState(baseState))
+
+    buildDashboardQrNodePayloadSpy.mockResolvedValue({
+      markup: canvasMarkup,
+      naturalHeight: baseState.height,
+      naturalWidth: baseState.width,
+    })
+
+    const motionState = setDotMatrixAnimationOptions(baseState, {
+      enabled: true,
+      animated: true,
+    })
+
+    const { container, reactRoot } = renderPane(motionState)
+
+    await waitForQrPaneRender()
+
+    expect(buildDashboardQrNodePayloadSpy).toHaveBeenCalledTimes(1)
+
+    const animatedPreview = container.querySelector('[data-testid="bitjson-animated-qr"]')
+
+    expect(animatedPreview).not.toBeNull()
+    expect(animatedPreview?.getAttribute("data-canvas-markup")).toContain("<svg")
+
+    await act(async () => {
+      reactRoot.render(
+        <Pane
+          state={setDotMatrixAnimationOptions(motionState, { loader: "mobius-run" })}
+          isSelected={false}
+          onQrClick={() => undefined}
+          onSelect={() => undefined}
+        />,
+      )
+      await flushPromises()
+      await flushPromises()
+    })
+
+    expect(buildDashboardQrNodePayloadSpy).toHaveBeenCalledTimes(2)
   })
 })
 

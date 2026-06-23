@@ -3,6 +3,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
+import { annotateCanvasSvgForBitjson } from "@/features/qr-code/motion/canvas-svg-adapter";
 import {
   DEFAULT_DOT_MATRIX_ANIMATION,
   MOTION_COLOR_SWATCHES,
@@ -13,6 +14,7 @@ import {
   type QrDotMatrixAnimationOptions,
   type QrStudioState,
 } from "@/features/qr-code/model/state";
+import { sanitizeDraftingQrArtworkMarkup } from "@/features/workspace/rendering/qr-artwork";
 
 export type BitjsonQrElementConfig = {
   animationPreset: string;
@@ -99,10 +101,16 @@ export function adaptQrcodeReactSvgForBitjson(state: QrStudioState) {
   });
 }
 
-export function toBitjsonElementConfig(state: QrStudioState): BitjsonQrElementConfig {
+export function toBitjsonElementConfig(
+  state: QrStudioState,
+  options: { canvasSvgMarkup?: string | null } = {},
+): BitjsonQrElementConfig {
   const animation = state.dotMatrixAnimation;
   const motionColors = resolveMotionColors(animation);
-  const adapted = adaptQrcodeReactSvgForBitjson(state);
+  const canvasSvgMarkup = options.canvasSvgMarkup?.trim();
+  const adapted = canvasSvgMarkup
+    ? annotateCanvasSvgForBitjson(sanitizeDraftingQrArtworkMarkup(canvasSvgMarkup), state)
+    : adaptQrcodeReactSvgForBitjson(state);
   const logoSrc = getAssetValue(state.logo);
 
   return {

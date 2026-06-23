@@ -115,6 +115,128 @@ export function createDotMatrixAnimationExtension(
   return null
 }
 
+export function annotateCanvasSvgForBitjsonMotion(svg: SVGElement): number | null {
+  materializeDataModulePaths(svg)
+  const dotShapes = collectCanvasDotModuleShapes(svg)
+
+  if (dotShapes.length === 0) {
+    return null
+  }
+
+  const metrics = collectDotMatrixMetrics(dotShapes) ?? getFallbackDotMatrixMetrics(dotShapes)
+  let annotatedCount = 0
+
+  for (const shape of dotShapes) {
+    const coordinates = resolveDotMatrixCoordinates(shape, metrics)
+
+    if (!coordinates) {
+      continue
+    }
+
+    appendSvgClass(shape, "module")
+    shape.setAttribute("data-column", String(coordinates.col))
+    shape.setAttribute("data-row", String(coordinates.row))
+    annotatedCount += 1
+  }
+
+  if (annotatedCount === 0) {
+    return null
+  }
+
+  annotateFinderPatternsForBitjson(svg)
+
+  return annotatedCount
+}
+
+function materializeDataModulePaths(svg: SVGElement) {
+  if (svg.querySelector('[data-qr-layer="bitjson-motion-modules"]')) {
+    return
+  }
+
+  const pathLayers = getQrModulePathLayers(svg)
+
+  for (const layer of pathLayers) {
+    if (layer.shapes.length === 0) {
+      continue
+    }
+
+    const document = svg.ownerDocument
+
+    if (!document) {
+      continue
+    }
+
+    const group = document.createElementNS(SVG_NS, "g")
+    group.setAttribute("data-qr-layer", "bitjson-motion-modules")
+
+    for (const segmentShape of layer.shapes) {
+      const path = document.createElementNS(SVG_NS, "path")
+      path.setAttribute("d", segmentShape.getAttribute("d") ?? "")
+      path.setAttribute("fill", layer.fill)
+      group.appendChild(path)
+    }
+
+    layer.element.replaceWith(group)
+  }
+}
+
+function collectCanvasDotModuleShapes(svg: SVGElement): SVGElement[] {
+  const fromMaterialized = Array.from(
+    svg.querySelectorAll('[data-qr-layer="bitjson-motion-modules"] path'),
+  ).filter(isSvgElementLike)
+
+  if (fromMaterialized.length > 0) {
+    return fromMaterialized
+  }
+
+  const clipLayers = getQrModuleClipLayers(svg)
+  const pathLayers = getQrModulePathLayers(svg)
+  const fromLayers = [
+    ...clipLayers.flatMap((layer) => layer.shapes),
+    ...pathLayers.flatMap((layer) => layer.shapes),
+  ]
+
+  if (fromLayers.length > 0) {
+    return fromLayers
+  }
+
+  const fromPalette = Array.from(svg.querySelectorAll('[data-qr-layer="dot-palette-clip"]')).flatMap(
+    (clipPath) => Array.from(clipPath.children).filter(isSvgElementLike),
+  )
+
+  if (fromPalette.length > 0) {
+    return fromPalette
+  }
+
+  return Array.from(svg.querySelectorAll('[data-qr-layer="dot-gradient-clip"]')).flatMap(
+    (clipPath) => Array.from(clipPath.children).filter(isSvgElementLike),
+  )
+}
+
+function appendSvgClass(element: SVGElement, className: string) {
+  const existing = element.getAttribute("class") ?? ""
+
+  if (existing.split(/\s+/).includes(className)) {
+    return
+  }
+
+  element.setAttribute("class", existing ? `${existing} ${className}` : className)
+}
+
+function annotateFinderPatternsForBitjson(svg: SVGElement) {
+  for (const element of svg.querySelectorAll('[data-testid="finder-patterns-outer"]')) {
+    if (isSvgElementLike(element)) {
+      appendSvgClass(element, "position-ring")
+    }
+  }
+
+  for (const element of svg.querySelectorAll('[data-testid="finder-patterns-inner"]')) {
+    if (isSvgElementLike(element)) {
+      appendSvgClass(element, "position-center")
+    }
+  }
+}
+
 function createDotsPaletteExtension(
   state: Pick<QrStudioState, "data" | "dotsPalette">,
 ): QrSvgExtensionFunction {

@@ -87,12 +87,14 @@ function applyBitjsonConfig(element: BitjsonQrCodeElement, config: BitjsonQrElem
 }
 
 export function BitjsonAnimatedQr({
+  canvasSvgMarkup,
   className,
   height,
   state,
   style,
   width,
 }: {
+  canvasSvgMarkup?: string | null;
   className?: string;
   height: number;
   state: QrStudioState;
@@ -100,7 +102,10 @@ export function BitjsonAnimatedQr({
   width: number;
 }) {
   const elementRef = useRef<BitjsonQrCodeElement | null>(null);
-  const config = useMemo(() => toBitjsonElementConfig(state), [state]);
+  const config = useMemo(
+    () => toBitjsonElementConfig(state, { canvasSvgMarkup }),
+    [canvasSvgMarkup, state],
+  );
   const motionEnabled = state.dotMatrixAnimation.enabled && state.dotMatrixAnimation.animated;
 
   useEffect(() => {

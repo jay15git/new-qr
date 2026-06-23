@@ -8,12 +8,15 @@ import {
   toBitjsonElementConfig,
   toQrcodeReactProps,
 } from "@/features/qr-code/motion/bitjson-bridge";
+import { annotateCanvasSvgForBitjson } from "@/features/qr-code/motion/canvas-svg-adapter";
+import { renderDashboardQrSvgMarkup } from "@/features/qr-code/rendering/qr-svg";
 import {
   createDefaultQrStudioState,
   dotMatrixLoaderToBitjsonPreset,
   resolveBitjsonMotionPreset,
   setDotMatrixAnimationOptions,
 } from "@/features/qr-code/model/state";
+import { createDraftingQrArtworkState } from "@/features/workspace/rendering/qr-artwork";
 
 describe("bitjson motion bridge", () => {
   it("maps desktop loaders to bitjson preset names", () => {
@@ -80,5 +83,37 @@ describe("bitjson motion bridge", () => {
     expect(props.value).toBe("https://example.com");
     expect(props.marginSize).toBe(8);
     expect(props.level).toBe(state.qrOptions.errorCorrectionLevel);
+  });
+
+  it("adapts canvas lglab svg for bitjson motion while preserving styled markers", () => {
+    const state = createDefaultQrStudioState();
+    state.data = "https://styled.example";
+    state.finderPatternInnerSettings.type = "heart";
+    state.finderPatternOuterSettings.type = "rounded-lg";
+
+    const canvasMarkup = renderDashboardQrSvgMarkup(createDraftingQrArtworkState(state));
+    const adapted = annotateCanvasSvgForBitjson(canvasMarkup, state);
+
+    expect(adapted?.moduleCount).toBeGreaterThan(0);
+    expect(adapted?.svg).toContain('class="module"');
+    expect(adapted?.svg).toContain("data-column");
+    expect(adapted?.svg).toContain('data-testid="finder-patterns-outer"');
+    expect(adapted?.svg).toContain('data-testid="finder-patterns-inner"');
+  });
+
+  it("prefers canvas svg markup over qrcode.react when building bitjson config", () => {
+    const state = setDotMatrixAnimationOptions(createDefaultQrStudioState(), {
+      enabled: true,
+      animated: true,
+    });
+    state.data = "https://canvas.example";
+
+    const canvasMarkup = renderDashboardQrSvgMarkup(createDraftingQrArtworkState(state));
+    const config = toBitjsonElementConfig(state, { canvasSvgMarkup: canvasMarkup });
+
+    expect(config.useExternalSvg).toBe(true);
+    expect(config.externalSvg).toContain('class="module"');
+    expect(config.externalSvg).toContain('data-testid="finder-patterns-outer"');
+    expect(config.contents).toBe("https://canvas.example");
   });
 });

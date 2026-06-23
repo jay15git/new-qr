@@ -980,12 +980,14 @@ function getTextRunKey(layerId: string, run: DraftingTextRun, index: number) {
 }
 
 function renderDraftingQrLayerContent({
+  canvasSvgMarkup,
   layer,
   qrMarkup,
   shapeTiltInnerStyle,
   shapeTiltPerspectiveStyle,
   state,
 }: {
+  canvasSvgMarkup: string | null
   layer: DraftingCanvasLayer
   qrMarkup: string
   shapeTiltInnerStyle: ReturnType<typeof getBackgroundShapeTiltInnerStyle>
@@ -996,7 +998,7 @@ function renderDraftingQrLayerContent({
   const scaledQrMarkup = qrMarkup
     ? scaleNestedSvgMarkup(qrMarkup, layout.innerWidth, layout.innerHeight)
     : ""
-  const useAnimatedQr = shouldUseBitjsonMotionPreview(state)
+  const useAnimatedQr = shouldUseBitjsonMotionPreview(state) && Boolean(canvasSvgMarkup)
 
   return (
     <div className="relative h-full w-full" style={shapeTiltPerspectiveStyle}>
@@ -1004,6 +1006,7 @@ function renderDraftingQrLayerContent({
         <DraftingQrBackground layer={layer} state={state} />
         {useAnimatedQr ? (
           <BitjsonAnimatedQr
+            canvasSvgMarkup={canvasSvgMarkup}
             height={layout.innerHeight}
             state={state}
             style={{
@@ -1107,13 +1110,8 @@ export const Pane = memo(function Pane({
   const markupCacheRef = useRef(new Map<string, string>())
   const qrArtworkState = useMemo(() => createDraftingQrArtworkState(state), [state])
   const stateCacheKey = useMemo(() => JSON.stringify(qrArtworkState), [qrArtworkState])
-  const motionPreviewActive = shouldUseBitjsonMotionPreview(state)
 
   useEffect(() => {
-    if (motionPreviewActive) {
-      return
-    }
-
     const requestId = ++requestRef.current
     const cachedMarkup = markupCacheRef.current.get(stateCacheKey)
 
@@ -1136,7 +1134,7 @@ export const Pane = memo(function Pane({
         setMarkup(null)
         setHasError(true)
       })
-  }, [motionPreviewActive, qrArtworkState, stateCacheKey])
+  }, [qrArtworkState, stateCacheKey])
 
   useEffect(
     () => () => {
@@ -1196,7 +1194,7 @@ export const Pane = memo(function Pane({
     }
   }, [contextMenu])
 
-  const isLoading = !motionPreviewActive && markup === null && !hasError
+  const isLoading = markup === null && !hasError
   const resolvedLayers = useMemo(
     () =>
       layers && layers.length > 0
@@ -2136,6 +2134,7 @@ export const Pane = memo(function Pane({
           onContextMenu={(event) => openLayerContextMenu(event, [layer.id])}
         >
           {renderDraftingQrLayerContent({
+            canvasSvgMarkup: markup,
             layer,
             qrMarkup,
             shapeTiltInnerStyle,
@@ -2368,6 +2367,7 @@ export const Pane = memo(function Pane({
           }}
         >
           {renderDraftingQrLayerContent({
+            canvasSvgMarkup: markup,
             layer,
             qrMarkup,
             shapeTiltInnerStyle,
