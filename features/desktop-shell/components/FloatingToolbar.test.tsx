@@ -1010,8 +1010,7 @@ describe("FloatingToolbar", () => {
     expect(motionToggle.getAttribute("aria-pressed")).toBe("false")
     expect(motionToggle.className).not.toContain("desktop-inspector-control-bg")
     expect(defaultLoader.getAttribute("aria-pressed")).toBe("true")
-    expect(defaultLoader.className).toContain("desktop-inspector-option-selected-bg")
-    expect(defaultLoader.className).not.toContain("border-[var(--desktop-inspector-option-selected-border)]")
+    expectAnimatedOptionSelection(defaultLoader)
     expect(defaultLoader.className).not.toContain("ring-black")
   })
 

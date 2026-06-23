@@ -36,6 +36,7 @@ import {
   Settings,
   ShapesIcon,
   Sparkles,
+  LayoutGrid,
   SunIcon,
   TypeIcon,
   UnderlineIcon,
@@ -2094,21 +2095,21 @@ export function DesktopThemeStyles() {
         border-color: transparent !important;
       }
 
-      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) {
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-motion-loader-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) {
         background-color: var(--desktop-inspector-option-selected-bg) !important;
         border-color: transparent !important;
         color: var(--desktop-inspector-option-selected-fg) !important;
         box-shadow: none !important;
       }
 
-      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]):hover {
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-motion-loader-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]):hover {
         background-color: var(--desktop-inspector-option-selected-bg) !important;
         border-color: transparent !important;
         color: var(--desktop-inspector-option-selected-fg) !important;
         filter: none !important;
       }
 
-      [data-slot="desktop-floating-inspector"] button:is([data-desktop-preview-option="true"], [data-desktop-content-type-option="true"], [data-desktop-option-tile="true"])[aria-pressed="true"]:not([data-desktop-animated-option-selection="true"]) {
+      [data-slot="desktop-floating-inspector"] button:is([data-desktop-preview-option="true"], [data-desktop-content-type-option="true"], [data-desktop-motion-loader-option="true"], [data-desktop-option-tile="true"])[aria-pressed="true"]:not([data-desktop-animated-option-selection="true"]) {
         background-color: var(--desktop-inspector-option-selected-bg) !important;
         border-color: var(--desktop-inspector-option-selected-border) !important;
       }
@@ -2206,22 +2207,22 @@ export function DesktopThemeStyles() {
         filter: none !important;
       }
 
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button:is([data-desktop-preview-option="true"], [data-desktop-content-type-option="true"], [data-desktop-option-tile="true"]) {
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button:is([data-desktop-preview-option="true"], [data-desktop-content-type-option="true"], [data-desktop-motion-loader-option="true"], [data-desktop-option-tile="true"]) {
         border-color: transparent !important;
         color: var(--desktop-inspector-fg-tertiary) !important;
       }
 
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button:is([data-desktop-preview-option="true"], [data-desktop-content-type-option="true"], [data-desktop-option-tile="true"]):hover:not([aria-pressed="true"]) {
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button:is([data-desktop-preview-option="true"], [data-desktop-content-type-option="true"], [data-desktop-motion-loader-option="true"], [data-desktop-option-tile="true"]):hover:not([aria-pressed="true"]) {
         background-color: rgba(15, 23, 42, 0.06) !important;
         color: var(--desktop-inspector-fg-secondary) !important;
       }
 
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button:is([data-desktop-preview-option="true"], [data-desktop-content-type-option="true"], [data-desktop-option-tile="true"])[aria-pressed="true"]:not([data-desktop-animated-option-selection="true"]) {
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button:is([data-desktop-preview-option="true"], [data-desktop-content-type-option="true"], [data-desktop-motion-loader-option="true"], [data-desktop-option-tile="true"])[aria-pressed="true"]:not([data-desktop-animated-option-selection="true"]) {
         background-color: var(--desktop-inspector-option-selected-bg) !important;
         border-color: var(--desktop-inspector-option-selected-border) !important;
       }
 
-      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) {
+      [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-motion-loader-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) {
         background-color: var(--desktop-inspector-option-selected-bg) !important;
         border-color: transparent !important;
         color: var(--desktop-inspector-option-selected-fg) !important;
@@ -2288,7 +2289,7 @@ export function DesktopThemeStyles() {
         color: #18181b !important;
       }
 
-      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) {
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-motion-loader-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]) {
         background-color: var(--desktop-inspector-option-selected-bg) !important;
         border-color: transparent !important;
         color: var(--desktop-inspector-option-selected-fg) !important;
@@ -2312,7 +2313,7 @@ export function DesktopThemeStyles() {
         color: var(--desktop-inspector-fg-primary) !important;
       }
 
-      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]):hover {
+      [data-slot="desktop-floating-inspector"] button[aria-pressed="true"]:not([data-desktop-tool-button="true"]):not([data-desktop-preview-option="true"]):not([data-desktop-content-type-option="true"]):not([data-desktop-motion-loader-option="true"]):not([data-desktop-option-tile="true"]):not([data-slot="desktop-layer-stack-icon-toggle"]):not([data-slot="desktop-layer-row"]):hover {
         background-color: var(--desktop-inspector-option-selected-bg) !important;
         border-color: transparent !important;
         color: var(--desktop-inspector-option-selected-fg) !important;
@@ -3394,31 +3395,43 @@ function DesktopMotionInspector({
           </div>
           <DesktopInspectorOptionGridScrollArea
             ariaLabel="Dot matrix motion presets"
-            columns={2}
+            columns={3}
             dataSlot="desktop-motion-loader-shelf-scroll-area"
-            rowKind="h-10"
             shelfDataSlot="desktop-motion-loader-shelf"
-            variant="compact"
+            variant="content"
           >
-            <div className={desktopInspectorOptionGridClass(2)}>
-              {QR_MOTION_DOT_MATRIX_PRESET_OPTIONS.map((loader) => (
-                <DesktopMotionLoaderButton
-                  key={loader.value}
-                  label={loader.label}
-                  selected={
-                    settings.presetCategory === "dotMatrix" &&
-                    (settings.preset === loader.value || settings.loader === loader.value)
-                  }
-                  onClick={() =>
-                    onMotionSettingsChange({
-                      loader: loader.value,
-                      preset: loader.value,
-                      presetCategory: "dotMatrix",
-                    })
-                  }
-                />
-              ))}
-            </div>
+            <DesktopInspectorAnimatedOptionGrid
+              columns={3}
+              data-slot="desktop-motion-dot-matrix-shelf"
+              selectedKey={
+                settings.presetCategory === "dotMatrix"
+                  ? typeof settings.preset === "string" && settings.preset
+                    ? settings.preset
+                    : settings.loader
+                  : null
+              }
+            >
+              {QR_MOTION_DOT_MATRIX_PRESET_OPTIONS.map((loader) => {
+                const isSelected =
+                  settings.presetCategory === "dotMatrix" &&
+                  (settings.preset === loader.value || settings.loader === loader.value)
+
+                return (
+                  <DesktopMotionPresetTileButton
+                    key={loader.value}
+                    label={loader.label}
+                    selected={isSelected}
+                    onClick={() =>
+                      onMotionSettingsChange({
+                        loader: loader.value,
+                        preset: loader.value,
+                        presetCategory: "dotMatrix",
+                      })
+                    }
+                  />
+                )
+              })}
+            </DesktopInspectorAnimatedOptionGrid>
           </DesktopInspectorOptionGridScrollArea>
         </DesktopInspectorSection>
 
@@ -3729,6 +3742,38 @@ function DesktopMotionLoaderButton({
       <span className={cn("mb-0 block max-w-[calc(100%-1.25rem)] truncate", DESKTOP_INSPECTOR_VALUE_CLASS)}>
         {label}
       </span>
+    </button>
+  )
+}
+
+function DesktopMotionPresetTileButton({
+  label,
+  onClick,
+  selected,
+}: {
+  label: string
+  onClick: () => void
+  selected: boolean
+}) {
+  return (
+    <button
+      aria-label={`Use ${label} motion loader`}
+      aria-pressed={selected}
+      className={cn(
+        "relative flex h-[54px] min-w-0 flex-col items-center justify-center gap-1 px-1",
+        desktopInspectorOptionGridItemClass(),
+        DESKTOP_INSPECTOR_OPTION_TILE_SURFACE_CLASS,
+        DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
+        selected && "text-[var(--desktop-inspector-option-selected-fg)]",
+      )}
+      data-desktop-animated-option-selection="true"
+      data-desktop-motion-loader-option="true"
+      data-desktop-option-tile="true"
+      type="button"
+      onClick={onClick}
+    >
+      <LayoutGrid className="relative z-10 size-4 shrink-0" />
+      <span className="relative z-10 max-w-full truncate">{label}</span>
     </button>
   )
 }
