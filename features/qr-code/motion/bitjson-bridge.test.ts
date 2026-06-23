@@ -63,14 +63,24 @@ describe("bitjson motion bridge", () => {
     expect(config.externalSvg).toContain('class="module"');
   });
 
-  it("resolves dot matrix presets from loader state", () => {
+  it("resolves ported standard motion presets through the bridge", () => {
     const state = setDotMatrixAnimationOptions(createDefaultQrStudioState(), {
-      loader: "prism-sweep",
-      preset: "prism-sweep",
-      presetCategory: "dotMatrix",
+      preset: "PrismSweep",
+      presetCategory: "standard",
     });
 
     expect(resolveBitjsonMotionPreset(state.dotMatrixAnimation)).toBe("PrismSweep");
+    expect(toBitjsonElementConfig(state).animationPreset).toBe("PrismSweep");
+  });
+
+  it("resolves new standard motion presets through the bridge", () => {
+    const state = setDotMatrixAnimationOptions(createDefaultQrStudioState(), {
+      preset: "QuantumMaterialize",
+      presetCategory: "standard",
+    });
+
+    expect(resolveBitjsonMotionPreset(state.dotMatrixAnimation)).toBe("QuantumMaterialize");
+    expect(toBitjsonElementConfig(state).animationPreset).toBe("QuantumMaterialize");
   });
 
   it("builds qrcode.react props from studio state", () => {

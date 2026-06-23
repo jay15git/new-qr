@@ -1031,7 +1031,7 @@ describe("FloatingToolbar", () => {
     expect(defaultLoader.getAttribute("aria-pressed")).toBe("true")
   })
 
-  it("selects a motion loader preset", async () => {
+  it("selects a standard motion preset", async () => {
     const surface = await renderPrototype()
     await openTool(surface.container, "motion")
 
@@ -1040,7 +1040,7 @@ describe("FloatingToolbar", () => {
     await clickButton(prismSweep)
 
     expect(prismSweep.getAttribute("aria-pressed")).toBe("true")
-    expect(getRequiredButton(surface.container, "Use Neon Drift motion loader").getAttribute("aria-pressed")).toBe("false")
+    expect(getRequiredButton(surface.container, "Use Fade In Top Down motion loader").getAttribute("aria-pressed")).toBe("false")
   })
 
   it("updates motion speed, matrix density, and overlay scale sliders", async () => {

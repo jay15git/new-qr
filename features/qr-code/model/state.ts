@@ -30,7 +30,6 @@ export type QrDotMatrixSquareLoader =
   | "pulse-ladder"
   | "core-spiral"
   | "twin-orbit"
-  | "prism-sweep"
   | "flux-columns"
   | "block-drop"
   | "strobe-stack"
@@ -42,8 +41,6 @@ export type QrDotMatrixSquareLoader =
   | "prism-bloom"
   | "helix-glow"
   | "helix-core"
-  | "half-helix"
-  | "sound-bars"
   | "infinity-run"
   | "mobius-run";
 export type QrDotMatrixColorPreset =
@@ -75,23 +72,34 @@ export type QrMotionStandardPreset =
   | "FireflyTwinkle"
   | "FlipClock"
   | "GlassSweep"
+  | "GravityCollapse"
+  | "HalfHelix"
+  | "HoloFlicker"
   | "KaleidoPulse"
   | "LensFocus"
   | "LumenWave"
   | "MagneticRipple"
+  | "MagneticSnap"
   | "MaterializeIn"
   | "NeonTrace"
   | "OrbitReveal"
   | "ParallaxTiles"
   | "PrismRipple"
+  | "PrismSweep"
+  | "QuantumMaterialize"
   | "RadialRipple"
   | "RadialRippleIn"
   | "ReceiptPrint"
+  | "ShockwaveJolt"
+  | "SignalGlitch"
   | "SignalScan"
   | "SoftMaterialize"
+  | "SoundBars"
   | "SpiralBloom"
   | "SubtlePulse"
-  | "VelvetBreath";
+  | "TideRise"
+  | "VelvetBreath"
+  | "WaveInterference";
 
 export type QrMotionHoverEffect =
   | ""
@@ -264,6 +272,7 @@ export const QR_MOTION_STANDARD_PRESET_OPTIONS: Array<{
   { label: "Center Bloom", value: "CenterBloom" },
   { label: "Corner Sweep", value: "CornerSweep" },
   { label: "Prism Ripple", value: "PrismRipple" },
+  { label: "Prism Sweep", value: "PrismSweep" },
   { label: "Orbit Reveal", value: "OrbitReveal" },
   { label: "Lumen Wave", value: "LumenWave" },
   { label: "Diamond Glint", value: "DiamondGlint" },
@@ -284,6 +293,16 @@ export const QR_MOTION_STANDARD_PRESET_OPTIONS: Array<{
   { label: "Lens Focus", value: "LensFocus" },
   { label: "Receipt Print", value: "ReceiptPrint" },
   { label: "Flip Clock", value: "FlipClock" },
+  { label: "Wave Interference", value: "WaveInterference" },
+  { label: "Quantum Materialize", value: "QuantumMaterialize" },
+  { label: "Magnetic Snap", value: "MagneticSnap" },
+  { label: "Holo Flicker", value: "HoloFlicker" },
+  { label: "Signal Glitch", value: "SignalGlitch" },
+  { label: "Shockwave Jolt", value: "ShockwaveJolt" },
+  { label: "Tide Rise", value: "TideRise" },
+  { label: "Gravity Collapse", value: "GravityCollapse" },
+  { label: "Half Helix", value: "HalfHelix" },
+  { label: "Sound Bars", value: "SoundBars" },
 ];
 
 export const QR_MOTION_HOVER_EFFECT_OPTIONS: Array<{
@@ -338,7 +357,6 @@ export const QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS: Array<{
   { label: "Pulse Ladder", value: "pulse-ladder" },
   { label: "Core Spiral", value: "core-spiral" },
   { label: "Twin Orbit", value: "twin-orbit" },
-  { label: "Prism Sweep", value: "prism-sweep" },
   { label: "Flux Columns", value: "flux-columns" },
   { label: "Block Drop", value: "block-drop" },
   { label: "Strobe Stack", value: "strobe-stack" },
@@ -350,8 +368,6 @@ export const QR_DOT_MATRIX_SQUARE_LOADER_OPTIONS: Array<{
   { label: "Prism Bloom", value: "prism-bloom" },
   { label: "Helix Glow", value: "helix-glow" },
   { label: "Helix Core", value: "helix-core" },
-  { label: "Half Helix", value: "half-helix" },
-  { label: "Sound Bars", value: "sound-bars" },
   { label: "Infinity Run", value: "infinity-run" },
   { label: "Mobius Run", value: "mobius-run" },
 ];
