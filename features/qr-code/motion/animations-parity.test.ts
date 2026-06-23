@@ -112,4 +112,19 @@ describe("matrix animation parity", () => {
       expect(origin.from).toBeGreaterThan(outer.from ?? 0);
     });
   });
+
+  describe("CoreRotor", () => {
+    it("uses continuous phase sampling instead of stepped frames", () => {
+      const preset = getAnimationPreset(AnimationPreset.CoreRotor);
+      const animation = preset({}, 0, 0, 21, QRCodeEntity.Module, defaultOpacitySettings);
+      const opacityFrames = animation.web?.opacity;
+
+      expect(animation.easing).toBe("linear");
+      expect(animation.easing).not.toMatch(/^steps\(/);
+      expect(Array.isArray(opacityFrames)).toBe(true);
+      if (Array.isArray(opacityFrames)) {
+        expect(opacityFrames.length).toBeGreaterThan(20);
+      }
+    });
+  });
 });

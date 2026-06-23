@@ -1924,26 +1924,36 @@ const OriginWave: QRCodeAnimation = (targets, x, y, count, entity) => {
   );
 };
 
-const SQUARE13_FRAME_MASKS = [
-  '..x..' + '..x..' + '..o..' + '.....' + '.....',
-  '....x' + '...x.' + '..o..' + '.....' + '.....',
-  '.....' + '.....' + '..oxx' + '.....' + '.....',
-  '.....' + '.....' + '..o..' + '...x.' + '....x',
-  '.....' + '.....' + '..o..' + '..x..' + '..x..',
-  '.....' + '.....' + '..o..' + '.x...' + 'x....',
-  '.....' + '.....' + 'xxo..' + '.....' + '.....',
-  'x....' + '.x...' + '..o..' + '.....' + '.....',
-];
-const SQUARE13_FRAME_SEQUENCE = [
-  0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7,
-];
+const MATRIX_CENTER = 2;
 
-const coreRotorCellOpacity = (row: number, col: number, step: number) => {
-  const mask = SQUARE13_FRAME_MASKS[SQUARE13_FRAME_SEQUENCE[step]];
-  const cell = frameMaskCell(mask, row, col);
-  if (cell === 'x') return 1;
-  if (cell === 'o') return 0.56;
-  return 0.08;
+const coreRotorCellOpacity = (row: number, col: number, phase: number) => {
+  const outline = Math.min(row, col, MATRIX_LAST - row, MATRIX_LAST - col);
+  const distFromCenter = Math.hypot(row - MATRIX_CENTER, col - MATRIX_CENTER);
+
+  if (distFromCenter < 0.55) {
+    const hub = 0.5 + 0.5 * Math.sin(phase * Math.PI * 2);
+    return 0.08 + hub * 0.56;
+  }
+
+  if (outline > 0.12) {
+    return 0.08;
+  }
+
+  const angle = Math.atan2(row - MATRIX_CENTER, col - MATRIX_CENTER);
+  const angularPhase = (angle + Math.PI) / (2 * Math.PI);
+  let delta = phase - angularPhase;
+
+  while (delta > 0.5) {
+    delta -= 1;
+  }
+  while (delta < -0.5) {
+    delta += 1;
+  }
+
+  const wrapped = Math.abs(delta) * 2;
+  const bump = Math.max(0, Math.cos(wrapped * Math.PI * 0.62));
+
+  return 0.08 + bump * 0.92;
 };
 
 const CoreRotor: QRCodeAnimation = (targets, x, y, count, entity) => {
@@ -1953,13 +1963,13 @@ const CoreRotor: QRCodeAnimation = (targets, x, y, count, entity) => {
     targets,
     entity,
     0,
-    1550,
-    steppedOpacityFrames(SQUARE13_FRAME_SEQUENCE.length, (step) =>
-      discreteCellField(fRow, fCol, (row, col) =>
-        coreRotorCellOpacity(row, col, step)
+    MATRIX_CYCLE_MS,
+    phaseOpacityFrames(56, (phase) =>
+      sampleCellField(fRow, fCol, (row, col) =>
+        coreRotorCellOpacity(row, col, phase)
       )
     ),
-    'steps(16, end)'
+    'linear'
   );
 };
 
