@@ -4,6 +4,7 @@ import { Image02Icon, KeyboardIcon, SignalIcon, SquareIcon } from "@hugeicons/co
 import { HugeiconsIcon } from "@hugeicons/react"
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
 
+import { buildSceneDocumentFromWorkspace } from "@/features/qr-code/export/scene-document-export"
 import type {
   QrErrorCorrectionLevel,
   QrFileExtension,
@@ -4264,6 +4265,11 @@ export function WorkspaceSurface({
     onExportDownload: () => {
       void handleDownload()
     },
+    buildSceneDocument: async () =>
+      buildSceneDocumentFromWorkspace({
+        document: draftingWorkspaceDocument,
+        nodeId: activeQrNodeId,
+      }),
     onExportReset: () => {
       setSelectedDownloadExtension("png")
       setSelectedDownloadTarget("current")

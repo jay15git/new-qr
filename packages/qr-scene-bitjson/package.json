@@ -1,0 +1,19 @@
+{
+  "name": "@new-qr/qr-scene-bitjson",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@bitjson/qr-code": "file:../../.external/qr-code",
+    "@new-qr/qr-scene-schema": "workspace:*",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "peerDependencies": {
+    "react": "^18 || ^19",
+    "react-dom": "^18 || ^19"
+  }
+}

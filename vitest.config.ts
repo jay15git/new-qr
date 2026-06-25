@@ -9,7 +9,14 @@ export default defineConfig({
     },
   },
   test: {
-    exclude: [".portable-compose-editor/**", ".external/**", "node_modules/**", ".next/**"],
+    exclude: [
+      ".portable-compose-editor/**",
+      ".external/**",
+      "node_modules/**",
+      ".next/**",
+      "packages/**/node_modules/**",
+      "**/*.spec.js",
+    ],
     environment: "node",
   },
 });

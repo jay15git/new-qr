@@ -133,7 +133,14 @@ export function BitjsonAnimatedQr({
       }
     };
 
+    const handlePress = () => {
+      if (!cancelled && config.animationPreset) {
+        startQrCodeAnimation(element, config.animationPreset);
+      }
+    };
+
     element.addEventListener("codeRendered", handleAnimation);
+    element.addEventListener("pointerdown", handlePress);
 
     void whenQrCodeElementReady(element).then(() => {
       handleAnimation();
@@ -142,6 +149,7 @@ export function BitjsonAnimatedQr({
     return () => {
       cancelled = true;
       element.removeEventListener("codeRendered", handleAnimation);
+      element.removeEventListener("pointerdown", handlePress);
     };
   }, [config, motionEnabled]);
 

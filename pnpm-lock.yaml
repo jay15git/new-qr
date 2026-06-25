@@ -23,6 +23,27 @@ importers:
       '@lglab/react-qr-code':
         specifier: ^1.7.0
         version: 1.7.0(react@19.2.4)
+      '@new-qr/qr-scene':
+        specifier: workspace:*
+        version: link:packages/qr-scene
+      '@new-qr/qr-scene-bitjson':
+        specifier: workspace:*
+        version: link:packages/qr-scene-bitjson
+      '@new-qr/qr-scene-core':
+        specifier: workspace:*
+        version: link:packages/qr-scene-core
+      '@new-qr/qr-scene-export':
+        specifier: workspace:*
+        version: link:packages/qr-scene-export
+      '@new-qr/qr-scene-paper':
+        specifier: workspace:*
+        version: link:packages/qr-scene-paper
+      '@new-qr/qr-scene-react':
+        specifier: workspace:*
+        version: link:packages/qr-scene-react
+      '@new-qr/qr-scene-schema':
+        specifier: workspace:*
+        version: link:packages/qr-scene-schema
       '@paper-design/shaders':
         specifier: 0.0.76
         version: 0.0.76
@@ -174,6 +195,98 @@ importers:
       vitest:
         specifier: ^4.1.4
         version: 4.1.4(@types/node@20.19.39)(jsdom@29.0.2(@noble/hashes@1.8.0))(msw@2.13.3(@types/node@20.19.39)(typescript@5.9.3))(vite@7.3.2(@types/node@20.19.39)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
+
+  packages/qr-scene:
+    dependencies:
+      '@new-qr/qr-scene-bitjson':
+        specifier: workspace:*
+        version: link:../qr-scene-bitjson
+      '@new-qr/qr-scene-core':
+        specifier: workspace:*
+        version: link:../qr-scene-core
+      '@new-qr/qr-scene-export':
+        specifier: workspace:*
+        version: link:../qr-scene-export
+      '@new-qr/qr-scene-paper':
+        specifier: workspace:*
+        version: link:../qr-scene-paper
+      '@new-qr/qr-scene-react':
+        specifier: workspace:*
+        version: link:../qr-scene-react
+      '@new-qr/qr-scene-schema':
+        specifier: workspace:*
+        version: link:../qr-scene-schema
+
+  packages/qr-scene-bitjson:
+    dependencies:
+      '@bitjson/qr-code':
+        specifier: file:../../.external/qr-code
+        version: file:.external/qr-code
+      '@new-qr/qr-scene-schema':
+        specifier: workspace:*
+        version: link:../qr-scene-schema
+      react:
+        specifier: ^19.2.4
+        version: 19.2.4
+      react-dom:
+        specifier: ^19.2.4
+        version: 19.2.4(react@19.2.4)
+
+  packages/qr-scene-core:
+    dependencies:
+      '@new-qr/qr-scene-schema':
+        specifier: workspace:*
+        version: link:../qr-scene-schema
+
+  packages/qr-scene-export:
+    dependencies:
+      '@new-qr/qr-scene-core':
+        specifier: workspace:*
+        version: link:../qr-scene-core
+      '@new-qr/qr-scene-schema':
+        specifier: workspace:*
+        version: link:../qr-scene-schema
+
+  packages/qr-scene-paper:
+    dependencies:
+      '@new-qr/qr-scene-schema':
+        specifier: workspace:*
+        version: link:../qr-scene-schema
+      '@paper-design/shaders':
+        specifier: 0.0.76
+        version: 0.0.76
+      '@paper-design/shaders-react':
+        specifier: 0.0.76
+        version: 0.0.76(@types/react@19.2.14)(react@19.2.4)
+      react:
+        specifier: ^19.2.4
+        version: 19.2.4
+      react-dom:
+        specifier: ^19.2.4
+        version: 19.2.4(react@19.2.4)
+
+  packages/qr-scene-react:
+    dependencies:
+      '@new-qr/qr-scene-bitjson':
+        specifier: workspace:*
+        version: link:../qr-scene-bitjson
+      '@new-qr/qr-scene-core':
+        specifier: workspace:*
+        version: link:../qr-scene-core
+      '@new-qr/qr-scene-paper':
+        specifier: workspace:*
+        version: link:../qr-scene-paper
+      '@new-qr/qr-scene-schema':
+        specifier: workspace:*
+        version: link:../qr-scene-schema
+      react:
+        specifier: ^19.2.4
+        version: 19.2.4
+      react-dom:
+        specifier: ^19.2.4
+        version: 19.2.4(react@19.2.4)
+
+  packages/qr-scene-schema: {}
 
 packages:
 

@@ -130,6 +130,7 @@ import {
   type StudioGradient,
   type StudioDataModulesStyle,
 } from "@/features/qr-code/model/state"
+import type { SceneDocumentV1 } from "@new-qr/qr-scene-schema"
 import {
   ERROR_CORRECTION_LEVEL_OPTIONS,
   TYPE_NUMBER_MAX,
@@ -214,6 +215,7 @@ import {
   QR_INPUT_OPTIONS,
   type QrInputType,
 } from "@/features/qr-code/content/input-options"
+import { DesktopEmbedInspector } from "@/features/desktop-shell/components/DesktopEmbedInspector"
 import { DownloadIcon as AnimatedDownloadIcon } from "@/components/ui/download"
 import {
   DraggableList,
@@ -657,6 +659,7 @@ export type DesktopToolbarController = {
   onExportReset: () => void
   onExportSettingsChange: (patch: Partial<DesktopExportSettings>) => void
   onExportDownload: () => void
+  buildSceneDocument?: () => Promise<SceneDocumentV1>
   onTextReset: () => void
   onTextSettingsChange: (patch: Partial<DesktopTextSettings>) => void
 }
@@ -3363,29 +3366,39 @@ function DesktopMotionInspector({
           </div>
           <DesktopInspectorOptionGridScrollArea
             ariaLabel="Standard motion presets"
-            columns={2}
+            columns={3}
             dataSlot="desktop-motion-standard-shelf-scroll-area"
-            rowKind="h-10"
             shelfDataSlot="desktop-motion-standard-shelf"
-            variant="compact"
+            variant="content"
           >
-            <div className={desktopInspectorOptionGridClass(2)}>
-              {QR_MOTION_STANDARD_PRESET_OPTIONS.map((preset) => (
-                <DesktopMotionLoaderButton
-                  key={preset.value}
-                  label={preset.label}
-                  selected={
-                    settings.presetCategory === "standard" && settings.preset === preset.value
-                  }
-                  onClick={() =>
-                    onMotionSettingsChange({
-                      preset: preset.value,
-                      presetCategory: "standard",
-                    })
-                  }
-                />
-              ))}
-            </div>
+            <DesktopInspectorAnimatedOptionGrid
+              columns={3}
+              data-slot="desktop-motion-standard-shelf"
+              selectedKey={
+                settings.presetCategory === "standard" && typeof settings.preset === "string"
+                  ? settings.preset
+                  : null
+              }
+            >
+              {QR_MOTION_STANDARD_PRESET_OPTIONS.map((preset) => {
+                const isSelected =
+                  settings.presetCategory === "standard" && settings.preset === preset.value
+
+                return (
+                  <DesktopMotionPresetTileButton
+                    key={preset.value}
+                    label={preset.label}
+                    selected={isSelected}
+                    onClick={() =>
+                      onMotionSettingsChange({
+                        preset: preset.value,
+                        presetCategory: "standard",
+                      })
+                    }
+                  />
+                )
+              })}
+            </DesktopInspectorAnimatedOptionGrid>
           </DesktopInspectorOptionGridScrollArea>
         </DesktopInspectorSection>
 
@@ -3569,9 +3582,12 @@ function DesktopMotionInspector({
             />
             <DesktopMotionToggleRow
               checked={settings.exportAnimatedSvg}
-              label="Animated SVG export"
+              label="Preview-only animated SVG export"
               onChange={(exportAnimatedSvg) => onMotionSettingsChange({ exportAnimatedSvg })}
             />
+            <p className={DESKTOP_INSPECTOR_CAPTION_CLASS}>
+              File export stays static today. This toggle is reserved for a future animated SVG path.
+            </p>
             <DesktopMotionToggleRow
               checked={settings.respectReducedMotion}
               label="Respect reduced motion"
@@ -3714,35 +3730,6 @@ function DesktopElasticSliderRow({
         />
       </div>
     </div>
-  )
-}
-
-function DesktopMotionLoaderButton({
-  label,
-  onClick,
-  selected,
-}: {
-  label: string
-  onClick: () => void
-  selected: boolean
-}) {
-  return (
-      <button
-        aria-label={`Use ${label} motion loader`}
-        aria-pressed={selected}
-      className={cn(
-        "relative h-10 min-w-0 px-2.5 text-left",
-        desktopInspectorOptionGridItemClass(),
-        DESKTOP_INSPECTOR_CONTROL_CLASS,
-        selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
-      )}
-      type="button"
-      onClick={onClick}
-    >
-      <span className={cn("mb-0 block max-w-[calc(100%-1.25rem)] truncate", DESKTOP_INSPECTOR_VALUE_CLASS)}>
-        {label}
-      </span>
-    </button>
   )
 }
 
@@ -5331,10 +5318,12 @@ function DesktopLayerStackIconToggle({
 }
 
 function DesktopExportInspector({
+  buildSceneDocument,
   onExportDownload,
   onExportSettingsChange,
   settings,
 }: {
+  buildSceneDocument?: () => Promise<SceneDocumentV1>
   onExportDownload: () => void
   onExportSettingsChange: (patch: Partial<DesktopExportSettings>) => void
   settings: DesktopExportSettings
@@ -5414,6 +5403,13 @@ function DesktopExportInspector({
                 </button>
               ))}
             </div>
+          </DesktopInspectorSection>
+        ) : null}
+
+        {buildSceneDocument ? (
+          <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
+            <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Embed</p>
+            <DesktopEmbedInspector buildSceneDocument={buildSceneDocument} />
           </DesktopInspectorSection>
         ) : null}
       </DesktopInspectorScrollArea>
@@ -5986,6 +5982,7 @@ export function DesktopFloatingInspector({
         />
       ) : activeTool === "export" ? (
         <DesktopExportInspector
+          buildSceneDocument={controller?.buildSceneDocument}
           settings={actualExportSettings}
           onExportDownload={controller?.onExportDownload ?? (() => undefined)}
           onExportSettingsChange={onExportSettingsChange}

@@ -1176,9 +1176,9 @@ export function DraftingLoaderPlaygroundTab({
       <DraftingToggleField
         checked={animation.exportAnimatedSvg}
         dataSlot="drafting-dot-matrix-animation-export"
-        description="Keeps raster exports static; only SVG preserves motion."
+        description="Reserved for a future animated SVG path. File export stays static today."
         id="drafting-dot-matrix-animation-export"
-        label="Animated SVG export"
+        label="Preview-only animated SVG export"
         onCheckedChange={(exportAnimatedSvg) =>
           onAnimationChange({ exportAnimatedSvg })
         }

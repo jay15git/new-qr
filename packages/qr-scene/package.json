@@ -1,0 +1,17 @@
+{
+  "name": "@new-qr/qr-scene",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@new-qr/qr-scene-bitjson": "workspace:*",
+    "@new-qr/qr-scene-core": "workspace:*",
+    "@new-qr/qr-scene-export": "workspace:*",
+    "@new-qr/qr-scene-paper": "workspace:*",
+    "@new-qr/qr-scene-react": "workspace:*",
+    "@new-qr/qr-scene-schema": "workspace:*"
+  }
+}

@@ -1189,11 +1189,11 @@ export function ControlsPanel({
       <Field orientation="horizontal">
         <FieldContent>
           <FieldLabel htmlFor="dot-matrix-animation-export">
-            Animated SVG export
+            Preview-only animated SVG export
           </FieldLabel>
           {!isDashboardMode ? (
             <FieldDescription>
-              Keeps raster exports static; only SVG can preserve motion.
+              Reserved for a future animated SVG path. File export stays static today.
             </FieldDescription>
           ) : null}
         </FieldContent>
