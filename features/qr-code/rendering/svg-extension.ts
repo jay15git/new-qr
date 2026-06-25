@@ -115,8 +115,11 @@ export function createDotMatrixAnimationExtension(
   return null
 }
 
-export function annotateCanvasSvgForBitjsonMotion(svg: SVGElement): number | null {
-  materializeDataModulePaths(svg)
+export function annotateCanvasSvgForBitjsonMotion(
+  svg: SVGElement,
+  state?: Pick<QrStudioState, "dotsColorMode" | "data" | "dotsPalette">,
+): number | null {
+  materializeDataModulePaths(svg, state)
   const dotShapes = collectCanvasDotModuleShapes(svg)
 
   if (dotShapes.length === 0) {
@@ -124,7 +127,7 @@ export function annotateCanvasSvgForBitjsonMotion(svg: SVGElement): number | nul
   }
 
   const metrics = collectDotMatrixMetrics(dotShapes) ?? getFallbackDotMatrixMetrics(dotShapes)
-  let annotatedCount = 0
+  const moduleGroups = new Map<string, SVGElement[]>()
 
   for (const shape of dotShapes) {
     const coordinates = resolveDotMatrixCoordinates(shape, metrics)
@@ -133,9 +136,43 @@ export function annotateCanvasSvgForBitjsonMotion(svg: SVGElement): number | nul
       continue
     }
 
-    appendSvgClass(shape, "module")
-    shape.setAttribute("data-column", String(coordinates.col))
-    shape.setAttribute("data-row", String(coordinates.row))
+    const key = `${coordinates.row}:${coordinates.col}`
+    const shapes = moduleGroups.get(key) ?? []
+    shapes.push(shape)
+    moduleGroups.set(key, shapes)
+  }
+
+  let annotatedCount = 0
+
+  for (const [key, shapes] of moduleGroups) {
+    const [row, col] = key.split(":").map(Number)
+
+    if (shapes.length === 1) {
+      const shape = shapes[0]!
+      appendSvgClass(shape, "module")
+      shape.setAttribute("data-column", String(col))
+      shape.setAttribute("data-row", String(row))
+      annotatedCount += 1
+      continue
+    }
+
+    const document = svg.ownerDocument
+    const parent = shapes[0]?.parentNode
+
+    if (!document || !parent) {
+      continue
+    }
+
+    const group = document.createElementNS(SVG_NS, "g")
+    group.setAttribute("class", "module")
+    group.setAttribute("data-column", String(col))
+    group.setAttribute("data-row", String(row))
+    parent.insertBefore(group, shapes[0]!)
+
+    for (const shape of shapes) {
+      group.appendChild(shape)
+    }
+
     annotatedCount += 1
   }
 
@@ -148,12 +185,26 @@ export function annotateCanvasSvgForBitjsonMotion(svg: SVGElement): number | nul
   return annotatedCount
 }
 
-function materializeDataModulePaths(svg: SVGElement) {
+function materializeDataModulePaths(
+  svg: SVGElement,
+  state?: Pick<QrStudioState, "dotsColorMode" | "data" | "dotsPalette">,
+) {
   if (svg.querySelector('[data-qr-layer="bitjson-motion-modules"]')) {
     return
   }
 
   const pathLayers = getQrModulePathLayers(svg)
+  const allShapes = pathLayers.flatMap((layer) => layer.shapes)
+  const metrics =
+    allShapes.length > 0
+      ? collectDotMatrixMetrics(allShapes) ?? getFallbackDotMatrixMetrics(allShapes)
+      : null
+  const paletteColorByKey =
+    state?.dotsColorMode === "palette" && metrics
+      ? buildPaletteColorByCoordinate(allShapes, metrics, state)
+      : null
+  const usesOverlayColorMode =
+    state?.dotsColorMode === "gradient" || state?.dotsColorMode === "palette"
 
   for (const layer of pathLayers) {
     if (layer.shapes.length === 0) {
@@ -169,14 +220,99 @@ function materializeDataModulePaths(svg: SVGElement) {
     const group = document.createElementNS(SVG_NS, "g")
     group.setAttribute("data-qr-layer", "bitjson-motion-modules")
 
-    for (const segmentShape of layer.shapes) {
+    for (const [shapeIndex, segmentShape] of layer.shapes.entries()) {
       const path = document.createElementNS(SVG_NS, "path")
       path.setAttribute("d", segmentShape.getAttribute("d") ?? "")
-      path.setAttribute("fill", layer.fill)
+      path.setAttribute(
+        "fill",
+        resolveMotionModuleFill(
+          segmentShape,
+          layer.fill,
+          metrics,
+          paletteColorByKey,
+          shapeIndex,
+          state,
+        ),
+      )
       group.appendChild(path)
     }
 
     layer.element.replaceWith(group)
+  }
+
+  if (usesOverlayColorMode) {
+    suppressGradientPaletteOverlayLayers(svg)
+  }
+}
+
+function resolveMotionModuleFill(
+  shape: SVGElement,
+  fallbackFill: string,
+  metrics: DotMatrixMetrics | null,
+  paletteColorByKey: Map<string, string> | null,
+  shapeIndex: number,
+  state?: Pick<QrStudioState, "dotsColorMode" | "data" | "dotsPalette">,
+) {
+  if (!state || state.dotsColorMode === "solid") {
+    return fallbackFill
+  }
+
+  if (state.dotsColorMode === "gradient") {
+    return "url('#dot-gradient-definition')"
+  }
+
+  if (paletteColorByKey && metrics) {
+    const coordinates = resolveDotMatrixCoordinates(shape, metrics)
+    const key = coordinates
+      ? `${coordinates.row}:${coordinates.col}`
+      : `fallback:${shapeIndex}`
+    return paletteColorByKey.get(key) ?? fallbackFill
+  }
+
+  return fallbackFill
+}
+
+function buildPaletteColorByCoordinate(
+  shapes: SVGElement[],
+  metrics: DotMatrixMetrics,
+  state: Pick<QrStudioState, "data" | "dotsPalette">,
+) {
+  const palette = getActiveDotsPalette(state)
+
+  if (palette.length === 0) {
+    return new Map<string, string>()
+  }
+
+  const paletteSeed = hashDotPaletteString(state.data.trim())
+  const shapeGroups = createDotPaletteShapeGroups(shapes, metrics)
+  const assignments = shapeGroups.map((group) => ({
+    group,
+    paletteIndex: getDotPaletteIndex(group, palette.length, paletteSeed),
+  }))
+
+  balanceDotPaletteAssignments(assignments, palette.length, paletteSeed)
+
+  const colorByKey = new Map<string, string>()
+
+  for (const { group, paletteIndex } of assignments) {
+    const color = palette[paletteIndex] ?? palette[0]!
+    const key = group.coordinates
+      ? `${group.coordinates.row}:${group.coordinates.col}`
+      : `fallback:${group.fallbackIndex}`
+
+    colorByKey.set(key, color)
+  }
+
+  return colorByKey
+}
+
+function suppressGradientPaletteOverlayLayers(svg: SVGElement) {
+  for (const layer of svg.querySelectorAll('[data-qr-layer="dot-gradient-fill"]')) {
+    layer.setAttribute("opacity", "0")
+  }
+
+  for (const layer of svg.querySelectorAll('[data-qr-layer="dot-palette-color"]')) {
+    layer.setAttribute("opacity", "0")
   }
 }
 

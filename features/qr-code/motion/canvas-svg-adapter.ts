@@ -24,7 +24,7 @@ export function annotateCanvasSvgForBitjson(markup: string, state: QrStudioState
     return undefined;
   }
 
-  if (annotateCanvasSvgForBitjsonMotion(svg) === null) {
+  if (annotateCanvasSvgForBitjsonMotion(svg, state) === null) {
     return undefined;
   }
 
