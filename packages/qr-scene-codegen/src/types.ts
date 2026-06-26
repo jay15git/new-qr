@@ -31,7 +31,7 @@ export type SceneIrFontRef = {
   cssUrl?: string
 }
 
-export type DomLayerKind = "card" | "text" | "image" | "shape" | "qr" | "group"
+export type DomLayerKind = "card" | "text" | "image" | "shape" | "qr" | "group" | "module"
 
 export type DomLayerNode = {
   kind: DomLayerKind

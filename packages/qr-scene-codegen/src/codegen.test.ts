@@ -85,7 +85,7 @@ describe("qr-scene-codegen", () => {
     expect(react).not.toContain("<svg")
   })
 
-  it("allows inline svg only inside qr layer divs", () => {
+  it("emits qr layers as clip-path module divs without dangerouslySetInnerHTML", () => {
     const ir: SceneIr = {
       ...sampleIr,
       domLayers: [
@@ -100,15 +100,30 @@ describe("qr-scene-codegen", () => {
             top: 0,
             width: 100,
           },
-          svgInner:
-            '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="#000"/></svg>',
+          children: [
+            {
+              kind: "module",
+              id: "qr-1-shape-1",
+              bounds: { x: 0, y: 0, width: 100, height: 100 },
+              style: {
+                position: "absolute",
+                left: 0,
+                top: 0,
+                width: 100,
+                height: 100,
+                clipPath: "path('M0 0h100v100H0z')",
+                backgroundColor: "#000000",
+              },
+            },
+          ],
         },
       ],
     }
 
     const react = emitLiveReact(ir, { dialect: "tsx", componentName: "QrCard" })
-    expect(react).toContain("dangerouslySetInnerHTML")
-    expect(react).not.toMatch(/<svg xmlns[\s\S]*<\/div>\s*<\/div>/)
+    expect(react).toContain("clipPath:")
+    expect(react).not.toContain("dangerouslySetInnerHTML")
+    expect(react).not.toContain("<svg")
   })
 
   it("flattens nested svg elements", () => {

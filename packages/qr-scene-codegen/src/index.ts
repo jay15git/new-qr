@@ -33,6 +33,8 @@ export { buildCodegenManifest, prependCodegenComment, prependCodegenJsComment } 
 export { normalizeSvg, extractSvgInnerMarkup } from "./normalize-svg"
 export { parseReactSvgContent } from "./svg-transforms/parse-react-svg"
 export { svgToFramework } from "./svg-transforms/svg-to-framework"
+export { convertQrSvgToDom } from "./svg-to-dom-modules"
+export type { ConvertQrSvgOptions } from "./svg-to-dom-modules"
 
 export async function buildCodegenOutput(ir: SceneIr, target: CodegenTarget) {
   const manifest = buildCodegenManifest(ir, target)

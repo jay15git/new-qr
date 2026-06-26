@@ -64,6 +64,10 @@ function emitDomLayerHtml(layer: DomLayerNode, index: number): string {
     return `<div class="${className}" style="${style}">\n${children}\n</div>`
   }
 
+  if (!inner && (layer.kind === "module" || layer.kind === "card")) {
+    return `<div class="${className}" style="${style}"></div>`
+  }
+
   return `<div class="${className}" style="${style}">${inner}</div>`
 }
 
@@ -81,6 +85,11 @@ function emitDomLayerReact(layer: DomLayerNode, indent: string): string {
     return `${indent}<div style={{ ${style} }}>${children}</div>`
   }
 
+  const moduleImage = parseModuleImageHtml(layer.htmlContent)
+  if (moduleImage) {
+    return `${indent}<img alt="" src={${JSON.stringify(moduleImage.src)}} style={{ ${cssPropertiesToReactStyle(moduleImage.style)} }} />`
+  }
+
   if (layer.htmlContent) {
     return `${indent}<div style={{ ${style} }} dangerouslySetInnerHTML={{ __html: ${JSON.stringify(layer.htmlContent)} }} />`
   }
@@ -93,7 +102,44 @@ function emitDomLayerReact(layer: DomLayerNode, indent: string): string {
     return `${indent}<div style={{ ${style}, whiteSpace: "pre-wrap" }}>${JSON.stringify(layer.content)}</div>`
   }
 
-  return `${indent}<div style={{ ${style} }}>${JSON.stringify(layer.content ?? "")}</div>`
+  if (layer.content) {
+    return `${indent}<div style={{ ${style} }}>${JSON.stringify(layer.content)}</div>`
+  }
+
+  return `${indent}<div style={{ ${style} }} />`
+}
+
+function parseModuleImageHtml(htmlContent?: string) {
+  if (!htmlContent?.startsWith("<img")) {
+    return null
+  }
+
+  const srcMatch = htmlContent.match(/\ssrc="([^"]+)"/)
+  const styleMatch = htmlContent.match(/\sstyle="([^"]+)"/)
+  if (!srcMatch) {
+    return null
+  }
+
+  const style: Record<string, string | number> = {}
+  if (styleMatch) {
+    for (const rule of styleMatch[1].split(";")) {
+      const [rawKey, rawValue] = rule.split(":")
+      const key = rawKey?.trim()
+      const value = rawValue?.trim()
+      if (!key || !value) {
+        continue
+      }
+
+      const camelKey = key.replace(/-([a-z])/g, (_match, char: string) => char.toUpperCase())
+      const numeric = Number.parseFloat(value)
+      style[camelKey] = value.endsWith("px") && Number.isFinite(numeric) ? numeric : value
+    }
+  }
+
+  return {
+    src: srcMatch[1],
+    style,
+  }
 }
 
 export function emitDomLayerCssRules(layers: DomLayerNode[], classPrefix = "qr-layer") {
@@ -131,6 +177,10 @@ function emitDomLayerCssMarkup(layer: DomLayerNode, path: string, classPrefix: s
 
   if (layer.children?.length) {
     return `<div class="${classPrefix} ${className}">\n${children}\n</div>`
+  }
+
+  if (!inner && layer.kind === "module") {
+    return `<div class="${classPrefix} ${className}"></div>`
   }
 
   return `<div class="${classPrefix} ${className}">${inner}</div>`

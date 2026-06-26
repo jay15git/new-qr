@@ -1,4 +1,4 @@
-import type { DomLayerNode } from "@new-qr/qr-scene-codegen"
+import { convertQrSvgToDom, type DomLayerNode } from "@new-qr/qr-scene-codegen"
 
 import type { DraftingCardState } from "@/features/workspace/model/card-state"
 import {
@@ -253,8 +253,9 @@ function getDraftingQrLayerDom(
     : qrMarkup
   const backgroundMarkup = getDraftingQrBackgroundSvgMarkup(layer, state)
   const scaledQrMarkup = scaleNestedSvgMarkup(shadowedQrMarkup, layer.width, layer.height)
+  const fullSvgMarkup = `<svg xmlns="http://www.w3.org/2000/svg" width="${layer.width}" height="${layer.height}" viewBox="0 0 ${layer.width} ${layer.height}" preserveAspectRatio="none">${backgroundMarkup}${scaledQrMarkup}</svg>`
 
-  return {
+  const baseNode: DomLayerNode = {
     kind: "qr",
     id: layer.id,
     bounds: {
@@ -268,7 +269,24 @@ function getDraftingQrLayerDom(
       ...getExportLayerEffectStyle(layer),
       overflow: "visible",
     },
-    svgInner: `<svg xmlns="http://www.w3.org/2000/svg" width="${layer.width}" height="${layer.height}" viewBox="0 0 ${layer.width} ${layer.height}" preserveAspectRatio="none">${backgroundMarkup}${scaledQrMarkup}</svg>`,
+  }
+
+  if (state.dotMatrixAnimation.enabled && state.dotMatrixAnimation.animated) {
+    return {
+      ...baseNode,
+      svgInner: fullSvgMarkup,
+    }
+  }
+
+  const moduleChildren = convertQrSvgToDom(fullSvgMarkup, {
+    width: layer.width,
+    height: layer.height,
+    idPrefix: layer.id,
+  })
+
+  return {
+    ...baseNode,
+    children: moduleChildren,
   }
 }
 
