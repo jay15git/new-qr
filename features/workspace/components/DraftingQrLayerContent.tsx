@@ -10,8 +10,9 @@ import {
   getDraftingQrLayerLayout,
 } from "@/features/qr-code/rendering/svg-extension"
 import { DraftingQrBackground } from "@/features/workspace/components/QrBackground"
-import { buildDraftingQrPreviewScaledMarkup } from "@/features/workspace/export/layered-dom-parts"
+import { buildDraftingQrPreviewModules } from "@/features/workspace/export/layered-dom-parts"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
+import { ScalableDomLayerTree } from "@/features/workspace/rendering/dom-layer-tree"
 
 type DraftingQrLayerContentProps = {
   canvasSvgMarkup: string | null
@@ -33,9 +34,9 @@ export const DraftingQrLayerContent = memo(function DraftingQrLayerContent({
   const layout = getDraftingQrLayerLayout(layer.width, state)
   const qrPlacementStyle = getDraftingQrDomPlacementStyle(layout)
   const useAnimatedQr = shouldUseBitjsonMotionPreview(state) && Boolean(canvasSvgMarkup)
-  const scaledQrMarkup = useMemo(
-    () => (useAnimatedQr ? null : buildDraftingQrPreviewScaledMarkup(layer, qrMarkup, state)),
-    [layer.height, layer.id, layer.width, qrMarkup, state, useAnimatedQr],
+  const qrPreview = useMemo(
+    () => (useAnimatedQr ? null : buildDraftingQrPreviewModules(layer, qrMarkup, state)),
+    [layer.id, layer.shadow, qrMarkup, state, useAnimatedQr],
   )
 
   if (useAnimatedQr) {
@@ -63,16 +64,21 @@ export const DraftingQrLayerContent = memo(function DraftingQrLayerContent({
     <div className="relative h-full w-full" style={shapeTiltPerspectiveStyle}>
       <div className="relative h-full w-full" style={shapeTiltInnerStyle}>
         <DraftingQrBackground layer={layer} state={state} />
-        {scaledQrMarkup ? (
+        {qrPreview?.nodes.length ? (
           <div
-            className="pointer-events-none z-10 max-h-none max-w-none [&_svg]:h-full [&_svg]:w-full"
-            dangerouslySetInnerHTML={{ __html: scaledQrMarkup }}
+            className="pointer-events-none z-10 overflow-hidden"
             data-slot="drafting-qr-dom"
             style={{
               ...qrPlacementStyle,
               transformStyle: shapeTiltInnerStyle.transformStyle,
             }}
-          />
+          >
+            <ScalableDomLayerTree
+              layoutHeight={qrPreview.layoutHeight}
+              layoutWidth={qrPreview.layoutWidth}
+              nodes={qrPreview.nodes}
+            />
+          </div>
         ) : null}
       </div>
     </div>

@@ -1,6 +1,12 @@
 "use client"
 
-import { memo, type CSSProperties } from "react"
+import {
+  memo,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react"
 
 import type { DomLayerNode } from "@new-qr/qr-scene-codegen"
 
@@ -82,5 +88,70 @@ export const DomLayerTree = memo(function DomLayerTree({ nodes }: { nodes: DomLa
         <DomLayerNodeView key={node.id} node={node} />
       ))}
     </>
+  )
+})
+
+type ScalableDomLayerTreeProps = {
+  layoutHeight: number
+  layoutWidth: number
+  nodes: DomLayerNode[]
+}
+
+/** Stretch module coordinates to fill the placement box like preserveAspectRatio="none" SVG. */
+export const ScalableDomLayerTree = memo(function ScalableDomLayerTree({
+  layoutHeight,
+  layoutWidth,
+  nodes,
+}: ScalableDomLayerTreeProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState({ x: 1, y: 1 })
+
+  useLayoutEffect(() => {
+    const element = containerRef.current
+    if (!element || layoutWidth <= 0 || layoutHeight <= 0) {
+      return
+    }
+
+    const updateScale = () => {
+      const width = element.clientWidth
+      const height = element.clientHeight
+      if (width <= 0 || height <= 0) {
+        return
+      }
+
+      const nextScale = {
+        x: width / layoutWidth,
+        y: height / layoutHeight,
+      }
+
+      setScale(nextScale)
+    }
+
+    updateScale()
+
+    if (typeof ResizeObserver === "undefined") {
+      return
+    }
+
+    const observer = new ResizeObserver(updateScale)
+    observer.observe(element)
+
+    return () => observer.disconnect()
+  }, [layoutHeight, layoutWidth, nodes])
+
+  return (
+    <div ref={containerRef} className="relative h-full w-full overflow-hidden">
+      <div
+        style={{
+          height: layoutHeight,
+          position: "relative",
+          transform: `scale(${scale.x}, ${scale.y})`,
+          transformOrigin: "0 0",
+          width: layoutWidth,
+        }}
+      >
+        <DomLayerTree nodes={nodes} />
+      </div>
+    </div>
   )
 })

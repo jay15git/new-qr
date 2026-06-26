@@ -280,6 +280,10 @@ function convertRectNode(node: Element, context: ConvertContext) {
   }
 
   const rx = Number.parseFloat(node.getAttribute("rx") ?? node.getAttribute("ry") ?? "0")
+  const opacity = resolveOpacity(node, context.inheritedOpacity)
+  const inlineStyle = parseSvgInlineStyle(node.getAttribute("style"))
+  const rectShape = resolveRectShapeStyle(width, height, rx)
+
   const style = buildModuleStyle({
     context,
     left: x,
@@ -287,11 +291,21 @@ function convertRectNode(node: Element, context: ConvertContext) {
     width,
     height,
     fill,
-    borderRadius: rx > 0 ? rx : undefined,
-    opacity: resolveOpacity(node, context.inheritedOpacity),
+    borderRadius: rectShape.borderRadius,
+    clipPath: rectShape.clipPath,
+    opacity,
+    inlineStyle,
   })
 
-  return [createModuleNode(context.idPrefix, { x, y, width, height }, style)]
+  return [
+    createModuleNode(
+      context.idPrefix,
+      { x, y, width, height },
+      style,
+      {},
+      getModuleSuffix(node),
+    ),
+  ]
 }
 
 function convertClipPathDefinition(clipPathElement: Element, fill: string, context: ConvertContext) {
@@ -304,24 +318,24 @@ function convertClipPathDefinition(clipPathElement: Element, fill: string, conte
         return []
       }
 
-      return splitPathSubpaths(pathData).map((subpath) => {
-        const style = buildModuleStyle({
-          context,
-          left: 0,
-          top: 0,
-          width: context.viewBox.width,
-          height: context.viewBox.height,
-          fill,
-          clipPath: `path('${escapeCssPath(subpath)}')`,
-          opacity: context.inheritedOpacity,
-        })
+      const style = buildModuleStyle({
+        context,
+        left: 0,
+        top: 0,
+        width: context.viewBox.width,
+        height: context.viewBox.height,
+        fill,
+        clipPath: buildPathClipPath(pathData, child.getAttribute("fill-rule")),
+        opacity: context.inheritedOpacity,
+      })
 
-        return createModuleNode(
+      return [
+        createModuleNode(
           context.idPrefix,
           { x: 0, y: 0, width: context.viewBox.width, height: context.viewBox.height },
           style,
-        )
-      })
+        ),
+      ]
     }
 
     if (tag === "rect") {
@@ -366,26 +380,60 @@ function convertPathNode(node: Element, context: ConvertContext) {
   }
 
   const opacity = resolveOpacity(node, context.inheritedOpacity)
-  const subpaths = splitPathSubpaths(pathData)
+  const inlineStyle = parseSvgInlineStyle(node.getAttribute("style"))
+  const hasInlineTransform = Boolean(
+    inlineStyle.transform && !isNoOpTransform(inlineStyle.transform),
+  )
 
-  return subpaths.map((subpath) => {
-    const style = buildModuleStyle({
-      context,
-      left: 0,
-      top: 0,
-      width: context.viewBox.width,
-      height: context.viewBox.height,
-      fill,
-      clipPath: `path('${escapeCssPath(subpath)}')`,
-      opacity,
-    })
+  if (hasInlineTransform) {
+    const bounds = measurePathBoundingBox(pathData, node, context.viewBox)
+    if (bounds && bounds.width > 0 && bounds.height > 0) {
+      const localPath = translatePathMoveToOrigin(pathData, bounds.x, bounds.y)
+      const style = buildModuleStyle({
+        context,
+        left: bounds.x,
+        top: bounds.y,
+        width: bounds.width,
+        height: bounds.height,
+        fill,
+        clipPath: buildPathClipPath(localPath, node.getAttribute("fill-rule")),
+        opacity,
+        inlineStyle,
+      })
 
-    return createModuleNode(
+      return [
+        createModuleNode(
+          context.idPrefix,
+          bounds,
+          style,
+          {},
+          getModuleSuffix(node),
+        ),
+      ]
+    }
+  }
+
+  const style = buildModuleStyle({
+    context,
+    left: 0,
+    top: 0,
+    width: context.viewBox.width,
+    height: context.viewBox.height,
+    fill,
+    clipPath: buildPathClipPath(pathData, node.getAttribute("fill-rule")),
+    opacity,
+    inlineStyle,
+  })
+
+  return [
+    createModuleNode(
       context.idPrefix,
       { x: 0, y: 0, width: context.viewBox.width, height: context.viewBox.height },
       style,
-    )
-  })
+      {},
+      getModuleSuffix(node),
+    ),
+  ]
 }
 
 function splitPathSubpaths(pathData: string) {
@@ -393,6 +441,16 @@ function splitPathSubpaths(pathData: string) {
     .split(/(?=[Mm])/)
     .map((segment) => segment.trim())
     .filter(Boolean)
+}
+
+function buildPathClipPath(pathData: string, fillRule?: string | null) {
+  const escaped = escapeCssPath(pathData)
+  if (splitPathSubpaths(pathData).length <= 1) {
+    return `path('${escaped}')`
+  }
+
+  const rule = fillRule === "evenodd" ? "evenodd" : "nonzero"
+  return `path(${rule}, '${escaped}')`
 }
 
 function convertCircleNode(node: Element, context: ConvertContext) {
@@ -489,6 +547,7 @@ function buildModuleStyle({
   clipPath,
   borderRadius,
   opacity,
+  inlineStyle,
 }: {
   context: ConvertContext
   left: number
@@ -499,6 +558,7 @@ function buildModuleStyle({
   clipPath?: string
   borderRadius?: number | string
   opacity: number
+  inlineStyle?: SvgInlineStyle
 }) {
   const style: Record<string, string | number> = {
     position: "absolute",
@@ -527,25 +587,245 @@ function buildModuleStyle({
     style.opacity = opacity
   }
 
-  if (context.inheritedTransform) {
-    style.transform = context.inheritedTransform
-    style.transformOrigin = "0 0"
-  }
+  applyInlineTransforms(style, context, inlineStyle)
 
   return style
+}
+
+type SvgInlineStyle = {
+  transform?: string
+  transformOrigin?: string
+  transformBox?: string
+}
+
+function parseSvgInlineStyle(value: string | null): SvgInlineStyle {
+  if (!value) {
+    return {}
+  }
+
+  const parsed: SvgInlineStyle = {}
+
+  for (const rule of value.split(";")) {
+    const separatorIndex = rule.indexOf(":")
+    if (separatorIndex === -1) {
+      continue
+    }
+
+    const key = rule.slice(0, separatorIndex).trim().toLowerCase()
+    const rawValue = rule.slice(separatorIndex + 1).trim()
+    if (!key || !rawValue) {
+      continue
+    }
+
+    if (key === "transform") {
+      parsed.transform = rawValue
+    }
+
+    if (key === "transform-origin") {
+      parsed.transformOrigin = rawValue
+    }
+
+    if (key === "transform-box") {
+      parsed.transformBox = rawValue
+    }
+  }
+
+  return parsed
+}
+
+function isNoOpTransform(transform: string) {
+  return /^rotate\(\s*0deg\s*\)$/i.test(transform.trim())
+}
+
+function mapSvgTransformOrigin(origin: string) {
+  const normalized = origin.trim().toLowerCase()
+  if (normalized === "center" || normalized === "center center") {
+    return "50% 50%"
+  }
+
+  return origin
+}
+
+function applyInlineTransforms(
+  style: Record<string, string | number>,
+  context: ConvertContext,
+  inlineStyle?: SvgInlineStyle,
+) {
+  const localTransform =
+    inlineStyle?.transform && !isNoOpTransform(inlineStyle.transform)
+      ? inlineStyle.transform
+      : undefined
+  const transforms = [context.inheritedTransform, localTransform].filter(Boolean)
+
+  if (transforms.length === 0) {
+    return
+  }
+
+  style.transform = transforms.join(" ")
+
+  if (localTransform && inlineStyle?.transformOrigin) {
+    style.transformOrigin = mapSvgTransformOrigin(inlineStyle.transformOrigin)
+    return
+  }
+
+  if (context.inheritedTransform) {
+    style.transformOrigin = "0 0"
+  }
+}
+
+function measurePathBoundingBox(
+  pathData: string,
+  node: Element,
+  viewBox: { width: number; height: number },
+) {
+  const graphics = node as SVGGraphicsElement
+  if (typeof graphics.getBBox === "function") {
+    try {
+      const bbox = graphics.getBBox()
+      if (Number.isFinite(bbox.width) && bbox.width > 0 && Number.isFinite(bbox.height) && bbox.height > 0) {
+        return {
+          x: bbox.x,
+          y: bbox.y,
+          width: bbox.width,
+          height: bbox.height,
+        }
+      }
+    } catch {
+      // Fall back to finder-cell snapping in environments without SVG geometry APIs.
+    }
+  }
+
+  return resolveFinderInnerCellBounds(pathData, viewBox)
+}
+
+function parsePathMovePoint(pathData: string) {
+  const match = pathData.match(
+    /^M\s*([+-]?(?:\d+\.?\d*|\.\d+))(?:[\s,]+([+-]?(?:\d+\.?\d*|\.\d+)))?/,
+  )
+
+  if (!match) {
+    return null
+  }
+
+  return {
+    x: Number.parseFloat(match[1]),
+    y: Number.parseFloat(match[2] ?? "0"),
+  }
+}
+
+function resolveFinderInnerCellBounds(
+  pathData: string,
+  viewBox: { width: number; height: number },
+) {
+  const anchor = parsePathMovePoint(pathData)
+  if (!anchor) {
+    return null
+  }
+
+  const finderCellSize = 3
+
+  for (let margin = 0; margin <= viewBox.width; margin += 1) {
+    const moduleCount = viewBox.width - margin * 2
+    if (moduleCount < 7) {
+      continue
+    }
+
+    const origins = [
+      { x: margin + 2, y: margin + 2 },
+      { x: moduleCount + margin - 7 + 2, y: margin + 2 },
+      { x: margin + 2, y: moduleCount + margin - 7 + 2 },
+    ]
+
+    for (const origin of origins) {
+      if (
+        anchor.x >= origin.x &&
+        anchor.x <= origin.x + finderCellSize &&
+        anchor.y >= origin.y &&
+        anchor.y <= origin.y + finderCellSize
+      ) {
+        return {
+          x: origin.x,
+          y: origin.y,
+          width: finderCellSize,
+          height: finderCellSize,
+        }
+      }
+    }
+  }
+
+  return null
+}
+
+function translatePathMoveToOrigin(pathData: string, originX: number, originY: number) {
+  return pathData.replace(
+    /M\s*([+-]?(?:\d+\.?\d*|\.\d+))(?:[\s,]+([+-]?(?:\d+\.?\d*|\.\d+)))?/g,
+    (_match, xValue, yValue) => {
+      const x = formatPathCoord(Number.parseFloat(xValue) - originX)
+      const y = formatPathCoord(
+        (yValue === undefined ? 0 : Number.parseFloat(yValue)) - originY,
+      )
+      return `M ${x} ${y}`
+    },
+  )
+}
+
+function formatPathCoord(value: number) {
+  if (!Number.isFinite(value)) {
+    return "0"
+  }
+
+  return Number.isInteger(value) ? String(value) : String(Number(value.toFixed(4)))
+}
+
+function resolveRectShapeStyle(width: number, height: number, rx: number) {
+  if (rx <= 0) {
+    return {
+      borderRadius: undefined,
+      clipPath: undefined,
+    }
+  }
+
+  const cap = Math.min(width, height) / 2
+  if (rx >= cap) {
+    return {
+      borderRadius: undefined,
+      clipPath: `circle(${cap}px at ${width / 2}px ${height / 2}px)`,
+    }
+  }
+
+  return {
+    borderRadius: rx,
+    clipPath: undefined,
+  }
 }
 
 function createModuleNode(
   idPrefix: string,
   bounds: { x: number; y: number; width: number; height: number },
   style: Record<string, string | number>,
+  extras: Pick<DomLayerNode, "svgInner" | "htmlContent"> = {},
+  moduleSuffix = "shape",
 ): DomLayerNode {
   return {
     kind: "module",
-    id: nextModuleId(idPrefix, "shape"),
+    id: nextModuleId(idPrefix, moduleSuffix),
     bounds,
     style,
+    ...extras,
   }
+}
+
+function getModuleSuffix(node: Element) {
+  const testId = node.getAttribute("data-testid")
+  if (testId === "finder-patterns-outer") {
+    return "finder-outer"
+  }
+
+  if (testId === "finder-patterns-inner") {
+    return "finder-inner"
+  }
+
+  return "shape"
 }
 
 function shouldSkipNode(node: Element) {

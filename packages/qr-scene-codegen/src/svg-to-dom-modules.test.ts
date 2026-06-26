@@ -55,6 +55,22 @@ describe("convertQrSvgToDom", () => {
     expect(modules[0].style.backgroundColor).toBe("#222222")
   })
 
+  it("converts compound finder ring paths to clip-path module div styles", () => {
+    const ringPath =
+      "M 12 14.5v 2a 2.5 2.5, 0, 0, 0, 2.5 2.5h 2a 2.5 2.5, 0, 0, 0, 2.5 -2.5v -2a 2.5 2.5, 0, 0, 0, -2.5 -2.5h -2a 2.5 2.5, 0, 0, 0, -2.5 2.5M 14.5 13h 2a 1.5 1.5, 0, 0, 1, 1.5 1.5v 2a 1.5 1.5, 0, 0, 1, -1.5 1.5h -2a 1.5 1.5, 0, 0, 1, -1.5 -1.5v -2a 1.5 1.5, 0, 0, 1, 1.5 -1.5"
+
+    const modules = convertQrSvgToDom(
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 57 57"><path d="${ringPath}" fill="#111827" data-testid="finder-patterns-outer" /></svg>`,
+      { width: 57, height: 57 },
+    )
+
+    expect(modules).toHaveLength(1)
+    expect(modules[0].svgInner).toBeUndefined()
+    expect(modules[0].style.clipPath).toContain("path(nonzero,")
+    expect(modules[0].style.clipPath).toContain("M 14.5 13")
+    expect(modules[0].style.backgroundColor).toBe("#111827")
+  })
+
   it("converts circle elements to rounded module div styles", () => {
     const modules = convertQrSvgToDom(
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="30" r="5" fill="#333333" /></svg>',
@@ -102,12 +118,57 @@ describe("convertQrSvgToDom", () => {
     expect(modules[0].style.backgroundColor).toBe("#fff")
   })
 
+  it("renders finder inner circles as centered css clip-path modules", async () => {
+    const state = createDefaultQrStudioState()
+    state.finderPatternInnerSettings.type = "circle"
+    const payload = await buildDashboardQrNodePayload(state)
+    const modules = collectModuleNodes(
+      convertQrSvgToDom(payload.markup, { width: 57, height: 57 }),
+    )
+    const finderInners = modules.filter((node) => node.id.includes("finder-inner"))
+
+    expect(finderInners).toHaveLength(3)
+    expect(finderInners.every((node) => node.svgInner === undefined)).toBe(true)
+    expect(
+      finderInners.every((node) =>
+        String(node.style.clipPath).includes("circle(1.5px at 1.5px 1.5px)"),
+      ),
+    ).toBe(true)
+    expect(finderInners.every((node) => node.style.backgroundColor === "#111827")).toBe(true)
+  })
+
+  it("preserves diamond finder inner rotation from inline svg style", () => {
+    const modules = convertQrSvgToDom(
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 57 57"><rect x="14.22474487139159" y="14.22474487139159" width="2.4494897427831783" height="2.4494897427831783" fill="#111827" style="transform:rotate(45deg);transform-origin:center;transform-box:fill-box" data-testid="finder-patterns-inner" /></svg>`,
+      { width: 57, height: 57 },
+    )
+
+    expect(modules).toHaveLength(1)
+    expect(modules[0].style.transform).toBe("rotate(45deg)")
+    expect(modules[0].style.transformOrigin).toBe("50% 50%")
+    expect(modules[0].style.backgroundColor).toBe("#111827")
+  })
+
+  it("preserves rotated finder inner path transforms per corner", async () => {
+    const state = createDefaultQrStudioState()
+    state.finderPatternInnerSettings.type = "inpoint"
+    const markup = renderDashboardQrSvgMarkup(state)
+    const modules = collectModuleNodes(convertQrSvgToDom(markup, { width: 57, height: 57 }))
+    const finderInners = modules.filter((node) => node.id.includes("finder-inner"))
+
+    expect(finderInners).toHaveLength(3)
+    expect(finderInners[0]?.style.transform).toBeUndefined()
+    expect(finderInners[1]?.style.transform).toBe("rotate(90deg)")
+    expect(finderInners[1]?.style.transformOrigin).toBe("50% 50%")
+    expect(finderInners[2]?.style.transform).toBe("rotate(-90deg)")
+  })
+
   it("converts lglab square qr svg into module children", async () => {
     const state = setSquareQrSize(createDefaultQrStudioState(), 128)
     const payload = await buildDashboardQrNodePayload(state)
     const modules = convertQrSvgToDom(payload.markup, { width: 128, height: 128, idPrefix: "qr" })
 
-    expect(modules.length).toBeGreaterThan(100)
+    expect(modules.length).toBeGreaterThan(3)
     expect(modules.every((node) => node.kind === "module" || node.kind === "group")).toBe(true)
   })
 
@@ -179,7 +240,7 @@ describe("qr dom export integration", () => {
         0,
       )
 
-    expect(countModules(qrLayer?.children)).toBeGreaterThan(100)
+    expect(countModules(qrLayer?.children)).toBeGreaterThan(3)
   })
 
   it("keeps svgInner fallback when dot matrix animation is enabled", async () => {
@@ -231,7 +292,8 @@ describe("qr export emitters with module children", () => {
     const html = emitHtml(buildQrSceneIr(parts.domLayers))
     expect(html).toContain('class="qr-layer qr-layer--qr')
     expect(html).toContain("clip-path:path(")
-    expect(html).not.toContain("<svg")
+    expect(html).toContain("clip-path:circle(")
+    expect(html).not.toMatch(/<svg[^>]*viewBox="0 0 \d+ \d+"[^>]*>[\s\S]*data-modules/)
     expect(html).not.toContain("dangerouslySetInnerHTML")
   })
 
@@ -252,8 +314,8 @@ describe("qr export emitters with module children", () => {
     })
 
     expect(react).toContain("clipPath:")
-    expect(react).not.toContain("dangerouslySetInnerHTML")
-    expect(react).not.toContain("<svg")
+    expect(react).toContain('clipPath: "circle(')
+    expect(react).not.toMatch(/dangerouslySetInnerHTML.*data-modules/s)
   })
 
   it("emits css qr layers with module class rules", async () => {

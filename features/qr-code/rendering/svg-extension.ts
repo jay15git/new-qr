@@ -2373,6 +2373,20 @@ export function getDraftingQrDomPlacementStyle(
   }
 }
 
+/** Stretch outer-metrics QR DOM coords to fill the drafting layer box. */
+export function getDraftingQrDomStretchScale(
+  layer: Pick<{ height: number; width: number }, "height" | "width">,
+  layout: Pick<DraftingQrLayerLayout, "metrics">,
+) {
+  const outerWidth = Math.max(1, layout.metrics.outerWidth)
+  const outerHeight = Math.max(1, layout.metrics.outerHeight)
+
+  return {
+    x: layer.width / outerWidth,
+    y: layer.height / outerHeight,
+  }
+}
+
 export function getDraftingQrBackgroundPathTransform(
   shape: QrBackgroundShapeDefinition,
   backingRegion: BackgroundRenderMetrics["backingRegion"],

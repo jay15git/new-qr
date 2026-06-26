@@ -272,7 +272,9 @@ describe("Pane", () => {
     const cardShape = card.querySelector('[data-slot="drafting-card-shape"]')
     const qrBackground = container.querySelector('[data-slot="drafting-qr-background"]')
     const qrDom = container.querySelector('[data-slot="drafting-qr-dom"]') as HTMLElement
-    const qrSvg = qrDom?.querySelector("svg")
+    const moduleNodes = Array.from(qrDom?.querySelectorAll("div") ?? []).filter((node) =>
+      Boolean(node.style.clipPath),
+    )
 
     expect(card.getAttribute("data-card-shape")).toBeNull()
     expect(cardShape).toBeNull()
@@ -280,7 +282,7 @@ describe("Pane", () => {
     expect(qrBackground).not.toBeNull()
     expect(qrBackground?.getAttribute("data-background-shape")).toBe("flower")
     expect(qrDom).not.toBeNull()
-    expect(qrSvg).not.toBeNull()
+    expect(moduleNodes.length).toBeGreaterThan(0)
     expect(buildDashboardQrNodePayloadSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         backgroundGradient: expect.objectContaining({ enabled: false }),
@@ -294,7 +296,9 @@ describe("Pane", () => {
         backgroundShapeId: "none",
       }),
     )
-    expect(qrSvg?.querySelector('[data-qr-layer="dot"]')).not.toBeNull()
+    expect(
+      moduleNodes.some((node) => node.style.clipPath?.includes("path(")),
+    ).toBe(true)
   })
 
   it("applies the selected card css pattern to the card layer", async () => {
@@ -1461,17 +1465,16 @@ describe("Pane", () => {
     await waitForQrPaneRender()
 
     const qrDom = container.querySelector('[data-slot="drafting-qr-dom"]') as HTMLElement
-    const qrSvg = qrDom?.querySelector("svg")
-    const shadowGroup = qrSvg?.querySelector('[data-drafting-qr-shadow-source="true"]')
-    const dropShadow = Array.from(qrSvg?.querySelectorAll("*") ?? []).find(
-      (node) => node.tagName.toLowerCase() === "fedropshadow",
+    const shadowGroup = Array.from(qrDom?.querySelectorAll("div") ?? []).find((node) =>
+      node.style.filter.includes("drop-shadow(6px 8px"),
+    )
+    const moduleNodes = Array.from(qrDom?.querySelectorAll("div") ?? []).filter((node) =>
+      node.style.clipPath?.includes("path("),
     )
 
-    expect(shadowGroup?.querySelector('rect[clip-path*="clip-path-dot-color"]')).not.toBeNull()
-    expect(dropShadow?.getAttribute("dx")).toBe("6")
-    expect(dropShadow?.getAttribute("dy")).toBe("8")
-    expect(dropShadow?.getAttribute("stdDeviation")).toBe("9")
-    expect(dropShadow?.getAttribute("flood-opacity")).toBe("0.6")
+    expect(shadowGroup).not.toBeNull()
+    expect(moduleNodes.length).toBeGreaterThan(0)
+    expect(shadowGroup?.contains(moduleNodes[0] ?? null)).toBe(true)
   })
 
   it("keeps the qr canvas unshadowed when not selected", async () => {

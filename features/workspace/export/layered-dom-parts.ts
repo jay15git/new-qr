@@ -280,26 +280,63 @@ export function buildDraftingQrPreviewScaledMarkup(
   return scaledQrMarkup
 }
 
-/** Preview/export helper: QR modules at inner layout size. */
+export type DraftingQrPreviewModules = {
+  layoutHeight: number
+  layoutWidth: number
+  nodes: DomLayerNode[]
+}
+
+function readQrMarkupViewBox(markup: string) {
+  const match = markup.match(/\bviewBox\s*=\s*(['"])([^'"]+)\1/i)
+  if (match) {
+    const parts = match[2].split(/[\s,]+/).map(Number.parseFloat)
+    if (parts.length === 4 && parts.every((value) => Number.isFinite(value)) && parts[2] > 0 && parts[3] > 0) {
+      return { x: parts[0], y: parts[1], width: parts[2], height: parts[3] }
+    }
+  }
+
+  return { x: 0, y: 0, width: 57, height: 57 }
+}
+
+function extractSvgInnerContent(markup: string) {
+  const match = markup.match(/<svg\b[^>]*>([\s\S]*)<\/svg>/i)
+  return match ? match[1] : markup
+}
+
+/** Keep nested svg width/height aligned with viewBox so flatten does not bake resize scale. */
+function normalizeQrSvgForDomConversion(markup: string) {
+  const viewBox = readQrMarkupViewBox(markup)
+  const inner = extractSvgInnerContent(markup)
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${viewBox.width}" height="${viewBox.height}" viewBox="0 0 ${viewBox.width} ${viewBox.height}">${inner}</svg>`
+}
+
+/** Preview helper: QR modules in native viewBox coords; placement box stretches them on resize. */
 export function buildDraftingQrPreviewModules(
   layer: DraftingCanvasLayer,
   qrMarkup: string,
   state: QrStudioState,
-): DomLayerNode[] | null {
+): DraftingQrPreviewModules | null {
   if (!qrMarkup) {
     return null
   }
 
-  const { layout, scaledQrMarkup } = getDraftingQrScaledMarkup(layer, qrMarkup, state)
-  const qrSvgMarkup = `<svg xmlns="http://www.w3.org/2000/svg" width="${layout.innerWidth}" height="${layout.innerHeight}" viewBox="0 0 ${layout.innerWidth} ${layout.innerHeight}" preserveAspectRatio="none">${scaledQrMarkup}</svg>`
-
+  const shadowedQrMarkup = hasDraftingLayerShadow(layer)
+    ? applyDraftingQrForegroundShadow(qrMarkup, layer)
+    : qrMarkup
+  const qrSvgMarkup = normalizeQrSvgForDomConversion(shadowedQrMarkup)
+  const viewBox = readQrMarkupViewBox(qrSvgMarkup)
   const modules = convertQrSvgToDom(qrSvgMarkup, {
-    width: layout.innerWidth,
-    height: layout.innerHeight,
+    width: viewBox.width,
+    height: viewBox.height,
     idPrefix: layer.id,
   })
 
-  return modules
+  return {
+    layoutHeight: viewBox.height,
+    layoutWidth: viewBox.width,
+    nodes: modules,
+  }
 }
 
 export function buildDraftingQrDomContent(
