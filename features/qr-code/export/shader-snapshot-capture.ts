@@ -13,7 +13,8 @@ export async function captureCardShaderSnapshots(
     return undefined
   }
 
-  const canvas = root.querySelector<HTMLCanvasElement>(
+  const exportRoot = root.querySelector("[data-export-root]") ?? root
+  const canvas = exportRoot.querySelector<HTMLCanvasElement>(
     '[data-shader-canvas-host] canvas, [data-slot="dashboard-compose-card-paper-shader"] canvas, [data-slot="drafting-card-paper-shader-preview"] canvas',
   )
 

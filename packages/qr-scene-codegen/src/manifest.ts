@@ -1,24 +1,27 @@
-import type { FrameworkTarget, SceneIr } from "./types"
-import { isLiveReactTarget } from "./types"
+import type { CodegenTarget, SceneIr } from "./types"
+import { isCodeExportTarget } from "./types"
 
-export function buildCodegenManifest(
-  ir: SceneIr,
-  target: FrameworkTarget,
-) {
-  const dependencies: Record<string, string> = {}
-
-  if (isLiveReactTarget(target)) {
-    if (ir.shaders.length > 0) {
-      dependencies["@paper-design/shaders-react"] = "0.0.76"
-      dependencies["@paper-design/shaders"] = "0.0.76"
-    }
-    if (ir.animatedQr) {
-      dependencies["@new-qr/qr-scene-bitjson"] = "workspace:*"
-    }
+function targetUsesReactDependencies(target: CodegenTarget) {
+  if (isCodeExportTarget(target)) {
+    return target.format === "react"
   }
 
-  if (target.framework === "react" && target.dialect === "tsx") {
-    dependencies.react = "^19.2.4"
+  return target.framework === "react"
+}
+
+export function buildCodegenManifest(ir: SceneIr, target: CodegenTarget) {
+  const dependencies: Record<string, string> = {}
+  const needsShaders = ir.shaders.length > 0
+  const needsAnimatedQr = Boolean(ir.animatedQr)
+  const usesReact = targetUsesReactDependencies(target)
+
+  if (usesReact && needsShaders) {
+    dependencies["@paper-design/shaders-react"] = "0.0.76"
+    dependencies["@paper-design/shaders"] = "0.0.76"
+  }
+
+  if (usesReact && needsAnimatedQr) {
+    dependencies["@new-qr/qr-scene-bitjson"] = "workspace:*"
   }
 
   const installCommand =
@@ -44,4 +47,20 @@ export function buildCodegenManifest(
     installCommand,
     fontBlocks,
   }
+}
+
+export function prependCodegenComment(code: string, installCommand: string) {
+  if (!installCommand) {
+    return code
+  }
+
+  return `<!-- Required:\n${installCommand}\n-->\n${code}`
+}
+
+export function prependCodegenJsComment(code: string, installCommand: string) {
+  if (!installCommand) {
+    return code
+  }
+
+  return `/** Required:\n * ${installCommand}\n */\n${code}`
 }

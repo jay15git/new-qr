@@ -3,8 +3,7 @@ import {
   getShaderComponentExportName,
 } from "@new-qr/qr-scene-shaders"
 
-import { emitSvg } from "./emit-svg"
-import { preprocessSvg } from "./preprocess-svg"
+import { emitDomLayersReact } from "./emit-dom-tree"
 import type { SceneIr } from "./types"
 
 function formatShaderProps(props: Record<string, unknown>) {
@@ -49,7 +48,7 @@ ${formatShaderProps(props)}
       </div>`
   }
 
-  const staticSvg = preprocessSvg(emitSvg({ ...ir, shaders: [] }))
+  const domBlocks = emitDomLayersReact(ir.domLayers ?? [])
   const paperImports = [...shaderImports].filter((name) => name !== "AnimatedQr")
   const shaderImportLine =
     paperImports.length > 0
@@ -63,11 +62,7 @@ ${formatShaderProps(props)}
   return (
     <div style={{ position: "relative", width: ${ir.bounds.width}, height: ${ir.bounds.height}, overflow: "hidden" }}>
 ${shaderBlocks.join("\n")}
-      <div
-        aria-hidden="true"
-        dangerouslySetInnerHTML={{ __html: ${JSON.stringify(staticSvg)} }}
-        style={{ position: "absolute", inset: 0 }}
-      />
+${domBlocks}
 ${qrBlock}
     </div>
   )

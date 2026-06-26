@@ -1,17 +1,51 @@
 import { describe, expect, it } from "vitest"
 
+import { emitCss } from "./emit-css"
+import { emitHtml } from "./emit-html"
 import { emitLiveReact } from "./emit-live-react"
 import { emitSvg } from "./emit-svg"
 import { buildCodegenOutput } from "./index"
 import { normalizeSvg } from "./normalize-svg"
 import { preprocessSvg } from "./preprocess-svg"
 import { parseReactSvgContent } from "./svg-transforms/parse-react-svg"
-import type { SceneIr } from "./types"
+import type { DomLayerNode, SceneIr } from "./types"
+
+const sampleDomLayers: DomLayerNode[] = [
+  {
+    kind: "card",
+    id: "card-1",
+    bounds: { x: 0, y: 0, width: 100, height: 100 },
+    style: {
+      backgroundColor: "#ffffff",
+      height: 100,
+      left: 0,
+      position: "absolute",
+      top: 0,
+      width: 100,
+    },
+  },
+  {
+    kind: "text",
+    id: "text-1",
+    bounds: { x: 10, y: 10, width: 80, height: 20 },
+    style: {
+      color: "#111111",
+      fontSize: 16,
+      height: "fit-content",
+      left: 10,
+      position: "absolute",
+      top: 10,
+      width: 80,
+    },
+    content: "Hello",
+  },
+]
 
 const sampleIr: SceneIr = {
   bounds: { minX: 0, minY: 0, width: 100, height: 100 },
   defs: "",
   body: '<rect x="10" y="10" width="20" height="20" fill="#111" />',
+  domLayers: sampleDomLayers,
   shaders: [],
   fonts: [],
   componentName: "QrCard",
@@ -22,6 +56,59 @@ describe("qr-scene-codegen", () => {
     const svg = emitSvg(sampleIr)
     expect(svg).toContain('<svg xmlns="http://www.w3.org/2000/svg"')
     expect(svg).toContain('<rect x="10" y="10"')
+  })
+
+  it("emits html from dom layers without root svg wrapper", () => {
+    const html = emitHtml(sampleIr)
+    expect(html).toContain('class="qr-card"')
+    expect(html).toContain('class="qr-layer qr-layer--card')
+    expect(html).toContain('class="qr-layer qr-layer--text')
+    expect(html).toContain("Hello")
+    expect(html).not.toMatch(/<svg[\s\S]*viewBox="0 0 100 100"/)
+    expect(html).not.toContain("Required:")
+  })
+
+  it("emits css from dom layers with layer classes", () => {
+    const css = emitCss(sampleIr)
+    expect(css).toContain("<style>")
+    expect(css).toContain(".qr-card")
+    expect(css).toContain(".qr-layer--card-0")
+    expect(css).toContain(".qr-layer--text-1")
+    expect(css).not.toMatch(/<svg[\s\S]*viewBox="0 0 100 100"/)
+  })
+
+  it("emits react from dom layers without monolithic svg blob", () => {
+    const react = emitLiveReact(sampleIr, { dialect: "tsx", componentName: "QrCard" })
+    expect(react).toContain("<div style={{")
+    expect(react).toContain("Hello")
+    expect(react).not.toContain("dangerouslySetInnerHTML")
+    expect(react).not.toContain("<svg")
+  })
+
+  it("allows inline svg only inside qr layer divs", () => {
+    const ir: SceneIr = {
+      ...sampleIr,
+      domLayers: [
+        {
+          kind: "qr",
+          id: "qr-1",
+          bounds: { x: 0, y: 0, width: 100, height: 100 },
+          style: {
+            height: 100,
+            left: 0,
+            position: "absolute",
+            top: 0,
+            width: 100,
+          },
+          svgInner:
+            '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="#000"/></svg>',
+        },
+      ],
+    }
+
+    const react = emitLiveReact(ir, { dialect: "tsx", componentName: "QrCard" })
+    expect(react).toContain("dangerouslySetInnerHTML")
+    expect(react).not.toMatch(/<svg xmlns[\s\S]*<\/div>\s*<\/div>/)
   })
 
   it("flattens nested svg elements", () => {
@@ -45,16 +132,47 @@ describe("qr-scene-codegen", () => {
     expect(react).toContain('fill="#111"')
   })
 
-  it("builds static tsx export", async () => {
+  it("builds react tsx export without deps for simple scenes", async () => {
     const result = await buildCodegenOutput(sampleIr, {
-      framework: "react",
+      format: "react",
       dialect: "tsx",
-      mode: "static",
       componentName: "QrCard",
     })
 
     expect(result.code).toContain("QrCard")
-    expect(result.code).toContain("SVGProps")
+    expect(result.code).not.toContain("Required:")
+    expect(result.manifest.installCommand).toBe("")
+    expect(result.code).not.toContain("dangerouslySetInnerHTML")
+  })
+
+  it("builds react export with shader import when shaders are present", async () => {
+    const ir: SceneIr = {
+      ...sampleIr,
+      shaders: [
+        {
+          kind: "shader",
+          shader: {
+            shaderId: "halftone-cmyk",
+            params: { size: 0.2 },
+            frame: 0,
+            speed: 1,
+            paused: false,
+          },
+          bounds: { x: 0, y: 0, width: 100, height: 100 },
+          fallbackFill: "#fff",
+        },
+      ],
+    }
+
+    const result = await buildCodegenOutput(ir, {
+      format: "react",
+      dialect: "tsx",
+      componentName: "QrCard",
+    })
+
+    expect(result.code).toContain("HalftoneCmyk")
+    expect(result.code).toContain("@paper-design/shaders-react")
+    expect(result.manifest.installCommand).toContain("@paper-design/shaders-react")
   })
 
   it("builds live react export with shader import", () => {
@@ -79,5 +197,17 @@ describe("qr-scene-codegen", () => {
     const code = emitLiveReact(ir, { dialect: "tsx", componentName: "QrCard" })
     expect(code).toContain("HalftoneCmyk")
     expect(code).toContain("@paper-design/shaders-react")
+  })
+
+  it("builds legacy static tsx export", async () => {
+    const result = await buildCodegenOutput(sampleIr, {
+      framework: "react",
+      dialect: "tsx",
+      mode: "static",
+      componentName: "QrCard",
+    })
+
+    expect(result.code).toContain("QrCard")
+    expect(result.code).toContain("SVGProps")
   })
 })

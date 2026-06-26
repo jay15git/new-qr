@@ -130,8 +130,7 @@ import {
   type StudioGradient,
   type StudioDataModulesStyle,
 } from "@/features/qr-code/model/state"
-import type { FrameworkTarget } from "@new-qr/qr-scene-codegen"
-import type { SceneDocumentV1 } from "@new-qr/qr-scene-schema"
+import type { CodeExportTarget } from "@new-qr/qr-scene-codegen"
 import {
   ERROR_CORRECTION_LEVEL_OPTIONS,
   TYPE_NUMBER_MAX,
@@ -216,7 +215,7 @@ import {
   QR_INPUT_OPTIONS,
   type QrInputType,
 } from "@/features/qr-code/content/input-options"
-import { DesktopEmbedInspector } from "@/features/desktop-shell/components/DesktopEmbedInspector"
+import { DesktopCodeExportInspector } from "@/features/desktop-shell/components/DesktopCodeExportInspector"
 import { DownloadIcon as AnimatedDownloadIcon } from "@/components/ui/download"
 import {
   DraggableList,
@@ -660,8 +659,8 @@ export type DesktopToolbarController = {
   onExportReset: () => void
   onExportSettingsChange: (patch: Partial<DesktopExportSettings>) => void
   onExportDownload: () => void
-  buildSceneDocument?: () => Promise<SceneDocumentV1>
-  buildCodegenExport?: (target: FrameworkTarget) => Promise<{ code: string }>
+  buildCodegenExport?: (target: CodeExportTarget) => Promise<{ code: string; installCommand?: string }>
+  exportDownloadError?: string | null
   onTextReset: () => void
   onTextSettingsChange: (patch: Partial<DesktopTextSettings>) => void
 }
@@ -5320,14 +5319,14 @@ function DesktopLayerStackIconToggle({
 }
 
 function DesktopExportInspector({
-  buildSceneDocument,
   buildCodegenExport,
+  exportDownloadError,
   onExportDownload,
   onExportSettingsChange,
   settings,
 }: {
-  buildSceneDocument?: () => Promise<SceneDocumentV1>
-  buildCodegenExport?: (target: FrameworkTarget) => Promise<{ code: string }>
+  buildCodegenExport?: (target: CodeExportTarget) => Promise<{ code: string; installCommand?: string }>
+  exportDownloadError?: string | null
   onExportDownload: () => void
   onExportSettingsChange: (patch: Partial<DesktopExportSettings>) => void
   settings: DesktopExportSettings
@@ -5410,13 +5409,10 @@ function DesktopExportInspector({
           </DesktopInspectorSection>
         ) : null}
 
-        {buildSceneDocument ? (
+        {buildCodegenExport ? (
           <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
-            <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Embed</p>
-            <DesktopEmbedInspector
-              buildSceneDocument={buildSceneDocument}
-              buildCodegenExport={buildCodegenExport}
-            />
+            <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Copy code</p>
+            <DesktopCodeExportInspector buildCodegenExport={buildCodegenExport} />
           </DesktopInspectorSection>
         ) : null}
       </DesktopInspectorScrollArea>
@@ -5431,6 +5427,9 @@ function DesktopExportInspector({
           <AnimatedDownloadIcon size={14} />
           Download {settings.extension.toUpperCase()}
         </button>
+        {exportDownloadError ? (
+          <p className={cn("mt-2 text-center text-xs text-red-500")}>{exportDownloadError}</p>
+        ) : null}
         {isRasterExport ? (
           <p className={cn("mt-2 truncate text-center", DESKTOP_INSPECTOR_CAPTION_CLASS)}>
             {selectedQuality.sizePx}px raster preset
@@ -5989,8 +5988,8 @@ export function DesktopFloatingInspector({
         />
       ) : activeTool === "export" ? (
         <DesktopExportInspector
-          buildSceneDocument={controller?.buildSceneDocument}
           buildCodegenExport={controller?.buildCodegenExport}
+          exportDownloadError={controller?.exportDownloadError}
           settings={actualExportSettings}
           onExportDownload={controller?.onExportDownload ?? (() => undefined)}
           onExportSettingsChange={onExportSettingsChange}

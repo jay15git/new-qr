@@ -5,7 +5,6 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
 
 import { buildCodegenExportFromWorkspace } from "@/features/qr-code/export/codegen-export"
-import { buildSceneDocumentFromWorkspace } from "@/features/qr-code/export/scene-document-export"
 import type {
   QrErrorCorrectionLevel,
   QrFileExtension,
@@ -465,7 +464,7 @@ function getDraftingRailToolId(toolId: DraftingToolId) {
 }
 
 type DraftingDownloadExtension = (typeof DRAFTING_DOWNLOAD_EXTENSIONS)[number]
-type DraftingDownloadTarget = "all-qr" | "current" | `qr:${string}`
+type DraftingDownloadTarget = "all-qr" | "current" | "surface" | `qr:${string}`
 type DraftingExportSizePreview =
   | { status: "error" }
   | { status: "idle" }
@@ -742,6 +741,7 @@ export function WorkspaceSurface({
     useState<DraftingDownloadExtension>("png")
   const [selectedDownloadTarget, setSelectedDownloadTarget] =
     useState<DraftingDownloadTarget>("current")
+  const [exportDownloadError, setExportDownloadError] = useState<string | null>(null)
   const [isDownloadPopoverOpen, setIsDownloadPopoverOpen] = useState(false)
   const [selectedRasterExportPresetId, setSelectedRasterExportPresetId] =
     useState<DraftingRasterExportPresetId>(DEFAULT_DRAFTING_RASTER_EXPORT_PRESET_ID)
@@ -2684,6 +2684,7 @@ export function WorkspaceSurface({
 
   async function handleDownload() {
     try {
+      setExportDownloadError(null)
       if (selectedDownloadTarget === "all-qr") {
         const nodes = await Promise.all(
           Object.entries(qrStateByNodeId).map(async ([nodeId, state]) => {
@@ -2717,7 +2718,10 @@ export function WorkspaceSurface({
           qualityPercent: draftingStudioState.rasterExportQualityPercent,
           targetSizePx: selectedRasterExportTargetSizePx,
         })
-      } else if (selectedDownloadTarget === "current" || selectedDownloadTarget.startsWith("qr:")) {
+      } else if (
+        selectedDownloadTarget === "current" ||
+        selectedDownloadTarget.startsWith("qr:")
+      ) {
         const nodeId =
           selectedDownloadTarget === "current"
             ? activeQrNodeId
@@ -2750,24 +2754,25 @@ export function WorkspaceSurface({
           qualityPercent: draftingStudioState.rasterExportQualityPercent,
           targetSizePx: selectedRasterExportTargetSizePx,
         })
-      } else if (isRasterExportExtension(selectedDownloadExtension)) {
-        await downloadDashboardRasterExport({
-          extension: selectedDownloadExtension,
-          name: DEFAULT_DOWNLOAD_NAME,
-          qualityPercent: draftingStudioState.rasterExportQualityPercent,
-          state: draftingStudioState,
-          targetSizePx: selectedRasterExportTargetSizePx,
-        })
-      } else {
-        await downloadDraftingSvgExport({
-          name: DEFAULT_DOWNLOAD_NAME,
-          state: draftingStudioState,
-        })
+      } else if (selectedDownloadTarget === "surface") {
+        if (isRasterExportExtension(selectedDownloadExtension)) {
+          await downloadDashboardRasterExport({
+            extension: selectedDownloadExtension,
+            name: DEFAULT_DOWNLOAD_NAME,
+            qualityPercent: draftingStudioState.rasterExportQualityPercent,
+            state: draftingStudioState,
+            targetSizePx: selectedRasterExportTargetSizePx,
+          })
+        } else {
+          await downloadDraftingSvgExport({
+            name: DEFAULT_DOWNLOAD_NAME,
+            state: draftingStudioState,
+          })
+        }
       }
 
-  
-    } catch {
-      // Export failed silently
+    } catch (error) {
+      setExportDownloadError(error instanceof Error ? error.message : "Export failed.")
     }
   }
 
@@ -4266,11 +4271,6 @@ export function WorkspaceSurface({
     onExportDownload: () => {
       void handleDownload()
     },
-    buildSceneDocument: async () =>
-      buildSceneDocumentFromWorkspace({
-        document: draftingWorkspaceDocument,
-        nodeId: activeQrNodeId,
-      }),
     buildCodegenExport: async (target) => {
       const result = await buildCodegenExportFromWorkspace({
         document: draftingWorkspaceDocument,
@@ -4278,9 +4278,14 @@ export function WorkspaceSurface({
         target,
         shaderSnapshotRoot: draftingSurfaceRef.current,
       })
-      return { code: result.code }
+      return {
+        code: result.code,
+        installCommand: result.manifest.installCommand || undefined,
+      }
     },
+    exportDownloadError,
     onExportReset: () => {
+      setExportDownloadError(null)
       setSelectedDownloadExtension("png")
       setSelectedDownloadTarget("current")
       setSelectedRasterExportPresetId(DEFAULT_DRAFTING_RASTER_EXPORT_PRESET_ID)
@@ -4905,11 +4910,13 @@ function getDesktopAssetSourceMode(source: "none" | "upload" | "url"): DesktopAs
 
 function getDesktopExportTarget(target: DraftingDownloadTarget): DesktopExportTarget {
   if (target === "all-qr") return "all-qr"
-  return target === "current" ? "current" : "surface"
+  if (target === "surface") return "surface"
+  return "current"
 }
 
 function getDraftingDownloadTarget(target: DesktopExportTarget): DraftingDownloadTarget {
   if (target === "all-qr") return "all-qr"
+  if (target === "surface") return "surface"
   return "current"
 }
 

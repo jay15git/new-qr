@@ -10,6 +10,7 @@ type DraftingCardPaperShaderLayerProps = {
 }
 
 type DraftingCardPaperShaderRendererProps = {
+  dataExportShader?: string
   dataSlot: string
   onError: () => void
   paperShader: DraftingCardPaperShaderState
@@ -81,6 +82,7 @@ function buildDraftingPaperShaderRenderProps(
 }
 
 export function DraftingCardPaperShaderRenderer({
+  dataExportShader,
   dataSlot,
   onError,
   paperShader,
@@ -99,6 +101,7 @@ export function DraftingCardPaperShaderRenderer({
       <ShaderComponent
         {...shaderProps}
         aria-hidden="true"
+        data-export-shader={dataExportShader ?? paperShader.shaderId}
         data-slot={dataSlot}
         data-shader-canvas-host
         style={style}
@@ -121,6 +124,7 @@ export function DraftingCardPaperShaderLayer({
   return (
     <DraftingCardPaperShaderRenderer
       dataSlot="dashboard-compose-card-paper-shader"
+      dataExportShader={paperShader.shaderId}
       onError={() => setShaderErrorId(paperShader.shaderId)}
       paperShader={paperShader}
       style={{

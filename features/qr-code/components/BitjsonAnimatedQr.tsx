@@ -156,6 +156,7 @@ export function BitjsonAnimatedQr({
   return (
     <div
       className={cn("relative max-h-none max-w-none [&_qr-code]:block [&_qr-code]:h-full [&_qr-code]:w-full", className)}
+      data-export-animated-qr="true"
       style={style}
     >
       <qr-code

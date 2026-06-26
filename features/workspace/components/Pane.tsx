@@ -38,10 +38,8 @@ import {
 } from "@/features/workspace/model/layers"
 import {
   ensureDraftingFontsForLayers,
-  getDraftingFontCssFamily,
 } from "@/features/workspace/model/fonts"
 import {
-  getDraftingTextFontFamily,
   layoutDraftingText,
 } from "@/features/workspace/rendering/text-layout"
 import {
@@ -53,9 +51,15 @@ import { DraftingQrBackground } from "@/features/workspace/components/QrBackgrou
 import { applyDraftingQrForegroundShadow } from "@/features/workspace/rendering/qr-layer-shadow"
 import { getDraftingLayerBoxShadow } from "@/features/workspace/rendering/layer-appearance"
 import {
+  getDraftingCardBorder,
+  getDraftingCardShadow,
+  getLayerPlacementStyle,
+  getTextLayerStyle,
+  getTextRunStyle,
+} from "@/features/workspace/rendering/layer-dom-styles"
+import {
   getBackgroundShapeTiltInnerStyle,
   getBackgroundShapeTiltPerspectiveStyle,
-  getLayerCssTransform,
 } from "@/features/workspace/rendering/layer-transform"
 import {
   DraftingImageLayerContent,
@@ -67,6 +71,13 @@ import { buildDashboardQrNodePayload } from "@/features/qr-code/rendering/qr-svg
 import { getDraftingQrLayerLayout } from "@/features/qr-code/rendering/svg-extension"
 import type { QrStudioState } from "@/features/qr-code/model/state"
 import { cn } from "@/lib/utils"
+
+function layerExportAttrs(kind: DraftingCanvasLayer["kind"]) {
+  return {
+    "data-export-kind": kind,
+    "data-export-layer": "true",
+  } as const
+}
 
 type PaneProps = {
   cardState?: DraftingCardState
@@ -190,50 +201,6 @@ const RESIZE_HANDLES: Array<{
     label: "top left",
   },
 ]
-
-function getDraftingCardShadow(cardState: DraftingCardState) {
-  if (
-    cardState.shadow.opacity <= 0 ||
-    (cardState.shadow.blur <= 0 && cardState.shadow.offsetX === 0 && cardState.shadow.offsetY === 0)
-  ) {
-    return "none"
-  }
-
-  return `${cardState.shadow.offsetX}px ${cardState.shadow.offsetY}px ${cardState.shadow.blur}px ${toRgba(
-    cardState.shadow.color,
-    cardState.shadow.opacity / 100,
-  )}`
-}
-
-function getDraftingCardBorder(cardState: DraftingCardState) {
-  const borderWidth = Math.max(0, cardState.border.width)
-
-  if (borderWidth <= 0) {
-    return undefined
-  }
-
-  const borderColor = toRgba(cardState.border.color, cardState.border.opacity / 100)
-  return `${borderWidth}px solid ${borderColor}`
-}
-
-function toRgba(color: string, opacity: number) {
-  const normalizedOpacity = Math.min(1, Math.max(0, Number.isFinite(opacity) ? opacity : 1))
-  const hex = color.trim().replace(/^#/, "")
-
-  if (/^[\da-f]{3}$/i.test(hex)) {
-    const [r, g, b] = hex.split("").map((channel) => Number.parseInt(channel + channel, 16))
-    return `rgba(${r}, ${g}, ${b}, ${normalizedOpacity})`
-  }
-
-  if (/^[\da-f]{6}$/i.test(hex)) {
-    const r = Number.parseInt(hex.slice(0, 2), 16)
-    const g = Number.parseInt(hex.slice(2, 4), 16)
-    const b = Number.parseInt(hex.slice(4, 6), 16)
-    return `rgba(${r}, ${g}, ${b}, ${normalizedOpacity})`
-  }
-
-  return color
-}
 
 export function resizeDraftingLayer(
   layer: DraftingCanvasLayer,
@@ -901,36 +868,6 @@ function LayerSizeValue({ height, width }: Pick<DraftingCanvasLayer, "height" | 
       {getLayerSizeLabel({ height, width })}
     </div>
   )
-}
-
-function getTextLayerStyle(layer: DraftingCanvasLayer): CSSProperties {
-  return {
-    color: layer.fill ?? "#171717",
-    fontFamily: getDraftingTextFontFamily(layer),
-    fontSize: layer.fontSize ?? 32,
-    fontStyle: layer.fontStyle ?? "normal",
-    fontWeight: layer.fontWeight ?? "normal",
-    letterSpacing: layer.letterSpacing ?? 0,
-    lineHeight: layer.lineHeight ?? 1.22,
-    textAlign: layer.textAlign ?? "left",
-    textDecorationLine: layer.underline ? "underline" : "none",
-    whiteSpace: "pre-wrap",
-    wordBreak: "break-word",
-  }
-}
-
-function getTextRunStyle(layer: DraftingCanvasLayer, run: DraftingTextRun): CSSProperties {
-  return {
-    color: run.fill ?? layer.fill ?? "#171717",
-    fontFamily: getDraftingFontCssFamily({
-      fontFamily: run.fontFamily ?? layer.fontFamily,
-      fontId: run.fontId ?? layer.fontId,
-    }),
-    fontSize: run.fontSize ?? layer.fontSize ?? 32,
-    fontStyle: run.fontStyle ?? layer.fontStyle ?? "normal",
-    fontWeight: run.fontWeight ?? layer.fontWeight ?? "normal",
-    textDecorationLine: (run.underline ?? layer.underline) ? "underline" : "none",
-  }
 }
 
 function getTextLayerRuns(layer: DraftingCanvasLayer): DraftingTextRun[] {
@@ -1872,21 +1809,6 @@ export const Pane = memo(function Pane({
     )
   }
 
-  function getLayerPlacementStyle(layer: DraftingCanvasLayer, nested = false): CSSProperties {
-    return {
-      height: layer.height,
-      left: nested ? 0 : "50%",
-      opacity: layer.opacity,
-      top: nested ? 0 : "50%",
-      transform: nested
-        ? undefined
-        : getLayerCssTransform(layer),
-      transformOrigin: "center center",
-      width: layer.width,
-      zIndex: layer.zIndex,
-    }
-  }
-
   function renderMarquee() {
     if (!marquee) {
       return null
@@ -2081,6 +2003,7 @@ export const Pane = memo(function Pane({
           data-slot="drafting-layer-group"
           data-layer-id={layer.id}
           data-selected={isLayerSelected ? "true" : "false"}
+          {...layerExportAttrs("group")}
           className={cn(
             "absolute max-h-none max-w-none touch-none",
             LAYER_MOVE_CURSOR_CLASS,
@@ -2117,6 +2040,7 @@ export const Pane = memo(function Pane({
           data-layer-id={layer.id}
           data-node-id={state.data}
           data-selected={isLayerSelected ? "true" : "false"}
+          {...layerExportAttrs("qr")}
           className={cn(
             "absolute max-h-none max-w-none touch-none",
             LAYER_MOVE_CURSOR_CLASS,
@@ -2154,6 +2078,7 @@ export const Pane = memo(function Pane({
           data-slot="drafting-text-layer"
           data-layer-id={layer.id}
           data-selected={isLayerSelected ? "true" : "false"}
+          {...layerExportAttrs("text")}
           className={cn(
             "absolute max-h-none max-w-none touch-none overflow-hidden",
             isEditing ? "cursor-text" : LAYER_MOVE_CURSOR_CLASS,
@@ -2212,6 +2137,7 @@ export const Pane = memo(function Pane({
           data-slot="drafting-image-layer"
           data-layer-id={layer.id}
           data-selected={isLayerSelected ? "true" : "false"}
+          {...layerExportAttrs("image")}
           className={cn(
             "absolute max-h-none max-w-none touch-none overflow-hidden",
           LAYER_MOVE_CURSOR_CLASS,
@@ -2242,6 +2168,7 @@ export const Pane = memo(function Pane({
           data-slot="drafting-shape-layer"
           data-layer-id={layer.id}
           data-selected={isLayerSelected ? "true" : "false"}
+          {...layerExportAttrs("shape")}
           className={cn(
             "absolute max-h-none max-w-none touch-none overflow-visible",
           LAYER_MOVE_CURSOR_CLASS,
@@ -2284,6 +2211,7 @@ export const Pane = memo(function Pane({
         data-card-enabled={layer.isVisible ? "true" : "false"}
         data-card-border-width={cardState.border.width}
         data-selected={isLayerSelected ? "true" : "false"}
+        {...layerExportAttrs("card")}
         className={cn(
           "absolute max-h-none max-w-none transition-[box-shadow,background-color,border-radius] duration-150",
           LAYER_MOVE_CURSOR_CLASS,
@@ -2335,6 +2263,7 @@ export const Pane = memo(function Pane({
           data-slot="drafting-layer-group"
           data-layer-id={layer.id}
           data-selected={isLayerSelected ? "true" : "false"}
+          {...layerExportAttrs("group")}
           className="absolute max-h-none max-w-none"
           style={{
             ...getLayerPlacementStyle(layer, true),
@@ -2360,6 +2289,7 @@ export const Pane = memo(function Pane({
           data-slot="dashboard-compose-node"
           data-layer-id={layer.id}
           data-selected={isLayerSelected ? "true" : "false"}
+          {...layerExportAttrs("qr")}
           className="absolute max-h-none max-w-none"
           style={{
             ...getLayerPlacementStyle(layer, true),
@@ -2385,6 +2315,7 @@ export const Pane = memo(function Pane({
           data-slot="drafting-text-layer"
           data-layer-id={layer.id}
           data-selected={isLayerSelected ? "true" : "false"}
+          {...layerExportAttrs("text")}
           className="absolute max-h-none max-w-none overflow-hidden"
           style={{
             ...getLayerPlacementStyle(layer, true),
@@ -2405,6 +2336,7 @@ export const Pane = memo(function Pane({
           data-slot="drafting-image-layer"
           data-layer-id={layer.id}
           data-selected={isLayerSelected ? "true" : "false"}
+          {...layerExportAttrs("image")}
           className="absolute max-h-none max-w-none overflow-hidden"
           style={{
             ...getLayerPlacementStyle(layer, true),
@@ -2423,6 +2355,7 @@ export const Pane = memo(function Pane({
           data-slot="drafting-shape-layer"
           data-layer-id={layer.id}
           data-selected={isLayerSelected ? "true" : "false"}
+          {...layerExportAttrs("shape")}
           className="absolute max-h-none max-w-none overflow-visible"
           style={{
             ...getLayerPlacementStyle(layer, true),
@@ -2440,6 +2373,7 @@ export const Pane = memo(function Pane({
         data-slot="dashboard-compose-card"
         data-layer-id={layer.id}
         data-selected={isLayerSelected ? "true" : "false"}
+        {...layerExportAttrs("card")}
         className="absolute max-h-none max-w-none overflow-visible"
         style={{
           ...cardStyle,
@@ -2495,7 +2429,9 @@ export const Pane = memo(function Pane({
           <>
             <SnapGuideOverlay guides={snapGuides} />
             {renderMarquee()}
-            {visibleLayers.map(renderLayer)}
+            <div data-export-root>
+              {visibleLayers.map(renderLayer)}
+            </div>
             {activeSelectedLayerIds.length > 0
               ? visibleLayers.map((layer) => renderLayerControls(layer))
               : null}

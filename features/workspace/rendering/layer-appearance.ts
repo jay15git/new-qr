@@ -1,6 +1,6 @@
 import type { DraftingCardShadowState } from "@/features/workspace/model/card-state"
 
-function toRgba(color: string, opacity: number) {
+export function toRgba(color: string, opacity: number) {
   const normalizedOpacity = Math.min(1, Math.max(0, Number.isFinite(opacity) ? opacity : 1))
   const hex = color.trim().replace(/^#/, "")
 

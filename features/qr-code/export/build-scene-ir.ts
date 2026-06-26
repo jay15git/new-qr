@@ -12,6 +12,7 @@ import {
   buildLayeredSvgParts,
   type LayeredSvgParts,
 } from "@/features/workspace/export/layered-svg-parts"
+import { buildLayeredDomParts } from "@/features/workspace/export/layered-dom-parts"
 import {
   DRAFTING_FONT_REGISTRY,
   ensureDraftingFontsForLayers,
@@ -131,33 +132,43 @@ export async function buildSceneIr({
     state,
     qrMarkup,
   })
+  const domParts = await buildLayeredDomParts({
+    cardState,
+    layers,
+    state,
+    qrMarkup,
+  })
 
   const cardLayer = findCardLayer(layers)
   const qrLayer = findQrLayer(layers)
   const shaders = buildShaderNodes(cardState, cardLayer, shaderSnapshots)
   const animation = state.dotMatrixAnimation
+  const animatedQr =
+    qrLayer && animation.enabled && animation.animated
+      ? {
+          kind: "animated-qr" as const,
+          contents: state.data.trim() || "https://example.com",
+          externalSvg: qrMarkup,
+          bounds: {
+            x: qrLayer.x,
+            y: qrLayer.y,
+            width: qrLayer.width,
+            height: qrLayer.height,
+          },
+          preset: resolveBitjsonMotionPreset(animation),
+          hoverEffect: animation.hoverEffect,
+        }
+      : undefined
 
   return {
     bounds: parts.bounds,
     defs: parts.defs,
     body: parts.body,
+    domLayers: animatedQr
+      ? domParts.domLayers.filter((layer) => layer.kind !== "qr")
+      : domParts.domLayers,
     shaders,
-    animatedQr:
-      qrLayer && animation.enabled && animation.animated
-        ? {
-            kind: "animated-qr",
-            contents: state.data.trim() || "https://example.com",
-            externalSvg: qrMarkup,
-            bounds: {
-              x: qrLayer.x,
-              y: qrLayer.y,
-              width: qrLayer.width,
-              height: qrLayer.height,
-            },
-            preset: resolveBitjsonMotionPreset(animation),
-            hoverEffect: animation.hoverEffect,
-          }
-        : undefined,
+    animatedQr,
     fonts: collectFontRefs(layers),
     componentName,
   }
@@ -248,6 +259,7 @@ export function buildSceneIrFromSceneDocument(scene: SceneDocumentV1): SceneIr {
     },
     defs: parts.defs,
     body: parts.body,
+    domLayers: [],
     shaders: card ? sceneCardToShaderNodes(card, cardLayer) : [],
     animatedQr:
       qr && qrLayer && qr.motion.enabled && qr.motion.animated

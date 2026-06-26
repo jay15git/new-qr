@@ -1,4 +1,4 @@
-import type { FrameworkTarget } from "@new-qr/qr-scene-codegen"
+import type { CodeExportTarget } from "@new-qr/qr-scene-codegen"
 import { buildCodegenOutput } from "@new-qr/qr-scene-codegen"
 
 import { buildSceneIr } from "@/features/qr-code/export/build-scene-ir"
@@ -19,7 +19,7 @@ export async function buildCodegenExportFromWorkspace({
 }: {
   document: DraftingWorkspaceDocumentV1
   nodeId?: string
-  target: FrameworkTarget
+  target: CodeExportTarget
   shaderSnapshotRoot?: ParentNode | null
 }) {
   const activeNodeId = nodeId ?? document.activeQrNodeId

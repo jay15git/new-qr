@@ -31,15 +31,35 @@ export type SceneIrFontRef = {
   cssUrl?: string
 }
 
+export type DomLayerKind = "card" | "text" | "image" | "shape" | "qr" | "group"
+
+export type DomLayerNode = {
+  kind: DomLayerKind
+  id: string
+  bounds: { x: number; y: number; width: number; height: number }
+  style: Record<string, string | number>
+  content?: string
+  htmlContent?: string
+  svgInner?: string
+  children?: DomLayerNode[]
+}
+
 export type SceneIr = {
   bounds: SceneIrBounds
   defs: string
   body: string
+  domLayers: DomLayerNode[]
   shaders: SceneIrShaderNode[]
   animatedQr?: SceneIrAnimatedQrNode
   fonts: SceneIrFontRef[]
   componentName?: string
 }
+
+export type CodeExportTarget =
+  | { format: "html" }
+  | { format: "css" }
+  | { format: "react"; dialect: "jsx" | "tsx"; componentName?: string }
+  | { format: "svg" }
 
 export type FrameworkTarget =
   | { framework: "svg" }
@@ -47,6 +67,12 @@ export type FrameworkTarget =
   | { framework: "react"; dialect: "jsx" | "tsx"; mode: "live"; componentName?: string }
   | { framework: "vue"; lang: "js" | "ts" }
   | { framework: "svelte"; lang: "js" | "ts" }
+
+export type CodegenTarget = CodeExportTarget | FrameworkTarget
+
+export function isCodeExportTarget(target: CodegenTarget): target is CodeExportTarget {
+  return "format" in target
+}
 
 export function isLiveReactTarget(
   target: FrameworkTarget,
