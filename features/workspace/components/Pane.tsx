@@ -44,11 +44,9 @@ import {
 } from "@/features/workspace/rendering/text-layout"
 import {
   createDraftingQrArtworkState,
-  scaleNestedSvgMarkup,
   sanitizeDraftingQrArtworkMarkup,
 } from "@/features/workspace/rendering/qr-artwork"
-import { DraftingQrBackground } from "@/features/workspace/components/QrBackground"
-import { applyDraftingQrForegroundShadow } from "@/features/workspace/rendering/qr-layer-shadow"
+import { DraftingQrLayerContent } from "@/features/workspace/components/DraftingQrLayerContent"
 import { getDraftingLayerBoxShadow } from "@/features/workspace/rendering/layer-appearance"
 import {
   getDraftingCardBorder,
@@ -65,10 +63,7 @@ import {
   DraftingImageLayerContent,
   DraftingShapeLayerContent,
 } from "@/features/workspace/rendering/shape-layer"
-import { BitjsonAnimatedQr } from "@/features/qr-code/components/BitjsonAnimatedQr"
-import { shouldUseBitjsonMotionPreview } from "@/features/qr-code/motion/bitjson-bridge"
 import { buildDashboardQrNodePayload } from "@/features/qr-code/rendering/qr-svg"
-import { getDraftingQrLayerLayout } from "@/features/qr-code/rendering/svg-extension"
 import type { QrStudioState } from "@/features/qr-code/model/state"
 import { cn } from "@/lib/utils"
 
@@ -914,65 +909,6 @@ function renderTextLayerContent(layer: DraftingCanvasLayer) {
 
 function getTextRunKey(layerId: string, run: DraftingTextRun, index: number) {
   return `${layerId}:run:${index}:${run.text.length}`
-}
-
-function renderDraftingQrLayerContent({
-  canvasSvgMarkup,
-  layer,
-  qrMarkup,
-  shapeTiltInnerStyle,
-  shapeTiltPerspectiveStyle,
-  state,
-}: {
-  canvasSvgMarkup: string | null
-  layer: DraftingCanvasLayer
-  qrMarkup: string
-  shapeTiltInnerStyle: ReturnType<typeof getBackgroundShapeTiltInnerStyle>
-  shapeTiltPerspectiveStyle: ReturnType<typeof getBackgroundShapeTiltPerspectiveStyle>
-  state: QrStudioState
-}) {
-  const layout = getDraftingQrLayerLayout(layer.width, state)
-  const scaledQrMarkup = qrMarkup
-    ? scaleNestedSvgMarkup(qrMarkup, layout.innerWidth, layout.innerHeight)
-    : ""
-  const useAnimatedQr = shouldUseBitjsonMotionPreview(state) && Boolean(canvasSvgMarkup)
-
-  return (
-    <div className="relative h-full w-full" style={shapeTiltPerspectiveStyle}>
-      <div className="relative h-full w-full" style={shapeTiltInnerStyle}>
-        <DraftingQrBackground layer={layer} state={state} />
-        {useAnimatedQr ? (
-          <BitjsonAnimatedQr
-            canvasSvgMarkup={canvasSvgMarkup}
-            height={layout.innerHeight}
-            state={state}
-            style={{
-              height: layout.innerHeight,
-              left: layout.metrics.translateX,
-              position: "absolute",
-              top: layout.metrics.translateY,
-              transformStyle: shapeTiltInnerStyle.transformStyle,
-              width: layout.innerWidth,
-              zIndex: 10,
-            }}
-            width={layout.innerWidth}
-          />
-        ) : (
-          <div
-            className="absolute z-10 max-h-none max-w-none [&_svg]:h-full [&_svg]:w-full"
-            dangerouslySetInnerHTML={{ __html: scaledQrMarkup }}
-            style={{
-              height: layout.innerHeight,
-              left: layout.metrics.translateX,
-              top: layout.metrics.translateY,
-              transformStyle: shapeTiltInnerStyle.transformStyle,
-              width: layout.innerWidth,
-            }}
-          />
-        )}
-      </div>
-    </div>
-  )
 }
 
 export const Pane = memo(function Pane({
@@ -2029,7 +1965,6 @@ export const Pane = memo(function Pane({
     }
 
     if (layer.kind === "qr") {
-      const qrMarkup = markup ? applyDraftingQrForegroundShadow(markup, layer) : ""
       const shapeTiltPerspectiveStyle = getBackgroundShapeTiltPerspectiveStyle(state.backgroundShapeOptions)
       const shapeTiltInnerStyle = getBackgroundShapeTiltInnerStyle(state.backgroundShapeOptions)
 
@@ -2057,14 +1992,14 @@ export const Pane = memo(function Pane({
           onPointerCancel={endLayerInteraction}
           onContextMenu={(event) => openLayerContextMenu(event, [layer.id])}
         >
-          {renderDraftingQrLayerContent({
-            canvasSvgMarkup: markup,
-            layer,
-            qrMarkup,
-            shapeTiltInnerStyle,
-            shapeTiltPerspectiveStyle,
-            state,
-          })}
+          <DraftingQrLayerContent
+            canvasSvgMarkup={markup}
+            layer={layer}
+            qrMarkup={markup ?? ""}
+            shapeTiltInnerStyle={shapeTiltInnerStyle}
+            shapeTiltPerspectiveStyle={shapeTiltPerspectiveStyle}
+            state={state}
+          />
         </div>
       )
     }
@@ -2279,7 +2214,6 @@ export const Pane = memo(function Pane({
     }
 
     if (layer.kind === "qr") {
-      const qrMarkup = markup ? applyDraftingQrForegroundShadow(markup, layer) : ""
       const shapeTiltPerspectiveStyle = getBackgroundShapeTiltPerspectiveStyle(state.backgroundShapeOptions)
       const shapeTiltInnerStyle = getBackgroundShapeTiltInnerStyle(state.backgroundShapeOptions)
 
@@ -2296,14 +2230,14 @@ export const Pane = memo(function Pane({
             filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
           }}
         >
-          {renderDraftingQrLayerContent({
-            canvasSvgMarkup: markup,
-            layer,
-            qrMarkup,
-            shapeTiltInnerStyle,
-            shapeTiltPerspectiveStyle,
-            state,
-          })}
+          <DraftingQrLayerContent
+            canvasSvgMarkup={markup}
+            layer={layer}
+            qrMarkup={markup ?? ""}
+            shapeTiltInnerStyle={shapeTiltInnerStyle}
+            shapeTiltPerspectiveStyle={shapeTiltPerspectiveStyle}
+            state={state}
+          />
         </div>
       )
     }

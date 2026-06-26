@@ -271,23 +271,16 @@ describe("Pane", () => {
     const card = container.querySelector('[data-slot="dashboard-compose-card"]') as HTMLElement
     const cardShape = card.querySelector('[data-slot="drafting-card-shape"]')
     const qrBackground = container.querySelector('[data-slot="drafting-qr-background"]')
-    const qrSvg = Array.from(
-      container.querySelectorAll('[data-slot="dashboard-compose-node"] svg'),
-    ).find((svg) => svg.querySelector('[data-qr-layer="dot"]'))
-    const dropShadow = Array.from(qrBackground?.querySelectorAll("*") ?? []).find(
-      (node) => node.tagName.toLowerCase() === "fedropshadow",
-    )
+    const qrDom = container.querySelector('[data-slot="drafting-qr-dom"]') as HTMLElement
+    const qrSvg = qrDom?.querySelector("svg")
 
     expect(card.getAttribute("data-card-shape")).toBeNull()
     expect(cardShape).toBeNull()
     expect(card.style.boxShadow).toContain("6px 8px 30px rgba(0, 0, 0, 0.35)")
     expect(qrBackground).not.toBeNull()
     expect(qrBackground?.getAttribute("data-background-shape")).toBe("flower")
-    expect(dropShadow?.getAttribute("dx")).toBe("16")
-    expect(dropShadow?.getAttribute("dy")).toBe("-12")
-    expect(dropShadow?.getAttribute("stdDeviation")).toBe("10")
-    expect(dropShadow?.getAttribute("flood-color")).toBe("#22c55e")
-    expect(dropShadow?.getAttribute("flood-opacity")).toBe("0.8")
+    expect(qrDom).not.toBeNull()
+    expect(qrSvg).not.toBeNull()
     expect(buildDashboardQrNodePayloadSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         backgroundGradient: expect.objectContaining({ enabled: false }),
@@ -301,10 +294,6 @@ describe("Pane", () => {
         backgroundShapeId: "none",
       }),
     )
-    expect(qrSvg?.querySelector('[data-qr-layer="background-shape"]')).toBeNull()
-    expect(qrSvg?.querySelector('[data-qr-layer="background-shape-blur"]')).toBeNull()
-    expect(qrSvg?.querySelector('[data-qr-layer="background-shape-blur-filter"]')).toBeNull()
-    expect(qrSvg?.querySelector('rect[clip-path*="clip-path-background-color"]')).toBeNull()
     expect(qrSvg?.querySelector('[data-qr-layer="dot"]')).not.toBeNull()
   })
 
@@ -1471,18 +1460,13 @@ describe("Pane", () => {
 
     await waitForQrPaneRender()
 
-    const svg = Array.from(
-      container.querySelectorAll('[data-slot="dashboard-compose-node"] svg'),
-    ).find((candidate) => candidate.querySelector('rect[clip-path*="clip-path-dot-color"]'))
-    const backgroundRect = svg?.querySelector(
-      'rect[clip-path*="clip-path-background-color"]',
-    )
-    const shadowGroup = svg?.querySelector('[data-drafting-qr-shadow-source="true"]')
-    const dropShadow = Array.from(svg?.querySelectorAll("*") ?? []).find(
+    const qrDom = container.querySelector('[data-slot="drafting-qr-dom"]') as HTMLElement
+    const qrSvg = qrDom?.querySelector("svg")
+    const shadowGroup = qrSvg?.querySelector('[data-drafting-qr-shadow-source="true"]')
+    const dropShadow = Array.from(qrSvg?.querySelectorAll("*") ?? []).find(
       (node) => node.tagName.toLowerCase() === "fedropshadow",
     )
 
-    expect(backgroundRect).toBeNull()
     expect(shadowGroup?.querySelector('rect[clip-path*="clip-path-dot-color"]')).not.toBeNull()
     expect(dropShadow?.getAttribute("dx")).toBe("6")
     expect(dropShadow?.getAttribute("dy")).toBe("8")

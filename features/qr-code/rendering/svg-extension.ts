@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react"
+
 import {
   getQrBackgroundShapeDefinition,
   type QrBackgroundShapeDefinition,
@@ -2337,8 +2339,8 @@ export function getDraftingQrLayerLayout(
 ): DraftingQrLayerLayout {
   const naturalOuter = getQrRenderedDimensions(state)
   const scale = naturalOuter.width > 0 ? layerWidth / naturalOuter.width : 1
-  const innerWidth = clampQrSize(state.width * scale)
-  const innerHeight = clampQrSize(state.height * scale)
+  const innerWidth = Math.max(1, state.width * scale)
+  const innerHeight = Math.max(1, state.height * scale)
   const shapeOptions = scaleQrBackgroundShapeOptions(state.backgroundShapeOptions, scale)
   const metrics = getBackgroundRenderMetrics(
     innerWidth,
@@ -2352,6 +2354,22 @@ export function getDraftingQrLayerLayout(
     metrics,
     scale,
     shapeOptions,
+  }
+}
+
+export function getDraftingQrDomPlacementStyle(
+  layout: Pick<DraftingQrLayerLayout, "innerHeight" | "innerWidth" | "metrics">,
+): CSSProperties {
+  const { metrics, innerWidth, innerHeight } = layout
+  const outerWidth = Math.max(1, metrics.outerWidth)
+  const outerHeight = Math.max(1, metrics.outerHeight)
+
+  return {
+    height: `${(innerHeight / outerHeight) * 100}%`,
+    left: `${(metrics.translateX / outerWidth) * 100}%`,
+    position: "absolute",
+    top: `${(metrics.translateY / outerHeight) * 100}%`,
+    width: `${(innerWidth / outerWidth) * 100}%`,
   }
 }
 

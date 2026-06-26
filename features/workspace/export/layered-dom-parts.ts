@@ -29,6 +29,7 @@ import {
   serializeCssProperties,
 } from "@/features/workspace/rendering/layer-dom-styles"
 import type { QrStudioState } from "@/features/qr-code/model/state"
+import { getDraftingQrLayerLayout } from "@/features/qr-code/rendering/svg-extension"
 
 import { getDraftingLayerBounds } from "./layered-svg-parts"
 
@@ -243,18 +244,102 @@ function getDraftingShapeLayerDom(layer: DraftingCanvasLayer): DomLayerNode {
   }
 }
 
+export type DraftingQrDomContent =
+  | { kind: "modules"; children: DomLayerNode[] }
+  | { kind: "svg"; svgInner: string }
+
+function getDraftingQrScaledMarkup(
+  layer: DraftingCanvasLayer,
+  qrMarkup: string,
+  state: QrStudioState,
+) {
+  const layout = getDraftingQrLayerLayout(layer.width, state)
+  const shadowedQrMarkup = hasDraftingLayerShadow(layer)
+    ? applyDraftingQrForegroundShadow(qrMarkup, layer)
+    : qrMarkup
+  const scaledQrMarkup = scaleNestedSvgMarkup(
+    shadowedQrMarkup,
+    layout.innerWidth,
+    layout.innerHeight,
+  )
+
+  return { layout, scaledQrMarkup, shadowedQrMarkup }
+}
+
+/** Preview-only: scaled QR svg markup for inner layout box. */
+export function buildDraftingQrPreviewScaledMarkup(
+  layer: DraftingCanvasLayer,
+  qrMarkup: string,
+  state: QrStudioState,
+): string | null {
+  if (!qrMarkup) {
+    return null
+  }
+
+  const { scaledQrMarkup } = getDraftingQrScaledMarkup(layer, qrMarkup, state)
+  return scaledQrMarkup
+}
+
+/** Preview/export helper: QR modules at inner layout size. */
+export function buildDraftingQrPreviewModules(
+  layer: DraftingCanvasLayer,
+  qrMarkup: string,
+  state: QrStudioState,
+): DomLayerNode[] | null {
+  if (!qrMarkup) {
+    return null
+  }
+
+  const { layout, scaledQrMarkup } = getDraftingQrScaledMarkup(layer, qrMarkup, state)
+  const qrSvgMarkup = `<svg xmlns="http://www.w3.org/2000/svg" width="${layout.innerWidth}" height="${layout.innerHeight}" viewBox="0 0 ${layout.innerWidth} ${layout.innerHeight}" preserveAspectRatio="none">${scaledQrMarkup}</svg>`
+
+  const modules = convertQrSvgToDom(qrSvgMarkup, {
+    width: layout.innerWidth,
+    height: layout.innerHeight,
+    idPrefix: layer.id,
+  })
+
+  return modules
+}
+
+export function buildDraftingQrDomContent(
+  layer: DraftingCanvasLayer,
+  qrMarkup: string,
+  state: QrStudioState,
+): DraftingQrDomContent | null {
+  if (!qrMarkup) {
+    return null
+  }
+
+  const { layout, scaledQrMarkup } = getDraftingQrScaledMarkup(layer, qrMarkup, state)
+  const backgroundMarkup = getDraftingQrBackgroundSvgMarkup(layer, state)
+  const qrPositionedMarkup = `<g transform="translate(${layout.metrics.translateX} ${layout.metrics.translateY})">${scaledQrMarkup}</g>`
+  const fullSvgMarkup = `<svg xmlns="http://www.w3.org/2000/svg" width="${layer.width}" height="${layer.height}" viewBox="0 0 ${layer.width} ${layer.height}" preserveAspectRatio="none">${backgroundMarkup}${qrPositionedMarkup}</svg>`
+
+  if (state.dotMatrixAnimation.enabled && state.dotMatrixAnimation.animated) {
+    return {
+      kind: "svg",
+      svgInner: fullSvgMarkup,
+    }
+  }
+
+  const moduleChildren = convertQrSvgToDom(fullSvgMarkup, {
+    width: layer.width,
+    height: layer.height,
+    idPrefix: layer.id,
+  })
+
+  return {
+    kind: "modules",
+    children: moduleChildren,
+  }
+}
+
 function getDraftingQrLayerDom(
   layer: DraftingCanvasLayer,
   qrMarkup: string,
   state: QrStudioState,
 ): DomLayerNode {
-  const shadowedQrMarkup = hasDraftingLayerShadow(layer)
-    ? applyDraftingQrForegroundShadow(qrMarkup, layer)
-    : qrMarkup
-  const backgroundMarkup = getDraftingQrBackgroundSvgMarkup(layer, state)
-  const scaledQrMarkup = scaleNestedSvgMarkup(shadowedQrMarkup, layer.width, layer.height)
-  const fullSvgMarkup = `<svg xmlns="http://www.w3.org/2000/svg" width="${layer.width}" height="${layer.height}" viewBox="0 0 ${layer.width} ${layer.height}" preserveAspectRatio="none">${backgroundMarkup}${scaledQrMarkup}</svg>`
-
   const baseNode: DomLayerNode = {
     kind: "qr",
     id: layer.id,
@@ -271,22 +356,22 @@ function getDraftingQrLayerDom(
     },
   }
 
-  if (state.dotMatrixAnimation.enabled && state.dotMatrixAnimation.animated) {
+  const domContent = buildDraftingQrDomContent(layer, qrMarkup, state)
+
+  if (!domContent) {
+    return baseNode
+  }
+
+  if (domContent.kind === "svg") {
     return {
       ...baseNode,
-      svgInner: fullSvgMarkup,
+      svgInner: domContent.svgInner,
     }
   }
 
-  const moduleChildren = convertQrSvgToDom(fullSvgMarkup, {
-    width: layer.width,
-    height: layer.height,
-    idPrefix: layer.id,
-  })
-
   return {
     ...baseNode,
-    children: moduleChildren,
+    children: domContent.children,
   }
 }
 
