@@ -59,7 +59,6 @@ export type QrMotionPresetCategory = "dotMatrix" | "standard";
 
 export type QrMotionStandardPreset =
   | "ApertureReveal"
-  | "AuroraSweep"
   | "BubbleCascade"
   | "CenterBloom"
   | "ConfettiPop"
@@ -71,21 +70,15 @@ export type QrMotionStandardPreset =
   | "FinderPing"
   | "FireflyTwinkle"
   | "FlipClock"
-  | "GlassSweep"
   | "GravityCollapse"
-  | "HalfHelix"
   | "HoloFlicker"
   | "KaleidoPulse"
   | "LensFocus"
-  | "LumenWave"
   | "MagneticRipple"
   | "MagneticSnap"
   | "MaterializeIn"
-  | "NeonTrace"
   | "OrbitReveal"
   | "ParallaxTiles"
-  | "PrismRipple"
-  | "PrismSweep"
   | "QuantumMaterialize"
   | "RadialRipple"
   | "RadialRippleIn"
@@ -94,11 +87,9 @@ export type QrMotionStandardPreset =
   | "SignalGlitch"
   | "SignalScan"
   | "SoftMaterialize"
-  | "SoundBars"
   | "SpiralBloom"
   | "SubtlePulse"
   | "TideRise"
-  | "VelvetBreath"
   | "WaveInterference";
 
 export type QrMotionHoverEffect =
@@ -271,21 +262,14 @@ export const QR_MOTION_STANDARD_PRESET_OPTIONS: Array<{
   { label: "Soft Materialize", value: "SoftMaterialize" },
   { label: "Center Bloom", value: "CenterBloom" },
   { label: "Corner Sweep", value: "CornerSweep" },
-  { label: "Prism Ripple", value: "PrismRipple" },
-  { label: "Prism Sweep", value: "PrismSweep" },
   { label: "Orbit Reveal", value: "OrbitReveal" },
-  { label: "Lumen Wave", value: "LumenWave" },
   { label: "Diamond Glint", value: "DiamondGlint" },
-  { label: "Neon Trace", value: "NeonTrace" },
-  { label: "Glass Sweep", value: "GlassSweep" },
-  { label: "Velvet Breath", value: "VelvetBreath" },
   { label: "Signal Scan", value: "SignalScan" },
   { label: "Confetti Pop", value: "ConfettiPop" },
   { label: "Spiral Bloom", value: "SpiralBloom" },
   { label: "Bubble Cascade", value: "BubbleCascade" },
   { label: "Kaleido Pulse", value: "KaleidoPulse" },
   { label: "Firefly Twinkle", value: "FireflyTwinkle" },
-  { label: "Aurora Sweep", value: "AuroraSweep" },
   { label: "Magnetic Ripple", value: "MagneticRipple" },
   { label: "Parallax Tiles", value: "ParallaxTiles" },
   { label: "Constellation Trace", value: "ConstellationTrace" },
@@ -301,8 +285,6 @@ export const QR_MOTION_STANDARD_PRESET_OPTIONS: Array<{
   { label: "Shockwave Jolt", value: "ShockwaveJolt" },
   { label: "Tide Rise", value: "TideRise" },
   { label: "Gravity Collapse", value: "GravityCollapse" },
-  { label: "Half Helix", value: "HalfHelix" },
-  { label: "Sound Bars", value: "SoundBars" },
 ];
 
 export const QR_MOTION_HOVER_EFFECT_OPTIONS: Array<{

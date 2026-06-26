@@ -189,20 +189,14 @@ describe('qr-code', () => {
             expect(getAnimationPreset('SoftMaterialize')).toEqual(expect.any(Function));
             expect(getAnimationPreset('CenterBloom')).toEqual(expect.any(Function));
             expect(getAnimationPreset('CornerSweep')).toEqual(expect.any(Function));
-            expect(getAnimationPreset('PrismRipple')).toEqual(expect.any(Function));
             expect(getAnimationPreset('OrbitReveal')).toEqual(expect.any(Function));
-            expect(getAnimationPreset('LumenWave')).toEqual(expect.any(Function));
             expect(getAnimationPreset('DiamondGlint')).toEqual(expect.any(Function));
-            expect(getAnimationPreset('NeonTrace')).toEqual(expect.any(Function));
-            expect(getAnimationPreset('GlassSweep')).toEqual(expect.any(Function));
-            expect(getAnimationPreset('VelvetBreath')).toEqual(expect.any(Function));
             expect(getAnimationPreset('SignalScan')).toEqual(expect.any(Function));
             expect(getAnimationPreset('ConfettiPop')).toEqual(expect.any(Function));
             expect(getAnimationPreset('SpiralBloom')).toEqual(expect.any(Function));
             expect(getAnimationPreset('BubbleCascade')).toEqual(expect.any(Function));
             expect(getAnimationPreset('KaleidoPulse')).toEqual(expect.any(Function));
             expect(getAnimationPreset('FireflyTwinkle')).toEqual(expect.any(Function));
-            expect(getAnimationPreset('AuroraSweep')).toEqual(expect.any(Function));
             expect(getAnimationPreset('MagneticRipple')).toEqual(expect.any(Function));
             expect(getAnimationPreset('ParallaxTiles')).toEqual(expect.any(Function));
             expect(getAnimationPreset('ConstellationTrace')).toEqual(expect.any(Function));
@@ -229,20 +223,14 @@ describe('qr-code', () => {
                 'SoftMaterialize',
                 'CenterBloom',
                 'CornerSweep',
-                'PrismRipple',
                 'OrbitReveal',
-                'LumenWave',
                 'DiamondGlint',
-                'NeonTrace',
-                'GlassSweep',
-                'VelvetBreath',
                 'SignalScan',
                 'ConfettiPop',
                 'SpiralBloom',
                 'BubbleCascade',
                 'KaleidoPulse',
                 'FireflyTwinkle',
-                'AuroraSweep',
                 'MagneticRipple',
                 'ParallaxTiles',
                 'ConstellationTrace',
@@ -258,9 +246,6 @@ describe('qr-code', () => {
                 'ShockwaveJolt',
                 'TideRise',
                 'GravityCollapse',
-                'PrismSweep',
-                'HalfHelix',
-                'SoundBars',
             ]);
             expect(dotMatrixAnimationPresets).toEqual(matrixPresets);
             const overlap = standardAnimationPresets.filter((preset) => dotMatrixAnimationPresets.indexOf(preset) > -1);
@@ -283,7 +268,6 @@ describe('qr-code', () => {
         });
         it('returns performant keyframes for new premium presets', () => {
             [
-                'AuroraSweep',
                 'ConstellationTrace',
                 'ApertureReveal',
                 'LensFocus',
@@ -376,7 +360,7 @@ describe('qr-code', () => {
                 ['TwinOrbit', 'EchoRing'],
                 ['GlyphPulse', 'PulseLadder'],
                 ['StrobeStack', 'BlockDrop'],
-                ['HelixGlow', 'SoundBars'],
+                ['HelixGlow', 'HelixCore'],
                 ['InfinityRun', 'MobiusRun'],
             ];
             representativePairs.forEach(([hidden, visible]) => {
@@ -708,12 +692,7 @@ describe('qr-code', () => {
         });
         it('uses performance-safe keyframes without filter animation', () => {
             const presets = [
-                'PrismRipple',
-                'LumenWave',
                 'DiamondGlint',
-                'NeonTrace',
-                'GlassSweep',
-                'VelvetBreath',
                 'SignalScan',
                 'ConfettiPop',
                 'SpiralBloom',

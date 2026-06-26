@@ -20,20 +20,14 @@ export var AnimationPreset;
     AnimationPreset["SoftMaterialize"] = "SoftMaterialize";
     AnimationPreset["CenterBloom"] = "CenterBloom";
     AnimationPreset["CornerSweep"] = "CornerSweep";
-    AnimationPreset["PrismRipple"] = "PrismRipple";
     AnimationPreset["OrbitReveal"] = "OrbitReveal";
-    AnimationPreset["LumenWave"] = "LumenWave";
     AnimationPreset["DiamondGlint"] = "DiamondGlint";
-    AnimationPreset["NeonTrace"] = "NeonTrace";
-    AnimationPreset["GlassSweep"] = "GlassSweep";
-    AnimationPreset["VelvetBreath"] = "VelvetBreath";
     AnimationPreset["SignalScan"] = "SignalScan";
     AnimationPreset["ConfettiPop"] = "ConfettiPop";
     AnimationPreset["SpiralBloom"] = "SpiralBloom";
     AnimationPreset["BubbleCascade"] = "BubbleCascade";
     AnimationPreset["KaleidoPulse"] = "KaleidoPulse";
     AnimationPreset["FireflyTwinkle"] = "FireflyTwinkle";
-    AnimationPreset["AuroraSweep"] = "AuroraSweep";
     AnimationPreset["MagneticRipple"] = "MagneticRipple";
     AnimationPreset["ParallaxTiles"] = "ParallaxTiles";
     AnimationPreset["ConstellationTrace"] = "ConstellationTrace";
@@ -53,7 +47,6 @@ export var AnimationPreset;
     AnimationPreset["PulseLadder"] = "PulseLadder";
     AnimationPreset["CoreSpiral"] = "CoreSpiral";
     AnimationPreset["TwinOrbit"] = "TwinOrbit";
-    AnimationPreset["PrismSweep"] = "PrismSweep";
     AnimationPreset["FluxColumns"] = "FluxColumns";
     AnimationPreset["BlockDrop"] = "BlockDrop";
     AnimationPreset["StrobeStack"] = "StrobeStack";
@@ -65,8 +58,6 @@ export var AnimationPreset;
     AnimationPreset["PrismBloom"] = "PrismBloom";
     AnimationPreset["HelixGlow"] = "HelixGlow";
     AnimationPreset["HelixCore"] = "HelixCore";
-    AnimationPreset["HalfHelix"] = "HalfHelix";
-    AnimationPreset["SoundBars"] = "SoundBars";
     AnimationPreset["InfinityRun"] = "InfinityRun";
     AnimationPreset["MobiusRun"] = "MobiusRun";
 })(AnimationPreset || (AnimationPreset = {}));
@@ -81,20 +72,14 @@ export const standardAnimationPresets = [
     AnimationPreset.SoftMaterialize,
     AnimationPreset.CenterBloom,
     AnimationPreset.CornerSweep,
-    AnimationPreset.PrismRipple,
     AnimationPreset.OrbitReveal,
-    AnimationPreset.LumenWave,
     AnimationPreset.DiamondGlint,
-    AnimationPreset.NeonTrace,
-    AnimationPreset.GlassSweep,
-    AnimationPreset.VelvetBreath,
     AnimationPreset.SignalScan,
     AnimationPreset.ConfettiPop,
     AnimationPreset.SpiralBloom,
     AnimationPreset.BubbleCascade,
     AnimationPreset.KaleidoPulse,
     AnimationPreset.FireflyTwinkle,
-    AnimationPreset.AuroraSweep,
     AnimationPreset.MagneticRipple,
     AnimationPreset.ParallaxTiles,
     AnimationPreset.ConstellationTrace,
@@ -110,9 +95,6 @@ export const standardAnimationPresets = [
     AnimationPreset.ShockwaveJolt,
     AnimationPreset.TideRise,
     AnimationPreset.GravityCollapse,
-    AnimationPreset.PrismSweep,
-    AnimationPreset.HalfHelix,
-    AnimationPreset.SoundBars,
 ];
 export const dotMatrixAnimationPresets = [
     AnimationPreset.NeonDrift,
@@ -282,12 +264,6 @@ const RadialRipple = (targets, x, y, count, entity) => {
         },
     };
 };
-const PrismRipple = (targets, x, y, count, entity) => {
-    const ripple = RadialRipple(targets, x, y, count, entity);
-    return Object.assign({}, ripple, { duration: 1200, web: Object.assign({}, ripple.web, { opacity: entity === QRCodeEntity.Module
-                ? [1, 0.72, 1]
-                : [{ offset: 0, value: 1 }, { offset: 0.5, value: 0.78 }, 1] }) });
-};
 const OrbitReveal = (targets, x, y, count, entity) => {
     const center = count / 2;
     const angle = Math.atan2(y - center, x - center);
@@ -310,21 +286,6 @@ const finderPulseEntities = [
     QRCodeEntity.Icon,
 ];
 const isFinderPulseEntity = (entity) => finderPulseEntities.indexOf(entity) > -1;
-const LumenWave = (targets, x, y, count, entity) => {
-    const center = count / 2;
-    const diagonalDelay = (x + y) * 12;
-    const centerBias = distanceBetween(x, y, center, center) * 3;
-    return {
-        targets,
-        from: entity === QRCodeEntity.Module ? diagonalDelay + centerBias : 80,
-        duration: 780,
-        easing: 'cubic-bezier(0.215, 0.610, 0.355, 1.000)',
-        web: {
-            opacity: entity === QRCodeEntity.Module ? [1, 0.68, 1] : [1, 0.84, 1],
-            scale: entity === QRCodeEntity.Module ? [1, 1.16, 0.98, 1] : [1, 1.04, 1],
-        },
-    };
-};
 const DiamondGlint = (targets, x, y, count, entity) => {
     const center = count / 2;
     const diamondDistance = Math.abs(x - center) + Math.abs(y - center);
@@ -341,61 +302,6 @@ const DiamondGlint = (targets, x, y, count, entity) => {
             scale: entity === QRCodeEntity.Module
                 ? [1, 0.72, 1.2, 1]
                 : [1, 0.92, 1.08, 1],
-        },
-    };
-};
-const NeonTrace = (targets, x, y, count, entity) => {
-    const edgeDistance = Math.min(x, y, count - x, count - y);
-    const finderLead = isFinderPulseEntity(entity) ? 0 : 180;
-    return {
-        targets,
-        from: edgeDistance * 34 + finderLead,
-        duration: isFinderPulseEntity(entity) ? 720 : 520,
-        easing: 'cubic-bezier(0.190, 1.000, 0.220, 1.000)',
-        web: isFinderPulseEntity(entity)
-            ? {
-                opacity: [1, 0.62, 1],
-                scale: [1, 1.16, 0.98, 1],
-            }
-            : {
-                opacity: [1, 0.82, 1],
-                scale: [1, 1.08, 1],
-            },
-    };
-};
-const GlassSweep = (targets, x, y, count, entity) => {
-    const center = count / 2;
-    const sweepLine = x * 18 + Math.abs(y - center) * 9;
-    return {
-        targets,
-        from: entity === QRCodeEntity.Icon ? 0 : sweepLine,
-        duration: entity === QRCodeEntity.Icon ? 860 : 620,
-        easing: 'cubic-bezier(0.445, 0.050, 0.550, 0.950)',
-        web: {
-            opacity: entity === QRCodeEntity.Module
-                ? [1, 0.74, 1]
-                : entity === QRCodeEntity.Icon
-                    ? [1, 0.78, 1]
-                    : [1, 0.82, 1],
-            scale: entity === QRCodeEntity.Module ? [1, 1.11, 1] : [1, 1.05, 1],
-        },
-    };
-};
-const VelvetBreath = (targets, x, y, count, entity) => {
-    const center = count / 2;
-    const distanceFromCenter = distanceBetween(x, y, center, center);
-    return {
-        targets,
-        from: distanceFromCenter * 9,
-        duration: entity === QRCodeEntity.Module ? 1180 : 1320,
-        easing: 'cubic-bezier(0.445, 0.050, 0.550, 0.950)',
-        web: {
-            opacity: entity === QRCodeEntity.Module
-                ? [1, 0.86, 1, 0.92, 1]
-                : [1, 0.9, 1],
-            scale: entity === QRCodeEntity.Module
-                ? [1, 1.045, 1, 1.025, 1]
-                : [1, 0.975, 1.025, 1],
         },
     };
 };
@@ -422,21 +328,6 @@ const coordinateSeed = (x, y, count) => Math.abs(Math.round((x + 1) * 37 + (y + 
 const hashNoise = (x, y, seed) => {
     const value = Math.sin((x + 1) * 12.9898 + (y + 1) * 78.233 + seed * 43.758) * 43758.5453;
     return value - Math.floor(value);
-};
-const qrDiagonalSnakeOrder = (x, y, count) => {
-    const row = clamp(Math.round(y), 0, count - 1);
-    const col = clamp(Math.round(x), 0, count - 1);
-    const diagonal = row + col;
-    const rowStart = Math.max(0, diagonal - (count - 1));
-    const rowEnd = Math.min(count - 1, diagonal);
-    const positionOnDiagonal = diagonal % 2 === 0 ? rowEnd - row : row - rowStart;
-    let order = 0;
-    for (let d = 0; d < diagonal; d++) {
-        const rs = Math.max(0, d - (count - 1));
-        const re = Math.min(count - 1, d);
-        order += re - rs + 1;
-    }
-    return order + positionOnDiagonal;
 };
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const MATRIX_SIZE = 5;
@@ -687,27 +578,6 @@ const FireflyTwinkle = (targets, x, y, count, entity) => {
                 : [1, 0.74, 1, 0.88, 1],
             scale: entity === QRCodeEntity.Module
                 ? [1, 0.76, 1.18, 0.94, 1]
-                : [1, 0.96, 1.08, 1],
-        },
-    };
-};
-const AuroraSweep = (targets, x, y, _count, entity) => {
-    const diagonalWave = (x + y) * 13;
-    const shimmerBand = Math.abs((x - y) % 6) * 24;
-    const rowColumnPhase = ((Math.round(x) * 5 + Math.round(y) * 3) % 4) * 42;
-    return {
-        targets,
-        from: entity === QRCodeEntity.Module
-            ? diagonalWave + shimmerBand + rowColumnPhase
-            : shimmerBand * 0.5,
-        duration: entity === QRCodeEntity.Icon ? 1120 : 860,
-        easing: 'cubic-bezier(0.215, 0.610, 0.355, 1.000)',
-        web: {
-            opacity: entity === QRCodeEntity.Module
-                ? [1, 0.7, 0.96, 0.82, 1]
-                : [1, 0.82, 1],
-            scale: entity === QRCodeEntity.Module
-                ? [1, 1.1, 0.97, 1.06, 1]
                 : [1, 0.96, 1.08, 1],
         },
     };
@@ -1138,97 +1008,6 @@ const GravityCollapse = (targets, x, y, count, entity) => {
             rotate: entity === QRCodeEntity.Module
                 ? [spin, spin * 0.35, -spin * 0.1, 0]
                 : [spin * 0.4, 0],
-        },
-    };
-};
-const PrismSweep = (targets, x, y, count, entity) => {
-    const order = qrDiagonalSnakeOrder(x, y, count);
-    const hueStep = ((order * 37) % 120) - 60;
-    const sweepDelay = order * 26 + hashNoise(x, y, 53) * 40;
-    return {
-        targets,
-        from: entity === QRCodeEntity.Module ? sweepDelay : sweepDelay * 0.35,
-        duration: entity === QRCodeEntity.Icon ? 1000 : 820,
-        easing: 'cubic-bezier(0.445, 0.050, 0.550, 0.950)',
-        web: {
-            opacity: entity === QRCodeEntity.Module
-                ? [0.22, 0.62, 1, 0.88, 1]
-                : [0.68, 1, 0.9, 1],
-            scale: entity === QRCodeEntity.Module
-                ? [0.76, 1.12, 0.94, 1.05, 1]
-                : [0.9, 1.06, 1],
-            filter: entity === QRCodeEntity.Module
-                ? [
-                    `hue-rotate(${hueStep}deg) brightness(0.9)`,
-                    `hue-rotate(${-hueStep * 0.5}deg) brightness(1.35)`,
-                    'hue-rotate(0deg) brightness(1)',
-                ]
-                : ['brightness(1)', 'brightness(1.12)', 'brightness(1)'],
-        },
-    };
-};
-const HalfHelix = (targets, x, y, count, entity) => {
-    const row = clamp(Math.round(y), 0, count - 1);
-    const col = clamp(Math.round(x), 0, count - 1);
-    const strandCol = Math.round(count / 2 + (count / 4) * Math.sin(row * 1.24));
-    const strandDistance = Math.abs(col - strandCol);
-    const onStrand = strandDistance <= 1;
-    const helixDelay = row * 22 + strandDistance * 38 + hashNoise(x, y, 71) * 30;
-    return {
-        targets,
-        from: entity === QRCodeEntity.Module ? helixDelay : helixDelay * 0.3,
-        duration: entity === QRCodeEntity.Icon ? 1040 : 860,
-        easing: 'cubic-bezier(0.445, 0.050, 0.550, 0.950)',
-        web: {
-            opacity: entity === QRCodeEntity.Module
-                ? onStrand
-                    ? [0.18, 0.72, 1, 0.92, 1]
-                    : [0.35, 0.55, 0.78, 0.88, 1]
-                : [0.7, 1, 0.92, 1],
-            scale: entity === QRCodeEntity.Module
-                ? onStrand
-                    ? [0.7, 1.14, 0.96, 1.04, 1]
-                    : [0.88, 0.96, 1.02, 1]
-                : [0.9, 1.06, 1],
-            y: entity === QRCodeEntity.Module
-                ? onStrand
-                    ? [2, -1, 0.5, 0]
-                    : [0, 0, 0, 0]
-                : [0, 0],
-        },
-    };
-};
-const SoundBars = (targets, x, y, count, entity) => {
-    const col = clamp(Math.round(x), 0, count - 1);
-    const row = clamp(Math.round(y), 0, count - 1);
-    const colPhase = col * 1.15 + hashNoise(0, col, count) * 0.8;
-    const barHeight = clamp(Math.round(1 + ((Math.sin(colPhase) + 1) / 2) * (count * 0.45)), 1, count);
-    const topLitRow = count - barHeight;
-    const isLit = row >= topLitRow;
-    const rowFromTop = row - topLitRow;
-    const barDelay = col * 34 +
-        (isLit ? (barHeight - rowFromTop) * 16 : barHeight * 20 + 80);
-    return {
-        targets,
-        from: entity === QRCodeEntity.Module ? barDelay : barDelay * 0.28,
-        duration: entity === QRCodeEntity.Icon ? 960 : 780,
-        easing: 'cubic-bezier(0.175, 0.885, 0.320, 1.275)',
-        web: {
-            opacity: entity === QRCodeEntity.Module
-                ? isLit
-                    ? [0.2, 0.85, 1, 0.94, 1]
-                    : [0.45, 0.55, 0.65, 0.72, 0.78]
-                : [0.72, 1, 0.94, 1],
-            scale: entity === QRCodeEntity.Module
-                ? isLit
-                    ? [0.5, 1.18, 0.94, 1.04, 1]
-                    : [0.92, 0.96, 1, 1]
-                : [0.88, 1.08, 1],
-            y: entity === QRCodeEntity.Module
-                ? isLit
-                    ? [6, -2, 1, 0]
-                    : [0, 0, 0, 0]
-                : [0, 0],
         },
     };
 };
@@ -1827,20 +1606,10 @@ const resolveAnimationPreset = (name) => {
             return CenterBloom;
         case AnimationPreset.CornerSweep:
             return CornerSweep;
-        case AnimationPreset.PrismRipple:
-            return PrismRipple;
         case AnimationPreset.OrbitReveal:
             return OrbitReveal;
-        case AnimationPreset.LumenWave:
-            return LumenWave;
         case AnimationPreset.DiamondGlint:
             return DiamondGlint;
-        case AnimationPreset.NeonTrace:
-            return NeonTrace;
-        case AnimationPreset.GlassSweep:
-            return GlassSweep;
-        case AnimationPreset.VelvetBreath:
-            return VelvetBreath;
         case AnimationPreset.SignalScan:
             return SignalScan;
         case AnimationPreset.ConfettiPop:
@@ -1853,8 +1622,6 @@ const resolveAnimationPreset = (name) => {
             return KaleidoPulse;
         case AnimationPreset.FireflyTwinkle:
             return FireflyTwinkle;
-        case AnimationPreset.AuroraSweep:
-            return AuroraSweep;
         case AnimationPreset.MagneticRipple:
             return MagneticRipple;
         case AnimationPreset.ParallaxTiles:
@@ -1885,12 +1652,6 @@ const resolveAnimationPreset = (name) => {
             return TideRise;
         case AnimationPreset.GravityCollapse:
             return GravityCollapse;
-        case AnimationPreset.PrismSweep:
-            return PrismSweep;
-        case AnimationPreset.HalfHelix:
-            return HalfHelix;
-        case AnimationPreset.SoundBars:
-            return SoundBars;
         case AnimationPreset.NeonDrift:
             return NeonDrift;
         case AnimationPreset.PulseLadder:
