@@ -100,6 +100,7 @@ export function DraftingCardPaperShaderRenderer({
         {...shaderProps}
         aria-hidden="true"
         data-slot={dataSlot}
+        data-shader-canvas-host
         style={style}
       />
     </PaperShaderErrorBoundary>

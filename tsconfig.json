@@ -32,7 +32,9 @@
       "@new-qr/qr-scene-react": ["./packages/qr-scene-react/src/index.ts"],
       "@new-qr/qr-scene-paper": ["./packages/qr-scene-paper/src/index.ts"],
       "@new-qr/qr-scene-bitjson": ["./packages/qr-scene-bitjson/src/index.ts"],
-      "@new-qr/qr-scene-export": ["./packages/qr-scene-export/src/index.ts"]
+      "@new-qr/qr-scene-export": ["./packages/qr-scene-export/src/index.ts"],
+      "@new-qr/qr-scene-codegen": ["./packages/qr-scene-codegen/src/index.ts"],
+      "@new-qr/qr-scene-shaders": ["./packages/qr-scene-shaders/src/index.ts"]
     }
   },
   "include": [

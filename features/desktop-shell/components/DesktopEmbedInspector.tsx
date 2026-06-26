@@ -1,7 +1,8 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
+import type { FrameworkTarget } from "@new-qr/qr-scene-codegen"
 import type { SceneDocumentV1 } from "@new-qr/qr-scene-schema"
 import {
   buildSceneEmbedSnippet,
@@ -9,14 +10,56 @@ import {
   downloadSceneDocument,
 } from "@/features/qr-code/export/scene-document-export"
 
-type DesktopEmbedInspectorProps = {
-  buildSceneDocument: () => Promise<SceneDocumentV1>
+type CodegenOption = {
+  id: string
+  label: string
+  target: FrameworkTarget
 }
 
-export function DesktopEmbedInspector({ buildSceneDocument }: DesktopEmbedInspectorProps) {
+const CODEGEN_OPTIONS: CodegenOption[] = [
+  { id: "svg", label: "SVG", target: { framework: "svg" } },
+  {
+    id: "react-jsx-static",
+    label: "React JSX (static)",
+    target: { framework: "react", dialect: "jsx", mode: "static", componentName: "QrCard" },
+  },
+  {
+    id: "react-tsx-static",
+    label: "React TSX (static)",
+    target: { framework: "react", dialect: "tsx", mode: "static", componentName: "QrCard" },
+  },
+  {
+    id: "react-jsx-live",
+    label: "React JSX (live)",
+    target: { framework: "react", dialect: "jsx", mode: "live", componentName: "QrCard" },
+  },
+  {
+    id: "react-tsx-live",
+    label: "React TSX (live)",
+    target: { framework: "react", dialect: "tsx", mode: "live", componentName: "QrCard" },
+  },
+]
+
+type DesktopEmbedInspectorProps = {
+  buildSceneDocument: () => Promise<SceneDocumentV1>
+  buildCodegenExport?: (target: FrameworkTarget) => Promise<{ code: string }>
+}
+
+export function DesktopEmbedInspector({
+  buildSceneDocument,
+  buildCodegenExport,
+}: DesktopEmbedInspectorProps) {
   const [scene, setScene] = useState<SceneDocumentV1 | null>(null)
   const [publishedSceneId, setPublishedSceneId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [selectedCodegenId, setSelectedCodegenId] = useState(CODEGEN_OPTIONS[0].id)
+  const [codegenPreview, setCodegenPreview] = useState<string>("")
+  const [codegenLoading, setCodegenLoading] = useState(false)
+
+  const selectedCodegen = useMemo(
+    () => CODEGEN_OPTIONS.find((option) => option.id === selectedCodegenId) ?? CODEGEN_OPTIONS[0],
+    [selectedCodegenId],
+  )
 
   const refreshScene = useCallback(() => {
     void buildSceneDocument()
@@ -29,9 +72,31 @@ export function DesktopEmbedInspector({ buildSceneDocument }: DesktopEmbedInspec
       })
   }, [buildSceneDocument])
 
+  const refreshCodegen = useCallback(() => {
+    if (!buildCodegenExport) {
+      return
+    }
+
+    setCodegenLoading(true)
+    void buildCodegenExport(selectedCodegen.target)
+      .then((result) => {
+        setCodegenPreview(result.code)
+      })
+      .catch(() => {
+        setCodegenPreview("Failed to generate export code.")
+      })
+      .finally(() => {
+        setCodegenLoading(false)
+      })
+  }, [buildCodegenExport, selectedCodegen.target])
+
   useEffect(() => {
     refreshScene()
   }, [refreshScene])
+
+  useEffect(() => {
+    refreshCodegen()
+  }, [refreshCodegen])
 
   async function handlePublish() {
     if (!scene) {
@@ -80,6 +145,44 @@ export function DesktopEmbedInspector({ buildSceneDocument }: DesktopEmbedInspec
 
   return (
     <div className="grid gap-4" data-slot="desktop-embed-inspector">
+      {buildCodegenExport ? (
+        <section className="grid gap-2" data-slot="desktop-codegen-inspector">
+          <p className="text-xs font-semibold uppercase tracking-wide opacity-70">Copy code</p>
+          <div className="flex flex-wrap gap-2">
+            {CODEGEN_OPTIONS.map((option) => (
+              <button
+                key={option.id}
+                className={`rounded-md border px-2 py-1 text-xs ${option.id === selectedCodegenId ? "bg-black/10" : ""}`}
+                type="button"
+                onClick={() => setSelectedCodegenId(option.id)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <pre className="max-h-56 overflow-auto rounded-md bg-black/5 p-3 text-xs">
+            {codegenLoading ? "Generating..." : codegenPreview}
+          </pre>
+          <div className="flex flex-wrap gap-2">
+            <button
+              className="rounded-md border px-3 py-2 text-sm"
+              type="button"
+              onClick={() => navigator.clipboard.writeText(codegenPreview)}
+              disabled={!codegenPreview || codegenLoading}
+            >
+              Copy {selectedCodegen.label}
+            </button>
+            <button
+              className="rounded-md border px-3 py-2 text-sm"
+              type="button"
+              onClick={() => refreshCodegen()}
+            >
+              Refresh preview
+            </button>
+          </div>
+        </section>
+      ) : null}
+
       <section className="grid gap-2">
         <p className="text-xs font-semibold uppercase tracking-wide opacity-70">Install</p>
         <pre className="overflow-x-auto rounded-md bg-black/5 p-3 text-xs">{liveSnippet.installCommand}</pre>
@@ -113,6 +216,13 @@ export function DesktopEmbedInspector({ buildSceneDocument }: DesktopEmbedInspec
           onClick={() => navigator.clipboard.writeText(liveSnippet.reactCode)}
         >
           Copy live embed
+        </button>
+        <button
+          className="rounded-md border px-3 py-2 text-sm"
+          type="button"
+          onClick={() => navigator.clipboard.writeText(reactLiveCode)}
+        >
+          Copy React live
         </button>
       </div>
 

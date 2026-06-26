@@ -2,6 +2,7 @@ import {
   buildSceneDependencyManifest,
   inlineSceneAssets,
 } from "@new-qr/qr-scene-core"
+import { emitLiveReact } from "@new-qr/qr-scene-codegen"
 import {
   SCENE_DOCUMENT_VERSION,
   type SceneCardState,
@@ -25,6 +26,7 @@ import {
   createDraftingQrArtworkState,
   sanitizeDraftingQrArtworkMarkup,
 } from "@/features/workspace/rendering/qr-artwork"
+import { buildSceneIrFromSceneDocument } from "@/features/qr-code/export/build-scene-ir"
 
 function toSceneLayer(layer: DraftingCanvasLayer): SceneLayer {
   return {
@@ -223,46 +225,13 @@ export function MyQrCard() {
 }
 
 export function buildSceneReactLiveCode(scene: SceneDocumentV1) {
-  const node = scene.activeNodeId
-  const card = scene.cardStateByNodeId[node]
-  const qr = scene.qrStateByNodeId[node]
-  const qrLayer = scene.layersByNodeId[node]?.find((layer) => layer.kind === "qr")
   const manifest = buildSceneDependencyManifest(scene)
   const installCommand = `pnpm add ${Object.keys(manifest.dependencies).join(" ")}`
-
-  const shaderBlock =
-    card?.styleMode === "paper-shader" && card.paperShader
-      ? `      <PaperShaderLayer
-        paperShader={${JSON.stringify(card.paperShader, null, 2).replaceAll("\n", "\n        ")}}
-        style={{ position: "absolute", inset: 0 }}
-      />`
-      : ""
-
-  const qrBlock =
-    qr && qrLayer
-      ? `      <div style={{ position: "absolute", left: ${qrLayer.x}, top: ${qrLayer.y}, width: ${qrLayer.width}, height: ${qrLayer.height} }}>
-        <AnimatedQr
-          contents="${qr.contents}"
-          externalSvg={\`${qr.externalSvg.replaceAll("`", "\\`")}\`}
-          preset="${qr.motion.preset}"
-          hoverEffect="${qr.motion.hoverEffect}"
-          width={${qrLayer.width}}
-          height={${qrLayer.height}}
-        />
-      </div>`
-      : ""
+  const ir = buildSceneIrFromSceneDocument(scene)
+  const code = emitLiveReact(ir, { dialect: "tsx", componentName: "MyQrCard" })
 
   return `/** Required:
  * ${installCommand}
  */
-import { AnimatedQr } from "@new-qr/qr-scene/bitjson"
-${card?.styleMode === "paper-shader" ? 'import { PaperShaderLayer } from "@new-qr/qr-scene/paper"\n' : ""}
-export function MyQrCard() {
-  return (
-    <div style={{ position: "relative", width: ${scene.width}, height: ${scene.height}, overflow: "hidden", borderRadius: ${card?.cornerRadius ?? 0} }}>
-${shaderBlock}
-${qrBlock}
-    </div>
-  )
-}`
+${code}`
 }

@@ -16,6 +16,8 @@
     "@bitjson/qr-code": "file:.external/qr-code",
     "@new-qr/qr-scene": "workspace:*",
     "@new-qr/qr-scene-bitjson": "workspace:*",
+    "@new-qr/qr-scene-codegen": "workspace:*",
+    "@new-qr/qr-scene-shaders": "workspace:*",
     "@new-qr/qr-scene-core": "workspace:*",
     "@new-qr/qr-scene-export": "workspace:*",
     "@new-qr/qr-scene-paper": "workspace:*",

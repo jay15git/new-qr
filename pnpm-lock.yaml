@@ -29,6 +29,9 @@ importers:
       '@new-qr/qr-scene-bitjson':
         specifier: workspace:*
         version: link:packages/qr-scene-bitjson
+      '@new-qr/qr-scene-codegen':
+        specifier: workspace:*
+        version: link:packages/qr-scene-codegen
       '@new-qr/qr-scene-core':
         specifier: workspace:*
         version: link:packages/qr-scene-core
@@ -44,6 +47,9 @@ importers:
       '@new-qr/qr-scene-schema':
         specifier: workspace:*
         version: link:packages/qr-scene-schema
+      '@new-qr/qr-scene-shaders':
+        specifier: workspace:*
+        version: link:packages/qr-scene-shaders
       '@paper-design/shaders':
         specifier: 0.0.76
         version: 0.0.76
@@ -232,6 +238,12 @@ importers:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
 
+  packages/qr-scene-codegen:
+    dependencies:
+      '@new-qr/qr-scene-shaders':
+        specifier: workspace:*
+        version: link:../qr-scene-shaders
+
   packages/qr-scene-core:
     dependencies:
       '@new-qr/qr-scene-schema':
@@ -252,6 +264,9 @@ importers:
       '@new-qr/qr-scene-schema':
         specifier: workspace:*
         version: link:../qr-scene-schema
+      '@new-qr/qr-scene-shaders':
+        specifier: workspace:*
+        version: link:../qr-scene-shaders
       '@paper-design/shaders':
         specifier: 0.0.76
         version: 0.0.76
@@ -287,6 +302,8 @@ importers:
         version: 19.2.4(react@19.2.4)
 
   packages/qr-scene-schema: {}
+
+  packages/qr-scene-shaders: {}
 
 packages:
 

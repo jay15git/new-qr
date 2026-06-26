@@ -2,12 +2,11 @@
 
 import { Component, type CSSProperties, type ReactNode, useMemo, useState } from "react"
 import { Dithering } from "@paper-design/shaders-react"
+import { buildPaperShaderRenderProps } from "@new-qr/qr-scene-shaders"
 
 import type { ScenePaperShaderState } from "@new-qr/qr-scene-schema"
 
-const SHADER_COMPONENTS: Record<string, typeof Dithering> = {
-  dithering: Dithering,
-}
+import { PAPER_SHADER_COMPONENTS_BY_ID } from "./shader-components"
 
 type PaperShaderLayerProps = {
   paperShader: ScenePaperShaderState
@@ -50,12 +49,14 @@ export function hasPaperShaderWebGlSupport() {
 }
 
 function buildShaderProps(paperShader: ScenePaperShaderState) {
-  return {
-    ...paperShader.params,
+  return buildPaperShaderRenderProps({
+    shaderId: paperShader.shaderId,
+    params: paperShader.params,
     frame: paperShader.frame,
-    speed: paperShader.paused ? 0 : paperShader.speed,
-    ...(paperShader.image?.value ? { image: paperShader.image.value } : {}),
-  }
+    speed: paperShader.speed,
+    paused: paperShader.paused,
+    image: paperShader.image,
+  })
 }
 
 export function PaperShaderLayer({
@@ -66,7 +67,7 @@ export function PaperShaderLayer({
 }: PaperShaderLayerProps) {
   const [canRenderShader] = useState(hasPaperShaderWebGlSupport)
   const [hasError, setHasError] = useState(false)
-  const ShaderComponent = SHADER_COMPONENTS[paperShader.shaderId] ?? Dithering
+  const ShaderComponent = PAPER_SHADER_COMPONENTS_BY_ID[paperShader.shaderId] ?? Dithering
   const shaderProps = useMemo(() => buildShaderProps(paperShader), [paperShader])
 
   if (!canRenderShader || hasError) {
@@ -90,6 +91,7 @@ export function PaperShaderLayer({
         {...shaderProps}
         aria-hidden="true"
         className={className}
+        data-shader-canvas-host
         style={{
           height: "100%",
           width: "100%",

@@ -6,6 +6,12 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL(".", import.meta.url)),
+      "@new-qr/qr-scene-codegen": fileURLToPath(
+        new URL("./packages/qr-scene-codegen/src/index.ts", import.meta.url),
+      ),
+      "@new-qr/qr-scene-shaders": fileURLToPath(
+        new URL("./packages/qr-scene-shaders/src/index.ts", import.meta.url),
+      ),
     },
   },
   test: {

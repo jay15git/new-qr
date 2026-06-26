@@ -130,6 +130,7 @@ import {
   type StudioGradient,
   type StudioDataModulesStyle,
 } from "@/features/qr-code/model/state"
+import type { FrameworkTarget } from "@new-qr/qr-scene-codegen"
 import type { SceneDocumentV1 } from "@new-qr/qr-scene-schema"
 import {
   ERROR_CORRECTION_LEVEL_OPTIONS,
@@ -660,6 +661,7 @@ export type DesktopToolbarController = {
   onExportSettingsChange: (patch: Partial<DesktopExportSettings>) => void
   onExportDownload: () => void
   buildSceneDocument?: () => Promise<SceneDocumentV1>
+  buildCodegenExport?: (target: FrameworkTarget) => Promise<{ code: string }>
   onTextReset: () => void
   onTextSettingsChange: (patch: Partial<DesktopTextSettings>) => void
 }
@@ -5319,11 +5321,13 @@ function DesktopLayerStackIconToggle({
 
 function DesktopExportInspector({
   buildSceneDocument,
+  buildCodegenExport,
   onExportDownload,
   onExportSettingsChange,
   settings,
 }: {
   buildSceneDocument?: () => Promise<SceneDocumentV1>
+  buildCodegenExport?: (target: FrameworkTarget) => Promise<{ code: string }>
   onExportDownload: () => void
   onExportSettingsChange: (patch: Partial<DesktopExportSettings>) => void
   settings: DesktopExportSettings
@@ -5409,7 +5413,10 @@ function DesktopExportInspector({
         {buildSceneDocument ? (
           <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
             <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Embed</p>
-            <DesktopEmbedInspector buildSceneDocument={buildSceneDocument} />
+            <DesktopEmbedInspector
+              buildSceneDocument={buildSceneDocument}
+              buildCodegenExport={buildCodegenExport}
+            />
           </DesktopInspectorSection>
         ) : null}
       </DesktopInspectorScrollArea>
@@ -5983,6 +5990,7 @@ export function DesktopFloatingInspector({
       ) : activeTool === "export" ? (
         <DesktopExportInspector
           buildSceneDocument={controller?.buildSceneDocument}
+          buildCodegenExport={controller?.buildCodegenExport}
           settings={actualExportSettings}
           onExportDownload={controller?.onExportDownload ?? (() => undefined)}
           onExportSettingsChange={onExportSettingsChange}

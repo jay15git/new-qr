@@ -1034,11 +1034,11 @@ describe("FloatingToolbar", () => {
     const surface = await renderPrototype()
     await openTool(surface.container, "motion")
 
-    const prismSweep = getRequiredButton(surface.container, "Use Prism Sweep motion loader")
+    const orbitReveal = getRequiredButton(surface.container, "Use Orbit Reveal motion loader")
 
-    await clickButton(prismSweep)
+    await clickButton(orbitReveal)
 
-    expect(prismSweep.getAttribute("aria-pressed")).toBe("true")
+    expect(orbitReveal.getAttribute("aria-pressed")).toBe("true")
     expect(getRequiredButton(surface.container, "Use Fade In Top Down motion loader").getAttribute("aria-pressed")).toBe("false")
   })
 
