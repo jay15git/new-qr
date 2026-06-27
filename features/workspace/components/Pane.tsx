@@ -128,7 +128,6 @@ function unlockLayerMoveCursor() {
 const LAYER_MOVE_CURSOR_CLASS = "cursor-all-scroll"
 const RESIZE_CONTROL_PADDING_PX = 12
 const ROTATE_HANDLE_OFFSET_PX = 34
-const ROTATE_HANDLE_RADIUS_PX = 10
 const ROTATE_LABEL_GAP_PX = 8
 const SIZE_LABEL_GAP_PX = 10
 const FLOATING_TOOLBAR_GAP_PX = 14
@@ -141,29 +140,21 @@ const CONTEXT_MENU_POINTER_OFFSET_PX = 8
 const ROTATION_SNAP_THRESHOLD_DEGREES = 4
 const ROTATION_SNAP_TARGETS = [0, 90, 180, 270] as const
 
-const RESIZE_HANDLES: Array<{
+const RESIZE_CORNER_HANDLE_SIZE_PX = 12
+const RESIZE_EDGE_HIT_SIZE_PX = 6
+const ROTATE_HANDLE_RADIUS_PX = RESIZE_CORNER_HANDLE_SIZE_PX / 2
+
+const CORNER_RESIZE_HANDLES: Array<{
   className: string
   cursorClassName: string
   direction: ResizeDirection
   label: string
 }> = [
   {
-    className: "left-1/2 top-0 -translate-x-1/2 -translate-y-1/2",
-    cursorClassName: "cursor-ns-resize",
-    direction: "n",
-    label: "top",
-  },
-  {
     className: "right-0 top-0 translate-x-1/2 -translate-y-1/2",
     cursorClassName: "cursor-nesw-resize",
     direction: "ne",
     label: "top right",
-  },
-  {
-    className: "right-0 top-1/2 -translate-y-1/2 translate-x-1/2",
-    cursorClassName: "cursor-ew-resize",
-    direction: "e",
-    label: "right",
   },
   {
     className: "bottom-0 right-0 translate-x-1/2 translate-y-1/2",
@@ -172,22 +163,10 @@ const RESIZE_HANDLES: Array<{
     label: "bottom right",
   },
   {
-    className: "bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2",
-    cursorClassName: "cursor-ns-resize",
-    direction: "s",
-    label: "bottom",
-  },
-  {
     className: "bottom-0 left-0 -translate-x-1/2 translate-y-1/2",
     cursorClassName: "cursor-nesw-resize",
     direction: "sw",
     label: "bottom left",
-  },
-  {
-    className: "left-0 top-1/2 -translate-x-1/2 -translate-y-1/2",
-    cursorClassName: "cursor-ew-resize",
-    direction: "w",
-    label: "left",
   },
   {
     className: "left-0 top-0 -translate-x-1/2 -translate-y-1/2",
@@ -196,6 +175,111 @@ const RESIZE_HANDLES: Array<{
     label: "top left",
   },
 ]
+
+const EDGE_RESIZE_ZONES: Array<{
+  className: string
+  cursorClassName: string
+  direction: ResizeDirection
+  label: string
+  style: CSSProperties
+}> = [
+  {
+    className: "top-0 -translate-y-1/2",
+    cursorClassName: "cursor-ns-resize",
+    direction: "n",
+    label: "top",
+    style: {
+      height: RESIZE_EDGE_HIT_SIZE_PX,
+      left: RESIZE_CORNER_HANDLE_SIZE_PX,
+      right: RESIZE_CORNER_HANDLE_SIZE_PX,
+    },
+  },
+  {
+    className: "right-0 translate-x-1/2",
+    cursorClassName: "cursor-ew-resize",
+    direction: "e",
+    label: "right",
+    style: {
+      bottom: RESIZE_CORNER_HANDLE_SIZE_PX,
+      top: RESIZE_CORNER_HANDLE_SIZE_PX,
+      width: RESIZE_EDGE_HIT_SIZE_PX,
+    },
+  },
+  {
+    className: "bottom-0 translate-y-1/2",
+    cursorClassName: "cursor-ns-resize",
+    direction: "s",
+    label: "bottom",
+    style: {
+      height: RESIZE_EDGE_HIT_SIZE_PX,
+      left: RESIZE_CORNER_HANDLE_SIZE_PX,
+      right: RESIZE_CORNER_HANDLE_SIZE_PX,
+    },
+  },
+  {
+    className: "left-0 -translate-x-1/2",
+    cursorClassName: "cursor-ew-resize",
+    direction: "w",
+    label: "left",
+    style: {
+      bottom: RESIZE_CORNER_HANDLE_SIZE_PX,
+      top: RESIZE_CORNER_HANDLE_SIZE_PX,
+      width: RESIZE_EDGE_HIT_SIZE_PX,
+    },
+  },
+]
+
+function renderResizeFrameControls(
+  targetLabel: string,
+  onResizePointerDown: (event: PointerEvent<HTMLButtonElement>, direction: ResizeDirection) => void,
+  onPointerCancel: (event: PointerEvent<HTMLButtonElement>) => void,
+  onPointerMove: (event: PointerEvent<HTMLButtonElement>) => void,
+  onPointerUp: (event: PointerEvent<HTMLButtonElement>) => void,
+) {
+  return (
+    <>
+      {EDGE_RESIZE_ZONES.map((zone) => (
+        <button
+          aria-label={`Resize ${targetLabel} from ${zone.label}`}
+          className={cn(
+            "pointer-events-auto absolute z-20 border-0 bg-transparent p-0",
+            zone.className,
+            zone.cursorClassName,
+          )}
+          data-resize-direction={zone.direction}
+          data-slot="drafting-layer-resize-edge"
+          key={zone.direction}
+          onClick={(event) => event.stopPropagation()}
+          onPointerCancel={onPointerCancel}
+          onPointerDown={(event) => onResizePointerDown(event, zone.direction)}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          style={zone.style}
+          type="button"
+        />
+      ))}
+      {CORNER_RESIZE_HANDLES.map((handle) => (
+        <button
+          aria-label={`Resize ${targetLabel} from ${handle.label}`}
+          className={cn(
+            "pointer-events-auto absolute z-30 size-3 rounded-full border border-[#a8b0bb] bg-white shadow-[var(--drafting-shadow-rest)]",
+            handle.className,
+            handle.cursorClassName,
+          )}
+          data-resize-direction={handle.direction}
+          data-slot="drafting-layer-resize-handle"
+          key={handle.direction}
+          onClick={(event) => event.stopPropagation()}
+          onPointerCancel={onPointerCancel}
+          onPointerDown={(event) => onResizePointerDown(event, handle.direction)}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          type="button"
+        />
+      ))}
+    </>
+  )
+}
 
 export function resizeDraftingLayer(
   layer: DraftingCanvasLayer,
@@ -1813,7 +1897,7 @@ export const Pane = memo(function Pane({
         <LayerSizeValue height={layer.height} width={layer.width} />
         <button
           aria-label={`Rotate ${layer.name}`}
-          className="pointer-events-auto absolute left-1/2 top-0 z-30 flex size-5 items-center justify-center rounded-full border border-[#a8b0bb] bg-white text-[#111827] shadow-[var(--drafting-shadow-rest)]"
+          className="pointer-events-auto absolute left-1/2 top-0 z-30 size-3 rounded-full border border-[#a8b0bb] bg-white shadow-[var(--drafting-shadow-rest)]"
           data-slot="drafting-layer-rotate-handle"
           onClick={(event) => event.stopPropagation()}
           onPointerCancel={endLayerInteraction}
@@ -1825,25 +1909,13 @@ export const Pane = memo(function Pane({
           }}
           type="button"
         />
-        {RESIZE_HANDLES.map((handle) => (
-          <button
-            aria-label={`Resize ${layer.name} from ${handle.label}`}
-            className={cn(
-              "pointer-events-auto absolute z-30 size-3 rounded-full border border-[#a8b0bb] bg-white shadow-[var(--drafting-shadow-rest)]",
-              handle.className,
-              handle.cursorClassName,
-            )}
-            data-resize-direction={handle.direction}
-            data-slot="drafting-layer-resize-handle"
-            key={handle.direction}
-            onClick={(event) => event.stopPropagation()}
-            onPointerCancel={endLayerInteraction}
-            onPointerDown={(event) => startLayerInteraction(event, layer, "resize", handle.direction)}
-            onPointerMove={updateLayerInteraction}
-            onPointerUp={endLayerInteraction}
-            type="button"
-          />
-        ))}
+        {renderResizeFrameControls(
+          layer.name,
+          (event, direction) => startLayerInteraction(event, layer, "resize", direction),
+          endLayerInteraction,
+          updateLayerInteraction,
+          endLayerInteraction,
+        )}
       </div>
     )
   }
@@ -1894,7 +1966,7 @@ export const Pane = memo(function Pane({
         <LayerSizeValue height={bounds.height} width={bounds.width} />
         <button
           aria-label="Rotate selection"
-          className="pointer-events-auto absolute left-1/2 top-0 z-30 flex size-5 items-center justify-center rounded-full border border-[#a8b0bb] bg-white text-[#111827] shadow-[var(--drafting-shadow-rest)]"
+          className="pointer-events-auto absolute left-1/2 top-0 z-30 size-3 rounded-full border border-[#a8b0bb] bg-white shadow-[var(--drafting-shadow-rest)]"
           data-slot="drafting-layer-rotate-handle"
           onClick={(event) => event.stopPropagation()}
           onPointerCancel={endLayerInteraction}
@@ -1906,25 +1978,13 @@ export const Pane = memo(function Pane({
           }}
           type="button"
         />
-        {RESIZE_HANDLES.map((handle) => (
-          <button
-            aria-label={`Resize selection from ${handle.label}`}
-            className={cn(
-              "pointer-events-auto absolute z-30 size-3 rounded-full border border-[#a8b0bb] bg-white shadow-[var(--drafting-shadow-rest)]",
-              handle.className,
-              handle.cursorClassName,
-            )}
-            data-resize-direction={handle.direction}
-            data-slot="drafting-layer-resize-handle"
-            key={handle.direction}
-            onClick={(event) => event.stopPropagation()}
-            onPointerCancel={endLayerInteraction}
-            onPointerDown={(event) => startMultiLayerInteraction(event, "resize", handle.direction)}
-            onPointerMove={updateLayerInteraction}
-            onPointerUp={endLayerInteraction}
-            type="button"
-          />
-        ))}
+        {renderResizeFrameControls(
+          "selection",
+          (event, direction) => startMultiLayerInteraction(event, "resize", direction),
+          endLayerInteraction,
+          updateLayerInteraction,
+          endLayerInteraction,
+        )}
       </div>
     )
   }

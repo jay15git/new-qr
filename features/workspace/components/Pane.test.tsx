@@ -408,7 +408,7 @@ describe("Pane", () => {
     expect((node as HTMLElement).style.height).toBe("320px")
   })
 
-  it("shows all edge and corner resize handles for the selected layer", async () => {
+  it("shows corner resize handles and grabbable edge zones for the selected layer", async () => {
     const { container } = renderPane(createDefaultQrStudioState(), true, createDefaultDraftingCardState(), {
       onLayerChange: () => undefined,
       selectedLayerId: "preview:qr",
@@ -416,12 +416,16 @@ describe("Pane", () => {
 
     await waitForQrPaneRender()
 
-    const directions = Array.from(
+    const cornerDirections = Array.from(
       container.querySelectorAll('[data-slot="drafting-layer-resize-handle"]'),
+    ).map((handle) => handle.getAttribute("data-resize-direction"))
+    const edgeDirections = Array.from(
+      container.querySelectorAll('[data-slot="drafting-layer-resize-edge"]'),
     ).map((handle) => handle.getAttribute("data-resize-direction"))
     const resizeHandle = container.querySelector('[data-slot="drafting-layer-resize-handle"]')
 
-    expect(directions).toEqual(["n", "ne", "e", "se", "s", "sw", "w", "nw"])
+    expect(cornerDirections).toEqual(["ne", "se", "sw", "nw"])
+    expect(edgeDirections).toEqual(["n", "e", "s", "w"])
     expect(resizeHandle?.className).toContain("rounded-full")
     expect(resizeHandle?.className).toContain("border-[#a8b0bb]")
     expect(resizeHandle?.className).toContain("bg-white")
@@ -551,7 +555,7 @@ describe("Pane", () => {
     await waitForQrPaneRender()
 
     const handle = container.querySelector(
-      '[data-slot="drafting-layer-resize-handle"][data-resize-direction="e"]',
+      '[data-slot="drafting-layer-resize-edge"][data-resize-direction="e"]',
     ) as HTMLButtonElement
 
     act(() => {
@@ -583,7 +587,7 @@ describe("Pane", () => {
     await waitForQrPaneRender()
 
     const handle = container.querySelector(
-      '[data-slot="drafting-layer-resize-handle"][data-resize-direction="e"]',
+      '[data-slot="drafting-layer-resize-edge"][data-resize-direction="e"]',
     ) as HTMLButtonElement
 
     act(() => {
@@ -616,7 +620,7 @@ describe("Pane", () => {
     await waitForQrPaneRender()
 
     const handle = container.querySelector(
-      '[data-slot="drafting-layer-resize-handle"][data-resize-direction="e"]',
+      '[data-slot="drafting-layer-resize-edge"][data-resize-direction="e"]',
     ) as HTMLButtonElement
 
     act(() => {
@@ -673,7 +677,7 @@ describe("Pane", () => {
     expect(rotateHandle?.className).toContain("rounded-full")
     expect(rotateHandle?.className).toContain("border-[#a8b0bb]")
     expect(rotateHandle?.className).toContain("bg-white")
-    expect(rotateHandle?.className).toContain("text-[#111827]")
+    expect(rotateHandle?.className).toContain("size-3")
     expect((rotateHandle as HTMLElement | null)?.style.transform).toBe(
       "translate(-50%, calc(-34px - 50%))",
     )
@@ -1517,7 +1521,8 @@ describe("Pane", () => {
     expect(multiFrame.style.width).toBe("392px")
     expect(multiFrame.style.height).toBe("520px")
     expect(multiFrame.style.transform).toBe("translate3d(-196px, -260px, 0)")
-    expect(container.querySelectorAll('[data-slot="drafting-layer-resize-handle"]')).toHaveLength(8)
+    expect(container.querySelectorAll('[data-slot="drafting-layer-resize-handle"]')).toHaveLength(4)
+    expect(container.querySelectorAll('[data-slot="drafting-layer-resize-edge"]')).toHaveLength(4)
     expect(rotateHandle).not.toBeNull()
     expect(container.innerHTML).toContain('aria-label="Rotate selection"')
   })
@@ -1537,7 +1542,7 @@ describe("Pane", () => {
     await waitForQrPaneRender()
 
     const handle = container.querySelector(
-      '[data-slot="drafting-layer-resize-handle"][data-resize-direction="e"]',
+      '[data-slot="drafting-layer-resize-edge"][data-resize-direction="e"]',
     ) as HTMLButtonElement
 
     act(() => {

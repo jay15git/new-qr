@@ -142,7 +142,7 @@ function DesktopWorkspaceStyles() {
         pointer-events: none;
       }
 
-      body:has([data-slot="desktop-workspace"]) button:not(:disabled):not([data-slot="draggable-list-handle"]):not([data-slot="drafting-layer-resize-handle"]),
+      body:has([data-slot="desktop-workspace"]) button:not(:disabled):not([data-slot="draggable-list-handle"]):not([data-slot="drafting-layer-resize-handle"]):not([data-slot="drafting-layer-resize-edge"]),
       body:has([data-slot="desktop-workspace"]) summary,
       body:has([data-slot="desktop-workspace"]) select:not(:disabled),
       body:has([data-slot="desktop-workspace"]) input[type="color"] {
