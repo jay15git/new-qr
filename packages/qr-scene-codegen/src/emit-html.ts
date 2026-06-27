@@ -50,15 +50,9 @@ export function emitHtml(ir: SceneIr) {
   const domMarkup = emitDomLayersHtml(ir.domLayers ?? [])
   const fontBlocks = emitFontBlocks(ir)
   const animatedBlock = emitAnimatedQrPlaceholder(ir)
-  const needsQrWebComponent = (ir.domLayers ?? []).some(
-    (layer) => layer.kind === "qr" && layer.qrProps,
-  )
-  const webComponentScript = needsQrWebComponent
-    ? `<script type="module">import { registerNewQrCodeElement } from "@new-qr/qr/web-component";registerNewQrCodeElement();</script>\n`
-    : ""
   const prefix = fontBlocks ? `${fontBlocks}\n` : ""
 
-  return `${prefix}${webComponentScript}<div class="qr-card" style="position:relative;width:${bounds.width}px;height:${bounds.height}px;overflow:hidden">
+  return `${prefix}<div class="qr-card" style="position:relative;width:${bounds.width}px;height:${bounds.height}px;overflow:hidden">
 ${shaderMarkup}
 ${domMarkup}
 ${animatedBlock}

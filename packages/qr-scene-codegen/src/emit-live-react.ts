@@ -57,11 +57,8 @@ ${formatShaderProps(props)}
   const animatedImportLine = ir.animatedQr
     ? `import { AnimatedQr } from "@new-qr/qr/animated"\n`
     : ""
-  const qrImportLine = (ir.domLayers ?? []).some((layer) => layer.kind === "qr" && layer.qrProps)
-    ? `import { NewQrCode } from "@new-qr/qr/react"\n`
-    : ""
 
-  return `${shaderImportLine}${animatedImportLine}${qrImportLine}export function ${componentName}() {
+  return `${shaderImportLine}${animatedImportLine}export function ${componentName}() {
   return (
     <div style={{ position: "relative", width: ${ir.bounds.width}, height: ${ir.bounds.height}, overflow: "hidden" }}>
 ${shaderBlocks.join("\n")}

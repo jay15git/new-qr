@@ -272,22 +272,17 @@ describe("Pane", () => {
     const cardShape = card.querySelector('[data-slot="drafting-card-shape"]')
     const qrBackground = container.querySelector('[data-slot="drafting-qr-background"]')
     const qrComponent = container.querySelector('[data-slot="drafting-qr-component"]') as HTMLElement
-    const newQrCode = container.querySelector('[data-slot="new-qr-code"]')
 
     expect(card.getAttribute("data-card-shape")).toBeNull()
     expect(cardShape).toBeNull()
     expect(card.style.boxShadow).toContain("6px 8px 30px rgba(0, 0, 0, 0.35)")
     expect(qrBackground).not.toBeNull()
     expect(qrBackground?.getAttribute("data-background-shape")).toBe("flower")
-    expect(qrBackground?.querySelector("svg")).toBeNull()
-    expect(
-      Array.from(qrBackground?.querySelectorAll("div") ?? []).some((node) =>
-        String((node as HTMLElement).style.clipPath).includes("path("),
-      ),
-    ).toBe(true)
+    expect(qrBackground?.querySelector("svg")).not.toBeNull()
+    expect(qrBackground?.querySelector("path")).not.toBeNull()
     expect(qrComponent).not.toBeNull()
-    expect(newQrCode).not.toBeNull()
-    expect(newQrCode?.querySelector("svg")).not.toBeNull()
+    expect(qrComponent?.querySelector("svg")).not.toBeNull()
+    expect(container.querySelector('[data-slot="new-qr-code"]')).toBeNull()
     expect(buildDashboardQrNodePayloadSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         backgroundGradient: expect.objectContaining({ enabled: false }),
@@ -1467,11 +1462,10 @@ describe("Pane", () => {
     await waitForQrPaneRender()
 
     const qrComponent = container.querySelector('[data-slot="drafting-qr-component"]') as HTMLElement
-    const newQrCode = container.querySelector('[data-slot="new-qr-code"]')
 
     expect(qrComponent).not.toBeNull()
-    expect(newQrCode).not.toBeNull()
-    expect(newQrCode?.querySelector("svg")).not.toBeNull()
+    expect(qrComponent?.querySelector("svg")).not.toBeNull()
+    expect(container.querySelector('[data-slot="new-qr-code"]')).toBeNull()
   })
 
   it("keeps the qr canvas unshadowed when not selected", async () => {

@@ -13,9 +13,7 @@ export function buildCodegenManifest(ir: SceneIr, target: CodegenTarget) {
   const dependencies: Record<string, string> = {}
   const needsShaders = ir.shaders.length > 0
   const needsAnimatedQr = Boolean(ir.animatedQr)
-  const needsQrPackage =
-    (ir.domLayers ?? []).some((layer) => layer.kind === "qr" && layer.qrProps) ||
-    needsAnimatedQr
+  const needsQrPackage = needsAnimatedQr
   const usesReact = targetUsesReactDependencies(target)
 
   if (needsQrPackage) {

@@ -1089,7 +1089,15 @@ function svgTransformToCss(transform: string) {
       return `translate(${parts[0]}px, ${parts[1]}px)`
     })
     .replace(/\bscale\(([^)]+)\)/g, "scale($1)")
-    .replace(/\brotate\(([^)]+)\)/g, "rotate($1deg)")
+    .replace(/\brotate\(([^)]+)\)/g, (_match, values: string) => {
+      const parts = values.split(/[\s,]+/).filter(Boolean)
+      if (parts.length === 1) {
+        return `rotate(${parts[0]}deg)`
+      }
+      return `rotate(${parts[0]}deg ${parts[1]}px ${parts[2]}px)`
+    })
+    .replace(/\bskewX\(([^)]+)\)/g, (_match, value: string) => `skewX(${value}deg)`)
+    .replace(/\bskewY\(([^)]+)\)/g, (_match, value: string) => `skewY(${value}deg)`)
 }
 
 function nextModuleId(prefix: string, suffix: string) {

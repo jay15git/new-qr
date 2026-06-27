@@ -231,7 +231,7 @@ describe("convertQrSvgToDom", () => {
 })
 
 describe("qr dom export integration", () => {
-  it("builds qr layer portable props with css background children for static qr", async () => {
+  it("builds qr layer with inline svg background and foreground children for static qr", async () => {
     const state = createDefaultQrStudioState()
     const qrPayload = await buildDashboardQrNodePayload(createDraftingQrArtworkState(state))
     const layers = createDefaultDraftingLayers("node-1", state, DEFAULT_DRAFTING_CARD_STATE)
@@ -245,13 +245,14 @@ describe("qr dom export integration", () => {
     const qrLayer = parts.domLayers.find((layer) => layer.kind === "qr")
     expect(qrLayer).toBeDefined()
     expect(qrLayer?.svgInner).toBeUndefined()
+    expect(qrLayer?.qrProps).toBeUndefined()
     expect(qrLayer?.children?.[0]?.kind).toBe("group")
-    expect(qrLayer?.children?.[0]?.children?.[0]?.style.backgroundColor).toBe("#f8fafc")
-    expect(qrLayer?.qrProps?.value).toBe(state.data.trim())
-    expect(qrLayer?.qrProps?.module).toBe(state.dataModulesSettings.type)
+    expect(qrLayer?.children?.[0]?.children?.[0]?.svgInner).toContain('fill="#f8fafc"')
+    expect(qrLayer?.children?.[1]?.svgInner).toContain("<svg")
+    expect(qrLayer?.children?.[1]?.svgInner).toContain('data-testid="data-modules"')
   })
 
-  it("keeps portable props when dot matrix animation is enabled", async () => {
+  it("keeps inline svg foreground when dot matrix animation is enabled", async () => {
     const state = createDefaultQrStudioState()
     state.dotMatrixAnimation = {
       ...state.dotMatrixAnimation,
@@ -270,8 +271,7 @@ describe("qr dom export integration", () => {
     })
 
     const qrLayer = parts.domLayers.find((layer) => layer.kind === "qr")
-    expect(qrLayer?.qrProps?.motion).toBe("bitjson")
-    expect(qrLayer?.qrProps?.motionPreset).toBe("FadeInTopDown")
+    expect(qrLayer?.children?.[1]?.svgInner).toContain("<svg")
     expect(qrLayer?.svgInner).toBeUndefined()
   })
 })
@@ -288,8 +288,8 @@ function buildQrSceneIr(domLayers: DomLayerNode[]): SceneIr {
   }
 }
 
-describe("qr export emitters with portable qr props", () => {
-  it("emits html qr layers with new-qr-code web component", async () => {
+describe("qr export emitters with inline svg qr layers", () => {
+  it("emits html qr layers with inline svg markup", async () => {
     const state = createDefaultQrStudioState()
     const qrPayload = await buildDashboardQrNodePayload(createDraftingQrArtworkState(state))
     const layers = createDefaultDraftingLayers("node-1", state, DEFAULT_DRAFTING_CARD_STATE)
@@ -302,13 +302,14 @@ describe("qr export emitters with portable qr props", () => {
 
     const html = emitHtml(buildQrSceneIr(parts.domLayers))
     expect(html).toContain('class="qr-layer qr-layer--qr')
-    expect(html).toContain("<new-qr-code")
-    expect(html).toContain('module="rounded"')
-    expect(html).toContain("registerNewQrCodeElement")
-    expect(html).toContain("background-color:#f8fafc")
+    expect(html).toContain("<svg")
+    expect(html).toContain('data-testid="data-modules"')
+    expect(html).not.toContain("<new-qr-code")
+    expect(html).not.toContain("registerNewQrCodeElement")
+    expect(html).toContain('fill="#f8fafc"')
   })
 
-  it("emits css clip-path background modules for decorative qr shapes", async () => {
+  it("emits inline svg background modules for decorative qr shapes", async () => {
     const state = createDefaultQrStudioState()
     state.backgroundShapeId = "flower"
     const qrPayload = await buildDashboardQrNodePayload(createDraftingQrArtworkState(state))
@@ -321,10 +322,12 @@ describe("qr export emitters with portable qr props", () => {
     })
 
     const html = emitHtml(buildQrSceneIr(parts.domLayers))
-    expect(html).toContain("clip-path:path(")
+    expect(html).toContain("<svg")
+    expect(html).toContain("<path")
+    expect(html).not.toContain("clip-path:shape(")
   })
 
-  it("emits react qr layers with NewQrCode component", async () => {
+  it("emits react qr layers with inline svg markup", async () => {
     const state = createDefaultQrStudioState()
     const qrPayload = await buildDashboardQrNodePayload(createDraftingQrArtworkState(state))
     const layers = createDefaultDraftingLayers("node-1", state, DEFAULT_DRAFTING_CARD_STATE)
@@ -340,12 +343,13 @@ describe("qr export emitters with portable qr props", () => {
       componentName: "QrCard",
     })
 
-    expect(react).toContain('import { NewQrCode } from "@new-qr/qr/react"')
-    expect(react).toContain("<NewQrCode")
-    expect(react).toContain('module="rounded"')
+    expect(react).not.toContain('import { NewQrCode } from "@new-qr/qr/react"')
+    expect(react).not.toContain("<NewQrCode")
+    expect(react).toContain("dangerouslySetInnerHTML")
+    expect(react).toContain('data-testid=\\"data-modules\\"')
   })
 
-  it("emits css qr layer rules with background modules", async () => {
+  it("emits qr layer rules with inline svg background modules", async () => {
     const state = createDefaultQrStudioState()
     const qrPayload = await buildDashboardQrNodePayload(createDraftingQrArtworkState(state))
     const layers = createDefaultDraftingLayers("node-1", state, DEFAULT_DRAFTING_CARD_STATE)
@@ -358,6 +362,6 @@ describe("qr export emitters with portable qr props", () => {
 
     const css = emitCss(buildQrSceneIr(parts.domLayers))
     expect(css).toContain(".qr-layer--qr-")
-    expect(css).toContain("background-color:#f8fafc")
+    expect(css).toContain('fill="#f8fafc"')
   })
 })

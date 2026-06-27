@@ -8,7 +8,7 @@ import { createDefaultDraftingLayers } from "@/features/workspace/model/layers"
 import { createDefaultDraftingCardState } from "@/features/workspace/model/card-state"
 
 describe("background shape dom conversion", () => {
-  it("converts decorative shapes to css clip-path modules", () => {
+  it("renders decorative shapes as inline svg modules", () => {
     const state = setSquareQrSize(createDefaultQrStudioState(), 240)
     state.backgroundShapeId = "flower"
     const [layer] = createDefaultDraftingLayers(
@@ -20,12 +20,39 @@ describe("background shape dom conversion", () => {
     const modules = buildDraftingQrBackgroundDomModules(layer, state)
 
     expect(modules?.shapeId).toBe("flower")
-    expect(modules?.nodes.length).toBeGreaterThan(0)
-    expect(String(modules?.nodes[0]?.children?.[0]?.style.clipPath ?? "")).toMatch(/^path\(/)
-    expect(modules?.nodes[0]?.kind).toBe("group")
-    expect(String(modules?.nodes[0]?.style.transform ?? "")).toMatch(/translate\(/)
-    expect(String(modules?.nodes[0]?.style.transform ?? "")).toMatch(/scale\(/)
-    expect(modules?.nodes[0]?.children?.[0]?.style.width).toBeGreaterThan(0)
+    expect(modules?.nodes).toHaveLength(1)
+    expect(modules?.nodes[0]?.kind).toBe("module")
+    expect(modules?.nodes[0]?.svgInner).toContain("<svg")
+    expect(modules?.nodes[0]?.svgInner).toContain("<path")
+    expect(modules?.nodes[0]?.style.clipPath).toBeUndefined()
+    expect(modules?.nodes[0]?.style.width).toBeGreaterThan(0)
+    expect(modules?.nodes[0]?.style.height).toBeGreaterThan(0)
+  })
+
+  it("keeps gradient and stroke attributes in inline svg markup", () => {
+    const state = setSquareQrSize(createDefaultQrStudioState(), 240)
+    state.backgroundShapeId = "circle"
+    state.backgroundShapeOptions = {
+      ...state.backgroundShapeOptions,
+      strokeWidth: 6,
+      strokeColor: "#ff00aa",
+    }
+    state.backgroundGradient = {
+      ...state.backgroundGradient,
+      enabled: true,
+    }
+    const [layer] = createDefaultDraftingLayers(
+      "preview",
+      state,
+      createDefaultDraftingCardState(),
+    ).filter((entry) => entry.kind === "qr")
+
+    const modules = buildDraftingQrBackgroundDomModules(layer, state)
+    const svgInner = modules?.nodes[0]?.svgInner ?? ""
+
+    expect(svgInner).toContain("linearGradient")
+    expect(svgInner).toContain('stroke-width="6"')
+    expect(svgInner).toContain('stroke="#ff00aa"')
   })
 
   it("keeps decorative shape layout proportional when the qr layer is resized", () => {
@@ -52,8 +79,8 @@ describe("background shape dom conversion", () => {
 
     expect(resized?.layoutWidth).toBeCloseTo((fullSize?.layoutWidth ?? 0) * resizeScale, 0)
     expect(resized?.layoutHeight).toBeCloseTo((fullSize?.layoutHeight ?? 0) * resizeScale, 0)
-    expect(String(resized?.nodes[0]?.style.transform ?? "")).toMatch(/translate\(/)
-    expect(String(resized?.nodes[0]?.style.transform ?? "")).toMatch(/scale\(/)
+    expect(resized?.nodes[0]?.svgInner).toContain("<path")
+    expect(resized?.nodes[0]?.style.width).toBeLessThan(fullSize?.nodes[0]?.style.width ?? 0)
   })
 
   it("fits background outer metrics to the layer box at small resize sizes", () => {
@@ -82,7 +109,7 @@ describe("background shape dom conversion", () => {
     }
   })
 
-  it("uses border radius for the default rect backing shape", () => {
+  it("uses rounded rect markup for the default rect backing shape", () => {
     const state = setSquareQrSize(createDefaultQrStudioState(), 240)
     state.backgroundOptions.round = 0.2
     const [layer] = createDefaultDraftingLayers(
@@ -94,6 +121,7 @@ describe("background shape dom conversion", () => {
     const modules = buildDraftingQrBackgroundDomModules(layer, state)
 
     expect(modules?.shapeId).toBe("rect")
-    expect(modules?.nodes[0]?.style.borderRadius).toBeDefined()
+    expect(modules?.nodes[0]?.svgInner).toContain("<rect")
+    expect(modules?.nodes[0]?.svgInner).toMatch(/rx="[^"]+"/)
   })
 })

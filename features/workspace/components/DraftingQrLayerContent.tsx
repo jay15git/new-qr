@@ -2,7 +2,6 @@
 
 import { memo, useMemo, type CSSProperties } from "react"
 
-import { toPortableQrConfig } from "@/features/qr-code/adapters/portable-config"
 import { BitjsonAnimatedQr } from "@/features/qr-code/components/BitjsonAnimatedQr"
 import { shouldUseBitjsonMotionPreview } from "@/features/qr-code/motion/bitjson-bridge"
 import type { QrStudioState } from "@/features/qr-code/model/state"
@@ -11,8 +10,8 @@ import {
   getDraftingQrLayerLayout,
 } from "@/features/qr-code/rendering/svg-extension"
 import { DraftingQrBackground } from "@/features/workspace/components/QrBackground"
+import { buildDraftingQrPreviewScaledMarkup } from "@/features/workspace/export/layered-dom-parts"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
-import { NewQrCode } from "@new-qr/qr/react"
 
 type DraftingQrLayerContentProps = {
   canvasSvgMarkup: string | null
@@ -26,7 +25,7 @@ type DraftingQrLayerContentProps = {
 export const DraftingQrLayerContent = memo(function DraftingQrLayerContent({
   canvasSvgMarkup,
   layer,
-  qrMarkup: _qrMarkup,
+  qrMarkup,
   shapeTiltInnerStyle,
   shapeTiltPerspectiveStyle,
   state,
@@ -34,7 +33,10 @@ export const DraftingQrLayerContent = memo(function DraftingQrLayerContent({
   const layout = getDraftingQrLayerLayout(layer.width, state, layer.height)
   const qrPlacementStyle = getDraftingQrDomPlacementStyle(layout)
   const useAnimatedQr = shouldUseBitjsonMotionPreview(state) && Boolean(canvasSvgMarkup)
-  const portableConfig = useMemo(() => toPortableQrConfig(state), [state])
+  const qrSvgMarkup = useMemo(
+    () => buildDraftingQrPreviewScaledMarkup(layer, qrMarkup, state),
+    [layer, qrMarkup, state],
+  )
 
   if (useAnimatedQr) {
     return (
@@ -68,9 +70,8 @@ export const DraftingQrLayerContent = memo(function DraftingQrLayerContent({
             ...qrPlacementStyle,
             transformStyle: shapeTiltInnerStyle.transformStyle,
           }}
-        >
-          <NewQrCode {...portableConfig} />
-        </div>
+          {...(qrSvgMarkup ? { dangerouslySetInnerHTML: { __html: qrSvgMarkup } } : {})}
+        />
       </div>
     </div>
   )

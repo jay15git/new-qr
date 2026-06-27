@@ -1,5 +1,4 @@
 import type { DomLayerNode } from "./types"
-import { emitNewQrCodeHtml, emitNewQrCodeReact } from "./emit-qr-component"
 
 function escapeHtml(value: string) {
   return value
@@ -58,21 +57,12 @@ function emitDomLayerHtml(layer: DomLayerNode, index: number): string {
     ? layer.children.map((child, childIndex) => emitDomLayerHtml(child, childIndex)).join("\n")
     : ""
 
-  if (layer.kind === "qr" && layer.qrProps) {
-    const qrMarkup = emitNewQrCodeHtml(layer.qrProps)
-    if (layer.children?.length) {
-      return `<div class="${className}" style="${style}">\n${children}\n${qrMarkup}\n</div>`
-    }
-
-    return `<div class="${className}" style="${style}">${qrMarkup}</div>`
-  }
-
   const inner =
     layer.htmlContent ??
     (layer.svgInner ? layer.svgInner : layer.content ? escapeHtml(layer.content) : "")
 
   if (layer.children?.length) {
-    return `<div class="${className}" style="${style}">\n${children}\n</div>`
+    return `<div class="${className}" style="${style}">\n${children}\n${inner ? `${inner}\n` : ""}</div>`
   }
 
   if (!inner && (layer.kind === "module" || layer.kind === "card")) {
@@ -88,19 +78,6 @@ export function emitDomLayersReact(layers: DomLayerNode[], indent = "      ") {
 
 function emitDomLayerReact(layer: DomLayerNode, indent: string): string {
   const style = cssPropertiesToReactStyle(layer.style)
-
-  if (layer.kind === "qr" && layer.qrProps) {
-    const qrMarkup = emitNewQrCodeReact(layer.qrProps, `${indent}  `)
-    if (layer.children?.length) {
-      const children = layer.children
-        .map((child) => emitDomLayerReact(child, `${indent}  `))
-        .join("\n")
-
-      return `${indent}<div style={{ ${style} }}>\n${children}\n${qrMarkup}\n${indent}</div>`
-    }
-
-    return `${indent}<div style={{ ${style} }}>\n${qrMarkup}\n${indent}</div>`
-  }
 
   const children: string = layer.children?.length
     ? `\n${layer.children.map((child) => emitDomLayerReact(child, `${indent}  `)).join("\n")}\n${indent}`
@@ -198,10 +175,7 @@ function emitDomLayerCssMarkup(layer: DomLayerNode, path: string, classPrefix: s
         .map((child, childIndex) => emitDomLayerCssMarkup(child, `${path}-${childIndex}`, classPrefix))
         .join("\n")
     : ""
-  const inner =
-    layer.kind === "qr" && layer.qrProps
-      ? emitNewQrCodeHtml(layer.qrProps)
-      : layer.htmlContent ?? layer.svgInner ?? (layer.content ? escapeHtml(layer.content) : "")
+  const inner = layer.htmlContent ?? layer.svgInner ?? (layer.content ? escapeHtml(layer.content) : "")
 
   if (layer.children?.length) {
     return `<div class="${classPrefix} ${className}">\n${children}\n</div>`
