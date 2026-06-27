@@ -98,6 +98,7 @@ import {
   DOT_STYLE_OPTIONS,
 } from "@/features/qr-code/styles/style-options"
 import { StylePreview, type StylePreviewKind } from "@/features/qr-code/components/StylePreview"
+import { GradientOffsetRangeField } from "@/features/qr-code/components/GradientOffsetRangeField"
 import {
   DEFAULT_DOT_MATRIX_ANIMATION,
   DEFAULT_BACKGROUND_SHAPE_OPTIONS,
@@ -124,6 +125,7 @@ import {
   type StudioDataModulesStyle,
 } from "@/features/qr-code/model/state"
 import type { CodeExportTarget } from "@new-qr/qr-scene-codegen"
+import { normalizeGradientOffsetRange } from "@/features/qr-code/styles/gradient-controls"
 import {
   ERROR_CORRECTION_LEVEL_OPTIONS,
   TYPE_NUMBER_MAX,
@@ -2399,6 +2401,12 @@ function DesktopLogoInspector({
                     })
                   }
                 />
+                <DesktopGradientOffsetSlider
+                  dataSlot="desktop-logo-gradient"
+                  gradient={settings.gradient}
+                  label="Logo color stop range"
+                  onGradientChange={(gradient) => onLogoSettingsChange({ gradient })}
+                />
               </div>
             )}
           </DesktopInspectorSection>
@@ -2676,6 +2684,12 @@ function DesktopCornerColorSection({
             value={gradient.colorStops[1].color}
             onChange={(color) => onGradientChange(updateDesktopGradientColor(gradient, 1, color))}
           />
+          <DesktopGradientOffsetSlider
+            dataSlot={dataSlot}
+            gradient={gradient}
+            label={`${colorLabelPrefix} color stop range`}
+            onGradientChange={onGradientChange}
+          />
           <DesktopSegmentedRow
             label="Type"
             options={DESKTOP_GRADIENT_TYPE_OPTIONS}
@@ -2844,6 +2858,12 @@ function DesktopShapeInspector({
                     shapeGradient: updateDesktopGradientColor(settings.shapeGradient, 1, color),
                   })
                 }
+              />
+              <DesktopGradientOffsetSlider
+                dataSlot="desktop-shape-gradient"
+                gradient={settings.shapeGradient}
+                label="Shape color stop range"
+                onGradientChange={(shapeGradient) => onShapeSettingsChange({ shapeGradient })}
               />
               <DesktopSegmentedRow
                 label="Type"
@@ -3930,6 +3950,14 @@ function DesktopPatternInspector({
                   })
                 }
               />
+              <DesktopGradientOffsetSlider
+                dataSlot="desktop-pattern-gradient"
+                gradient={settings.dataModulesGradient}
+                label="Pattern color stop range"
+                onGradientChange={(dataModulesGradient) =>
+                  onPatternSettingsChange({ dataModulesGradient })
+                }
+              />
               <DesktopSegmentedRow
                 label="Type"
                 options={DESKTOP_GRADIENT_TYPE_OPTIONS}
@@ -4311,6 +4339,56 @@ function updateDesktopGradientColor(
       stopIndex === index ? { ...stop, color } : stop,
     ) as StudioGradient["colorStops"],
   }
+}
+
+function updateDesktopGradientOffsetRange(
+  gradient: StudioGradient,
+  values: [number, number],
+): StudioGradient {
+  const [startOffset, endOffset] = normalizeGradientOffsetRange(values)
+
+  return {
+    ...gradient,
+    enabled: true,
+    colorStops: [
+      { ...gradient.colorStops[0], offset: startOffset },
+      { ...gradient.colorStops[1], offset: endOffset },
+    ],
+  }
+}
+
+function DesktopGradientOffsetSlider({
+  dataSlot,
+  gradient,
+  label,
+  onGradientChange,
+}: {
+  dataSlot: string
+  gradient: StudioGradient
+  label: string
+  onGradientChange: (gradient: StudioGradient) => void
+}) {
+  const gradientOffsetRange = normalizeGradientOffsetRange([
+    gradient.colorStops[0].offset,
+    gradient.colorStops[1].offset,
+  ])
+
+  return (
+    <GradientOffsetRangeField
+      hideHeader
+      id={`${dataSlot}-offset-range`}
+      endColor={gradient.colorStops[1].color}
+      endValue={gradientOffsetRange[1]}
+      label={label}
+      max={1}
+      min={0}
+      onValueChange={(values) => onGradientChange(updateDesktopGradientOffsetRange(gradient, values))}
+      startColor={gradient.colorStops[0].color}
+      startValue={gradientOffsetRange[0]}
+      step={0.01}
+      valueFormatter={(value) => value.toFixed(2)}
+    />
+  )
 }
 
 function areDesktopColorPalettesEqual(currentPalette: string[], presetPalette: string[]): boolean {

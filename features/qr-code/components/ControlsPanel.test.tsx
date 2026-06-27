@@ -327,7 +327,8 @@ describe("ControlsPanel", () => {
     expect(markup).toContain('data-slot="gradient-offset-track"')
     expect(markup).toContain('data-slot="gradient-offset-thumb"')
     expect(markup).toContain('data-slot="segmented-picker"')
-    expect(markup).toContain("linear-gradient(90deg, #18181b 0%, #3f3f46 100%)")
+    expect(markup).toContain("var(--checker-a, #808080)")
+    expect(markup).toContain("linear-gradient(to right")
     expect(markup).not.toContain(
       'class="flex justify-center rounded-[var(--radius-xl)] border border-border/70 bg-background/80 p-3"',
     )
@@ -374,7 +375,8 @@ describe("ControlsPanel", () => {
     expect(markup).toContain('data-slot="gradient-offset-track"')
     expect(markup).toContain('data-slot="gradient-offset-thumb"')
     expect(markup).toContain('data-slot="segmented-picker"')
-    expect(markup).toContain("linear-gradient(90deg, #18181b 0%, #3f3f46 100%)")
+    expect(markup).toContain("var(--checker-a, #808080)")
+    expect(markup).toContain("linear-gradient(to right")
     expect(markup).not.toContain('id="corner-dot-gradient-rotation"')
     expect(markup).not.toContain('id="corner-dot-gradient-start-color"')
     expect(markup).not.toContain('id="corner-dot-gradient-end-color"')
@@ -476,7 +478,8 @@ describe("ControlsPanel", () => {
     expect(markup).toContain('data-slot="gradient-offset-track"')
     expect(markup).toContain('data-slot="gradient-offset-thumb"')
     expect(markup).toContain('data-slot="segmented-picker"')
-    expect(markup).toContain("linear-gradient(90deg, #f8fafc 0%, #dbeafe 100%)")
+    expect(markup).toContain("var(--checker-a, #808080)")
+    expect(markup).toContain("linear-gradient(to right")
     expect(markup).not.toContain('id="background-gradient-rotation"')
     expect(markup).not.toContain('id="background-gradient-start-color"')
     expect(markup).not.toContain('id="background-gradient-end-color"')
@@ -548,7 +551,8 @@ describe("ControlsPanel", () => {
     expect(markup).toContain('data-slot="gradient-offset-range-slider"')
     expect(markup).toContain('data-slot="gradient-offset-track"')
     expect(markup).toContain('data-slot="gradient-offset-thumb"')
-    expect(markup).toContain("linear-gradient(90deg, #18181b 0%, #3f3f46 100%)")
+    expect(markup).toContain("var(--checker-a, #808080)")
+    expect(markup).toContain("linear-gradient(to right")
   })
 
   it("keeps functional validation copy in dashboard mode", () => {

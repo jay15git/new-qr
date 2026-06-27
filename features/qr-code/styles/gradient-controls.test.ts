@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  buildGradientSliderTrackStyle,
   clampGradientOffset,
   normalizeGradientOffsetRange,
   degreesToRadians,
@@ -29,5 +30,14 @@ describe("qr gradient controls helpers", () => {
   it("normalizes a gradient offset range into ascending supported values", () => {
     expect(normalizeGradientOffsetRange([-0.25, 1.4])).toEqual([0, 1])
     expect(normalizeGradientOffsetRange([0.8, 0.2])).toEqual([0.2, 0.8])
+  })
+
+  it("builds a checker-backed track gradient from start and end colors", () => {
+    const style = buildGradientSliderTrackStyle("#ef4f93", "#3730a3")
+
+    expect(style.backgroundImage).toContain("linear-gradient(to right")
+    expect(style.backgroundImage).toContain("var(--checker-a, #808080)")
+    expect(style.backgroundSize).toBe("100% 100%, 8px 8px")
+    expect(style.borderWidth).toBe(0)
   })
 })

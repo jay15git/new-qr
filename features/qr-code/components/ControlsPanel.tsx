@@ -37,7 +37,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { buildAdaptiveTrackGradient } from "@/components/ui/adaptive-slider"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider as UnlumenSlider } from "@/components/vendor/unlumen-ui/slider"
@@ -92,6 +91,7 @@ import {
   DEFAULT_BRAND_ICON_COLOR,
 } from "@/features/qr-code/assets/brand-icon-svg"
 import { EmbeddedColorPickerField } from "@/features/qr-code/components/ColorField"
+import { GradientOffsetRangeField } from "@/features/qr-code/components/GradientOffsetRangeField"
 import {
   applyAssetNoneSelection,
   applyAssetUploadValue,
@@ -2427,173 +2427,6 @@ function NumberField({
         onChange={(event) => onValueChange(Number(event.target.value))}
       />
     </Field>
-  )
-}
-
-function GradientOffsetRangeField({
-  appearance = "default",
-  className,
-  endColor,
-  endLabel = "End",
-  endValue,
-  hideHeader = false,
-  id,
-  label,
-  max,
-  min,
-  onValueChange,
-  startColor,
-  startLabel = "Start",
-  startValue,
-  step,
-  valueFormatter,
-}: {
-  appearance?: "default" | "drafting"
-  className?: string
-  endColor: string
-  endLabel?: string
-  endValue: number
-  hideHeader?: boolean
-  id: string
-  label: string
-  max: number
-  min: number
-  onValueChange: (value: [number, number]) => void
-  startColor: string
-  startLabel?: string
-  startValue: number
-  step: number
-  valueFormatter: (value: number) => string
-}) {
-  const displayValues = normalizeGradientOffsetRange([startValue, endValue])
-  const trackGradient = buildAdaptiveTrackGradient(startColor, endColor)
-  const isDrafting = appearance === "drafting"
-
-  return (
-    <Field data-slot="gradient-offset-range-slider" className={className}>
-      {!hideHeader ? (
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <FieldLabel>{label}</FieldLabel>
-          <div className="flex flex-wrap items-center gap-2">
-            <GradientValueChip
-              appearance={appearance}
-              label={startLabel}
-              value={valueFormatter(displayValues[0])}
-            />
-            <GradientValueChip
-              appearance={appearance}
-              label={endLabel}
-              value={valueFormatter(displayValues[1])}
-            />
-          </div>
-        </div>
-      ) : (
-        <FieldLabel className="sr-only">{label}</FieldLabel>
-      )}
-      <UnlumenSlider
-        appearance={appearance}
-        className="w-full"
-        data-slot="gradient-offset-slider"
-        formatValue={valueFormatter}
-        id={id}
-        label={label}
-        max={max}
-        min={min}
-        onChange={(nextValue) => {
-          if (!Array.isArray(nextValue) || nextValue.length < 2) {
-            return
-          }
-
-          onValueChange(
-            normalizeGradientOffsetRange([
-              nextValue[0] ?? min,
-              nextValue[1] ?? max,
-            ]),
-          )
-        }}
-        rangeClassName="bg-transparent"
-        rangeStyle={{ backgroundColor: "transparent" }}
-        renderThumb={(index, state) => (
-          <GradientSliderThumb
-            appearance={appearance}
-            accentColor={index === 0 ? startColor : endColor}
-            isActive={state.isActive}
-          />
-        )}
-        showValue={false}
-        step={step}
-        thumbDataSlot="gradient-offset-thumb"
-        trackDataSlot="gradient-offset-track"
-        trackClassName={isDrafting ? "border-[var(--drafting-line)]" : undefined}
-        trackStyle={{ background: trackGradient }}
-        value={displayValues}
-      />
-    </Field>
-  )
-}
-
-function GradientSliderThumb({
-  appearance = "default",
-  accentColor,
-  isActive = false,
-}: {
-  appearance?: "default" | "drafting"
-  accentColor: string
-  isActive?: boolean
-}) {
-  const isDrafting = appearance === "drafting"
-
-  return (
-    <span
-      className={cn(
-        "flex size-[18px] items-center justify-center rounded-[4px] border transition-transform",
-        isDrafting
-          ? "border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-active)] shadow-[var(--drafting-shadow-rest)]"
-          : "border-black/10 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.06)]",
-        isActive && "scale-105",
-      )}
-    >
-      <span
-        className={cn(
-          "size-2.5 rounded-[2px] border",
-          isDrafting ? "border-[var(--drafting-line-hover)]" : "border-black/10",
-        )}
-        style={{ backgroundColor: accentColor }}
-      />
-    </span>
-  )
-}
-
-function GradientValueChip({
-  appearance = "default",
-  label,
-  value,
-}: {
-  appearance?: "default" | "drafting"
-  label: string
-  value: string
-}) {
-  const isDrafting = appearance === "drafting"
-
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-mono text-[11px]",
-        isDrafting
-          ? "border-[var(--drafting-line)] bg-[var(--drafting-control-bg)] text-[var(--drafting-ink-muted)]"
-          : "border-border/60 bg-muted/30 text-muted-foreground",
-      )}
-    >
-      <span
-        className={cn(
-          "font-medium",
-          isDrafting ? "text-[var(--drafting-ink)]" : "text-foreground",
-        )}
-      >
-        {label}
-      </span>
-      <span>{value}</span>
-    </span>
   )
 }
 

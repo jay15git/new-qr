@@ -51,7 +51,13 @@ interface SliderProps
   fillStyle?: CSSProperties;
   hideFill?: boolean;
   thumbColor?: string;
+  /** Per-thumb fill colors in range mode; falls back to thumbColor. */
+  thumbColors?: string[];
   thumbBorderColor?: string;
+  /** Render checkerboard under thumb fills (for alpha-aware color stops). */
+  showThumbCheckerboard?: boolean;
+  trackDataSlot?: string;
+  thumbDataSlot?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -65,6 +71,9 @@ const DOT_SIZE = 4;
 const PIP_SIZE = 5;
 // Inset track BG so its rounded-end centers align with thumb centers at min/max
 const TRACK_INSET = (THUMB_SIZE - TRACK_BG_HEIGHT) / 2;
+
+const SLIDER_CHECKER_PATTERN =
+  "conic-gradient(var(--checker-a, #808080) 0 25%, var(--checker-b, #c0c0c0) 0 50%, var(--checker-a, #808080) 0 75%, var(--checker-b, #c0c0c0) 0)";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -311,7 +320,11 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
       fillStyle,
       hideFill = false,
       thumbColor,
+      thumbColors,
       thumbBorderColor,
+      showThumbCheckerboard = false,
+      trackDataSlot,
+      thumbDataSlot,
       className,
       ...props
     },
@@ -709,9 +722,11 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
     // --- Render visual thumb (not Radix — purely visual) ---
     const renderVisualThumb = (index: number) => {
       const motionX = index === 0 ? motionX0 : motionX1;
+      const fillColor = thumbColors?.[index] ?? thumbColor ?? "white";
       return (
         <motion.span
           key={`visual-thumb-${index}`}
+          data-slot={thumbDataSlot}
           className="flex items-center justify-center pointer-events-none"
           style={{
             width: THUMB_SIZE,
@@ -726,7 +741,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
           initial={false}
         >
           <motion.span
-            className="block rounded-full"
+            className={cn("block rounded-full", showThumbCheckerboard && "relative overflow-hidden")}
             initial={false}
             animate={{
               width: THUMB_SIZE_REST,
@@ -734,11 +749,29 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
             }}
             transition={spring.fast}
             style={{
-              backgroundColor: thumbColor ?? "white",
+              backgroundColor: showThumbCheckerboard ? undefined : fillColor,
               boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
               border: thumbBorderColor ? `1px solid ${thumbBorderColor}` : undefined,
             }}
-          />
+          >
+            {showThumbCheckerboard ? (
+              <>
+                <span
+                  aria-hidden
+                  className="absolute inset-0"
+                  style={{
+                    backgroundImage: SLIDER_CHECKER_PATTERN,
+                    backgroundSize: "8px 8px",
+                  }}
+                />
+                <span
+                  aria-hidden
+                  className="absolute inset-0"
+                  style={{ backgroundColor: fillColor }}
+                />
+              </>
+            ) : null}
+          </motion.span>
           {/* Focus ring */}
           <motion.span
             className="absolute rounded-full border border-[#6B97FF] pointer-events-none"
@@ -897,6 +930,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
 
             {/* Track background */}
             <motion.div
+              data-slot={trackDataSlot}
               className={cn("absolute border border-border overflow-hidden rounded-full", trackClassName)}
               initial={false}
               animate={{

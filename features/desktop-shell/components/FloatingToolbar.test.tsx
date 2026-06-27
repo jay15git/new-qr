@@ -633,6 +633,8 @@ describe("FloatingToolbar", () => {
     expect(frameGradient.getAttribute("aria-selected")).toBe("true")
     expect(dotSolid.getAttribute("aria-selected")).toBe("true")
     expect(surface.container.querySelector('input[aria-label="Frame start color"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="gradient-offset-range-slider"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="gradient-offset-track"]')).not.toBeNull()
     expect(surface.container.querySelector('input[aria-label="Dot solid color"]')).not.toBeNull()
   })
 
@@ -798,6 +800,7 @@ describe("FloatingToolbar", () => {
     expect(gradientMode.getAttribute("aria-selected")).toBe("true")
     expect(surface.container.querySelector('input[aria-label="Shape start color"]')).not.toBeNull()
     expect(surface.container.querySelector('input[aria-label="Shape end color"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="gradient-offset-range-slider"]')).not.toBeNull()
     expect(surface.container.querySelector('input[aria-label="Shape solid color"]')).toBeNull()
   })
 
