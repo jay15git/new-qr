@@ -125,7 +125,11 @@ import {
   type StudioDataModulesStyle,
 } from "@/features/qr-code/model/state"
 import type { CodeExportTarget } from "@new-qr/qr-scene-codegen"
-import { normalizeGradientOffsetRange } from "@/features/qr-code/styles/gradient-controls"
+import {
+  degreesToRadians,
+  normalizeGradientOffsetRange,
+  radiansToDegrees,
+} from "@/features/qr-code/styles/gradient-controls"
 import {
   ERROR_CORRECTION_LEVEL_OPTIONS,
   TYPE_NUMBER_MAX,
@@ -2407,6 +2411,10 @@ function DesktopLogoInspector({
                   label="Logo color stop range"
                   onGradientChange={(gradient) => onLogoSettingsChange({ gradient })}
                 />
+                <DesktopGradientRotationSlider
+                  gradient={settings.gradient}
+                  onGradientChange={(gradient) => onLogoSettingsChange({ gradient })}
+                />
               </div>
             )}
           </DesktopInspectorSection>
@@ -2691,11 +2699,13 @@ function DesktopCornerColorSection({
             onGradientChange={onGradientChange}
           />
           <DesktopSegmentedRow
+            hideLabel
             label="Type"
             options={DESKTOP_GRADIENT_TYPE_OPTIONS}
             value={gradient.type}
             onChange={(type) => onGradientChange({ ...gradient, enabled: true, type })}
           />
+          <DesktopGradientRotationSlider gradient={gradient} onGradientChange={onGradientChange} />
         </div>
       ) : null}
     </DesktopInspectorSection>
@@ -2866,12 +2876,17 @@ function DesktopShapeInspector({
                 onGradientChange={(shapeGradient) => onShapeSettingsChange({ shapeGradient })}
               />
               <DesktopSegmentedRow
+                hideLabel
                 label="Type"
                 options={DESKTOP_GRADIENT_TYPE_OPTIONS}
                 value={settings.shapeGradient.type}
                 onChange={(type) =>
                   onShapeSettingsChange({ shapeGradient: { ...settings.shapeGradient, type } })
                 }
+              />
+              <DesktopGradientRotationSlider
+                gradient={settings.shapeGradient}
+                onGradientChange={(shapeGradient) => onShapeSettingsChange({ shapeGradient })}
               />
             </div>
           ) : null}
@@ -3959,11 +3974,18 @@ function DesktopPatternInspector({
                 }
               />
               <DesktopSegmentedRow
+                hideLabel
                 label="Type"
                 options={DESKTOP_GRADIENT_TYPE_OPTIONS}
                 value={settings.dataModulesGradient.type}
                 onChange={(type) =>
                   onPatternSettingsChange({ dataModulesGradient: { ...settings.dataModulesGradient, type } })
+                }
+              />
+              <DesktopGradientRotationSlider
+                gradient={settings.dataModulesGradient}
+                onGradientChange={(dataModulesGradient) =>
+                  onPatternSettingsChange({ dataModulesGradient })
                 }
               />
             </div>
@@ -4305,19 +4327,21 @@ function DesktopTextPresetButton({
 }
 
 function DesktopSegmentedRow<TValue extends string>({
+  hideLabel = false,
   label,
   onChange,
   options,
   value,
 }: {
+  hideLabel?: boolean
   label: string
   onChange: (value: TValue) => void
   options: Array<{ label: string; value: TValue }>
   value: TValue
 }) {
   return (
-    <div className="min-w-0 py-2.5">
-      <DesktopInspectorLabel>{label}</DesktopInspectorLabel>
+    <div className={cn("min-w-0", hideLabel ? "py-0" : "py-2.5")}>
+      {hideLabel ? null : <DesktopInspectorLabel>{label}</DesktopInspectorLabel>}
       <DesktopInspectorSegmentedControl
         items={options}
         value={value}
@@ -4387,6 +4411,35 @@ function DesktopGradientOffsetSlider({
       startValue={gradientOffsetRange[0]}
       step={0.01}
       valueFormatter={(value) => value.toFixed(2)}
+    />
+  )
+}
+
+function DesktopGradientRotationSlider({
+  gradient,
+  label = "Rotation",
+  onGradientChange,
+}: {
+  gradient: StudioGradient
+  label?: string
+  onGradientChange: (gradient: StudioGradient) => void
+}) {
+  if (gradient.type !== "linear") {
+    return null
+  }
+
+  const rotationDegrees = Math.min(360, Math.max(0, radiansToDegrees(gradient.rotation)))
+
+  return (
+    <DesktopElasticSliderRow
+      label={label}
+      max={360}
+      min={0}
+      value={rotationDegrees}
+      valueLabel={`${Math.round(rotationDegrees)}°`}
+      onChange={(value) =>
+        onGradientChange({ ...gradient, rotation: degreesToRadians(value) })
+      }
     />
   )
 }
