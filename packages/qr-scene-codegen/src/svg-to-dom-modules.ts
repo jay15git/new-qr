@@ -379,18 +379,38 @@ function convertPathNode(node: Element, context: ConvertContext) {
     return []
   }
 
-  const opacity = resolveOpacity(node, context.inheritedOpacity)
+  const pathContext: ConvertContext = {
+    ...context,
+    inheritedTransform: combineTransforms(context.inheritedTransform, node.getAttribute("transform")),
+  }
+  const opacity = resolveOpacity(node, pathContext.inheritedOpacity)
   const inlineStyle = parseSvgInlineStyle(node.getAttribute("style"))
+  const attributeTransform = node.getAttribute("transform")
   const hasInlineTransform = Boolean(
     inlineStyle.transform && !isNoOpTransform(inlineStyle.transform),
   )
 
+  if (attributeTransform && !hasInlineTransform) {
+    const grouped = convertTransformedPathToGroupNode(
+      node,
+      pathData,
+      fill,
+      opacity,
+      pathContext,
+      context,
+      attributeTransform,
+    )
+    if (grouped) {
+      return grouped
+    }
+  }
+
   if (hasInlineTransform) {
-    const bounds = measurePathBoundingBox(pathData, node, context.viewBox)
+    const bounds = measurePathBoundingBox(pathData, node, pathContext.viewBox)
     if (bounds && bounds.width > 0 && bounds.height > 0) {
       const localPath = translatePathMoveToOrigin(pathData, bounds.x, bounds.y)
       const style = buildModuleStyle({
-        context,
+        context: pathContext,
         left: bounds.x,
         top: bounds.y,
         width: bounds.width,
@@ -403,7 +423,7 @@ function convertPathNode(node: Element, context: ConvertContext) {
 
       return [
         createModuleNode(
-          context.idPrefix,
+          pathContext.idPrefix,
           bounds,
           style,
           {},
@@ -414,11 +434,11 @@ function convertPathNode(node: Element, context: ConvertContext) {
   }
 
   const style = buildModuleStyle({
-    context,
+    context: pathContext,
     left: 0,
     top: 0,
-    width: context.viewBox.width,
-    height: context.viewBox.height,
+    width: pathContext.viewBox.width,
+    height: pathContext.viewBox.height,
     fill,
     clipPath: buildPathClipPath(pathData, node.getAttribute("fill-rule")),
     opacity,
@@ -427,13 +447,174 @@ function convertPathNode(node: Element, context: ConvertContext) {
 
   return [
     createModuleNode(
-      context.idPrefix,
-      { x: 0, y: 0, width: context.viewBox.width, height: context.viewBox.height },
+      pathContext.idPrefix,
+      { x: 0, y: 0, width: pathContext.viewBox.width, height: pathContext.viewBox.height },
       style,
       {},
       getModuleSuffix(node),
     ),
   ]
+}
+
+function convertTransformedPathToGroupNode(
+  node: Element,
+  pathData: string,
+  fill: string,
+  opacity: number,
+  pathContext: ConvertContext,
+  context: ConvertContext,
+  attributeTransform: string,
+) {
+  const untransformedBounds =
+    measureUntransformedPathBounds(pathData, node) ?? readShapeViewBoxBounds(node)
+  if (!untransformedBounds || untransformedBounds.width <= 0 || untransformedBounds.height <= 0) {
+    return null
+  }
+
+  const localPath = translatePathMoveToOrigin(
+    pathData,
+    untransformedBounds.x,
+    untransformedBounds.y,
+  )
+  const childStyle = buildModuleStyle({
+    context: { ...pathContext, inheritedTransform: undefined },
+    left: 0,
+    top: 0,
+    width: untransformedBounds.width,
+    height: untransformedBounds.height,
+    fill,
+    clipPath: buildPathClipPath(localPath, node.getAttribute("fill-rule")),
+    opacity,
+  })
+  const child = createModuleNode(
+    pathContext.idPrefix,
+    { x: 0, y: 0, width: untransformedBounds.width, height: untransformedBounds.height },
+    childStyle,
+    {},
+    getModuleSuffix(node),
+  )
+  const cssTransform = combineTransforms(context.inheritedTransform, attributeTransform)
+  const groupStyle: Record<string, string | number> = {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    width: pathContext.viewBox.width,
+    height: pathContext.viewBox.height,
+    pointerEvents: "none",
+  }
+
+  if (cssTransform) {
+    groupStyle.transform = cssTransform
+    groupStyle.transformOrigin = "0 0"
+  }
+
+  if (opacity < 1) {
+    groupStyle.opacity = opacity
+  }
+
+  return [
+    {
+      kind: "group",
+      id: nextModuleId(pathContext.idPrefix, "group"),
+      bounds: { x: 0, y: 0, width: pathContext.viewBox.width, height: pathContext.viewBox.height },
+      style: groupStyle,
+      children: [child],
+    },
+  ]
+}
+
+function measureUntransformedPathBounds(pathData: string, node: Element) {
+  const hadTransform = node.hasAttribute("transform")
+  const savedTransform = node.getAttribute("transform")
+
+  if (hadTransform) {
+    node.removeAttribute("transform")
+  }
+
+  try {
+    const graphics = node as SVGGraphicsElement
+    if (typeof graphics.getBBox === "function") {
+      const bbox = graphics.getBBox()
+      if (
+        bbox &&
+        Number.isFinite(bbox.width) &&
+        bbox.width > 0 &&
+        Number.isFinite(bbox.height) &&
+        bbox.height > 0
+      ) {
+        return {
+          x: bbox.x,
+          y: bbox.y,
+          width: bbox.width,
+          height: bbox.height,
+        }
+      }
+    }
+  } catch {
+    return estimatePathBoundsFromPathData(pathData)
+  } finally {
+    if (hadTransform && savedTransform !== null) {
+      node.setAttribute("transform", savedTransform)
+    }
+  }
+
+  return estimatePathBoundsFromPathData(pathData)
+}
+
+function readShapeViewBoxBounds(node: Element) {
+  const raw = node.getAttribute("data-shape-view-box")
+  if (!raw) {
+    return null
+  }
+
+  const parts = raw.split(/[\s,]+/).map(Number.parseFloat)
+  if (parts.length !== 2 || !parts.every((value) => Number.isFinite(value) && value > 0)) {
+    return null
+  }
+
+  return {
+    x: 0,
+    y: 0,
+    width: parts[0],
+    height: parts[1],
+  }
+}
+
+function estimatePathBoundsFromPathData(pathData: string) {
+  const numbers = pathData.match(/[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?/gi)
+  if (!numbers || numbers.length < 2) {
+    return null
+  }
+
+  const values = numbers.map((value) => Number.parseFloat(value)).filter(Number.isFinite)
+  if (values.length < 2) {
+    return null
+  }
+
+  let minX = Number.POSITIVE_INFINITY
+  let minY = Number.POSITIVE_INFINITY
+  let maxX = Number.NEGATIVE_INFINITY
+  let maxY = Number.NEGATIVE_INFINITY
+
+  for (let index = 0; index + 1 < values.length; index += 2) {
+    const x = values[index]
+    const y = values[index + 1]
+    minX = Math.min(minX, x)
+    minY = Math.min(minY, y)
+    maxX = Math.max(maxX, x)
+    maxY = Math.max(maxY, y)
+  }
+
+  if (!Number.isFinite(minX) || !Number.isFinite(minY) || !Number.isFinite(maxX) || !Number.isFinite(maxY)) {
+    return null
+  }
+
+  return {
+    x: minX,
+    y: minY,
+    width: Math.max(0, maxX - minX),
+    height: Math.max(0, maxY - minY),
+  }
 }
 
 function splitPathSubpaths(pathData: string) {

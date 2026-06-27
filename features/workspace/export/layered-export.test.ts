@@ -63,7 +63,7 @@ describe("drafting layered export", () => {
       }),
     )
     expect(payload.originalSvgMarkup).toContain('data-drafting-qr-background="flower"')
-    expect(payload.originalSvgMarkup).toContain('data-qr-layer="dot"')
+    expect(payload.originalSvgMarkup).toContain('data-testid="data-modules"')
     expect(payload.originalSvgMarkup).not.toContain('data-qr-layer="background-shape"')
     expect(payload.originalSvgMarkup).not.toContain("clip-path-background-color")
   })

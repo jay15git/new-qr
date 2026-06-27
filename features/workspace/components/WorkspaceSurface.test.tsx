@@ -868,7 +868,7 @@ describe("WorkspaceSurface", () => {
     expect(exportedMarkup).toContain('data-drafting-qr-background="flower"')
     expect(exportedMarkup).not.toContain('data-drafting-card-shape="flower"')
     expect(exportedMarkup).toContain("<feDropShadow")
-    expect(exportedMarkup).toContain('data-qr-layer="dot"')
+    expect(exportedMarkup).toContain('data-testid="data-modules"')
     expect(exportedMarkup).not.toContain('data-qr-layer="background-shape"')
     expect(exportedMarkup).not.toContain('data-qr-layer="background-shape-blur"')
     expect(exportedMarkup).not.toContain('data-qr-layer="background-shape-blur-filter"')

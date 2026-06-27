@@ -18,6 +18,9 @@ import {
   getDraftingQrBackgroundBounds,
   getDraftingQrBackgroundSvgMarkup,
 } from "@/features/workspace/components/QrBackground"
+import { renderNewQrSvg } from "@new-qr/qr"
+
+import { toPortableQrConfig } from "@/features/qr-code/adapters/portable-config"
 import type { QrStudioState } from "@/features/qr-code/model/state"
 
 export type LayeredSvgParts = {
@@ -217,15 +220,16 @@ function getDraftingShapeLayerSvg(layer: DraftingCanvasLayer) {
 
 function getDraftingQrLayerSvg(
   layer: DraftingCanvasLayer,
-  qrMarkup: string,
+  _qrMarkup: string,
   state: QrStudioState,
 ) {
   const filter = getDraftingLayerFilterMarkup(layer)
     ? ` filter="url(#${getSvgId(layer.id)}-filter)"`
     : ""
+  const packageQrMarkup = renderNewQrSvg(toPortableQrConfig(state))
   const shadowedQrMarkup = hasDraftingLayerShadow(layer)
-    ? applyDraftingQrForegroundShadow(qrMarkup, layer)
-    : qrMarkup
+    ? applyDraftingQrForegroundShadow(packageQrMarkup, layer)
+    : packageQrMarkup
 
   return `<g opacity="${layer.opacity}" transform="${getDraftingLayerSvgTransform(layer)}"${filter}>${getDraftingQrBackgroundSvgMarkup(layer, state)}${scaleNestedSvgMarkup(shadowedQrMarkup, layer.width, layer.height)}</g>`
 }

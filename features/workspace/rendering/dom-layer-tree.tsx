@@ -95,6 +95,9 @@ type ScalableDomLayerTreeProps = {
   layoutHeight: number
   layoutWidth: number
   nodes: DomLayerNode[]
+  overflow?: "hidden" | "visible"
+  targetHeight?: number
+  targetWidth?: number
 }
 
 /** Stretch module coordinates to fill the placement box like preserveAspectRatio="none" SVG. */
@@ -102,6 +105,9 @@ export const ScalableDomLayerTree = memo(function ScalableDomLayerTree({
   layoutHeight,
   layoutWidth,
   nodes,
+  overflow = "hidden",
+  targetHeight,
+  targetWidth,
 }: ScalableDomLayerTreeProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState({ x: 1, y: 1 })
@@ -113,8 +119,10 @@ export const ScalableDomLayerTree = memo(function ScalableDomLayerTree({
     }
 
     const updateScale = () => {
-      const width = element.clientWidth
-      const height = element.clientHeight
+      const measuredWidth = element.clientWidth
+      const measuredHeight = element.clientHeight
+      const width = measuredWidth > 0 ? measuredWidth : (targetWidth ?? 0)
+      const height = measuredHeight > 0 ? measuredHeight : (targetHeight ?? 0)
       if (width <= 0 || height <= 0) {
         return
       }
@@ -137,10 +145,14 @@ export const ScalableDomLayerTree = memo(function ScalableDomLayerTree({
     observer.observe(element)
 
     return () => observer.disconnect()
-  }, [layoutHeight, layoutWidth, nodes])
+  }, [layoutHeight, layoutWidth, nodes, targetHeight, targetWidth])
 
   return (
-    <div ref={containerRef} className="relative h-full w-full overflow-hidden">
+    <div
+      ref={containerRef}
+      className="relative h-full w-full"
+      style={{ overflow }}
+    >
       <div
         style={{
           height: layoutHeight,

@@ -1,7 +1,8 @@
 "use client"
 
-import type { CSSProperties } from "react"
+import { useMemo, type CSSProperties } from "react"
 
+import { buildDraftingQrBackgroundDomModules } from "@/features/qr-code/rendering/background-shape-dom"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
 import {
   getQrBackgroundShapeDefinition,
@@ -15,6 +16,7 @@ import {
 import {
   getBackgroundShapeSkewTransform,
 } from "@/features/workspace/rendering/layer-transform"
+import { ScalableDomLayerTree } from "@/features/workspace/rendering/dom-layer-tree"
 
 type DraftingQrBackgroundFrame = {
   height: number
@@ -38,18 +40,15 @@ export function DraftingQrBackground({
   state: QrStudioState
 }) {
   const frame = getDraftingQrBackgroundFrame(layer)
-  const shape = getQrBackgroundShapeDefinition(state.backgroundShapeId)
-  const layout = getDraftingQrLayerLayout(layer.width, state)
-  const { metrics, shapeOptions } = layout
-  const ids = getDraftingQrBackgroundIds(layer.id)
-  const fill = getDraftingQrBackgroundFill(state, ids)
-  const filterId = getDraftingQrBackgroundFilterId(state, ids, shapeOptions)
-  const stroke = getDraftingQrBackgroundStroke(shapeOptions)
-  const pathShapeOptions = {
-    ...shapeOptions,
-    tiltX: 0,
-    tiltY: 0,
+  const modules = useMemo(
+    () => buildDraftingQrBackgroundDomModules(layer, state),
+    [layer, state],
+  )
+
+  if (!modules) {
+    return null
   }
+
   const style: CSSProperties = {
     height: frame.height,
     left: frame.x,
@@ -58,47 +57,58 @@ export function DraftingQrBackground({
   }
 
   return (
-    <svg
+    <div
       aria-hidden="true"
       className="pointer-events-none absolute z-0 overflow-visible"
-      data-background-shape={shape?.id ?? "rect"}
+      data-background-shape={modules.shapeId}
       data-slot="drafting-qr-background"
-      preserveAspectRatio="none"
       style={style}
-      viewBox={`0 0 ${metrics.outerWidth} ${metrics.outerHeight}`}
-      xmlns="http://www.w3.org/2000/svg"
     >
-      <DraftingQrBackgroundDefs ids={ids} shapeOptions={shapeOptions} state={state} />
-      {shape ? (
-        <path
-          d={shape.path}
-          fill={fill}
-          filter={filterId ? `url(#${filterId})` : undefined}
-          stroke={stroke.width > 0 ? stroke.color : undefined}
-          strokeLinejoin="round"
-          strokeOpacity={stroke.width > 0 ? stroke.opacity : undefined}
-          strokeWidth={stroke.width > 0 ? stroke.width : undefined}
-          transform={getDraftingQrBackgroundPathTransform(shape, metrics.backingRegion, pathShapeOptions)}
-        />
-      ) : (
-        <rect
-          fill={fill}
-          filter={filterId ? `url(#${filterId})` : undefined}
-          height={metrics.backingRegion.height}
-          rx={
-            (Math.min(metrics.backingRegion.width, metrics.backingRegion.height) / 2) *
-            state.backgroundOptions.round
-          }
-          stroke={stroke.width > 0 ? stroke.color : undefined}
-          strokeOpacity={stroke.width > 0 ? stroke.opacity : undefined}
-          strokeWidth={stroke.width > 0 ? stroke.width : undefined}
-          width={metrics.backingRegion.width}
-          x={metrics.backingRegion.x}
-          y={metrics.backingRegion.y}
-        />
-      )}
-    </svg>
+      <ScalableDomLayerTree
+        layoutHeight={modules.layoutHeight}
+        layoutWidth={modules.layoutWidth}
+        nodes={modules.nodes}
+        overflow="visible"
+        targetHeight={frame.height}
+        targetWidth={frame.width}
+      />
+    </div>
   )
+}
+
+export function buildDraftingQrBackgroundPreviewSvgMarkup(
+  layer: DraftingCanvasLayer,
+  state: QrStudioState,
+) {
+  const shape = getQrBackgroundShapeDefinition(state.backgroundShapeId)
+  const layout = getDraftingQrLayerLayout(layer.width, state, layer.height)
+  const { metrics, shapeOptions } = layout
+  const ids = getDraftingQrBackgroundIds(layer.id)
+  const defs = getDraftingQrBackgroundDefsMarkup(ids, state)
+  const fill = getDraftingQrBackgroundFill(state, ids)
+  const filterId = getDraftingQrBackgroundFilterId(state, ids, shapeOptions)
+  const filter = filterId ? ` filter="url(#${filterId})"` : ""
+  const stroke = getDraftingQrBackgroundStroke(shapeOptions)
+  const strokeMarkup =
+    stroke.width > 0
+      ? ` stroke="${escapeXml(stroke.color)}" stroke-opacity="${stroke.opacity}" stroke-width="${stroke.width}" stroke-linejoin="round"`
+      : ""
+  const pathShapeOptions = {
+    ...shapeOptions,
+    tiltX: 0,
+    tiltY: 0,
+  }
+  const innerMarkup = shape
+    ? `<path data-shape-view-box="${shape.viewBox.width} ${shape.viewBox.height}" d="${escapeXml(shape.path)}" fill="${escapeXml(fill)}"${strokeMarkup}${filter} transform="${getDraftingQrBackgroundPathTransform(shape, metrics.backingRegion, pathShapeOptions)}"/>`
+    : (() => {
+        const radius =
+          (Math.min(metrics.backingRegion.width, metrics.backingRegion.height) / 2) *
+          state.backgroundOptions.round
+
+        return `<rect x="${metrics.backingRegion.x}" y="${metrics.backingRegion.y}" width="${metrics.backingRegion.width}" height="${metrics.backingRegion.height}" rx="${radius}" fill="${escapeXml(fill)}"${strokeMarkup}${filter}/>`
+      })()
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${metrics.outerWidth}" height="${metrics.outerHeight}" viewBox="0 0 ${metrics.outerWidth} ${metrics.outerHeight}"><defs>${defs}</defs>${innerMarkup}</svg>`
 }
 
 export function getDraftingQrBackgroundSvgMarkup(
@@ -150,85 +160,6 @@ export function getDraftingQrBackgroundBounds(
     minX: layer.x + frame.x - overflow.left,
     minY: layer.y + frame.y - overflow.top,
   }
-}
-
-function DraftingQrBackgroundDefs({
-  ids,
-  shapeOptions,
-  state,
-}: {
-  ids: DraftingQrBackgroundIds
-  shapeOptions: QrStudioState["backgroundShapeOptions"]
-  state: QrStudioState
-}) {
-  const filterId = getDraftingQrBackgroundFilterId(state, ids, shapeOptions)
-  const imageHref = getDraftingQrBackgroundImageHref(state)
-
-  if (!state.backgroundGradient.enabled && !filterId && !imageHref) {
-    return null
-  }
-
-  return (
-    <defs>
-      {state.backgroundGradient.enabled ? (
-        <DraftingQrBackgroundGradient id={ids.gradientId} gradient={state.backgroundGradient} />
-      ) : null}
-      {imageHref ? (
-        <pattern
-          id={ids.imagePatternId}
-          height="1"
-          patternContentUnits="objectBoundingBox"
-          width="1"
-        >
-          <image height="1" href={imageHref} preserveAspectRatio="xMidYMid slice" width="1" />
-        </pattern>
-      ) : null}
-      {filterId ? (
-        <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
-          <feDropShadow
-            dx={shapeOptions.shadowOffsetX}
-            dy={shapeOptions.shadowOffsetY}
-            stdDeviation={shapeOptions.edgeBlur / 2}
-            floodColor={shapeOptions.shadowColor}
-            floodOpacity={shapeOptions.shadowOpacity / 100}
-          />
-        </filter>
-      ) : null}
-    </defs>
-  )
-}
-
-function DraftingQrBackgroundGradient({
-  gradient,
-  id,
-}: {
-  gradient: StudioGradient
-  id: string
-}) {
-  if (gradient.type === "radial") {
-    return (
-      <radialGradient id={id} cx="50%" cy="50%" r="50%">
-        {gradient.colorStops.map((stop) => (
-          <stop key={stop.offset} offset={stop.offset} stopColor={stop.color} />
-        ))}
-      </radialGradient>
-    )
-  }
-
-  return (
-    <linearGradient
-      id={id}
-      x1="0%"
-      x2="100%"
-      y1="0%"
-      y2="100%"
-      gradientTransform={`rotate(${(gradient.rotation * 180) / Math.PI} .5 .5)`}
-    >
-      {gradient.colorStops.map((stop) => (
-        <stop key={stop.offset} offset={stop.offset} stopColor={stop.color} />
-      ))}
-    </linearGradient>
-  )
 }
 
 type DraftingQrBackgroundIds = {

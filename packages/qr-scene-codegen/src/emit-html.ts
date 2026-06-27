@@ -40,7 +40,7 @@ function emitAnimatedQrPlaceholder(ir: SceneIr) {
   }
 
   const qr = ir.animatedQr
-  return `<!-- Animated QR requires React export with @new-qr/qr-scene-bitjson -->
+  return `<!-- Animated QR requires React export with @new-qr/qr/animated -->
 <div style="position:absolute;left:${qr.bounds.x}px;top:${qr.bounds.y}px;width:${qr.bounds.width}px;height:${qr.bounds.height}px"></div>`
 }
 
@@ -50,9 +50,15 @@ export function emitHtml(ir: SceneIr) {
   const domMarkup = emitDomLayersHtml(ir.domLayers ?? [])
   const fontBlocks = emitFontBlocks(ir)
   const animatedBlock = emitAnimatedQrPlaceholder(ir)
+  const needsQrWebComponent = (ir.domLayers ?? []).some(
+    (layer) => layer.kind === "qr" && layer.qrProps,
+  )
+  const webComponentScript = needsQrWebComponent
+    ? `<script type="module">import { registerNewQrCodeElement } from "@new-qr/qr/web-component";registerNewQrCodeElement();</script>\n`
+    : ""
   const prefix = fontBlocks ? `${fontBlocks}\n` : ""
 
-  return `${prefix}<div class="qr-card" style="position:relative;width:${bounds.width}px;height:${bounds.height}px;overflow:hidden">
+  return `${prefix}${webComponentScript}<div class="qr-card" style="position:relative;width:${bounds.width}px;height:${bounds.height}px;overflow:hidden">
 ${shaderMarkup}
 ${domMarkup}
 ${animatedBlock}

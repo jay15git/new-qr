@@ -28,8 +28,9 @@ import {
   getTextRunStyle,
   serializeCssProperties,
 } from "@/features/workspace/rendering/layer-dom-styles"
+import { toPortableQrConfig } from "@/features/qr-code/adapters/portable-config"
 import type { QrStudioState } from "@/features/qr-code/model/state"
-import { getDraftingQrLayerLayout } from "@/features/qr-code/rendering/svg-extension"
+import { buildDraftingQrBackgroundDomModules } from "@/features/qr-code/rendering/background-shape-dom"
 
 import { getDraftingLayerBounds } from "./layered-svg-parts"
 
@@ -253,7 +254,7 @@ function getDraftingQrScaledMarkup(
   qrMarkup: string,
   state: QrStudioState,
 ) {
-  const layout = getDraftingQrLayerLayout(layer.width, state)
+  const layout = getDraftingQrLayerLayout(layer.width, state, layer.height)
   const shadowedQrMarkup = hasDraftingLayerShadow(layer)
     ? applyDraftingQrForegroundShadow(qrMarkup, layer)
     : qrMarkup
@@ -374,10 +375,12 @@ export function buildDraftingQrDomContent(
 
 function getDraftingQrLayerDom(
   layer: DraftingCanvasLayer,
-  qrMarkup: string,
+  _qrMarkup: string,
   state: QrStudioState,
 ): DomLayerNode {
-  const baseNode: DomLayerNode = {
+  const background = buildDraftingQrBackgroundDomModules(layer, state)
+
+  return {
     kind: "qr",
     id: layer.id,
     bounds: {
@@ -390,25 +393,33 @@ function getDraftingQrLayerDom(
       ...getExportLayerPlacementStyle(layer),
       ...getExportLayerEffectStyle(layer),
       overflow: "visible",
+      position: "relative",
     },
-  }
-
-  const domContent = buildDraftingQrDomContent(layer, qrMarkup, state)
-
-  if (!domContent) {
-    return baseNode
-  }
-
-  if (domContent.kind === "svg") {
-    return {
-      ...baseNode,
-      svgInner: domContent.svgInner,
-    }
-  }
-
-  return {
-    ...baseNode,
-    children: domContent.children,
+    qrProps: toPortableQrConfig(state),
+    children: background
+      ? [
+          {
+            kind: "group" as const,
+            id: `${layer.id}-qr-background`,
+            bounds: {
+              x: 0,
+              y: 0,
+              width: layer.width,
+              height: layer.height,
+            },
+            style: {
+              height: layer.height,
+              left: 0,
+              pointerEvents: "none",
+              position: "absolute",
+              top: 0,
+              width: layer.width,
+              zIndex: 0,
+            },
+            children: background.nodes,
+          },
+        ]
+      : undefined,
   }
 }
 

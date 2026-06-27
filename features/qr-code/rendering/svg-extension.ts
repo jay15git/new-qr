@@ -2336,8 +2336,12 @@ export function getDraftingQrLayerLayout(
     QrStudioState,
     "backgroundImage" | "backgroundShapeId" | "backgroundShapeOptions" | "height" | "width"
   >,
+  layerHeight?: number,
 ): DraftingQrLayerLayout {
   const naturalOuter = getQrRenderedDimensions(state)
+  const targetHeight =
+    layerHeight ??
+    (naturalOuter.width > 0 ? layerWidth * (naturalOuter.height / naturalOuter.width) : layerWidth)
   const scale = naturalOuter.width > 0 ? layerWidth / naturalOuter.width : 1
   const innerWidth = Math.max(1, state.width * scale)
   const innerHeight = Math.max(1, state.height * scale)
@@ -2347,13 +2351,62 @@ export function getDraftingQrLayerLayout(
     innerHeight,
     normalizeBackgroundShapeOptions(shapeOptions),
   )
+  const fitted = fitBackgroundRenderMetricsToLayer(
+    metrics,
+    innerWidth,
+    innerHeight,
+    layerWidth,
+    targetHeight,
+  )
 
   return {
-    innerHeight,
-    innerWidth,
-    metrics,
+    innerHeight: fitted.innerHeight,
+    innerWidth: fitted.innerWidth,
+    metrics: fitted.metrics,
     scale,
     shapeOptions,
+  }
+}
+
+function fitBackgroundRenderMetricsToLayer(
+  metrics: BackgroundRenderMetrics,
+  innerWidth: number,
+  innerHeight: number,
+  layerWidth: number,
+  layerHeight: number,
+) {
+  const widthScale = layerWidth / Math.max(1, metrics.outerWidth)
+  const heightScale = layerHeight / Math.max(1, metrics.outerHeight)
+
+  if (Math.abs(widthScale - 1) < 1e-6 && Math.abs(heightScale - 1) < 1e-6) {
+    return { innerWidth, innerHeight, metrics }
+  }
+
+  const scaleX = (value: number) => value * widthScale
+  const scaleY = (value: number) => value * heightScale
+  const uniformScale = Math.min(widthScale, heightScale)
+
+  return {
+    innerWidth: Math.max(1, innerWidth * widthScale),
+    innerHeight: Math.max(1, innerHeight * heightScale),
+    metrics: {
+      backingRegion: {
+        height: scaleY(metrics.backingRegion.height),
+        width: scaleX(metrics.backingRegion.width),
+        x: scaleX(metrics.backingRegion.x),
+        y: scaleY(metrics.backingRegion.y),
+      },
+      bottomEffectOutset: scaleY(metrics.bottomEffectOutset),
+      leftEffectOutset: scaleX(metrics.leftEffectOutset),
+      outerHeight: layerHeight,
+      outerWidth: layerWidth,
+      rightEffectOutset: scaleX(metrics.rightEffectOutset),
+      shapeOutset: metrics.shapeOutset * uniformScale,
+      topEffectOutset: scaleY(metrics.topEffectOutset),
+      totalOutset: Math.max(scaleX(metrics.translateX), scaleY(metrics.translateY)),
+      translateX: scaleX(metrics.translateX),
+      translateY: scaleY(metrics.translateY),
+    },
   }
 }
 

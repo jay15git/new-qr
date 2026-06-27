@@ -1,4 +1,5 @@
 import type { SerializablePaperShaderState } from "@new-qr/qr-scene-shaders"
+import type { NewQrCodeProps } from "@new-qr/qr"
 
 export type SceneIrBounds = {
   minX: number
@@ -41,6 +42,7 @@ export type DomLayerNode = {
   content?: string
   htmlContent?: string
   svgInner?: string
+  qrProps?: NewQrCodeProps
   children?: DomLayerNode[]
 }
 

@@ -271,18 +271,23 @@ describe("Pane", () => {
     const card = container.querySelector('[data-slot="dashboard-compose-card"]') as HTMLElement
     const cardShape = card.querySelector('[data-slot="drafting-card-shape"]')
     const qrBackground = container.querySelector('[data-slot="drafting-qr-background"]')
-    const qrDom = container.querySelector('[data-slot="drafting-qr-dom"]') as HTMLElement
-    const moduleNodes = Array.from(qrDom?.querySelectorAll("div") ?? []).filter((node) =>
-      Boolean(node.style.clipPath),
-    )
+    const qrComponent = container.querySelector('[data-slot="drafting-qr-component"]') as HTMLElement
+    const newQrCode = container.querySelector('[data-slot="new-qr-code"]')
 
     expect(card.getAttribute("data-card-shape")).toBeNull()
     expect(cardShape).toBeNull()
     expect(card.style.boxShadow).toContain("6px 8px 30px rgba(0, 0, 0, 0.35)")
     expect(qrBackground).not.toBeNull()
     expect(qrBackground?.getAttribute("data-background-shape")).toBe("flower")
-    expect(qrDom).not.toBeNull()
-    expect(moduleNodes.length).toBeGreaterThan(0)
+    expect(qrBackground?.querySelector("svg")).toBeNull()
+    expect(
+      Array.from(qrBackground?.querySelectorAll("div") ?? []).some((node) =>
+        String((node as HTMLElement).style.clipPath).includes("path("),
+      ),
+    ).toBe(true)
+    expect(qrComponent).not.toBeNull()
+    expect(newQrCode).not.toBeNull()
+    expect(newQrCode?.querySelector("svg")).not.toBeNull()
     expect(buildDashboardQrNodePayloadSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         backgroundGradient: expect.objectContaining({ enabled: false }),
@@ -296,9 +301,6 @@ describe("Pane", () => {
         backgroundShapeId: "none",
       }),
     )
-    expect(
-      moduleNodes.some((node) => node.style.clipPath?.includes("path(")),
-    ).toBe(true)
   })
 
   it("applies the selected card css pattern to the card layer", async () => {
@@ -1464,17 +1466,12 @@ describe("Pane", () => {
 
     await waitForQrPaneRender()
 
-    const qrDom = container.querySelector('[data-slot="drafting-qr-dom"]') as HTMLElement
-    const shadowGroup = Array.from(qrDom?.querySelectorAll("div") ?? []).find((node) =>
-      node.style.filter.includes("drop-shadow(6px 8px"),
-    )
-    const moduleNodes = Array.from(qrDom?.querySelectorAll("div") ?? []).filter((node) =>
-      node.style.clipPath?.includes("path("),
-    )
+    const qrComponent = container.querySelector('[data-slot="drafting-qr-component"]') as HTMLElement
+    const newQrCode = container.querySelector('[data-slot="new-qr-code"]')
 
-    expect(shadowGroup).not.toBeNull()
-    expect(moduleNodes.length).toBeGreaterThan(0)
-    expect(shadowGroup?.contains(moduleNodes[0] ?? null)).toBe(true)
+    expect(qrComponent).not.toBeNull()
+    expect(newQrCode).not.toBeNull()
+    expect(newQrCode?.querySelector("svg")).not.toBeNull()
   })
 
   it("keeps the qr canvas unshadowed when not selected", async () => {

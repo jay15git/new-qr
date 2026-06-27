@@ -1,0 +1,25 @@
+{
+  "name": "@new-qr/qr",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./core": "./src/core/index.ts",
+    "./react": "./src/react/index.ts",
+    "./web-component": "./src/web-component/index.ts",
+    "./shaders": "./src/shaders/index.ts",
+    "./animated": "./src/animated/index.ts"
+  },
+  "dependencies": {
+    "@lglab/react-qr-code": "^1.7.0",
+    "@new-qr/qr-scene-bitjson": "workspace:*",
+    "@new-qr/qr-scene-paper": "workspace:*",
+    "@new-qr/qr-scene-react": "workspace:*",
+    "@new-qr/qr-scene-shaders": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

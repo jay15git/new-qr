@@ -85,7 +85,7 @@ describe("qr-scene-codegen", () => {
     expect(react).not.toContain("<svg")
   })
 
-  it("emits qr layers as clip-path module divs without dangerouslySetInnerHTML", () => {
+  it("emits qr layers as NewQrCode component props", () => {
     const ir: SceneIr = {
       ...sampleIr,
       domLayers: [
@@ -100,30 +100,50 @@ describe("qr-scene-codegen", () => {
             top: 0,
             width: 100,
           },
-          children: [
-            {
-              kind: "module",
-              id: "qr-1-shape-1",
-              bounds: { x: 0, y: 0, width: 100, height: 100 },
-              style: {
-                position: "absolute",
-                left: 0,
-                top: 0,
-                width: 100,
-                height: 100,
-                clipPath: "path('M0 0h100v100H0z')",
-                backgroundColor: "#000000",
-              },
-            },
-          ],
+          qrProps: {
+            value: "https://example.com",
+            module: "diamond",
+            finderInner: "rounded",
+            finderOuter: "rounded-lg",
+          },
         },
       ],
     }
 
     const react = emitLiveReact(ir, { dialect: "tsx", componentName: "QrCard" })
-    expect(react).toContain("clipPath:")
-    expect(react).not.toContain("dangerouslySetInnerHTML")
-    expect(react).not.toContain("<svg")
+    expect(react).toContain('import { NewQrCode } from "@new-qr/qr/react"')
+    expect(react).toContain("<NewQrCode")
+    expect(react).toContain('module="diamond"')
+    expect(react).not.toContain("clipPath:")
+  })
+
+  it("emits qr layers as new-qr-code web component in html", () => {
+    const ir: SceneIr = {
+      ...sampleIr,
+      domLayers: [
+        {
+          kind: "qr",
+          id: "qr-1",
+          bounds: { x: 0, y: 0, width: 100, height: 100 },
+          style: {
+            height: 100,
+            left: 0,
+            position: "absolute",
+            top: 0,
+            width: 100,
+          },
+          qrProps: {
+            value: "https://example.com",
+            module: "diamond",
+          },
+        },
+      ],
+    }
+
+    const html = emitHtml(ir)
+    expect(html).toContain("<new-qr-code")
+    expect(html).toContain('module="diamond"')
+    expect(html).toContain('registerNewQrCodeElement')
   })
 
   it("flattens nested svg elements", () => {

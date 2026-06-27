@@ -13,15 +13,18 @@ export function buildCodegenManifest(ir: SceneIr, target: CodegenTarget) {
   const dependencies: Record<string, string> = {}
   const needsShaders = ir.shaders.length > 0
   const needsAnimatedQr = Boolean(ir.animatedQr)
+  const needsQrPackage =
+    (ir.domLayers ?? []).some((layer) => layer.kind === "qr" && layer.qrProps) ||
+    needsAnimatedQr
   const usesReact = targetUsesReactDependencies(target)
+
+  if (needsQrPackage) {
+    dependencies["@new-qr/qr"] = "0.1.0"
+  }
 
   if (usesReact && needsShaders) {
     dependencies["@paper-design/shaders-react"] = "0.0.76"
     dependencies["@paper-design/shaders"] = "0.0.76"
-  }
-
-  if (usesReact && needsAnimatedQr) {
-    dependencies["@new-qr/qr-scene-bitjson"] = "workspace:*"
   }
 
   const installCommand =
