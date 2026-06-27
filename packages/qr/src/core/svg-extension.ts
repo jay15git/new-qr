@@ -140,7 +140,85 @@ function applyDotsPaletteExtension(svg: SVGElement, props: NewQrCodeProps) {
   dotsGroup.setAttribute("data-qr-layer", "dot-palette")
 }
 
+function getAlignedCornerGradientRotation(
+  gradient: NewQrCodeProps["finderInnerGradient"],
+) {
+  if (!gradient || gradient === "none" || gradient.type !== "linear") {
+    return null
+  }
+
+  return gradient.rotation ?? 0
+}
+
+function alignCornerGradientDirection(
+  svg: SVGElement,
+  {
+    gradientIdPrefix,
+    rotation,
+  }: {
+    gradientIdPrefix: string
+    rotation: number
+  },
+) {
+  const descendants = Array.from(svg.querySelectorAll("*"))
+
+  for (const gradient of descendants) {
+    if (
+      gradient.tagName.toLowerCase() !== "lineargradient" ||
+      !gradient.getAttribute("id")?.startsWith(gradientIdPrefix)
+    ) {
+      continue
+    }
+
+    const gradientId = gradient.getAttribute("id")
+    if (!gradientId) {
+      continue
+    }
+
+    const fillRect = descendants.find(
+      (element) =>
+        element.tagName.toLowerCase() === "rect" &&
+        element.getAttribute("fill") === `url(#${gradientId})`,
+    )
+
+    if (!(fillRect instanceof SVGGraphicsElement)) {
+      continue
+    }
+
+    const bbox = fillRect.getBBox()
+    const radians = ((rotation ?? 0) * Math.PI) / 180
+    const centerX = bbox.x + bbox.width / 2
+    const centerY = bbox.y + bbox.height / 2
+    const halfDiagonal = Math.sqrt(bbox.width ** 2 + bbox.height ** 2) / 2
+
+    gradient.setAttribute("x1", String(centerX - Math.cos(radians) * halfDiagonal))
+    gradient.setAttribute("y1", String(centerY - Math.sin(radians) * halfDiagonal))
+    gradient.setAttribute("x2", String(centerX + Math.cos(radians) * halfDiagonal))
+    gradient.setAttribute("y2", String(centerY + Math.sin(radians) * halfDiagonal))
+  }
+}
+
+function applyFinderGradientExtensions(svg: SVGElement, props: NewQrCodeProps) {
+  const outerRotation = getAlignedCornerGradientRotation(props.finderOuterGradient)
+  const innerRotation = getAlignedCornerGradientRotation(props.finderInnerGradient)
+
+  if (outerRotation !== null) {
+    alignCornerGradientDirection(svg, {
+      gradientIdPrefix: "corners-square-color-",
+      rotation: outerRotation,
+    })
+  }
+
+  if (innerRotation !== null) {
+    alignCornerGradientDirection(svg, {
+      gradientIdPrefix: "corners-dot-color-",
+      rotation: innerRotation,
+    })
+  }
+}
+
 export function applyPortableQrSvgExtensions(svg: SVGElement, props: NewQrCodeProps) {
   applyDotsGradientExtension(svg, props)
   applyDotsPaletteExtension(svg, props)
+  applyFinderGradientExtensions(svg, props)
 }

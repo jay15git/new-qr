@@ -24,25 +24,36 @@ function mapBackground(state: QrStudioState): NewQrCodeProps["background"] {
   return state.backgroundOptions.color
 }
 
-function mapGradient(state: QrStudioState): NewQrCodeProps["gradient"] {
-  if (state.dotsColorMode !== "gradient" || !state.dataModulesGradient.enabled) {
+function mapStudioGradient(
+  gradient: QrStudioState["dataModulesGradient"],
+  enabled: boolean,
+): NewQrCodeProps["gradient"] {
+  if (!enabled || !gradient.enabled) {
     return "none"
   }
 
   return {
-    type: state.dataModulesGradient.type,
-    rotation: state.dataModulesGradient.rotation,
+    type: gradient.type,
+    rotation: gradient.rotation,
     stops: [
       {
-        offset: state.dataModulesGradient.colorStops[0].offset,
-        color: state.dataModulesGradient.colorStops[0].color,
+        offset: gradient.colorStops[0].offset,
+        color: gradient.colorStops[0].color,
       },
       {
-        offset: state.dataModulesGradient.colorStops[1].offset,
-        color: state.dataModulesGradient.colorStops[1].color,
+        offset: gradient.colorStops[1].offset,
+        color: gradient.colorStops[1].color,
       },
     ],
   }
+}
+
+function mapGradient(state: QrStudioState): NewQrCodeProps["gradient"] {
+  if (state.dotsColorMode !== "gradient") {
+    return "none"
+  }
+
+  return mapStudioGradient(state.dataModulesGradient, true)
 }
 
 function mapLogo(state: QrStudioState): NewQrCodeProps["logo"] | undefined {
@@ -78,10 +89,21 @@ export function toPortableQrConfig(state: QrStudioState): NewQrCodeProps {
     colorMode: state.dotsColorMode,
     finderInner: state.finderPatternInnerSettings.type as QrFinderStyle,
     finderOuter: state.finderPatternOuterSettings.type as QrFinderStyle,
+    finderInnerColor: state.finderPatternInnerSettings.color,
+    finderOuterColor: state.finderPatternOuterSettings.color,
+    finderInnerGradient: mapStudioGradient(
+      state.finderPatternInnerGradient,
+      state.finderPatternInnerGradient.enabled,
+    ),
+    finderOuterGradient: mapStudioGradient(
+      state.finderPatternOuterGradient,
+      state.finderPatternOuterGradient.enabled,
+    ),
     foreground: state.dataModulesSettings.color,
     gradient: mapGradient(state),
     margin: state.margin,
     module: state.dataModulesSettings.type as QrModuleStyle,
+    moduleRoundSize: state.dataModulesSettings.roundSize,
     motion: motion.motion,
     motionPreset: motion.motionPreset,
     palette: state.dotsPalette,

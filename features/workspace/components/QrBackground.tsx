@@ -1,8 +1,7 @@
 "use client"
 
-import { useMemo, type CSSProperties } from "react"
+import { useMemo } from "react"
 
-import { buildDraftingQrBackgroundDomModules } from "@/features/qr-code/rendering/background-shape-dom"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
 import {
   getQrBackgroundShapeDefinition,
@@ -16,7 +15,13 @@ import {
 import {
   getBackgroundShapeSkewTransform,
 } from "@/features/workspace/rendering/layer-transform"
-import { ScalableDomLayerTree } from "@/features/workspace/rendering/dom-layer-tree"
+
+export type DraftingQrBackgroundSvgPayload = {
+  height: number
+  markup: string
+  shapeId: string
+  width: number
+}
 
 type DraftingQrBackgroundFrame = {
   height: number
@@ -32,6 +37,25 @@ type DraftingQrBackgroundOverflow = {
   top: number
 }
 
+export function buildDraftingQrBackgroundSvgPayload(
+  layer: DraftingCanvasLayer,
+  state: QrStudioState,
+): DraftingQrBackgroundSvgPayload | null {
+  const markup = buildDraftingQrBackgroundPreviewSvgMarkup(layer, state)
+  if (!markup) {
+    return null
+  }
+
+  const layout = getDraftingQrLayerLayout(layer.width, state, layer.height)
+
+  return {
+    height: Math.max(1, layout.metrics.outerHeight),
+    markup,
+    shapeId: state.backgroundShapeId === "none" ? "rect" : state.backgroundShapeId,
+    width: Math.max(1, layout.metrics.outerWidth),
+  }
+}
+
 export function DraftingQrBackground({
   layer,
   state,
@@ -40,39 +64,29 @@ export function DraftingQrBackground({
   state: QrStudioState
 }) {
   const frame = getDraftingQrBackgroundFrame(layer)
-  const modules = useMemo(
-    () => buildDraftingQrBackgroundDomModules(layer, state),
+  const payload = useMemo(
+    () => buildDraftingQrBackgroundSvgPayload(layer, state),
     [layer, state],
   )
 
-  if (!modules) {
+  if (!payload) {
     return null
-  }
-
-  const style: CSSProperties = {
-    height: frame.height,
-    left: frame.x,
-    top: frame.y,
-    width: frame.width,
   }
 
   return (
     <div
       aria-hidden="true"
       className="pointer-events-none absolute z-0 overflow-visible"
-      data-background-shape={modules.shapeId}
+      data-background-shape={payload.shapeId}
       data-slot="drafting-qr-background"
-      style={style}
-    >
-      <ScalableDomLayerTree
-        layoutHeight={modules.layoutHeight}
-        layoutWidth={modules.layoutWidth}
-        nodes={modules.nodes}
-        overflow="visible"
-        targetHeight={frame.height}
-        targetWidth={frame.width}
-      />
-    </div>
+      style={{
+        height: frame.height,
+        left: frame.x,
+        top: frame.y,
+        width: frame.width,
+      }}
+      dangerouslySetInnerHTML={{ __html: payload.markup }}
+    />
   )
 }
 

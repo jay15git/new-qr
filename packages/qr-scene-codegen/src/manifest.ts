@@ -1,5 +1,6 @@
 import type { CodegenTarget, SceneIr } from "./types"
 import { isCodeExportTarget } from "./types"
+import { domLayersUseQrPackage } from "./emit-dom-tree"
 
 function targetUsesReactDependencies(target: CodegenTarget) {
   if (isCodeExportTarget(target)) {
@@ -13,7 +14,7 @@ export function buildCodegenManifest(ir: SceneIr, target: CodegenTarget) {
   const dependencies: Record<string, string> = {}
   const needsShaders = ir.shaders.length > 0
   const needsAnimatedQr = Boolean(ir.animatedQr)
-  const needsQrPackage = needsAnimatedQr
+  const needsQrPackage = needsAnimatedQr || domLayersUseQrPackage(ir.domLayers ?? [])
   const usesReact = targetUsesReactDependencies(target)
 
   if (needsQrPackage) {

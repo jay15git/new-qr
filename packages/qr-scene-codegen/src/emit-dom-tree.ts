@@ -1,4 +1,5 @@
 import type { DomLayerNode } from "./types"
+import { emitNewQrCodeHtml, emitNewQrCodeReact } from "./emit-qr-component"
 
 function escapeHtml(value: string) {
   return value
@@ -46,6 +47,24 @@ export function cssPropertiesToReactStyle(properties: Record<string, string | nu
     .join(", ")
 }
 
+export function domLayersUseQrPackage(layers: DomLayerNode[]) {
+  const walk = (nodes: DomLayerNode[]): boolean => {
+    for (const node of nodes) {
+      if (node.qrProps) {
+        return true
+      }
+
+      if (node.children?.length && walk(node.children)) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  return walk(layers)
+}
+
 export function emitDomLayersHtml(layers: DomLayerNode[]) {
   return layers.map((layer, index) => emitDomLayerHtml(layer, index)).join("\n")
 }
@@ -59,7 +78,13 @@ function emitDomLayerHtml(layer: DomLayerNode, index: number): string {
 
   const inner =
     layer.htmlContent ??
-    (layer.svgInner ? layer.svgInner : layer.content ? escapeHtml(layer.content) : "")
+    (layer.qrProps
+      ? emitNewQrCodeHtml(layer.qrProps)
+      : layer.svgInner
+        ? layer.svgInner
+        : layer.content
+          ? escapeHtml(layer.content)
+          : "")
 
   if (layer.children?.length) {
     return `<div class="${className}" style="${style}">\n${children}\n${inner ? `${inner}\n` : ""}</div>`
@@ -94,6 +119,26 @@ function emitDomLayerReact(layer: DomLayerNode, indent: string): string {
 
   if (layer.htmlContent) {
     return `${indent}<div style={{ ${style} }} dangerouslySetInnerHTML={{ __html: ${JSON.stringify(layer.htmlContent)} }} />`
+  }
+
+  if (layer.qrProps) {
+    const { className, style: qrStyle, ...qrProps } = layer.qrProps
+    const classAttr = className ? ` className=${JSON.stringify(className)}` : ""
+
+    return `${indent}<div${classAttr} style={{ ${style} }}>
+${emitNewQrCodeReact(
+  {
+    ...qrProps,
+    style: {
+      display: "block",
+      height: "100%",
+      width: "100%",
+      ...qrStyle,
+    },
+  },
+  `${indent}  `,
+)}
+${indent}</div>`
   }
 
   if (layer.svgInner) {
@@ -175,7 +220,15 @@ function emitDomLayerCssMarkup(layer: DomLayerNode, path: string, classPrefix: s
         .map((child, childIndex) => emitDomLayerCssMarkup(child, `${path}-${childIndex}`, classPrefix))
         .join("\n")
     : ""
-  const inner = layer.htmlContent ?? layer.svgInner ?? (layer.content ? escapeHtml(layer.content) : "")
+  const inner =
+    layer.htmlContent ??
+    (layer.qrProps
+      ? emitNewQrCodeHtml(layer.qrProps)
+      : layer.svgInner
+        ? layer.svgInner
+        : layer.content
+          ? escapeHtml(layer.content)
+          : "")
 
   if (layer.children?.length) {
     return `<div class="${classPrefix} ${className}">\n${children}\n</div>`

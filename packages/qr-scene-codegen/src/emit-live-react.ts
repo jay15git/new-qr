@@ -3,7 +3,7 @@ import {
   getShaderComponentExportName,
 } from "@new-qr/qr-scene-shaders"
 
-import { emitDomLayersReact } from "./emit-dom-tree"
+import { emitDomLayersReact, domLayersUseQrPackage } from "./emit-dom-tree"
 import type { SceneIr } from "./types"
 
 function formatShaderProps(props: Record<string, unknown>) {
@@ -49,6 +49,7 @@ ${formatShaderProps(props)}
   }
 
   const domBlocks = emitDomLayersReact(ir.domLayers ?? [])
+  const usesQrPackage = domLayersUseQrPackage(ir.domLayers ?? [])
   const paperImports = [...shaderImports].filter((name) => name !== "AnimatedQr")
   const shaderImportLine =
     paperImports.length > 0
@@ -57,8 +58,11 @@ ${formatShaderProps(props)}
   const animatedImportLine = ir.animatedQr
     ? `import { AnimatedQr } from "@new-qr/qr/animated"\n`
     : ""
+  const qrImportLine = usesQrPackage
+    ? `import { NewQrCode } from "@new-qr/qr/react"\n`
+    : ""
 
-  return `${shaderImportLine}${animatedImportLine}export function ${componentName}() {
+  return `${shaderImportLine}${animatedImportLine}${qrImportLine}export function ${componentName}() {
   return (
     <div style={{ position: "relative", width: ${ir.bounds.width}, height: ${ir.bounds.height}, overflow: "hidden" }}>
 ${shaderBlocks.join("\n")}

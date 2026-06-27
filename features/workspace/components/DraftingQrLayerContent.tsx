@@ -5,12 +5,12 @@ import { memo, useMemo, type CSSProperties } from "react"
 import { BitjsonAnimatedQr } from "@/features/qr-code/components/BitjsonAnimatedQr"
 import { shouldUseBitjsonMotionPreview } from "@/features/qr-code/motion/bitjson-bridge"
 import type { QrStudioState } from "@/features/qr-code/model/state"
+import { buildDraftingQrStudioPreviewMarkup } from "@/features/qr-code/rendering/drafting-qr-preview"
 import {
   getDraftingQrDomPlacementStyle,
   getDraftingQrLayerLayout,
 } from "@/features/qr-code/rendering/svg-extension"
 import { DraftingQrBackground } from "@/features/workspace/components/QrBackground"
-import { buildDraftingQrPreviewScaledMarkup } from "@/features/workspace/export/layered-dom-parts"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
 
 type DraftingQrLayerContentProps = {
@@ -34,8 +34,8 @@ export const DraftingQrLayerContent = memo(function DraftingQrLayerContent({
   const qrPlacementStyle = getDraftingQrDomPlacementStyle(layout)
   const useAnimatedQr = shouldUseBitjsonMotionPreview(state) && Boolean(canvasSvgMarkup)
   const qrSvgMarkup = useMemo(
-    () => buildDraftingQrPreviewScaledMarkup(layer, qrMarkup, state),
-    [layer, qrMarkup, state],
+    () => buildDraftingQrStudioPreviewMarkup(state, layout.innerWidth, layout.innerHeight),
+    [layout.innerHeight, layout.innerWidth, state],
   )
 
   if (useAnimatedQr) {

@@ -1,9 +1,8 @@
 import type { DomLayerNode } from "@new-qr/qr-scene-codegen"
 
-import { buildDraftingQrBackgroundPreviewSvgMarkup } from "@/features/workspace/components/QrBackground"
+import { buildDraftingQrBackgroundSvgPayload } from "@/features/workspace/components/QrBackground"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
 import type { QrStudioState } from "@/features/qr-code/model/state"
-import { getDraftingQrLayerLayout } from "@/features/qr-code/rendering/svg-extension"
 
 export type DraftingQrBackgroundDomModules = {
   layoutHeight: number
@@ -12,23 +11,19 @@ export type DraftingQrBackgroundDomModules = {
   shapeId: string
 }
 
+/** @deprecated Use buildDraftingQrBackgroundSvgPayload for new code. */
 export function buildDraftingQrBackgroundDomModules(
   layer: DraftingCanvasLayer,
   state: QrStudioState,
 ): DraftingQrBackgroundDomModules | null {
-  const previewSvg = buildDraftingQrBackgroundPreviewSvgMarkup(layer, state)
-  if (!previewSvg) {
+  const payload = buildDraftingQrBackgroundSvgPayload(layer, state)
+  if (!payload) {
     return null
   }
 
-  const layout = getDraftingQrLayerLayout(layer.width, state, layer.height)
-  const layoutWidth = Math.max(1, layout.metrics.outerWidth)
-  const layoutHeight = Math.max(1, layout.metrics.outerHeight)
-  const shapeId = state.backgroundShapeId === "none" ? "rect" : state.backgroundShapeId
-
   return {
-    layoutHeight,
-    layoutWidth,
+    layoutHeight: payload.height,
+    layoutWidth: payload.width,
     nodes: [
       {
         kind: "module",
@@ -36,21 +31,21 @@ export function buildDraftingQrBackgroundDomModules(
         bounds: {
           x: 0,
           y: 0,
-          width: layoutWidth,
-          height: layoutHeight,
+          width: payload.width,
+          height: payload.height,
         },
         style: {
-          height: layoutHeight,
+          height: payload.height,
           left: 0,
           overflow: "visible",
           pointerEvents: "none",
           position: "absolute",
           top: 0,
-          width: layoutWidth,
+          width: payload.width,
         },
-        svgInner: previewSvg,
+        svgInner: payload.markup,
       },
     ],
-    shapeId,
+    shapeId: payload.shapeId,
   }
 }

@@ -85,7 +85,7 @@ describe("qr-scene-codegen", () => {
     expect(react).not.toContain("<svg")
   })
 
-  it("emits qr layers as inline svg modules", () => {
+  it("emits qr layers with package qr component props", () => {
     const ir: SceneIr = {
       ...sampleIr,
       domLayers: [
@@ -112,8 +112,20 @@ describe("qr-scene-codegen", () => {
                 top: 0,
                 width: 57,
               },
-              svgInner:
-                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 57 57"><path data-qr-layer="dot" d="M0 0h7v7H0z" fill="#111"/></svg>',
+              qrProps: {
+                background: "#fff",
+                colorMode: "solid",
+                finderInner: "square",
+                finderOuter: "square",
+                foreground: "#111",
+                gradient: "none",
+                margin: 0,
+                module: "square",
+                motion: "none",
+                palette: [],
+                size: 57,
+                value: "https://example.com",
+              },
             },
           ],
         },
@@ -121,13 +133,12 @@ describe("qr-scene-codegen", () => {
     }
 
     const react = emitLiveReact(ir, { dialect: "tsx", componentName: "QrCard" })
-    expect(react).not.toContain('import { NewQrCode } from "@new-qr/qr/react"')
-    expect(react).toContain("dangerouslySetInnerHTML")
-    expect(react).toContain('data-qr-layer=\\"dot\\"')
+    expect(react).toContain('import { NewQrCode } from "@new-qr/qr/react"')
+    expect(react).toContain("<NewQrCode")
     expect(react).not.toContain("clipPath:")
   })
 
-  it("emits qr layers as inline svg in html", () => {
+  it("emits qr layers with package web component in html", () => {
     const ir: SceneIr = {
       ...sampleIr,
       domLayers: [
@@ -154,8 +165,20 @@ describe("qr-scene-codegen", () => {
                 top: 0,
                 width: 57,
               },
-              svgInner:
-                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 57 57"><path data-qr-layer="dot" d="M0 0h7v7H0z" fill="#111"/></svg>',
+              qrProps: {
+                background: "#fff",
+                colorMode: "solid",
+                finderInner: "square",
+                finderOuter: "square",
+                foreground: "#111",
+                gradient: "none",
+                margin: 0,
+                module: "square",
+                motion: "none",
+                palette: [],
+                size: 57,
+                value: "https://example.com",
+              },
             },
           ],
         },
@@ -163,10 +186,8 @@ describe("qr-scene-codegen", () => {
     }
 
     const html = emitHtml(ir)
-    expect(html).toContain("<svg")
-    expect(html).toContain('data-qr-layer="dot"')
-    expect(html).not.toContain("<new-qr-code")
-    expect(html).not.toContain("registerNewQrCodeElement")
+    expect(html).toContain("<new-qr-code")
+    expect(html).not.toContain('data-qr-layer="dot"')
   })
 
   it("flattens nested svg elements", () => {

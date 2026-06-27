@@ -3,7 +3,11 @@ import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 
 import type { DashboardQrNodePayload } from "@/features/qr-code/rendering/compose-scene"
-import { buildQrExtension, getQrRenderedDimensions } from "@/features/qr-code/rendering/svg-extension"
+import {
+  buildQrExtension,
+  createAlignedCornerGradientExtension,
+  getQrRenderedDimensions,
+} from "@/features/qr-code/rendering/svg-extension"
 import { type QrStudioState } from "@/features/qr-code/model/state"
 import { toReactQrCodeProps } from "@/features/qr-code/adapters/react-qr-adapter"
 
@@ -25,21 +29,12 @@ export async function buildDashboardQrNodePayload(
   state: QrStudioState,
 ): Promise<DashboardQrNodePayload> {
   const dashboardState = createDashboardSurfaceQrState(state)
-  const extension = buildQrExtension(dashboardState)
   const markup = stripXmlDeclaration(
     renderToStaticMarkup(createElement(ReactQRCode, toReactQrCodeProps(dashboardState))),
   )
 
-  if (extension) {
-    return {
-      markup: applyQrSvgExtension(markup, extension, dashboardState),
-      naturalHeight: getQrRenderedDimensions(dashboardState).height,
-      naturalWidth: getQrRenderedDimensions(dashboardState).width,
-    }
-  }
-
   return {
-    markup,
+    markup: applyStudioQrSvgMarkupExtensions(markup, dashboardState),
     naturalHeight: getQrRenderedDimensions(dashboardState).height,
     naturalWidth: getQrRenderedDimensions(dashboardState).width,
   }
@@ -47,17 +42,33 @@ export async function buildDashboardQrNodePayload(
 
 export function renderDashboardQrSvgMarkup(state: QrStudioState) {
   const dashboardState = createDashboardSurfaceQrState(state)
-  const extension = buildQrExtension(dashboardState)
   const markup = stripXmlDeclaration(
     renderToStaticMarkup(createElement(ReactQRCode, toReactQrCodeProps(dashboardState))),
   )
 
-  return extension ? applyQrSvgExtension(markup, extension, dashboardState) : markup
+  return applyStudioQrSvgMarkupExtensions(markup, dashboardState)
+}
+
+export function applyStudioQrSvgMarkupExtensions(markup: string, state: QrStudioState) {
+  let result = markup
+  const extension = buildQrExtension(state)
+
+  if (extension) {
+    result = applyQrSvgExtension(result, extension, state)
+  }
+
+  const cornerExtension = createAlignedCornerGradientExtension(state)
+
+  if (cornerExtension) {
+    result = applyQrSvgExtension(result, cornerExtension, state)
+  }
+
+  return result
 }
 
 function applyQrSvgExtension(
   markup: string,
-  extension: NonNullable<ReturnType<typeof buildQrExtension>>,
+  extension: (svg: SVGElement, options: { height?: number; width?: number }) => void,
   state: QrStudioState,
 ) {
   const parser = new DOMParser()

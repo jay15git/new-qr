@@ -7,11 +7,6 @@ import {
   type DraftingTextRun,
 } from "@/features/workspace/model/layers"
 import { layoutDraftingText } from "@/features/workspace/rendering/text-layout"
-import {
-  applyDraftingQrForegroundShadow,
-  hasDraftingLayerShadow,
-} from "@/features/workspace/rendering/qr-layer-shadow"
-import { scaleNestedSvgMarkup } from "@/features/workspace/rendering/qr-artwork"
 import { getShapeSvgPath } from "@/features/workspace/rendering/shape-layer"
 import { QR_BACKGROUND_SHAPES } from "@/features/qr-code/styles/background-shapes"
 import {
@@ -25,9 +20,10 @@ import {
   getTextRunStyle,
   serializeCssProperties,
 } from "@/features/workspace/rendering/layer-dom-styles"
+import { toPortableQrConfig } from "@/features/qr-code/adapters/portable-config"
 import type { QrStudioState } from "@/features/qr-code/model/state"
 import { getDraftingQrLayerLayout } from "@/features/qr-code/rendering/svg-extension"
-import { buildDraftingQrBackgroundDomModules } from "@/features/qr-code/rendering/background-shape-dom"
+import { buildDraftingQrBackgroundSvgPayload } from "@/features/workspace/components/QrBackground"
 
 import { getDraftingLayerBounds } from "./layered-svg-parts"
 
@@ -242,48 +238,10 @@ function getDraftingShapeLayerDom(layer: DraftingCanvasLayer): DomLayerNode {
   }
 }
 
-function getDraftingQrScaledMarkup(
-  layer: DraftingCanvasLayer,
-  qrMarkup: string,
-  state: QrStudioState,
-) {
-  const layout = getDraftingQrLayerLayout(layer.width, state, layer.height)
-  const shadowedQrMarkup = hasDraftingLayerShadow(layer)
-    ? applyDraftingQrForegroundShadow(qrMarkup, layer)
-    : qrMarkup
-  const scaledQrMarkup = scaleNestedSvgMarkup(
-    shadowedQrMarkup,
-    layout.innerWidth,
-    layout.innerHeight,
-  )
-
-  return { layout, scaledQrMarkup, shadowedQrMarkup }
-}
-
-/** Preview-only: scaled QR svg markup for inner layout box. */
-export function buildDraftingQrPreviewScaledMarkup(
-  layer: DraftingCanvasLayer,
-  qrMarkup: string,
-  state: QrStudioState,
-): string | null {
-  if (!qrMarkup) {
-    return null
-  }
-
-  const { scaledQrMarkup } = getDraftingQrScaledMarkup(layer, qrMarkup, state)
-  return scaledQrMarkup
-}
-
 function buildDraftingQrForegroundDomNode(
   layer: DraftingCanvasLayer,
-  qrMarkup: string,
   state: QrStudioState,
 ): DomLayerNode | null {
-  const svgInner = buildDraftingQrPreviewScaledMarkup(layer, qrMarkup, state)
-  if (!svgInner) {
-    return null
-  }
-
   const layout = getDraftingQrLayerLayout(layer.width, state, layer.height)
 
   return {
@@ -304,22 +262,30 @@ function buildDraftingQrForegroundDomNode(
       width: layout.innerWidth,
       zIndex: 10,
     },
-    svgInner,
+    qrProps: {
+      ...toPortableQrConfig(state),
+      size: layout.innerWidth,
+      style: {
+        display: "block",
+        height: "100%",
+        width: "100%",
+      },
+    },
   }
 }
 
 function getDraftingQrLayerDom(
   layer: DraftingCanvasLayer,
-  qrMarkup: string,
+  _qrMarkup: string,
   state: QrStudioState,
 ): DomLayerNode {
-  const background = buildDraftingQrBackgroundDomModules(layer, state)
-  const foreground = buildDraftingQrForegroundDomNode(layer, qrMarkup, state)
+  const background = buildDraftingQrBackgroundSvgPayload(layer, state)
+  const foreground = buildDraftingQrForegroundDomNode(layer, state)
   const children: DomLayerNode[] = []
 
   if (background) {
     children.push({
-      kind: "group",
+      kind: "module",
       id: `${layer.id}-qr-background`,
       bounds: {
         x: 0,
@@ -330,13 +296,14 @@ function getDraftingQrLayerDom(
       style: {
         height: layer.height,
         left: 0,
+        overflow: "visible",
         pointerEvents: "none",
         position: "absolute",
         top: 0,
         width: layer.width,
         zIndex: 0,
       },
-      children: background.nodes,
+      svgInner: background.markup,
     })
   }
 

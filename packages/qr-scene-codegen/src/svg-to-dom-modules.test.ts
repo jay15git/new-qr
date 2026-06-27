@@ -245,14 +245,13 @@ describe("qr dom export integration", () => {
     const qrLayer = parts.domLayers.find((layer) => layer.kind === "qr")
     expect(qrLayer).toBeDefined()
     expect(qrLayer?.svgInner).toBeUndefined()
-    expect(qrLayer?.qrProps).toBeUndefined()
-    expect(qrLayer?.children?.[0]?.kind).toBe("group")
-    expect(qrLayer?.children?.[0]?.children?.[0]?.svgInner).toContain('fill="#f8fafc"')
-    expect(qrLayer?.children?.[1]?.svgInner).toContain("<svg")
-    expect(qrLayer?.children?.[1]?.svgInner).toContain('data-testid="data-modules"')
+    expect(qrLayer?.children?.[0]?.svgInner).toContain('fill="#f8fafc"')
+    expect(qrLayer?.children?.[1]?.qrProps).toBeDefined()
+    expect(qrLayer?.children?.[1]?.qrProps?.value).toBeTruthy()
+    expect(qrLayer?.children?.[1]?.svgInner).toBeUndefined()
   })
 
-  it("keeps inline svg foreground when dot matrix animation is enabled", async () => {
+  it("keeps package qr props when dot matrix animation is enabled", async () => {
     const state = createDefaultQrStudioState()
     state.dotMatrixAnimation = {
       ...state.dotMatrixAnimation,
@@ -271,7 +270,7 @@ describe("qr dom export integration", () => {
     })
 
     const qrLayer = parts.domLayers.find((layer) => layer.kind === "qr")
-    expect(qrLayer?.children?.[1]?.svgInner).toContain("<svg")
+    expect(qrLayer?.children?.[1]?.qrProps).toBeDefined()
     expect(qrLayer?.svgInner).toBeUndefined()
   })
 })
@@ -302,10 +301,7 @@ describe("qr export emitters with inline svg qr layers", () => {
 
     const html = emitHtml(buildQrSceneIr(parts.domLayers))
     expect(html).toContain('class="qr-layer qr-layer--qr')
-    expect(html).toContain("<svg")
-    expect(html).toContain('data-testid="data-modules"')
-    expect(html).not.toContain("<new-qr-code")
-    expect(html).not.toContain("registerNewQrCodeElement")
+    expect(html).toContain("<new-qr-code")
     expect(html).toContain('fill="#f8fafc"')
   })
 
@@ -343,10 +339,9 @@ describe("qr export emitters with inline svg qr layers", () => {
       componentName: "QrCard",
     })
 
-    expect(react).not.toContain('import { NewQrCode } from "@new-qr/qr/react"')
-    expect(react).not.toContain("<NewQrCode")
-    expect(react).toContain("dangerouslySetInnerHTML")
-    expect(react).toContain('data-testid=\\"data-modules\\"')
+    expect(react).toContain('import { NewQrCode } from "@new-qr/qr/react"')
+    expect(react).toContain("<NewQrCode")
+    expect(react).not.toContain('data-testid=\\"data-modules\\"')
   })
 
   it("emits qr layer rules with inline svg background modules", async () => {

@@ -49,6 +49,10 @@ export type NewQrCodeProps = {
   module?: QrModuleStyle
   finderInner?: QrFinderStyle
   finderOuter?: QrFinderStyle
+  finderInnerColor?: string
+  finderOuterColor?: string
+  finderInnerGradient?: NewQrGradientConfig | "none"
+  finderOuterGradient?: NewQrGradientConfig | "none"
   foreground?: string
   background?: string
   margin?: number
@@ -56,6 +60,7 @@ export type NewQrCodeProps = {
   gradient?: NewQrGradientConfig | "none"
   colorMode?: "solid" | "gradient" | "palette"
   palette?: string[]
+  moduleRoundSize?: boolean
   motion?: "none" | "bitjson"
   motionPreset?: string
   className?: string

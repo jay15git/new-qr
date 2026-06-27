@@ -22,6 +22,10 @@ export function formatPortableQrPropsForCodegen(props: NewQrCodeProps) {
     "module",
     "finderInner",
     "finderOuter",
+    "finderInnerColor",
+    "finderOuterColor",
+    "finderInnerGradient",
+    "finderOuterGradient",
     "foreground",
     "background",
     "margin",
@@ -32,6 +36,7 @@ export function formatPortableQrPropsForCodegen(props: NewQrCodeProps) {
     "logo",
     "motion",
     "motionPreset",
+    "moduleRoundSize",
   ]
 
   for (const key of entries) {

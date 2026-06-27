@@ -12,15 +12,35 @@ describe("toPortableQrConfig", () => {
       colorMode: "solid",
       finderInner: "circle",
       finderOuter: "rounded-lg",
+      finderInnerColor: "#111827",
+      finderOuterColor: "#111827",
+      finderInnerGradient: "none",
+      finderOuterGradient: "none",
       foreground: "#111827",
       gradient: "none",
       margin: 12,
       module: "rounded",
+      moduleRoundSize: true,
       motion: "none",
       palette: ["#04879c", "#0c3c78", "#090030", "#f30a49"],
       size: 320,
       value: "https://new-qr-studio.local/launch",
     })
+  })
+
+  it("maps separate finder colors and module round size", () => {
+    const state = createDefaultQrStudioState()
+    state.dataModulesSettings.color = "#ff0000"
+    state.finderPatternInnerSettings.color = "#00ff00"
+    state.finderPatternOuterSettings.color = "#0000ff"
+    state.dataModulesSettings.roundSize = false
+
+    const config = toPortableQrConfig(state)
+
+    expect(config.foreground).toBe("#ff0000")
+    expect(config.finderInnerColor).toBe("#00ff00")
+    expect(config.finderOuterColor).toBe("#0000ff")
+    expect(config.moduleRoundSize).toBe(false)
   })
 
   it("uses a transparent qr background when a decorative shape is active", () => {
