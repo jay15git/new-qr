@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 
 import { DesktopWorkspace } from "@/features/desktop-shell/components/DesktopWorkspace"
 import { HubToEditorTransition } from "@/features/studio-hub/components/HubToEditorTransition"
@@ -22,7 +22,6 @@ function resolveInitialTool(source: string | null): DesktopToolbarToolId | undef
 }
 
 export function DesktopPageClient({ fontClassName }: DesktopPageClientProps) {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const source = searchParams.get("source")
   const [initialTheme] = React.useState<DesktopThemeMode>(() => {
@@ -38,10 +37,6 @@ export function DesktopPageClient({ fontClassName }: DesktopPageClientProps) {
     }
   })
 
-  const handleBack = React.useCallback(() => {
-    router.push("/")
-  }, [router])
-
   return (
     <>
       <HubToEditorTransition />
@@ -49,7 +44,6 @@ export function DesktopPageClient({ fontClassName }: DesktopPageClientProps) {
         fontClassName={fontClassName}
         initialTheme={initialTheme}
         initialActiveTool={resolveInitialTool(source)}
-        onBack={handleBack}
       />
     </>
   )

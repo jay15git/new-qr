@@ -17,14 +17,12 @@ type DesktopWorkspaceProps = {
   fontClassName?: string
   initialTheme?: DesktopThemeMode
   initialActiveTool?: DesktopToolbarToolId
-  onBack?: () => void
 }
 
 export function DesktopWorkspace({
   fontClassName,
   initialTheme = "light",
   initialActiveTool,
-  onBack,
 }: DesktopWorkspaceProps) {
   const [desktopTheme, setDesktopTheme] = useState<DesktopThemeMode>(initialTheme)
   const workspaceTone = {
@@ -58,8 +56,10 @@ export function DesktopWorkspace({
       >
       <WorkspaceSurface
         chrome="canvas-only"
+        desktopTheme={desktopTheme}
         fontClassName={fontClassName}
         initialActiveTool={initialActiveTool}
+        onDesktopThemeChange={setDesktopTheme}
         onSaveToLibrary={handleSaveToLibrary}
         paneToolbarVariant="desktop-zoom"
         sliderVariant="desktop-elastic"
@@ -68,7 +68,6 @@ export function DesktopWorkspace({
             controller={controller}
             theme={desktopTheme}
             onThemeChange={setDesktopTheme}
-            onBack={onBack}
           />
         )}
       />

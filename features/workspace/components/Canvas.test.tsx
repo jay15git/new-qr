@@ -476,7 +476,8 @@ describe("Canvas", () => {
     const bottomToolbar = workspace.container.querySelector('[data-slot="dashboard-compose-toolbar"]')
 
     expect(bottomToolbar?.className).toContain("gap-0.5")
-    expect(bottomToolbar?.className).toContain("px-2.5")
+    expect(bottomToolbar?.className).toContain("flex-col")
+    expect(bottomToolbar?.className).toContain("px-1")
     expect(bottomToolbar?.className).toContain("cursor-pointer")
     expect(
       Array.from(bottomToolbar?.children ?? []).filter((child) =>
@@ -496,6 +497,8 @@ describe("Canvas", () => {
       "Add text on canvas",
       "Add content",
       "Layer appearance",
+      "Open keyboard shortcuts",
+      "Switch to light mode",
     ])
   })
 
@@ -663,6 +666,7 @@ function renderWorkspace({
   selectedLayerIds,
   showCanvasGrid,
   toolbarVariant,
+  onDesktopThemeChange = vi.fn(),
 }: {
   activeCanvasTool?: ComponentProps<typeof Canvas>["activeCanvasTool"]
   canRedo?: boolean
@@ -684,6 +688,7 @@ function renderWorkspace({
   selectedLayerIds?: ComponentProps<typeof Canvas>["selectedLayerIds"]
   showCanvasGrid?: ComponentProps<typeof Canvas>["showCanvasGrid"]
   toolbarVariant?: ComponentProps<typeof Canvas>["toolbarVariant"]
+  onDesktopThemeChange?: ComponentProps<typeof Canvas>["onDesktopThemeChange"]
 } = {}) {
   const container = document.createElement("div")
   const root = createRoot(container)
@@ -713,6 +718,7 @@ function renderWorkspace({
         selectedLayerIds={selectedLayerIds}
         showCanvasGrid={showCanvasGrid}
         toolbarVariant={toolbarVariant}
+        onDesktopThemeChange={onDesktopThemeChange}
       />,
     )
   }

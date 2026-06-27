@@ -126,6 +126,7 @@ import type {
   DesktopPatternSettings,
   DesktopShapeSettings,
   DesktopTextSettings,
+  DesktopThemeMode,
   DesktopToolbarController,
   DesktopToolbarToolId,
 } from "@/features/desktop-shell/components/FloatingToolbar"
@@ -247,8 +248,10 @@ type DraftingWorkspaceController = DesktopToolbarController
 
 type WorkspaceSurfaceProps = {
   chrome?: WorkspaceSurfaceChrome
+  desktopTheme?: DesktopThemeMode
   fontClassName?: string
   initialActiveTool?: DesktopToolbarToolId
+  onDesktopThemeChange?: (theme: DesktopThemeMode) => void
   onSaveToLibrary?: (document: DraftingWorkspaceDocumentV1) => Promise<void>
   paneToolbarVariant?: DraftingPaneToolbarVariant
   renderOverlay?: (controller: DraftingWorkspaceController) => ReactNode
@@ -528,8 +531,10 @@ function DraftingCardObjectInspectorNav({
 
 export function WorkspaceSurface({
   chrome = "full",
+  desktopTheme = "dark",
   fontClassName,
   initialActiveTool,
+  onDesktopThemeChange,
   onSaveToLibrary,
   paneToolbarVariant = "default",
   renderOverlay,
@@ -4872,6 +4877,8 @@ export function WorkspaceSurface({
               }}
               onUndo={handleUndoDraftingWorkspace}
               panes={panes}
+              desktopTheme={desktopTheme}
+              onDesktopThemeChange={onDesktopThemeChange}
               showCanvasGrid={paneToolbarVariant === "desktop-zoom" ? showDesktopCanvasGrid : true}
               toolbarVariant={paneToolbarVariant}
               selectedLayerId={selectedLayerId}

@@ -1,17 +1,13 @@
 "use client"
 
 import {
-  AppleIcon,
-  ArrowLeft01Icon,
   CircleLock01Icon,
   CircleUnlock02Icon,
   Download02Icon,
   EyeIcon,
   Image02Icon,
-  KeyboardIcon,
   SaveIcon,
   ViewOffSlashIcon,
-  WindowsOldIcon,
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useEffect, useId, useMemo, useState, type CSSProperties, type ReactNode } from "react"
@@ -29,7 +25,6 @@ import {
   BoldIcon,
   ChevronDownIcon,
   ItalicIcon,
-  MoonIcon,
   Redo2Icon,
   RotateCcwIcon,
   ShieldCheckIcon,
@@ -37,7 +32,6 @@ import {
   ShapesIcon,
   Sparkles,
   LayoutGrid,
-  SunIcon,
   TypeIcon,
   UnderlineIcon,
   Undo2Icon,
@@ -80,7 +74,6 @@ import {
 import { DesktopDynamicIslandChrome } from "@/features/desktop-shell/components/DesktopAppearanceIsland"
 import { DesktopElementInspector, DesktopTransformSection } from "@/features/desktop-shell/components/DesktopElementInspector"
 import type { DesktopAppearanceSnapshot } from "@/features/desktop-shell/model/appearance"
-import { DRAFTING_KEYBOARD_SHORTCUT_GROUPS } from "@/features/workspace/model/keyboard-shortcuts"
 import {
   DRAFTING_FONT_REGISTRY,
   getDraftingFontCssFamily,
@@ -149,8 +142,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Kbd } from "@/components/kbd"
-import { CalligraphText } from "@/components/ui/calligraph-text"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   DesktopInspectorOptionGridScrollArea,
@@ -258,52 +249,6 @@ type DesktopToolbarTool = {
 }
 
 export type DesktopThemeMode = "dark" | "light"
-
-type DesktopShortcutPlatform = "apple" | "windows"
-
-const DESKTOP_SHORTCUT_PLATFORMS: Array<{
-  icon: typeof WindowsOldIcon
-  label: string
-  value: DesktopShortcutPlatform
-}> = [
-  { icon: AppleIcon, label: "Apple", value: "apple" },
-  { icon: WindowsOldIcon, label: "Windows", value: "windows" },
-]
-
-function getDefaultShortcutPlatform(): DesktopShortcutPlatform {
-  if (typeof navigator === "undefined") {
-    return "windows"
-  }
-
-  const platform =
-    (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ??
-    navigator.platform ??
-    ""
-  const userAgent = navigator.userAgent ?? ""
-  const platformSignature = `${platform} ${userAgent}`.toLowerCase()
-
-  return /mac|iphone|ipad|ipod/.test(platformSignature) ? "apple" : "windows"
-}
-
-function getShortcutKeyCombos(keys: string, platform: DesktopShortcutPlatform): string[][] {
-  if (keys === "Arrow keys") {
-    return [["↑"], ["↓"], ["←"], ["→"]]
-  }
-
-  if (keys === "Shift + Arrow") {
-    return [["Shift", "← ↑ ↓ →"]]
-  }
-
-  return keys.split(" / ").map((combo) =>
-    combo.split(" + ").map((key) => {
-      if (key === "Cmd/Ctrl") {
-        return platform === "apple" ? "⌘" : "Ctrl"
-      }
-
-      return key
-    }),
-  )
-}
 
 const DESKTOP_TOOLBAR_TOOLS: DesktopToolbarTool[] = [
   {
@@ -1237,28 +1182,18 @@ export function FloatingToolbar({
   controller,
   theme,
   onThemeChange,
-  onBack,
 }: {
   controller?: DesktopToolbarController
   theme?: DesktopThemeMode
   onThemeChange?: (theme: DesktopThemeMode) => void
-  onBack?: () => void
 } = {}) {
-  const [shortcutPlatform, setShortcutPlatform] = useState<DesktopShortcutPlatform>(
-    getDefaultShortcutPlatform,
-  )
   const model = useDesktopToolbarInspectorModel({ controller, theme, onThemeChange })
   const {
     actualActiveTool,
     actualDesktopTheme,
     activeToolConfig,
     onActiveToolChange,
-    onDesktopThemeChange,
   } = model
-
-  function handleDesktopThemeToggle() {
-    onDesktopThemeChange(actualDesktopTheme === "light" ? "dark" : "light")
-  }
 
   return (
     <TooltipProvider delayDuration={150}>
@@ -1276,24 +1211,29 @@ export function FloatingToolbar({
           className="pointer-events-none fixed top-5 right-5 left-[25rem] z-30 grid grid-cols-[1fr_auto_1fr] items-center gap-3 max-md:left-4 max-md:right-4 max-md:top-4"
           data-slot="desktop-top-chrome"
         >
-          <DesktopUtilityToolbar
-            data-slot="desktop-document-toolbar"
-            className="pointer-events-auto shrink-0 justify-self-start"
+          <div aria-hidden="true" className="pointer-events-none shrink-0 justify-self-start" />
+          <div
+            className={cn(
+              DESKTOP_UTILITY_TOOLBAR_SHELL_CLASS,
+              "pointer-events-auto justify-self-center",
+            )}
+            data-slot="desktop-dynamic-island"
+            data-toolbar-appearance="desktop-glass"
           >
-            {onBack ? (
-              <DesktopUtilityToolbarButton
-                aria-label="Back to studio hub"
-                data-slot="desktop-back-trigger"
-                onClick={onBack}
-              >
-                <HugeiconsIcon
-                  icon={ArrowLeft01Icon}
-                  size={16}
-                  color="currentColor"
-                  strokeWidth={1.8}
-                />
-              </DesktopUtilityToolbarButton>
-            ) : null}
+            <DesktopDynamicIslandChrome
+              appearance={controller?.appearanceSnapshot}
+              layerLabel={
+                controller?.selectedAppearanceLayer
+                  ? `${controller.selectedAppearanceLayer.kind.charAt(0).toUpperCase()}${controller.selectedAppearanceLayer.kind.slice(1)}`
+                  : null
+              }
+              onPatch={controller?.onAppearancePatch}
+            />
+          </div>
+          <DesktopUtilityToolbar
+            data-slot="desktop-utility-toolbar"
+            className="pointer-events-auto shrink-0 justify-self-end"
+          >
             <DesktopUtilityToolbarButton
               aria-label="Save"
               data-slot="desktop-save-trigger"
@@ -1319,179 +1259,6 @@ export function FloatingToolbar({
               />
             </DesktopUtilityToolbarButton>
           </DesktopUtilityToolbar>
-          <div
-            className={cn(
-              DESKTOP_UTILITY_TOOLBAR_SHELL_CLASS,
-              "pointer-events-auto justify-self-center",
-            )}
-            data-slot="desktop-dynamic-island"
-            data-toolbar-appearance="desktop-glass"
-          >
-            <DesktopDynamicIslandChrome
-              appearance={controller?.appearanceSnapshot}
-              layerLabel={
-                controller?.selectedAppearanceLayer
-                  ? `${controller.selectedAppearanceLayer.kind.charAt(0).toUpperCase()}${controller.selectedAppearanceLayer.kind.slice(1)}`
-                  : null
-              }
-              onPatch={controller?.onAppearancePatch}
-            />
-          </div>
-          <DesktopUtilityToolbar
-            data-slot="desktop-utility-toolbar"
-            className="pointer-events-auto shrink-0 justify-self-end"
-          >
-          <Popover>
-            <PopoverTrigger asChild>
-              <DesktopUtilityToolbarButton
-                aria-label="Open keyboard shortcuts"
-                data-slot="desktop-keyboard-shortcuts-trigger"
-              >
-                <HugeiconsIcon
-                  icon={KeyboardIcon}
-                  size={16}
-                  color="currentColor"
-                  strokeWidth={1.8}
-                />
-              </DesktopUtilityToolbarButton>
-            </PopoverTrigger>
-            <PopoverContent
-              align="end"
-              data-slot="desktop-keyboard-shortcuts-popover"
-              sideOffset={12}
-              className="z-[20000] flex h-[min(44rem,calc(100dvh-7rem))] max-h-[min(44rem,calc(100dvh-7rem))] w-[min(27rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-[16px] border border-[#242424] bg-[#0a0a0a] p-0 text-white shadow-[0_24px_70px_rgba(0,0,0,0.35)]"
-              style={
-                {
-                  "--desktop-inspector-field-bg": "#141414",
-                  "--desktop-inspector-section-bg": "#181818",
-                } as CSSProperties
-              }
-            >
-              <div className="grid shrink-0 grid-cols-[auto_1fr_auto] items-center gap-3 px-4 pb-2 pt-3">
-                <div
-                  aria-label="Shortcut platform"
-                  className="inline-flex gap-1"
-                  data-slot="desktop-shortcut-platform-toggle"
-                  role="group"
-                >
-                  {DESKTOP_SHORTCUT_PLATFORMS.map((platform) => {
-                    const isSelected = shortcutPlatform === platform.value
-
-	                    return (
-	                      <button
-	                        aria-label={`Use ${platform.label} shortcuts`}
-	                        aria-pressed={isSelected}
-	                        className={cn(
-	                          "grid size-7 cursor-pointer place-items-center rounded-full text-white/52 transition hover:bg-[#262626] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35",
-	                          isSelected && "bg-[#303030] text-white",
-	                        )}
-	                        data-platform={platform.value}
-	                        data-slot="desktop-shortcut-platform-button"
-	                        key={platform.value}
-	                        onClick={() => setShortcutPlatform(platform.value)}
-	                        type="button"
-	                      >
-	                        <HugeiconsIcon
-	                          icon={platform.icon}
-	                          size={15}
-	                          color="currentColor"
-	                          strokeWidth={1.8}
-	                        />
-	                      </button>
-	                    )
-                  })}
-                </div>
-                <div className="min-w-0 text-center">
-                  <h2 className="text-sm font-semibold text-white/92">Shortcuts</h2>
-                </div>
-                <span aria-hidden="true" className="w-[3.75rem]" />
-              </div>
-              <ScrollArea
-                chevron
-                cueSize="comfortable"
-                className="h-full min-h-0 flex-1"
-                data-slot="desktop-keyboard-shortcuts-scroll-area"
-                scrollFade
-                viewportClassName="px-3 pb-3 pt-1"
-              >
-                <div data-slot="desktop-keyboard-shortcuts-scroll">
-                  <div className="grid gap-2.5">
-                    {DRAFTING_KEYBOARD_SHORTCUT_GROUPS.map((group) => (
-                      <DesktopInspectorSection className={cn("p-2.5")} key={group.title}
-                        aria-label={`${group.title} shortcuts`}>
-                        <h3 className="px-1 pb-1.5 text-[11px] font-semibold text-white/64">
-                          {group.title}
-                        </h3>
-                        <div className="grid gap-1">
-                          {group.shortcuts.map(([keys, description]) => (
-                            <div
-                              key={keys}
-                              className="grid grid-cols-[minmax(10rem,12.5rem)_1fr] items-center gap-3 rounded-[7px] px-2 py-1.5 text-[12px]"
-                            >
-                              <span
-                                className="flex min-w-0 flex-wrap items-center gap-1.5 justify-self-start"
-                                data-slot="desktop-shortcut-keycaps"
-                              >
-                                {getShortcutKeyCombos(keys, shortcutPlatform).map((combo, comboIndex) => (
-                                  <span
-                                    className="inline-flex items-center gap-1"
-                                    key={`${keys}-${comboIndex}`}
-                                  >
-                                    {comboIndex > 0 ? (
-                                      <span className="px-0.5 text-[10px] font-semibold text-white/34">
-                                        /
-                                      </span>
-                                    ) : null}
-                                    {combo.map((key, keyIndex) => (
-                                      <span
-                                        className="inline-flex items-center gap-1"
-                                        key={`${keys}-${comboIndex}-${keyIndex}`}
-                                      >
-                                        {keyIndex > 0 ? (
-                                          <span
-                                            aria-hidden="true"
-                                            className="text-[11px] font-semibold text-white/38"
-                                            data-slot="desktop-shortcut-combo-separator"
-                                          >
-                                            +
-                                          </span>
-                                        ) : null}
-                                        <Kbd
-                                          className="border-[#333333] bg-[#202020] text-white/88 shadow-[0_3px_6px_-2px_rgba(0,0,0,0.25)]"
-                                          data-slot="desktop-shortcut-kbd"
-                                          size="md"
-                                          variant="sculpted"
-                                        >
-                                          <CalligraphText>{key}</CalligraphText>
-                                        </Kbd>
-                                      </span>
-                                    ))}
-                                  </span>
-                                ))}
-                              </span>
-                              <span className="min-w-0 text-white/58">{description}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </DesktopInspectorSection>
-                    ))}
-                  </div>
-                </div>
-              </ScrollArea>
-            </PopoverContent>
-          </Popover>
-          <DesktopUtilityToolbarButton
-            aria-label={`Switch to ${actualDesktopTheme === "light" ? "dark" : "light"} mode`}
-            data-slot="desktop-theme-toggle"
-            onClick={handleDesktopThemeToggle}
-          >
-            {actualDesktopTheme === "light" ? (
-              <MoonIcon className="size-3.5" />
-            ) : (
-              <SunIcon className="size-3.5" />
-            )}
-          </DesktopUtilityToolbarButton>
-        </DesktopUtilityToolbar>
         </div>
         <div
           data-slot="desktop-action-toolbar"
@@ -2342,12 +2109,48 @@ export function DesktopThemeStyles() {
 
 function DesktopInspectorHeader({
   title,
+  canRedo,
+  canUndo,
+  onRedo,
+  onUndo,
+  showHistoryActions = false,
 }: {
   title: string
+  canRedo?: boolean
+  canUndo?: boolean
+  onRedo?: () => void
+  onUndo?: () => void
+  showHistoryActions?: boolean
 }) {
+  if (!showHistoryActions) {
+    return (
+      <div className={DESKTOP_INSPECTOR_HEADER_CLASS}>
+        <h2 className={DESKTOP_INSPECTOR_PANEL_TITLE_CLASS}>{title}</h2>
+      </div>
+    )
+  }
+
   return (
-    <div className={DESKTOP_INSPECTOR_HEADER_CLASS}>
-      <h2 className={DESKTOP_INSPECTOR_PANEL_TITLE_CLASS}>{title}</h2>
+    <div className="grid min-w-0 grid-cols-[2.25rem_1fr_2.25rem] items-center px-4 py-3">
+      <button
+        aria-label="Undo"
+        className={DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS}
+        disabled={!canUndo || !onUndo}
+        type="button"
+        onClick={onUndo}
+      >
+        <Undo2Icon className="size-3.5" />
+      </button>
+      <h2 className={cn(DESKTOP_INSPECTOR_PANEL_TITLE_CLASS, "text-center")}>{title}</h2>
+      <button
+        aria-label="Redo"
+        className={cn(DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS, "justify-self-end")}
+        disabled={!canRedo || !onRedo}
+        type="button"
+        onClick={onRedo}
+      >
+        <Redo2Icon className="size-3.5" />
+      </button>
     </div>
   )
 }
@@ -3849,20 +3652,28 @@ function DesktopPatternPalettePresetButton({
 }
 
 function DesktopContentInspector({
+  canRedo,
+  canUndo,
   contentType,
   contentValues,
   desktopTheme,
   encodedValue,
   onContentTypeChange,
   onContentValueChange,
+  onRedo,
+  onUndo,
   validation,
 }: {
+  canRedo?: boolean
+  canUndo?: boolean
   contentType: QrInputType
   contentValues: StaticQrContentValues
   desktopTheme: DesktopThemeMode
   encodedValue: string
   onContentTypeChange: (type: QrInputType) => void
   onContentValueChange: (field: string, value: StaticQrContentValue) => void
+  onRedo?: () => void
+  onUndo?: () => void
   validation: ReturnType<typeof validateStaticQrContent>
 }) {
   const [collectionId, setCollectionId] = useState<DesktopContentCollectionId>("popular")
@@ -3893,7 +3704,14 @@ function DesktopContentInspector({
 
   return (
     <div data-slot="desktop-content-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <DesktopInspectorHeader title="Content" />
+      <DesktopInspectorHeader
+        canRedo={canRedo}
+        canUndo={canUndo}
+        onRedo={onRedo}
+        onUndo={onUndo}
+        showHistoryActions
+        title="Content"
+      />
 
       <DesktopInspectorScrollArea>
         <DesktopInspectorSection dataSlot="desktop-content-type-section">
@@ -5927,6 +5745,8 @@ export function DesktopFloatingInspector({
         />
       ) : activeTool === "content" ? (
         <DesktopContentInspector
+          canRedo={controller?.canRedo}
+          canUndo={controller?.canUndo}
           contentType={actualContentType}
           contentValues={actualContentValues}
           desktopTheme={actualDesktopTheme}
@@ -5934,6 +5754,8 @@ export function DesktopFloatingInspector({
           validation={actualContentValidation}
           onContentTypeChange={onContentTypeChange}
           onContentValueChange={onContentValueChange}
+          onRedo={controller?.onRedo}
+          onUndo={controller?.onUndo}
         />
       ) : activeTool === "pattern" ? (
         <DesktopPatternInspector

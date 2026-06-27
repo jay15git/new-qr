@@ -1374,7 +1374,18 @@ describe("WorkspaceSurface", () => {
       "Add text on canvas",
       "Add content",
       "Layer appearance",
+      "Open keyboard shortcuts",
+      "Switch to light mode",
     ])
+    const utilityToolbar = getRequiredElement(surface.container, '[data-slot="desktop-utility-toolbar"]')
+    expect(surface.container.querySelector('[data-slot="desktop-document-toolbar"]')).toBeNull()
+    expect(Array.from(utilityToolbar.querySelectorAll("button")).map((button) => button.getAttribute("aria-label"))).toEqual([
+      "Save",
+      "Download",
+    ])
+    expect(utilityToolbar.querySelector('[data-slot="desktop-keyboard-shortcuts-trigger"]')).toBeNull()
+    expect(utilityToolbar.querySelector('[data-slot="desktop-theme-toggle"]')).toBeNull()
+    expect(composeToolbar.querySelector('[data-slot="desktop-keyboard-shortcuts-trigger"]')).not.toBeNull()
 	    const actionToolbar = getRequiredElement(surface.container, '[data-slot="desktop-action-toolbar"]')
 	    expect(actionToolbar.getAttribute("data-toolbar-appearance")).toBe("desktop-glass")
 	    expect(actionToolbar.querySelector('button[aria-label="Switch to light mode"]')).toBeNull()
@@ -1383,45 +1394,50 @@ describe("WorkspaceSurface", () => {
 	      "Undo",
 	      "Redo",
 	    ])
-	    expect(getRequiredElement(surface.container, 'button[aria-label="Switch to light mode"]').getAttribute("data-slot")).toBe("desktop-theme-toggle")
+	    expect(getRequiredElement(composeToolbar, '[data-slot="desktop-theme-toggle"]').getAttribute("aria-label")).toBe("Switch to light mode")
     const resizeToolbar = getRequiredElement(surface.container, '[data-slot="desktop-resize-toolbar"]')
     expect(resizeToolbar.parentElement?.className).toContain("bottom-4")
     expect(resizeToolbar.parentElement?.className).toContain("right-5")
+    expect(composeToolbar.parentElement?.className).toContain("top-1/2")
+    expect(composeToolbar.parentElement?.className).toContain("-translate-y-1/2")
+    expect(resizeToolbar.parentElement).not.toBe(composeToolbar.parentElement)
+    expect(resizeToolbar.className).toContain("flex-col")
+    expect(resizeToolbar.className).toContain("min-w-12")
     expect(resizeToolbar.getAttribute("data-toolbar-appearance")).toBe("desktop-glass")
-    expect(resizeToolbar.className).toContain("min-h-12")
-    expect(resizeToolbar.className).toContain("px-2.5")
+    expect(resizeToolbar.className).toContain("px-1")
     expect(getRequiredElement(resizeToolbar, 'button[aria-label="Decrease canvas size"]').className).toContain("size-9")
-    expect(getRequiredElement(resizeToolbar, 'button[aria-label="Choose canvas size"]').className).toContain("h-9")
     expect(getRequiredElement(resizeToolbar, 'button[aria-label="Increase canvas size"]').className).toContain("size-9")
-    expect(resizeToolbar.textContent).toContain("100%")
+    expect(resizeToolbar.querySelector('button[aria-label^="Choose canvas size"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="desktop-zoom-popover"]')).toBeNull()
+    expect(Array.from(resizeToolbar.querySelectorAll("button")).map((button) => button.getAttribute("aria-label"))).toEqual([
+      "Increase canvas size",
+      "Decrease canvas size",
+    ])
 
     act(() => {
       activateElement(getRequiredElement(surface.container, 'button[aria-label="Increase canvas size"]'))
     })
 
-    expect(resizeToolbar.textContent).toContain("110%")
+    act(() => {
+      activateElement(getRequiredElement(surface.container, 'button[aria-label="Decrease canvas size"]'))
+    })
+  })
+
+  it("opens keyboard shortcuts from the compose toolbar", () => {
+    const surface = renderDesktopOverlaySurface({ paneToolbarVariant: "desktop-zoom" })
+    const composeToolbar = getRequiredElement(surface.container, '[data-slot="dashboard-compose-toolbar"]')
+    const shortcutsTrigger = getRequiredElement(
+      composeToolbar,
+      '[data-slot="desktop-keyboard-shortcuts-trigger"]',
+    )
+
+    expect(document.body.querySelector('[data-slot="desktop-keyboard-shortcuts-popover"]')).toBeNull()
 
     act(() => {
-      const zoomButton = getRequiredElement(surface.container, 'button[aria-label="Choose canvas size"]')
-      zoomButton.dispatchEvent(new MouseEvent("dblclick", { bubbles: true, button: 0 }))
+      activateElement(shortcutsTrigger)
     })
 
-    expect(resizeToolbar.textContent).toContain("100%")
-
-    act(() => {
-      activateElement(getRequiredElement(surface.container, 'button[aria-label="Choose canvas size"]'))
-    })
-
-    const zoomPopover = getRequiredElement(surface.container, '[data-slot="desktop-zoom-popover"]')
-    expect(zoomPopover.textContent).toContain("10%")
-    expect(zoomPopover.textContent).toContain("400%")
-    expect(getRequiredElement(zoomPopover, 'button[aria-checked="true"]').textContent).toContain("100%")
-
-    act(() => {
-      activateElement(getRequiredElement(zoomPopover, 'button[aria-checked="false"]:last-of-type'))
-    })
-
-    expect(resizeToolbar.textContent).toContain("400%")
+    expect(document.body.querySelector('[data-slot="desktop-keyboard-shortcuts-popover"]')).not.toBeNull()
   })
 
   it("wires desktop bottom toolbar layer controls into the active drafting layer state", () => {
@@ -4284,17 +4300,34 @@ function renderSurface({
   }
 }
 
+function DesktopOverlayTestHarness(props: ComponentProps<typeof WorkspaceSurface>) {
+  const [desktopTheme, setDesktopTheme] = useState<"dark" | "light">(
+    props.desktopTheme ?? "dark",
+  )
+
+  return (
+    <WorkspaceSurface
+      {...props}
+      desktopTheme={desktopTheme}
+      onDesktopThemeChange={setDesktopTheme}
+      renderOverlay={(controller) => (
+        <FloatingToolbar
+          controller={controller}
+          onThemeChange={setDesktopTheme}
+          theme={desktopTheme}
+        />
+      )}
+    />
+  )
+}
+
 function renderDesktopOverlaySurface(props: ComponentProps<typeof WorkspaceSurface> = {}) {
   const container = document.createElement("div")
   const root = createRoot(container)
 
   act(() => {
     root.render(
-      <WorkspaceSurface
-        chrome="canvas-only"
-        renderOverlay={(controller) => <FloatingToolbar controller={controller} />}
-        {...props}
-      />,
+      <DesktopOverlayTestHarness chrome="canvas-only" {...props} />,
     )
   })
 

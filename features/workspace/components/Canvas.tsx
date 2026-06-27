@@ -36,9 +36,15 @@ import type { DraftingCardState } from "@/features/workspace/model/card-state"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
 import {
   DESKTOP_CANVAS_GLASS_TOOLBAR_SHELL_CLASS,
+  DESKTOP_CANVAS_GLASS_TOOLBAR_VERTICAL_SHELL_CLASS,
   DESKTOP_COMPOSE_TOOLBAR_ICON_BUTTON_CLASS,
   DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS,
 } from "@/features/desktop-shell/components/DesktopUtilityToolbar"
+import {
+  DesktopKeyboardShortcutsTrigger,
+  DesktopThemeToggleButton,
+} from "@/features/desktop-shell/components/DesktopChromeControls"
+import type { DesktopThemeMode } from "@/features/desktop-shell/components/FloatingToolbar"
 import { Pane, type DraftingLayerMenuAction } from "@/features/workspace/components/Pane"
 import { InsertMenu } from "@/features/workspace/components/InsertMenu"
 import { getQrLayout } from "@/features/workspace/model/layout-engine"
@@ -110,7 +116,6 @@ const MIN_PREVIEW_ZOOM = 0.1
 const MAX_PREVIEW_ZOOM = 4
 const PREVIEW_ZOOM_STEP = 0.1
 const WHEEL_ZOOM_SENSITIVITY = 0.001
-const DESKTOP_ZOOM_PRESETS = [0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4] as const
 
 const COMPOSE_TOOLBAR_NEUTRAL_ICON_BUTTON_CLASS =
   "h-7 w-7 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)] [&_svg]:size-3.5"
@@ -173,6 +178,8 @@ type CanvasProps = {
   selectedLayerId?: string | null
   selectedLayerIds?: string[]
   toolbarVariant?: DraftingPaneToolbarVariant
+  desktopTheme?: DesktopThemeMode
+  onDesktopThemeChange?: (theme: DesktopThemeMode) => void
 }
 
 function groupPanes<T>(panes: T[], groups: number[]) {
@@ -829,6 +836,8 @@ export function Canvas({
   selectedLayerId,
   selectedLayerIds,
   toolbarVariant = "default",
+  desktopTheme = "dark",
+  onDesktopThemeChange,
 }: CanvasProps) {
   const [zoomLevels, setZoomLevels] = useState<Record<string, number>>({})
   const [panOffsets, setPanOffsets] = useState<DraftingPanePanOffsets>({})
@@ -837,7 +846,6 @@ export function Canvas({
   const [draggingPaneId, setDraggingPaneId] = useState<string | null>(null)
   const [snapTargetPaneId, setSnapTargetPaneId] = useState<string | null>(null)
   const [panelLayouts, setPanelLayouts] = useState<DraftingPanelLayouts>({})
-  const [desktopZoomPopoverOpen, setDesktopZoomPopoverOpen] = useState(false)
   const draggingPaneIdRef = useRef<string | null>(null)
   const isPortrait = useSyncExternalStore(
     subscribePortrait,
@@ -868,13 +876,6 @@ export function Canvas({
     }))
   }, [])
 
-  const handleActiveZoomChange = useCallback((nextZoom: number) => {
-    setZoomLevels((current) => ({
-      ...current,
-      [activePaneId]: clampPreviewZoom(nextZoom),
-    }))
-  }, [activePaneId])
-
   const handleResetView = useCallback(() => {
     setZoomLevels((current) => ({
       ...current,
@@ -893,7 +894,8 @@ export function Canvas({
     }))
   }, [])
 
-  const zoomPercent = `${Math.round(activeZoom * 100)}%`
+  const zoomLevel = Math.round(activeZoom * 100)
+  const zoomPercent = `${zoomLevel}%`
   const isDesktopZoomToolbar = toolbarVariant === "desktop-zoom"
   const activeInteractionTool = activeCanvasTool === "pan"
     ? "pan"
@@ -1142,98 +1144,22 @@ export function Canvas({
           )}
         </div>
 
-        {isDesktopZoomToolbar ? (
-          <div className="pointer-events-none absolute bottom-4 right-5 z-[60] flex justify-end max-md:right-4">
-            <div
-              data-slot="desktop-resize-toolbar"
-              data-toolbar-appearance="desktop-glass"
-              className={cn("pointer-events-auto", DESKTOP_CANVAS_GLASS_TOOLBAR_SHELL_CLASS)}
-            >
-              <button
-                aria-label="Decrease canvas size"
-                className={DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS}
-                disabled={activeZoom <= MIN_PREVIEW_ZOOM}
-                type="button"
-                onClick={handleZoomOut}
-              >
-                <MinusIcon className="size-3.5" strokeWidth={2.6} />
-              </button>
-              <Popover open={desktopZoomPopoverOpen} onOpenChange={setDesktopZoomPopoverOpen}>
-                <PopoverTrigger asChild>
-	                  <button
-	                    aria-label="Choose canvas size"
-	                    className="h-9 min-w-[3.25rem] cursor-pointer rounded-full px-2 text-center text-[0.9375rem] font-semibold tracking-normal text-white transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
-	                    type="button"
-                    onClick={() => setDesktopZoomPopoverOpen((open) => !open)}
-                    onDoubleClick={() => {
-                      handleResetView()
-                      setDesktopZoomPopoverOpen(false)
-                    }}
-                  >
-                    {zoomPercent}
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent
-                  align="center"
-                  side="top"
-                  sideOffset={10}
-                  data-slot="desktop-zoom-popover"
-                  className="w-48 rounded-[20px] border border-white/[0.12] bg-black/70 p-2 text-white/84 shadow-[0_24px_64px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
-                >
-                  <div className="grid gap-0.5" role="menu" aria-label="Canvas size presets">
-                    {DESKTOP_ZOOM_PRESETS.map((preset) => {
-                      const isSelected = Math.round(activeZoom * 100) === Math.round(preset * 100)
-
-                      return (
-                        <button
-                          key={preset}
-                          aria-checked={isSelected}
-                          className="grid h-9 cursor-pointer grid-cols-[1.125rem_1fr] items-center rounded-[10px] px-2 text-left text-[0.9375rem] font-semibold text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
-                          role="menuitemradio"
-                          type="button"
-                          onClick={() => {
-                            handleActiveZoomChange(preset)
-                            setDesktopZoomPopoverOpen(false)
-                          }}
-                        >
-                          <span className="grid place-items-center">
-                            {isSelected ? <CheckIcon className="size-3.5" strokeWidth={2.6} /> : null}
-                          </span>
-                          <span>{Math.round(preset * 100)}%</span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </PopoverContent>
-              </Popover>
-              <button
-                aria-label="Increase canvas size"
-                className={DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS}
-                disabled={activeZoom >= MAX_PREVIEW_ZOOM}
-                type="button"
-                onClick={handleZoomIn}
-              >
-                <PlusIcon className="size-3.5" strokeWidth={2.3} />
-              </button>
-            </div>
-          </div>
-        ) : null}
-
         <div
           className={cn(
-            "pointer-events-none absolute bottom-4 z-[60] flex justify-center",
+            "pointer-events-none absolute z-[60] flex",
             isDesktopZoomToolbar
-              ? "inset-x-5 px-2 sm:inset-x-6 md:left-[23.75rem] md:right-0 md:px-0"
-              : "inset-x-5 px-2 sm:inset-x-6 lg:inset-x-8",
+              ? "right-5 top-1/2 max-md:right-4 -translate-y-1/2 flex-col items-end"
+              : "bottom-4 justify-center inset-x-5 px-2 sm:inset-x-6 lg:inset-x-8",
           )}
         >
           <div
             data-slot="dashboard-compose-toolbar"
             data-toolbar-appearance={isDesktopZoomToolbar ? "desktop-glass" : "neutral"}
             className={cn(
-              "pointer-events-auto inline-flex max-w-full flex-wrap items-center justify-center gap-1 rounded-[10px] bg-[var(--drafting-panel-bg-active)] px-2 py-1.5",
-              isDesktopZoomToolbar &&
-                DESKTOP_CANVAS_GLASS_TOOLBAR_SHELL_CLASS,
+              "pointer-events-auto max-w-full flex-wrap justify-center",
+              isDesktopZoomToolbar
+                ? DESKTOP_CANVAS_GLASS_TOOLBAR_VERTICAL_SHELL_CLASS
+                : "inline-flex items-center gap-1 rounded-[10px] bg-[var(--drafting-panel-bg-active)] px-2 py-1.5",
             )}
           >
             {!isDesktopZoomToolbar ? (
@@ -1545,8 +1471,65 @@ export function Canvas({
               <DesktopLayerSettingsToolbar controls={desktopLayerToolbarControls} />
             ) : null}
 
+            {isDesktopZoomToolbar && onDesktopThemeChange ? (
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex">
+                      <DesktopKeyboardShortcutsTrigger popoverSide="left" variant="glass" />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>Keyboard shortcuts</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DesktopThemeToggleButton
+                      theme={desktopTheme}
+                      onToggle={() =>
+                        onDesktopThemeChange(desktopTheme === "light" ? "dark" : "light")
+                      }
+                      variant="glass"
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {desktopTheme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+                  </TooltipContent>
+                </Tooltip>
+              </>
+            ) : null}
+
           </div>
         </div>
+
+        {isDesktopZoomToolbar ? (
+          <div className="pointer-events-none absolute bottom-4 right-5 z-[60] flex justify-end max-md:right-4">
+            <div
+              data-slot="desktop-resize-toolbar"
+              data-toolbar-appearance="desktop-glass"
+              className={cn("pointer-events-auto", DESKTOP_CANVAS_GLASS_TOOLBAR_VERTICAL_SHELL_CLASS)}
+            >
+              <button
+                aria-label="Increase canvas size"
+                className={DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS}
+                disabled={activeZoom >= MAX_PREVIEW_ZOOM}
+                type="button"
+                onClick={handleZoomIn}
+              >
+                <PlusIcon className="size-3.5" strokeWidth={2.3} />
+              </button>
+              <button
+                aria-label="Decrease canvas size"
+                className={DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS}
+                disabled={activeZoom <= MIN_PREVIEW_ZOOM}
+                type="button"
+                onClick={handleZoomOut}
+              >
+                <MinusIcon className="size-3.5" strokeWidth={2.6} />
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
     </TooltipProvider>
   )

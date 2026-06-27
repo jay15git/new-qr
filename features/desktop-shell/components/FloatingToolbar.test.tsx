@@ -117,112 +117,29 @@ describe("FloatingToolbar", () => {
     const surface = await renderPrototype()
     const prototype = surface.container.querySelector('[data-slot="desktop-floating-toolbar-root"]')
     const actionToolbar = surface.container.querySelector('[data-slot="desktop-action-toolbar"]')
-    const themeToggle = getRequiredButton(surface.container, "Switch to light mode")
+    const utilityToolbar = surface.container.querySelector('[data-slot="desktop-utility-toolbar"]')
 
     expect(prototype?.getAttribute("data-desktop-theme")).toBe("dark")
     expect(actionToolbar).not.toBeNull()
     expect(actionToolbar?.querySelector('button[aria-label="Switch to light mode"]')).toBeNull()
+    expect(utilityToolbar?.querySelector('[data-slot="desktop-theme-toggle"]')).toBeNull()
     expect(Array.from(actionToolbar?.querySelectorAll("button") ?? []).map((button) => button.getAttribute("aria-label"))).toEqual([
       "Reset defaults",
       "Undo",
       "Redo",
     ])
-    expect(getRequiredButton(surface.container, "Switch to light mode").getAttribute("data-slot")).toBe("desktop-theme-toggle")
-
-    await clickButton(themeToggle)
-
-    expect(prototype?.getAttribute("data-desktop-theme")).toBe("light")
-    expect(getRequiredButton(surface.container, "Switch to dark mode")).not.toBeNull()
   })
 
-  it("opens desktop keyboard shortcuts from the top-right utility toolbar", async () => {
-    Object.defineProperty(navigator, "platform", {
-      configurable: true,
-      value: "Win32",
-    })
+  it("places save and download in the top-right utility toolbar", async () => {
     const surface = await renderPrototype()
     const utilityToolbar = surface.container.querySelector('[data-slot="desktop-utility-toolbar"]')
-    const shortcutsTrigger = getRequiredButton(surface.container, "Open keyboard shortcuts")
 
-    expect(utilityToolbar?.contains(shortcutsTrigger)).toBe(true)
-    expect(document.body.querySelector('[data-slot="desktop-keyboard-shortcuts-popover"]')).toBeNull()
-
-    await clickButton(shortcutsTrigger)
-
-    const popover = document.body.querySelector('[data-slot="desktop-keyboard-shortcuts-popover"]')
-    const source = readFileSync(
-      resolve(process.cwd(), "features/desktop-shell/components/FloatingToolbar.tsx"),
-      "utf8",
-    )
-    const platformToggle = popover?.querySelector('[data-slot="desktop-shortcut-platform-toggle"]')
-    const scrollArea = popover?.querySelector('[data-slot="desktop-keyboard-shortcuts-scroll-area"]')
-    const scrollViewport = popover?.querySelector('[data-slot="desktop-keyboard-shortcuts-scroll"]')
-    const windowsButton = popover?.querySelector<HTMLButtonElement>(
-      '[data-slot="desktop-shortcut-platform-button"][data-platform="windows"]',
-    )
-    const appleButton = popover?.querySelector<HTMLButtonElement>(
-      '[data-slot="desktop-shortcut-platform-button"][data-platform="apple"]',
-    )
-    const keycaps = Array.from(
-      popover?.querySelectorAll('[data-slot="desktop-shortcut-kbd"]') ?? [],
-    )
-    const keycapLabels = keycaps.map((keycap) => keycap.textContent)
-    const comboSeparators = Array.from(
-      popover?.querySelectorAll('[data-slot="desktop-shortcut-combo-separator"]') ?? [],
-    ).map((separator) => separator.textContent)
-
-    expect(popover).not.toBeNull()
-    expect(platformToggle).not.toBeNull()
-    expect(scrollArea).not.toBeNull()
-    expect(scrollViewport).not.toBeNull()
-    expect(scrollArea?.querySelector('[data-slot="scroll-area-viewport"]')).not.toBeNull()
-    expect(scrollArea?.querySelector('[aria-hidden="true"] svg')).not.toBeNull()
-    expect(popover?.className).toContain("h-[min(44rem,calc(100dvh-7rem))]")
-    expect(popover?.className).toContain("w-[min(27rem,calc(100vw-1rem))]")
-    expect(popover?.className).toContain("bg-[#0a0a0a]")
-    expect(popover?.className).not.toContain("bg-black/72")
-    expect(popover?.className).not.toContain("backdrop-blur")
-    expect(source).toContain("background: #ffffff !important;")
-    expect(source).toContain("--desktop-inspector-section-bg\": \"#181818\"")
-    expect(scrollArea?.className).toContain("h-full")
-    expect(popover?.innerHTML).not.toContain("border-b border-white/[0.08]")
-    expect(platformToggle?.className).not.toContain("bg-white")
-    expect(platformToggle?.className).not.toContain("border")
-    expect(windowsButton).not.toBeNull()
-    expect(appleButton).not.toBeNull()
-    expect(windowsButton?.getAttribute("aria-label")).toBe("Use Windows shortcuts")
-    expect(appleButton?.getAttribute("aria-label")).toBe("Use Apple shortcuts")
-    expect(windowsButton?.textContent).toBe("")
-    expect(appleButton?.textContent).toBe("")
-    expect(windowsButton?.getAttribute("aria-pressed")).toBe("true")
-    expect(appleButton?.getAttribute("aria-pressed")).toBe("false")
-    expect(popover?.textContent).toContain("Shortcuts")
-    expect(popover?.textContent).not.toContain("Keyboard")
-    expect(popover?.textContent).not.toContain("Arrow keys")
-    expect(popover?.textContent).not.toContain("Cmd/Ctrl + C")
-    expect(keycapLabels).toContain("↑")
-    expect(keycapLabels).toContain("↓")
-    expect(keycapLabels).toContain("←")
-    expect(keycapLabels).toContain("→")
-    expect(keycapLabels).toContain("← ↑ ↓ →")
-    expect(keycapLabels).toContain("Ctrl")
-    expect(keycapLabels).toContain("C")
-    expect(keycapLabels).toContain("Delete")
-    expect(keycaps[0]?.className).toContain("min-h-6")
-    expect(comboSeparators).toContain("+")
-    expect(popover?.textContent).toContain("Lock/unlock selected layers")
-
-    await clickButton(appleButton as HTMLButtonElement)
-
-    const updatedKeycaps = Array.from(
-      popover?.querySelectorAll('[data-slot="desktop-shortcut-kbd"]') ?? [],
-    ).map((keycap) => keycap.textContent?.replace(/\s+/g, "") ?? "")
-
-    expect(windowsButton?.getAttribute("aria-pressed")).toBe("false")
-    expect(appleButton?.getAttribute("aria-pressed")).toBe("true")
-    expect(popover?.querySelector('[aria-label="⌘"]')).not.toBeNull()
-    expect(popover?.textContent).toContain("⌘")
-    expect(updatedKeycaps.filter((label) => label.includes("⌘")).length).toBeGreaterThan(0)
+    expect(surface.container.querySelector('[data-slot="desktop-document-toolbar"]')).toBeNull()
+    expect(getRequiredButton(utilityToolbar as HTMLElement, "Save")).not.toBeNull()
+    expect(getRequiredButton(utilityToolbar as HTMLElement, "Download")).not.toBeNull()
+    expect(utilityToolbar?.querySelector('[data-slot="desktop-keyboard-shortcuts-trigger"]')).toBeNull()
+    expect(utilityToolbar?.querySelector('[data-slot="desktop-theme-toggle"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="dashboard-compose-toolbar"]')).toBeNull()
   })
 
   it("wires undo and redo through the top-right desktop action toolbar", async () => {
@@ -241,19 +158,17 @@ describe("FloatingToolbar", () => {
       },
     })
     const actionToolbar = surface.container.querySelector('[data-slot="desktop-action-toolbar"]')
-    const documentToolbar = surface.container.querySelector('[data-slot="desktop-document-toolbar"]')
     const utilityToolbar = surface.container.querySelector('[data-slot="desktop-utility-toolbar"]')
 
     expect(actionToolbar?.className).toContain("min-h-12")
     const topChrome = surface.container.querySelector('[data-slot="desktop-top-chrome"]')
     expect(topChrome?.className).toContain("left-[25rem]")
     expect(topChrome?.className).toContain("top-5")
-    expect(documentToolbar?.className).toContain("min-h-12")
-    expect(getRequiredButton(documentToolbar as HTMLElement, "Save").className).toContain("size-9")
-    expect(getRequiredButton(documentToolbar as HTMLElement, "Download").className).toContain("size-9")
-    expect(getRequiredButton(utilityToolbar as HTMLElement, "Open keyboard shortcuts").className).toContain("size-9")
-    expect(getRequiredButton(utilityToolbar as HTMLElement, "Switch to light mode").className).toContain("size-9")
-    expect(utilityToolbar?.querySelector('[data-slot="desktop-save-trigger"]')).toBeNull()
+    expect(utilityToolbar?.className).toContain("min-h-12")
+    expect(getRequiredButton(utilityToolbar as HTMLElement, "Save").className).toContain("size-9")
+    expect(getRequiredButton(utilityToolbar as HTMLElement, "Download").className).toContain("size-9")
+    expect(utilityToolbar?.querySelector('[data-slot="desktop-save-trigger"]')).not.toBeNull()
+    expect(utilityToolbar?.querySelector('[data-slot="desktop-keyboard-shortcuts-trigger"]')).toBeNull()
     expect(getRequiredButton(actionToolbar as HTMLElement, "Reset defaults").className).toContain("size-9")
     expect(getRequiredButton(actionToolbar as HTMLElement, "Undo").className).toContain("size-9")
     expect(getRequiredButton(actionToolbar as HTMLElement, "Redo").className).toContain("size-9")
@@ -262,7 +177,7 @@ describe("FloatingToolbar", () => {
       getRequiredButton(actionToolbar as HTMLElement, "Reset defaults").dispatchEvent(new MouseEvent("click", { bubbles: true }))
       getRequiredButton(actionToolbar as HTMLElement, "Undo").dispatchEvent(new MouseEvent("click", { bubbles: true }))
       getRequiredButton(actionToolbar as HTMLElement, "Redo").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-      getRequiredButton(documentToolbar as HTMLElement, "Download").dispatchEvent(new MouseEvent("click", { bubbles: true }))
+      getRequiredButton(utilityToolbar as HTMLElement, "Download").dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
     expect(onResetDefaults).toHaveBeenCalledTimes(1)
