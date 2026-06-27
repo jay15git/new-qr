@@ -12,6 +12,52 @@ import {
   createDefaultQrStudioState,
   setSquareQrSize,
 } from "@/features/qr-code/model/state"
+import {
+  CORNER_DOT_STYLE_OPTIONS,
+  CORNER_SQUARE_STYLE_OPTIONS,
+} from "@/features/qr-code/styles/style-options"
+
+const TEST_FRAME_GRADIENT = {
+  enabled: true,
+  type: "linear" as const,
+  rotation: Math.PI / 4,
+  colorStops: [
+    { offset: 0, color: "#ff0000" },
+    { offset: 1, color: "#0000ff" },
+  ],
+}
+
+const TEST_DOT_GRADIENT = {
+  enabled: true,
+  type: "linear" as const,
+  rotation: Math.PI / 2,
+  colorStops: [
+    { offset: 0, color: "#00ff00" },
+    { offset: 1, color: "#ffff00" },
+  ],
+}
+
+function getGradientFillSizes(markup: string, layer: string) {
+  const document = new DOMParser().parseFromString(markup, "image/svg+xml")
+
+  return Array.from(document.querySelectorAll(`[data-qr-layer="${layer}"]`)).map((element) => ({
+    height: Number.parseFloat(element.getAttribute("height") ?? "0"),
+    width: Number.parseFloat(element.getAttribute("width") ?? "0"),
+  }))
+}
+
+function getSvgNumCells(markup: string) {
+  const document = new DOMParser().parseFromString(markup, "image/svg+xml")
+  const svg = document.documentElement
+  const viewBox = svg.getAttribute("viewBox")
+
+  if (!viewBox) {
+    return null
+  }
+
+  const parts = viewBox.trim().split(/[\s,]+/).map(Number.parseFloat)
+  return parts[2] ?? null
+}
 
 describe("dashboard qr svg helpers", () => {
   it("forces svg rendering for the dashboard surface without mutating the original state", () => {
@@ -103,6 +149,119 @@ describe("dashboard qr svg helpers", () => {
       }
     },
   )
+
+  it("applies corner frame gradients to finder outer patterns", () => {
+    const state = createDefaultQrStudioState()
+    state.finderPatternOuterGradient = TEST_FRAME_GRADIENT
+
+    const markup = renderDashboardQrSvgMarkup(state)
+    const frameFillSizes = getGradientFillSizes(markup, "corner-frame-gradient-fill")
+    const numCells = getSvgNumCells(markup)
+
+    expect(markup).toContain('data-qr-layer="corner-frame-gradient"')
+    expect(markup).toContain('id="corners-square-color-')
+    expect(markup).toContain('fill="url(\'#corners-square-color-')
+    expect(frameFillSizes).toHaveLength(3)
+    expect(frameFillSizes.every((size) => size.width === 7 && size.height === 7)).toBe(true)
+    expect(numCells).not.toBeNull()
+    expect(frameFillSizes.some((size) => size.width === numCells)).toBe(false)
+    expect(markup).toMatch(
+      /<path[^>]+data-testid="finder-patterns-outer"[^>]+opacity="0"/,
+    )
+  })
+
+  it("applies corner dot gradients to finder inner patterns", () => {
+    const state = createDefaultQrStudioState()
+    state.finderPatternInnerGradient = TEST_DOT_GRADIENT
+
+    const markup = renderDashboardQrSvgMarkup(state)
+    const dotFillSizes = getGradientFillSizes(markup, "corner-dot-gradient-fill")
+
+    expect(markup).toContain('data-qr-layer="corner-dot-gradient"')
+    expect(markup).toContain('id="corners-dot-color-')
+    expect(markup).toContain('fill="url(\'#corners-dot-color-')
+    expect(dotFillSizes).toHaveLength(3)
+    expect(dotFillSizes.every((size) => size.width === 4.5 && size.height === 4.5)).toBe(true)
+    expect(markup).toMatch(
+      /<rect[^>]+data-testid="finder-patterns-inner"[^>]+opacity="0"/,
+    )
+  })
+
+  it.each(CORNER_SQUARE_STYLE_OPTIONS.map((option) => option.value))(
+    "localizes corner frame gradients for %s outer styles",
+    (style) => {
+      const state = createDefaultQrStudioState()
+      state.finderPatternOuterSettings.type = style
+      state.finderPatternOuterGradient = TEST_FRAME_GRADIENT
+
+      const markup = renderDashboardQrSvgMarkup(state)
+      const hasOuterPattern = markup.includes('data-testid="finder-patterns-outer"')
+
+      if (!hasOuterPattern) {
+        expect(markup).not.toContain('data-qr-layer="corner-frame-gradient"')
+        return
+      }
+
+      const frameFillSizes = getGradientFillSizes(markup, "corner-frame-gradient-fill")
+
+      expect(frameFillSizes).toHaveLength(3)
+      expect(frameFillSizes.every((size) => size.width === 7 && size.height === 7)).toBe(true)
+      expect(markup).toContain('fill="url(\'#corners-square-color-')
+    },
+  )
+
+  it.each(CORNER_DOT_STYLE_OPTIONS.map((option) => option.value))(
+    "localizes corner dot gradients for %s inner styles",
+    (style) => {
+      const state = createDefaultQrStudioState()
+      state.finderPatternInnerSettings.type = style
+      state.finderPatternInnerGradient = TEST_DOT_GRADIENT
+
+      const markup = renderDashboardQrSvgMarkup(state)
+      const hasInnerPattern = markup.includes('data-testid="finder-patterns-inner"')
+
+      if (!hasInnerPattern) {
+        expect(markup).not.toContain('data-qr-layer="corner-dot-gradient"')
+        return
+      }
+
+      const dotFillSizes = getGradientFillSizes(markup, "corner-dot-gradient-fill")
+
+      expect(dotFillSizes).toHaveLength(3)
+      expect(dotFillSizes.every((size) => size.width === 4.5 && size.height === 4.5)).toBe(true)
+      expect(markup).toContain('fill="url(\'#corners-dot-color-')
+    },
+  )
+
+  it("keeps module gradients isolated when corner frame gradients are enabled", () => {
+    const state = createDefaultQrStudioState()
+    state.dotsColorMode = "gradient"
+    state.dataModulesGradient = {
+      enabled: true,
+      type: "linear",
+      rotation: Math.PI / 2,
+      colorStops: [
+        { offset: 0, color: "#101010" },
+        { offset: 1, color: "#fafafa" },
+      ],
+    }
+    state.finderPatternOuterGradient = {
+      enabled: true,
+      type: "linear",
+      rotation: 0,
+      colorStops: [
+        { offset: 0, color: "#ff0000" },
+        { offset: 1, color: "#0000ff" },
+      ],
+    }
+
+    const markup = renderDashboardQrSvgMarkup(state)
+
+    expect(markup).toContain('data-qr-layer="dot-gradient"')
+    expect(markup).toContain('data-qr-layer="corner-frame-gradient"')
+    expect(markup).toContain('fill="url(\'#dot-gradient-definition\')"')
+    expect(markup).toContain('fill="url(\'#corners-square-color-')
+  })
 
   it("applies module gradients without repainting finder patterns", () => {
     const state = createDefaultQrStudioState()

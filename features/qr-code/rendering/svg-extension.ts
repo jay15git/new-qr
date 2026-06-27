@@ -72,6 +72,34 @@ export function buildQrExtension(state: QrStudioState) {
     extensions.push(createDotsPaletteExtension(state))
   }
 
+  if (state.finderPatternOuterGradient.enabled) {
+    extensions.push(
+      createFinderPatternGradientExtension(
+        "finder-patterns-outer",
+        state.finderPatternOuterGradient,
+        state.margin,
+        {
+          gradientIdPrefix: "corners-square-color-",
+          groupLayer: "corner-frame-gradient",
+        },
+      ),
+    )
+  }
+
+  if (state.finderPatternInnerGradient.enabled) {
+    extensions.push(
+      createFinderPatternGradientExtension(
+        "finder-patterns-inner",
+        state.finderPatternInnerGradient,
+        state.margin,
+        {
+          gradientIdPrefix: "corners-dot-color-",
+          groupLayer: "corner-dot-gradient",
+        },
+      ),
+    )
+  }
+
   if (extensions.length === 0) {
     return null
   }
@@ -98,8 +126,12 @@ export function getQrExtensionKey(state: QrStudioState) {
     backgroundShapeOptions: getAssetValue(state.backgroundImage)
       ? null
       : state.backgroundShapeOptions,
-    finderPatternInnerGradient: null,
-    finderPatternOuterGradient: null,
+    finderPatternInnerGradient: state.finderPatternInnerGradient.enabled
+      ? state.finderPatternInnerGradient
+      : null,
+    finderPatternOuterGradient: state.finderPatternOuterGradient.enabled
+      ? state.finderPatternOuterGradient
+      : null,
     customDotShape: null,
     dataModulesGradient: state.dotsColorMode === "gradient" ? state.dataModulesGradient : null,
     dotsColorMode: state.dotsColorMode,
@@ -2926,6 +2958,228 @@ function getBackgroundShapeGradientKey(
   }
 
   return state.backgroundGradient
+}
+
+type FinderCornerKind = "inner" | "outer"
+
+type FinderCornerRegion = {
+  height: number
+  width: number
+  x: number
+  y: number
+}
+
+export function getQrSvgNumCells(svg: SVGElement) {
+  const viewBox = svg.getAttribute("viewBox")
+
+  if (viewBox) {
+    const parts = viewBox
+      .trim()
+      .split(/[\s,]+/)
+      .map((value) => Number.parseFloat(value))
+
+    const width = parts[2]
+    const height = parts[3]
+
+    if (
+      width !== undefined &&
+      height !== undefined &&
+      Number.isFinite(width) &&
+      Number.isFinite(height) &&
+      width > 0 &&
+      height > 0
+    ) {
+      return Math.min(width, height)
+    }
+  }
+
+  const width = getNumericAttribute(svg, "width")
+  const height = getNumericAttribute(svg, "height")
+
+  if (
+    width !== null &&
+    height !== null &&
+    width > 0 &&
+    height > 0
+  ) {
+    return Math.min(width, height)
+  }
+
+  return null
+}
+
+export function getFinderCornerRegions(
+  margin: number,
+  numCells: number,
+  kind: FinderCornerKind,
+): FinderCornerRegion[] {
+  const moduleCount = numCells - margin * 2
+  const outerSize = 7
+  const innerSize = 3
+  const innerInset = 2
+  const innerPadding = kind === "inner" ? 0.75 : 0
+
+  if (moduleCount <= outerSize || margin < 0) {
+    return []
+  }
+
+  if (kind === "outer") {
+    return [
+      { height: outerSize, width: outerSize, x: margin, y: margin },
+      {
+        height: outerSize,
+        width: outerSize,
+        x: moduleCount + margin - outerSize,
+        y: margin,
+      },
+      {
+        height: outerSize,
+        width: outerSize,
+        x: margin,
+        y: moduleCount + margin - outerSize,
+      },
+    ]
+  }
+
+  const size = innerSize + innerPadding * 2
+  const inset = innerInset - innerPadding
+  const innerX = moduleCount + margin - outerSize + inset
+  const innerY = moduleCount + margin - outerSize + inset
+
+  return [
+    { height: size, width: size, x: margin + inset, y: margin + inset },
+    { height: size, width: size, x: innerX, y: margin + inset },
+    { height: size, width: size, x: margin + inset, y: innerY },
+  ]
+}
+
+function createFinderPatternGradientExtension(
+  testId: "finder-patterns-inner" | "finder-patterns-outer",
+  gradient: StudioGradient,
+  margin: number,
+  {
+    gradientIdPrefix,
+    groupLayer,
+  }: {
+    gradientIdPrefix: string
+    groupLayer: string
+  },
+): QrSvgExtensionFunction {
+  const kind: FinderCornerKind =
+    testId === "finder-patterns-outer" ? "outer" : "inner"
+
+  return (svg) => {
+    const document = svg.ownerDocument
+
+    if (!document) {
+      return
+    }
+
+    svg.querySelectorAll(`[data-qr-layer="${groupLayer}"]`).forEach((node) => {
+      node.remove()
+    })
+
+    const patterns = Array.from(svg.querySelectorAll(`[data-testid="${testId}"]`)).filter(
+      isSvgElementLike,
+    )
+
+    if (patterns.length === 0) {
+      return
+    }
+
+    const numCells = getQrSvgNumCells(svg)
+    const cornerRegions = numCells === null ? [] : getFinderCornerRegions(margin, numCells, kind)
+
+    if (cornerRegions.length === 0) {
+      return
+    }
+
+    const group = document.createElementNS(SVG_NS, "g")
+    const defs = document.createElementNS(SVG_NS, "defs")
+
+    group.setAttribute("data-qr-layer", groupLayer)
+    group.appendChild(defs)
+
+    let overlaysCreated = 0
+
+    for (const region of cornerRegions) {
+      const gradientId = `${gradientIdPrefix}${Math.round(region.x)}-${Math.round(region.y)}-1`
+      const gradientElement = createBackgroundShapeGradient(svg, gradient, {
+        height: region.height,
+        id: gradientId,
+        layer: `${groupLayer}-definition`,
+        width: region.width,
+        x: region.x,
+        y: region.y,
+      })
+
+      if (!gradientElement) {
+        continue
+      }
+
+      const clipPathId = `clip-path-${gradientId}`
+      const clipPath = document.createElementNS(SVG_NS, "clipPath")
+
+      clipPath.setAttribute("id", clipPathId)
+      clipPath.setAttribute("data-qr-layer", `${groupLayer}-clip`)
+
+      for (const pattern of patterns) {
+        const clonedPattern = pattern.cloneNode(true) as SVGElement
+        clonedPattern.removeAttribute("clip-path")
+        clonedPattern.removeAttribute("opacity")
+        clipPath.appendChild(clonedPattern)
+      }
+
+      defs.appendChild(gradientElement)
+      defs.appendChild(clipPath)
+
+      const gradientFill = document.createElementNS(SVG_NS, "rect")
+      gradientFill.setAttribute("x", formatSvgNumber(region.x))
+      gradientFill.setAttribute("y", formatSvgNumber(region.y))
+      gradientFill.setAttribute("width", formatSvgNumber(region.width))
+      gradientFill.setAttribute("height", formatSvgNumber(region.height))
+      gradientFill.setAttribute("clip-path", `url('#${clipPathId}')`)
+      gradientFill.setAttribute("fill", `url('#${gradientId}')`)
+      gradientFill.setAttribute("data-qr-layer", `${groupLayer}-fill`)
+      group.appendChild(gradientFill)
+      overlaysCreated += 1
+    }
+
+    if (overlaysCreated !== cornerRegions.length) {
+      group.remove()
+      return
+    }
+
+    for (const pattern of patterns) {
+      pattern.setAttribute("opacity", "0")
+    }
+
+    svg.insertBefore(group, findDotMatrixLayerAnchor(svg))
+  }
+}
+
+function getSvgViewBoxRegion(svg: SVGElement) {
+  const viewBox = svg.getAttribute("viewBox")
+
+  if (viewBox) {
+    const [x = 0, y = 0, width = 0, height = 0] = viewBox
+      .trim()
+      .split(/[\s,]+/)
+      .map((value) => Number.parseFloat(value))
+
+    if (width > 0 && height > 0) {
+      return { height, width, x, y }
+    }
+  }
+
+  const width = getNumericAttribute(svg, "width")
+  const height = getNumericAttribute(svg, "height")
+
+  if (width !== null && height !== null && width > 0 && height > 0) {
+    return { height, width, x: 0, y: 0 }
+  }
+
+  return null
 }
 
 export function createAlignedCornerGradientExtension(

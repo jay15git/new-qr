@@ -33,15 +33,11 @@ export function toReactQrCodeProps(state: QrStudioState): ReactQRCodeProps {
       style: state.dataModulesSettings.type,
     },
     finderPatternInnerSettings: {
-      color: state.finderPatternInnerGradient.enabled
-        ? undefined
-        : state.finderPatternInnerSettings.color,
+      color: state.finderPatternInnerSettings.color,
       style: state.finderPatternInnerSettings.type,
     },
     finderPatternOuterSettings: {
-      color: state.finderPatternOuterGradient.enabled
-        ? undefined
-        : state.finderPatternOuterSettings.color,
+      color: state.finderPatternOuterSettings.color,
       style: state.finderPatternOuterSettings.type,
     },
     gradient: undefined,

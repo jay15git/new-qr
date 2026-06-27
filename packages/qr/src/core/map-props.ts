@@ -24,10 +24,6 @@ export function portablePropsToReactQrProps(props: NewQrCodeProps): ReactQRCodeP
 
   const dotsColor =
     props.colorMode === "solid" || !props.colorMode ? props.foreground : undefined
-  const finderInnerGradientActive =
-    props.finderInnerGradient !== undefined && props.finderInnerGradient !== "none"
-  const finderOuterGradientActive =
-    props.finderOuterGradient !== undefined && props.finderOuterGradient !== "none"
 
   return {
     background:
@@ -44,15 +40,11 @@ export function portablePropsToReactQrProps(props: NewQrCodeProps): ReactQRCodeP
       style: (props.module ?? "square") as DataModulesStyle,
     },
     finderPatternInnerSettings: {
-      color: finderInnerGradientActive
-        ? undefined
-        : (props.finderInnerColor ?? props.foreground),
+      color: props.finderInnerColor ?? props.foreground,
       style: (props.finderInner ?? "square") as FinderPatternInnerStyle,
     },
     finderPatternOuterSettings: {
-      color: finderOuterGradientActive
-        ? undefined
-        : (props.finderOuterColor ?? props.foreground),
+      color: props.finderOuterColor ?? props.foreground,
       style: (props.finderOuter ?? "square") as FinderPatternOuterStyle,
     },
     imageSettings: props.logo?.src

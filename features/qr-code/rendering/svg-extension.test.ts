@@ -4,7 +4,9 @@ import {
   buildQrExtension,
   createAlignedCornerGradientExtension,
   createDotMatrixAnimationExtension,
+  getFinderCornerRegions,
   getQrExtensionKey,
+  getQrSvgNumCells,
 } from "./svg-extension"
 import {
   createDefaultQrStudioState,
@@ -352,6 +354,29 @@ function getGradientRelativeCoordinates(
 }
 
 describe("qr rendering helpers", () => {
+  it("derives three localized outer finder regions from qr geometry", () => {
+    expect(getFinderCornerRegions(12, 57, "outer")).toEqual([
+      { height: 7, width: 7, x: 12, y: 12 },
+      { height: 7, width: 7, x: 38, y: 12 },
+      { height: 7, width: 7, x: 12, y: 38 },
+    ])
+  })
+
+  it("derives three localized inner finder regions from qr geometry", () => {
+    expect(getFinderCornerRegions(12, 57, "inner")).toEqual([
+      { height: 4.5, width: 4.5, x: 13.25, y: 13.25 },
+      { height: 4.5, width: 4.5, x: 39.25, y: 13.25 },
+      { height: 4.5, width: 4.5, x: 13.25, y: 39.25 },
+    ])
+  })
+
+  it("reads qr num cells from rendered svg view boxes", () => {
+    const svg = createStubElement("svg")
+    svg.setAttribute("viewBox", "0 0 57 57")
+
+    expect(getQrSvgNumCells(svg as unknown as SVGElement)).toBe(57)
+  })
+
   it("keeps logo-only changes on the upstream image path instead of the extension pipeline", () => {
     const defaultState = createDefaultQrStudioState()
     const stateWithLogo = createDefaultQrStudioState()
@@ -585,7 +610,7 @@ describe("qr rendering helpers", () => {
   })
 
 
-  it("keeps the extension key stable when only ReactQRCode-owned corner gradients change", () => {
+  it("changes the extension key when corner gradients are enabled", () => {
     const defaultState = createDefaultQrStudioState()
     const stateWithCornerGradient = createDefaultQrStudioState()
     stateWithCornerGradient.finderPatternOuterGradient = {
@@ -595,7 +620,7 @@ describe("qr rendering helpers", () => {
       type: "linear",
     }
 
-    expect(getQrExtensionKey(stateWithCornerGradient)).toBe(
+    expect(getQrExtensionKey(stateWithCornerGradient)).not.toBe(
       getQrExtensionKey(defaultState),
     )
   })
