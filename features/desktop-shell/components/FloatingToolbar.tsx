@@ -27,7 +27,6 @@ import {
   ItalicIcon,
   Redo2Icon,
   RotateCcwIcon,
-  ShieldCheckIcon,
   Settings,
   ShapesIcon,
   Sparkles,
@@ -228,6 +227,7 @@ import { PlayIcon } from "@/components/ui/play"
 import { ReceiptTextIcon } from "@/components/ui/receipt-text"
 import { cn } from "@/lib/utils"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
+import type { ScanSafetyResult } from "@/features/qr-code/scan-safety/types"
 
 type DesktopToolbarGroup = "QR" | "Add" | "Manage"
 export type DesktopToolbarToolId =
@@ -613,6 +613,7 @@ export type DesktopToolbarController = {
   exportDownloadError?: string | null
   onTextReset: () => void
   onTextSettingsChange: (patch: Partial<DesktopTextSettings>) => void
+  scanSafetyResult?: ScanSafetyResult
 }
 
 const DEFAULT_DESKTOP_DOTS_GRADIENT: StudioGradient = {
@@ -1234,6 +1235,7 @@ export function FloatingToolbar({
                   : null
               }
               onPatch={controller?.onAppearancePatch}
+              scanSafetyResult={controller?.scanSafetyResult}
             />
           </div>
           <DesktopUtilityToolbar
@@ -2612,17 +2614,6 @@ function DesktopCornersInspector({
               }
             />
 
-            <DesktopInspectorSection as="div" className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, "flex items-center justify-between gap-3 px-3 py-2.5")}>
-              <div className="flex min-w-0 items-center gap-2">
-                <ShieldCheckIcon className={cn("size-4 shrink-0", DESKTOP_INSPECTOR_FG_MUTED)} />
-                <div className="min-w-0">
-                  <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Scan Safety</p>
-                </div>
-              </div>
-              <span className="shrink-0 rounded-full bg-emerald-400/15 px-2 py-1 text-[10px] font-bold text-emerald-200">
-                Valid
-              </span>
-            </DesktopInspectorSection>
           </DesktopInspectorScrollArea>
         </div>
         {/* Variants: insert below this line */}
@@ -4088,18 +4079,6 @@ function DesktopPatternInspector({
               ) : null}
             </div>
           ) : null}
-        </DesktopInspectorSection>
-
-        <DesktopInspectorSection as="div" className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, "flex items-center justify-between gap-3 px-3 py-2.5")}>
-          <div className="flex min-w-0 items-center gap-2">
-            <ShieldCheckIcon className={cn("size-4 shrink-0", DESKTOP_INSPECTOR_FG_MUTED)} />
-            <div className="min-w-0">
-              <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Scan Safety</p>
-            </div>
-          </div>
-          <span className="shrink-0 rounded-full bg-emerald-400/15 px-2 py-1 text-[10px] font-bold text-emerald-200">
-            Valid
-          </span>
         </DesktopInspectorSection>
       </DesktopInspectorScrollArea>
 

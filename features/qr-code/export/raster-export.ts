@@ -2,6 +2,7 @@ import {
   createDashboardSurfaceQrState,
   renderDashboardQrSvgMarkup,
 } from "@/features/qr-code/rendering/qr-svg"
+import { rasterizeSvgMarkupToCanvas } from "@/features/qr-code/rendering/svg-raster"
 import {
   getQrRenderedDimensions,
   scaleQrBackgroundShapeOptions,
@@ -18,6 +19,7 @@ const DASHBOARD_RASTER_EXPORT_MAX_DIMENSION = 4096
 export type DashboardRasterExtension = Exclude<QrFileExtension, "svg">
 
 type DashboardRasterExportOptions = {
+  backgroundColor?: string
   extension: DashboardRasterExtension
   name: string
   qualityPercent: number
@@ -107,6 +109,7 @@ export function getLossyRasterEncoderQuality(qualityPercent: number) {
 }
 
 export async function downloadDashboardRasterExport({
+  backgroundColor,
   extension,
   name,
   qualityPercent,
@@ -114,6 +117,7 @@ export async function downloadDashboardRasterExport({
   targetSizePx,
 }: DashboardRasterExportOptions) {
   const result = await renderDashboardRasterExport({
+    backgroundColor,
     extension,
     qualityPercent,
     state,
@@ -163,6 +167,7 @@ export function formatDashboardExportFileSize(bytes: number) {
 }
 
 async function renderDashboardRasterExport({
+  backgroundColor,
   extension,
   qualityPercent,
   state,
@@ -184,23 +189,12 @@ async function renderDashboardRasterExport({
     height: Math.max(1, Math.round(clampQrSize(state.height) * renderScale)),
     width: Math.max(1, Math.round(clampQrSize(state.width) * renderScale)),
   }
-  const svgBlob = new Blob([renderDashboardQrSvgMarkup(exportState)], {
-    type: "image/svg+xml",
-  })
-  const image = await loadSvgBlobAsImage(svgBlob)
-  const canvas = document.createElement("canvas")
-
-  canvas.width = dimensions.width
-  canvas.height = dimensions.height
-
-  const context = canvas.getContext("2d")
-
-  if (!context) {
-    throw new Error("The browser could not create a canvas context for export.")
-  }
-
-  context.clearRect(0, 0, canvas.width, canvas.height)
-  context.drawImage(image, 0, 0, canvas.width, canvas.height)
+  const canvas = await rasterizeSvgMarkupToCanvas(
+    renderDashboardQrSvgMarkup(exportState),
+    dimensions.width,
+    dimensions.height,
+    backgroundColor ? { backgroundColor } : {},
+  )
 
   const mimeType = getMimeTypeForRasterExtension(extension)
   const encoderQuality =
@@ -228,23 +222,6 @@ function getMimeTypeForRasterExtension(extension: DashboardRasterExtension) {
     case "webp":
       return "image/webp"
   }
-}
-
-async function loadSvgBlobAsImage(blob: Blob) {
-  return await new Promise<HTMLImageElement>((resolve, reject) => {
-    const objectUrl = URL.createObjectURL(blob)
-    const image = new Image()
-
-    image.onload = () => {
-      URL.revokeObjectURL(objectUrl)
-      resolve(image)
-    }
-    image.onerror = () => {
-      URL.revokeObjectURL(objectUrl)
-      reject(new Error("The exported SVG could not be rasterized."))
-    }
-    image.src = objectUrl
-  })
 }
 
 async function canvasToBlob(

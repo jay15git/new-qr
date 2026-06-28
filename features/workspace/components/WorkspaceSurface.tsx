@@ -98,7 +98,6 @@ import {
 } from "@/features/workspace/components/LayerList"
 import {
   buildDraftingLayeredNodePayload,
-  downloadDraftingSvgExport,
 } from "@/features/workspace/export/layered-export"
 import {
   Canvas,
@@ -149,7 +148,7 @@ import {
   createIconstackIconDataUrl,
   createIconstackIconGradientDataUrl,
 } from "@/features/qr-code/assets/iconstack-svg"
-import type { QrBackgroundShapeId } from "@/features/qr-code/styles/background-shapes"
+import { useQrScanSafety } from "@/features/qr-code/hooks/useQrScanSafety"
 import {
   createBrandIconDataUrl,
   createBrandIconGradientDataUrl,
@@ -168,7 +167,6 @@ import {
   downloadDashboardQrNodeExport,
 } from "@/features/qr-code/export/batch-export"
 import {
-  downloadDashboardRasterExport,
   formatDashboardExportFileSize,
   isRasterExportExtension,
   measureDashboardRasterExport,
@@ -2761,20 +2759,25 @@ export function WorkspaceSurface({
           targetSizePx: selectedRasterExportTargetSizePx,
         })
       } else if (selectedDownloadTarget === "surface") {
-        if (isRasterExportExtension(selectedDownloadExtension)) {
-          await downloadDashboardRasterExport({
-            extension: selectedDownloadExtension,
-            name: DEFAULT_DOWNLOAD_NAME,
-            qualityPercent: draftingStudioState.rasterExportQualityPercent,
-            state: draftingStudioState,
-            targetSizePx: selectedRasterExportTargetSizePx,
-          })
-        } else {
-          await downloadDraftingSvgExport({
-            name: DEFAULT_DOWNLOAD_NAME,
-            state: draftingStudioState,
-          })
-        }
+        const activeCardState = selectedCardState
+        const activeLayers =
+          layerStateByNodeId[activeQrNodeId] ??
+          createDefaultDraftingLayers(activeQrNodeId, draftingStudioState, activeCardState)
+        const payload = await buildDraftingLayeredNodePayload({
+          cardState: activeCardState,
+          layers: activeLayers,
+          name: DEFAULT_DOWNLOAD_NAME,
+          nodeId: activeQrNodeId,
+          state: draftingStudioState,
+        })
+
+        await downloadDashboardQrNodeExport({
+          extension: selectedDownloadExtension,
+          name: DEFAULT_DOWNLOAD_NAME,
+          node: payload,
+          qualityPercent: draftingStudioState.rasterExportQualityPercent,
+          targetSizePx: selectedRasterExportTargetSizePx,
+        })
       }
 
     } catch (error) {
@@ -4195,6 +4198,11 @@ export function WorkspaceSurface({
     if (patch.target) setSelectedDownloadTarget(getDraftingDownloadTarget(patch.target))
   }
 
+  const scanSafetyResult = useQrScanSafety(draftingStudioState, {
+    cardFill: selectedCardState.fill,
+    contentIsValid: selectedContentValidation.isValid,
+  })
+
   const desktopController: DraftingWorkspaceController = {
     activeTool: desktopActiveTool,
     canRedo: canRedoDraftingWorkspace,
@@ -4220,6 +4228,7 @@ export function WorkspaceSurface({
     selectedTransformLayer,
     selectedAppearanceLayer,
     appearanceSnapshot: desktopAppearanceSnapshot,
+    scanSafetyResult,
     onInsertLayer: handleInsertLayer,
     onElementLayerPatch: (patch) => {
       if (selectedElementLayer) {

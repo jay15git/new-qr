@@ -16,9 +16,12 @@ import {
   AppearanceShadowControls,
   AppearanceStrokeControls,
 } from "@/features/desktop-shell/components/AppearancePopoverControls"
+import { DesktopScanSafetyPopover } from "@/features/desktop-shell/components/DesktopScanSafetyPopover"
 import { DESKTOP_INSPECTOR_FG_SECONDARY } from "@/features/desktop-shell/components/InspectorControls"
 import { DesktopUtilityToolbarButton } from "@/features/desktop-shell/components/DesktopUtilityToolbar"
 import type { DesktopAppearanceSnapshot } from "@/features/desktop-shell/model/appearance"
+import type { ScanSafetyResult } from "@/features/qr-code/scan-safety/types"
+import { DEFAULT_SCAN_SAFETY_RESULT } from "@/features/qr-code/scan-safety/types"
 import DynamicIsland from "@/components/smoothui/dynamic-island"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
@@ -183,10 +186,12 @@ export function DesktopDynamicIslandChrome({
   appearance,
   layerLabel,
   onPatch,
+  scanSafetyResult = DEFAULT_SCAN_SAFETY_RESULT,
 }: {
   appearance?: DesktopAppearanceSnapshot | null
   layerLabel?: string | null
   onPatch?: (patch: Partial<DraftingCanvasLayer>) => void
+  scanSafetyResult?: ScanSafetyResult
 }) {
   const hasAppearance = Boolean(appearance && layerLabel && onPatch)
 
@@ -194,13 +199,19 @@ export function DesktopDynamicIslandChrome({
     <DynamicIsland
       appearance="desktop-glass"
       idleContent={
-        hasAppearance ? (
-          <DesktopAppearanceIsland
-            appearance={appearance!}
-            layerLabel={layerLabel!}
-            onPatch={onPatch!}
-          />
-        ) : undefined
+        <div
+          className="flex min-w-0 items-center gap-1 px-1"
+          data-slot="desktop-dynamic-island-content"
+        >
+          {hasAppearance ? (
+            <DesktopAppearanceIsland
+              appearance={appearance!}
+              layerLabel={layerLabel!}
+              onPatch={onPatch!}
+            />
+          ) : null}
+          <DesktopScanSafetyPopover result={scanSafetyResult} />
+        </div>
       }
       showViewControls={false}
       className={cn(hasAppearance && "min-w-[12rem]")}

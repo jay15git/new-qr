@@ -19,7 +19,7 @@ describe("drafting layered export", () => {
   it("exports app-owned qr background shapes without qr-library backing artifacts", async () => {
     buildDashboardQrNodePayloadSpy.mockResolvedValue({
       markup:
-        '<svg width="240" height="240" viewBox="0 0 240 240"><defs><filter data-qr-layer="background-shape-blur-filter" id="background-shape-blur-filter"/><clipPath id="clip-path-background-color-0"><rect width="240" height="240"/></clipPath><clipPath id="clip-path-dot-color-0"><path d="M20 20h40v40H20z"/></clipPath></defs><path data-qr-layer="background-shape" d="M0 0h240v240H0z"/><rect width="240" height="240" clip-path="url(\'#clip-path-background-color-0\')" fill="#fff"/><path data-qr-layer="dot" clip-path="url(\'#clip-path-dot-color-0\')" d="M20 20h40v40H20z" fill="#111"/></svg>',
+        '<svg width="240" height="240" viewBox="0 0 240 240" data-testid="studio-markup"><defs><filter data-qr-layer="background-shape-blur-filter" id="background-shape-blur-filter"/><clipPath id="clip-path-background-color-0"><rect width="240" height="240"/></clipPath><clipPath id="clip-path-dot-color-0"><path d="M20 20h40v40H20z"/></clipPath></defs><path data-qr-layer="background-shape" d="M0 0h240v240H0z"/><rect width="240" height="240" clip-path="url(\'#clip-path-background-color-0\')" fill="#fff"/><path data-qr-layer="dot" clip-path="url(\'#clip-path-dot-color-0\')" d="M20 20h40v40H20z" fill="#111"/></svg>',
       naturalHeight: 240,
       naturalWidth: 240,
     })
@@ -63,7 +63,8 @@ describe("drafting layered export", () => {
       }),
     )
     expect(payload.originalSvgMarkup).toContain('data-drafting-qr-background="flower"')
-    expect(payload.originalSvgMarkup).toContain('data-testid="data-modules"')
+    expect(payload.originalSvgMarkup).toContain('data-testid="studio-markup"')
+    expect(payload.originalSvgMarkup).toContain('data-qr-layer="dot"')
     expect(payload.originalSvgMarkup).not.toContain('data-qr-layer="background-shape"')
     expect(payload.originalSvgMarkup).not.toContain("clip-path-background-color")
   })

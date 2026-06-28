@@ -392,7 +392,6 @@ describe("FloatingToolbar", () => {
     expect(inspector?.textContent).toContain("Module Pattern")
     expect(inspector?.textContent).toContain("Module Color")
     expect(inspector?.textContent).toContain("Patterns")
-    expect(inspector?.textContent).toContain("Scan Safety")
     expect(inspector?.textContent).not.toContain("Reset Pattern")
     expect(surface.container.querySelector('input[placeholder="Search patterns"]')).toBeNull()
   })
@@ -496,7 +495,6 @@ describe("FloatingToolbar", () => {
     expect(inspector?.textContent).toContain("Dot Color")
     expect(inspector?.querySelector('[data-slot="desktop-corner-frame-color"]')).not.toBeNull()
     expect(inspector?.querySelector('[data-slot="desktop-corner-dot-color"]')).not.toBeNull()
-    expect(inspector?.textContent).toContain("Valid")
     expect(inspector?.textContent).not.toContain("Reset Corners")
     expect(inspector?.textContent).not.toContain("Coming soon")
   })
@@ -1344,6 +1342,22 @@ describe("FloatingToolbar", () => {
     expect(surface.container.querySelector('[data-slot="desktop-appearance-blur-trigger"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="desktop-appearance-opacity-trigger"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="desktop-appearance-stroke-trigger"]')).toBeNull()
+  })
+
+  it("renders scan safety in the dynamic island", async () => {
+    const surface = await renderPrototype({
+      controller: {
+        scanSafetyResult: {
+          status: "invalid",
+          summary: "Not scannable",
+          expectedText: "https://example.com",
+          decodedText: null,
+        },
+      },
+    })
+
+    expect(surface.container.querySelector('[data-slot="desktop-scan-safety-trigger"]')).not.toBeNull()
+    expect(surface.container.textContent).toContain("Not scannable")
   })
 
   it("shows the iconstack search placeholder before a logo query is entered", async () => {

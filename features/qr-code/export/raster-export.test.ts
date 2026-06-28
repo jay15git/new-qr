@@ -24,6 +24,9 @@ describe("dashboard raster export helper", () => {
   let canvasContext: {
     clearRect: ReturnType<typeof vi.fn>
     drawImage: ReturnType<typeof vi.fn>
+    fillRect: ReturnType<typeof vi.fn>
+    fillStyle: string
+    imageSmoothingEnabled: boolean
   }
   let createdCanvases: Array<{ height: number; width: number }>
   let canvasToBlobSpy: ReturnType<typeof vi.fn>
@@ -35,6 +38,9 @@ describe("dashboard raster export helper", () => {
     canvasContext = {
       clearRect: vi.fn(),
       drawImage: vi.fn(),
+      fillRect: vi.fn(),
+      fillStyle: "",
+      imageSmoothingEnabled: true,
     }
     createdCanvases = []
     canvasToBlobSpy = vi.fn((callback: (blob: Blob | null) => void) => {
