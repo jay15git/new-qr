@@ -3,7 +3,6 @@
 import { useState, type ReactNode } from "react"
 import { CopyPlusIcon, FrameIcon, ImageIcon, TypeIcon } from "lucide-react"
 
-import { OptionCard } from "@/components/ui/option-card"
 import { Button } from "@/components/ui/button"
 import {
   Popover,
@@ -13,21 +12,14 @@ import {
 import { SecondaryButton } from "@/components/ui/secondary-button"
 import FileUpload from "@/components/vendor/kokonutui/file-upload"
 import { Input } from "@/components/ui/input"
+import { DraftingElementShapeOptionGrid } from "@/features/workspace/components/DraftingElementShapeOptionGrid"
 import {
   createDraftingImageLayer,
   createDraftingShapeLayer,
   createDraftingTextLayer,
   type DraftingElementShapeId,
 } from "@/features/workspace/model/layers"
-import { QR_BACKGROUND_SHAPES } from "@/features/qr-code/styles/background-shapes"
 import { cn } from "@/lib/utils"
-
-const INSERT_SHAPE_PRIMITIVES: Array<{ id: DraftingElementShapeId; label: string }> = [
-  { id: "rect", label: "Rectangle" },
-  { id: "ellipse", label: "Ellipse" },
-  { id: "line", label: "Line" },
-  { id: "arrow", label: "Arrow" },
-]
 
 const DESKTOP_INSERT_POPOVER_SHELL =
   "w-[min(18rem,calc(100vw-2rem))] rounded-[20px] border border-white/[0.12] bg-black/70 p-2 text-white/84 shadow-[0_24px_64px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
@@ -250,50 +242,11 @@ export function InsertMenu({
                 Back
               </Button>
             </div>
-            <div className="grid max-h-72 grid-cols-[repeat(auto-fit,minmax(84px,1fr))] gap-2 overflow-y-auto">
-              {INSERT_SHAPE_PRIMITIVES.map((shape) => (
-                <OptionCard
-                  appearance="drafting"
-                  checked={false}
-                  darkShadowTone="ink"
-                  key={shape.id}
-                  label={shape.label}
-                  labelClassName="drafting-type-option-label"
-                  name="drafting-insert-shape"
-                  onSelect={() => insertShape(shape.id)}
-                  size="compact"
-                  value={shape.id}
-                >
-                  <span className="grid size-full place-items-center text-[10px] font-semibold text-[var(--drafting-ink-muted)]">
-                    {shape.label}
-                  </span>
-                </OptionCard>
-              ))}
-              {QR_BACKGROUND_SHAPES.map((shape) => (
-                <OptionCard
-                  appearance="drafting"
-                  checked={false}
-                  darkShadowTone="ink"
-                  key={shape.id}
-                  label={shape.label}
-                  labelClassName="drafting-type-option-label"
-                  name="drafting-insert-shape"
-                  onSelect={() => insertShape(shape.id)}
-                  size="compact"
-                  value={shape.id}
-                >
-                  <span className="flex items-center justify-center [&_svg]:size-12">
-                    <svg
-                      aria-hidden="true"
-                      fill="none"
-                      viewBox={`0 0 ${shape.viewBox.width} ${shape.viewBox.height}`}
-                    >
-                      <path d={shape.path} fill="#E8E8E8" />
-                    </svg>
-                  </span>
-                </OptionCard>
-              ))}
-            </div>
+            <DraftingElementShapeOptionGrid
+              decorativeDataSlot="drafting-insert-decorative-shape-grid"
+              variant={isDesktopPopover ? "insert-desktop" : "insert-drafting"}
+              onSelect={insertShape}
+            />
           </div>
         ) : null}
 

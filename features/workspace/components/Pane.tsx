@@ -29,6 +29,7 @@ import { DraftingCardPaperShaderLayer } from "@/features/workspace/components/Ca
 import { getDraftingCardPatternStyle } from "@/features/workspace/model/card-patterns"
 import {
   createDefaultDraftingLayers,
+  DEFAULT_DRAFTING_SHAPE_LAYER,
   getDraftingMarqueeSelection,
   type DraftingLayerAlignAction,
   type DraftingLayerDistributeAction,
@@ -2160,6 +2161,7 @@ export const Pane = memo(function Pane({
       return (
         <div
           key={layer.id}
+          data-shape-id={layer.shapeId ?? DEFAULT_DRAFTING_SHAPE_LAYER.shapeId}
           data-slot="drafting-shape-layer"
           data-layer-id={layer.id}
           data-selected={isLayerSelected ? "true" : "false"}
@@ -2346,6 +2348,7 @@ export const Pane = memo(function Pane({
       return (
         <div
           key={layer.id}
+          data-shape-id={layer.shapeId ?? DEFAULT_DRAFTING_SHAPE_LAYER.shapeId}
           data-slot="drafting-shape-layer"
           data-layer-id={layer.id}
           data-selected={isLayerSelected ? "true" : "false"}

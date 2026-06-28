@@ -244,12 +244,26 @@ export function createDraftingShapeLayer(
   shapeId: DraftingElementShapeId = DEFAULT_DRAFTING_SHAPE_LAYER.shapeId,
   options: Partial<DraftingCanvasLayer> = {},
 ): DraftingCanvasLayer {
+  const resolvedShapeId =
+    typeof shapeId === "string"
+      ? normalizeElementShapeId(shapeId, DEFAULT_DRAFTING_SHAPE_LAYER.shapeId)
+      : DEFAULT_DRAFTING_SHAPE_LAYER.shapeId
+  const isStrokePrimitive =
+    resolvedShapeId === "line" || resolvedShapeId === "arrow"
+
   return patchDraftingCanvasLayer(
     {
       ...createFallbackLayer(nodeId, "shape"),
       ...options,
       kind: "shape",
-      shapeId,
+      shapeId: resolvedShapeId,
+      ...(isStrokePrimitive
+        ? {
+            fillMode: options.fillMode ?? "none",
+            stroke: options.stroke ?? options.fill ?? DEFAULT_DRAFTING_SHAPE_LAYER.fill,
+            strokeWidth: options.strokeWidth ?? 4,
+          }
+        : null),
     },
     {},
   )

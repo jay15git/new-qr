@@ -48,7 +48,10 @@ describe("DesktopElementInspector", () => {
     )
 
     expect(markup).toContain('data-slot="desktop-layer-shape-inspector"')
+    expect(markup).toContain('data-slot="desktop-layer-shape-fill-mode"')
+    expect(markup).toContain('data-slot="desktop-layer-shape-fill"')
     expect(markup).toContain('data-slot="desktop-layer-shape-options"')
+    expect(markup).toContain('data-slot="desktop-color-picker"')
     expect(markup).not.toContain('data-slot="drafting-shape-inspector"')
   })
 

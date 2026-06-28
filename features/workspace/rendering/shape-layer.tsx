@@ -27,8 +27,16 @@ function getShapeFillStyle(layer: DraftingCanvasLayer): CSSProperties {
   }
 
   return {
-    backgroundColor: layer.fill ?? "#E8E8E8",
+    backgroundColor: "transparent",
   }
+}
+
+function getShapePathFill(layer: DraftingCanvasLayer) {
+  if (layer.fillMode === "none") {
+    return "none"
+  }
+
+  return layer.fill ?? "#E8E8E8"
 }
 
 function renderPrimitiveShape(
@@ -125,7 +133,7 @@ export function DraftingShapeLayerContent({ layer }: { layer: DraftingCanvasLaye
         >
           <path
             d={definition.path}
-            fill={layer.fillMode === "none" ? "none" : (layer.fill ?? "#E8E8E8")}
+            fill={getShapePathFill(layer)}
             stroke={layer.stroke ?? "#171717"}
             strokeOpacity={(layer.strokeOpacity ?? 100) / 100}
             strokeWidth={layer.strokeWidth ?? 0}

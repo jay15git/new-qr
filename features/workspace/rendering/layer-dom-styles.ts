@@ -263,6 +263,6 @@ export function getDraftingShapeDomStyle(layer: DraftingCanvasLayer): Record<str
   }
 
   return {
-    backgroundColor: layer.fill ?? "#E8E8E8",
+    backgroundColor: "transparent",
   }
 }

@@ -6,7 +6,6 @@ import { OptionCard } from "@/components/ui/option-card"
 import {
   DEFAULT_DRAFTING_SHAPE_LAYER,
   type DraftingCanvasLayer,
-  type DraftingElementShapeId,
   type DraftingShapeFillMode,
 } from "@/features/workspace/model/layers"
 import {
@@ -16,14 +15,10 @@ import {
   InspectorNumberInput,
   InspectorToggleButton,
 } from "@/features/workspace/components/inspector/InspectorFields"
-import { QR_BACKGROUND_SHAPES } from "@/features/qr-code/styles/background-shapes"
-
-const DRAFTING_SHAPE_PRIMITIVES: Array<{ id: DraftingElementShapeId; label: string }> = [
-  { id: "rect", label: "Rectangle" },
-  { id: "ellipse", label: "Ellipse" },
-  { id: "line", label: "Line" },
-  { id: "arrow", label: "Arrow" },
-]
+import {
+  DRAFTING_ELEMENT_DECORATIVE_SHAPES,
+  DRAFTING_SHAPE_PRIMITIVES,
+} from "@/features/workspace/model/element-shapes"
 
 export function ShapeInspector({
   layer,
@@ -60,7 +55,7 @@ export function ShapeInspector({
             </span>
           </OptionCard>
         ))}
-        {QR_BACKGROUND_SHAPES.map((shape) => (
+        {DRAFTING_ELEMENT_DECORATIVE_SHAPES.map((shape) => (
           <OptionCard
             appearance="drafting"
             checked={shape.id === shapeId}

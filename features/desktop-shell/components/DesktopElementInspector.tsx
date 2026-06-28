@@ -26,6 +26,7 @@ import {
   desktopInspectorOptionGridItemClass,
   desktopInspectorOptionStackClass,
 } from "@/features/desktop-shell/components/InspectorControls"
+import { DesktopColorInputRow } from "@/features/desktop-shell/components/DesktopColorControls"
 import {
   DesktopInspectorColorRow,
   DesktopInspectorElasticSliderRow,
@@ -39,13 +40,12 @@ import {
   getDesktopLayerFontWeight,
   getNearestDesktopFontWeight,
 } from "@/features/desktop-shell/model/font-weight"
-import { QR_BACKGROUND_SHAPES } from "@/features/qr-code/styles/background-shapes"
+import { DesktopElementShapeOptionGrid } from "@/features/desktop-shell/components/DesktopElementShapeOptionGrid"
 import {
   DEFAULT_DRAFTING_IMAGE_LAYER,
   DEFAULT_DRAFTING_SHAPE_LAYER,
   DEFAULT_DRAFTING_TEXT_LAYER,
   type DraftingCanvasLayer,
-  type DraftingElementShapeId,
   type DraftingShapeFillMode,
   type DraftingTextAlign,
 } from "@/features/workspace/model/layers"
@@ -61,13 +61,6 @@ const DESKTOP_TEXT_ALIGN_OPTIONS: Array<{ label: string; value: DraftingTextAlig
   { label: "Left", value: "left" },
   { label: "Center", value: "center" },
   { label: "Right", value: "right" },
-]
-
-const DESKTOP_SHAPE_PRIMITIVES: Array<{ id: DraftingElementShapeId; label: string }> = [
-  { id: "rect", label: "Rectangle" },
-  { id: "ellipse", label: "Ellipse" },
-  { id: "line", label: "Line" },
-  { id: "arrow", label: "Arrow" },
 ]
 
 function getElementInspectorTitle(layer: DraftingCanvasLayer) {
@@ -458,48 +451,23 @@ function DesktopLayerShapeInspector({
   const fillMode = layer.fillMode ?? DEFAULT_DRAFTING_SHAPE_LAYER.fillMode
 
   return (
-    <DesktopInspectorSection
-      className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}
-      dataSlot="desktop-layer-shape-inspector"
-      resize
-    >
-      <DesktopInspectorLabel>Shape</DesktopInspectorLabel>
-      <div
-        aria-label="Shape options"
-        className={desktopInspectorOptionGridClass(2)}
-        data-slot="desktop-layer-shape-options"
-        role="radiogroup"
+    <>
+      <DesktopInspectorSection
+        className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}
+        dataSlot="desktop-layer-shape-inspector"
+        resize
       >
-        {DESKTOP_SHAPE_PRIMITIVES.map((shape) => (
-          <DesktopShapeOptionButton
-            key={shape.id}
-            label={shape.label}
-            selected={shape.id === shapeId}
-            onClick={() => onPatch({ shapeId: shape.id })}
-          />
-        ))}
-        {QR_BACKGROUND_SHAPES.map((shape) => (
-          <DesktopShapeOptionButton
-            key={shape.id}
-            label={shape.label}
-            preview={
-              <svg
-                aria-hidden="true"
-                className="size-8"
-                fill="none"
-                viewBox={`0 0 ${shape.viewBox.width} ${shape.viewBox.height}`}
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d={shape.path} fill={layer.fill ?? DEFAULT_DRAFTING_SHAPE_LAYER.fill} />
-              </svg>
-            }
-            selected={shape.id === shapeId}
-            onClick={() => onPatch({ shapeId: shape.id })}
-          />
-        ))}
-      </div>
+        <DesktopInspectorLabel>Shape</DesktopInspectorLabel>
+        <DesktopElementShapeOptionGrid
+          selectedShapeId={shapeId}
+          onSelect={(nextShapeId) => onPatch({ shapeId: nextShapeId })}
+        />
+      </DesktopInspectorSection>
 
-      <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
+      <DesktopInspectorSection
+        className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}
+        dataSlot="desktop-layer-shape-fill-mode"
+      >
         <p className={cn("mb-2", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Fill mode</p>
         <DesktopInspectorSegmentedControl
           columns={4}
@@ -511,47 +479,51 @@ function DesktopLayerShapeInspector({
           value={fillMode}
           onValueChange={(mode) => onPatch({ fillMode: mode as DraftingShapeFillMode })}
         />
-      </div>
+
+        {fillMode === "image" ? (
+          <div className={cn("mt-2.5 space-y-2", DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
+            <DesktopInspectorTextInput
+              aria-label="Shape fill image URL"
+              placeholder="https://example.com/texture.png"
+              value={layer.imageSource === "url" ? (layer.imageValue ?? "") : ""}
+              onChange={(event) =>
+                onPatch({
+                  imageSource: event.currentTarget.value ? "url" : "none",
+                  imageValue: event.currentTarget.value || undefined,
+                })
+              }
+            />
+            <FileUpload
+              acceptedFileTypes={["image/*"]}
+              className="mx-0 max-w-full"
+              onUploadError={() => undefined}
+              onUploadSuccess={(file) => {
+                onPatch({
+                  imageSource: "upload",
+                  imageValue: URL.createObjectURL(file),
+                })
+              }}
+              uploadDelay={0}
+            />
+          </div>
+        ) : null}
+      </DesktopInspectorSection>
 
       {fillMode === "solid" || fillMode === "gradient" ? (
-        <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
-          <DesktopInspectorColorRow
+        <DesktopInspectorSection
+          className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}
+          dataSlot="desktop-layer-shape-fill"
+        >
+          <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Fill</p>
+          <DesktopColorInputRow
+            ariaLabel="Shape fill color"
             label="Fill color"
             value={layer.fill ?? DEFAULT_DRAFTING_SHAPE_LAYER.fill}
             onChange={(fill) => onPatch({ fill })}
           />
-        </div>
+        </DesktopInspectorSection>
       ) : null}
-
-      {fillMode === "image" ? (
-        <div className={cn("space-y-2", DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
-          <DesktopInspectorTextInput
-            aria-label="Shape fill image URL"
-            placeholder="https://example.com/texture.png"
-            value={layer.imageSource === "url" ? (layer.imageValue ?? "") : ""}
-            onChange={(event) =>
-              onPatch({
-                imageSource: event.currentTarget.value ? "url" : "none",
-                imageValue: event.currentTarget.value || undefined,
-              })
-            }
-          />
-          <FileUpload
-            acceptedFileTypes={["image/*"]}
-            className="mx-0 max-w-full"
-            onUploadError={() => undefined}
-            onUploadSuccess={(file) => {
-              onPatch({
-                imageSource: "upload",
-                imageValue: URL.createObjectURL(file),
-              })
-            }}
-            uploadDelay={0}
-          />
-        </div>
-      ) : null}
-
-    </DesktopInspectorSection>
+    </>
   )
 }
 
@@ -636,35 +608,6 @@ function DesktopIconToggleButton({
       onClick={onClick}
     >
       {icon}
-    </button>
-  )
-}
-
-function DesktopShapeOptionButton({
-  label,
-  onClick,
-  preview,
-  selected,
-}: {
-  label: string
-  onClick: () => void
-  preview?: ReactNode
-  selected: boolean
-}) {
-  return (
-    <button
-      aria-label={`Use ${label} shape`}
-      aria-pressed={selected}
-      className={cn(
-        "flex h-10 min-w-0 items-center justify-center gap-2 px-2 text-[10px] font-semibold",
-        desktopInspectorOptionGridItemClass(),
-        DESKTOP_INSPECTOR_CONTROL_CLASS,
-        selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
-      )}
-      type="button"
-      onClick={onClick}
-    >
-      {preview ?? <span className="truncate">{label}</span>}
     </button>
   )
 }
