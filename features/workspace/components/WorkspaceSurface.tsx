@@ -585,6 +585,7 @@ export function WorkspaceSurface({
   const [selectedDotsPalette, setSelectedDotsPalette] = useState<string[]>([
     ...DEFAULT_DRAFTING_STUDIO_STATE.dotsPalette,
   ])
+  const [selectedDotsPalettePreset, setSelectedDotsPalettePreset] = useState<string | "custom">("Signal")
   const [selectedDotMatrixAnimation, setSelectedDotMatrixAnimation] =
     useState<QrDotMatrixAnimationOptions>({
       ...DEFAULT_DRAFTING_STUDIO_STATE.dotMatrixAnimation,
@@ -3754,6 +3755,7 @@ export function WorkspaceSurface({
     dotsColorMode: selectedDotsColorMode,
     dataModulesGradient: selectedDotsGradient,
     dotsPalette: selectedDotsPalette,
+    dotsPalettePreset: selectedDotsPalettePreset,
     dotsSolidColor: selectedDotColor,
     qrDotType: selectedDotType,
   }
@@ -3890,6 +3892,11 @@ export function WorkspaceSurface({
       setSelectedDotsColorMode("palette")
       setSelectedDotsPalette([...patch.dotsPalette])
     }
+    if (patch.dotsPalettePreset !== undefined) {
+      ensureDotsColorItemExpanded("palette")
+      setSelectedDotsColorMode("palette")
+      setSelectedDotsPalettePreset(patch.dotsPalettePreset)
+    }
   }
 
   function resetDesktopPatternSettings() {
@@ -3898,6 +3905,7 @@ export function WorkspaceSurface({
     setSelectedDotColor(DEFAULT_DRAFTING_STUDIO_STATE.dataModulesSettings.color)
     setSelectedDotsGradient(structuredClone(DEFAULT_DRAFTING_STUDIO_STATE.dataModulesGradient))
     setSelectedDotsPalette([...DEFAULT_DRAFTING_STUDIO_STATE.dotsPalette])
+    setSelectedDotsPalettePreset("Signal")
   }
 
   function updateDesktopLogoSettings(patch: DesktopLogoSettingsPatch) {

@@ -377,6 +377,7 @@ export type DesktopPatternSettings = {
   dotsColorMode: DotsColorMode
   dataModulesGradient: StudioGradient
   dotsPalette: string[]
+  dotsPalettePreset: string | "custom"
   dotsSolidColor: string
   qrDotType: StudioDataModulesStyle
 }
@@ -721,6 +722,7 @@ const DEFAULT_DESKTOP_PATTERN_SETTINGS: DesktopPatternSettings = {
   dotsColorMode: "solid",
   dataModulesGradient: DEFAULT_DESKTOP_DOTS_GRADIENT,
   dotsPalette: DEFAULT_DESKTOP_DOTS_PALETTE,
+  dotsPalettePreset: "Signal",
   dotsSolidColor: "#18181b",
   qrDotType: "rounded",
 }
@@ -3643,6 +3645,36 @@ function DesktopMotionColorPresetButton({
   )
 }
 
+function DesktopPatternPaletteCustomButton({
+  onClick,
+  selected,
+}: {
+  onClick: () => void
+  selected: boolean
+}) {
+  return (
+    <button
+      aria-label="Use custom pattern palette"
+      aria-pressed={selected}
+      data-desktop-animated-option-selection="true"
+      data-desktop-option-tile="true"
+      className={cn(
+        "group relative flex aspect-square w-full min-w-0 items-center justify-center p-0 text-center transition",
+        desktopInspectorOptionGridItemClass("loose"),
+        DESKTOP_INSPECTOR_OPTION_TILE_SURFACE_CLASS,
+        DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
+        selected && "text-[var(--desktop-inspector-option-selected-fg)]",
+      )}
+      type="button"
+      onClick={onClick}
+    >
+      <span className={cn("relative z-10 text-[10px] font-medium leading-none", DESKTOP_INSPECTOR_VALUE_CLASS)}>
+        Custom
+      </span>
+    </button>
+  )
+}
+
 function DesktopPatternPalettePresetButton({
   colors,
   label,
@@ -3658,27 +3690,26 @@ function DesktopPatternPalettePresetButton({
     <button
       aria-label={`Use ${label} pattern palette`}
       aria-pressed={selected}
+      data-desktop-animated-option-selection="true"
+      data-desktop-option-tile="true"
       className={cn(
-        "relative flex h-9 min-w-0 items-center gap-2 px-2 text-left",
-        desktopInspectorOptionGridItemClass(),
-        DESKTOP_INSPECTOR_CONTROL_CLASS,
-        selected && DESKTOP_INSPECTOR_SELECTED_CLASS,
+        "group relative flex aspect-square w-full min-w-0 items-center justify-center p-0 text-center transition",
+        desktopInspectorOptionGridItemClass("loose"),
+        DESKTOP_INSPECTOR_OPTION_TILE_SURFACE_CLASS,
+        DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
+        selected && "text-[var(--desktop-inspector-option-selected-fg)]",
       )}
       type="button"
       onClick={onClick}
     >
-      <span className="flex shrink-0 -space-x-1">
+      <span aria-hidden="true" className="relative z-10 flex shrink-0 -space-x-2">
         {colors.map((color, index) => (
           <span
             key={`${label}-${color}-${index}`}
-            aria-hidden="true"
-            className="size-4 rounded-full border border-black/35"
+            className="size-5 rounded-full"
             style={{ backgroundColor: color }}
           />
         ))}
-      </span>
-      <span className={cn("mb-0 min-w-0 flex-1 truncate", DESKTOP_INSPECTOR_VALUE_CLASS)}>
-        {label}
       </span>
     </button>
   )
@@ -3991,36 +4022,70 @@ function DesktopPatternInspector({
 
           {settings.dotsColorMode === "palette" ? (
             <div className="mt-2.5 grid gap-2">
-              <div className={DESKTOP_INSPECTOR_ROW_CLASS}>
-                <span className={DESKTOP_INSPECTOR_LABEL_CLASS}>Palette</span>
-                <span className="flex min-w-0 flex-wrap justify-end gap-2">
-                  {settings.dotsPalette.map((color, index) => (
-                    <DesktopColorSwatchPicker
-                      ariaLabel={`Pattern color ${index + 1}`}
-                      key={`${color}-${index}`}
-                      value={color}
-                      onChange={(nextColor) =>
+              <DesktopInspectorOptionGridScrollArea
+                ariaLabel="Pattern palette presets"
+                columns={3}
+                dataSlot="desktop-pattern-palette-presets-scroll-area"
+                shelfDataSlot="desktop-pattern-palette-presets"
+                variant="preset"
+              >
+                <DesktopInspectorAnimatedOptionGrid
+                  columns={3}
+                  data-slot="desktop-pattern-palette-presets"
+                  selectedKey={resolveDesktopDotsPalettePresetKey(
+                    settings.dotsPalette,
+                    settings.dotsPalettePreset,
+                  )}
+                >
+                  <DesktopPatternPaletteCustomButton
+                    key="custom"
+                    selected={isDesktopDotsPaletteCustomSelected(settings)}
+                    onClick={() => onPatternSettingsChange({ dotsPalettePreset: "custom" })}
+                  />
+                  {DESKTOP_DOTS_PALETTE_PRESETS.map((preset) => (
+                    <DesktopPatternPalettePresetButton
+                      colors={preset.colors}
+                      key={preset.label}
+                      label={preset.label}
+                      selected={
+                        resolveDesktopDotsPalettePresetKey(
+                          settings.dotsPalette,
+                          settings.dotsPalettePreset,
+                        ) === preset.label
+                      }
+                      onClick={() =>
                         onPatternSettingsChange({
-                          dotsPalette: settings.dotsPalette.map((currentColor, currentIndex) =>
-                            currentIndex === index ? nextColor : currentColor,
-                          ),
+                          dotsPalette: [...preset.colors],
+                          dotsPalettePreset: preset.label,
                         })
                       }
                     />
                   ))}
-                </span>
-              </div>
-              <div className={desktopInspectorOptionGridClass(2)} data-slot="desktop-pattern-palette-presets">
-                {DESKTOP_DOTS_PALETTE_PRESETS.map((preset) => (
-                  <DesktopPatternPalettePresetButton
-                    colors={preset.colors}
-                    key={preset.label}
-                    label={preset.label}
-                    selected={areDesktopColorPalettesEqual(settings.dotsPalette, preset.colors)}
-                    onClick={() => onPatternSettingsChange({ dotsPalette: [...preset.colors] })}
-                  />
-                ))}
-              </div>
+                </DesktopInspectorAnimatedOptionGrid>
+              </DesktopInspectorOptionGridScrollArea>
+
+              {isDesktopDotsPaletteCustomSelected(settings) ? (
+                <div className={DESKTOP_INSPECTOR_ROW_CLASS}>
+                  <span className={DESKTOP_INSPECTOR_LABEL_CLASS}>Pattern</span>
+                  <span className="flex min-w-0 flex-wrap justify-end gap-2">
+                    {settings.dotsPalette.map((color, index) => (
+                      <DesktopColorSwatchPicker
+                        ariaLabel={`Pattern color ${index + 1}`}
+                        key={`${color}-${index}`}
+                        value={color}
+                        onChange={(nextColor) =>
+                          onPatternSettingsChange({
+                            dotsPalette: settings.dotsPalette.map((currentColor, currentIndex) =>
+                              currentIndex === index ? nextColor : currentColor,
+                            ),
+                            dotsPalettePreset: "custom",
+                          })
+                        }
+                      />
+                    ))}
+                  </span>
+                </div>
+              ) : null}
             </div>
           ) : null}
         </DesktopInspectorSection>
@@ -4341,6 +4406,31 @@ function areDesktopColorPalettesEqual(currentPalette: string[], presetPalette: s
     currentPalette.length === presetPalette.length &&
     currentPalette.every((color, index) => color.toLowerCase() === presetPalette[index]?.toLowerCase())
   )
+}
+
+function resolveDesktopDotsPalettePresetKey(
+  palette: string[],
+  preset: string | "custom" | undefined,
+): string | "custom" {
+  if (preset === "custom") {
+    return "custom"
+  }
+
+  if (preset && DESKTOP_DOTS_PALETTE_PRESETS.some((entry) => entry.label === preset)) {
+    return preset
+  }
+
+  const matchedPreset = DESKTOP_DOTS_PALETTE_PRESETS.find((entry) =>
+    areDesktopColorPalettesEqual(palette, entry.colors),
+  )
+
+  return matchedPreset?.label ?? "custom"
+}
+
+function isDesktopDotsPaletteCustomSelected(
+  settings: Pick<DesktopPatternSettings, "dotsPalette" | "dotsPalettePreset">,
+): boolean {
+  return resolveDesktopDotsPalettePresetKey(settings.dotsPalette, settings.dotsPalettePreset) === "custom"
 }
 
 function DesktopContentFields({

@@ -710,18 +710,37 @@ describe("FloatingToolbar", () => {
 
     const presetGrid = surface.container.querySelector('[data-slot="desktop-pattern-palette-presets"]')
     const presetButtons = presetGrid?.querySelectorAll("button")
+    const customPreset = getRequiredButton(surface.container, "Use custom pattern palette")
     const signalPreset = getRequiredButton(surface.container, "Use Signal pattern palette")
     const auroraPreset = getRequiredButton(surface.container, "Use Aurora pattern palette")
 
     expect(presetGrid).not.toBeNull()
-    expect(presetButtons).toHaveLength(10)
+    expect(presetButtons).toHaveLength(11)
+    expect(customPreset.getAttribute("aria-pressed")).toBe("false")
     expect(signalPreset.getAttribute("aria-pressed")).toBe("true")
     expect(auroraPreset.getAttribute("aria-pressed")).toBe("false")
+    expect(
+      Array.from(surface.container.querySelectorAll("button")).some(
+        (button) => button.getAttribute("aria-label") === "Pattern color 1",
+      ),
+    ).toBe(false)
+
+    await clickButton(customPreset)
+
+    expect(customPreset.getAttribute("aria-pressed")).toBe("true")
+    expect(signalPreset.getAttribute("aria-pressed")).toBe("false")
+    expect(getRequiredButton(surface.container, "Pattern color 1")).toBeTruthy()
 
     await clickButton(auroraPreset)
 
     expect(auroraPreset.getAttribute("aria-pressed")).toBe("true")
+    expect(customPreset.getAttribute("aria-pressed")).toBe("false")
     expect(signalPreset.getAttribute("aria-pressed")).toBe("false")
+    expect(
+      Array.from(surface.container.querySelectorAll("button")).some(
+        (button) => button.getAttribute("aria-label") === "Pattern color 1",
+      ),
+    ).toBe(false)
   })
 
   it("renders a Pixelmator-style shape inspector without placeholder copy", async () => {
