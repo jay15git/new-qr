@@ -190,11 +190,20 @@ describe("qr-scene-codegen", () => {
     expect(html).not.toContain('data-qr-layer="dot"')
   })
 
-  it("flattens nested svg elements", () => {
-    const nested = `<svg viewBox="0 0 100 100"><g><svg x="10" y="10" width="20" height="20" viewBox="0 0 10 10"><rect width="10" height="10"/></svg></g></svg>`
+  it("flattens nested svg elements without a viewBox", () => {
+    const nested = `<svg viewBox="0 0 100 100"><g><svg x="10" y="10" width="20" height="20"><rect width="10" height="10"/></svg></g></svg>`
     const flattened = preprocessSvg(nested)
+
     expect(flattened).not.toMatch(/<svg[\s\S]*<svg/)
     expect(flattened).toContain("<g")
+  })
+
+  it("preserves nested svg elements that declare a viewBox", () => {
+    const nested = `<svg viewBox="0 0 100 100"><g><svg x="10" y="10" width="20" height="20" viewBox="0 0 10 10"><rect width="10" height="10"/></svg></g></svg>`
+    const flattened = preprocessSvg(nested)
+
+    expect(flattened).toMatch(/<svg[\s\S]*<svg/)
+    expect(flattened).not.toContain("scale(")
   })
 
   it("keeps static react svg semantically aligned with canonical svg", async () => {
@@ -288,5 +297,73 @@ describe("qr-scene-codegen", () => {
 
     expect(result.code).toContain("QrCard")
     expect(result.code).toContain("SVGProps")
+  })
+
+  it("prefixes quoted paint-server references used by qr svg extensions", () => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="dot-gradient-definition"></linearGradient></defs><path fill="url('#dot-gradient-definition')" d="M0 0"/></svg>`
+
+    const result = preprocessSvg(svg, { idPrefix: "node-1" })
+
+    expect(result).toContain('id="node-1-dot-gradient-definition"')
+    expect(result).toContain(`fill="url('#node-1-dot-gradient-definition')"`)
+  })
+
+  it("builds svg export without runtime qr package deps when dom layers use qr props", async () => {
+    const ir: SceneIr = {
+      ...sampleIr,
+      domLayers: [
+        {
+          kind: "qr",
+          id: "qr-1",
+          bounds: { x: 0, y: 0, width: 100, height: 100 },
+          style: {
+            height: 100,
+            left: 0,
+            position: "absolute",
+            top: 0,
+            width: 100,
+          },
+          children: [
+            {
+              kind: "module",
+              id: "qr-1-foreground",
+              bounds: { x: 0, y: 0, width: 57, height: 57 },
+              style: {
+                height: 57,
+                left: 0,
+                position: "absolute",
+                top: 0,
+                width: 57,
+              },
+              qrProps: {
+                background: "#fff",
+                colorMode: "solid",
+                finderInner: "square",
+                finderOuter: "square",
+                foreground: "#111",
+                gradient: "none",
+                margin: 0,
+                module: "square",
+                motion: "none",
+                palette: [],
+                size: 57,
+                value: "https://example.com",
+              },
+            },
+          ],
+        },
+      ],
+    }
+
+    const svgResult = await buildCodegenOutput(ir, { format: "svg" })
+    const reactResult = await buildCodegenOutput(ir, {
+      format: "react",
+      dialect: "tsx",
+      componentName: "QrCard",
+    })
+
+    expect(svgResult.manifest.installCommand).toBe("")
+    expect(svgResult.code).toContain("<svg")
+    expect(reactResult.manifest.installCommand).toContain("@new-qr/qr")
   })
 })

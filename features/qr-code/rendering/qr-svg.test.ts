@@ -11,6 +11,7 @@ import {
 import {
   createDefaultQrStudioState,
   setSquareQrSize,
+  type StudioGradient,
 } from "@/features/qr-code/model/state"
 import {
   CORNER_DOT_STYLE_OPTIONS,
@@ -25,7 +26,7 @@ const TEST_FRAME_GRADIENT = {
     { offset: 0, color: "#ff0000" },
     { offset: 1, color: "#0000ff" },
   ],
-}
+} satisfies StudioGradient
 
 const TEST_DOT_GRADIENT = {
   enabled: true,
@@ -35,15 +36,22 @@ const TEST_DOT_GRADIENT = {
     { offset: 0, color: "#00ff00" },
     { offset: 1, color: "#ffff00" },
   ],
-}
+} satisfies StudioGradient
 
-function getGradientFillSizes(markup: string, layer: string) {
+function getLocalizedFinderGradientRegionSizes(markup: string, gradientIdPrefix: string) {
   const document = new DOMParser().parseFromString(markup, "image/svg+xml")
 
-  return Array.from(document.querySelectorAll(`[data-qr-layer="${layer}"]`)).map((element) => ({
-    height: Number.parseFloat(element.getAttribute("height") ?? "0"),
-    width: Number.parseFloat(element.getAttribute("width") ?? "0"),
-  }))
+  return Array.from(document.querySelectorAll(`linearGradient[id^="${gradientIdPrefix}"]`)).map(
+    (gradient) => {
+      const id = gradient.getAttribute("id") ?? ""
+      const match = id.match(/(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)-1$/)
+
+      return {
+        height: Number.parseFloat(match?.[2] ?? "0"),
+        width: Number.parseFloat(match?.[1] ?? "0"),
+      }
+    },
+  )
 }
 
 function getSvgNumCells(markup: string) {
@@ -90,7 +98,7 @@ describe("dashboard qr svg helpers", () => {
     expect(payload.naturalHeight).toBe(512)
     expect(payload.markup).toContain("<svg")
     expect(payload.markup).toContain('width="512"')
-    expect(payload.markup).toContain("width:100%")
+    expect(payload.markup).not.toContain("width:100%")
   })
 
   it("renders ReactQRCode finder pattern styles into the dashboard payload", async () => {
@@ -113,11 +121,11 @@ describe("dashboard qr svg helpers", () => {
 
     const payload = await buildDashboardQrNodePayload(state)
 
-    expect(payload.markup).toContain('data-qr-layer="dot-palette"')
+    expect(payload.markup).toContain('data-qr-layer="dot-palette-fill"')
     expect(payload.markup).toContain('fill="#04879c"')
     expect(payload.markup).toContain('fill="#0c3c78"')
     expect(payload.markup).toContain('fill="#f30a49"')
-    expect(payload.markup).toContain('opacity="0"')
+    expect(payload.markup).not.toContain('qr-dot-palette-clip')
   })
 
   it("applies palette module colors to direct qr svg markup", () => {
@@ -127,7 +135,7 @@ describe("dashboard qr svg helpers", () => {
 
     const markup = renderDashboardQrSvgMarkup(state)
 
-    expect(markup).toContain('data-qr-layer="dot-palette"')
+    expect(markup).toContain('data-qr-layer="dot-palette-fill"')
     expect(markup).toContain('fill="#04879c"')
     expect(markup).toContain('fill="#0c3c78"')
     expect(markup).toContain('fill="#f30a49"')
@@ -143,7 +151,7 @@ describe("dashboard qr svg helpers", () => {
 
       const markup = renderDashboardQrSvgMarkup(state)
 
-      expect(markup).toContain('data-qr-layer="dot-palette"')
+      expect(markup).toContain('data-qr-layer="dot-palette-fill"')
       for (const color of state.dotsPalette) {
         expect(markup).toContain(`fill="${color}"`)
       }
@@ -155,19 +163,20 @@ describe("dashboard qr svg helpers", () => {
     state.finderPatternOuterGradient = TEST_FRAME_GRADIENT
 
     const markup = renderDashboardQrSvgMarkup(state)
-    const frameFillSizes = getGradientFillSizes(markup, "corner-frame-gradient-fill")
+    const frameFillSizes = getLocalizedFinderGradientRegionSizes(markup, "corners-square-color-")
     const numCells = getSvgNumCells(markup)
+    const document = new DOMParser().parseFromString(markup, "image/svg+xml")
+    const frameFills = document.querySelectorAll('[data-qr-layer="corner-frame-gradient-fill"]')
 
     expect(markup).toContain('data-qr-layer="corner-frame-gradient"')
     expect(markup).toContain('id="corners-square-color-')
     expect(markup).toContain('fill="url(\'#corners-square-color-')
+    expect(frameFills).toHaveLength(3)
+    expect(frameFills[0]?.tagName.toLowerCase()).toBe("path")
     expect(frameFillSizes).toHaveLength(3)
-    expect(frameFillSizes.every((size) => size.width === 7 && size.height === 7)).toBe(true)
     expect(numCells).not.toBeNull()
     expect(frameFillSizes.some((size) => size.width === numCells)).toBe(false)
-    expect(markup).toMatch(
-      /<path[^>]+data-testid="finder-patterns-outer"[^>]+opacity="0"/,
-    )
+    expect(markup).not.toContain('data-qr-layer="corner-frame-gradient-clip"')
   })
 
   it("renders custom corner dot shapes into the dashboard payload", async () => {
@@ -190,14 +199,14 @@ describe("dashboard qr svg helpers", () => {
     state.finderPatternInnerGradient = TEST_DOT_GRADIENT
 
     const markup = renderDashboardQrSvgMarkup(state)
-    const dotFillSizes = getGradientFillSizes(markup, "corner-dot-gradient-fill")
+    const document = new DOMParser().parseFromString(markup, "image/svg+xml")
+    const dotFills = document.querySelectorAll('[data-qr-layer="custom-corner-dot"]')
 
     expect(markup).toContain('data-qr-layer="corner-dot-gradient"')
     expect(markup).toContain('data-qr-layer="custom-corner-dot"')
-    expect(dotFillSizes).toHaveLength(3)
-    expect(markup).toMatch(
-      /<path[^>]+data-testid="finder-patterns-inner"[^>]+opacity="0"/,
-    )
+    expect(dotFills).toHaveLength(3)
+    expect(dotFills[0]?.getAttribute("fill")).toContain("corners-dot-color-")
+    expect(markup).not.toContain('data-qr-layer="corner-dot-gradient-clip"')
   })
 
   it("applies corner dot gradients to finder inner patterns", () => {
@@ -205,16 +214,14 @@ describe("dashboard qr svg helpers", () => {
     state.finderPatternInnerGradient = TEST_DOT_GRADIENT
 
     const markup = renderDashboardQrSvgMarkup(state)
-    const dotFillSizes = getGradientFillSizes(markup, "corner-dot-gradient-fill")
+    const document = new DOMParser().parseFromString(markup, "image/svg+xml")
+    const dotFills = document.querySelectorAll('[data-qr-layer="corner-dot-gradient-fill"]')
 
     expect(markup).toContain('data-qr-layer="corner-dot-gradient"')
     expect(markup).toContain('id="corners-dot-color-')
     expect(markup).toContain('fill="url(\'#corners-dot-color-')
-    expect(dotFillSizes).toHaveLength(3)
-    expect(dotFillSizes.every((size) => size.width === 4.5 && size.height === 4.5)).toBe(true)
-    expect(markup).toMatch(
-      /<rect[^>]+data-testid="finder-patterns-inner"[^>]+opacity="0"/,
-    )
+    expect(dotFills).toHaveLength(3)
+    expect(markup).not.toContain('data-qr-layer="corner-dot-gradient-clip"')
   })
 
   it.each(CORNER_SQUARE_STYLE_OPTIONS.map((option) => option.value))(
@@ -232,11 +239,14 @@ describe("dashboard qr svg helpers", () => {
         return
       }
 
-      const frameFillSizes = getGradientFillSizes(markup, "corner-frame-gradient-fill")
+      const frameFillSizes = getLocalizedFinderGradientRegionSizes(markup, "corners-square-color-")
+      const document = new DOMParser().parseFromString(markup, "image/svg+xml")
+      const frameFills = document.querySelectorAll('[data-qr-layer="corner-frame-gradient-fill"]')
 
+      expect(frameFills).toHaveLength(3)
       expect(frameFillSizes).toHaveLength(3)
-      expect(frameFillSizes.every((size) => size.width === 7 && size.height === 7)).toBe(true)
       expect(markup).toContain('fill="url(\'#corners-square-color-')
+      expect(markup).not.toContain('data-qr-layer="corner-frame-gradient-clip"')
     },
   )
 
@@ -255,11 +265,14 @@ describe("dashboard qr svg helpers", () => {
         return
       }
 
-      const dotFillSizes = getGradientFillSizes(markup, "corner-dot-gradient-fill")
+      const document = new DOMParser().parseFromString(markup, "image/svg+xml")
+      const dotFills = document.querySelectorAll(
+        '[data-qr-layer="corner-dot-gradient-fill"], [data-qr-layer="custom-corner-dot"]',
+      )
 
-      expect(dotFillSizes).toHaveLength(3)
-      expect(dotFillSizes.every((size) => size.width === 4.5 && size.height === 4.5)).toBe(true)
+      expect(dotFills).toHaveLength(3)
       expect(markup).toContain('fill="url(\'#corners-dot-color-')
+      expect(markup).not.toContain('data-qr-layer="corner-dot-gradient-clip"')
     },
   )
 
@@ -287,10 +300,11 @@ describe("dashboard qr svg helpers", () => {
 
     const markup = renderDashboardQrSvgMarkup(state)
 
-    expect(markup).toContain('data-qr-layer="dot-gradient"')
+    expect(markup).toContain('data-qr-layer="dot-gradient-definition"')
     expect(markup).toContain('data-qr-layer="corner-frame-gradient"')
     expect(markup).toContain('fill="url(\'#dot-gradient-definition\')"')
     expect(markup).toContain('fill="url(\'#corners-square-color-')
+    expect(markup).not.toContain('data-qr-layer="dot-gradient-clip"')
   })
 
   it("applies module gradients without repainting finder patterns", () => {
@@ -308,7 +322,7 @@ describe("dashboard qr svg helpers", () => {
 
     const markup = renderDashboardQrSvgMarkup(state)
 
-    expect(markup).toContain('data-qr-layer="dot-gradient"')
+    expect(markup).toContain('data-qr-layer="dot-gradient-definition"')
     expect(markup).toContain('data-qr-layer="dot-gradient-fill"')
     expect(markup).toContain('fill="url(\'#dot-gradient-definition\')"')
     expect(markup).toContain('data-testid="finder-patterns-inner"')
@@ -317,6 +331,28 @@ describe("dashboard qr svg helpers", () => {
     expect(markup).toMatch(/<path[^>]+fill="#111827"[^>]+data-testid="finder-patterns-outer"/)
     expect(markup).not.toContain('data-testid="finder-patterns-inner" fill="url(')
     expect(markup).not.toContain('data-testid="finder-patterns-outer" fill="url(')
+    expect(markup).not.toContain('data-qr-layer="dot-gradient-clip"')
+  })
+
+  it("renders a standalone svg with namespace and visible default qr geometry", () => {
+    const state = createDefaultQrStudioState()
+    state.dataModulesSettings.type = "square"
+    state.finderPatternOuterSettings.type = "square"
+    state.finderPatternInnerSettings.type = "square"
+
+    const markup = renderDashboardQrSvgMarkup(state)
+    const document = new DOMParser().parseFromString(markup, "image/svg+xml")
+    const svg = document.documentElement
+
+    expect(document.querySelector("parsererror")).toBeNull()
+    expect(svg.tagName.toLowerCase()).toBe("svg")
+    expect(svg.getAttribute("xmlns")).toBe("http://www.w3.org/2000/svg")
+    const dataModules = svg.querySelector('[data-testid="data-modules"]')
+    expect(dataModules?.tagName.toLowerCase()).toBe("path")
+    expect(dataModules?.getAttribute("fill")).toBe("#111827")
+    expect((dataModules?.getAttribute("d") ?? "").length).toBeGreaterThan(1000)
+    expect(markup).toContain('data-testid="finder-patterns-outer"')
+    expect(markup).toContain('data-testid="finder-patterns-inner"')
   })
 
   it("reports expanded natural size when background effects grow outside the qr", async () => {

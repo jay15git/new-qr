@@ -38,12 +38,14 @@ export async function buildDraftingLayeredNodePayload({
     shaderSnapshots,
   })
 
+  const rawSvg = emitSvg(ir)
+  const originalSvgMarkup = preprocessSvg(rawSvg, { idPrefix: nodeId })
   return {
     id: nodeId,
     name,
     naturalHeight: ir.bounds.height,
     naturalWidth: ir.bounds.width,
-    originalSvgMarkup: preprocessSvg(emitSvg(ir), { idPrefix: nodeId }),
+    originalSvgMarkup,
   }
 }
 

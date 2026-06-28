@@ -2779,7 +2779,6 @@ export function WorkspaceSurface({
           targetSizePx: selectedRasterExportTargetSizePx,
         })
       }
-
     } catch (error) {
       setExportDownloadError(error instanceof Error ? error.message : "Export failed.")
     }

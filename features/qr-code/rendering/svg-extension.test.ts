@@ -163,6 +163,10 @@ function createStubElement(tagName: string): StubElement {
           return node.attributes["data-qr-layer"] === "dot-palette"
         }
 
+        if (selector === '[data-qr-layer="dot-palette-fill"]') {
+          return node.attributes["data-qr-layer"] === "dot-palette-fill"
+        }
+
         if (selector === '[data-qr-layer="dot-palette-color"]') {
           return node.attributes["data-qr-layer"] === "dot-palette-color"
         }
@@ -246,34 +250,32 @@ function createDotMatrixSvgFixture({
   return { dotLayer, height, svg, width }
 }
 
-function getPaletteLayerAnchors(svg: StubElement, colorLayers: StubElement[]) {
-  return new Map(
-    colorLayers.map((layer) => {
-      const color = layer.getAttribute("fill") ?? ""
-      const clipPathId = /#([^'")]+)/.exec(layer.getAttribute("clip-path") ?? "")?.[1]
-      const clipPath = svg.querySelectorAll("clipPath").find(
-        (candidate) => candidate.getAttribute("id") === clipPathId,
-      )
-      const anchors =
-        clipPath?.children
-          .map((shape) => {
-            if (shape.tagName === "path") {
-              const match = /M\s*([+-]?(?:\d+\.?\d*|\.\d+))[\s,]+([+-]?(?:\d+\.?\d*|\.\d+))/.exec(
-                shape.getAttribute("d") ?? "",
-              )
-              return match ? `${Math.floor(Number(match[1]))},${Math.floor(Number(match[2]))}` : null
-            }
+function getPaletteLayerAnchors(_svg: StubElement, colorLayers: StubElement[]) {
+  const anchorsByColor = new Map<string, string[]>()
 
-            const x = shape.getAttribute("x")
-            const y = shape.getAttribute("y")
+  for (const layer of colorLayers) {
+    const color = layer.getAttribute("fill") ?? layer.children[0]?.getAttribute("fill") ?? ""
+    const anchors = Array.from(layer.children)
+      .map((shape) => {
+        if (shape.tagName === "path") {
+          const match = /M\s*([+-]?(?:\d+\.?\d*|\.\d+))[\s,]+([+-]?(?:\d+\.?\d*|\.\d+))/.exec(
+            shape.getAttribute("d") ?? "",
+          )
+          return match ? `${Math.floor(Number(match[1]))},${Math.floor(Number(match[2]))}` : null
+        }
 
-            return x && y ? `${x},${y}` : null
-          })
-          .filter((anchor): anchor is string => anchor !== null) ?? []
+        const x = shape.getAttribute("x")
+        const y = shape.getAttribute("y")
 
-      return [color, anchors] as const
-    }),
-  )
+        return x && y ? `${x},${y}` : null
+      })
+      .filter((anchor): anchor is string => anchor !== null)
+
+    const existing = anchorsByColor.get(color) ?? []
+    anchorsByColor.set(color, [...existing, ...anchors])
+  }
+
+  return anchorsByColor
 }
 
 function renderDotMatrixTracks(
@@ -435,16 +437,15 @@ describe("qr rendering helpers", () => {
     })
 
     const paletteLayer = svg.querySelector('[data-qr-layer="dot-palette"]')
-    const colorLayers = svg.querySelectorAll('[data-qr-layer="dot-palette-color"]')
+    const colorLayers = svg.querySelectorAll('[data-qr-layer="dot-palette-fill"]')
 
-    expect(dotLayer.getAttribute("opacity")).toBe("0")
+    expect(svg.querySelector('[clip-path*="clip-path-dot-color-0"]')).toBeNull()
     expect(paletteLayer?.getAttribute("data-qr-palette-size")).toBe("2")
     expect(colorLayers).toHaveLength(2)
-    expect(colorLayers.map((layer) => layer.getAttribute("fill"))).toEqual([
-      "#111111",
-      "#eeeeee",
-    ])
-    expect(colorLayers.every((layer) => layer.getAttribute("clip-path")?.includes("qr-dot-palette-clip-"))).toBe(true)
+    expect(
+      [...new Set(colorLayers.map((layer) => layer.getAttribute("fill") ?? layer.children[0]?.getAttribute("fill")))],
+    ).toEqual(["#111111", "#eeeeee"])
+    expect(colorLayers.every((layer) => layer.getAttribute("clip-path"))).toBe(false)
   })
 
   it("scatters palette colors without sorted bands or checkerboard repetition", () => {
@@ -469,7 +470,7 @@ describe("qr rendering helpers", () => {
       width,
     })
 
-    const colorLayers = svg.querySelectorAll('[data-qr-layer="dot-palette-color"]')
+    const colorLayers = svg.querySelectorAll('[data-qr-layer="dot-palette-fill"]')
     const anchorsByColor = getPaletteLayerAnchors(svg, colorLayers)
     const allAnchors = new Map(
       Array.from(anchorsByColor.entries()).flatMap(([color, anchors]) =>
@@ -532,7 +533,7 @@ describe("qr rendering helpers", () => {
       width: 120,
     })
 
-    const colorLayers = svg.querySelectorAll('[data-qr-layer="dot-palette-color"]')
+    const colorLayers = svg.querySelectorAll('[data-qr-layer="dot-palette-fill"]')
     const anchorsByColor = getPaletteLayerAnchors(svg, colorLayers)
     const colorsForFirstCoordinate = Array.from(anchorsByColor.entries())
       .filter((entry) => entry[1].includes("10,10"))
@@ -579,20 +580,20 @@ describe("qr rendering helpers", () => {
       width,
     })
 
-    const gradientLayer = svg.querySelector('[data-qr-layer="dot-gradient"]')
-    const gradientFill = svg.querySelector('[data-qr-layer="dot-gradient-fill"]')
     const gradientDefinition = svg.querySelector('[data-qr-layer="dot-gradient-definition"]')
 
-    expect(dotLayer.getAttribute("opacity")).toBe("0")
+    expect(dotLayer.getAttribute("opacity")).toBeNull()
     expect(cornerLayer.getAttribute("opacity")).toBeNull()
-    expect(gradientLayer).not.toBeNull()
-    expect(gradientFill?.getAttribute("fill")).toBe("url('#dot-gradient-definition')")
-    expect(gradientFill?.getAttribute("clip-path")).toContain("dot-gradient-clip")
+    expect(gradientDefinition).not.toBeNull()
+    expect(dotLayer.getAttribute("fill")).toBe("url('#dot-gradient-definition')")
+    expect(dotLayer.getAttribute("clip-path")).toContain("clip-path-dot-color-0")
+    expect(dotLayer.getAttribute("data-qr-layer")).toBe("dot-gradient-fill")
     expect(gradientDefinition?.tagName).toBe("linearGradient")
     expect(gradientDefinition?.getAttribute("x1")).toBe("15")
     expect(gradientDefinition?.getAttribute("y1")).toBe("10")
     expect(gradientDefinition?.getAttribute("x2")).toBe("15")
     expect(gradientDefinition?.getAttribute("y2")).toBe("20")
+    expect(svg.querySelector('[data-qr-layer="dot-gradient-clip"]')).toBeNull()
   })
 
 

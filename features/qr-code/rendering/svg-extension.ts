@@ -239,18 +239,29 @@ function materializeDataModulePaths(
     return
   }
 
+  if (svg.querySelector('[data-qr-layer="dot-palette"]')) {
+    return
+  }
+
+  const clipLayers = getQrModuleClipLayers(svg)
   const pathLayers = getQrModulePathLayers(svg)
-  const allShapes = pathLayers.flatMap((layer) => layer.shapes)
-  const metrics =
-    allShapes.length > 0
-      ? collectDotMatrixMetrics(allShapes) ?? getFallbackDotMatrixMetrics(allShapes)
-      : null
-  const paletteColorByKey =
-    state?.dotsColorMode === "palette" && metrics
-      ? buildPaletteColorByCoordinate(allShapes, metrics, state)
-      : null
-  const usesOverlayColorMode =
-    state?.dotsColorMode === "gradient" || state?.dotsColorMode === "palette"
+
+  if (state?.dotsColorMode === "palette" && getActiveDotsPalette(state).length > 0) {
+    const allDotShapes = [
+      ...clipLayers.flatMap((layer) => layer.shapes),
+      ...pathLayers.flatMap((layer) => layer.shapes),
+    ]
+
+    if (
+      applyDirectPalettePaint(svg, state, allDotShapes, clipLayers, pathLayers, {
+        groupLayer: "bitjson-motion-modules",
+      })
+    ) {
+      return
+    }
+  }
+
+  const usesOverlayColorMode = state?.dotsColorMode === "gradient"
 
   for (const layer of pathLayers) {
     if (layer.shapes.length === 0) {
@@ -266,19 +277,12 @@ function materializeDataModulePaths(
     const group = document.createElementNS(SVG_NS, "g")
     group.setAttribute("data-qr-layer", "bitjson-motion-modules")
 
-    for (const [shapeIndex, segmentShape] of layer.shapes.entries()) {
+    for (const segmentShape of layer.shapes) {
       const path = document.createElementNS(SVG_NS, "path")
       path.setAttribute("d", segmentShape.getAttribute("d") ?? "")
       path.setAttribute(
         "fill",
-        resolveMotionModuleFill(
-          segmentShape,
-          layer.fill,
-          metrics,
-          paletteColorByKey,
-          shapeIndex,
-          state,
-        ),
+        resolveMotionModuleFill(segmentShape, layer.fill, state),
       )
       group.appendChild(path)
     }
@@ -294,10 +298,7 @@ function materializeDataModulePaths(
 function resolveMotionModuleFill(
   shape: SVGElement,
   fallbackFill: string,
-  metrics: DotMatrixMetrics | null,
-  paletteColorByKey: Map<string, string> | null,
-  shapeIndex: number,
-  state?: Pick<QrStudioState, "dotsColorMode" | "data" | "dotsPalette">,
+  state?: Pick<QrStudioState, "dotsColorMode">,
 ) {
   if (!state || state.dotsColorMode === "solid") {
     return fallbackFill
@@ -307,65 +308,161 @@ function resolveMotionModuleFill(
     return "url('#dot-gradient-definition')"
   }
 
-  if (paletteColorByKey && metrics) {
-    const coordinates = resolveDotMatrixCoordinates(shape, metrics)
-    const key = coordinates
-      ? `${coordinates.row}:${coordinates.col}`
-      : `fallback:${shapeIndex}`
-    return paletteColorByKey.get(key) ?? fallbackFill
-  }
-
   return fallbackFill
 }
 
-function buildPaletteColorByCoordinate(
-  shapes: SVGElement[],
-  metrics: DotMatrixMetrics,
+type PaletteColorAssignment = {
+  color: string
+  paletteIndex: number
+  shapes: SVGElement[]
+}
+
+type PalettePaintGroupLayer = "bitjson-motion-modules" | "dot-palette"
+
+function buildPaletteColorAssignments(
   state: Pick<QrStudioState, "data" | "dotsPalette">,
+  allDotShapes: SVGElement[],
+  metrics: DotMatrixMetrics | null,
 ) {
   const palette = getActiveDotsPalette(state)
 
-  if (palette.length === 0) {
-    return new Map<string, string>()
+  if (palette.length === 0 || allDotShapes.length === 0) {
+    return null
   }
 
   const paletteSeed = hashDotPaletteString(state.data.trim())
-  const shapeGroups = createDotPaletteShapeGroups(shapes, metrics)
-  const assignments = shapeGroups.map((group) => ({
+  const shapeGroups = createDotPaletteShapeGroups(allDotShapes, metrics)
+  const assignments: PaletteColorAssignment[] = palette.map((color) => ({
+    color,
+    paletteIndex: palette.indexOf(color),
+    shapes: [],
+  }))
+  const groupAssignments = shapeGroups.map((group) => ({
     group,
     paletteIndex: getDotPaletteIndex(group, palette.length, paletteSeed),
   }))
 
-  balanceDotPaletteAssignments(assignments, palette.length, paletteSeed)
+  balanceDotPaletteAssignments(groupAssignments, palette.length, paletteSeed)
 
-  const colorByKey = new Map<string, string>()
-
-  for (const { group, paletteIndex } of assignments) {
-    const color = palette[paletteIndex] ?? palette[0]!
-    const key = group.coordinates
-      ? `${group.coordinates.row}:${group.coordinates.col}`
-      : `fallback:${group.fallbackIndex}`
-
-    colorByKey.set(key, color)
+  for (const { group, paletteIndex } of groupAssignments) {
+    assignments[paletteIndex]?.shapes.push(...group.shapes)
   }
 
-  return colorByKey
+  const activeAssignments = assignments.filter((assignment) => assignment.shapes.length > 0)
+
+  return activeAssignments.length > 0 ? activeAssignments : null
+}
+
+function createPaletteModuleGroup(
+  document: Document,
+  palette: string[],
+  activeAssignments: PaletteColorAssignment[],
+  groupLayer: PalettePaintGroupLayer,
+) {
+  const group = document.createElementNS(SVG_NS, "g")
+  group.setAttribute("data-qr-layer", groupLayer)
+
+  if (groupLayer === "dot-palette") {
+    group.setAttribute("data-qr-palette-size", String(palette.length))
+  }
+
+  for (const { color, paletteIndex, shapes } of activeAssignments) {
+    const colorGroup = document.createElementNS(SVG_NS, "g")
+    colorGroup.setAttribute("fill", color)
+    colorGroup.setAttribute("data-qr-layer", "dot-palette-fill")
+    colorGroup.setAttribute("data-qr-palette-index", String(paletteIndex))
+
+    for (const shape of shapes) {
+      const painted = shape.cloneNode(true) as SVGElement
+      painted.removeAttribute("clip-path")
+      painted.removeAttribute("opacity")
+      painted.setAttribute("fill", color)
+      painted.setAttribute("data-qr-palette-index", String(paletteIndex))
+      colorGroup.appendChild(painted)
+    }
+
+    group.appendChild(colorGroup)
+  }
+
+  return group
+}
+
+function removeDotMatrixBaseLayers(
+  dotClipLayers: DotClipLayer[],
+  dotPathLayers: DotPathLayer[],
+) {
+  for (const layer of dotClipLayers) {
+    layer.element.remove()
+  }
+
+  for (const layer of dotPathLayers) {
+    layer.element.remove()
+  }
+}
+
+function removeOrphanedModuleClipPaths(svg: SVGElement) {
+  for (const clipPath of svg.querySelectorAll("clipPath")) {
+    const clipPathId = clipPath.getAttribute("id") ?? ""
+
+    if (QR_MODULE_CLIP_PATH_PREFIXES.some((prefix) => clipPathId.startsWith(prefix))) {
+      clipPath.remove()
+    }
+  }
+}
+
+function applyDirectPalettePaint(
+  svg: SVGElement,
+  state: Pick<QrStudioState, "data" | "dotsPalette">,
+  allDotShapes: SVGElement[],
+  dotClipLayers: DotClipLayer[],
+  dotPathLayers: DotPathLayer[],
+  options: { groupLayer: PalettePaintGroupLayer },
+) {
+  const document = svg.ownerDocument
+  const palette = getActiveDotsPalette(state)
+
+  if (!document || palette.length === 0) {
+    return false
+  }
+
+  const metrics =
+    collectDotMatrixMetrics(allDotShapes) ?? getFallbackDotMatrixMetrics(allDotShapes)
+  const activeAssignments = buildPaletteColorAssignments(state, allDotShapes, metrics)
+
+  if (!activeAssignments) {
+    return false
+  }
+
+  const anchor = findDotMatrixLayerAnchor(svg)
+  removeDotMatrixBaseLayers(dotClipLayers, dotPathLayers)
+  removeOrphanedModuleClipPaths(svg)
+
+  const group = createPaletteModuleGroup(document, palette, activeAssignments, options.groupLayer)
+
+  if (group.children.length === 0) {
+    return false
+  }
+
+  svg.insertBefore(group, anchor)
+
+  return true
 }
 
 function suppressGradientPaletteOverlayLayers(svg: SVGElement) {
   for (const layer of svg.querySelectorAll('[data-qr-layer="dot-gradient-fill"]')) {
     layer.setAttribute("opacity", "0")
   }
-
-  for (const layer of svg.querySelectorAll('[data-qr-layer="dot-palette-color"]')) {
-    layer.setAttribute("opacity", "0")
-  }
 }
 
 function collectCanvasDotModuleShapes(svg: SVGElement): SVGElement[] {
-  const fromMaterialized = Array.from(
-    svg.querySelectorAll('[data-qr-layer="bitjson-motion-modules"] path'),
-  ).filter(isSvgElementLike)
+  const fromMaterialized = [
+    ...svg.querySelectorAll(
+      '[data-qr-layer="bitjson-motion-modules"] path, [data-qr-layer="bitjson-motion-modules"] rect, [data-qr-layer="bitjson-motion-modules"] circle',
+    ),
+    ...svg.querySelectorAll(
+      '[data-qr-layer="dot-palette"] [data-qr-layer="dot-palette-fill"] > *',
+    ),
+  ].filter(isSvgElementLike)
 
   if (fromMaterialized.length > 0) {
     return fromMaterialized
@@ -380,14 +477,6 @@ function collectCanvasDotModuleShapes(svg: SVGElement): SVGElement[] {
 
   if (fromLayers.length > 0) {
     return fromLayers
-  }
-
-  const fromPalette = Array.from(svg.querySelectorAll('[data-qr-layer="dot-palette-clip"]')).flatMap(
-    (clipPath) => Array.from(clipPath.children).filter(isSvgElementLike),
-  )
-
-  if (fromPalette.length > 0) {
-    return fromPalette
   }
 
   return Array.from(svg.querySelectorAll('[data-qr-layer="dot-gradient-clip"]')).flatMap(
@@ -539,13 +628,10 @@ function getFinderInnerElementRegion(element: SVGElement): FinderInnerElementReg
 function createDotsPaletteExtension(
   state: Pick<QrStudioState, "data" | "dotsPalette">,
 ): QrSvgExtensionFunction {
-  const palette = getActiveDotsPalette(state)
-  const paletteSeed = hashDotPaletteString(state.data.trim())
+  return (svg) => {
+    const palette = getActiveDotsPalette(state)
 
-  return (svg, options) => {
-    const document = svg.ownerDocument
-
-    if (!document || palette.length === 0) {
+    if (palette.length === 0) {
       return
     }
 
@@ -553,88 +639,21 @@ function createDotsPaletteExtension(
       node.remove()
     })
 
-    const dotLayers = getQrModuleClipLayers(svg)
+    const dotClipLayers = getQrModuleClipLayers(svg)
     const dotPathLayers = getQrModulePathLayers(svg)
 
-    if (dotLayers.length === 0 && dotPathLayers.length === 0) {
+    if (dotClipLayers.length === 0 && dotPathLayers.length === 0) {
       return
     }
 
-    const dotShapes = dotLayers.flatMap((layer) => layer.shapes)
-    const dotPathShapes = dotPathLayers.flatMap((layer) => layer.shapes)
-    const allDotShapes = [...dotShapes, ...dotPathShapes]
-    const metrics = collectDotMatrixMetrics(allDotShapes)
-    const shapeGroups = createDotPaletteShapeGroups(allDotShapes, metrics)
-    const assignments = palette.map((color) => ({
-      color,
-      paletteIndex: palette.indexOf(color),
-      shapes: [] as SVGElement[],
-    }))
-    const groupAssignments = shapeGroups.map((group) => ({
-      group,
-      paletteIndex: getDotPaletteIndex(group, palette.length, paletteSeed),
-    }))
+    const allDotShapes = [
+      ...dotClipLayers.flatMap((layer) => layer.shapes),
+      ...dotPathLayers.flatMap((layer) => layer.shapes),
+    ]
 
-    balanceDotPaletteAssignments(groupAssignments, palette.length, paletteSeed)
-
-    for (const { group, paletteIndex } of groupAssignments) {
-      assignments[paletteIndex]?.shapes.push(...group.shapes)
-    }
-
-    const activeAssignments = assignments.filter((assignment) => assignment.shapes.length > 0)
-
-    if (activeAssignments.length === 0) {
-      return
-    }
-
-    suppressDotMatrixBaseLayers(dotLayers)
-    suppressDotMatrixBasePathLayers(dotPathLayers)
-
-    const group = document.createElementNS(SVG_NS, "g")
-    group.setAttribute("data-qr-layer", "dot-palette")
-    group.setAttribute("data-qr-palette-size", String(palette.length))
-    const defs = document.createElementNS(SVG_NS, "defs")
-    defs.setAttribute("data-qr-layer", "dot-palette-defs")
-    group.appendChild(defs)
-
-    const coverRect = getDotMatrixCoverRect(
-      svg,
-      options,
-      metrics ?? getFallbackDotMatrixMetrics(allDotShapes),
-    )
-
-    for (const [index, { color, paletteIndex, shapes }] of activeAssignments.entries()) {
-      const clipPath = document.createElementNS(SVG_NS, "clipPath")
-      const clipPathId = `qr-dot-palette-clip-${index}`
-
-      clipPath.setAttribute("id", clipPathId)
-      clipPath.setAttribute("data-qr-layer", "dot-palette-clip")
-
-      for (const shape of shapes) {
-        const clonedShape = shape.cloneNode(true) as SVGElement
-        clonedShape.removeAttribute("clip-path")
-        clipPath.appendChild(clonedShape)
-      }
-
-      defs.appendChild(clipPath)
-
-      const paletteLayer = document.createElementNS(SVG_NS, "rect")
-      paletteLayer.setAttribute("x", formatSvgNumber(coverRect.x))
-      paletteLayer.setAttribute("y", formatSvgNumber(coverRect.y))
-      paletteLayer.setAttribute("width", formatSvgNumber(coverRect.width))
-      paletteLayer.setAttribute("height", formatSvgNumber(coverRect.height))
-      paletteLayer.setAttribute("clip-path", `url('#${clipPathId}')`)
-      paletteLayer.setAttribute("fill", color)
-      paletteLayer.setAttribute("data-qr-layer", "dot-palette-color")
-      paletteLayer.setAttribute("data-qr-palette-index", String(paletteIndex))
-      group.appendChild(paletteLayer)
-    }
-
-    if (group.children.length <= 1) {
-      return
-    }
-
-    svg.insertBefore(group, findDotMatrixLayerAnchor(svg))
+    applyDirectPalettePaint(svg, state, allDotShapes, dotClipLayers, dotPathLayers, {
+      groupLayer: "dot-palette",
+    })
   }
 }
 
@@ -642,31 +661,41 @@ function createDotsGradientExtension(
   state: Pick<QrStudioState, "dataModulesGradient">,
 ): QrSvgExtensionFunction {
   return (svg) => {
-    const document = svg.ownerDocument
+    removeLegacyDotGradientOverlay(svg)
 
-    if (!document) {
-      return
-    }
-
-    svg.querySelectorAll('[data-qr-layer="dot-gradient"]').forEach((node) => {
-      node.remove()
-    })
-    svg.querySelectorAll('[data-qr-layer="dot-gradient-definition"]').forEach((node) => {
-      node.remove()
-    })
-
-    const dotLayers = getQrModuleClipLayers(svg)
+    const dotClipLayers = getQrModuleClipLayers(svg)
     const dotPathLayers = getQrModulePathLayers(svg)
+    const paintTargets = [
+      ...dotClipLayers.map((layer) => layer.element),
+      ...dotPathLayers.map((layer) => layer.element),
+    ]
 
-    if (dotLayers.length === 0 && dotPathLayers.length === 0) {
+    if (paintTargets.length === 0) {
+      const dataModules = svg.querySelector('[data-testid="data-modules"]')
+
+      if (isSvgElementLike(dataModules)) {
+        paintTargets.push(dataModules)
+      }
+    }
+
+    if (paintTargets.length === 0) {
       return
     }
 
-    const dotShapes = dotLayers.flatMap((layer) => layer.shapes)
-    const dotPathShapes = dotPathLayers.flatMap((layer) => layer.shapes)
-    const allDotShapes = [...dotShapes, ...dotPathShapes]
-    const metrics = collectDotMatrixMetrics(allDotShapes) ?? getFallbackDotMatrixMetrics(allDotShapes)
-    const coverRect = getDotShapeCoverRect(metrics)
+    const dotShapes = [
+      ...dotClipLayers.flatMap((layer) => layer.shapes),
+      ...dotPathLayers.flatMap((layer) => layer.shapes),
+    ]
+    const metrics =
+      dotShapes.length > 0
+        ? collectDotMatrixMetrics(dotShapes) ?? getFallbackDotMatrixMetrics(dotShapes)
+        : getDataModulesPathMetrics(svg)
+    const coverRect = metrics ? getDotShapeCoverRect(metrics) : getSvgViewBoxRegion(svg)
+
+    if (!coverRect) {
+      return
+    }
+
     const gradientId = "dot-gradient-definition"
     const gradient = createBackgroundShapeGradient(svg, state.dataModulesGradient, {
       height: coverRect.height,
@@ -681,41 +710,60 @@ function createDotsGradientExtension(
       return
     }
 
-    suppressDotMatrixBaseLayers(dotLayers)
-    suppressDotMatrixBasePathLayers(dotPathLayers)
+    getOrCreateSvgDefs(svg).appendChild(gradient)
 
-    const group = document.createElementNS(SVG_NS, "g")
-    const defs = document.createElementNS(SVG_NS, "defs")
-    const clipPath = document.createElementNS(SVG_NS, "clipPath")
-    const clipPathId = "dot-gradient-clip"
+    const gradientFill = `url('#${gradientId}')`
 
-    group.setAttribute("data-qr-layer", "dot-gradient")
-    defs.setAttribute("data-qr-layer", "dot-gradient-defs")
-    clipPath.setAttribute("id", clipPathId)
-    clipPath.setAttribute("data-qr-layer", "dot-gradient-clip")
-
-    for (const shape of allDotShapes) {
-      const clonedShape = shape.cloneNode(true) as SVGElement
-      clonedShape.removeAttribute("clip-path")
-      clipPath.appendChild(clonedShape)
+    for (const target of paintTargets) {
+      target.setAttribute("fill", gradientFill)
+      target.setAttribute("data-qr-layer", "dot-gradient-fill")
+      target.removeAttribute("opacity")
     }
-
-    defs.appendChild(gradient)
-    defs.appendChild(clipPath)
-    group.appendChild(defs)
-
-    const gradientFill = document.createElementNS(SVG_NS, "rect")
-    gradientFill.setAttribute("x", formatSvgNumber(coverRect.x))
-    gradientFill.setAttribute("y", formatSvgNumber(coverRect.y))
-    gradientFill.setAttribute("width", formatSvgNumber(coverRect.width))
-    gradientFill.setAttribute("height", formatSvgNumber(coverRect.height))
-    gradientFill.setAttribute("clip-path", `url('#${clipPathId}')`)
-    gradientFill.setAttribute("fill", `url('#${gradientId}')`)
-    gradientFill.setAttribute("data-qr-layer", "dot-gradient-fill")
-    group.appendChild(gradientFill)
-
-    svg.insertBefore(group, findDotMatrixLayerAnchor(svg))
   }
+}
+
+function removeLegacyDotGradientOverlay(svg: SVGElement) {
+  for (const node of svg.querySelectorAll('[data-qr-layer="dot-gradient"]')) {
+    if (node.tagName.toLowerCase() === "g") {
+      node.remove()
+    }
+  }
+
+  for (const node of svg.querySelectorAll('[data-qr-layer="dot-gradient-definition"]')) {
+    node.remove()
+  }
+}
+
+function getDataModulesPathMetrics(svg: SVGElement) {
+  const dataModules = svg.querySelector('[data-testid="data-modules"]')
+
+  if (!isSvgElementLike(dataModules)) {
+    return null
+  }
+
+  const pathData = dataModules.getAttribute("d")
+
+  if (!pathData) {
+    return null
+  }
+
+  const document = dataModules.ownerDocument
+
+  if (!document) {
+    return null
+  }
+
+  const shapes = splitSvgPathData(pathData).map((segment) => {
+    const shape = document.createElementNS(SVG_NS, "path")
+    shape.setAttribute("d", segment)
+    return shape
+  })
+
+  if (shapes.length === 0) {
+    return null
+  }
+
+  return collectDotMatrixMetrics(shapes) ?? getFallbackDotMatrixMetrics(shapes)
 }
 
 function getDotShapeCoverRect(metrics: DotMatrixMetrics) {
@@ -929,18 +977,6 @@ function splitSvgPathData(pathData: string | null) {
     .split(/(?=M\s*[+-]?(?:\d+\.?\d*|\.\d+)[\s,])/)
     .map((segment) => segment.trim())
     .filter(Boolean)
-}
-
-function suppressDotMatrixBaseLayers(dotLayers: DotClipLayer[]) {
-  for (const layer of dotLayers) {
-    layer.element.setAttribute("opacity", "0")
-  }
-}
-
-function suppressDotMatrixBasePathLayers(dotLayers: DotPathLayer[]) {
-  for (const layer of dotLayers) {
-    layer.element.setAttribute("opacity", "0")
-  }
 }
 
 function createDotPaletteShapeGroups(
@@ -3205,7 +3241,9 @@ function createFinderPatternGradientExtension(
     }
 
     svg.querySelectorAll(`[data-qr-layer="${groupLayer}"]`).forEach((node) => {
-      node.remove()
+      if (node.tagName.toLowerCase() === "g") {
+        node.remove()
+      }
     })
 
     const patterns = Array.from(svg.querySelectorAll(`[data-testid="${testId}"]`)).filter(
@@ -3223,15 +3261,34 @@ function createFinderPatternGradientExtension(
       return
     }
 
+    const cornerElements = buildFinderCornerGradientElements(
+      patterns,
+      cornerRegions,
+      document,
+      testId,
+    )
+
+    if (cornerElements.length !== cornerRegions.length) {
+      return
+    }
+
     const group = document.createElementNS(SVG_NS, "g")
-    const defs = document.createElementNS(SVG_NS, "defs")
-
     group.setAttribute("data-qr-layer", groupLayer)
-    group.appendChild(defs)
+    const defs = getOrCreateSvgDefs(svg)
+    const parent = patterns[0]?.parentNode ?? svg
+    const insertReference = patterns[0]?.nextSibling ?? findDotMatrixLayerAnchor(svg)
 
-    let overlaysCreated = 0
+    for (const pattern of patterns) {
+      pattern.remove()
+    }
 
-    for (const region of cornerRegions) {
+    for (const [index, region] of cornerRegions.entries()) {
+      const element = cornerElements[index]
+
+      if (!element) {
+        continue
+      }
+
       const gradientId = `${gradientIdPrefix}${Math.round(region.x)}-${Math.round(region.y)}-1`
       const gradientElement = createBackgroundShapeGradient(svg, gradient, {
         height: region.height,
@@ -3246,45 +3303,206 @@ function createFinderPatternGradientExtension(
         continue
       }
 
-      const clipPathId = `clip-path-${gradientId}`
-      const clipPath = document.createElementNS(SVG_NS, "clipPath")
-
-      clipPath.setAttribute("id", clipPathId)
-      clipPath.setAttribute("data-qr-layer", `${groupLayer}-clip`)
-
-      for (const pattern of patterns) {
-        const clonedPattern = pattern.cloneNode(true) as SVGElement
-        clonedPattern.removeAttribute("clip-path")
-        clonedPattern.removeAttribute("opacity")
-        clipPath.appendChild(clonedPattern)
-      }
-
       defs.appendChild(gradientElement)
-      defs.appendChild(clipPath)
 
-      const gradientFill = document.createElementNS(SVG_NS, "rect")
-      gradientFill.setAttribute("x", formatSvgNumber(region.x))
-      gradientFill.setAttribute("y", formatSvgNumber(region.y))
-      gradientFill.setAttribute("width", formatSvgNumber(region.width))
-      gradientFill.setAttribute("height", formatSvgNumber(region.height))
-      gradientFill.setAttribute("clip-path", `url('#${clipPathId}')`)
-      gradientFill.setAttribute("fill", `url('#${gradientId}')`)
-      gradientFill.setAttribute("data-qr-layer", `${groupLayer}-fill`)
-      group.appendChild(gradientFill)
-      overlaysCreated += 1
+      const painted = element.cloneNode(true) as SVGElement
+      painted.setAttribute("fill", `url('#${gradientId}')`)
+      painted.setAttribute("data-qr-layer", `${groupLayer}-fill`)
+      painted.removeAttribute("opacity")
+
+      const customCornerLayer = element.getAttribute("data-qr-layer")
+
+      if (customCornerLayer === "custom-corner-dot") {
+        painted.setAttribute("data-qr-layer", "custom-corner-dot")
+      }
+      group.appendChild(painted)
     }
 
-    if (overlaysCreated !== cornerRegions.length) {
-      group.remove()
+    if (group.children.length === 0) {
       return
     }
 
-    for (const pattern of patterns) {
-      pattern.setAttribute("opacity", "0")
+    if (insertReference && insertReference.parentNode === parent) {
+      parent.insertBefore(group, insertReference)
+      return
     }
 
-    svg.insertBefore(group, findDotMatrixLayerAnchor(svg))
+    parent.appendChild(group)
   }
+}
+
+function buildFinderCornerGradientElements(
+  patterns: SVGElement[],
+  cornerRegions: FinderCornerRegion[],
+  document: Document,
+  testId: "finder-patterns-inner" | "finder-patterns-outer",
+) {
+  if (patterns.length === cornerRegions.length) {
+    return sortFinderElementsByCornerRegions(patterns, cornerRegions).map(
+      (pattern) => pattern.cloneNode(true) as SVGElement,
+    )
+  }
+
+  if (patterns.length === 1) {
+    return splitFinderPatternIntoCornerElements(patterns[0], cornerRegions, document, testId)
+  }
+
+  return []
+}
+
+function sortFinderElementsByCornerRegions(
+  patterns: SVGElement[],
+  cornerRegions: FinderCornerRegion[],
+) {
+  return [...patterns].sort((left, right) => {
+    const leftIndex = getFinderElementCornerIndex(left, cornerRegions)
+    const rightIndex = getFinderElementCornerIndex(right, cornerRegions)
+
+    return leftIndex - rightIndex
+  })
+}
+
+function splitFinderPatternIntoCornerElements(
+  pattern: SVGElement,
+  cornerRegions: FinderCornerRegion[],
+  document: Document,
+  testId: "finder-patterns-inner" | "finder-patterns-outer",
+) {
+  const tagName = pattern.tagName.toLowerCase()
+
+  if (tagName !== "path") {
+    return cornerRegions.map(() => pattern.cloneNode(true) as SVGElement)
+  }
+
+  const groupedSubpaths = cornerRegions.map(() => [] as string[])
+
+  for (const subpath of splitSvgPathData(pattern.getAttribute("d"))) {
+    const start = getSvgPathSubpathStartPoint(subpath)
+
+    if (!start) {
+      continue
+    }
+
+    const cornerIndex = getFinderCornerIndexForPoint(start, cornerRegions)
+    groupedSubpaths[cornerIndex]?.push(subpath)
+  }
+
+  return groupedSubpaths.map((subpaths, index) => {
+    if (subpaths.length === 0) {
+      return null
+    }
+
+    const path = document.createElementNS(SVG_NS, "path")
+    path.setAttribute("d", subpaths.join(""))
+    path.setAttribute("data-testid", testId)
+    copyFinderPatternPresentation(pattern, path)
+    return path
+  }).filter((element): element is SVGElement => element !== null)
+}
+
+function copyFinderPatternPresentation(source: SVGElement, target: SVGElement) {
+  for (const attribute of ["class", "shape-rendering", "style", "transform", "fill-rule"]) {
+    const value = source.getAttribute(attribute)
+
+    if (value) {
+      target.setAttribute(attribute, value)
+    }
+  }
+
+  const layer = source.getAttribute("data-qr-layer")
+
+  if (layer) {
+    target.setAttribute("data-qr-layer", layer)
+  }
+}
+
+function getFinderElementCornerIndex(element: SVGElement, cornerRegions: FinderCornerRegion[]) {
+  const tagName = element.tagName.toLowerCase()
+
+  if (tagName === "rect") {
+    const x = Number.parseFloat(element.getAttribute("x") ?? "")
+    const y = Number.parseFloat(element.getAttribute("y") ?? "")
+    const width = Number.parseFloat(element.getAttribute("width") ?? "0")
+    const height = Number.parseFloat(element.getAttribute("height") ?? "0")
+
+    if (Number.isFinite(x) && Number.isFinite(y)) {
+      return getFinderCornerIndexForPoint(
+        { x: x + width / 2, y: y + height / 2 },
+        cornerRegions,
+      )
+    }
+  }
+
+  if (tagName === "path") {
+    const transform = element.getAttribute("transform")
+
+    if (transform) {
+      const translateMatch = transform.match(/translate\(([-\d.]+)[,\s]+([-\d.]+)\)/)
+      const x = Number.parseFloat(translateMatch?.[1] ?? "")
+      const y = Number.parseFloat(translateMatch?.[2] ?? "")
+
+      if (Number.isFinite(x) && Number.isFinite(y)) {
+        return getFinderCornerIndexForPoint({ x: x + 1.5, y: y + 1.5 }, cornerRegions)
+      }
+    }
+
+    const start = getSvgPathSubpathStartPoint(element.getAttribute("d"))
+
+    if (start) {
+      return getFinderCornerIndexForPoint(start, cornerRegions)
+    }
+  }
+
+  return 0
+}
+
+function getFinderCornerIndexForPoint(
+  point: { x: number; y: number },
+  cornerRegions: FinderCornerRegion[],
+) {
+  for (const [index, region] of cornerRegions.entries()) {
+    if (
+      point.x >= region.x &&
+      point.x <= region.x + region.width &&
+      point.y >= region.y &&
+      point.y <= region.y + region.height
+    ) {
+      return index
+    }
+  }
+
+  let closestIndex = 0
+  let closestDistance = Number.POSITIVE_INFINITY
+
+  for (const [index, region] of cornerRegions.entries()) {
+    const centerX = region.x + region.width / 2
+    const centerY = region.y + region.height / 2
+    const distance = (point.x - centerX) ** 2 + (point.y - centerY) ** 2
+
+    if (distance < closestDistance) {
+      closestDistance = distance
+      closestIndex = index
+    }
+  }
+
+  return closestIndex
+}
+
+function getSvgPathSubpathStartPoint(pathData: string | null) {
+  const match = (pathData ?? "").trim().match(/^M\s*([+-]?(?:\d+\.?\d*|\.\d+))[\s,]+([+-]?(?:\d+\.?\d*|\.\d+))/)
+
+  if (!match) {
+    return null
+  }
+
+  const x = Number.parseFloat(match[1] ?? "")
+  const y = Number.parseFloat(match[2] ?? "")
+
+  if (!Number.isFinite(x) || !Number.isFinite(y)) {
+    return null
+  }
+
+  return { x, y }
 }
 
 function getSvgViewBoxRegion(svg: SVGElement) {

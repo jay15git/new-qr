@@ -57,6 +57,7 @@ export function toReactQrCodeProps(state: QrStudioState): ReactQRCodeProps {
     minVersion: Math.max(1, state.qrOptions.typeNumber || 1),
     size: qrSize,
     svgProps: {
+      xmlns: "http://www.w3.org/2000/svg",
       style: {
         borderRadius: `${clampQrBackgroundRound(state.backgroundOptions.round) * 100}%`,
         display: "block",

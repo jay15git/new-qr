@@ -10,11 +10,26 @@ function targetUsesReactDependencies(target: CodegenTarget) {
   return target.framework === "react"
 }
 
+function targetNeedsRuntimeQrPackage(target: CodegenTarget, ir: SceneIr) {
+  if (ir.animatedQr) {
+    return true
+  }
+
+  if (!domLayersUseQrPackage(ir.domLayers ?? [])) {
+    return false
+  }
+
+  if (isCodeExportTarget(target)) {
+    return target.format !== "svg"
+  }
+
+  return target.framework !== "svg"
+}
+
 export function buildCodegenManifest(ir: SceneIr, target: CodegenTarget) {
   const dependencies: Record<string, string> = {}
   const needsShaders = ir.shaders.length > 0
-  const needsAnimatedQr = Boolean(ir.animatedQr)
-  const needsQrPackage = needsAnimatedQr || domLayersUseQrPackage(ir.domLayers ?? [])
+  const needsQrPackage = targetNeedsRuntimeQrPackage(target, ir)
   const usesReact = targetUsesReactDependencies(target)
 
   if (needsQrPackage) {

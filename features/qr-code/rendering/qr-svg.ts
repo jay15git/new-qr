@@ -10,6 +10,7 @@ import {
 } from "@/features/qr-code/rendering/svg-extension"
 import { type QrStudioState } from "@/features/qr-code/model/state"
 import { toReactQrCodeProps } from "@/features/qr-code/adapters/react-qr-adapter"
+import { alignReactQrSvgToModuleGrid } from "@/features/workspace/rendering/qr-artwork"
 
 export function createDashboardSurfaceQrState(state: QrStudioState): QrStudioState {
   return {
@@ -63,7 +64,13 @@ export function applyStudioQrSvgMarkupExtensions(markup: string, state: QrStudio
     result = applyQrSvgExtension(result, cornerExtension, state)
   }
 
-  return result
+  const renderedDimensions = getQrRenderedDimensions(state)
+
+  return alignReactQrSvgToModuleGrid(
+    result,
+    renderedDimensions.width,
+    renderedDimensions.height,
+  )
 }
 
 function applyQrSvgExtension(

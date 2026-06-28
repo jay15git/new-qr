@@ -13,6 +13,13 @@ import {
   type QrStudioState,
 } from "@/features/qr-code/model/state"
 import type { QrFileExtension } from "@/features/qr-code/model/types"
+import {
+  parseNestedQrSvgMetrics,
+  parseSvgViewBoxSize,
+  snapDimensionToViewBoxGrid,
+  snapLayeredRasterDimensionsToQrModuleGrid,
+} from "@/features/workspace/rendering/qr-artwork"
+import { getQrModuleCount } from "@/features/qr-code/scan-safety-legacy/matrix"
 
 const DASHBOARD_RASTER_EXPORT_MAX_DIMENSION = 4096
 
@@ -68,6 +75,24 @@ export function clampDashboardRasterTargetSize(value: number) {
   return Math.max(1, Math.min(DASHBOARD_RASTER_EXPORT_MAX_DIMENSION, Math.round(value)))
 }
 
+function resolveQrModuleUnitsForRasterSnap(markup: string, state: QrStudioState) {
+  const nested = parseNestedQrSvgMetrics(markup)
+
+  if (nested) {
+    return nested.moduleUnits
+  }
+
+  const viewBox = parseSvgViewBoxSize(markup)
+
+  if (viewBox && viewBox.width <= 200) {
+    return viewBox.width
+  }
+
+  const margin = Math.max(0, Math.floor(state.margin))
+
+  return getQrModuleCount(state) + margin * 2
+}
+
 export function getDashboardRasterExportDimensions(
   state: QrStudioState,
   qualityPercent: number,
@@ -77,12 +102,19 @@ export function getDashboardRasterExportDimensions(
 
   if (targetSizePx !== undefined) {
     const targetSize = clampDashboardRasterTargetSize(targetSizePx)
+    const moduleUnits = resolveQrModuleUnitsForRasterSnap(
+      renderDashboardQrSvgMarkup(state),
+      state,
+    )
+    const snappedTargetSize = moduleUnits
+      ? snapDimensionToViewBoxGrid(targetSize, moduleUnits)
+      : targetSize
 
     return {
-      height: targetSize,
-      requestedScale: targetSize / Math.max(1, renderedDimensions.width),
-      scale: targetSize / Math.max(1, renderedDimensions.width),
-      width: targetSize,
+      height: snappedTargetSize,
+      requestedScale: snappedTargetSize / Math.max(1, renderedDimensions.width),
+      scale: snappedTargetSize / Math.max(1, renderedDimensions.width),
+      width: snappedTargetSize,
     }
   }
 

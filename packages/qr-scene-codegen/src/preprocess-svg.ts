@@ -9,11 +9,16 @@ export function flattenNestedSvgs(svg: string) {
 
     const next = result.replace(
       /<svg\b([^>]*)>((?:(?!<svg\b)[\s\S])*?)<\/svg>/,
-      (_, attrs: string, inner: string) => {
+      (match, attrs: string, inner: string) => {
         const attr = (name: string) => {
           const match = attrs.match(new RegExp(`\\b${name}\\s*=\\s*(['"])([^'"]*)\\1`))
           return match ? match[2] : null
         }
+
+        if (attr("viewBox")) {
+          return match
+        }
+
         const x = Number.parseFloat(attr("x") ?? "0") || 0
         const y = Number.parseFloat(attr("y") ?? "0") || 0
         const w = Number.parseFloat(attr("width") ?? "0")
@@ -76,6 +81,8 @@ export function prefixSvgIds(svg: string, prefix: string) {
     result = result.replaceAll(`id="${id}"`, `id="${nextId}"`)
     result = result.replaceAll(`id='${id}'`, `id='${nextId}'`)
     result = result.replaceAll(`url(#${id})`, `url(#${nextId})`)
+    result = result.replaceAll(`url('#${id}')`, `url('#${nextId}')`)
+    result = result.replaceAll(`url("#${id}")`, `url("#${nextId}")`)
     result = result.replaceAll(`href="#${id}"`, `href="#${nextId}"`)
     result = result.replaceAll(`xlink:href="#${id}"`, `xlink:href="#${nextId}"`)
   }

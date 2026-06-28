@@ -9,6 +9,10 @@ import {
   getLossyRasterEncoderQuality,
   type DashboardRasterExtension,
 } from "@/features/qr-code/export/raster-export"
+import {
+  parseNestedQrSvgMetrics,
+  snapLayeredRasterDimensionsToQrModuleGrid,
+} from "@/features/workspace/rendering/qr-artwork"
 
 const DASHBOARD_QR_NODE_EXPORT_MAX_DIMENSION = 4096
 
@@ -103,12 +107,10 @@ async function renderDashboardQrNodeExport({
   targetSizePx,
 }: Omit<DashboardQrNodeExportOptions, "name">) {
   if (extension === "svg") {
-    return {
-      blob: new Blob([node.originalSvgMarkup], {
-        type: "image/svg+xml;charset=utf-8",
-      }),
-      extension,
-    }
+    const blob = new Blob([node.originalSvgMarkup], {
+      type: "image/svg+xml;charset=utf-8",
+    })
+    return { blob, extension }
   }
 
   const dimensions = getDashboardQrNodeRasterDimensions(
@@ -122,14 +124,13 @@ async function renderDashboardQrNodeExport({
     dimensions.height,
   )
 
-  return {
-    blob: await canvasToBlob(
-      canvas,
-      getMimeTypeForRasterExtension(extension),
-      extension === "png" ? undefined : getLossyRasterEncoderQuality(qualityPercent),
-    ),
-    extension,
-  }
+  const blob = await canvasToBlob(
+    canvas,
+    getMimeTypeForRasterExtension(extension),
+    extension === "png" ? undefined : getLossyRasterEncoderQuality(qualityPercent),
+  )
+
+  return { blob, extension }
 }
 
 function getDashboardQrNodeRasterDimensions(
@@ -137,29 +138,55 @@ function getDashboardQrNodeRasterDimensions(
   qualityPercent: number,
   targetSizePx?: number,
 ) {
+  let dimensions: { height: number; width: number }
+
   if (targetSizePx !== undefined) {
     const targetSize = clampDashboardRasterTargetSize(targetSizePx)
+    const maxNatural = Math.max(node.naturalWidth, node.naturalHeight)
 
-    return {
-      height: targetSize,
-      width: targetSize,
+    if (maxNatural <= 0) {
+      dimensions = {
+        height: targetSize,
+        width: targetSize,
+      }
+    } else {
+      const scale = targetSize / maxNatural
+
+      dimensions = {
+        height: Math.max(1, Math.round(node.naturalHeight * scale)),
+        width: Math.max(1, Math.round(node.naturalWidth * scale)),
+      }
+    }
+  } else {
+    const requestedScale = getDashboardRasterExportScale(qualityPercent)
+    const effectiveScale = Math.max(
+      1,
+      Math.min(
+        requestedScale,
+        DASHBOARD_QR_NODE_EXPORT_MAX_DIMENSION / node.naturalWidth,
+        DASHBOARD_QR_NODE_EXPORT_MAX_DIMENSION / node.naturalHeight,
+      ),
+    )
+
+    dimensions = {
+      height: Math.max(1, Math.round(node.naturalHeight * effectiveScale)),
+      width: Math.max(1, Math.round(node.naturalWidth * effectiveScale)),
     }
   }
 
-  const requestedScale = getDashboardRasterExportScale(qualityPercent)
-  const effectiveScale = Math.max(
-    1,
-    Math.min(
-      requestedScale,
-      DASHBOARD_QR_NODE_EXPORT_MAX_DIMENSION / node.naturalWidth,
-      DASHBOARD_QR_NODE_EXPORT_MAX_DIMENSION / node.naturalHeight,
-    ),
-  )
+  const qrMetrics = parseNestedQrSvgMetrics(node.originalSvgMarkup)
 
-  return {
-    height: Math.max(1, Math.round(node.naturalHeight * effectiveScale)),
-    width: Math.max(1, Math.round(node.naturalWidth * effectiveScale)),
+  if (!qrMetrics) {
+    return dimensions
   }
+
+  return snapLayeredRasterDimensionsToQrModuleGrid({
+    exportHeight: dimensions.height,
+    exportWidth: dimensions.width,
+    naturalHeight: node.naturalHeight,
+    naturalWidth: node.naturalWidth,
+    qrMetrics,
+  })
 }
 
 function getMimeTypeForRasterExtension(extension: DashboardRasterExtension) {
