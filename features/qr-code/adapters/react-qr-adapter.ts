@@ -1,12 +1,14 @@
-import type { QrGradientSettings, ReactQRCodeProps } from "@/features/qr-code/model/types";
+import type { QrGradientSettings, QrFinderPatternInnerStyle, ReactQRCodeProps } from "@/features/qr-code/model/types";
 import {
   clampQrBackgroundRound,
   clampQrSize,
   getAssetValue,
   hasActiveBackgroundShapeOptions,
   type QrStudioState,
+  type StudioCornerDotStyle,
   type StudioGradient,
 } from "@/features/qr-code/model/state";
+import { isCustomCornerDotShape } from "@/features/qr-code/styles/custom-corner-dot-shapes";
 
 export function toReactQrCodeProps(state: QrStudioState): ReactQRCodeProps {
   const logoImage = getAssetValue(state.logo);
@@ -34,7 +36,7 @@ export function toReactQrCodeProps(state: QrStudioState): ReactQRCodeProps {
     },
     finderPatternInnerSettings: {
       color: state.finderPatternInnerSettings.color,
-      style: state.finderPatternInnerSettings.type,
+      style: resolveFinderInnerStyle(state.finderPatternInnerSettings.type),
     },
     finderPatternOuterSettings: {
       color: state.finderPatternOuterSettings.color,
@@ -64,6 +66,10 @@ export function toReactQrCodeProps(state: QrStudioState): ReactQRCodeProps {
     },
     value: state.data.trim(),
   };
+}
+
+function resolveFinderInnerStyle(type: StudioCornerDotStyle): QrFinderPatternInnerStyle {
+  return isCustomCornerDotShape(type) ? "square" : type;
 }
 
 function getDotsColor(state: QrStudioState) {

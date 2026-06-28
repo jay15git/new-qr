@@ -8,10 +8,10 @@ import { buildCodegenExportFromWorkspace } from "@/features/qr-code/export/codeg
 import type {
   QrErrorCorrectionLevel,
   QrFileExtension,
-  QrFinderPatternInnerStyle,
   QrFinderPatternOuterStyle,
   QrTypeNumber,
 } from "@/features/qr-code/model/types"
+import type { StudioCornerDotStyle } from "@/features/qr-code/model/state"
 
 import {
   DraftingBackgroundColorTab,
@@ -608,7 +608,7 @@ export function WorkspaceSurface({
     "solid",
   ])
   const [selectedQrFinderPatternInnerStyle, setSelectedQrFinderPatternInnerStyle] =
-    useState<QrFinderPatternInnerStyle>("circle")
+    useState<StudioCornerDotStyle>("circle")
   const [selectedCornerDotColorMode, setSelectedCornerDotColorMode] =
     useState<DraftingBinaryColorMode>(
       DEFAULT_DRAFTING_STUDIO_STATE.finderPatternInnerGradient.enabled ? "gradient" : "solid",

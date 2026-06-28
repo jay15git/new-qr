@@ -62,6 +62,18 @@ describe("StylePreview", () => {
     expect(leafMarkup).not.toBe(squareMarkup)
   })
 
+  it("renders custom corner-dot previews at the inner finder origin", () => {
+    const markup = renderToStaticMarkup(
+      <StylePreview previewKind="corner-dot" value="orbit-weave" />,
+    )
+
+    expect(markup).toContain('data-slot="style-preview-corner-dot"')
+    expect(markup).toContain('data-corner-dot-renderer="custom-path"')
+    expect(markup).toContain('viewBox="1.65 1.65 3.7 3.7"')
+    expect(markup).toContain('transform="translate(2.12')
+    expect(markup).toContain("M 228 0")
+  })
+
   it("renders corner-square previews from a real qr code, cropped to the top-left finder", () => {
     const roundedMarkup = renderToStaticMarkup(
       <StylePreview previewKind="corner-square" value="rounded-lg" />,

@@ -170,6 +170,36 @@ describe("dashboard qr svg helpers", () => {
     )
   })
 
+  it("renders custom corner dot shapes into the dashboard payload", async () => {
+    const state = createDefaultQrStudioState()
+    state.finderPatternInnerSettings.type = "orbit-weave"
+
+    const markup = renderDashboardQrSvgMarkup(state)
+
+    expect(markup).toContain('data-testid="finder-patterns-inner"')
+    expect(markup).toContain('data-qr-layer="custom-corner-dot"')
+    expect(markup).toContain("M 228 0")
+    expect(markup).not.toMatch(
+      /<rect[^>]+data-testid="finder-patterns-inner"/,
+    )
+  })
+
+  it("applies corner dot gradients to custom inner patterns", () => {
+    const state = createDefaultQrStudioState()
+    state.finderPatternInnerSettings.type = "rounded-plus"
+    state.finderPatternInnerGradient = TEST_DOT_GRADIENT
+
+    const markup = renderDashboardQrSvgMarkup(state)
+    const dotFillSizes = getGradientFillSizes(markup, "corner-dot-gradient-fill")
+
+    expect(markup).toContain('data-qr-layer="corner-dot-gradient"')
+    expect(markup).toContain('data-qr-layer="custom-corner-dot"')
+    expect(dotFillSizes).toHaveLength(3)
+    expect(markup).toMatch(
+      /<path[^>]+data-testid="finder-patterns-inner"[^>]+opacity="0"/,
+    )
+  })
+
   it("applies corner dot gradients to finder inner patterns", () => {
     const state = createDefaultQrStudioState()
     state.finderPatternInnerGradient = TEST_DOT_GRADIENT

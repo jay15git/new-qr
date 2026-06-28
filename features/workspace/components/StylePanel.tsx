@@ -13,11 +13,11 @@ import {
 import { Search01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import type {
-  QrFinderPatternInnerStyle,
   QrFinderPatternOuterStyle,
   QrErrorCorrectionLevel,
   QrTypeNumber,
 } from "@/features/qr-code/model/types"
+import type { StudioCornerDotStyle } from "@/features/qr-code/model/state"
 
 import FileUpload from "@/components/vendor/kokonutui/file-upload"
 import {
@@ -2469,8 +2469,8 @@ export function DraftingCornerDotStyleTab({
   onValueChange,
   value,
 }: {
-  onValueChange: (value: QrFinderPatternInnerStyle) => void
-  value: QrFinderPatternInnerStyle
+  onValueChange: (value: StudioCornerDotStyle) => void
+  value: StudioCornerDotStyle
 }) {
   return (
     <DraftingOptionCardGrid

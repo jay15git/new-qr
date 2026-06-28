@@ -12,12 +12,12 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useEffect, useId, useMemo, useState, type CSSProperties, type ReactNode } from "react"
 import type {
-  QrFinderPatternInnerStyle,
   QrFinderPatternOuterStyle,
   QrErrorCorrectionLevel,
   QrFileExtension,
   QrTypeNumber,
 } from "@/features/qr-code/model/types"
+import type { StudioCornerDotStyle } from "@/features/qr-code/model/state"
 import {
   AlignCenterIcon,
   AlignLeftIcon,
@@ -407,7 +407,7 @@ export type DesktopCornersSettings = {
   cornerDotColorMode: DesktopCornerColorMode
   cornerDotGradient: StudioGradient
   cornerDotSolidColor: string
-  cornerDotType: QrFinderPatternInnerStyle
+  cornerDotType: StudioCornerDotStyle
   cornerSquareColorMode: DesktopCornerColorMode
   cornerSquareGradient: StudioGradient
   cornerSquareSolidColor: string
@@ -2733,7 +2733,7 @@ function DesktopCornerStyleButton({
   previewKind: Extract<StylePreviewKind, "corner-dot" | "corner-square">
   selected: boolean
   target: "corner dot" | "corner frame"
-  value: QrFinderPatternInnerStyle | QrFinderPatternOuterStyle
+  value: StudioCornerDotStyle | QrFinderPatternOuterStyle
 }) {
   return (
     <button

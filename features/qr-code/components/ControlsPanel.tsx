@@ -43,12 +43,12 @@ import { Slider as UnlumenSlider } from "@/components/vendor/unlumen-ui/slider"
 import { cn } from "@/lib/utils"
 import type {
   QrDrawType,
-  QrFinderPatternInnerStyle,
   QrFinderPatternOuterStyle,
   QrGradientType,
   QrMode,
   QrTypeNumber,
 } from "@/features/qr-code/model/types"
+import type { StudioCornerDotStyle } from "@/features/qr-code/model/state"
 
 import { getActiveCustomDotShape } from "@/features/qr-code/styles/custom-dot-shapes"
 import {
@@ -571,7 +571,7 @@ export function ControlsPanel({
           ...current,
           finderPatternInnerSettings: {
             ...current.finderPatternInnerSettings,
-            type: value as QrFinderPatternInnerStyle,
+            type: value as StudioCornerDotStyle,
           },
         }))
       }
@@ -588,7 +588,7 @@ export function ControlsPanel({
           ...current,
           finderPatternInnerSettings: {
             ...current.finderPatternInnerSettings,
-            type: value as QrFinderPatternInnerStyle,
+            type: value as StudioCornerDotStyle,
           },
         }))
       }

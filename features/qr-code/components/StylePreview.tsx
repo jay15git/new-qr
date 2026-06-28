@@ -3,6 +3,12 @@ import type { SVGProps } from "react"
 import { ReactQRCode } from "@lglab/react-qr-code"
 
 import {
+  buildCustomCornerDotTransform,
+  getCustomCornerDotShapeGeometry,
+  isCustomCornerDotShape,
+  type CustomCornerDotShape,
+} from "@/features/qr-code/styles/custom-corner-dot-shapes"
+import {
   DOT_STYLE_PREVIEW_ROWS,
   isDotStylePreviewDark,
 } from "@/features/qr-code/styles/style-preview"
@@ -16,6 +22,8 @@ const FINDER_FRAME_PREVIEW_VIEW_BOX = "0 0 7 7"
 // tips and reads as blunt corners in the option tiles.
 const FINDER_DOT_PREVIEW_VIEW_BOX = "1.65 1.65 3.7 3.7"
 const FINDER_PREVIEW_SIZE = 64
+// Matches @lglab/react-qr-code inner finder placement with marginSize={0}.
+const FINDER_DOT_PREVIEW_ORIGIN = 2
 
 export function StylePreview({
   color,
@@ -132,6 +140,16 @@ function CornerDotStylePreview({
 }) {
   const previewColor = color ?? "currentColor"
 
+  if (isCustomCornerDotShape(value)) {
+    return (
+      <CustomCornerDotStylePreview
+        color={previewColor}
+        shape={value}
+        value={value}
+      />
+    )
+  }
+
   return (
     <FinderPatternPreview
       finderPatternInnerSettings={{ color: previewColor, style: value as never }}
@@ -142,6 +160,44 @@ function CornerDotStylePreview({
       style={value}
       viewBox={FINDER_DOT_PREVIEW_VIEW_BOX}
     />
+  )
+}
+
+function CustomCornerDotStylePreview({
+  color,
+  shape,
+  value,
+}: {
+  color: string
+  shape: CustomCornerDotShape
+  value: string
+}) {
+  const geometry = getCustomCornerDotShapeGeometry(
+    shape,
+    FINDER_DOT_PREVIEW_ORIGIN,
+    FINDER_DOT_PREVIEW_ORIGIN,
+    3,
+  )
+
+  return (
+    <svg
+      aria-hidden="true"
+      className={PREVIEW_ICON_CLASS_NAME}
+      data-corner-dot-renderer="custom-path"
+      data-preview-kind="corner-dot"
+      data-preview-style={value}
+      data-slot="style-preview-corner-dot"
+      fill="none"
+      viewBox={FINDER_DOT_PREVIEW_VIEW_BOX}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d={geometry.d}
+        fill={color}
+        fillRule={geometry.fillRule}
+        transform={buildCustomCornerDotTransform(geometry)}
+      />
+    </svg>
   )
 }
 

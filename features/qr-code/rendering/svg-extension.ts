@@ -25,6 +25,11 @@ import {
   type StudioGradient,
 } from "@/features/qr-code/model/state"
 import { getBackgroundShapeSkewTransform } from "@/features/workspace/rendering/layer-transform"
+import {
+  buildCustomCornerDotTransform,
+  getCustomCornerDotShapeGeometry,
+  isCustomCornerDotShape,
+} from "@/features/qr-code/styles/custom-corner-dot-shapes"
 
 type QrAnimationRenderMode = "export" | "none" | "preview"
 export type QrSvgExtensionOptions = {
@@ -44,6 +49,12 @@ const DOT_MATRIX_QUIET_TRACK_INDEX = -1
 
 export function buildQrExtension(state: QrStudioState) {
   const extensions: QrSvgExtensionFunction[] = []
+  const customCornerDotExtension = createCustomCornerDotExtension(state)
+
+  if (customCornerDotExtension) {
+    extensions.push(customCornerDotExtension)
+  }
+
   const backgroundImage = getAssetValue(state.backgroundImage)
   const backgroundShape = backgroundImage
     ? null
@@ -129,6 +140,7 @@ export function getQrExtensionKey(state: QrStudioState) {
     finderPatternInnerGradient: state.finderPatternInnerGradient.enabled
       ? state.finderPatternInnerGradient
       : null,
+    finderPatternInnerType: state.finderPatternInnerSettings.type,
     finderPatternOuterGradient: state.finderPatternOuterGradient.enabled
       ? state.finderPatternOuterGradient
       : null,
@@ -405,6 +417,123 @@ function annotateFinderPatternsForBitjson(svg: SVGElement) {
       appendSvgClass(element, "position-center")
     }
   }
+}
+
+function createCustomCornerDotExtension(
+  state: Pick<QrStudioState, "finderPatternInnerSettings">,
+): QrSvgExtensionFunction | null {
+  const shape = state.finderPatternInnerSettings.type
+
+  if (!isCustomCornerDotShape(shape)) {
+    return null
+  }
+
+  const color = state.finderPatternInnerSettings.color
+
+  return (svg) => {
+    const document = svg.ownerDocument
+
+    if (!document) {
+      return
+    }
+
+    const existing = Array.from(
+      svg.querySelectorAll('[data-testid="finder-patterns-inner"]'),
+    ).filter(isSvgElementLike)
+
+    if (existing.length === 0) {
+      return
+    }
+
+    const regions = existing.map((element) => getFinderInnerElementRegion(element)).filter(
+      (region): region is FinderInnerElementRegion => region !== null,
+    )
+
+    if (regions.length === 0) {
+      return
+    }
+
+    const insertBefore = existing.at(-1)?.nextSibling ?? null
+
+    for (const element of existing) {
+      element.remove()
+    }
+
+    for (const region of regions) {
+      const geometry = getCustomCornerDotShapeGeometry(shape, region.x, region.y, region.size)
+      const path = document.createElementNS(SVG_NS, "path")
+
+      path.setAttribute("d", geometry.d)
+      path.setAttribute("fill", color)
+      path.setAttribute("transform", buildCustomCornerDotTransform(geometry))
+      path.setAttribute("data-testid", "finder-patterns-inner")
+      path.setAttribute("data-qr-layer", "custom-corner-dot")
+
+      if (geometry.fillRule) {
+        path.setAttribute("fill-rule", geometry.fillRule)
+      }
+
+      if (insertBefore) {
+        svg.insertBefore(path, insertBefore)
+      } else {
+        svg.appendChild(path)
+      }
+    }
+  }
+}
+
+type FinderInnerElementRegion = {
+  size: number
+  x: number
+  y: number
+}
+
+function getFinderInnerElementRegion(element: SVGElement): FinderInnerElementRegion | null {
+  const tagName = element.tagName.toLowerCase()
+
+  if (tagName === "rect") {
+    const x = Number.parseFloat(element.getAttribute("x") ?? "")
+    const y = Number.parseFloat(element.getAttribute("y") ?? "")
+    const width = Number.parseFloat(element.getAttribute("width") ?? "3")
+    const height = Number.parseFloat(element.getAttribute("height") ?? "3")
+
+    if (!Number.isFinite(x) || !Number.isFinite(y)) {
+      return null
+    }
+
+    return {
+      x,
+      y,
+      size: Number.isFinite(width) && Number.isFinite(height) ? Math.min(width, height) : 3,
+    }
+  }
+
+  if (tagName === "path") {
+    const transform = element.getAttribute("transform")
+
+    if (!transform) {
+      return null
+    }
+
+    const translateMatch = transform.match(
+      /translate\(([-\d.]+)[,\s]+([-\d.]+)\)/,
+    )
+
+    if (!translateMatch) {
+      return null
+    }
+
+    const x = Number.parseFloat(translateMatch[1] ?? "")
+    const y = Number.parseFloat(translateMatch[2] ?? "")
+
+    if (!Number.isFinite(x) || !Number.isFinite(y)) {
+      return null
+    }
+
+    return { x, y, size: 3 }
+  }
+
+  return null
 }
 
 function createDotsPaletteExtension(

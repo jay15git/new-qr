@@ -1,4 +1,5 @@
 import type { QrBackgroundShapeId } from "@/features/qr-code/styles/background-shapes";
+import type { CustomCornerDotShape } from "@/features/qr-code/styles/custom-corner-dot-shapes";
 import type {
   QrDataModulesStyle,
   QrDrawType,
@@ -9,6 +10,8 @@ import type {
   QrMode,
   QrTypeNumber,
 } from "@/features/qr-code/model/types";
+
+export type StudioCornerDotStyle = QrFinderPatternInnerStyle | CustomCornerDotShape;
 
 export type GradientStop = {
   offset: number;
@@ -194,7 +197,7 @@ export type QrStudioState = {
     color: string;
   };
   finderPatternInnerSettings: {
-    type: QrFinderPatternInnerStyle;
+    type: StudioCornerDotStyle;
     color: string;
   };
   backgroundOptions: {
