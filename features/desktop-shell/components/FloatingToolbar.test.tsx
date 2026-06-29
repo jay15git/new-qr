@@ -391,9 +391,23 @@ describe("FloatingToolbar", () => {
     expect(inspector?.querySelector('[data-slot="desktop-pattern-chooser"]')).toBeNull()
     expect(inspector?.textContent).toContain("Module Pattern")
     expect(inspector?.textContent).toContain("Module Color")
+    expect(inspector?.textContent).toContain("Error correction")
+    expect(inspector?.querySelector('[data-slot="desktop-pattern-error-correction"]')).not.toBeNull()
     expect(inspector?.textContent).toContain("Patterns")
     expect(inspector?.textContent).not.toContain("Reset Pattern")
     expect(surface.container.querySelector('input[placeholder="Search patterns"]')).toBeNull()
+  })
+
+  it("updates error correction from the pattern inspector", async () => {
+    const surface = await renderPrototype()
+    await openTool(surface.container, "pattern")
+
+    const highCorrection = getRequiredButton(surface.container, "Use H error correction")
+
+    await clickButton(highCorrection)
+
+    expect(highCorrection.getAttribute("aria-selected")).toBe("true")
+    expect(surface.container.textContent).toContain("≈30% recovery")
   })
 
   it("keeps module color mode controls flat until selected", async () => {

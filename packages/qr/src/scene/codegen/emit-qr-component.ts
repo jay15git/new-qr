@@ -11,7 +11,14 @@ function formatReactPropValue(key: string, value: unknown) {
     return `{${JSON.stringify(value)}}`
   }
 
-  if (key === "gradient" || key === "logo" || key === "palette") {
+  if (
+    key === "gradient" ||
+    key === "backgroundGradient" ||
+    key === "finderInnerGradient" ||
+    key === "finderOuterGradient" ||
+    key === "logo" ||
+    key === "palette"
+  ) {
     return `{${JSON.stringify(value)}}`
   }
 

@@ -661,6 +661,14 @@ const DESKTOP_DOTS_COLOR_MODES: Array<{ label: string; value: DotsColorMode }> =
   { label: "Patterns", value: "palette" },
 ]
 
+const DESKTOP_ERROR_CORRECTION_LEVEL_OPTIONS: Array<{
+  label: string
+  value: QrErrorCorrectionLevel
+}> = ERROR_CORRECTION_LEVEL_OPTIONS.map((option) => ({
+  label: option.label,
+  value: option.value,
+}))
+
 const DESKTOP_CORNER_COLOR_MODES: Array<{ label: string; value: DesktopCornerColorMode }> = [
   { label: "Solid", value: "solid" },
   { label: "Gradient", value: "gradient" },
@@ -3900,10 +3908,14 @@ function DesktopContentInspector({
 
 function DesktopPatternInspector({
   desktopTheme,
+  errorCorrectionLevel,
+  onErrorCorrectionLevelChange,
   onPatternSettingsChange,
   settings,
 }: {
   desktopTheme: DesktopThemeMode
+  errorCorrectionLevel: QrErrorCorrectionLevel
+  onErrorCorrectionLevelChange: (errorCorrectionLevel: QrErrorCorrectionLevel) => void
   onPatternSettingsChange: (patch: Partial<DesktopPatternSettings>) => void
   settings: DesktopPatternSettings
 }) {
@@ -4079,6 +4091,24 @@ function DesktopPatternInspector({
               ) : null}
             </div>
           ) : null}
+        </DesktopInspectorSection>
+
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
+          <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Error correction</p>
+          <DesktopInspectorSegmentedControl
+            columns={4}
+            dataSlot="desktop-pattern-error-correction"
+            itemAriaLabel={(option) => `Use ${option.label} error correction`}
+            items={DESKTOP_ERROR_CORRECTION_LEVEL_OPTIONS}
+            value={errorCorrectionLevel}
+            onValueChange={onErrorCorrectionLevelChange}
+          />
+          <p className={cn("mt-2", DESKTOP_INSPECTOR_CAPTION_CLASS, DESKTOP_INSPECTOR_FG_TERTIARY)}>
+            {
+              ERROR_CORRECTION_LEVEL_OPTIONS.find((option) => option.value === errorCorrectionLevel)
+                ?.summary
+            }
+          </p>
         </DesktopInspectorSection>
       </DesktopInspectorScrollArea>
 
@@ -5852,7 +5882,11 @@ export function DesktopFloatingInspector({
       ) : activeTool === "pattern" ? (
         <DesktopPatternInspector
           desktopTheme={actualDesktopTheme}
+          errorCorrectionLevel={actualEncodingSettings.errorCorrectionLevel}
           settings={actualPatternSettings}
+          onErrorCorrectionLevelChange={(errorCorrectionLevel) =>
+            onEncodingSettingsChange({ errorCorrectionLevel })
+          }
           onPatternSettingsChange={onPatternSettingsChange}
         />
       ) : activeTool === "corners" ? (

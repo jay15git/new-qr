@@ -9,6 +9,8 @@ describe("toPortableQrConfig", () => {
 
     expect(toPortableQrConfig(state)).toEqual({
       background: "#f8fafc",
+      backgroundGradient: "none",
+      boostLevel: true,
       colorMode: "solid",
       finderInner: "circle",
       finderOuter: "rounded-lg",
@@ -18,7 +20,9 @@ describe("toPortableQrConfig", () => {
       finderOuterGradient: "none",
       foreground: "#111827",
       gradient: "none",
+      level: "Q",
       margin: 12,
+      minVersion: 1,
       module: "rounded",
       moduleRoundSize: true,
       motion: "none",

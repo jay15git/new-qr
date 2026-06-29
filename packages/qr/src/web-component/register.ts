@@ -121,7 +121,13 @@ export function emitNewQrCodeAttributes(props: NewQrCodeProps) {
 
   const entries: Array<[string, unknown]> = [
     ["value", props.value],
+    ["level", props.level],
+    ["min-version", props.minVersion],
+    ["boost-level", props.boostLevel],
+    ["aria-label", props.ariaLabel],
     ["module", props.module],
+    ["module-size", props.moduleSize],
+    ["module-line-width", props.moduleLineWidth],
     ["finder-inner", props.finderInner],
     ["finder-outer", props.finderOuter],
     ["finder-inner-color", props.finderInnerColor],
@@ -130,6 +136,7 @@ export function emitNewQrCodeAttributes(props: NewQrCodeProps) {
     ["finder-outer-gradient", props.finderOuterGradient],
     ["foreground", props.foreground],
     ["background", props.background],
+    ["background-gradient", props.backgroundGradient],
     ["margin", props.margin],
     ["size", props.size],
     ["color-mode", props.colorMode],
@@ -138,6 +145,7 @@ export function emitNewQrCodeAttributes(props: NewQrCodeProps) {
     ["motion-preset", props.motionPreset],
     ["gradient", props.gradient],
     ["logo", props.logo],
+    ["module-round-size", props.moduleRoundSize],
   ]
 
   for (const [key, value] of entries) {

@@ -4,7 +4,12 @@ import {
   resolveBitjsonMotionPreset,
   type QrStudioState,
 } from "@/features/qr-code/model/state"
-import type { NewQrCodeProps, QrFinderStyle, QrModuleStyle } from "@new-qr/qr"
+import type {
+  NewQrCodeProps,
+  QrFinderInnerStyle,
+  QrFinderOuterStyle,
+  QrModuleStyle,
+} from "@new-qr/qr"
 
 function mapBackground(state: QrStudioState): NewQrCodeProps["background"] {
   const backgroundImage = getAssetValue(state.backgroundImage)
@@ -48,6 +53,24 @@ function mapStudioGradient(
   }
 }
 
+function mapBackgroundGradient(state: QrStudioState): NewQrCodeProps["backgroundGradient"] {
+  const backgroundImage = getAssetValue(state.backgroundImage)
+  const customBackgroundSurfaceActive =
+    !backgroundImage &&
+    (state.backgroundShapeId !== "none" ||
+      hasActiveBackgroundShapeOptions(state.backgroundShapeOptions))
+
+  if (
+    backgroundImage ||
+    customBackgroundSurfaceActive ||
+    state.backgroundOptions.transparent
+  ) {
+    return "none"
+  }
+
+  return mapStudioGradient(state.backgroundGradient, state.backgroundGradient.enabled)
+}
+
 function mapGradient(state: QrStudioState): NewQrCodeProps["gradient"] {
   if (state.dotsColorMode !== "gradient") {
     return "none"
@@ -63,6 +86,7 @@ function mapLogo(state: QrStudioState): NewQrCodeProps["logo"] | undefined {
   }
 
   return {
+    crossOrigin: state.imageOptions.crossOrigin,
     excavate: state.imageOptions.hideBackgroundDots,
     size: state.imageOptions.imageSize,
     src,
@@ -86,9 +110,11 @@ export function toPortableQrConfig(state: QrStudioState): NewQrCodeProps {
 
   return {
     background: mapBackground(state),
+    backgroundGradient: mapBackgroundGradient(state),
+    boostLevel: true,
     colorMode: state.dotsColorMode,
-    finderInner: state.finderPatternInnerSettings.type as QrFinderStyle,
-    finderOuter: state.finderPatternOuterSettings.type as QrFinderStyle,
+    finderInner: state.finderPatternInnerSettings.type as QrFinderInnerStyle,
+    finderOuter: state.finderPatternOuterSettings.type as QrFinderOuterStyle,
     finderInnerColor: state.finderPatternInnerSettings.color,
     finderOuterColor: state.finderPatternOuterSettings.color,
     finderInnerGradient: mapStudioGradient(
@@ -101,7 +127,9 @@ export function toPortableQrConfig(state: QrStudioState): NewQrCodeProps {
     ),
     foreground: state.dataModulesSettings.color,
     gradient: mapGradient(state),
+    level: state.qrOptions.errorCorrectionLevel,
     margin: state.margin,
+    minVersion: Math.max(1, state.qrOptions.typeNumber || 1),
     module: state.dataModulesSettings.type as QrModuleStyle,
     moduleRoundSize: state.dataModulesSettings.roundSize,
     motion: motion.motion,

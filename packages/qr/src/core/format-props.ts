@@ -1,6 +1,9 @@
 import type { NewQrCodeProps } from "../types"
 
 const DEFAULTS: Partial<NewQrCodeProps> = {
+  boostLevel: true,
+  level: "Q",
+  minVersion: 1,
   module: "square",
   finderInner: "square",
   finderOuter: "square",
@@ -11,6 +14,7 @@ const DEFAULTS: Partial<NewQrCodeProps> = {
   colorMode: "solid",
   motion: "none",
   gradient: "none",
+  backgroundGradient: "none",
 }
 
 export function formatPortableQrPropsForCodegen(props: NewQrCodeProps) {
@@ -19,7 +23,13 @@ export function formatPortableQrPropsForCodegen(props: NewQrCodeProps) {
   }
 
   const entries: Array<keyof NewQrCodeProps> = [
+    "level",
+    "minVersion",
+    "boostLevel",
+    "ariaLabel",
     "module",
+    "moduleSize",
+    "moduleLineWidth",
     "finderInner",
     "finderOuter",
     "finderInnerColor",
@@ -28,6 +38,7 @@ export function formatPortableQrPropsForCodegen(props: NewQrCodeProps) {
     "finderOuterGradient",
     "foreground",
     "background",
+    "backgroundGradient",
     "margin",
     "size",
     "colorMode",
@@ -51,7 +62,7 @@ export function formatPortableQrPropsForCodegen(props: NewQrCodeProps) {
       continue
     }
 
-    if (key === "gradient" && value === "none") {
+    if ((key === "gradient" || key === "backgroundGradient") && value === "none") {
       continue
     }
 
