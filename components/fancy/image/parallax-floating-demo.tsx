@@ -17,9 +17,14 @@ const Preview = () => {
 
   return (
     <div
-      className="flex w-dvw h-dvh justify-center items-center bg-black overflow-hidden"
+      className="relative flex w-dvw h-dvh justify-center items-center overflow-hidden"
       ref={scope}
     >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center bg-no-repeat brightness-[0.55]"
+        style={{ backgroundImage: "url('/backgrounds/ascii-landscape.png')" }}
+      />
       <motion.div
         className="z-50 text-center space-y-4 items-center flex flex-col"
         initial={{ opacity: 0, y: 10 }}
