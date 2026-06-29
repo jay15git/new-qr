@@ -1,6 +1,6 @@
-import type { SceneIr, SceneIrFontRef, SceneIrShaderNode } from "@new-qr/qr-scene-codegen"
-import { shaderRequiresImage } from "@new-qr/qr-scene-shaders"
-import type { SceneDocumentV1 } from "@new-qr/qr-scene-schema"
+import type { SceneIr, SceneIrFontRef, SceneIrShaderNode } from "@new-qr/qr-internal/codegen"
+import { shaderRequiresImage } from "@new-qr/qr/shaders"
+import type { SceneDocumentV1 } from "@new-qr/qr-internal/scene"
 
 import {
   resolveBitjsonMotionPreset,

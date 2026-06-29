@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 
-import type { CodeExportTarget } from "@new-qr/qr-scene-codegen"
+import type { CodeExportTarget } from "@new-qr/qr-internal/codegen"
 
 type CodeExportOption = {
   id: string

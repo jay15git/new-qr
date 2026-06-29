@@ -1,4 +1,4 @@
-import type { DomLayerNode } from "@new-qr/qr-scene-codegen"
+import type { DomLayerNode } from "@new-qr/qr-internal/codegen"
 
 import { buildDraftingQrBackgroundSvgPayload } from "@/features/workspace/components/QrBackground"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"

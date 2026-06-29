@@ -1,5 +1,5 @@
 import type { DraftingCardState } from "@/features/workspace/model/card-state"
-import { captureShaderCanvasSnapshot } from "@new-qr/qr-scene-export"
+import { captureShaderCanvasSnapshot } from "@new-qr/qr-internal/export"
 
 export async function captureCardShaderSnapshots(
   root: ParentNode | null,

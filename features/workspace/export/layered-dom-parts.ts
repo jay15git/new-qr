@@ -1,4 +1,4 @@
-import { type DomLayerNode } from "@new-qr/qr-scene-codegen"
+import { type DomLayerNode } from "@new-qr/qr-internal/codegen"
 
 import type { DraftingCardState } from "@/features/workspace/model/card-state"
 import {

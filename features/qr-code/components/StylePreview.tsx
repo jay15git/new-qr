@@ -1,6 +1,6 @@
 import type { SVGProps } from "react"
 
-import { ReactQRCode } from "@lglab/react-qr-code"
+import { ReactQRCode } from "@new-qr/qr-internal/react-qr-code"
 
 import {
   buildCustomCornerDotTransform,
@@ -22,7 +22,7 @@ const FINDER_FRAME_PREVIEW_VIEW_BOX = "0 0 7 7"
 // tips and reads as blunt corners in the option tiles.
 const FINDER_DOT_PREVIEW_VIEW_BOX = "1.65 1.65 3.7 3.7"
 const FINDER_PREVIEW_SIZE = 64
-// Matches @lglab/react-qr-code inner finder placement with marginSize={0}.
+// Matches @new-qr/qr-internal/react-qr-code inner finder placement with marginSize={0}.
 const FINDER_DOT_PREVIEW_ORIGIN = 2
 
 export function StylePreview({

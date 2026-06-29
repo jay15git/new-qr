@@ -1,4 +1,4 @@
-import { adaptExternalQRCodeSVG } from "@bitjson/qr-code/dist/collection/components/qr-code/qr-svg-adapter.js";
+import { adaptExternalQRCodeSVG } from "@new-qr/qr-internal/bitjson-vendor";
 
 import { annotateCanvasSvgForBitjsonMotion } from "@/features/qr-code/rendering/svg-extension";
 import type { QrStudioState } from "@/features/qr-code/model/state";

@@ -1,5 +1,5 @@
-import type { CodeExportTarget } from "@new-qr/qr-scene-codegen"
-import { buildCodegenOutput } from "@new-qr/qr-scene-codegen"
+import type { CodeExportTarget } from "@new-qr/qr-internal/codegen"
+import { buildCodegenOutput } from "@new-qr/qr-internal/codegen"
 
 import { buildSceneIr } from "@/features/qr-code/export/build-scene-ir"
 import type { DraftingWorkspaceDocumentV1 } from "@/features/workspace/model/document"

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
 
 import { buildSceneEmbedSnippet } from "./scene-document-export"
-import { SCENE_DOCUMENT_VERSION } from "@new-qr/qr-scene-schema"
+import { SCENE_DOCUMENT_VERSION } from "@new-qr/qr-internal/scene"
 
 vi.mock("@/features/workspace/export/layered-export", () => ({
   buildDraftingLayeredNodePayload: vi.fn(async () => ({

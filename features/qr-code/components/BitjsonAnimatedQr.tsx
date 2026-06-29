@@ -1,6 +1,6 @@
 "use client";
 
-import { defineCustomElements } from "@bitjson/qr-code/dist/esm";
+import { defineCustomElements } from "@new-qr/qr-internal/bitjson-vendor";
 import { useEffect, useMemo, useRef, type CSSProperties } from "react";
 
 import {

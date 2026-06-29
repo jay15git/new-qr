@@ -1,8 +1,8 @@
 import {
   buildSceneDependencyManifest,
   inlineSceneAssets,
-} from "@new-qr/qr-scene-core"
-import { emitLiveReact } from "@new-qr/qr-scene-codegen"
+} from "@new-qr/qr-internal/scene"
+import { emitLiveReact } from "@new-qr/qr-internal/codegen"
 import {
   SCENE_DOCUMENT_VERSION,
   type SceneCardState,
@@ -10,7 +10,7 @@ import {
   type SceneLayer,
   type SceneQrMotionState,
   type SceneQrState,
-} from "@new-qr/qr-scene-schema"
+} from "@new-qr/qr-internal/scene"
 
 import {
   resolveBitjsonAutoAnimatePreset,
@@ -211,7 +211,7 @@ export function buildSceneEmbedSnippet(scene: SceneDocumentV1, options: { locked
   const reactCode = `/** Required:
  * ${installCommand}
  */
-import { QrScene } from "@new-qr/qr-scene/react"
+import { QrScene } from "@new-qr/qr/react"
 ${options.locked || !scene.sceneId ? "" : 'import scene from "./my-qr-card.scene.json"\n'}
 export function MyQrCard() {
   return <QrScene ${sceneRef} mode="live" />

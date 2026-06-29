@@ -1,7 +1,0 @@
-export { QrScene } from "@new-qr/qr-scene-react"
-export type { QrSceneProps } from "@new-qr/qr-scene-react"
-export { AnimatedQr } from "@new-qr/qr-scene-bitjson"
-export { PaperShaderLayer } from "@new-qr/qr-scene-paper"
-export { exportScene, exportSceneSvg } from "@new-qr/qr-scene-export"
-export * from "@new-qr/qr-scene-schema"
-export * from "@new-qr/qr-scene-core"

@@ -2,24 +2,55 @@
   "name": "@new-qr/qr",
   "version": "0.1.0",
   "private": true,
+  "description": "Customizable QR code, animated QR, and paper shader React components",
+  "license": "MIT",
   "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "vendor/bitjson-qr-code/dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run"
+  },
   "exports": {
-    ".": "./src/index.ts",
-    "./core": "./src/core/index.ts",
-    "./react": "./src/react/index.ts",
-    "./web-component": "./src/web-component/index.ts",
-    "./shaders": "./src/shaders/index.ts",
-    "./animated": "./src/animated/index.ts"
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
+    "./react": {
+      "types": "./src/react/index.ts",
+      "import": "./src/react/index.ts"
+    },
+    "./animated": {
+      "types": "./src/animated/index.ts",
+      "import": "./src/animated/index.ts"
+    },
+    "./shaders": {
+      "types": "./src/shaders/index.ts",
+      "import": "./src/shaders/index.ts"
+    }
   },
   "dependencies": {
-    "@lglab/react-qr-code": "^1.7.0",
-    "@new-qr/qr-scene-bitjson": "workspace:*",
-    "@new-qr/qr-scene-paper": "workspace:*",
-    "@new-qr/qr-scene-react": "workspace:*",
-    "@new-qr/qr-scene-shaders": "workspace:*"
+    "@paper-design/shaders": "0.0.76",
+    "@paper-design/shaders-react": "0.0.76"
   },
   "peerDependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react": "^18 || ^19",
+    "react-dom": "^18 || ^19"
+  },
+  "peerDependenciesMeta": {
+    "@paper-design/shaders": {
+      "optional": true
+    },
+    "@paper-design/shaders-react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.4"
   }
 }

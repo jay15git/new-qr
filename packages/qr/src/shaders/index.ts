@@ -1,1 +1,2 @@
-export * from "@new-qr/qr-scene-shaders"
+export * from "../scene/shaders"
+export { PaperShaderLayer } from "../scene/paper"

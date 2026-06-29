@@ -5,7 +5,7 @@ This version has breaking changes. Read the relevant guide in `node_modules/next
 <!-- END:nextjs-agent-rules -->
 
 ## Stack
-- Single-package `pnpm` app using Next.js `16.2.3`, React `19`, Tailwind CSS `4`, Vitest `4`, shadcn/ui (`radix-nova`), and `@lglab/react-qr-code`.
+- Single-package `pnpm` app using Next.js `16.2.3`, React `19`, Tailwind CSS `4`, Vitest `4`, shadcn/ui (`radix-nova`), and `@new-qr/qr` (vendored react-qr + scene tooling).
 - Use `pnpm`; the repo is locked with `pnpm-lock.yaml`.
 
 ## Commands
@@ -22,7 +22,7 @@ This version has breaking changes. Read the relevant guide in `node_modules/next
 - `app/page.tsx` is the home route; renders `HomePromptShell` from `components/home/`.
 - `/desktop` is the active desktop workspace and `/mobile` is the mobile shell.
 - `/new`, `/dashboard`, and `/settings` have been removed. Do not re-add features or fixes there unless explicitly asked.
-- `components/qr/qr-studio-state.ts` is the core state and mapper layer. Update this first when adding new controls, defaults, or `@lglab/react-qr-code` options.
+- `features/qr-code/model/state.ts` is the core QR state and mapper layer. Update this first when adding new controls, defaults, or renderer options.
 - `components/qr/qr-control-sections.tsx` is the large control-surface form. Follow its existing inline `setState` pattern unless there is a clear reason to refactor.
 - `components/drafting/drafting-surface.tsx` is the shared drafting UI used by `/desktop`.
 - `lib/utils.ts` only provides `cn()`.
@@ -44,6 +44,17 @@ This version has breaking changes. Read the relevant guide in `node_modules/next
 - Tailwind theme tokens and shadcn CSS variables live in `app/globals.css`.
 - shadcn config lives in `components.json` and uses the `radix-nova` style.
 - There is no checked-in CI workflow, formatter config, or pre-commit hook config in this repo, so verify locally with lint, typecheck, tests, and build before claiming completion.
+
+## `@new-qr/qr` package layout
+- Publishable library lives in `packages/qr/`. One npm package, three public component families:
+  - `@new-qr/qr/react` — `NewQrCode`, `QrScene`
+  - `@new-qr/qr/animated` — `AnimatedQr`
+  - `@new-qr/qr/shaders` — `PaperShaderLayer`
+  - `@new-qr/qr` — shared types and `NewQrCode` re-export
+- Studio-only code (codegen, export, scene schema, vendored renderers) is imported via `@new-qr/qr-internal/*` paths in `tsconfig.json`. These are **not** in `packages/qr/package.json` exports.
+- Vendored forks: `packages/qr/vendor/react-qr-code`, `packages/qr/vendor/bitjson-qr-code`.
+- Build library: `pnpm build:packages` (or `pnpm --filter @new-qr/qr build`).
+- Registry stubs for copied canvas components: `registry/components/{new-qr-code,paper-shader-layer,animated-qr,new-qr-scene}.tsx`.
 
 ## Search / Editing Gotchas
 - Exclude `.next` and `node_modules` when searching; they create noisy false positives.

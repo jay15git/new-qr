@@ -1,10 +1,7 @@
 import type { JSX as ReactJSX } from "react";
 
-declare module "@bitjson/qr-code/dist/esm" {
+declare module "@new-qr/qr-internal/bitjson-vendor" {
   export function defineCustomElements(window: Window): void;
-}
-
-declare module "@bitjson/qr-code/dist/collection/components/qr-code/qr-svg-adapter.js" {
   export function adaptExternalQRCodeSVG(
     externalSvg: string,
     options: {

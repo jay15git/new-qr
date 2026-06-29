@@ -1,3 +1,3 @@
 "use client"
 
-export { PaperShaderLayer } from "@new-qr/qr-scene-paper"
+export { PaperShaderLayer } from "@new-qr/qr/shaders"

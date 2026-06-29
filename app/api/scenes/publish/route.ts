@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-import { migrateSceneDocument } from "@new-qr/qr-scene-schema"
+import { migrateSceneDocument } from "@new-qr/qr-internal/scene"
 import { publishSceneDocument } from "@/lib/scene-publish-store"
 
 export async function POST(request: Request) {

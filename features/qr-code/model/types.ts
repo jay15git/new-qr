@@ -5,7 +5,7 @@ import type {
   FinderPatternOuterStyle,
   GradientSettings,
   ReactQRCodeProps,
-} from "@lglab/react-qr-code"
+} from "@new-qr/qr-internal/react-qr-code"
 
 export type QrFileExtension = "png" | "jpeg" | "webp" | "svg"
 export type QrDrawType = "svg" | "canvas"

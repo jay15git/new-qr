@@ -13,7 +13,7 @@ import {
   SOURCE_MID_OPACITY,
   SOURCE_PEAK_OPACITY,
   type QRCodeAnimationSettings,
-} from "../../../.external/qr-code/src/components/qr-code/animations";
+} from "../../../packages/qr/vendor/bitjson-qr-code/src/components/qr-code/animations";
 
 const defaultOpacitySettings: QRCodeAnimationSettings = {
   dotMatrixOpacityBase: 0.16,

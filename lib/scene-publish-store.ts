@@ -1,4 +1,4 @@
-import type { SceneDocumentV1 } from "@new-qr/qr-scene-schema"
+import type { SceneDocumentV1 } from "@new-qr/qr-internal/scene"
 
 type PublishedSceneRecord = {
   latestVersion: number

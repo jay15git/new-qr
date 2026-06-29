@@ -8,7 +8,7 @@ import {
   type CSSProperties,
 } from "react"
 
-import type { DomLayerNode } from "@new-qr/qr-scene-codegen"
+import type { DomLayerNode } from "@new-qr/qr-internal/codegen"
 
 function domLayerStyleToCss(properties: Record<string, string | number>): CSSProperties {
   return properties as CSSProperties

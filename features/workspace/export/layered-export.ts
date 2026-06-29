@@ -1,4 +1,4 @@
-import { emitSvg, preprocessSvg } from "@new-qr/qr-scene-codegen"
+import { emitSvg, preprocessSvg } from "@new-qr/qr-internal/codegen"
 
 import { buildSceneIr } from "@/features/qr-code/export/build-scene-ir"
 import type { DraftingCardState } from "@/features/workspace/model/card-state"

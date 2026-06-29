@@ -3,7 +3,7 @@ import type {
   FinderPatternInnerStyle,
   FinderPatternOuterStyle,
   ReactQRCodeProps,
-} from "@lglab/react-qr-code"
+} from "../react-qr-code"
 
 import type { NewQrCodeProps } from "../types"
 

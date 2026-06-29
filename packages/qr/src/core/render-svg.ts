@@ -1,4 +1,4 @@
-import { ReactQRCode } from "@lglab/react-qr-code"
+import { ReactQRCode } from "../react-qr-code"
 import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 

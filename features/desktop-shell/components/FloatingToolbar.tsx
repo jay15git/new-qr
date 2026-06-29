@@ -123,7 +123,7 @@ import {
   type StudioGradient,
   type StudioDataModulesStyle,
 } from "@/features/qr-code/model/state"
-import type { CodeExportTarget } from "@new-qr/qr-scene-codegen"
+import type { CodeExportTarget } from "@new-qr/qr-internal/codegen"
 import {
   degreesToRadians,
   normalizeGradientOffsetRange,

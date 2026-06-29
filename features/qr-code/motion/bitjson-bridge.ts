@@ -1,4 +1,4 @@
-import { adaptExternalQRCodeSVG } from "@bitjson/qr-code/dist/collection/components/qr-code/qr-svg-adapter.js";
+import { adaptExternalQRCodeSVG } from "@new-qr/qr-internal/bitjson-vendor";
 import { QRCodeSVG } from "qrcode.react";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";

@@ -20,21 +20,17 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@new-qr/qr-scene": ["./packages/qr-scene/src/index.ts"],
-      "@new-qr/qr-scene/schema": ["./packages/qr-scene-schema/src/index.ts"],
-      "@new-qr/qr-scene/core": ["./packages/qr-scene-core/src/index.ts"],
-      "@new-qr/qr-scene/react": ["./packages/qr-scene-react/src/index.ts"],
-      "@new-qr/qr-scene/paper": ["./packages/qr-scene-paper/src/index.ts"],
-      "@new-qr/qr-scene/bitjson": ["./packages/qr-scene-bitjson/src/index.ts"],
-      "@new-qr/qr-scene/export": ["./packages/qr-scene-export/src/index.ts"],
-      "@new-qr/qr-scene-schema": ["./packages/qr-scene-schema/src/index.ts"],
-      "@new-qr/qr-scene-core": ["./packages/qr-scene-core/src/index.ts"],
-      "@new-qr/qr-scene-react": ["./packages/qr-scene-react/src/index.ts"],
-      "@new-qr/qr-scene-paper": ["./packages/qr-scene-paper/src/index.ts"],
-      "@new-qr/qr-scene-bitjson": ["./packages/qr-scene-bitjson/src/index.ts"],
-      "@new-qr/qr-scene-export": ["./packages/qr-scene-export/src/index.ts"],
-      "@new-qr/qr-scene-codegen": ["./packages/qr-scene-codegen/src/index.ts"],
-      "@new-qr/qr-scene-shaders": ["./packages/qr-scene-shaders/src/index.ts"]
+      "@new-qr/qr": ["./packages/qr/src/index.ts"],
+      "@new-qr/qr/react": ["./packages/qr/src/react/index.ts"],
+      "@new-qr/qr/shaders": ["./packages/qr/src/shaders/index.ts"],
+      "@new-qr/qr/animated": ["./packages/qr/src/animated/index.ts"],
+      "@new-qr/qr-internal/codegen": ["./packages/qr/src/scene/codegen/index.ts"],
+      "@new-qr/qr-internal/export": ["./packages/qr/src/scene/export/index.ts"],
+      "@new-qr/qr-internal/scene": ["./packages/qr/src/scene/index.ts"],
+      "@new-qr/qr-internal/core": ["./packages/qr/src/core/index.ts"],
+      "@new-qr/qr-internal/react-qr-code": ["./packages/qr/src/react-qr-code/index.ts"],
+      "@new-qr/qr-internal/bitjson-vendor": ["./packages/qr/src/bitjson-vendor/runtime.js"],
+      "@new-qr/qr-internal/web-component": ["./packages/qr/src/web-component/index.ts"]
     }
   },
   "include": [
@@ -45,5 +41,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "packages/qr/vendor"]
 }
