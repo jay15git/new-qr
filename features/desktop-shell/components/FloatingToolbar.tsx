@@ -9,6 +9,7 @@ import {
   SaveIcon,
   ViewOffSlashIcon,
 } from "@hugeicons/core-free-icons"
+import Github01Icon from "@hugeicons/core-free-icons/Github01Icon"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useEffect, useId, useMemo, useState, type CSSProperties, type ReactNode } from "react"
 import type {
@@ -1410,7 +1411,7 @@ export function FloatingToolbar({
           <TabsSubtleIconRail
             aria-label="Desktop tools"
             data-slot="desktop-floating-toolbar"
-            className="relative min-h-0 min-w-0 overflow-x-hidden overflow-y-auto p-1.5 pt-14 text-[var(--desktop-toolbar-fg)] max-md:p-1 max-md:pt-12"
+            className="relative min-h-0 min-w-0 overflow-x-hidden overflow-y-auto px-1.5 pb-1.5 pt-0 text-[var(--desktop-toolbar-fg)] max-md:px-1 max-md:pb-1"
             selectedIndex={
               actualActiveTool
                 ? DESKTOP_TOOLBAR_TOOLS.findIndex((tool) => tool.id === actualActiveTool)
@@ -1423,36 +1424,50 @@ export function FloatingToolbar({
             selectedPillClassName="rounded-full bg-[var(--desktop-toolbar-pill-selected)]"
             hoverPillClassName="rounded-full bg-[var(--desktop-toolbar-pill-hover)]"
           >
-            {DESKTOP_TOOLBAR_TOOLS.map((tool, index) => {
-              const previousGroup = DESKTOP_TOOLBAR_TOOLS[index - 1]?.group
-              const startsGroup = index > 0 && tool.group !== previousGroup
+            <div
+              className={cn(
+                DESKTOP_INSPECTOR_HEADER_CLASS,
+                "min-h-11 w-full shrink-0",
+              )}
+              data-slot="desktop-toolbar-brand"
+            >
+              <HugeiconsIcon icon={Github01Icon} size={18} color="currentColor" strokeWidth={1.8} />
+            </div>
+            <div
+              className="mt-3 flex w-full flex-col items-center"
+              data-slot="desktop-toolbar-tools"
+            >
+              {DESKTOP_TOOLBAR_TOOLS.map((tool, index) => {
+                const previousGroup = DESKTOP_TOOLBAR_TOOLS[index - 1]?.group
+                const startsGroup = index > 0 && tool.group !== previousGroup
 
-              return (
-                <div key={tool.id} className="contents">
-                  {startsGroup ? <TabsSubtleIconRailSeparator /> : null}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <TabsSubtleIconRailItem
-                        aria-label={`Open ${tool.title}`}
-                        data-desktop-tool-button="true"
-                        data-tool-id={tool.id}
-                        index={index}
+                return (
+                  <div key={tool.id} className="contents">
+                    {startsGroup ? <TabsSubtleIconRailSeparator /> : null}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <TabsSubtleIconRailItem
+                          aria-label={`Open ${tool.title}`}
+                          data-desktop-tool-button="true"
+                          data-tool-id={tool.id}
+                          index={index}
+                        >
+                          {tool.renderIcon()}
+                        </TabsSubtleIconRailItem>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        hideArrow
+                        side="right"
+                        sideOffset={10}
+                        className="border border-white/[0.12] bg-[#15161a] text-white shadow-xl"
                       >
-                        {tool.renderIcon()}
-                      </TabsSubtleIconRailItem>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      hideArrow
-                      side="right"
-                      sideOffset={10}
-                      className="border border-white/[0.12] bg-[#15161a] text-white shadow-xl"
-                    >
-                      {tool.title}
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-              )
-            })}
+                        {tool.title}
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                )
+              })}
+            </div>
           </TabsSubtleIconRail>
 
           {activeToolConfig || controller?.selectedElementLayer ? (
@@ -2213,50 +2228,10 @@ export function DesktopThemeStyles() {
   )
 }
 
-function DesktopInspectorHeader({
-  title,
-  canRedo,
-  canUndo,
-  onRedo,
-  onUndo,
-  showHistoryActions = false,
-}: {
-  title: string
-  canRedo?: boolean
-  canUndo?: boolean
-  onRedo?: () => void
-  onUndo?: () => void
-  showHistoryActions?: boolean
-}) {
-  if (!showHistoryActions) {
-    return (
-      <div className={DESKTOP_INSPECTOR_HEADER_CLASS}>
-        <h2 className={DESKTOP_INSPECTOR_PANEL_TITLE_CLASS}>{title}</h2>
-      </div>
-    )
-  }
-
+function DesktopInspectorHeader({ title }: { title: string }) {
   return (
-    <div className="grid min-w-0 grid-cols-[2.25rem_1fr_2.25rem] items-center px-4 py-3">
-      <button
-        aria-label="Undo"
-        className={DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS}
-        disabled={!canUndo || !onUndo}
-        type="button"
-        onClick={onUndo}
-      >
-        <Undo2Icon className="size-3.5" />
-      </button>
-      <h2 className={cn(DESKTOP_INSPECTOR_PANEL_TITLE_CLASS, "text-center")}>{title}</h2>
-      <button
-        aria-label="Redo"
-        className={cn(DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS, "justify-self-end")}
-        disabled={!canRedo || !onRedo}
-        type="button"
-        onClick={onRedo}
-      >
-        <Redo2Icon className="size-3.5" />
-      </button>
+    <div className={DESKTOP_INSPECTOR_HEADER_CLASS}>
+      <h2 className={DESKTOP_INSPECTOR_PANEL_TITLE_CLASS}>{title}</h2>
     </div>
   )
 }
@@ -3892,8 +3867,6 @@ function DesktopPatternPalettePresetButton({
 
 function DesktopContentInspector({
   accessibilitySettings,
-  canRedo,
-  canUndo,
   contentType,
   contentValues,
   desktopTheme,
@@ -3901,13 +3874,9 @@ function DesktopContentInspector({
   onAccessibilitySettingsChange,
   onContentTypeChange,
   onContentValueChange,
-  onRedo,
-  onUndo,
   validation,
 }: {
   accessibilitySettings: DesktopAccessibilitySettings
-  canRedo?: boolean
-  canUndo?: boolean
   contentType: QrInputType
   contentValues: StaticQrContentValues
   desktopTheme: DesktopThemeMode
@@ -3915,8 +3884,6 @@ function DesktopContentInspector({
   onAccessibilitySettingsChange: (patch: Partial<DesktopAccessibilitySettings>) => void
   onContentTypeChange: (type: QrInputType) => void
   onContentValueChange: (field: string, value: StaticQrContentValue) => void
-  onRedo?: () => void
-  onUndo?: () => void
   validation: ReturnType<typeof validateStaticQrContent>
 }) {
   const [collectionId, setCollectionId] = useState<DesktopContentCollectionId>("popular")
@@ -3947,14 +3914,7 @@ function DesktopContentInspector({
 
   return (
     <div data-slot="desktop-content-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <DesktopInspectorHeader
-        canRedo={canRedo}
-        canUndo={canUndo}
-        onRedo={onRedo}
-        onUndo={onUndo}
-        showHistoryActions
-        title="Content"
-      />
+      <DesktopInspectorHeader title="Content" />
 
       <DesktopInspectorScrollArea>
         <DesktopInspectorSection dataSlot="desktop-content-type-section">
@@ -6157,8 +6117,6 @@ export function DesktopFloatingInspector({
       ) : activeTool === "content" ? (
         <DesktopContentInspector
           accessibilitySettings={actualAccessibilitySettings}
-          canRedo={controller?.canRedo}
-          canUndo={controller?.canUndo}
           contentType={actualContentType}
           contentValues={actualContentValues}
           desktopTheme={actualDesktopTheme}
@@ -6167,8 +6125,6 @@ export function DesktopFloatingInspector({
           onAccessibilitySettingsChange={onAccessibilitySettingsChange}
           onContentTypeChange={onContentTypeChange}
           onContentValueChange={onContentValueChange}
-          onRedo={controller?.onRedo}
-          onUndo={controller?.onUndo}
         />
       ) : activeTool === "pattern" ? (
         <DesktopPatternInspector
