@@ -2,20 +2,47 @@
   --desktop-settings-toolbar-chrome-gap: 1.25rem;
   --desktop-settings-toolbar-width: 380px;
   --desktop-settings-toolbar-corner-radius: 36px;
-  --desktop-settings-toolbar-chrome-left: calc(
-    var(--desktop-settings-toolbar-width) + var(--desktop-settings-toolbar-chrome-gap)
-  );
+  --desktop-top-chrome-right: 1.25rem;
 }
 
-[data-slot="desktop-top-chrome"],
-[data-slot="desktop-action-toolbar"] {
-  left: var(--desktop-settings-toolbar-chrome-left);
+[data-slot="desktop-floating-toolbar-root"] {
+  --desktop-settings-toolbar-width: 380px;
+  --desktop-settings-toolbar-chrome-gap: 1.25rem;
+  --desktop-top-chrome-right: 1.25rem;
+}
+
+[data-slot="desktop-dynamic-island-anchor"] {
+  position: fixed;
+  top: var(--desktop-top-chrome-right);
+  z-index: 30;
+  left: calc(
+    (
+        100vw + var(--desktop-settings-toolbar-width) +
+          var(--desktop-settings-toolbar-chrome-gap) - var(--desktop-top-chrome-right)
+      ) / 2
+  );
+  transform: translateX(-50%);
+  pointer-events: none;
 }
 
 @media (max-width: 768px) {
-  [data-slot="desktop-top-chrome"],
-  [data-slot="desktop-action-toolbar"] {
-    left: 1rem;
+  [data-slot="desktop-dynamic-island-anchor"] {
+    left: 50%;
+    top: 1rem;
+  }
+}
+
+[data-slot="desktop-utility-toolbar-anchor"] {
+  position: fixed;
+  top: var(--desktop-top-chrome-right);
+  right: var(--desktop-top-chrome-right);
+  z-index: 30;
+}
+
+@media (max-width: 768px) {
+  [data-slot="desktop-utility-toolbar-anchor"] {
+    top: 1rem;
+    right: 1rem;
   }
 }
 

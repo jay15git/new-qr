@@ -26,15 +26,12 @@ import {
   BoldIcon,
   ChevronDownIcon,
   ItalicIcon,
-  Redo2Icon,
-  RotateCcwIcon,
   Settings,
   ShapesIcon,
   Sparkles,
   LayoutGrid,
   TypeIcon,
   UnderlineIcon,
-  Undo2Icon,
 } from "lucide-react"
 
 import { BlocksIcon } from "@/components/vendor/animate-ui/icons/blocks"
@@ -68,7 +65,6 @@ import {
 import {
   DesktopUtilityToolbar,
   DesktopUtilityToolbarButton,
-  DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS,
   DESKTOP_UTILITY_TOOLBAR_SHELL_CLASS,
 } from "@/features/desktop-shell/components/DesktopUtilityToolbar"
 import { DesktopDynamicIslandChrome } from "@/features/desktop-shell/components/DesktopAppearanceIsland"
@@ -1308,32 +1304,37 @@ export function FloatingToolbar({
       >
         <DesktopThemeStyles />
         <div
-          className="pointer-events-none fixed top-5 right-5 z-30 grid grid-cols-[1fr_auto_1fr] items-center gap-3 max-md:left-4 max-md:right-4 max-md:top-4"
-          data-slot="desktop-top-chrome"
+          data-slot="desktop-dynamic-island-anchor"
         >
-          <div aria-hidden="true" className="pointer-events-none shrink-0 justify-self-start" />
           <div
             className={cn(
               DESKTOP_UTILITY_TOOLBAR_SHELL_CLASS,
-              "pointer-events-auto justify-self-center",
+              "pointer-events-auto",
             )}
             data-slot="desktop-dynamic-island"
             data-toolbar-appearance="desktop-glass"
           >
             <DesktopDynamicIslandChrome
               appearance={controller?.appearanceSnapshot}
+              canRedo={controller?.canRedo}
+              canUndo={controller?.canUndo}
               layerLabel={
                 controller?.selectedAppearanceLayer
                   ? `${controller.selectedAppearanceLayer.kind.charAt(0).toUpperCase()}${controller.selectedAppearanceLayer.kind.slice(1)}`
                   : null
               }
               onPatch={controller?.onAppearancePatch}
+              onRedo={controller?.onRedo}
+              onResetDefaults={controller?.onResetDefaults}
+              onUndo={controller?.onUndo}
               scanSafetyResult={controller?.scanSafetyResult}
             />
           </div>
+        </div>
+        <div data-slot="desktop-utility-toolbar-anchor">
           <DesktopUtilityToolbar
             data-slot="desktop-utility-toolbar"
-            className="pointer-events-auto shrink-0 justify-self-end"
+            className="pointer-events-auto"
           >
             <DesktopUtilityToolbarButton
               aria-label="Save"
@@ -1360,42 +1361,6 @@ export function FloatingToolbar({
               />
             </DesktopUtilityToolbarButton>
           </DesktopUtilityToolbar>
-        </div>
-        <div
-          data-slot="desktop-action-toolbar"
-          data-toolbar-appearance="desktop-glass"
-          className={cn(
-            DESKTOP_UTILITY_TOOLBAR_SHELL_CLASS,
-            "fixed bottom-4 z-30 px-2.5 max-md:left-auto max-md:right-4",
-          )}
-        >
-          <button
-            aria-label="Reset defaults"
-            className={DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS}
-            disabled={!controller?.onResetDefaults}
-            type="button"
-            onClick={controller?.onResetDefaults}
-          >
-            <RotateCcwIcon className="size-3.5" />
-          </button>
-          <button
-            aria-label="Undo"
-            className={DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS}
-            disabled={!controller?.canUndo || !controller.onUndo}
-            type="button"
-            onClick={controller?.onUndo}
-          >
-            <Undo2Icon className="size-3.5" />
-          </button>
-          <button
-            aria-label="Redo"
-            className={DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS}
-            disabled={!controller?.canRedo || !controller.onRedo}
-            type="button"
-            onClick={controller?.onRedo}
-          >
-            <Redo2Icon className="size-3.5" />
-          </button>
         </div>
         <DesktopSettingsToolbarShell
           model={model}
@@ -6037,7 +6002,7 @@ export function DesktopFloatingInspector({
             : "Tool settings"
       }
       data-slot="desktop-floating-inspector"
-      className={cn("flex min-h-0 min-w-0 flex-col overflow-hidden", className)}
+      className={cn("flex h-full min-h-0 min-w-0 flex-col overflow-hidden", className)}
     >
       {showElementInspector && controller?.selectedElementLayer ? (
         <DesktopElementInspector

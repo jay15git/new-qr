@@ -124,14 +124,15 @@ describe("FloatingToolbar", () => {
   it("toggles the desktop prototype between dark and light mode", async () => {
     const surface = await renderPrototype()
     const prototype = surface.container.querySelector('[data-slot="desktop-floating-toolbar-root"]')
-    const actionToolbar = surface.container.querySelector('[data-slot="desktop-action-toolbar"]')
+    const historyActions = surface.container.querySelector('[data-slot="desktop-history-actions"]')
     const utilityToolbar = surface.container.querySelector('[data-slot="desktop-utility-toolbar"]')
 
     expect(prototype?.getAttribute("data-desktop-theme")).toBe("dark")
-    expect(actionToolbar).not.toBeNull()
-    expect(actionToolbar?.querySelector('button[aria-label="Switch to light mode"]')).toBeNull()
+    expect(surface.container.querySelector('[data-slot="desktop-action-toolbar"]')).toBeNull()
+    expect(historyActions).not.toBeNull()
+    expect(historyActions?.querySelector('button[aria-label="Switch to light mode"]')).toBeNull()
     expect(utilityToolbar?.querySelector('[data-slot="desktop-theme-toggle"]')).toBeNull()
-    expect(Array.from(actionToolbar?.querySelectorAll("button") ?? []).map((button) => button.getAttribute("aria-label"))).toEqual([
+    expect(Array.from(historyActions?.querySelectorAll("button") ?? []).map((button) => button.getAttribute("aria-label"))).toEqual([
       "Reset defaults",
       "Undo",
       "Redo",
@@ -150,7 +151,7 @@ describe("FloatingToolbar", () => {
     expect(surface.container.querySelector('[data-slot="dashboard-compose-toolbar"]')).toBeNull()
   })
 
-  it("wires undo and redo through the top-right desktop action toolbar", async () => {
+  it("wires undo and redo through the top dynamic island history actions", async () => {
     const onUndo = vi.fn()
     const onRedo = vi.fn()
     const onResetDefaults = vi.fn()
@@ -165,31 +166,31 @@ describe("FloatingToolbar", () => {
         onUndo,
       },
     })
-    const actionToolbar = surface.container.querySelector('[data-slot="desktop-action-toolbar"]')
+    const historyActions = getRequiredElement(surface.container, '[data-slot="desktop-history-actions"]')
     const utilityToolbar = surface.container.querySelector('[data-slot="desktop-utility-toolbar"]')
 
-    expect(actionToolbar?.className).toContain("min-h-12")
-    const topChrome = surface.container.querySelector('[data-slot="desktop-top-chrome"]')
+    expect(surface.container.querySelector('[data-slot="desktop-action-toolbar"]')).toBeNull()
+    const islandAnchor = surface.container.querySelector('[data-slot="desktop-dynamic-island-anchor"]')
     const motionSource = readFileSync(
       resolve(process.cwd(), "features/desktop-shell/components/desktop-settings-toolbar-motion.css"),
       "utf8",
     )
-    expect(motionSource).toContain("--desktop-settings-toolbar-chrome-left")
-    expect(topChrome?.className).not.toContain("left-[25rem]")
-    expect(topChrome?.className).toContain("top-5")
+    expect(motionSource).toContain("--desktop-settings-toolbar-width")
+    expect(motionSource).toContain("desktop-dynamic-island-anchor")
+    expect(islandAnchor).not.toBeNull()
     expect(utilityToolbar?.className).toContain("min-h-12")
     expect(getRequiredButton(utilityToolbar as HTMLElement, "Save").className).toContain("size-9")
     expect(getRequiredButton(utilityToolbar as HTMLElement, "Download").className).toContain("size-9")
     expect(utilityToolbar?.querySelector('[data-slot="desktop-save-trigger"]')).not.toBeNull()
     expect(utilityToolbar?.querySelector('[data-slot="desktop-keyboard-shortcuts-trigger"]')).toBeNull()
-    expect(getRequiredButton(actionToolbar as HTMLElement, "Reset defaults").className).toContain("size-9")
-    expect(getRequiredButton(actionToolbar as HTMLElement, "Undo").className).toContain("size-9")
-    expect(getRequiredButton(actionToolbar as HTMLElement, "Redo").className).toContain("size-9")
+    expect(getRequiredButton(historyActions, "Reset defaults").className).toContain("size-9")
+    expect(getRequiredButton(historyActions, "Undo").className).toContain("size-9")
+    expect(getRequiredButton(historyActions, "Redo").className).toContain("size-9")
 
     await act(async () => {
-      getRequiredButton(actionToolbar as HTMLElement, "Reset defaults").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-      getRequiredButton(actionToolbar as HTMLElement, "Undo").dispatchEvent(new MouseEvent("click", { bubbles: true }))
-      getRequiredButton(actionToolbar as HTMLElement, "Redo").dispatchEvent(new MouseEvent("click", { bubbles: true }))
+      getRequiredButton(historyActions, "Reset defaults").dispatchEvent(new MouseEvent("click", { bubbles: true }))
+      getRequiredButton(historyActions, "Undo").dispatchEvent(new MouseEvent("click", { bubbles: true }))
+      getRequiredButton(historyActions, "Redo").dispatchEvent(new MouseEvent("click", { bubbles: true }))
       getRequiredButton(utilityToolbar as HTMLElement, "Download").dispatchEvent(new MouseEvent("click", { bubbles: true }))
     })
 
@@ -274,7 +275,7 @@ describe("FloatingToolbar", () => {
     expect(source).toContain('[data-slot="dashboard-compose-surface"][data-grid-visible="false"]')
     expect(source).toContain("background-image: none !important")
     expect(source).toContain('[data-slot="desktop-resize-toolbar"] button:hover')
-    expect(source).toContain('[data-slot="desktop-action-toolbar"] button:hover')
+    expect(source).toContain('[data-slot="desktop-dynamic-island"] button:hover')
     expect(source).toContain('body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="drafting-layer-floating-toolbar"] button:hover')
     expect(source).toContain("background: rgba(15, 23, 42, 0.08) !important")
     expect(source).toContain("background: rgb(255, 255, 255) !important")

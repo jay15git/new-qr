@@ -1386,14 +1386,14 @@ describe("WorkspaceSurface", () => {
     expect(utilityToolbar.querySelector('[data-slot="desktop-keyboard-shortcuts-trigger"]')).toBeNull()
     expect(utilityToolbar.querySelector('[data-slot="desktop-theme-toggle"]')).toBeNull()
     expect(composeToolbar.querySelector('[data-slot="desktop-keyboard-shortcuts-trigger"]')).not.toBeNull()
-	    const actionToolbar = getRequiredElement(surface.container, '[data-slot="desktop-action-toolbar"]')
-	    expect(actionToolbar.getAttribute("data-toolbar-appearance")).toBe("desktop-glass")
-	    expect(actionToolbar.querySelector('button[aria-label="Switch to light mode"]')).toBeNull()
-	    expect(Array.from(actionToolbar.querySelectorAll("button")).map((button) => button.getAttribute("aria-label"))).toEqual([
-	      "Reset defaults",
-	      "Undo",
-	      "Redo",
-	    ])
+    expect(surface.container.querySelector('[data-slot="desktop-action-toolbar"]')).toBeNull()
+    const historyActions = getRequiredElement(surface.container, '[data-slot="desktop-history-actions"]')
+    expect(historyActions.querySelector('button[aria-label="Switch to light mode"]')).toBeNull()
+    expect(Array.from(historyActions.querySelectorAll("button")).map((button) => button.getAttribute("aria-label"))).toEqual([
+      "Reset defaults",
+      "Undo",
+      "Redo",
+    ])
 	    expect(getRequiredElement(composeToolbar, '[data-slot="desktop-theme-toggle"]').getAttribute("aria-label")).toBe("Switch to light mode")
     const resizeToolbar = getRequiredElement(surface.container, '[data-slot="desktop-resize-toolbar"]')
     expect(resizeToolbar.parentElement?.className).toContain("bottom-4")

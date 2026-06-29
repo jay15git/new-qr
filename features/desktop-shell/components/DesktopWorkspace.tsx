@@ -166,6 +166,8 @@ function DesktopWorkspaceStyles() {
       [data-slot="desktop-workspace"] [data-slot="desktop-resize-toolbar"],
       [data-slot="desktop-workspace"] [data-slot="desktop-document-toolbar"],
       [data-slot="desktop-workspace"] [data-slot="desktop-utility-toolbar"],
+      [data-slot="desktop-workspace"] [data-slot="desktop-dynamic-island-anchor"],
+      [data-slot="desktop-workspace"] [data-slot="desktop-utility-toolbar-anchor"],
       [data-slot="desktop-workspace"] [data-slot="desktop-top-chrome"],
       [data-slot="desktop-workspace"] [data-slot="desktop-dynamic-island"],
       [data-slot="desktop-workspace"] [data-slot="desktop-theme-toggle"] {

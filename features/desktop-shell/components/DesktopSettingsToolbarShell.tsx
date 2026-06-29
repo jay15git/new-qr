@@ -73,11 +73,8 @@ export function DesktopSettingsToolbarShell({
   const { actualActiveTool, controller, onActiveToolChange } = model
   const [internalHovered, setInternalHovered] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const [direction, setDirection] = useState(0)
-  const [enablePanelSlide, setEnablePanelSlide] = useState(false)
   const [isShellAnimating, setIsShellAnimating] = useState(false)
   const [panelMounted, setPanelMounted] = useState(false)
-  const prevToolIndexRef = useRef(0)
   const isCollapsedRef = useRef(isCollapsed)
   const isHovered = hovered ?? internalHovered
 
@@ -88,6 +85,9 @@ export function DesktopSettingsToolbarShell({
   useEffect(() => {
     const collapsed = readCollapsedFromSession()
     setIsCollapsed(collapsed)
+    syncToolbarWidthVar(
+      collapsed ? DESKTOP_SHELL_COLLAPSED_WIDTH_PX : DESKTOP_SHELL_EXPANDED_WIDTH_PX,
+    )
     setPanelMounted(!collapsed && showInspector)
   }, [showInspector])
 
@@ -114,18 +114,15 @@ export function DesktopSettingsToolbarShell({
 
       if (isCollapsedRef.current || !showInspector) {
         setPanelMounted(false)
-        setEnablePanelSlide(false)
         return
       }
 
       setPanelMounted(true)
-      setEnablePanelSlide(false)
     },
     [showInspector],
   )
 
   const toggleCollapsed = useCallback(() => {
-    setEnablePanelSlide(false)
     setIsCollapsed((previous) => {
       const next = !previous
       window.sessionStorage.setItem(
@@ -139,12 +136,23 @@ export function DesktopSettingsToolbarShell({
   const brandIconSwapState = isHovered ? "b" : "a"
   const sidebarIconSwapState = isCollapsed ? "b" : "a"
 
+  const handleShellMouseEnter = useCallback(() => {
+    if (hovered === undefined) {
+      setInternalHovered(true)
+    }
+  }, [hovered])
+
+  const handleShellMouseLeave = useCallback(() => {
+    if (hovered === undefined) {
+      setInternalHovered(false)
+    }
+  }, [hovered])
+
   const handleBrandClick = () => {
     if (!isHovered) {
       return
     }
 
-    setDirection(isCollapsed ? 1 : -1)
     toggleCollapsed()
   }
 
@@ -154,19 +162,7 @@ export function DesktopSettingsToolbarShell({
       return
     }
 
-    const isToolChange = DESKTOP_TOOLBAR_TOOLS[index]?.id !== actualActiveTool
-
-    if (isToolChange && !isCollapsed && !isShellAnimating) {
-      setDirection(index > prevToolIndexRef.current ? 1 : -1)
-      setEnablePanelSlide(true)
-    } else {
-      setEnablePanelSlide(false)
-    }
-
-    prevToolIndexRef.current = index
-
     if (isCollapsed) {
-      setEnablePanelSlide(false)
       setIsCollapsed(false)
       window.sessionStorage.setItem(DESKTOP_SETTINGS_TOOLBAR_COLLAPSED_STORAGE_KEY, "false")
     }
@@ -179,7 +175,6 @@ export function DesktopSettingsToolbarShell({
       aria-label="Desktop tools"
       data-slot="desktop-floating-toolbar"
       className="relative h-full min-h-0 min-w-0 overflow-x-hidden overflow-y-auto px-1.5 pb-1.5 pt-0 text-[var(--desktop-toolbar-fg)] max-md:px-1 max-md:pb-1"
-      onRailPresenceChange={hovered === undefined ? setInternalHovered : undefined}
       selectedIndex={
         actualActiveTool
           ? DESKTOP_TOOLBAR_TOOLS.findIndex((tool) => tool.id === actualActiveTool)
@@ -282,15 +277,19 @@ export function DesktopSettingsToolbarShell({
   ) : null
 
   return (
-    <div className="fixed bottom-5 left-5 top-5 z-[25] max-md:bottom-4 max-md:left-3 max-md:top-4">
+    <div
+      className="fixed bottom-5 left-5 top-5 z-[25] max-md:bottom-4 max-md:left-3 max-md:top-4"
+      onMouseEnter={handleShellMouseEnter}
+      onMouseLeave={handleShellMouseLeave}
+    >
       <ExpandablePanelShell
         activeKey={activeKey}
         collapsedWidth={DESKTOP_SHELL_COLLAPSED_WIDTH_PX}
         data-collapsed={isCollapsed ? "true" : "false"}
         data-slot="desktop-left-toolbar-shell"
         data-toolbar-appearance="desktop-glass"
-        direction={direction}
-        enablePanelSlide={enablePanelSlide}
+        direction={0}
+        enablePanelSlide={false}
         expanded={isExpanded}
         expandedWidth={DESKTOP_SHELL_EXPANDED_WIDTH_PX}
         layout="left-rail"

@@ -5,7 +5,10 @@ import {
   DropletsIcon,
   MoonIcon,
   PencilLineIcon,
+  Redo2Icon,
+  RotateCcwIcon,
   SquareRoundCornerIcon,
+  Undo2Icon,
 } from "lucide-react"
 import { type ReactNode } from "react"
 
@@ -145,6 +148,58 @@ function DesktopAppearancePopover({
   )
 }
 
+function DesktopDynamicIslandDivider() {
+  return (
+    <div
+      aria-hidden="true"
+      className="mx-0.5 h-6 w-px shrink-0 bg-[var(--desktop-glass-border)]"
+    />
+  )
+}
+
+export function DesktopHistoryActionButtons({
+  canRedo,
+  canUndo,
+  onRedo,
+  onResetDefaults,
+  onUndo,
+}: {
+  canRedo?: boolean
+  canUndo?: boolean
+  onRedo?: () => void
+  onResetDefaults?: () => void
+  onUndo?: () => void
+}) {
+  return (
+    <div
+      className="flex min-w-0 items-center gap-0.5"
+      data-slot="desktop-history-actions"
+    >
+      <DesktopUtilityToolbarButton
+        aria-label="Reset defaults"
+        disabled={!onResetDefaults}
+        onClick={onResetDefaults}
+      >
+        <RotateCcwIcon className="size-3.5" />
+      </DesktopUtilityToolbarButton>
+      <DesktopUtilityToolbarButton
+        aria-label="Undo"
+        disabled={!canUndo || !onUndo}
+        onClick={onUndo}
+      >
+        <Undo2Icon className="size-3.5" />
+      </DesktopUtilityToolbarButton>
+      <DesktopUtilityToolbarButton
+        aria-label="Redo"
+        disabled={!canRedo || !onRedo}
+        onClick={onRedo}
+      >
+        <Redo2Icon className="size-3.5" />
+      </DesktopUtilityToolbarButton>
+    </div>
+  )
+}
+
 export function DesktopAppearanceIsland({
   appearance,
   layerLabel,
@@ -184,13 +239,23 @@ export function DesktopAppearanceIsland({
 
 export function DesktopDynamicIslandChrome({
   appearance,
+  canRedo,
+  canUndo,
   layerLabel,
   onPatch,
+  onRedo,
+  onResetDefaults,
+  onUndo,
   scanSafetyResult = DEFAULT_SCAN_SAFETY_RESULT,
 }: {
   appearance?: DesktopAppearanceSnapshot | null
+  canRedo?: boolean
+  canUndo?: boolean
   layerLabel?: string | null
   onPatch?: (patch: Partial<DraftingCanvasLayer>) => void
+  onRedo?: () => void
+  onResetDefaults?: () => void
+  onUndo?: () => void
   scanSafetyResult?: ScanSafetyResult
 }) {
   const hasAppearance = Boolean(appearance && layerLabel && onPatch)
@@ -203,13 +268,24 @@ export function DesktopDynamicIslandChrome({
           className="flex min-w-0 items-center gap-1 px-1"
           data-slot="desktop-dynamic-island-content"
         >
+          <DesktopHistoryActionButtons
+            canRedo={canRedo}
+            canUndo={canUndo}
+            onRedo={onRedo}
+            onResetDefaults={onResetDefaults}
+            onUndo={onUndo}
+          />
           {hasAppearance ? (
-            <DesktopAppearanceIsland
-              appearance={appearance!}
-              layerLabel={layerLabel!}
-              onPatch={onPatch!}
-            />
+            <>
+              <DesktopDynamicIslandDivider />
+              <DesktopAppearanceIsland
+                appearance={appearance!}
+                layerLabel={layerLabel!}
+                onPatch={onPatch!}
+              />
+            </>
           ) : null}
+          <DesktopDynamicIslandDivider />
           <DesktopScanSafetyPopover result={scanSafetyResult} />
         </div>
       }
