@@ -7,6 +7,7 @@ import { motion, stagger, useAnimate } from "motion/react"
 import Floating, {
   FloatingElement,
 } from "@/components/fancy/image/parallax-floating"
+import Silk from "@/components/Silk/Silk"
 
 const Preview = () => {
   const [scope, animate] = useAnimate()
@@ -20,11 +21,15 @@ const Preview = () => {
       className="relative flex w-dvw h-dvh justify-center items-center overflow-hidden"
       ref={scope}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center bg-no-repeat brightness-[0.55]"
-        style={{ backgroundImage: "url('/backgrounds/ascii-landscape.png')" }}
-      />
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 size-full">
+        <Silk
+          speed={2.2}
+          scale={0.6}
+          color="#565555"
+          noiseIntensity={4}
+          rotation={0}
+        />
+      </div>
       <motion.div
         className="z-50 text-center space-y-4 items-center flex flex-col"
         initial={{ opacity: 0, y: 10 }}
@@ -32,7 +37,7 @@ const Preview = () => {
         transition={{ duration: 0.88, delay: 1.5 }}
       >
         <p className="text-5xl md:text-7xl z-50 text-white font-calendas italic">
-          fancy.
+          QRafty
         </p>
         <p className="text-xs z-50 hover:scale-110 transition-transform bg-white text-black rounded-full py-2 w-20 cursor-pointer">
           Download
