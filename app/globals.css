@@ -1049,14 +1049,24 @@
 }
 
 /* Calligraph slots in desktop inspector number fields */
+[data-slot="desktop-inspector-calligraph-value"],
+[data-slot="desktop-inspector-calligraph-value"] .desktop-inspector-calligraph {
+  line-height: 1;
+  overflow: hidden;
+}
+
 [data-slot="desktop-inspector-calligraph-value"] {
+  color: inherit;
+}
+
+[data-slot="desktop-inspector-calligraph-value"] .desktop-inspector-calligraph,
+[data-slot="desktop-inspector-calligraph-value"] .desktop-inspector-calligraph * {
   color: inherit;
 }
 
 [data-slot="desktop-inspector-calligraph-value"] .desktop-inspector-calligraph {
   align-items: center !important;
   justify-content: center !important;
-  overflow: hidden;
 }
 
 [data-slot="desktop-inspector-calligraph-value"] .desktop-inspector-calligraph > span {
@@ -1075,7 +1085,7 @@
   display: inline-flex !important;
   height: 1em !important;
   justify-content: center !important;
-  line-height: inherit !important;
+  line-height: 1 !important;
   max-height: 1em !important;
   overflow: hidden !important;
   vertical-align: middle !important;

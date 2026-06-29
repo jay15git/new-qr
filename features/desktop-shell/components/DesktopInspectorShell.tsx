@@ -187,7 +187,11 @@ export function DesktopInspectorElasticSliderRow({
 }
 
 export function DesktopInspectorValueGrid({ children }: { children: ReactNode }) {
-  return <div className="grid grid-cols-[auto_auto] gap-x-4 gap-y-2">{children}</div>
+  return (
+    <div className="grid w-full grid-cols-2 gap-x-5 gap-y-3 [&>:nth-child(even)]:justify-self-end [&>:nth-child(odd)]:justify-self-start">
+      {children}
+    </div>
+  )
 }
 
 export function DesktopInspectorNumberField({
@@ -217,10 +221,13 @@ export function DesktopInspectorNumberField({
   })
 
   return (
-    <div className="flex min-w-0 items-center gap-1" role="group">
+    <div
+      className="grid grid-cols-[1.25rem_4.75rem] items-center gap-x-2.5"
+      role="group"
+    >
       <span
         className={cn(
-          "w-3.5 shrink-0 text-center",
+          "text-center",
           DESKTOP_INSPECTOR_LABEL_CLASS,
           scrub.canScrub && "cursor-ew-resize select-none",
         )}

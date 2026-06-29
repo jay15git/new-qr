@@ -772,6 +772,17 @@ function mirrorInputTypography(source: HTMLElement): CSSProperties {
   }
 }
 
+function mirrorCalligraphTypography(source: HTMLElement): CSSProperties {
+  const computed = getComputedStyle(source)
+  const { lineHeight: _lineHeight, ...typography } = mirrorInputTypography(source)
+
+  return {
+    ...typography,
+    color: computed.color,
+    lineHeight: 1,
+  }
+}
+
 function DesktopInspectorCalligraphNumber({
   style,
   value,
@@ -796,7 +807,7 @@ function DesktopInspectorCalligraphNumber({
       <Calligraph
         animation="snappy"
         autoSize={false}
-        className="desktop-inspector-calligraph inline-flex items-center justify-center"
+        className="desktop-inspector-calligraph inline-flex items-center justify-center leading-none"
         style={style}
         variant="slots"
       >
@@ -830,7 +841,7 @@ export function DesktopInspectorScrubNumberInput({
       return
     }
 
-    setMirroredTypography(mirrorInputTypography(source))
+    setMirroredTypography(mirrorCalligraphTypography(source))
   }, [scrub.editing, scrub.inputRef])
 
   useLayoutEffect(() => {
