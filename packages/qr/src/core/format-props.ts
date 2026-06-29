@@ -47,6 +47,7 @@ export function formatPortableQrPropsForCodegen(props: NewQrCodeProps) {
     "logo",
     "motion",
     "motionPreset",
+    "gradientMode",
     "moduleRoundSize",
   ]
 

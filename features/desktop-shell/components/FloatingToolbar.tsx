@@ -15,6 +15,7 @@ import type {
   QrFinderPatternOuterStyle,
   QrErrorCorrectionLevel,
   QrFileExtension,
+  QrMode,
   QrTypeNumber,
 } from "@/features/qr-code/model/types"
 import type { StudioCornerDotStyle } from "@/features/qr-code/model/state"
@@ -96,6 +97,11 @@ import {
   CORNER_SQUARE_STYLE_OPTIONS,
   DOT_STYLE_OPTIONS,
 } from "@/features/qr-code/styles/style-options"
+import {
+  supportsModuleLineWidth,
+  supportsModuleRoundSize,
+  supportsModuleSize,
+} from "@/features/qr-code/styles/module-tuning"
 import { StylePreview, type StylePreviewKind } from "@/features/qr-code/components/StylePreview"
 import { GradientOffsetRangeField } from "@/features/qr-code/components/GradientOffsetRangeField"
 import {
@@ -116,8 +122,16 @@ import {
   QR_MOTION_INTENSITY_OPTIONS,
   QR_MOTION_STANDARD_PRESET_OPTIONS,
   createDefaultQrStudioState,
+  QR_MODULE_LINE_WIDTH_MAX,
+  QR_MODULE_LINE_WIDTH_MIN,
+  QR_MODULE_SIZE_MAX,
+  QR_MODULE_SIZE_MIN,
   setDotMatrixAnimationOptions,
   type DotsColorMode,
+  type QrCrossOrigin,
+  type QrGradientLinkMode,
+  type QrLogoPositionMode,
+  type QrLogoSizeMode,
   type QrDotMatrixAnimationOptions,
   type QrDotMatrixAnimationPatch,
   type StudioGradient,
@@ -380,6 +394,10 @@ export type DesktopPatternSettings = {
   dotsPalettePreset: string | "custom"
   dotsSolidColor: string
   qrDotType: StudioDataModulesStyle
+  moduleRoundSize: boolean
+  moduleSize?: number
+  moduleLineWidth?: number
+  gradientLinkMode: QrGradientLinkMode
 }
 
 export type DesktopLogoSourceMode = "brand" | "none" | "upload" | "url"
@@ -397,6 +415,15 @@ export type DesktopLogoSettings = {
   solidColor: string
   sourceMode: DesktopLogoSourceMode
   uploadMode: DesktopAssetSourceMode
+  opacity: number
+  sizeMode: QrLogoSizeMode
+  widthPx?: number
+  heightPx?: number
+  lockAspect: boolean
+  positionMode: QrLogoPositionMode
+  offsetX: number
+  offsetY: number
+  crossOrigin: QrCrossOrigin
 }
 
 export type DesktopLogoSettingsPatch = Partial<DesktopLogoSettings> & {
@@ -459,6 +486,13 @@ export type DesktopMotionSettings = QrDotMatrixAnimationOptions
 export type DesktopEncodingSettings = {
   errorCorrectionLevel: QrErrorCorrectionLevel
   typeNumber: QrTypeNumber
+  boostLevel: boolean
+  mode: QrMode
+  valueSegmentsText: string
+}
+
+export type DesktopAccessibilitySettings = {
+  ariaLabel: string
 }
 
 type DesktopImageIntent = "image-object" | "logo" | "shape-fill"
@@ -562,6 +596,7 @@ export type DesktopToolbarController = {
   shapeSettings: DesktopShapeSettings
   motionSettings: DesktopMotionSettings
   encodingSettings: DesktopEncodingSettings
+  accessibilitySettings: DesktopAccessibilitySettings
   imageSettings: DesktopImageSettings
   decorationsSettings: DesktopDecorationsSettings
   effectsSettings: DesktopEffectsSettings
@@ -597,6 +632,8 @@ export type DesktopToolbarController = {
   onMotionSettingsChange: (patch: QrDotMatrixAnimationPatch) => void
   onEncodingReset: () => void
   onEncodingSettingsChange: (patch: Partial<DesktopEncodingSettings>) => void
+  onAccessibilityReset: () => void
+  onAccessibilitySettingsChange: (patch: Partial<DesktopAccessibilitySettings>) => void
   onImageReset: () => void
   onImageSettingsChange: (patch: Partial<DesktopImageSettings>) => void
   onDecorationsReset: () => void
@@ -727,6 +764,34 @@ const DESKTOP_RASTER_EXPORT_PRESETS = [
   { id: "max-quality", label: "Max quality", primaryUse: "handoff, archive", sizePx: 4096 },
 ] as const
 
+const DESKTOP_QR_MODE_OPTIONS: Array<{ label: string; value: QrMode }> = [
+  { label: "Byte", value: "Byte" },
+  { label: "Alphanumeric", value: "Alphanumeric" },
+  { label: "Numeric", value: "Numeric" },
+  { label: "Kanji", value: "Kanji" },
+]
+
+const DESKTOP_CROSS_ORIGIN_OPTIONS: Array<{ label: string; value: QrCrossOrigin }> = [
+  { label: "Default", value: "" },
+  { label: "Anonymous", value: "anonymous" },
+  { label: "Credentials", value: "use-credentials" },
+]
+
+const DESKTOP_GRADIENT_LINK_OPTIONS: Array<{ label: string; value: QrGradientLinkMode }> = [
+  { label: "Split", value: "split" },
+  { label: "Unified", value: "unified" },
+]
+
+const DESKTOP_LOGO_SIZE_MODE_OPTIONS: Array<{ label: string; value: QrLogoSizeMode }> = [
+  { label: "Ratio", value: "ratio" },
+  { label: "Pixels", value: "pixels" },
+]
+
+const DESKTOP_LOGO_POSITION_OPTIONS: Array<{ label: string; value: QrLogoPositionMode }> = [
+  { label: "Center", value: "center" },
+  { label: "Custom", value: "custom" },
+]
+
 const DEFAULT_DESKTOP_PATTERN_SETTINGS: DesktopPatternSettings = {
   dotsColorMode: "solid",
   dataModulesGradient: DEFAULT_DESKTOP_DOTS_GRADIENT,
@@ -734,6 +799,8 @@ const DEFAULT_DESKTOP_PATTERN_SETTINGS: DesktopPatternSettings = {
   dotsPalettePreset: "Signal",
   dotsSolidColor: "#18181b",
   qrDotType: "rounded",
+  moduleRoundSize: true,
+  gradientLinkMode: "split",
 }
 
 const DEFAULT_DESKTOP_LOGO_SETTINGS: DesktopLogoSettings = {
@@ -748,6 +815,13 @@ const DEFAULT_DESKTOP_LOGO_SETTINGS: DesktopLogoSettings = {
   solidColor: DEFAULT_BRAND_ICON_COLOR,
   sourceMode: "brand",
   uploadMode: "upload",
+  opacity: 100,
+  sizeMode: "ratio",
+  lockAspect: true,
+  positionMode: "center",
+  offsetX: 0,
+  offsetY: 0,
+  crossOrigin: "anonymous",
 }
 
 const DEFAULT_DESKTOP_CORNERS_SETTINGS: DesktopCornersSettings = {
@@ -824,6 +898,13 @@ const DEFAULT_DESKTOP_MOTION_SETTINGS: DesktopMotionSettings = {
 const DEFAULT_DESKTOP_ENCODING_SETTINGS: DesktopEncodingSettings = {
   errorCorrectionLevel: "Q",
   typeNumber: 0,
+  boostLevel: true,
+  mode: "Byte",
+  valueSegmentsText: "",
+}
+
+const DEFAULT_DESKTOP_ACCESSIBILITY_SETTINGS: DesktopAccessibilitySettings = {
+  ariaLabel: "",
 }
 
 const DEFAULT_DESKTOP_IMAGE_SETTINGS: DesktopImageSettings = {
@@ -977,6 +1058,7 @@ export type DesktopInspectorModel = {
   actualShapeSettings: DesktopShapeSettings
   actualMotionSettings: DesktopMotionSettings
   actualEncodingSettings: DesktopEncodingSettings
+  actualAccessibilitySettings: DesktopAccessibilitySettings
   actualImageSettings: DesktopImageSettings
   actualDecorationsSettings: DesktopDecorationsSettings
   actualEffectsSettings: DesktopEffectsSettings
@@ -993,6 +1075,7 @@ export type DesktopInspectorModel = {
   onShapeSettingsChange: (patch: Partial<DesktopShapeSettings>) => void
   onMotionSettingsChange: (patch: QrDotMatrixAnimationPatch) => void
   onEncodingSettingsChange: (patch: Partial<DesktopEncodingSettings>) => void
+  onAccessibilitySettingsChange: (patch: Partial<DesktopAccessibilitySettings>) => void
   onImageSettingsChange: (patch: Partial<DesktopImageSettings>) => void
   onDecorationsSettingsChange: (patch: Partial<DesktopDecorationsSettings>) => void
   onEffectsSettingsChange: (patch: Partial<DesktopEffectsSettings>) => void
@@ -1030,6 +1113,9 @@ export function useDesktopToolbarInspectorModel({
   )
   const [encodingSettings, setEncodingSettings] = useState<DesktopEncodingSettings>(
     DEFAULT_DESKTOP_ENCODING_SETTINGS,
+  )
+  const [accessibilitySettings, setAccessibilitySettings] = useState<DesktopAccessibilitySettings>(
+    DEFAULT_DESKTOP_ACCESSIBILITY_SETTINGS,
   )
   const [imageSettings, setImageSettings] = useState<DesktopImageSettings>(
     DEFAULT_DESKTOP_IMAGE_SETTINGS,
@@ -1110,6 +1196,7 @@ export function useDesktopToolbarInspectorModel({
     actualShapeSettings: controller?.shapeSettings ?? shapeSettings,
     actualMotionSettings: controller?.motionSettings ?? motionSettings,
     actualEncodingSettings: controller?.encodingSettings ?? encodingSettings,
+    actualAccessibilitySettings: controller?.accessibilitySettings ?? accessibilitySettings,
     actualImageSettings: controller?.imageSettings ?? imageSettings,
     actualDecorationsSettings: controller?.decorationsSettings ?? decorationsSettings,
     actualEffectsSettings: controller?.effectsSettings ?? effectsSettings,
@@ -1153,6 +1240,10 @@ export function useDesktopToolbarInspectorModel({
       controller?.onEncodingSettingsChange ??
       ((patch: Partial<DesktopEncodingSettings>) =>
         setEncodingSettings((current) => ({ ...current, ...patch }))),
+    onAccessibilitySettingsChange:
+      controller?.onAccessibilitySettingsChange ??
+      ((patch: Partial<DesktopAccessibilitySettings>) =>
+        setAccessibilitySettings((current) => ({ ...current, ...patch }))),
     onImageSettingsChange:
       controller?.onImageSettingsChange ??
       ((patch: Partial<DesktopImageSettings>) =>
@@ -2433,13 +2524,104 @@ function DesktopLogoInspector({
         {settings.sourceMode !== "none" ? (
           <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
             <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Size</p>
+            <DesktopInspectorSegmentedControl
+              columns={2}
+              dataSlot="desktop-logo-size-mode"
+              itemAriaLabel={(option) => `Use ${option.label.toLowerCase()} logo sizing`}
+              items={DESKTOP_LOGO_SIZE_MODE_OPTIONS}
+              value={settings.sizeMode}
+              onValueChange={(sizeMode) => onLogoSettingsChange({ sizeMode })}
+            />
+            {settings.sizeMode === "ratio" ? (
+              <DesktopMotionSliderRow
+                label="Logo size"
+                max={100}
+                min={0}
+                value={settings.size}
+                valueLabel={`${Math.round(settings.size)}%`}
+                onChange={(size) => onLogoSettingsChange({ size })}
+              />
+            ) : (
+              <div className="mt-2.5 grid gap-2">
+                <DesktopMotionSliderRow
+                  label="Logo width"
+                  max={320}
+                  min={8}
+                  step={1}
+                  value={settings.widthPx ?? 64}
+                  valueLabel={`${Math.round(settings.widthPx ?? 64)} px`}
+                  onChange={(widthPx) => {
+                    const patch: DesktopLogoSettingsPatch = { widthPx }
+                    if (settings.lockAspect) {
+                      patch.heightPx = widthPx
+                    }
+                    onLogoSettingsChange(patch)
+                  }}
+                />
+                <DesktopMotionSliderRow
+                  label="Logo height"
+                  max={320}
+                  min={8}
+                  step={1}
+                  value={settings.heightPx ?? settings.widthPx ?? 64}
+                  valueLabel={`${Math.round(settings.heightPx ?? settings.widthPx ?? 64)} px`}
+                  onChange={(heightPx) => onLogoSettingsChange({ heightPx })}
+                />
+                <DesktopMotionToggleRow
+                  checked={settings.lockAspect}
+                  label="Lock aspect ratio"
+                  onChange={(lockAspect) => onLogoSettingsChange({ lockAspect })}
+                />
+              </div>
+            )}
             <DesktopMotionSliderRow
-              label="Logo size"
+              label="Logo opacity"
               max={100}
               min={0}
-              value={settings.size}
-              valueLabel={`${Math.round(settings.size)}%`}
-              onChange={(size) => onLogoSettingsChange({ size })}
+              step={5}
+              value={settings.opacity}
+              valueLabel={`${Math.round(settings.opacity)}%`}
+              onChange={(opacity) => onLogoSettingsChange({ opacity })}
+            />
+            <p className={cn("mt-2.5", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Position</p>
+            <DesktopInspectorSegmentedControl
+              columns={2}
+              dataSlot="desktop-logo-position-mode"
+              itemAriaLabel={(option) => `Use ${option.label.toLowerCase()} logo position`}
+              items={DESKTOP_LOGO_POSITION_OPTIONS}
+              value={settings.positionMode}
+              onValueChange={(positionMode) => onLogoSettingsChange({ positionMode })}
+            />
+            {settings.positionMode === "custom" ? (
+              <div className="mt-2.5 grid gap-2">
+                <DesktopMotionSliderRow
+                  label="Logo X offset"
+                  max={160}
+                  min={-160}
+                  step={1}
+                  value={settings.offsetX}
+                  valueLabel={`${Math.round(settings.offsetX)} px`}
+                  onChange={(offsetX) => onLogoSettingsChange({ offsetX })}
+                />
+                <DesktopMotionSliderRow
+                  label="Logo Y offset"
+                  max={160}
+                  min={-160}
+                  step={1}
+                  value={settings.offsetY}
+                  valueLabel={`${Math.round(settings.offsetY)} px`}
+                  onChange={(offsetY) => onLogoSettingsChange({ offsetY })}
+                />
+              </div>
+            ) : null}
+            <p className={cn("mt-2.5", DESKTOP_INSPECTOR_SECTION_HEADING_CLASS)}>Cross-origin</p>
+            <DesktopInspectorSegmentedControl
+              columns={3}
+              dataSlot="desktop-logo-cross-origin"
+              itemAriaLabel={(option) => `Use ${option.label.toLowerCase()} cross-origin`}
+              items={DESKTOP_CROSS_ORIGIN_OPTIONS}
+              value={settings.crossOrigin}
+              onValueChange={(crossOrigin) => onLogoSettingsChange({ crossOrigin })}
             />
             <div className="mt-2.5 grid gap-2">
               <DesktopNumberRow
@@ -3715,24 +3897,28 @@ function DesktopPatternPalettePresetButton({
 }
 
 function DesktopContentInspector({
+  accessibilitySettings,
   canRedo,
   canUndo,
   contentType,
   contentValues,
   desktopTheme,
   encodedValue,
+  onAccessibilitySettingsChange,
   onContentTypeChange,
   onContentValueChange,
   onRedo,
   onUndo,
   validation,
 }: {
+  accessibilitySettings: DesktopAccessibilitySettings
   canRedo?: boolean
   canUndo?: boolean
   contentType: QrInputType
   contentValues: StaticQrContentValues
   desktopTheme: DesktopThemeMode
   encodedValue: string
+  onAccessibilitySettingsChange: (patch: Partial<DesktopAccessibilitySettings>) => void
   onContentTypeChange: (type: QrInputType) => void
   onContentValueChange: (field: string, value: StaticQrContentValue) => void
   onRedo?: () => void
@@ -3890,6 +4076,25 @@ function DesktopContentInspector({
             validation={validation}
             onContentValueChange={onContentValueChange}
           />
+        </DesktopInspectorSection>
+
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
+          <label className={cn("mb-1.5 block", DESKTOP_INSPECTOR_LABEL_CLASS)} htmlFor="desktop-qr-aria-label">
+            Accessibility label
+          </label>
+          <DesktopInspectorTextInput
+            aria-label="QR code accessibility label"
+            data-slot="desktop-qr-aria-label"
+            id="desktop-qr-aria-label"
+            placeholder="QR Code"
+            value={accessibilitySettings.ariaLabel}
+            onChange={(event) =>
+              onAccessibilitySettingsChange({ ariaLabel: event.currentTarget.value })
+            }
+          />
+          <p className={cn("mt-2", DESKTOP_INSPECTOR_CAPTION_CLASS, DESKTOP_INSPECTOR_FG_TERTIARY)}>
+            Sets the SVG aria-label for screen readers. Leave empty for the renderer default.
+          </p>
         </DesktopInspectorSection>
 
         <DesktopInspectorSection as="details" className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, "px-3 py-2.5")}>
@@ -4092,6 +4297,61 @@ function DesktopPatternInspector({
             </div>
           ) : null}
         </DesktopInspectorSection>
+
+        {supportsModuleSize(settings.qrDotType) ? (
+          <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)} data-slot="desktop-module-size">
+            <DesktopMotionSliderRow
+              label="Module size"
+              max={QR_MODULE_SIZE_MAX}
+              min={QR_MODULE_SIZE_MIN}
+              step={0.05}
+              value={settings.moduleSize ?? 1}
+              valueLabel={`${Math.round((settings.moduleSize ?? 1) * 100)}%`}
+              onChange={(moduleSize) => onPatternSettingsChange({ moduleSize })}
+            />
+          </DesktopInspectorSection>
+        ) : null}
+
+        {supportsModuleLineWidth(settings.qrDotType) ? (
+          <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)} data-slot="desktop-module-line-width">
+            <DesktopMotionSliderRow
+              label="Module line width"
+              max={QR_MODULE_LINE_WIDTH_MAX}
+              min={QR_MODULE_LINE_WIDTH_MIN}
+              step={0.05}
+              value={settings.moduleLineWidth ?? 1}
+              valueLabel={`${Math.round((settings.moduleLineWidth ?? 1) * 100)}%`}
+              onChange={(moduleLineWidth) => onPatternSettingsChange({ moduleLineWidth })}
+            />
+          </DesktopInspectorSection>
+        ) : null}
+
+        {supportsModuleRoundSize(settings.qrDotType) ? (
+          <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
+            <DesktopMotionToggleRow
+              checked={settings.moduleRoundSize}
+              data-slot="desktop-module-round-size"
+              label="Uniform random module size"
+              onChange={(moduleRoundSize) => onPatternSettingsChange({ moduleRoundSize })}
+            />
+          </DesktopInspectorSection>
+        ) : null}
+
+        {settings.dotsColorMode === "gradient" ? (
+          <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
+            <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Gradient scope</p>
+            <DesktopInspectorSegmentedControl
+              columns={2}
+              dataSlot="desktop-gradient-link-mode"
+              itemAriaLabel={(option) => `Use ${option.label.toLowerCase()} module and finder gradients`}
+              items={DESKTOP_GRADIENT_LINK_OPTIONS}
+              value={settings.gradientLinkMode}
+              onValueChange={(gradientLinkMode) =>
+                onPatternSettingsChange({ gradientLinkMode })
+              }
+            />
+          </DesktopInspectorSection>
+        ) : null}
 
         <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Error correction</p>
@@ -4771,6 +5031,29 @@ function DesktopEncodingInspector({
         </DesktopInspectorSection>
 
         <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
+          <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Encoding mode</p>
+          <DesktopInspectorSegmentedControl
+            columns={2}
+            dataSlot="desktop-encoding-mode"
+            itemAriaLabel={(option) => `Use ${option.label} encoding mode`}
+            items={DESKTOP_QR_MODE_OPTIONS}
+            value={settings.mode}
+            onValueChange={(mode) => onEncodingSettingsChange({ mode })}
+          />
+        </DesktopInspectorSection>
+
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
+          <DesktopMotionToggleRow
+            checked={settings.boostLevel}
+            label="Boost error correction"
+            onChange={(boostLevel) => onEncodingSettingsChange({ boostLevel })}
+          />
+          <p className={cn("mt-2", DESKTOP_INSPECTOR_CAPTION_CLASS, DESKTOP_INSPECTOR_FG_TERTIARY)}>
+            Raise ECC without increasing QR version when possible.
+          </p>
+        </DesktopInspectorSection>
+
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
           <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Error Correction</p>
           <div className={desktopInspectorOptionStackClass()} data-slot="desktop-error-correction-grid">
             {ERROR_CORRECTION_LEVEL_OPTIONS.map((option) => (
@@ -4799,6 +5082,28 @@ function DesktopEncodingInspector({
               </button>
             ))}
           </div>
+        </DesktopInspectorSection>
+
+        <DesktopInspectorSection as="details" className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, "px-3 py-2.5")}>
+          <summary className={cn("cursor-pointer select-none", DESKTOP_INSPECTOR_LABEL_CLASS)}>
+            Advanced segments
+          </summary>
+          <textarea
+            aria-label="QR encoding segments"
+            className={cn(
+              "mt-2 min-h-24 w-full resize-y rounded-[6px] border border-[var(--desktop-inspector-control-border)] bg-[var(--desktop-inspector-control-bg)] px-2.5 py-2",
+              DESKTOP_INSPECTOR_CAPTION_CLASS,
+            )}
+            data-slot="desktop-encoding-segments"
+            placeholder={"One segment per line\nhttps://example.com\nextra-data"}
+            value={settings.valueSegmentsText}
+            onChange={(event) =>
+              onEncodingSettingsChange({ valueSegmentsText: event.currentTarget.value })
+            }
+          />
+          <p className={cn("mt-2", DESKTOP_INSPECTOR_CAPTION_CLASS, DESKTOP_INSPECTOR_FG_TERTIARY)}>
+            Optional multi-segment encoding. Overrides the main content value when non-empty.
+          </p>
         </DesktopInspectorSection>
       </DesktopInspectorScrollArea>
     </div>
@@ -5810,6 +6115,7 @@ export function DesktopFloatingInspector({
     actualEffectsSettings,
     actualEncodedContentValue,
     actualEncodingSettings,
+    actualAccessibilitySettings,
     actualExportSettings,
     actualImageSettings,
     actualLayersSettings,
@@ -5825,6 +6131,7 @@ export function DesktopFloatingInspector({
     onDecorationsSettingsChange,
     onEffectsSettingsChange,
     onEncodingSettingsChange,
+    onAccessibilitySettingsChange,
     onExportSettingsChange,
     onImageSettingsChange,
     onLayersReorder,
@@ -5867,6 +6174,7 @@ export function DesktopFloatingInspector({
         />
       ) : activeTool === "content" ? (
         <DesktopContentInspector
+          accessibilitySettings={actualAccessibilitySettings}
           canRedo={controller?.canRedo}
           canUndo={controller?.canUndo}
           contentType={actualContentType}
@@ -5874,6 +6182,7 @@ export function DesktopFloatingInspector({
           desktopTheme={actualDesktopTheme}
           encodedValue={actualEncodedContentValue}
           validation={actualContentValidation}
+          onAccessibilitySettingsChange={onAccessibilitySettingsChange}
           onContentTypeChange={onContentTypeChange}
           onContentValueChange={onContentValueChange}
           onRedo={controller?.onRedo}

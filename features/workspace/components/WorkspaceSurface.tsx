@@ -9,6 +9,7 @@ import type {
   QrErrorCorrectionLevel,
   QrFileExtension,
   QrFinderPatternOuterStyle,
+  QrMode,
   QrTypeNumber,
 } from "@/features/qr-code/model/types"
 import type { StudioCornerDotStyle } from "@/features/qr-code/model/state"
@@ -112,6 +113,7 @@ import type {
   DesktopCornersSettings,
   DesktopDecorationsSettings,
   DesktopEncodingSettings,
+  DesktopAccessibilitySettings,
   DesktopEffectsSettings,
   DesktopExportSettings,
   DesktopExportTarget,
@@ -182,6 +184,10 @@ import {
   type BackgroundShapeOptions,
   type DotsColorMode,
   type QrDotMatrixAnimationOptions,
+  type QrCrossOrigin,
+  type QrGradientLinkMode,
+  type QrLogoPositionMode,
+  type QrLogoSizeMode,
   type QrStudioState,
   type StudioDataModulesStyle,
   type StudioGradient,
@@ -280,6 +286,19 @@ type DraftingTool = {
 }
 
 const DEFAULT_DRAFTING_STUDIO_STATE = createDefaultQrStudioState()
+
+function parseValueSegmentsText(text: string) {
+  const segments = text
+    .split("\n")
+    .map((segment) => segment.trim())
+    .filter(Boolean)
+
+  return segments.length > 0 ? segments : undefined
+}
+
+function formatValueSegmentsText(segments: string[] | undefined) {
+  return segments?.join("\n") ?? ""
+}
 const DEFAULT_DRAFTING_TOOL_ID = "content" satisfies DraftingToolId
 const DEFAULT_DRAFTING_PANE_QR_SIZE = 240
 const DRAFTING_LAYER_CLIPBOARD_TYPE = "new-qr/drafting-layers"
@@ -711,6 +730,43 @@ export function WorkspaceSurface({
     useState<QrErrorCorrectionLevel>(
       DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.errorCorrectionLevel,
     )
+  const [selectedBoostLevel, setSelectedBoostLevel] = useState(
+    DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.boostLevel,
+  )
+  const [selectedQrMode, setSelectedQrMode] = useState<QrMode>(
+    DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.mode,
+  )
+  const [selectedValueSegmentsText, setSelectedValueSegmentsText] = useState("")
+  const [selectedAriaLabel, setSelectedAriaLabel] = useState("")
+  const [selectedModuleRoundSize, setSelectedModuleRoundSize] = useState(
+    DEFAULT_DRAFTING_STUDIO_STATE.dataModulesSettings.roundSize,
+  )
+  const [selectedModuleSize, setSelectedModuleSize] = useState<number | undefined>(undefined)
+  const [selectedModuleLineWidth, setSelectedModuleLineWidth] = useState<number | undefined>(
+    undefined,
+  )
+  const [selectedGradientLinkMode, setSelectedGradientLinkMode] = useState<QrGradientLinkMode>(
+    DEFAULT_DRAFTING_STUDIO_STATE.gradientLinkMode,
+  )
+  const [selectedLogoOpacity, setSelectedLogoOpacity] = useState(
+    DEFAULT_DRAFTING_STUDIO_STATE.imageOptions.opacity * 100,
+  )
+  const [selectedLogoSizeMode, setSelectedLogoSizeMode] = useState<QrLogoSizeMode>(
+    DEFAULT_DRAFTING_STUDIO_STATE.imageOptions.sizeMode,
+  )
+  const [selectedLogoWidthPx, setSelectedLogoWidthPx] = useState<number | undefined>(undefined)
+  const [selectedLogoHeightPx, setSelectedLogoHeightPx] = useState<number | undefined>(undefined)
+  const [selectedLogoLockAspect, setSelectedLogoLockAspect] = useState(
+    DEFAULT_DRAFTING_STUDIO_STATE.imageOptions.lockAspect,
+  )
+  const [selectedLogoPositionMode, setSelectedLogoPositionMode] = useState<QrLogoPositionMode>(
+    DEFAULT_DRAFTING_STUDIO_STATE.imageOptions.logoPositionMode,
+  )
+  const [selectedLogoOffsetX, setSelectedLogoOffsetX] = useState(0)
+  const [selectedLogoOffsetY, setSelectedLogoOffsetY] = useState(0)
+  const [selectedLogoCrossOrigin, setSelectedLogoCrossOrigin] = useState<QrCrossOrigin>(
+    DEFAULT_DRAFTING_STUDIO_STATE.imageOptions.crossOrigin,
+  )
   const [activeQrNodeId, setActiveQrNodeId] = useState(DASHBOARD_QR_NODE_ID)
   const [qrStateByNodeId, setQrStateByNodeId] = useState<DraftingQrStateByNodeId>(() => ({
     [DASHBOARD_QR_NODE_ID]: createDefaultDraftingWorkspaceQrState(),
@@ -818,6 +874,8 @@ export function WorkspaceSurface({
         ...DEFAULT_DRAFTING_STUDIO_STATE.qrOptions,
         typeNumber: selectedQrTypeNumber,
         errorCorrectionLevel: selectedQrErrorCorrectionLevel,
+        boostLevel: selectedBoostLevel,
+        mode: selectedQrMode,
       },
       imageOptions: {
         ...DEFAULT_DRAFTING_STUDIO_STATE.imageOptions,
@@ -825,12 +883,28 @@ export function WorkspaceSurface({
         imageSize: selectedLogoSize / 100,
         margin: selectedLogoMargin,
         saveAsBlob: selectedSaveAsBlob,
+        crossOrigin: selectedLogoCrossOrigin,
+        opacity: selectedLogoOpacity / 100,
+        sizeMode: selectedLogoSizeMode,
+        lockAspect: selectedLogoLockAspect,
+        logoPositionMode: selectedLogoPositionMode,
+        ...(selectedLogoWidthPx !== undefined ? { widthPx: selectedLogoWidthPx } : {}),
+        ...(selectedLogoHeightPx !== undefined ? { heightPx: selectedLogoHeightPx } : {}),
+        ...(selectedLogoPositionMode === "custom"
+          ? { x: selectedLogoOffsetX, y: selectedLogoOffsetY }
+          : {}),
       },
       dataModulesSettings: {
         ...DEFAULT_DRAFTING_STUDIO_STATE.dataModulesSettings,
         type: selectedDotType,
         color: selectedDotColor,
+        roundSize: selectedModuleRoundSize,
+        ...(selectedModuleSize !== undefined ? { moduleSize: selectedModuleSize } : {}),
+        ...(selectedModuleLineWidth !== undefined ? { lineWidth: selectedModuleLineWidth } : {}),
       },
+      ariaLabel: selectedAriaLabel || undefined,
+      valueSegments: parseValueSegmentsText(selectedValueSegmentsText),
+      gradientLinkMode: selectedGradientLinkMode,
       dotsColorMode: selectedDotsColorMode,
       dotsPalette: [...selectedDotsPalette],
       dotMatrixAnimation: { ...selectedDotMatrixAnimation },
@@ -894,6 +968,23 @@ export function WorkspaceSurface({
       selectedDotsPalette,
       selectedDotType,
       selectedQrErrorCorrectionLevel,
+      selectedBoostLevel,
+      selectedQrMode,
+      selectedValueSegmentsText,
+      selectedAriaLabel,
+      selectedModuleRoundSize,
+      selectedModuleSize,
+      selectedModuleLineWidth,
+      selectedGradientLinkMode,
+      selectedLogoOpacity,
+      selectedLogoSizeMode,
+      selectedLogoWidthPx,
+      selectedLogoHeightPx,
+      selectedLogoLockAspect,
+      selectedLogoPositionMode,
+      selectedLogoOffsetX,
+      selectedLogoOffsetY,
+      selectedLogoCrossOrigin,
       selectedHideBackgroundDots,
       selectedLogoColor,
       selectedLogoColorMode,
@@ -1380,6 +1471,23 @@ export function WorkspaceSurface({
     setSelectedSaveAsBlob(nextState.imageOptions.saveAsBlob)
     setSelectedQrTypeNumber(nextState.qrOptions.typeNumber)
     setSelectedQrErrorCorrectionLevel(nextState.qrOptions.errorCorrectionLevel)
+    setSelectedBoostLevel(nextState.qrOptions.boostLevel)
+    setSelectedQrMode(nextState.qrOptions.mode)
+    setSelectedValueSegmentsText(formatValueSegmentsText(nextState.valueSegments))
+    setSelectedAriaLabel(nextState.ariaLabel ?? "")
+    setSelectedModuleRoundSize(nextState.dataModulesSettings.roundSize)
+    setSelectedModuleSize(nextState.dataModulesSettings.moduleSize)
+    setSelectedModuleLineWidth(nextState.dataModulesSettings.lineWidth)
+    setSelectedGradientLinkMode(nextState.gradientLinkMode)
+    setSelectedLogoOpacity(nextState.imageOptions.opacity * 100)
+    setSelectedLogoSizeMode(nextState.imageOptions.sizeMode)
+    setSelectedLogoWidthPx(nextState.imageOptions.widthPx)
+    setSelectedLogoHeightPx(nextState.imageOptions.heightPx)
+    setSelectedLogoLockAspect(nextState.imageOptions.lockAspect)
+    setSelectedLogoPositionMode(nextState.imageOptions.logoPositionMode)
+    setSelectedLogoOffsetX(nextState.imageOptions.x ?? 0)
+    setSelectedLogoOffsetY(nextState.imageOptions.y ?? 0)
+    setSelectedLogoCrossOrigin(nextState.imageOptions.crossOrigin)
   }
 
   function buildDraftingWorkspaceDocument(): DraftingWorkspaceDocumentV1 {
@@ -3760,6 +3868,10 @@ export function WorkspaceSurface({
     dotsPalettePreset: selectedDotsPalettePreset,
     dotsSolidColor: selectedDotColor,
     qrDotType: selectedDotType,
+    moduleRoundSize: selectedModuleRoundSize,
+    moduleSize: selectedModuleSize,
+    moduleLineWidth: selectedModuleLineWidth,
+    gradientLinkMode: selectedGradientLinkMode,
   }
   const desktopLogoSettings: DesktopLogoSettings = {
     colorMode: selectedLogoColorMode,
@@ -3773,6 +3885,15 @@ export function WorkspaceSurface({
     solidColor: selectedLogoColor,
     sourceMode: getDesktopLogoSourceMode(selectedLogoSourceMode),
     uploadMode: selectedLogoAssetSourceMode,
+    opacity: selectedLogoOpacity,
+    sizeMode: selectedLogoSizeMode,
+    widthPx: selectedLogoWidthPx,
+    heightPx: selectedLogoHeightPx,
+    lockAspect: selectedLogoLockAspect,
+    positionMode: selectedLogoPositionMode,
+    offsetX: selectedLogoOffsetX,
+    offsetY: selectedLogoOffsetY,
+    crossOrigin: selectedLogoCrossOrigin,
   }
   const desktopCornersSettings: DesktopCornersSettings = {
     cornerDotColorMode: selectedCornerDotColorMode,
@@ -3822,6 +3943,12 @@ export function WorkspaceSurface({
   const desktopEncodingSettings: DesktopEncodingSettings = {
     errorCorrectionLevel: selectedQrErrorCorrectionLevel,
     typeNumber: selectedQrTypeNumber,
+    boostLevel: selectedBoostLevel,
+    mode: selectedQrMode,
+    valueSegmentsText: selectedValueSegmentsText,
+  }
+  const desktopAccessibilitySettings: DesktopAccessibilitySettings = {
+    ariaLabel: selectedAriaLabel,
   }
   const desktopImageSettings: DesktopImageSettings = {
     fit: selectedCardState.cardImage.fit,
@@ -3875,6 +4002,10 @@ export function WorkspaceSurface({
 
   function updateDesktopPatternSettings(patch: Partial<DesktopPatternSettings>) {
     if (patch.qrDotType) setSelectedDotType(patch.qrDotType)
+    if (patch.moduleRoundSize !== undefined) setSelectedModuleRoundSize(patch.moduleRoundSize)
+    if (patch.moduleSize !== undefined) setSelectedModuleSize(patch.moduleSize)
+    if (patch.moduleLineWidth !== undefined) setSelectedModuleLineWidth(patch.moduleLineWidth)
+    if (patch.gradientLinkMode) setSelectedGradientLinkMode(patch.gradientLinkMode)
     if (patch.dotsColorMode) {
       ensureDotsColorItemExpanded(patch.dotsColorMode)
       setSelectedDotsColorMode(patch.dotsColorMode)
@@ -3908,6 +4039,10 @@ export function WorkspaceSurface({
     setSelectedDotsGradient(structuredClone(DEFAULT_DRAFTING_STUDIO_STATE.dataModulesGradient))
     setSelectedDotsPalette([...DEFAULT_DRAFTING_STUDIO_STATE.dotsPalette])
     setSelectedDotsPalettePreset("Signal")
+    setSelectedModuleRoundSize(DEFAULT_DRAFTING_STUDIO_STATE.dataModulesSettings.roundSize)
+    setSelectedModuleSize(undefined)
+    setSelectedModuleLineWidth(undefined)
+    setSelectedGradientLinkMode(DEFAULT_DRAFTING_STUDIO_STATE.gradientLinkMode)
   }
 
   function updateDesktopLogoSettings(patch: DesktopLogoSettingsPatch) {
@@ -3989,6 +4124,15 @@ export function WorkspaceSurface({
     if (patch.margin !== undefined) setSelectedLogoMargin(patch.margin)
     if (patch.hideBackgroundDots !== undefined) setSelectedHideBackgroundDots(patch.hideBackgroundDots)
     if (patch.saveAsBlob !== undefined) setSelectedSaveAsBlob(patch.saveAsBlob)
+    if (patch.opacity !== undefined) setSelectedLogoOpacity(patch.opacity)
+    if (patch.sizeMode) setSelectedLogoSizeMode(patch.sizeMode)
+    if (patch.widthPx !== undefined) setSelectedLogoWidthPx(patch.widthPx)
+    if (patch.heightPx !== undefined) setSelectedLogoHeightPx(patch.heightPx)
+    if (patch.lockAspect !== undefined) setSelectedLogoLockAspect(patch.lockAspect)
+    if (patch.positionMode) setSelectedLogoPositionMode(patch.positionMode)
+    if (patch.offsetX !== undefined) setSelectedLogoOffsetX(patch.offsetX)
+    if (patch.offsetY !== undefined) setSelectedLogoOffsetY(patch.offsetY)
+    if (patch.crossOrigin !== undefined) setSelectedLogoCrossOrigin(patch.crossOrigin)
   }
 
   function resetDesktopLogoSettings() {
@@ -4119,6 +4263,13 @@ export function WorkspaceSurface({
   function updateDesktopEncodingSettings(patch: Partial<DesktopEncodingSettings>) {
     if (patch.typeNumber !== undefined) setSelectedQrTypeNumber(patch.typeNumber)
     if (patch.errorCorrectionLevel) setSelectedQrErrorCorrectionLevel(patch.errorCorrectionLevel)
+    if (patch.boostLevel !== undefined) setSelectedBoostLevel(patch.boostLevel)
+    if (patch.mode) setSelectedQrMode(patch.mode)
+    if (patch.valueSegmentsText !== undefined) setSelectedValueSegmentsText(patch.valueSegmentsText)
+  }
+
+  function updateDesktopAccessibilitySettings(patch: Partial<DesktopAccessibilitySettings>) {
+    if (patch.ariaLabel !== undefined) setSelectedAriaLabel(patch.ariaLabel)
   }
 
   function updateDesktopTextSettings(patch: Partial<DesktopTextSettings>) {
@@ -4214,6 +4365,7 @@ export function WorkspaceSurface({
     effectsSettings: desktopEffectsSettings,
     encodedContentValue: selectedContentValue,
     encodingSettings: desktopEncodingSettings,
+    accessibilitySettings: desktopAccessibilitySettings,
     exportSettings: desktopExportSettings,
     imageSettings: desktopImageSettings,
     layersSettings: desktopLayersSettings,
@@ -4287,8 +4439,13 @@ export function WorkspaceSurface({
     onEncodingReset: () => {
       setSelectedQrTypeNumber(DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.typeNumber)
       setSelectedQrErrorCorrectionLevel(DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.errorCorrectionLevel)
+      setSelectedBoostLevel(DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.boostLevel)
+      setSelectedQrMode(DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.mode)
+      setSelectedValueSegmentsText("")
     },
     onEncodingSettingsChange: updateDesktopEncodingSettings,
+    onAccessibilityReset: () => setSelectedAriaLabel(""),
+    onAccessibilitySettingsChange: updateDesktopAccessibilitySettings,
     onExportDownload: () => {
       void handleDownload()
     },

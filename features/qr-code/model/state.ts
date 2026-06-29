@@ -27,6 +27,10 @@ export type StudioGradient = {
 
 export type StudioDataModulesStyle = QrDataModulesStyle;
 export type DotsColorMode = "solid" | "gradient" | "palette";
+export type QrLogoPositionMode = "center" | "custom";
+export type QrLogoSizeMode = "ratio" | "pixels";
+export type QrCrossOrigin = "anonymous" | "use-credentials" | "";
+export type QrGradientLinkMode = "split" | "unified";
 export type AssetSourceMode = "none" | "preset" | "url" | "upload";
 export type QrDotMatrixSquareLoader =
   | "neon-drift"
@@ -176,19 +180,33 @@ export type QrStudioState = {
     typeNumber: QrTypeNumber;
     mode: QrMode;
     errorCorrectionLevel: QrErrorCorrectionLevel;
+    boostLevel: boolean;
   };
   imageOptions: {
     hideBackgroundDots: boolean;
     imageSize: number;
     margin: number;
     saveAsBlob: boolean;
-    crossOrigin: "anonymous";
+    crossOrigin: QrCrossOrigin;
+    opacity: number;
+    sizeMode: QrLogoSizeMode;
+    widthPx?: number;
+    heightPx?: number;
+    lockAspect: boolean;
+    logoPositionMode: QrLogoPositionMode;
+    x?: number;
+    y?: number;
   };
   dataModulesSettings: {
     type: StudioDataModulesStyle;
     color: string;
     roundSize: boolean;
+    moduleSize?: number;
+    lineWidth?: number;
   };
+  ariaLabel?: string;
+  valueSegments?: string[];
+  gradientLinkMode: QrGradientLinkMode;
   dotMatrixAnimation: QrDotMatrixAnimationOptions;
   dotsColorMode: DotsColorMode;
   dotsPalette: string[];
@@ -233,6 +251,12 @@ const BACKGROUND_SHAPE_SHADOW_OFFSET_MIN = -64;
 const BACKGROUND_SHAPE_SHADOW_OFFSET_MAX = 64;
 export const BACKGROUND_SHAPE_TILT_MIN = -60;
 export const BACKGROUND_SHAPE_TILT_MAX = 60;
+export const QR_MODULE_SIZE_MIN = 0.75;
+export const QR_MODULE_SIZE_MAX = 1;
+export const QR_MODULE_LINE_WIDTH_MIN = 0.25;
+export const QR_MODULE_LINE_WIDTH_MAX = 1;
+export const QR_LOGO_OPACITY_MIN = 0;
+export const QR_LOGO_OPACITY_MAX = 1;
 
 const DEFAULT_GRADIENT: StudioGradient = {
   enabled: false,
@@ -474,6 +498,7 @@ export function createDefaultQrStudioState(): QrStudioState {
       typeNumber: 0,
       mode: "Byte",
       errorCorrectionLevel: "Q",
+      boostLevel: true,
     },
     imageOptions: {
       hideBackgroundDots: true,
@@ -481,12 +506,17 @@ export function createDefaultQrStudioState(): QrStudioState {
       margin: 12,
       saveAsBlob: true,
       crossOrigin: "anonymous",
+      opacity: 1,
+      sizeMode: "ratio",
+      lockAspect: true,
+      logoPositionMode: "center",
     },
     dataModulesSettings: {
       type: "rounded",
       color: "#111827",
       roundSize: true,
     },
+    gradientLinkMode: "split",
     dotMatrixAnimation: { ...DEFAULT_DOT_MATRIX_ANIMATION },
     dotsColorMode: "solid",
     dotsPalette: [...DEFAULT_DOTS_PALETTE],
@@ -532,6 +562,18 @@ function coerceNumber(
 
 export function clampQrSize(value: number) {
   return coerceNumber(value, QR_SIZE_MIN, QR_SIZE_MAX, DEFAULT_QR_SIZE);
+}
+
+export function clampModuleSize(value: number) {
+  return coerceNumber(value, QR_MODULE_SIZE_MIN, QR_MODULE_SIZE_MAX, 1);
+}
+
+export function clampModuleLineWidth(value: number) {
+  return coerceNumber(value, QR_MODULE_LINE_WIDTH_MIN, QR_MODULE_LINE_WIDTH_MAX, 1);
+}
+
+export function clampLogoOpacity(value: number) {
+  return coerceNumber(value, QR_LOGO_OPACITY_MIN, QR_LOGO_OPACITY_MAX, 1);
 }
 
 export function clampRasterExportQualityPercent(value: number) {

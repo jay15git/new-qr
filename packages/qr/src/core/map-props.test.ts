@@ -128,4 +128,24 @@ describe("portablePropsToReactQrProps", () => {
     expect(result.dataModulesSettings?.style).toBe("circle")
     expect(result.dataModulesSettings?.randomSize).toBe(true)
   })
+
+  it("maps unified gradientMode to upstream gradient prop", () => {
+    const result = portablePropsToReactQrProps({
+      value: "x",
+      colorMode: "gradient",
+      gradient: {
+        rotation: 0,
+        stops: [
+          { color: "#111111", offset: 0 },
+          { color: "#999999", offset: 1 },
+        ],
+        type: "linear",
+      },
+      gradientMode: "unified",
+      foreground: "#111111",
+    })
+
+    expect(result.gradient).toMatchObject({ type: "linear" })
+    expect(result.dataModulesSettings?.color).toBeUndefined()
+  })
 })

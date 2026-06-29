@@ -96,4 +96,35 @@ describe("toPortableQrConfig", () => {
     expect(config.motion).toBe("bitjson")
     expect(config.motionPreset).toBe("FadeInTopDown")
   })
+
+  it("maps boostLevel, module tuning, logo advanced fields, and ariaLabel", () => {
+    const state = createDefaultQrStudioState()
+    state.qrOptions.boostLevel = false
+    state.dataModulesSettings.moduleSize = 0.9
+    state.dataModulesSettings.lineWidth = 0.75
+    state.ariaLabel = "Scan to pay"
+    state.imageOptions.opacity = 0.8
+    state.imageOptions.sizeMode = "pixels"
+    state.imageOptions.widthPx = 48
+    state.imageOptions.heightPx = 32
+    state.imageOptions.logoPositionMode = "custom"
+    state.imageOptions.x = 10
+    state.imageOptions.y = 12
+    state.logo = { source: "url", value: "https://example.com/logo.png" }
+
+    expect(toPortableQrConfig(state)).toMatchObject({
+      ariaLabel: "Scan to pay",
+      boostLevel: false,
+      logo: {
+        height: 32,
+        opacity: 0.8,
+        src: "https://example.com/logo.png",
+        width: 48,
+        x: 10,
+        y: 12,
+      },
+      moduleLineWidth: 0.75,
+      moduleSize: 0.9,
+    })
+  })
 })

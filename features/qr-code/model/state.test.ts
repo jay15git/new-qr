@@ -52,6 +52,24 @@ describe("qr studio state helpers", () => {
     });
   });
 
+  it("passes boostLevel, moduleSize, lineWidth, logo opacity, and aria-label to ReactQRCode", () => {
+    const state = createDefaultQrStudioState()
+    state.qrOptions.boostLevel = false
+    state.dataModulesSettings.moduleSize = 0.85
+    state.dataModulesSettings.lineWidth = 0.5
+    state.ariaLabel = "Event ticket"
+    state.imageOptions.opacity = 0.6
+    state.logo = { source: "url", value: "https://example.com/logo.png" }
+
+    const props = toReactQrCodeProps(state)
+
+    expect(props.boostLevel).toBe(false)
+    expect(props.dataModulesSettings?.size).toBe(0.85)
+    expect(props.dataModulesSettings?.lineWidth).toBe(0.5)
+    expect(props.svgProps?.["aria-label"]).toBe("Event ticket")
+    expect(props.imageSettings?.opacity).toBe(0.6)
+  })
+
   it("builds ReactQRCode props from the default state", () => {
     const state = createDefaultQrStudioState();
     const props = toReactQrCodeProps(state);
@@ -526,7 +544,7 @@ describe("qr studio state helpers", () => {
 
     expect(toReactQrCodeProps(zeroSizeState).imageSettings).toBeUndefined();
     fullSizeState.logo = { source: "url", value: "https://example.com/logo.png" };
-    expect(toReactQrCodeProps(fullSizeState).imageSettings?.width).toBe(320);
+    expect(toReactQrCodeProps(fullSizeState).imageSettings?.width).toBe(308);
   });
 
   it("maps preset logo assets onto the upstream image field", () => {

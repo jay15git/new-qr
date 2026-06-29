@@ -86,9 +86,16 @@ export function portablePropsToReactQrProps(props: NewQrCodeProps): ReactQRCodeP
   const size = coerceNumber(props.size, 120, 1200, 320)
   const margin = coerceNumber(props.margin, 0, 80, 12)
   const { randomSizeDefault, style: moduleStyle } = resolveModuleStyle(props.module)
+  const unifiedGradient =
+    props.gradientMode === "unified" &&
+    props.colorMode === "gradient" &&
+    props.gradient !== undefined &&
+    props.gradient !== "none"
 
   const dotsColor =
-    props.colorMode === "solid" || !props.colorMode ? props.foreground : undefined
+    !unifiedGradient && (props.colorMode === "solid" || !props.colorMode)
+      ? props.foreground
+      : undefined
 
   const dataModulesSettings: NonNullable<ReactQRCodeProps["dataModulesSettings"]> = {
     color: dotsColor,
@@ -107,18 +114,24 @@ export function portablePropsToReactQrProps(props: NewQrCodeProps): ReactQRCodeP
     dataModulesSettings.lineWidth = props.moduleLineWidth
   }
 
+  const upstreamGradient =
+    unifiedGradient && props.gradient !== "none" && props.gradient
+      ? toUpstreamGradient(props.gradient)
+      : undefined
+
   return {
     background: resolveBackground(props),
     boostLevel: props.boostLevel ?? true,
     dataModulesSettings,
     finderPatternInnerSettings: {
-      color: props.finderInnerColor ?? props.foreground,
+      color: unifiedGradient ? undefined : props.finderInnerColor ?? props.foreground,
       style: (props.finderInner ?? "square") as FinderPatternInnerStyle,
     },
     finderPatternOuterSettings: {
-      color: props.finderOuterColor ?? props.foreground,
+      color: unifiedGradient ? undefined : props.finderOuterColor ?? props.foreground,
       style: (props.finderOuter ?? "square") as FinderPatternOuterStyle,
     },
+    gradient: upstreamGradient,
     imageSettings: resolveImageSettings(props, size),
     level: props.level ?? "Q",
     marginSize: margin,

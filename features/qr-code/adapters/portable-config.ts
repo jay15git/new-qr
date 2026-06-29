@@ -85,12 +85,37 @@ function mapLogo(state: QrStudioState): NewQrCodeProps["logo"] | undefined {
     return undefined
   }
 
-  return {
-    crossOrigin: state.imageOptions.crossOrigin,
+  const logo: NonNullable<NewQrCodeProps["logo"]> = {
+    crossOrigin: state.imageOptions.crossOrigin || undefined,
     excavate: state.imageOptions.hideBackgroundDots,
-    size: state.imageOptions.imageSize,
     src,
   }
+
+  if (state.imageOptions.sizeMode === "pixels") {
+    if (state.imageOptions.widthPx !== undefined) {
+      logo.width = Math.max(1, state.imageOptions.widthPx)
+    }
+    if (state.imageOptions.heightPx !== undefined) {
+      logo.height = Math.max(1, state.imageOptions.heightPx)
+    }
+  } else {
+    logo.size = state.imageOptions.imageSize
+  }
+
+  if (state.imageOptions.opacity !== 1) {
+    logo.opacity = state.imageOptions.opacity
+  }
+
+  if (state.imageOptions.logoPositionMode === "custom") {
+    if (state.imageOptions.x !== undefined) {
+      logo.x = state.imageOptions.x
+    }
+    if (state.imageOptions.y !== undefined) {
+      logo.y = state.imageOptions.y
+    }
+  }
+
+  return logo
 }
 
 function mapMotion(state: QrStudioState): Pick<NewQrCodeProps, "motion" | "motionPreset"> {
@@ -104,39 +129,61 @@ function mapMotion(state: QrStudioState): Pick<NewQrCodeProps, "motion" | "motio
   }
 }
 
+function mapValue(state: QrStudioState): NewQrCodeProps["value"] {
+  if (state.valueSegments?.length) {
+    return state.valueSegments.map((segment) => segment.trim()).filter(Boolean)
+  }
+
+  return state.data.trim()
+}
+
 export function toPortableQrConfig(state: QrStudioState): NewQrCodeProps {
   const logo = mapLogo(state)
   const motion = mapMotion(state)
+  const unifiedGradient =
+    state.gradientLinkMode === "unified" && state.dotsColorMode === "gradient"
 
   return {
+    ...(state.ariaLabel ? { ariaLabel: state.ariaLabel } : {}),
     background: mapBackground(state),
     backgroundGradient: mapBackgroundGradient(state),
-    boostLevel: true,
+    boostLevel: state.qrOptions.boostLevel,
     colorMode: state.dotsColorMode,
     finderInner: state.finderPatternInnerSettings.type as QrFinderInnerStyle,
     finderOuter: state.finderPatternOuterSettings.type as QrFinderOuterStyle,
     finderInnerColor: state.finderPatternInnerSettings.color,
     finderOuterColor: state.finderPatternOuterSettings.color,
-    finderInnerGradient: mapStudioGradient(
-      state.finderPatternInnerGradient,
-      state.finderPatternInnerGradient.enabled,
-    ),
-    finderOuterGradient: mapStudioGradient(
-      state.finderPatternOuterGradient,
-      state.finderPatternOuterGradient.enabled,
-    ),
+    finderInnerGradient: unifiedGradient
+      ? "none"
+      : mapStudioGradient(
+          state.finderPatternInnerGradient,
+          state.finderPatternInnerGradient.enabled,
+        ),
+    finderOuterGradient: unifiedGradient
+      ? "none"
+      : mapStudioGradient(
+          state.finderPatternOuterGradient,
+          state.finderPatternOuterGradient.enabled,
+        ),
     foreground: state.dataModulesSettings.color,
     gradient: mapGradient(state),
     level: state.qrOptions.errorCorrectionLevel,
     margin: state.margin,
     minVersion: Math.max(1, state.qrOptions.typeNumber || 1),
     module: state.dataModulesSettings.type as QrModuleStyle,
+    ...(state.dataModulesSettings.moduleSize !== undefined
+      ? { moduleSize: state.dataModulesSettings.moduleSize }
+      : {}),
+    ...(state.dataModulesSettings.lineWidth !== undefined
+      ? { moduleLineWidth: state.dataModulesSettings.lineWidth }
+      : {}),
     moduleRoundSize: state.dataModulesSettings.roundSize,
     motion: motion.motion,
     motionPreset: motion.motionPreset,
     palette: state.dotsPalette,
     size: state.width,
-    value: state.data.trim(),
+    value: mapValue(state),
+    ...(unifiedGradient ? { gradientMode: "unified" as const } : {}),
     ...(logo ? { logo } : {}),
   }
 }

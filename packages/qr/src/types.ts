@@ -67,6 +67,7 @@ export type NewQrCodeProps = {
   colorMode?: "solid" | "gradient" | "palette"
   palette?: string[]
   moduleRoundSize?: boolean
+  gradientMode?: "split" | "unified"
   motion?: "none" | "bitjson"
   motionPreset?: string
   className?: string

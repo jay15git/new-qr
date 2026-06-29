@@ -18,38 +18,65 @@ export function toReactQrCodeProps(state: QrStudioState): ReactQRCodeProps {
     (state.backgroundShapeId !== "none" ||
       hasActiveBackgroundShapeOptions(state.backgroundShapeOptions));
   const qrSize = clampQrSize(state.width);
-  const logoSize = Math.max(
-    1,
-    Math.round(qrSize * coerceNumber(state.imageOptions.imageSize, 0, 1, 0.4)),
+  const marginFactor = 1 - coerceNumber(state.imageOptions.margin, 0, 40, 0) / qrSize;
+  const ratioSize = Math.max(
+    0,
+    coerceNumber(state.imageOptions.imageSize, 0, 1, 0.4) * marginFactor,
   );
+  const defaultLogoSize = Math.max(1, Math.round(qrSize * ratioSize));
+  const unifiedGradient =
+    state.gradientLinkMode === "unified" &&
+    state.dotsColorMode === "gradient" &&
+    state.dataModulesGradient.enabled;
 
   return {
     background:
       backgroundImage || customBackgroundSurfaceActive || state.backgroundOptions.transparent
         ? "transparent"
         : buildGradient(state.backgroundGradient) ?? state.backgroundOptions.color,
-    boostLevel: true,
+    boostLevel: state.qrOptions.boostLevel,
     dataModulesSettings: {
-      color: getDotsColor(state),
+      color: getDotsColor(state, unifiedGradient),
       randomSize: !state.dataModulesSettings.roundSize,
       style: state.dataModulesSettings.type,
+      ...(state.dataModulesSettings.moduleSize !== undefined
+        ? { size: state.dataModulesSettings.moduleSize }
+        : {}),
+      ...(state.dataModulesSettings.lineWidth !== undefined
+        ? { lineWidth: state.dataModulesSettings.lineWidth }
+        : {}),
     },
     finderPatternInnerSettings: {
-      color: state.finderPatternInnerSettings.color,
+      color: unifiedGradient ? undefined : state.finderPatternInnerSettings.color,
       style: resolveFinderInnerStyle(state.finderPatternInnerSettings.type),
     },
     finderPatternOuterSettings: {
-      color: state.finderPatternOuterSettings.color,
+      color: unifiedGradient ? undefined : state.finderPatternOuterSettings.color,
       style: state.finderPatternOuterSettings.type,
     },
-    gradient: undefined,
+    gradient: unifiedGradient ? buildGradient(state.dataModulesGradient) : undefined,
     imageSettings: logoImage
       ? {
-          crossOrigin: state.imageOptions.crossOrigin,
+          crossOrigin: state.imageOptions.crossOrigin || undefined,
           excavate: state.imageOptions.hideBackgroundDots,
-          height: logoSize,
+          height:
+            state.imageOptions.sizeMode === "pixels" && state.imageOptions.heightPx !== undefined
+              ? Math.max(1, state.imageOptions.heightPx)
+              : state.imageOptions.sizeMode === "pixels" && state.imageOptions.widthPx !== undefined
+                ? Math.max(1, state.imageOptions.widthPx)
+                : defaultLogoSize,
+          opacity: state.imageOptions.opacity,
           src: logoImage,
-          width: logoSize,
+          width:
+            state.imageOptions.sizeMode === "pixels" && state.imageOptions.widthPx !== undefined
+              ? Math.max(1, state.imageOptions.widthPx)
+              : defaultLogoSize,
+          ...(state.imageOptions.logoPositionMode === "custom" && state.imageOptions.x !== undefined
+            ? { x: state.imageOptions.x }
+            : {}),
+          ...(state.imageOptions.logoPositionMode === "custom" && state.imageOptions.y !== undefined
+            ? { y: state.imageOptions.y }
+            : {}),
         }
       : undefined,
     level: state.qrOptions.errorCorrectionLevel,
@@ -57,6 +84,7 @@ export function toReactQrCodeProps(state: QrStudioState): ReactQRCodeProps {
     minVersion: Math.max(1, state.qrOptions.typeNumber || 1),
     size: qrSize,
     svgProps: {
+      ...(state.ariaLabel ? { "aria-label": state.ariaLabel } : {}),
       xmlns: "http://www.w3.org/2000/svg",
       style: {
         borderRadius: `${clampQrBackgroundRound(state.backgroundOptions.round) * 100}%`,
@@ -65,7 +93,9 @@ export function toReactQrCodeProps(state: QrStudioState): ReactQRCodeProps {
         width: "100%",
       },
     },
-    value: state.data.trim(),
+    value: state.valueSegments?.length
+      ? state.valueSegments.map((segment) => segment.trim()).filter(Boolean)
+      : state.data.trim(),
   };
 }
 
@@ -73,8 +103,8 @@ function resolveFinderInnerStyle(type: StudioCornerDotStyle): QrFinderPatternInn
   return isCustomCornerDotShape(type) ? "square" : type;
 }
 
-function getDotsColor(state: QrStudioState) {
-  if (state.dotsColorMode !== "solid") {
+function getDotsColor(state: QrStudioState, unifiedGradient: boolean) {
+  if (unifiedGradient || state.dotsColorMode !== "solid") {
     return undefined;
   }
 
