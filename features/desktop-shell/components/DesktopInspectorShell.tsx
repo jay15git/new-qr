@@ -6,11 +6,13 @@ import { ElasticSlider } from "@/components/ui/elastic-slider"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   DESKTOP_INSPECTOR_HEADER_CLASS,
+  DESKTOP_INSPECTOR_INPUT_CLASS,
   DESKTOP_INSPECTOR_LABEL_CLASS,
   DESKTOP_INSPECTOR_PANEL_TITLE_CLASS,
   DESKTOP_INSPECTOR_ROW_CLASS,
   DesktopInspectorTextInput,
   desktopInspectorOptionGridClass,
+  useDesktopInspectorNumberScrub,
 } from "@/features/desktop-shell/components/InspectorControls"
 import { SurfaceProvider } from "@/lib/surface-context"
 import { cn } from "@/lib/utils"
@@ -206,27 +208,39 @@ export function DesktopInspectorNumberField({
   step?: number
   value: number
 }) {
-  return (
-    <label className="flex min-w-0 items-center gap-1.5">
-      <span className={cn("min-w-0 shrink-0", DESKTOP_INSPECTOR_LABEL_CLASS)}>{label}</span>
-      <DesktopInspectorTextInput
-        aria-label={label}
-        className="h-8 min-w-0 flex-1 rounded-[6px] px-2"
-        disabled={disabled}
-        max={max}
-        min={min}
-        step={step}
-        type="number"
-        value={value}
-        onChange={(event) => {
-          const nextValue = Number(event.currentTarget.value)
+  const scrub = useDesktopInspectorNumberScrub({
+    disabled,
+    max,
+    min,
+    onChange,
+    step,
+    value,
+  })
 
-          if (Number.isFinite(nextValue)) {
-            onChange(nextValue)
-          }
-        }}
+  return (
+    <div className="flex min-w-0 items-center gap-1.5" role="group">
+      <span
+        className={cn(
+          "min-w-0 shrink-0",
+          DESKTOP_INSPECTOR_LABEL_CLASS,
+          scrub.canScrub && "cursor-ew-resize select-none",
+        )}
+        {...scrub.labelScrubHandlers}
+      >
+        {label}
+      </span>
+      <input
+        {...scrub.inputProps}
+        aria-label={label}
+        className={cn(
+          "h-8 min-w-0 flex-1 rounded-[6px] px-2",
+          DESKTOP_INSPECTOR_INPUT_CLASS,
+          scrub.canScrub && "cursor-ew-resize select-none",
+        )}
+        disabled={disabled}
+        step={step}
       />
-    </label>
+    </div>
   )
 }
 

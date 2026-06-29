@@ -22,6 +22,7 @@ import {
   DesktopInspectorSegmentedControl,
   DesktopInspectorTextarea,
   DesktopInspectorTextInput,
+  DesktopInspectorScrubbableNumberInput,
   desktopInspectorOptionGridClass,
   desktopInspectorOptionGridItemClass,
   desktopInspectorOptionStackClass,
@@ -272,20 +273,13 @@ function DesktopLayerTextInspector({
               />
             </button>
           </div>
-          <DesktopInspectorTextInput
+          <DesktopInspectorScrubbableNumberInput
             aria-label="Text font size"
             className="h-8 rounded-[6px] px-2 text-[12px] font-semibold"
             max={300}
             min={6}
-            type="number"
             value={layer.fontSize ?? DEFAULT_DRAFTING_TEXT_LAYER.fontSize}
-            onChange={(event) => {
-              const fontSize = Number(event.currentTarget.value)
-
-              if (Number.isFinite(fontSize)) {
-                patchTextLayer({ fontSize })
-              }
-            }}
+            onValueChange={(fontSize) => patchTextLayer({ fontSize })}
           />
         </div>
         {fontMenuOpen ? (

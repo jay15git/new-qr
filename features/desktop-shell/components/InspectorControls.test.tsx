@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
   DESKTOP_INSPECTOR_INPUT_CLASS,
   DesktopInspectorNativeSelect,
+  DesktopInspectorScrubbableNumberInput,
   DesktopInspectorSearchInput,
   DesktopInspectorSegmentedControl,
   DesktopInspectorTextInput,
@@ -51,5 +52,21 @@ describe("desktop inspector controls", () => {
     expect(markup).toContain('role="tablist"')
     expect(markup).toContain('role="tab"')
     expect(markup).not.toContain('aria-pressed="true"')
+  })
+
+  it("renders scrubbable number inputs with resize cursor and scrub slot", () => {
+    const markup = renderToStaticMarkup(
+      <DesktopInspectorScrubbableNumberInput
+        aria-label="Width"
+        className="h-8 rounded-[6px] px-2"
+        min={1}
+        value={120}
+        onValueChange={vi.fn()}
+      />,
+    )
+
+    expect(markup).toContain('data-slot="desktop-inspector-scrubbable-number"')
+    expect(markup).toContain("cursor-ew-resize")
+    expect(markup).toContain("appearance-none")
   })
 })

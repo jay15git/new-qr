@@ -7,9 +7,12 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  type ChangeEvent,
   type ComponentProps,
   type CSSProperties,
   type ElementType,
+  type KeyboardEvent,
+  type PointerEvent,
   type ReactNode,
 } from "react"
 import { ChevronDownIcon, SearchIcon } from "lucide-react"
@@ -380,6 +383,402 @@ export function DesktopInspectorTextInput({
       type={type}
       {...props}
     />
+  )
+}
+
+const DESKTOP_INSPECTOR_NUMBER_SPINNER_HIDE_CLASS =
+  "[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+
+function clampDesktopInspectorNumber(value: number, min?: number, max?: number) {
+  let bounded = value
+
+  if (min != null) {
+    bounded = Math.max(min, bounded)
+  }
+
+  if (max != null) {
+    bounded = Math.min(max, bounded)
+  }
+
+  return bounded
+}
+
+function quantizeDesktopInspectorNumber(value: number, step: number) {
+  if (!Number.isFinite(step) || step <= 0) {
+    return value
+  }
+
+  const quantized = Math.round(value / step) * step
+
+  if (Number.isInteger(step)) {
+    return quantized
+  }
+
+  const decimals = step.toString().split(".")[1]?.length ?? 0
+  return parseFloat(quantized.toFixed(decimals))
+}
+
+type UseDesktopInspectorNumberScrubOptions = {
+  disabled?: boolean
+  max?: number
+  min?: number
+  onChange: (value: number) => void
+  shiftStep?: number
+  step?: number
+  value: number
+}
+
+export function useDesktopInspectorNumberScrub({
+  disabled = false,
+  max,
+  min,
+  onChange,
+  shiftStep = 10,
+  step = 1,
+  value,
+}: UseDesktopInspectorNumberScrubOptions) {
+  const [draft, setDraft] = useState(String(value))
+  const [editing, setEditing] = useState(false)
+  const interactingRef = useRef(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const scrubRef = useRef<{
+    captureTarget: HTMLElement | null
+    pointerId: number
+    scrubbing: boolean
+    source: "input" | "label"
+    startValue: number
+    startX: number
+  } | null>(null)
+
+  useEffect(() => {
+    if (!interactingRef.current) {
+      setDraft(String(value))
+    }
+  }, [value])
+
+  useEffect(() => {
+    const input = inputRef.current
+
+    if (!input || disabled) {
+      return
+    }
+
+    const blockWheelWhileIdle = (event: WheelEvent) => {
+      if (!editing) {
+        event.preventDefault()
+      }
+    }
+
+    input.addEventListener("wheel", blockWheelWhileIdle, { passive: false })
+
+    return () => {
+      input.removeEventListener("wheel", blockWheelWhileIdle)
+    }
+  }, [disabled, editing])
+
+  const commit = useCallback(
+    (nextValue: number) => {
+      const quantized = quantizeDesktopInspectorNumber(nextValue, step)
+      const bounded = clampDesktopInspectorNumber(quantized, min, max)
+      onChange(bounded)
+      setDraft(String(bounded))
+    },
+    [max, min, onChange, step],
+  )
+
+  const nudge = useCallback(
+    (direction: 1 | -1, shift: boolean) => {
+      const current = Number(draft)
+
+      if (!Number.isFinite(current)) {
+        return
+      }
+
+      const delta = shift ? shiftStep : step
+      commit(current + direction * delta)
+    },
+    [commit, draft, shiftStep, step],
+  )
+
+  const enterEditMode = useCallback(() => {
+    if (disabled) {
+      return
+    }
+
+    setEditing(true)
+    interactingRef.current = true
+
+    requestAnimationFrame(() => {
+      const input = inputRef.current
+
+      if (!input) {
+        return
+      }
+
+      input.focus({ preventScroll: true })
+      input.select()
+    })
+  }, [disabled])
+
+  const canScrub = !disabled && !editing
+
+  const endScrubSession = useCallback(
+    (event: PointerEvent<HTMLElement>, allowEditOnClick: boolean) => {
+      const state = scrubRef.current
+
+      if (!state) {
+        return
+      }
+
+      const wasScrubbing = state.scrubbing
+      scrubRef.current = null
+
+      if (state.captureTarget) {
+        try {
+          state.captureTarget.releasePointerCapture(event.pointerId)
+        } catch {
+          // Pointer capture may already be released.
+        }
+      }
+
+      if (wasScrubbing) {
+        interactingRef.current = false
+        setDraft(String(value))
+        event.preventDefault()
+        return
+      }
+
+      if (allowEditOnClick && state.source === "input") {
+        enterEditMode()
+      }
+    },
+    [enterEditMode, value],
+  )
+
+  const applyScrubDelta = useCallback(
+    (event: PointerEvent<HTMLElement>) => {
+      const state = scrubRef.current
+
+      if (!state) {
+        return
+      }
+
+      const deltaX = event.clientX - state.startX
+
+      if (!state.scrubbing && Math.abs(deltaX) > 3) {
+        state.scrubbing = true
+        interactingRef.current = true
+      }
+
+      if (state.scrubbing) {
+        const delta = event.shiftKey ? shiftStep : step
+        commit(state.startValue + deltaX * delta)
+      }
+    },
+    [commit, shiftStep, step],
+  )
+
+  const beginLabelScrub = useCallback(
+    (event: PointerEvent<HTMLElement>) => {
+      if (!canScrub) {
+        return
+      }
+
+      if (event.pointerType === "mouse" && event.button !== 0) {
+        return
+      }
+
+      const current = Number(draft)
+
+      if (!Number.isFinite(current)) {
+        return
+      }
+
+      scrubRef.current = {
+        captureTarget: event.currentTarget,
+        pointerId: event.pointerId,
+        scrubbing: false,
+        source: "label",
+        startValue: current,
+        startX: event.clientX,
+      }
+      event.preventDefault()
+      event.currentTarget.setPointerCapture(event.pointerId)
+    },
+    [canScrub, draft],
+  )
+
+  const beginInputScrub = useCallback(
+    (event: PointerEvent<HTMLInputElement>) => {
+      if (!canScrub) {
+        return
+      }
+
+      if (event.pointerType === "mouse" && event.button !== 0) {
+        return
+      }
+
+      const current = Number(draft)
+
+      if (!Number.isFinite(current)) {
+        return
+      }
+
+      scrubRef.current = {
+        captureTarget: null,
+        pointerId: event.pointerId,
+        scrubbing: false,
+        source: "input",
+        startValue: current,
+        startX: event.clientX,
+      }
+      event.preventDefault()
+    },
+    [canScrub, draft],
+  )
+
+  const onInputPointerMove = useCallback(
+    (event: PointerEvent<HTMLInputElement>) => {
+      const state = scrubRef.current
+
+      if (!state) {
+        return
+      }
+
+      if (!state.scrubbing && Math.abs(event.clientX - state.startX) > 3) {
+        state.scrubbing = true
+        interactingRef.current = true
+        state.captureTarget = event.currentTarget
+        event.currentTarget.blur()
+        event.preventDefault()
+        event.currentTarget.setPointerCapture(event.pointerId)
+      }
+
+      applyScrubDelta(event)
+    },
+    [applyScrubDelta],
+  )
+
+  const labelScrubHandlers = {
+    onPointerCancel: (event: PointerEvent<HTMLElement>) => {
+      endScrubSession(event, false)
+    },
+    onPointerDown: beginLabelScrub,
+    onPointerMove: applyScrubDelta,
+    onPointerUp: (event: PointerEvent<HTMLElement>) => {
+      endScrubSession(event, false)
+    },
+  }
+
+  const inputProps = {
+    "data-slot": "desktop-inspector-scrubbable-number",
+    inputMode: "numeric" as const,
+    onBlur: () => {
+      interactingRef.current = false
+      setEditing(false)
+
+      const parsed = Number(draft)
+
+      if (Number.isFinite(parsed)) {
+        commit(parsed)
+        return
+      }
+
+      setDraft(String(value))
+    },
+    onChange: (event: ChangeEvent<HTMLInputElement>) => {
+      setDraft(event.currentTarget.value)
+    },
+    onFocus: () => {
+      interactingRef.current = true
+      setEditing(true)
+    },
+    onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === "Enter") {
+        event.currentTarget.blur()
+        return
+      }
+
+      if (event.key === "Escape") {
+        setDraft(String(value))
+        event.currentTarget.blur()
+        return
+      }
+
+      if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+        event.preventDefault()
+        nudge(event.key === "ArrowUp" ? 1 : -1, event.shiftKey)
+      }
+    },
+    onPointerCancel: (event: PointerEvent<HTMLInputElement>) => {
+      endScrubSession(event, false)
+    },
+    onPointerDown: beginInputScrub,
+    onPointerMove: onInputPointerMove,
+    onPointerUp: (event: PointerEvent<HTMLInputElement>) => {
+      endScrubSession(event, true)
+    },
+    readOnly: !editing,
+    ref: inputRef,
+    type: "text" as const,
+    value: draft,
+  }
+
+  return {
+    canScrub,
+    editing,
+    inputProps,
+    inputRef,
+    labelScrubHandlers,
+  }
+}
+
+type DesktopInspectorScrubbableNumberInputProps = Omit<
+  ComponentProps<"input">,
+  "onChange" | "type" | "value"
+> & {
+  onValueChange: (value: number) => void
+  shiftStep?: number
+  value: number
+}
+
+export function DesktopInspectorScrubbableNumberInput({
+  className,
+  disabled,
+  max,
+  min,
+  onValueChange,
+  shiftStep,
+  step,
+  value,
+  ...props
+}: DesktopInspectorScrubbableNumberInputProps) {
+  const scrub = useDesktopInspectorNumberScrub({
+    disabled,
+    max: typeof max === "number" ? max : undefined,
+    min: typeof min === "number" ? min : undefined,
+    onChange: onValueChange,
+    shiftStep,
+    step: typeof step === "number" ? step : undefined,
+    value,
+  })
+
+  return (
+    <div className="min-w-0">
+      <input
+        {...props}
+        {...scrub.inputProps}
+        className={cn(
+          "h-9 w-full rounded-[7px] px-3",
+          DESKTOP_INSPECTOR_INPUT_CLASS,
+          DESKTOP_INSPECTOR_NUMBER_SPINNER_HIDE_CLASS,
+          scrub.canScrub && "cursor-ew-resize select-none",
+          className,
+        )}
+        disabled={disabled}
+        step={step}
+      />
+    </div>
   )
 }
 

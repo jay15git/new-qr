@@ -203,6 +203,7 @@ import {
   DesktopInspectorSegmentedControl,
   DesktopInspectorTextarea,
   DesktopInspectorTextInput,
+  DesktopInspectorScrubbableNumberInput,
   desktopInspectorOptionGridClass,
   desktopInspectorOptionGridItemClass,
   desktopInspectorOptionStackClass,
@@ -4459,25 +4460,18 @@ function DesktopNumberRow({
   value: number
 }) {
   return (
-    <label className={DESKTOP_INSPECTOR_ROW_CLASS}>
+    <div className={DESKTOP_INSPECTOR_ROW_CLASS} role="group">
       <span className={DESKTOP_INSPECTOR_LABEL_CLASS}>{label}</span>
-      <DesktopInspectorTextInput
+      <DesktopInspectorScrubbableNumberInput
         aria-label={label}
         className="h-7 w-20 rounded-[5px] px-2"
         max={max}
         min={min}
         step={step}
-        type="number"
         value={value}
-        onChange={(event) => {
-          const nextValue = Number(event.currentTarget.value)
-
-          if (Number.isFinite(nextValue)) {
-            onChange(nextValue)
-          }
-        }}
+        onValueChange={onChange}
       />
-    </label>
+    </div>
   )
 }
 
@@ -5766,20 +5760,13 @@ function DesktopTextInspector({
                 />
               </button>
             </div>
-            <DesktopInspectorTextInput
+            <DesktopInspectorScrubbableNumberInput
               aria-label="Text font size"
               className={cn("h-8 rounded-[6px] px-2", DESKTOP_INSPECTOR_VALUE_CLASS, DESKTOP_INSPECTOR_CONTROL_CLASS)}
               max={300}
               min={6}
-              type="number"
               value={settings.fontSize}
-              onChange={(event) => {
-                const fontSize = Number(event.currentTarget.value)
-
-                if (Number.isFinite(fontSize)) {
-                  onTextSettingsChange({ fontSize })
-                }
-              }}
+              onValueChange={(fontSize) => onTextSettingsChange({ fontSize })}
             />
           </div>
           {fontMenuOpen ? (
