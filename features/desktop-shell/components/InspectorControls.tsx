@@ -16,7 +16,8 @@ import {
   type ReactNode,
 } from "react"
 import { ChevronDownIcon, SearchIcon } from "lucide-react"
-import { motion, type Transition } from "motion/react"
+import { Calligraph } from "calligraph"
+import { motion, useReducedMotion, type Transition } from "motion/react"
 
 import { TabsSubtle, TabsSubtleItem } from "@/components/ui/tabs-subtle"
 import {
@@ -89,6 +90,10 @@ export const DESKTOP_OPTION_CARD_SELECTED_CLASS =
 export const DESKTOP_INSPECTOR_INPUT_CLASS = cn(
   "desktop-inspector-input-bg bg-[var(--desktop-inspector-field-bg)] font-medium text-[var(--desktop-inspector-fg-primary)] outline-none placeholder:text-[var(--desktop-inspector-fg-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]",
   DESKTOP_INSPECTOR_TYPE_VALUE_CLASS,
+)
+export const DESKTOP_INSPECTOR_SCRUB_NUMBER_FIELD_CLASS = cn(
+  "text-center tabular-nums",
+  DESKTOP_INSPECTOR_INPUT_CLASS,
 )
 export const DESKTOP_INSPECTOR_FOCUS_CLASS =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
@@ -441,6 +446,7 @@ export function useDesktopInspectorNumberScrub({
   const [editing, setEditing] = useState(false)
   const interactingRef = useRef(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const surfaceRef = useRef<HTMLDivElement>(null)
   const scrubRef = useRef<{
     captureTarget: HTMLElement | null
     pointerId: number
@@ -457,9 +463,9 @@ export function useDesktopInspectorNumberScrub({
   }, [value])
 
   useEffect(() => {
-    const input = inputRef.current
+    const node = surfaceRef.current
 
-    if (!input || disabled) {
+    if (!node || disabled) {
       return
     }
 
@@ -469,10 +475,10 @@ export function useDesktopInspectorNumberScrub({
       }
     }
 
-    input.addEventListener("wheel", blockWheelWhileIdle, { passive: false })
+    node.addEventListener("wheel", blockWheelWhileIdle, { passive: false })
 
     return () => {
-      input.removeEventListener("wheel", blockWheelWhileIdle)
+      node.removeEventListener("wheel", blockWheelWhileIdle)
     }
   }, [disabled, editing])
 
@@ -609,7 +615,7 @@ export function useDesktopInspectorNumberScrub({
   )
 
   const beginInputScrub = useCallback(
-    (event: PointerEvent<HTMLInputElement>) => {
+    (event: PointerEvent<HTMLElement>) => {
       if (!canScrub) {
         return
       }
@@ -638,7 +644,7 @@ export function useDesktopInspectorNumberScrub({
   )
 
   const onInputPointerMove = useCallback(
-    (event: PointerEvent<HTMLInputElement>) => {
+    (event: PointerEvent<HTMLElement>) => {
       const state = scrubRef.current
 
       if (!state) {
@@ -669,6 +675,21 @@ export function useDesktopInspectorNumberScrub({
       endScrubSession(event, false)
     },
   }
+
+  const scrubSurfaceHandlers = {
+    onPointerCancel: (event: PointerEvent<HTMLElement>) => {
+      endScrubSession(event, false)
+    },
+    onPointerDown: beginInputScrub,
+    onPointerMove: onInputPointerMove,
+    onPointerUp: (event: PointerEvent<HTMLElement>) => {
+      endScrubSession(event, true)
+    },
+  }
+
+  const onDisplayFocus = useCallback(() => {
+    enterEditMode()
+  }, [enterEditMode])
 
   const inputProps = {
     "data-slot": "desktop-inspector-scrubbable-number",
@@ -710,15 +731,6 @@ export function useDesktopInspectorNumberScrub({
         nudge(event.key === "ArrowUp" ? 1 : -1, event.shiftKey)
       }
     },
-    onPointerCancel: (event: PointerEvent<HTMLInputElement>) => {
-      endScrubSession(event, false)
-    },
-    onPointerDown: beginInputScrub,
-    onPointerMove: onInputPointerMove,
-    onPointerUp: (event: PointerEvent<HTMLInputElement>) => {
-      endScrubSession(event, true)
-    },
-    readOnly: !editing,
     ref: inputRef,
     type: "text" as const,
     value: draft,
@@ -726,11 +738,181 @@ export function useDesktopInspectorNumberScrub({
 
   return {
     canScrub,
+    displayValue: draft,
     editing,
     inputProps,
     inputRef,
     labelScrubHandlers,
+    onDisplayFocus,
+    scrubSurfaceHandlers,
+    surfaceRef,
   }
+}
+
+function splitSignedDisplayValue(value: string) {
+  if (value.startsWith("-")) {
+    return { body: value.slice(1), sign: "-" }
+  }
+
+  return { body: value, sign: "" }
+}
+
+function mirrorInputTypography(source: HTMLElement): CSSProperties {
+  const computed = getComputedStyle(source)
+
+  return {
+    fontFamily: computed.fontFamily,
+    fontFeatureSettings: computed.fontFeatureSettings,
+    fontSize: computed.fontSize,
+    fontStyle: computed.fontStyle,
+    fontVariantNumeric: computed.fontVariantNumeric as CSSProperties["fontVariantNumeric"],
+    fontWeight: computed.fontWeight,
+    letterSpacing: computed.letterSpacing,
+    lineHeight: computed.lineHeight,
+  }
+}
+
+function DesktopInspectorCalligraphNumber({
+  style,
+  value,
+}: {
+  style?: CSSProperties
+  value: string
+}) {
+  const shouldReduceMotion = useReducedMotion()
+  const { body, sign } = splitSignedDisplayValue(value)
+
+  if (shouldReduceMotion) {
+    return <span style={style}>{value}</span>
+  }
+
+  return (
+    <span className="inline-flex items-center justify-center" style={style}>
+      {sign ? (
+        <span aria-hidden="true" className="inline-block" style={style}>
+          {sign}
+        </span>
+      ) : null}
+      <Calligraph
+        animation="snappy"
+        autoSize={false}
+        className="desktop-inspector-calligraph inline-flex items-center justify-center"
+        style={style}
+        variant="slots"
+      >
+        {body}
+      </Calligraph>
+    </span>
+  )
+}
+
+export function DesktopInspectorScrubNumberInput({
+  className,
+  disabled,
+  inputClassName,
+  scrub,
+  ...props
+}: {
+  className?: string
+  disabled?: boolean
+  inputClassName?: string
+  scrub: ReturnType<typeof useDesktopInspectorNumberScrub>
+} & Omit<ComponentProps<"input">, "onChange" | "type" | "value">) {
+  const fieldClass = cn(inputClassName, DESKTOP_INSPECTOR_SCRUB_NUMBER_FIELD_CLASS)
+  const ariaLabel = props["aria-label"]
+  const mirrorRef = useRef<HTMLInputElement>(null)
+  const [mirroredTypography, setMirroredTypography] = useState<CSSProperties>({})
+
+  const syncMirroredTypography = useCallback(() => {
+    const source = scrub.editing ? scrub.inputRef.current : mirrorRef.current
+
+    if (!source) {
+      return
+    }
+
+    setMirroredTypography(mirrorInputTypography(source))
+  }, [scrub.editing, scrub.inputRef])
+
+  useLayoutEffect(() => {
+    syncMirroredTypography()
+
+    const source = scrub.editing ? scrub.inputRef.current : mirrorRef.current
+
+    if (!source || typeof ResizeObserver === "undefined") {
+      return
+    }
+
+    const observer = new ResizeObserver(syncMirroredTypography)
+    observer.observe(source)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [scrub.displayValue, scrub.editing, syncMirroredTypography])
+
+  return (
+    <div ref={scrub.surfaceRef} className={cn("relative shrink-0", className)}>
+      <input
+        ref={mirrorRef}
+        aria-hidden
+        className={fieldClass}
+        readOnly
+        tabIndex={-1}
+        value={scrub.displayValue}
+        style={{
+          inset: 0,
+          opacity: 0,
+          pointerEvents: "none",
+          position: "absolute",
+          zIndex: 0,
+        }}
+      />
+      {scrub.editing ? (
+        <input
+          {...props}
+          {...scrub.inputProps}
+          className={cn(fieldClass, "relative z-[1]")}
+          disabled={disabled}
+        />
+      ) : (
+        <div
+          {...scrub.scrubSurfaceHandlers}
+          aria-label={typeof ariaLabel === "string" ? ariaLabel : undefined}
+          className={cn(
+            fieldClass,
+            "relative z-[1] flex items-center justify-center",
+            scrub.canScrub && "cursor-ew-resize select-none",
+            disabled && "cursor-not-allowed opacity-50",
+          )}
+          data-slot="desktop-inspector-scrubbable-number"
+          role="button"
+          tabIndex={disabled ? -1 : 0}
+          onFocus={scrub.onDisplayFocus}
+          onKeyDown={(event) => {
+            if (disabled) {
+              return
+            }
+
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault()
+              scrub.onDisplayFocus()
+            }
+          }}
+        >
+          <div
+            className="pointer-events-none flex w-full items-center justify-center"
+            data-slot="desktop-inspector-calligraph-value"
+            style={mirroredTypography}
+          >
+            <DesktopInspectorCalligraphNumber
+              style={mirroredTypography}
+              value={scrub.displayValue}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
 
 type DesktopInspectorScrubbableNumberInputProps = Omit<
@@ -765,17 +947,15 @@ export function DesktopInspectorScrubbableNumberInput({
 
   return (
     <div className="min-w-0">
-      <input
+      <DesktopInspectorScrubNumberInput
         {...props}
-        {...scrub.inputProps}
-        className={cn(
-          "h-9 w-full rounded-[7px] px-3",
-          DESKTOP_INSPECTOR_INPUT_CLASS,
-          DESKTOP_INSPECTOR_NUMBER_SPINNER_HIDE_CLASS,
-          scrub.canScrub && "cursor-ew-resize select-none",
-          className,
-        )}
+        className={cn("h-9 w-full", className)}
         disabled={disabled}
+        inputClassName={cn(
+          "h-9 w-full rounded-[7px] px-3",
+          DESKTOP_INSPECTOR_NUMBER_SPINNER_HIDE_CLASS,
+        )}
+        scrub={scrub}
         step={step}
       />
     </div>

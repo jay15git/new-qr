@@ -6,12 +6,11 @@ import { ElasticSlider } from "@/components/ui/elastic-slider"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   DESKTOP_INSPECTOR_HEADER_CLASS,
-  DESKTOP_INSPECTOR_INPUT_CLASS,
   DESKTOP_INSPECTOR_LABEL_CLASS,
   DESKTOP_INSPECTOR_PANEL_TITLE_CLASS,
   DESKTOP_INSPECTOR_ROW_CLASS,
   DesktopInspectorTextInput,
-  desktopInspectorOptionGridClass,
+  DesktopInspectorScrubNumberInput,
   useDesktopInspectorNumberScrub,
 } from "@/features/desktop-shell/components/InspectorControls"
 import { SurfaceProvider } from "@/lib/surface-context"
@@ -188,7 +187,7 @@ export function DesktopInspectorElasticSliderRow({
 }
 
 export function DesktopInspectorValueGrid({ children }: { children: ReactNode }) {
-  return <div className={desktopInspectorOptionGridClass(2)}>{children}</div>
+  return <div className="grid grid-cols-[auto_auto] gap-x-4 gap-y-2">{children}</div>
 }
 
 export function DesktopInspectorNumberField({
@@ -218,10 +217,10 @@ export function DesktopInspectorNumberField({
   })
 
   return (
-    <div className="flex min-w-0 items-center gap-1.5" role="group">
+    <div className="flex min-w-0 items-center gap-1" role="group">
       <span
         className={cn(
-          "min-w-0 shrink-0",
+          "w-3.5 shrink-0 text-center",
           DESKTOP_INSPECTOR_LABEL_CLASS,
           scrub.canScrub && "cursor-ew-resize select-none",
         )}
@@ -229,15 +228,12 @@ export function DesktopInspectorNumberField({
       >
         {label}
       </span>
-      <input
-        {...scrub.inputProps}
+      <DesktopInspectorScrubNumberInput
         aria-label={label}
-        className={cn(
-          "h-8 min-w-0 flex-1 rounded-[6px] px-2",
-          DESKTOP_INSPECTOR_INPUT_CLASS,
-          scrub.canScrub && "cursor-ew-resize select-none",
-        )}
+        className="h-7 w-[4.75rem]"
         disabled={disabled}
+        inputClassName="h-7 w-full rounded-[6px] px-1.5"
+        scrub={scrub}
         step={step}
       />
     </div>
