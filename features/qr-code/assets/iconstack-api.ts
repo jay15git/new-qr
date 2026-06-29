@@ -1,3 +1,5 @@
+import { isValidIconstackSvgMarkup, normalizeIconstackSvgMarkup } from "@/features/qr-code/assets/iconstack-svg"
+
 export const ICONSTACK_API_BASE =
   "https://sglpxftkuzsqdpdhftwv.supabase.co/functions/v1"
 
@@ -143,5 +145,15 @@ export async function fetchIconSvg({
     throw new Error(`Iconstack SVG fetch failed (${response.status})`)
   }
 
-  return (await response.json()) as IconstackSvgResponse
+  const payload = (await response.json()) as IconstackSvgResponse
+  const svg = normalizeIconstackSvgMarkup(payload.svg ?? "")
+
+  if (!isValidIconstackSvgMarkup(svg)) {
+    throw new Error(`Iconstack SVG fetch returned invalid markup for ${library}/${id}`)
+  }
+
+  return {
+    ...payload,
+    svg,
+  }
 }

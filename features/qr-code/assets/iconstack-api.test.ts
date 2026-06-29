@@ -78,7 +78,7 @@ describe("iconstack-api", () => {
           library: "lucide",
           id: "heart",
           fullId: "lucide-heart",
-          svg: '<svg xmlns="http://www.w3.org/2000/svg"></svg>',
+          svg: '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>',
           url: "https://iconstack.io/icon/lucide/heart",
         }),
         { status: 200 },
@@ -91,5 +91,6 @@ describe("iconstack-api", () => {
       `${ICONSTACK_API_BASE}/icon-svg?library=lucide&id=heart`,
     )
     expect(response.svg).toContain("<svg")
+    expect(response.svg).toContain("<path")
   })
 })

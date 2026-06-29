@@ -388,7 +388,35 @@ describe("qr rendering helpers", () => {
     }
 
     expect(buildQrExtension(stateWithLogo)).toBeNull()
-    expect(getQrExtensionKey(stateWithLogo)).toBe(getQrExtensionKey(defaultState))
+    expect(getQrExtensionKey(stateWithLogo)).not.toBe(getQrExtensionKey(defaultState))
+  })
+
+  it("builds unified module gradient extensions without touching logo assets", () => {
+    const stateWithUnifiedLogo = createDefaultQrStudioState()
+    stateWithUnifiedLogo.dotsColorMode = "gradient"
+    stateWithUnifiedLogo.gradientLinkMode = "unified"
+    stateWithUnifiedLogo.dataModulesGradient = {
+      ...stateWithUnifiedLogo.dataModulesGradient,
+      enabled: true,
+    }
+    stateWithUnifiedLogo.logo = {
+      source: "url",
+      value: "https://example.com/logo.png",
+    }
+
+    expect(buildQrExtension(stateWithUnifiedLogo)).toBeTypeOf("function")
+  })
+
+  it("does not create an alignment extension in unified gradient mode", () => {
+    const state = createDefaultQrStudioState()
+    state.dotsColorMode = "gradient"
+    state.gradientLinkMode = "unified"
+    state.dataModulesGradient = {
+      ...state.dataModulesGradient,
+      enabled: true,
+    }
+
+    expect(createAlignedCornerGradientExtension(state)).toBeNull()
   })
 
   it("changes the extension key when a background image is active", () => {

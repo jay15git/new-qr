@@ -2428,9 +2428,9 @@ function DesktopLogoInspector({
                   ))
                 )}
               </DesktopInspectorAnimatedOptionGrid>
-              {canSearch && !isLoading && !error && total > results.length ? (
+              {canSearch && !isLoading && !error && results.length > 0 ? (
                 <p className={cn("mt-2 px-1 text-center", DESKTOP_INSPECTOR_CAPTION_CLASS)}>
-                  Showing {results.length} of {total}. Refine your search for more.
+                  {results.length} SVG {results.length === 1 ? "icon" : "icons"}
                 </p>
               ) : null}
             </DesktopInspectorOptionGridScrollArea>
@@ -4343,7 +4343,9 @@ function DesktopPatternInspector({
             <DesktopInspectorSegmentedControl
               columns={2}
               dataSlot="desktop-gradient-link-mode"
-              itemAriaLabel={(option) => `Use ${option.label.toLowerCase()} module and finder gradients`}
+              itemAriaLabel={(option) =>
+                `Use ${option.label.toLowerCase()} module and finder gradients`
+              }
               items={DESKTOP_GRADIENT_LINK_OPTIONS}
               value={settings.gradientLinkMode}
               onValueChange={(gradientLinkMode) =>

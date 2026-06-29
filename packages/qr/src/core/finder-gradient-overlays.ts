@@ -170,7 +170,7 @@ function getLinearGradientEndpoints({
   return { x1, x2, y1, y2 }
 }
 
-function createCornerGradientElement(
+export function createCornerGradientElement(
   document: Document,
   gradient: NewQrGradientConfig,
   {

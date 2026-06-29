@@ -9,6 +9,10 @@ import {
   stripXmlDeclaration,
 } from "@/features/qr-code/rendering/qr-svg"
 import {
+  createBrandIconDataUrl,
+} from "@/features/qr-code/assets/brand-icon-svg"
+import { getBrandIconById } from "@/features/qr-code/assets/brand-icons"
+import {
   createDefaultQrStudioState,
   setSquareQrSize,
   type StudioGradient,
@@ -305,6 +309,64 @@ describe("dashboard qr svg helpers", () => {
     expect(markup).toContain('fill="url(\'#dot-gradient-definition\')"')
     expect(markup).toContain('fill="url(\'#corners-square-color-')
     expect(markup).not.toContain('data-qr-layer="dot-gradient-clip"')
+  })
+
+  it("applies unified module gradients to corner frames and corner dots", () => {
+    const state = createDefaultQrStudioState()
+    state.dotsColorMode = "gradient"
+    state.gradientLinkMode = "unified"
+    state.dataModulesGradient = {
+      enabled: true,
+      type: "linear",
+      rotation: Math.PI / 2,
+      colorStops: [
+        { offset: 0, color: "#101010" },
+        { offset: 1, color: "#fafafa" },
+      ],
+    }
+
+    const markup = renderDashboardQrSvgMarkup(state)
+    const document = new DOMParser().parseFromString(markup, "image/svg+xml")
+    const unifiedFills = document.querySelectorAll('[data-qr-layer="unified-gradient-fill"]')
+    const finderOuter = document.querySelectorAll('[data-testid="finder-patterns-outer"]')
+    const finderInner = document.querySelectorAll('[data-testid="finder-patterns-inner"]')
+
+    expect(markup).toContain('data-qr-layer="unified-gradient-definition"')
+    expect(markup).toContain('fill="url(#unified-gradient-definition)"')
+    expect(markup).not.toContain('data-qr-layer="corner-frame-gradient"')
+    expect(markup).not.toContain('data-qr-layer="corner-dot-gradient"')
+    expect(markup).not.toContain('corners-square-color-')
+    expect(markup).not.toContain('corners-dot-color-')
+    expect(unifiedFills.length).toBeGreaterThan(0)
+    expect(finderOuter.length).toBeGreaterThan(0)
+    expect(finderInner.length).toBeGreaterThan(0)
+  })
+
+  it("leaves logo images untouched when unified module gradients are active", () => {
+    const state = createDefaultQrStudioState()
+    state.dotsColorMode = "gradient"
+    state.gradientLinkMode = "unified"
+    state.dataModulesGradient = {
+      enabled: true,
+      type: "linear",
+      rotation: Math.PI / 2,
+      colorStops: [
+        { offset: 0, color: "#101010" },
+        { offset: 1, color: "#fafafa" },
+      ],
+    }
+    state.logo = {
+      source: "preset",
+      presetId: "github",
+      value: createBrandIconDataUrl(getBrandIconById("github"), "#111827"),
+    }
+
+    const markup = renderDashboardQrSvgMarkup(state)
+    const document = new DOMParser().parseFromString(markup, "image/svg+xml")
+
+    expect(document.querySelector("image")).not.toBeNull()
+    expect(markup).not.toContain('data-qr-layer="logo-unified-gradient"')
+    expect(markup).not.toContain('data-qr-layer="logo-unified-gradient-fill"')
   })
 
   it("applies module gradients without repainting finder patterns", () => {

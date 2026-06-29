@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest"
 import {
   createIconstackIconDataUrl,
   createIconstackIconGradientDataUrl,
+  isValidIconstackSvgMarkup,
+  normalizeIconstackSvgMarkup,
   recolorSvgMarkup,
 } from "@/features/qr-code/assets/iconstack-svg"
 
@@ -10,6 +12,18 @@ const strokeSvg =
   '<svg xmlns="http://www.w3.org/2000/svg" stroke="currentColor" fill="none"><path d="M0 0"/></svg>'
 
 describe("iconstack-svg", () => {
+  it("normalizes svg markup by stripping comments", () => {
+    const svg = "<!-- meta -->\n<svg><path d=\"M0 0\"/></svg>"
+
+    expect(normalizeIconstackSvgMarkup(svg)).toBe("<svg><path d=\"M0 0\"/></svg>")
+    expect(isValidIconstackSvgMarkup(svg)).toBe(true)
+  })
+
+  it("rejects markup without svg shapes", () => {
+    expect(isValidIconstackSvgMarkup("<svg></svg>")).toBe(false)
+    expect(isValidIconstackSvgMarkup("")).toBe(false)
+  })
+
   it("recolors stroke-based svg markup", () => {
     expect(recolorSvgMarkup(strokeSvg, "#ff4f00")).toContain('stroke="#ff4f00"')
   })

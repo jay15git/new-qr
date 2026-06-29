@@ -9,6 +9,7 @@ import {
   type IconstackLibraryId,
   type IconstackSearchResult,
 } from "@/features/qr-code/assets/iconstack-api"
+import { isValidIconstackSvgMarkup } from "@/features/qr-code/assets/iconstack-svg"
 
 const SEARCH_DEBOUNCE_MS = 300
 const MIN_QUERY_LENGTH = 2
@@ -61,9 +62,6 @@ export function useIconstackIconSearch({
             return
           }
 
-          setResults(response.results)
-          setTotal(response.total)
-
           const previewEntries = await Promise.all(
             response.results.map(async (result) => {
               try {
@@ -73,9 +71,13 @@ export function useIconstackIconSearch({
                   id: iconId,
                 })
 
+                if (!isValidIconstackSvgMarkup(svgResponse.svg)) {
+                  return null
+                }
+
                 return [result.id, svgResponse.svg] as const
               } catch {
-                return [result.id, ""] as const
+                return null
               }
             }),
           )
@@ -84,9 +86,16 @@ export function useIconstackIconSearch({
             return
           }
 
-          setPreviewSvgs(
-            Object.fromEntries(previewEntries.filter(([, svg]) => svg.length > 0)),
+          const nextPreviewSvgs = Object.fromEntries(
+            previewEntries.filter(
+              (entry): entry is readonly [string, string] => entry !== null,
+            ),
           )
+          const svgResults = response.results.filter((result) => result.id in nextPreviewSvgs)
+
+          setPreviewSvgs(nextPreviewSvgs)
+          setResults(svgResults)
+          setTotal(svgResults.length)
         } catch (searchError) {
           if (cancelled) {
             return

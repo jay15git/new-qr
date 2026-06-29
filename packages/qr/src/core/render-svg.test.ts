@@ -77,6 +77,71 @@ describe("@new-qr/qr core renderer", () => {
     expect(dotFillSizes.every((width) => width === 4.5)).toBe(true)
   })
 
+  it("renders unified module gradients on both finder layers", () => {
+    const moduleGradient = {
+      type: "linear" as const,
+      rotation: Math.PI / 4,
+      stops: [
+        { offset: 0, color: "#101010" },
+        { offset: 1, color: "#fafafa" },
+      ],
+    }
+
+    const markup = renderNewQrSvg({
+      value: "https://example.com",
+      colorMode: "gradient",
+      gradient: moduleGradient,
+      gradientMode: "unified",
+      foreground: "#111827",
+      background: "#ffffff",
+      margin: 12,
+    })
+
+    const resultDoc = new DOMParser().parseFromString(markup, "image/svg+xml")
+    const unifiedFills = resultDoc.querySelectorAll('[data-qr-layer="unified-gradient-fill"]')
+    const finderOuter = resultDoc.querySelectorAll('[data-testid="finder-patterns-outer"]')
+    const finderInner = resultDoc.querySelectorAll('[data-testid="finder-patterns-inner"]')
+
+    expect(markup).toContain('id="new-qr-dots-gradient"')
+    expect(markup).toContain('fill="url(#new-qr-dots-gradient)"')
+    expect(markup).not.toContain('data-qr-layer="corner-frame-gradient"')
+    expect(markup).not.toContain('data-qr-layer="corner-dot-gradient"')
+    expect(unifiedFills.length).toBeGreaterThan(0)
+    expect(finderOuter.length).toBeGreaterThan(0)
+    expect(finderInner.length).toBeGreaterThan(0)
+  })
+
+  it("leaves logo images untouched when unified module gradients are active", () => {
+    const moduleGradient = {
+      type: "linear" as const,
+      rotation: Math.PI / 4,
+      stops: [
+        { offset: 0, color: "#101010" },
+        { offset: 1, color: "#fafafa" },
+      ],
+    }
+
+    const markup = renderNewQrSvg({
+      value: "https://example.com",
+      colorMode: "gradient",
+      gradient: moduleGradient,
+      gradientMode: "unified",
+      foreground: "#111827",
+      background: "#ffffff",
+      margin: 12,
+      logo: {
+        src: "https://example.com/logo.png",
+        size: 0.2,
+      },
+    })
+
+    const resultDoc = new DOMParser().parseFromString(markup, "image/svg+xml")
+
+    expect(resultDoc.querySelector("image")).not.toBeNull()
+    expect(markup).not.toContain('data-qr-layer="logo-unified-gradient"')
+    expect(markup).not.toContain('data-qr-layer="logo-unified-gradient-fill"')
+  })
+
   it("renders localized finder regions for portable rendering", () => {
     expect(getFinderCornerRegions(12, 49, "outer")[0]).toEqual({
       height: 7,

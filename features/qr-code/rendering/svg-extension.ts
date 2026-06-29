@@ -25,6 +25,7 @@ import {
   type StudioGradient,
 } from "@/features/qr-code/model/state"
 import { getBackgroundShapeSkewTransform } from "@/features/workspace/rendering/layer-transform"
+import { applyUnifiedQrGradientFill } from "@new-qr/qr-internal/core"
 import {
   buildCustomCornerDotTransform,
   getCustomCornerDotShapeGeometry,
@@ -75,7 +76,12 @@ export function buildQrExtension(state: QrStudioState) {
     extensions.push(createBackgroundSurfaceExtension(state))
   }
 
-  if (state.dotsColorMode === "gradient") {
+  const unifiedModuleGradient =
+    state.gradientLinkMode === "unified" &&
+    state.dotsColorMode === "gradient" &&
+    state.dataModulesGradient.enabled
+
+  if (state.dotsColorMode === "gradient" && !unifiedModuleGradient) {
     extensions.push(createDotsGradientExtension(state))
   }
 
@@ -83,32 +89,36 @@ export function buildQrExtension(state: QrStudioState) {
     extensions.push(createDotsPaletteExtension(state))
   }
 
-  if (state.finderPatternOuterGradient.enabled) {
-    extensions.push(
-      createFinderPatternGradientExtension(
-        "finder-patterns-outer",
-        state.finderPatternOuterGradient,
-        state.margin,
-        {
-          gradientIdPrefix: "corners-square-color-",
-          groupLayer: "corner-frame-gradient",
-        },
-      ),
-    )
-  }
+  if (unifiedModuleGradient) {
+    extensions.push(createUnifiedGradientExtension(state))
+  } else {
+    if (state.finderPatternOuterGradient.enabled) {
+      extensions.push(
+        createFinderPatternGradientExtension(
+          "finder-patterns-outer",
+          state.finderPatternOuterGradient,
+          state.margin,
+          {
+            gradientIdPrefix: "corners-square-color-",
+            groupLayer: "corner-frame-gradient",
+          },
+        ),
+      )
+    }
 
-  if (state.finderPatternInnerGradient.enabled) {
-    extensions.push(
-      createFinderPatternGradientExtension(
-        "finder-patterns-inner",
-        state.finderPatternInnerGradient,
-        state.margin,
-        {
-          gradientIdPrefix: "corners-dot-color-",
-          groupLayer: "corner-dot-gradient",
-        },
-      ),
-    )
+    if (state.finderPatternInnerGradient.enabled) {
+      extensions.push(
+        createFinderPatternGradientExtension(
+          "finder-patterns-inner",
+          state.finderPatternInnerGradient,
+          state.margin,
+          {
+            gradientIdPrefix: "corners-dot-color-",
+            groupLayer: "corner-dot-gradient",
+          },
+        ),
+      )
+    }
   }
 
   if (extensions.length === 0) {
@@ -148,6 +158,8 @@ export function getQrExtensionKey(state: QrStudioState) {
     dataModulesGradient: state.dotsColorMode === "gradient" ? state.dataModulesGradient : null,
     dotsColorMode: state.dotsColorMode,
     dotsPalette: state.dotsPalette,
+    gradientLinkMode: state.gradientLinkMode,
+    logo: getAssetValue(state.logo),
     seed: state.data.trim(),
   })
 }
@@ -2279,6 +2291,53 @@ function findDotMatrixLayerAnchor(svg: SVGElement) {
   }) ?? null
 }
 
+function createUnifiedGradientExtension(
+  state: Pick<
+    QrStudioState,
+    "gradientLinkMode" | "dotsColorMode" | "dataModulesGradient" | "margin"
+  >,
+): QrSvgExtensionFunction {
+  return (svg) => {
+    removeLegacyDotGradientOverlay(svg)
+
+    const dotClipLayers = getQrModuleClipLayers(svg)
+    const dotPathLayers = getQrModulePathLayers(svg)
+    const modulePaintTargets = [
+      ...dotClipLayers.map((layer) => layer.element),
+      ...dotPathLayers.map((layer) => layer.element),
+    ]
+
+    if (modulePaintTargets.length === 0) {
+      const dataModules = svg.querySelector('[data-testid="data-modules"]')
+
+      if (isSvgElementLike(dataModules)) {
+        modulePaintTargets.push(dataModules)
+      }
+    }
+
+    applyUnifiedQrGradientFill(svg, {
+      gradient: {
+        type: state.dataModulesGradient.type,
+        rotation: state.dataModulesGradient.rotation,
+        stops: [
+          {
+            color: state.dataModulesGradient.colorStops[0]?.color ?? "#000000",
+            offset: state.dataModulesGradient.colorStops[0]?.offset ?? 0,
+          },
+          {
+            color: state.dataModulesGradient.colorStops[1]?.color ?? "#ffffff",
+            offset: state.dataModulesGradient.colorStops[1]?.offset ?? 1,
+          },
+        ],
+      },
+      gradientId: "unified-gradient-definition",
+      gradientLayer: "unified-gradient-definition",
+      margin: state.margin,
+      modulePaintTargets,
+    })
+  }
+}
+
 function createBackgroundShapeExtension(
   shape: QrBackgroundShapeDefinition,
   state: Pick<QrStudioState, "backgroundGradient" | "backgroundOptions" | "backgroundShapeOptions">,
@@ -3530,14 +3589,26 @@ function getSvgViewBoxRegion(svg: SVGElement) {
 }
 
 export function createAlignedCornerGradientExtension(
-  state: Pick<QrStudioState, "finderPatternInnerGradient" | "finderPatternOuterGradient">,
+  state: Pick<
+    QrStudioState,
+    | "finderPatternInnerGradient"
+    | "finderPatternOuterGradient"
+    | "gradientLinkMode"
+    | "dotsColorMode"
+    | "dataModulesGradient"
+  >,
 ): QrSvgExtensionFunction | null {
-  const cornerSquareRotation = getAlignedCornerGradientRotation(
-    state.finderPatternOuterGradient,
-  )
-  const cornerDotRotation = getAlignedCornerGradientRotation(
-    state.finderPatternInnerGradient,
-  )
+  const unifiedModuleGradient =
+    state.gradientLinkMode === "unified" &&
+    state.dotsColorMode === "gradient" &&
+    state.dataModulesGradient.enabled
+
+  if (unifiedModuleGradient) {
+    return null
+  }
+
+  const cornerSquareRotation = getAlignedCornerGradientRotation(state.finderPatternOuterGradient)
+  const cornerDotRotation = getAlignedCornerGradientRotation(state.finderPatternInnerGradient)
 
   if (cornerSquareRotation === null && cornerDotRotation === null) {
     return null

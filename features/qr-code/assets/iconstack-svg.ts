@@ -1,6 +1,22 @@
 import type { StudioGradient } from "@/features/qr-code/model/state"
 
 const ICONSTACK_GRADIENT_ID = "iconstack-icon-gradient"
+const ICONSTACK_SHAPE_TAG =
+  /<(path|circle|rect|polygon|polyline|ellipse|line)\b/i
+
+export function normalizeIconstackSvgMarkup(svg: string) {
+  return svg.replace(/<!--[\s\S]*?-->/g, "").trim()
+}
+
+export function isValidIconstackSvgMarkup(svg: string) {
+  const normalized = normalizeIconstackSvgMarkup(svg)
+
+  if (!/<svg[\s>]/i.test(normalized)) {
+    return false
+  }
+
+  return ICONSTACK_SHAPE_TAG.test(normalized)
+}
 
 export function svgMarkupToDataUrl(markup: string) {
   return `data:image/svg+xml,${encodeURIComponent(markup)}`
@@ -17,13 +33,13 @@ export function recolorSvgMarkup(svg: string, color: string) {
 }
 
 export function createIconstackIconDataUrl(svg: string, color: string) {
-  return svgMarkupToDataUrl(recolorSvgMarkup(svg, color))
+  return svgMarkupToDataUrl(recolorSvgMarkup(normalizeIconstackSvgMarkup(svg), color))
 }
 
 export function createIconstackIconGradientDataUrl(svg: string, gradient: StudioGradient) {
   const gradientMarkup = createSvgGradientMarkup(gradient)
   const fillValue = `url(#${ICONSTACK_GRADIENT_ID})`
-  const withDefinitions = injectSvgDefinitions(svg, gradientMarkup)
+  const withDefinitions = injectSvgDefinitions(normalizeIconstackSvgMarkup(svg), gradientMarkup)
 
   return svgMarkupToDataUrl(
     withDefinitions
