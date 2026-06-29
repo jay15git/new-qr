@@ -186,7 +186,6 @@ export type QrStudioState = {
     hideBackgroundDots: boolean;
     imageSize: number;
     margin: number;
-    saveAsBlob: boolean;
     crossOrigin: QrCrossOrigin;
     opacity: number;
     sizeMode: QrLogoSizeMode;
@@ -504,7 +503,6 @@ export function createDefaultQrStudioState(): QrStudioState {
       hideBackgroundDots: true,
       imageSize: 0.4,
       margin: 12,
-      saveAsBlob: true,
       crossOrigin: "anonymous",
       opacity: 1,
       sizeMode: "ratio",

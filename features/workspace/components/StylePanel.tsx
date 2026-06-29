@@ -3120,11 +3120,9 @@ export function DraftingLogoSizeTab({
   hideBackgroundDots,
   logoMargin,
   logoSize,
-  saveAsBlob,
   onHideBackgroundDotsChange,
   onLogoMarginChange,
   onLogoSizeChange,
-  onSaveAsBlobChange,
 }: {
   hideBackgroundDots: boolean
   logoMargin: number
@@ -3132,8 +3130,6 @@ export function DraftingLogoSizeTab({
   onHideBackgroundDotsChange: (value: boolean) => void
   onLogoMarginChange: (value: number) => void
   onLogoSizeChange: (value: number) => void
-  onSaveAsBlobChange: (value: boolean) => void
-  saveAsBlob: boolean
 }) {
   return (
     <div
@@ -3173,15 +3169,6 @@ export function DraftingLogoSizeTab({
         id="drafting-hide-background-dots"
         label="Hide background dots"
         onCheckedChange={onHideBackgroundDotsChange}
-      />
-
-      <DraftingToggleField
-        checked={saveAsBlob}
-        dataSlot="drafting-logo-save-as-blob"
-        description="Larger SVG files, but better compatibility when the QR is opened elsewhere."
-        id="drafting-save-as-blob"
-        label="Save embedded image as blob"
-        onCheckedChange={onSaveAsBlobChange}
       />
     </div>
   )

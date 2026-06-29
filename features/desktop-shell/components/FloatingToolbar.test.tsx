@@ -1197,11 +1197,9 @@ describe("FloatingToolbar", () => {
     const logoMargin = getRequiredInput(surface.container, "Logo margin")
     const logoMarginRow = logoMargin.closest("label")
     const hideDots = getRequiredButton(surface.container, "Hide background dots")
-    const saveBlob = getRequiredButton(surface.container, "Save embedded image as blob")
 
     expect(logoMarginRow?.className).not.toContain("desktop-inspector-control-bg")
     expect(hideDots.className).not.toContain("desktop-inspector-control-bg")
-    expect(saveBlob.className).not.toContain("desktop-inspector-control-bg")
   })
 
   it("removes header preview tiles from desktop color selection sections", async () => {

@@ -1047,28 +1047,6 @@ export function ControlsPanel({
           }
         />
       </Field>
-
-      <Field orientation="horizontal">
-        <FieldContent>
-          <FieldLabel htmlFor="save-as-blob">Save embedded image as blob</FieldLabel>
-          {!isDashboardMode ? (
-            <FieldDescription>
-              Larger SVG files, but better compatibility when the QR is opened
-              elsewhere.
-            </FieldDescription>
-          ) : null}
-        </FieldContent>
-        <Switch
-          id="save-as-blob"
-          checked={state.imageOptions.saveAsBlob}
-          onCheckedChange={(checked) =>
-            setState((current) => ({
-              ...current,
-              imageOptions: { ...current.imageOptions, saveAsBlob: checked },
-            }))
-          }
-        />
-      </Field>
     </>
   )
 

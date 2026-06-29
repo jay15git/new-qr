@@ -720,9 +720,6 @@ export function WorkspaceSurface({
   const [selectedHideBackgroundDots, setSelectedHideBackgroundDots] = useState(
     DEFAULT_DRAFTING_STUDIO_STATE.imageOptions.hideBackgroundDots,
   )
-  const [selectedSaveAsBlob, setSelectedSaveAsBlob] = useState(
-    DEFAULT_DRAFTING_STUDIO_STATE.imageOptions.saveAsBlob,
-  )
   const [selectedQrTypeNumber, setSelectedQrTypeNumber] = useState<QrTypeNumber>(
     DEFAULT_DRAFTING_STUDIO_STATE.qrOptions.typeNumber,
   )
@@ -882,7 +879,6 @@ export function WorkspaceSurface({
         hideBackgroundDots: selectedHideBackgroundDots,
         imageSize: selectedLogoSize / 100,
         margin: selectedLogoMargin,
-        saveAsBlob: selectedSaveAsBlob,
         crossOrigin: selectedLogoCrossOrigin,
         opacity: selectedLogoOpacity / 100,
         sizeMode: selectedLogoSizeMode,
@@ -999,7 +995,6 @@ export function WorkspaceSurface({
       selectedRasterExportQualityPercent,
       selectedQrMargin,
       selectedQrSize,
-      selectedSaveAsBlob,
       selectedQrTypeNumber,
     ],
   )
@@ -1468,7 +1463,6 @@ export function WorkspaceSurface({
     setSelectedLogoSize(nextState.imageOptions.imageSize * 100)
     setSelectedLogoMargin(nextState.imageOptions.margin)
     setSelectedHideBackgroundDots(nextState.imageOptions.hideBackgroundDots)
-    setSelectedSaveAsBlob(nextState.imageOptions.saveAsBlob)
     setSelectedQrTypeNumber(nextState.qrOptions.typeNumber)
     setSelectedQrErrorCorrectionLevel(nextState.qrOptions.errorCorrectionLevel)
     setSelectedBoostLevel(nextState.qrOptions.boostLevel)
@@ -3383,11 +3377,9 @@ export function WorkspaceSurface({
           hideBackgroundDots={selectedHideBackgroundDots}
           logoMargin={selectedLogoMargin}
           logoSize={selectedLogoSize}
-          saveAsBlob={selectedSaveAsBlob}
           onHideBackgroundDotsChange={setSelectedHideBackgroundDots}
           onLogoMarginChange={setSelectedLogoMargin}
           onLogoSizeChange={setSelectedLogoSize}
-          onSaveAsBlobChange={setSelectedSaveAsBlob}
         />,
       )
     }
@@ -3879,7 +3871,6 @@ export function WorkspaceSurface({
     hideBackgroundDots: selectedHideBackgroundDots,
     margin: selectedLogoMargin,
     remoteUrl: selectedLogoRemoteUrl,
-    saveAsBlob: selectedSaveAsBlob,
     selectedBrandIconId: selectedLogoPresetId ?? "",
     size: selectedLogoSize,
     solidColor: selectedLogoColor,
@@ -4123,7 +4114,6 @@ export function WorkspaceSurface({
     if (patch.size !== undefined) setSelectedLogoSize(patch.size)
     if (patch.margin !== undefined) setSelectedLogoMargin(patch.margin)
     if (patch.hideBackgroundDots !== undefined) setSelectedHideBackgroundDots(patch.hideBackgroundDots)
-    if (patch.saveAsBlob !== undefined) setSelectedSaveAsBlob(patch.saveAsBlob)
     if (patch.opacity !== undefined) setSelectedLogoOpacity(patch.opacity)
     if (patch.sizeMode) setSelectedLogoSizeMode(patch.sizeMode)
     if (patch.widthPx !== undefined) setSelectedLogoWidthPx(patch.widthPx)

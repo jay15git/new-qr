@@ -678,7 +678,6 @@ describe("ControlsPanel", () => {
     expect(markup).not.toContain("Logo margin")
     expect(markup).not.toContain('data-slot="logo-margin-slider"')
     expect(markup).not.toContain("Hide background dots")
-    expect(markup).not.toContain("Save embedded image as blob")
   })
 
   it("keeps the colors tab out of the stacked logo editor", () => {
@@ -713,7 +712,6 @@ describe("ControlsPanel", () => {
     expect(markup).toContain("Logo size")
     expect(markup).toContain("Logo margin")
     expect(markup).toContain("Hide background dots")
-    expect(markup).toContain("Save embedded image as blob")
     expect(markup).toContain('data-slot="select-trigger"')
     expect(markup).not.toContain(">Upload file<")
     expect(markup).not.toContain(">Remote URL<")

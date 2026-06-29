@@ -410,7 +410,6 @@ export type DesktopLogoSettings = {
   hideBackgroundDots: boolean
   margin: number
   remoteUrl: string
-  saveAsBlob: boolean
   selectedBrandIconId: string
   size: number
   solidColor: string
@@ -810,7 +809,6 @@ const DEFAULT_DESKTOP_LOGO_SETTINGS: DesktopLogoSettings = {
   hideBackgroundDots: true,
   margin: 12,
   remoteUrl: "",
-  saveAsBlob: true,
   selectedBrandIconId: "",
   size: 40,
   solidColor: DEFAULT_BRAND_ICON_COLOR,
@@ -2636,11 +2634,6 @@ function DesktopLogoInspector({
                 checked={settings.hideBackgroundDots}
                 label="Hide background dots"
                 onChange={(hideBackgroundDots) => onLogoSettingsChange({ hideBackgroundDots })}
-              />
-              <DesktopMotionToggleRow
-                checked={settings.saveAsBlob}
-                label="Save embedded image as blob"
-                onChange={(saveAsBlob) => onLogoSettingsChange({ saveAsBlob })}
               />
             </div>
           </DesktopInspectorSection>

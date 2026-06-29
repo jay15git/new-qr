@@ -3191,7 +3191,7 @@ describe("WorkspaceSurface", () => {
     expect(surfaceRoot.getAttribute("data-logo-preset-value")).toBe("")
   })
 
-  it("renders the logo size tab with both sliders and both toggles", () => {
+  it("renders the logo size tab with both sliders and the hide-background toggle", () => {
     const surface = renderSurface()
     const logoButton = getRequiredElement(surface.container, 'button[aria-label="Open Logo"]')
 
@@ -3207,11 +3207,9 @@ describe("WorkspaceSurface", () => {
     expect(sizeTab.querySelector('[data-slot="drafting-logo-size-slider"]')).not.toBeNull()
     expect(sizeTab.querySelector('[data-slot="drafting-logo-margin-slider"]')).not.toBeNull()
     expect(sizeTab.querySelector('[data-slot="drafting-logo-hide-background-dots"]')).not.toBeNull()
-    expect(sizeTab.querySelector('[data-slot="drafting-logo-save-as-blob"]')).not.toBeNull()
     expect(surface.container.textContent).toContain("Logo size")
     expect(surface.container.textContent).toContain("Logo margin")
     expect(surface.container.textContent).toContain("Hide background dots")
-    expect(surface.container.textContent).toContain("Save embedded image as blob")
   })
 
   it("seeds the logo size tab defaults from the shared qr studio defaults", () => {
@@ -3231,19 +3229,15 @@ describe("WorkspaceSurface", () => {
       sizeTab,
       '#drafting-hide-background-dots',
     )
-    const saveAsBlobSwitch = getRequiredElement(sizeTab, '#drafting-save-as-blob')
 
     expect(sizeTab.textContent).toContain(`Logo size: ${Math.round(defaultState.imageOptions.imageSize * 100)}%`)
     expect(sizeTab.textContent).toContain(`Logo margin: ${Math.round(defaultState.imageOptions.margin)} px`)
     expect(hideBackgroundDotsSwitch.getAttribute("aria-checked")).toBe(
       String(defaultState.imageOptions.hideBackgroundDots),
     )
-    expect(saveAsBlobSwitch.getAttribute("aria-checked")).toBe(
-      String(defaultState.imageOptions.saveAsBlob),
-    )
   })
 
-  it("updates the logo size tab toggle states when toggled", () => {
+  it("updates the logo size tab hide-background toggle when toggled", () => {
     const surface = renderSurface()
     const logoButton = getRequiredElement(surface.container, 'button[aria-label="Open Logo"]')
     const defaultState = createDefaultQrStudioState()
@@ -3256,25 +3250,17 @@ describe("WorkspaceSurface", () => {
       surface.container,
       '#drafting-hide-background-dots',
     )
-    const saveAsBlobSwitch = getRequiredElement(surface.container, '#drafting-save-as-blob')
 
     expect(hideBackgroundDotsSwitch.getAttribute("aria-checked")).toBe(
       String(defaultState.imageOptions.hideBackgroundDots),
     )
-    expect(saveAsBlobSwitch.getAttribute("aria-checked")).toBe(
-      String(defaultState.imageOptions.saveAsBlob),
-    )
 
     act(() => {
       activateElement(hideBackgroundDotsSwitch)
-      activateElement(saveAsBlobSwitch)
     })
 
     expect(hideBackgroundDotsSwitch.getAttribute("aria-checked")).toBe(
       String(!defaultState.imageOptions.hideBackgroundDots),
-    )
-    expect(saveAsBlobSwitch.getAttribute("aria-checked")).toBe(
-      String(!defaultState.imageOptions.saveAsBlob),
     )
   })
 
