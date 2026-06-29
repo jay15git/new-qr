@@ -8,8 +8,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import {
   DESKTOP_TOOLBAR_TOOLS,
   FloatingToolbar,
+  type DesktopInspectorModel,
 } from "@/features/desktop-shell/components/FloatingToolbar"
+import {
+  DESKTOP_SETTINGS_TOOLBAR_COLLAPSED_STORAGE_KEY,
+  DesktopSettingsToolbarShell,
+} from "@/features/desktop-shell/components/DesktopSettingsToolbarShell"
 import { createDraftingTextLayer, type DraftingCanvasLayer } from "@/features/workspace/model/layers"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { renderWithAsyncJsdomRoot } from "@/test-utils/jsdom-react-root"
 
 const NODE_ID = "test-node"
@@ -90,7 +96,7 @@ describe("FloatingToolbar", () => {
     expect(shell).not.toBeNull()
     expect(shell?.querySelector('[data-slot="desktop-floating-toolbar"]')).toBe(rail)
     expect(shell?.querySelector('[data-slot="desktop-floating-inspector"]')).toBe(inspector)
-    expect(shell?.className).toContain("grid-cols-[4.5rem_minmax(0,1fr)]")
+    expect(shell?.getAttribute("data-collapsed")).toBe("false")
     expect(rail?.className).not.toContain("fixed")
     expect(rail?.className).not.toContain("rounded-full")
     expect(rail?.className).not.toContain("bg-black/55")
@@ -164,7 +170,12 @@ describe("FloatingToolbar", () => {
 
     expect(actionToolbar?.className).toContain("min-h-12")
     const topChrome = surface.container.querySelector('[data-slot="desktop-top-chrome"]')
-    expect(topChrome?.className).toContain("left-[25rem]")
+    const motionSource = readFileSync(
+      resolve(process.cwd(), "features/desktop-shell/components/desktop-settings-toolbar-motion.css"),
+      "utf8",
+    )
+    expect(motionSource).toContain("--desktop-settings-toolbar-chrome-left")
+    expect(topChrome?.className).not.toContain("left-[25rem]")
     expect(topChrome?.className).toContain("top-5")
     expect(utilityToolbar?.className).toContain("min-h-12")
     expect(getRequiredButton(utilityToolbar as HTMLElement, "Save").className).toContain("size-9")
@@ -186,6 +197,59 @@ describe("FloatingToolbar", () => {
     expect(onUndo).toHaveBeenCalledTimes(1)
     expect(onRedo).toHaveBeenCalledTimes(1)
     expect(onExportDownload).toHaveBeenCalledTimes(1)
+  })
+
+  it("collapses and expands the settings toolbar from the brand sidebar control", async () => {
+    sessionStorage.clear()
+    const surface = await renderWithAsyncJsdomRoot(
+      <TooltipProvider>
+        <DesktopSettingsToolbarShell
+          hovered
+          showInspector
+          inspector={<div data-slot="desktop-floating-inspector">Inspector</div>}
+          model={
+            {
+              actualActiveTool: "content",
+              onActiveToolChange: vi.fn(),
+            } as unknown as DesktopInspectorModel
+          }
+        />
+      </TooltipProvider>,
+    )
+    const shell = getRequiredElement(surface.container, '[data-slot="desktop-left-toolbar-shell"]')
+    const brandButton = getRequiredButton(shell, "Collapse settings panel")
+    const inspector = shell.querySelector('[data-slot="desktop-floating-inspector"]')
+
+    expect(shell.getAttribute("data-collapsed")).toBe("false")
+    expect(brandButton.getAttribute("aria-expanded")).toBe("true")
+    expect(inspector).not.toBeNull()
+
+    await act(async () => {
+      brandButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    expect(shell.getAttribute("data-collapsed")).toBe("true")
+    expect(brandButton.getAttribute("aria-expanded")).toBe("false")
+    expect(brandButton.getAttribute("aria-label")).toBe("Expand settings panel")
+    expect(sessionStorage.getItem(DESKTOP_SETTINGS_TOOLBAR_COLLAPSED_STORAGE_KEY)).toBe("true")
+
+    await act(async () => {
+      brandButton.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    })
+
+    expect(shell.getAttribute("data-collapsed")).toBe("false")
+    expect(brandButton.getAttribute("aria-expanded")).toBe("true")
+    expect(shell.querySelector('[data-slot="desktop-floating-inspector"]')).not.toBeNull()
+    expect(sessionStorage.getItem(DESKTOP_SETTINGS_TOOLBAR_COLLAPSED_STORAGE_KEY)).toBe("false")
+  })
+
+  it("restores collapsed settings toolbar state from sessionStorage", async () => {
+    sessionStorage.setItem(DESKTOP_SETTINGS_TOOLBAR_COLLAPSED_STORAGE_KEY, "true")
+    const surface = await renderPrototype({ controller: { activeTool: "content" } })
+    const shell = getRequiredElement(surface.container, '[data-slot="desktop-left-toolbar-shell"]')
+
+    expect(shell.getAttribute("data-collapsed")).toBe("true")
+    sessionStorage.clear()
   })
 
   it("keeps the desktop workspace chrome contract for tool states and light tooltips", () => {
@@ -1429,6 +1493,16 @@ async function renderPrototype({
   return renderWithAsyncJsdomRoot(
     <FloatingToolbar controller={controller as NonNullable<ComponentProps<typeof FloatingToolbar>>["controller"]} />,
   )
+}
+
+function getRequiredElement(container: HTMLElement, selector: string) {
+  const element = container.querySelector<HTMLElement>(selector)
+
+  if (!element) {
+    throw new Error(`Missing element: ${selector}`)
+  }
+
+  return element
 }
 
 function getOptionSelectionIndicator(button: HTMLElement | null) {

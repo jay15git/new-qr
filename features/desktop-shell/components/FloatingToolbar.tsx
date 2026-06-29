@@ -9,7 +9,6 @@ import {
   SaveIcon,
   ViewOffSlashIcon,
 } from "@hugeicons/core-free-icons"
-import Github01Icon from "@hugeicons/core-free-icons/Github01Icon"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useEffect, useId, useMemo, useState, type CSSProperties, type ReactNode } from "react"
 import type {
@@ -73,6 +72,7 @@ import {
   DESKTOP_UTILITY_TOOLBAR_SHELL_CLASS,
 } from "@/features/desktop-shell/components/DesktopUtilityToolbar"
 import { DesktopDynamicIslandChrome } from "@/features/desktop-shell/components/DesktopAppearanceIsland"
+import { DesktopSettingsToolbarShell } from "@/features/desktop-shell/components/DesktopSettingsToolbarShell"
 import { DesktopElementInspector, DesktopTransformSection } from "@/features/desktop-shell/components/DesktopElementInspector"
 import type { DesktopAppearanceSnapshot } from "@/features/desktop-shell/model/appearance"
 import {
@@ -215,11 +215,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import {
-  TabsSubtleIconRail,
-  TabsSubtleIconRailItem,
-  TabsSubtleIconRailSeparator,
-} from "@/components/ui/tabs-subtle-icon-rail"
 import {
   DEFAULT_QR_INPUT_TYPE,
   QR_INPUT_OPTIONS,
@@ -1298,7 +1293,6 @@ export function FloatingToolbar({
     actualActiveTool,
     actualDesktopTheme,
     activeToolConfig,
-    onActiveToolChange,
   } = model
 
   return (
@@ -1314,7 +1308,7 @@ export function FloatingToolbar({
       >
         <DesktopThemeStyles />
         <div
-          className="pointer-events-none fixed top-5 right-5 left-[25rem] z-30 grid grid-cols-[1fr_auto_1fr] items-center gap-3 max-md:left-4 max-md:right-4 max-md:top-4"
+          className="pointer-events-none fixed top-5 right-5 z-30 grid grid-cols-[1fr_auto_1fr] items-center gap-3 max-md:left-4 max-md:right-4 max-md:top-4"
           data-slot="desktop-top-chrome"
         >
           <div aria-hidden="true" className="pointer-events-none shrink-0 justify-self-start" />
@@ -1372,7 +1366,7 @@ export function FloatingToolbar({
           data-toolbar-appearance="desktop-glass"
           className={cn(
             DESKTOP_UTILITY_TOOLBAR_SHELL_CLASS,
-            "fixed bottom-4 left-[25rem] z-30 px-2.5 max-md:left-auto max-md:right-4",
+            "fixed bottom-4 z-30 px-2.5 max-md:left-auto max-md:right-4",
           )}
         >
           <button
@@ -1403,77 +1397,13 @@ export function FloatingToolbar({
             <Redo2Icon className="size-3.5" />
           </button>
         </div>
-        <div
-          data-slot="desktop-left-toolbar-shell"
-          data-toolbar-appearance="desktop-glass"
-          className="fixed bottom-5 left-5 top-5 z-[25] grid w-[23.75rem] grid-cols-[4.5rem_minmax(0,1fr)] overflow-hidden rounded-[20px] border border-[var(--desktop-glass-panel-border)] bg-[var(--desktop-glass-bg)] text-[var(--desktop-glass-fg)] shadow-[var(--desktop-glass-panel-shadow)] backdrop-blur-2xl max-md:bottom-4 max-md:left-3 max-md:top-4 max-md:w-[min(20rem,calc(100vw-1.5rem))] max-md:grid-cols-[3.5rem_minmax(0,1fr)] max-md:rounded-[18px]"
-        >
-          <TabsSubtleIconRail
-            aria-label="Desktop tools"
-            data-slot="desktop-floating-toolbar"
-            className="relative min-h-0 min-w-0 overflow-x-hidden overflow-y-auto px-1.5 pb-1.5 pt-0 text-[var(--desktop-toolbar-fg)] max-md:px-1 max-md:pb-1"
-            selectedIndex={
-              actualActiveTool
-                ? DESKTOP_TOOLBAR_TOOLS.findIndex((tool) => tool.id === actualActiveTool)
-                : -1
-            }
-            onSelect={(index) => {
-              const toolId = DESKTOP_TOOLBAR_TOOLS[index]?.id
-              if (toolId) onActiveToolChange(toolId)
-            }}
-            selectedPillClassName="rounded-full bg-[var(--desktop-toolbar-pill-selected)]"
-            hoverPillClassName="rounded-full bg-[var(--desktop-toolbar-pill-hover)]"
-          >
-            <div
-              className={cn(
-                DESKTOP_INSPECTOR_HEADER_CLASS,
-                "min-h-11 w-full shrink-0",
-              )}
-              data-slot="desktop-toolbar-brand"
-            >
-              <HugeiconsIcon icon={Github01Icon} size={18} color="currentColor" strokeWidth={1.8} />
-            </div>
-            <div
-              className="mt-3 flex w-full flex-col items-center"
-              data-slot="desktop-toolbar-tools"
-            >
-              {DESKTOP_TOOLBAR_TOOLS.map((tool, index) => {
-                const previousGroup = DESKTOP_TOOLBAR_TOOLS[index - 1]?.group
-                const startsGroup = index > 0 && tool.group !== previousGroup
-
-                return (
-                  <div key={tool.id} className="contents">
-                    {startsGroup ? <TabsSubtleIconRailSeparator /> : null}
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <TabsSubtleIconRailItem
-                          aria-label={`Open ${tool.title}`}
-                          data-desktop-tool-button="true"
-                          data-tool-id={tool.id}
-                          index={index}
-                        >
-                          {tool.renderIcon()}
-                        </TabsSubtleIconRailItem>
-                      </TooltipTrigger>
-                      <TooltipContent
-                        hideArrow
-                        side="right"
-                        sideOffset={10}
-                        className="border border-white/[0.12] bg-[#15161a] text-white shadow-xl"
-                      >
-                        {tool.title}
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                )
-              })}
-            </div>
-          </TabsSubtleIconRail>
-
-          {activeToolConfig || controller?.selectedElementLayer ? (
+        <DesktopSettingsToolbarShell
+          model={model}
+          showInspector={Boolean(activeToolConfig || controller?.selectedElementLayer)}
+          inspector={
             <DesktopFloatingInspector activeTool={actualActiveTool} model={model} />
-          ) : null}
-        </div>
+          }
+        />
       </section>
     </TooltipProvider>
   )
@@ -2132,7 +2062,7 @@ export function DesktopThemeStyles() {
       [data-slot="desktop-left-toolbar-shell"] {
         background: rgba(0, 0, 0, 0.55) !important;
         border-color: rgba(255, 255, 255, 0.12) !important;
-        border-radius: 20px !important;
+        border-radius: var(--desktop-settings-toolbar-corner-radius, 36px) !important;
         box-shadow: 0 22px 55px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
         backdrop-filter: blur(40px) !important;
       }

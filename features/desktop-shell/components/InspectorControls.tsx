@@ -20,6 +20,7 @@ import { Calligraph } from "calligraph"
 import { motion, useReducedMotion, type Transition } from "motion/react"
 
 import { TabsSubtle, TabsSubtleItem } from "@/components/ui/tabs-subtle"
+import { useDesktopSettingsPanelMotionFrozen } from "@/features/desktop-shell/components/desktop-settings-panel-motion-frozen-context"
 import {
   FileUpload,
   FileUploadDropzone,
@@ -151,6 +152,8 @@ export const DESKTOP_INSPECTOR_OPTION_SELECTION_SPRING: Transition = {
   mass: 1,
 }
 
+const DESKTOP_INSPECTOR_FROZEN_MOTION_TRANSITION: Transition = { duration: 0 }
+
 type DesktopInspectorOptionSelectionRect = {
   height: number
   left: number
@@ -191,15 +194,20 @@ export function DesktopInspectorAnimatedOptionGrid({
 } & ComponentProps<"div">) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [selectedRect, setSelectedRect] = useState<DesktopInspectorOptionSelectionRect | null>(null)
+  const motionFrozen = useDesktopSettingsPanelMotionFrozen()
 
   const measureSelected = useCallback(() => {
+    if (motionFrozen) {
+      return
+    }
+
     const container = containerRef.current
     if (!container) {
       return
     }
 
     setSelectedRect(measureDesktopInspectorOptionSelection(container))
-  }, [])
+  }, [motionFrozen])
 
   useLayoutEffect(() => {
     measureSelected()
@@ -215,6 +223,10 @@ export function DesktopInspectorAnimatedOptionGrid({
     const resizeTarget = viewport ?? container
 
     const handleChange = () => {
+      if (motionFrozen) {
+        return
+      }
+
       measureSelected()
     }
 
@@ -236,7 +248,7 @@ export function DesktopInspectorAnimatedOptionGrid({
       resizeTarget.removeEventListener("scroll", handleChange)
       window.removeEventListener("resize", handleChange)
     }
-  }, [measureSelected, selectedKey])
+  }, [measureSelected, motionFrozen, selectedKey])
 
   return (
     <div
@@ -255,7 +267,11 @@ export function DesktopInspectorAnimatedOptionGrid({
             width: selectedRect.width,
             height: selectedRect.height,
           }}
-          transition={DESKTOP_INSPECTOR_OPTION_SELECTION_SPRING}
+          transition={
+            motionFrozen
+              ? DESKTOP_INSPECTOR_FROZEN_MOTION_TRANSITION
+              : DESKTOP_INSPECTOR_OPTION_SELECTION_SPRING
+          }
         />
       ) : null}
       {children}
@@ -1081,12 +1097,14 @@ export function DesktopInspectorSegmentedControl<TValue extends string>({
   )
   const compactItemClass =
     columns === 4 ? "px-1 [&_span]:text-[length:var(--desktop-inspector-type-caption)]" : columns === 3 ? "px-1.5 [&_span]:text-[length:var(--desktop-inspector-type-caption)]" : undefined
+  const pauseSelectionMotion = useDesktopSettingsPanelMotionFrozen()
 
   return (
     <TabsSubtle
       className={cn("w-full gap-0 py-0 my-0", className)}
       data-slot={dataSlot ?? "desktop-inspector-segmented-control"}
       idPrefix={idPrefix}
+      pauseSelectionMotion={pauseSelectionMotion}
       selectedIndex={selectedIndex}
       onSelect={(index) => {
         const next = items[index]

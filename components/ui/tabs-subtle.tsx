@@ -21,6 +21,7 @@ import { useProximityHover } from "@/hooks/use-proximity-hover";
 
 const TABS_SUBTLE_PILL_CLASS = "rounded-full";
 const TABS_SUBTLE_FOCUS_RING_CLASS = "rounded-full";
+const TABS_SUBTLE_FROZEN_TRANSITION = { duration: 0 };
 
 interface TabsSubtleContextValue {
   registerTab: (index: number, element: HTMLElement | null) => void;
@@ -46,10 +47,12 @@ interface TabsSubtleProps extends Omit<HTMLAttributes<HTMLDivElement>, "onSelect
   idPrefix?: string;
   /** When true, only the selected tab shows its text label. Requires icons on tabs. */
   activeLabel?: boolean;
+  /** Freezes selection/hover pill motion while the settings shell is resizing. */
+  pauseSelectionMotion?: boolean;
 }
 
 const TabsSubtle = forwardRef<HTMLDivElement, TabsSubtleProps>(
-  ({ children, selectedIndex, onSelect, idPrefix: idPrefixProp, activeLabel = false, className, ...props }, ref) => {
+  ({ children, selectedIndex, onSelect, idPrefix: idPrefixProp, activeLabel = false, pauseSelectionMotion = false, className, ...props }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const isMouseInside = useRef(false);
     const generatedId = useId();
@@ -79,11 +82,19 @@ const TabsSubtle = forwardRef<HTMLDivElement, TabsSubtleProps>(
     );
 
     useEffect(() => {
+      if (pauseSelectionMotion) {
+        return
+      }
+
       measureTabs();
-    }, [measureTabs, children]);
+    }, [measureTabs, children, pauseSelectionMotion]);
 
     // Observe individual tab buttons for resize (label expand/collapse in activeLabel mode)
     useEffect(() => {
+      if (pauseSelectionMotion) {
+        return
+      }
+
       const elements = tabElementsRef.current;
       if (elements.size === 0) return;
       if (typeof ResizeObserver === "undefined") {
@@ -93,7 +104,7 @@ const TabsSubtle = forwardRef<HTMLDivElement, TabsSubtleProps>(
       const ro = new ResizeObserver(() => measureTabs());
       elements.forEach((el) => ro.observe(el));
       return () => ro.disconnect();
-    }, [measureTabs, children]);
+    }, [measureTabs, children, pauseSelectionMotion]);
 
     // Wrap handlers to track isMouseInside
     const handleMouseMove = useCallback(
@@ -177,7 +188,7 @@ const TabsSubtle = forwardRef<HTMLDivElement, TabsSubtleProps>(
           {...props}
         >
           {/* Selected pill */}
-          {selectedRect && (
+          {selectedRect ? (
             <motion.div
               className={cn("absolute bg-active pointer-events-none", TABS_SUBTLE_PILL_CLASS)}
               initial={false}
@@ -188,16 +199,20 @@ const TabsSubtle = forwardRef<HTMLDivElement, TabsSubtleProps>(
                 height: selectedRect.height,
                 opacity: isHovering ? 0.8 : 1,
               }}
-              transition={{
-                ...spring.moderate,
-                opacity: { duration: 0.08 },
-              }}
+              transition={
+                pauseSelectionMotion
+                  ? TABS_SUBTLE_FROZEN_TRANSITION
+                  : {
+                      ...spring.moderate,
+                      opacity: { duration: 0.08 },
+                    }
+              }
             />
-          )}
+          ) : null}
 
           {/* Hover pill */}
           <AnimatePresence>
-            {hoverRect && !isHoveringSelected && selectedRect && (
+            {hoverRect && !isHoveringSelected && selectedRect && !pauseSelectionMotion && (
               <motion.div
                 className={cn("absolute bg-active pointer-events-none", TABS_SUBTLE_PILL_CLASS)}
                 initial={{
@@ -236,7 +251,7 @@ const TabsSubtle = forwardRef<HTMLDivElement, TabsSubtleProps>(
 
           {/* Focus ring */}
           <AnimatePresence>
-            {focusRect && (
+            {focusRect && !pauseSelectionMotion && (
               <motion.div
                 className={cn(
                   "absolute pointer-events-none z-20 border border-[#6B97FF]",

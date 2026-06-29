@@ -1,0 +1,90 @@
+:root {
+  --desktop-settings-toolbar-chrome-gap: 1.25rem;
+  --desktop-settings-toolbar-width: 380px;
+  --desktop-settings-toolbar-corner-radius: 36px;
+  --desktop-settings-toolbar-chrome-left: calc(
+    var(--desktop-settings-toolbar-width) + var(--desktop-settings-toolbar-chrome-gap)
+  );
+}
+
+[data-slot="desktop-top-chrome"],
+[data-slot="desktop-action-toolbar"] {
+  left: var(--desktop-settings-toolbar-chrome-left);
+}
+
+@media (max-width: 768px) {
+  [data-slot="desktop-top-chrome"],
+  [data-slot="desktop-action-toolbar"] {
+    left: 1rem;
+  }
+}
+
+.desktop-settings-toolbar-brand {
+  cursor: pointer;
+}
+
+/* Transitions.dev — icon swap (brand GitHub ↔ sidebar) */
+[data-slot="desktop-toolbar-brand"] {
+  --icon-swap-dur: 250ms;
+  --icon-swap-blur: 2px;
+  --icon-swap-start-scale: 0.25;
+  --icon-swap-ease: ease-in-out;
+}
+
+[data-slot="desktop-toolbar-brand"] .t-icon-swap {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+}
+
+[data-slot="desktop-toolbar-brand"] .t-icon-swap > .t-icon {
+  grid-area: 1 / 1;
+  transition:
+    opacity var(--icon-swap-dur) var(--icon-swap-ease),
+    filter var(--icon-swap-dur) var(--icon-swap-ease),
+    transform var(--icon-swap-dur) var(--icon-swap-ease);
+  will-change: opacity, filter, transform;
+}
+
+[data-slot="desktop-toolbar-brand"] .t-icon-swap[data-state="a"] > .t-icon[data-icon="a"],
+[data-slot="desktop-toolbar-brand"] .t-icon-swap[data-state="b"] > .t-icon[data-icon="b"] {
+  opacity: 1;
+  filter: blur(0);
+  transform: scale(1);
+}
+
+[data-slot="desktop-toolbar-brand"] .t-icon-swap[data-state="a"] > .t-icon[data-icon="b"],
+[data-slot="desktop-toolbar-brand"] .t-icon-swap[data-state="b"] > .t-icon[data-icon="a"] {
+  opacity: 0;
+  filter: blur(var(--icon-swap-blur));
+  transform: scale(var(--icon-swap-start-scale));
+}
+
+/* Sidebar left ↔ right: blur + fade only, no scale */
+[data-slot="desktop-toolbar-brand"] .t-icon-swap--sidebar > .t-icon {
+  transition:
+    opacity var(--icon-swap-dur) var(--icon-swap-ease),
+    filter var(--icon-swap-dur) var(--icon-swap-ease);
+  will-change: opacity, filter;
+}
+
+[data-slot="desktop-toolbar-brand"] .t-icon-swap--sidebar[data-state="a"] > .t-icon[data-icon="b"],
+[data-slot="desktop-toolbar-brand"] .t-icon-swap--sidebar[data-state="b"] > .t-icon[data-icon="a"] {
+  transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="desktop-toolbar-brand"] .t-icon-swap > .t-icon {
+    transition: none !important;
+  }
+
+  [data-slot="desktop-toolbar-brand"] .t-icon-swap--sidebar > .t-icon {
+    transition: none !important;
+  }
+}
+
+[data-slot="desktop-left-toolbar-shell"] {
+  border-radius: var(--desktop-settings-toolbar-corner-radius, 36px);
+}

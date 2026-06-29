@@ -74,6 +74,7 @@ function useTabsSubtleIconRail() {
 
 interface TabsSubtleIconRailProps extends Omit<HTMLAttributes<HTMLDivElement>, "onSelect"> {
   children: ReactNode;
+  onRailPresenceChange?: (present: boolean) => void;
   selectedIndex: number;
   onSelect: (index: number) => void;
   selectedPillClassName?: string;
@@ -89,12 +90,15 @@ const TabsSubtleIconRail = forwardRef<HTMLDivElement, TabsSubtleIconRailProps>(
   (
     {
       children,
+      onRailPresenceChange,
       selectedIndex,
       onSelect,
       selectedPillClassName = DEFAULT_SELECTED_PILL,
       hoverPillClassName = DEFAULT_HOVER_PILL,
       focusRingClassName = DEFAULT_FOCUS_RING,
       className,
+      onMouseEnter,
+      onMouseLeave,
       ...props
     },
     ref,
@@ -148,10 +152,24 @@ const TabsSubtleIconRail = forwardRef<HTMLDivElement, TabsSubtleIconRailProps>(
       [handlers],
     );
 
-    const handleMouseLeave = useCallback(() => {
-      isMouseInside.current = false;
-      handlers.onMouseLeave();
-    }, [handlers]);
+    const handleMouseEnter = useCallback(
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        isMouseInside.current = true;
+        onRailPresenceChange?.(true);
+        onMouseEnter?.(e);
+      },
+      [onMouseEnter, onRailPresenceChange],
+    );
+
+    const handleMouseLeave = useCallback(
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        isMouseInside.current = false;
+        handlers.onMouseLeave();
+        onRailPresenceChange?.(false);
+        onMouseLeave?.(e);
+      },
+      [handlers, onMouseLeave, onRailPresenceChange],
+    );
 
     const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
     const iconSize = useIconRailIconSize();
@@ -182,6 +200,7 @@ const TabsSubtleIconRail = forwardRef<HTMLDivElement, TabsSubtleIconRailProps>(
             else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
           }}
           data-slot="tabs-subtle-icon-rail"
+          onMouseEnter={handleMouseEnter}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
           onFocus={(e) => {
@@ -316,7 +335,44 @@ const TabsSubtleIconRail = forwardRef<HTMLDivElement, TabsSubtleIconRailProps>(
   },
 );
 
-TabsSubtleIconRail.displayName = "TabsSubtleIconRail";
+interface TabsSubtleIconRailAccessoryProps extends HTMLAttributes<HTMLButtonElement> {
+  index: number;
+}
+
+const TabsSubtleIconRailAccessory = forwardRef<HTMLButtonElement, TabsSubtleIconRailAccessoryProps>(
+  ({ index, className, onClick, children, ...props }, ref) => {
+    const internalRef = useRef<HTMLButtonElement>(null);
+    const { registerItem, hoveredIndex } = useTabsSubtleIconRail();
+
+    useEffect(() => {
+      registerItem(index, internalRef.current);
+      return () => registerItem(index, null);
+    }, [index, registerItem]);
+
+    const isHovered = hoveredIndex === index;
+
+    return (
+      <button
+        ref={(node) => {
+          (internalRef as React.MutableRefObject<HTMLButtonElement | null>).current = node;
+          if (typeof ref === "function") ref(node);
+          else if (ref) (ref as React.MutableRefObject<HTMLButtonElement | null>).current = node;
+        }}
+        type="button"
+        data-proximity-index={index}
+        data-active={isHovered ? "" : undefined}
+        tabIndex={0}
+        onClick={onClick}
+        className={cn(ICON_RAIL_ITEM_CLASS, ICON_RAIL_HITBOX_CLASS, className)}
+        {...props}
+      >
+        {children}
+      </button>
+    );
+  },
+);
+
+TabsSubtleIconRailAccessory.displayName = "TabsSubtleIconRailAccessory";
 
 interface TabsSubtleIconRailItemProps extends HTMLAttributes<HTMLButtonElement> {
   index: number;
@@ -392,6 +448,7 @@ TabsSubtleIconRailSeparator.displayName = "TabsSubtleIconRailSeparator";
 
 export {
   TabsSubtleIconRail,
+  TabsSubtleIconRailAccessory,
   TabsSubtleIconRailItem,
   TabsSubtleIconRailSeparator,
   ICON_RAIL_ITEM_CLASS,
