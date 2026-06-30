@@ -1363,15 +1363,15 @@ export function DesktopThemeStyles() {
         --desktop-glass-bg: rgba(0, 0, 0, 0.55);
         --desktop-glass-border: rgba(255, 255, 255, 0.12);
         --desktop-glass-fg: rgba(255, 255, 255, 0.72);
-        --desktop-glass-shadow: 0 16px 36px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+        --desktop-glass-shadow: 0 12px 48px -16px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.06);
         --desktop-glass-panel-border: rgba(255, 255, 255, 0.1);
-        --desktop-glass-panel-shadow: 0 24px 65px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        --desktop-glass-panel-shadow: 0 20px 80px -24px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.06);
         --desktop-glass-button-hover-bg: rgba(255, 255, 255, 0.11);
         --desktop-glass-button-hover-fg: rgba(255, 255, 255, 1);
         --desktop-glass-button-focus-ring: rgba(255, 255, 255, 0.45);
         --desktop-appearance-popover-bg: rgba(10, 10, 10, 0.96);
         --desktop-appearance-popover-border: rgba(255, 255, 255, 0.1);
-        --desktop-appearance-popover-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+        --desktop-appearance-popover-shadow: 0 20px 80px -24px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.06);
         --desktop-inspector-fg-primary: rgba(255, 255, 255, 0.94);
         --desktop-inspector-fg-secondary: rgba(255, 255, 255, 0.76);
         --desktop-inspector-fg-tertiary: rgba(255, 255, 255, 0.50);
@@ -1449,6 +1449,22 @@ export function DesktopThemeStyles() {
 
       [data-desktop-theme="light"] {
         color-scheme: light;
+      }
+
+      [data-desktop-theme="dark"] {
+        color-scheme: dark;
+      }
+
+      [data-desktop-theme="dark"] [data-slot="desktop-left-toolbar-shell"],
+      [data-desktop-theme="dark"] [data-slot="desktop-document-toolbar"],
+      [data-desktop-theme="dark"] [data-slot="desktop-utility-toolbar"],
+      [data-desktop-theme="dark"] [data-slot="desktop-dynamic-island"],
+      [data-desktop-theme="dark"] [data-slot="desktop-action-toolbar"] {
+        box-shadow: var(--desktop-glass-shadow) !important;
+      }
+
+      [data-desktop-theme="dark"] [data-slot="desktop-left-toolbar-shell"] {
+        box-shadow: var(--desktop-glass-panel-shadow) !important;
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-left-toolbar-shell"],
@@ -2010,7 +2026,7 @@ export function DesktopThemeStyles() {
         background: rgba(0, 0, 0, 0.55) !important;
         border-color: rgba(255, 255, 255, 0.12) !important;
         border-radius: var(--desktop-settings-toolbar-corner-radius, 36px) !important;
-        box-shadow: 0 22px 55px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+        box-shadow: var(--desktop-glass-panel-shadow) !important;
         backdrop-filter: blur(40px) !important;
       }
 
