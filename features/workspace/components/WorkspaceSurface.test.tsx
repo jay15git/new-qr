@@ -1374,9 +1374,8 @@ describe("WorkspaceSurface", () => {
       "Add text on canvas",
       "Add content",
       "Layer appearance",
-      "Open keyboard shortcuts",
-      "Switch to light mode",
     ])
+    const dynamicIsland = getRequiredElement(surface.container, '[data-slot="desktop-dynamic-island"]')
     const utilityToolbar = getRequiredElement(surface.container, '[data-slot="desktop-utility-toolbar"]')
     expect(surface.container.querySelector('[data-slot="desktop-document-toolbar"]')).toBeNull()
     expect(Array.from(utilityToolbar.querySelectorAll("button")).map((button) => button.getAttribute("aria-label"))).toEqual([
@@ -1385,7 +1384,10 @@ describe("WorkspaceSurface", () => {
     ])
     expect(utilityToolbar.querySelector('[data-slot="desktop-keyboard-shortcuts-trigger"]')).toBeNull()
     expect(utilityToolbar.querySelector('[data-slot="desktop-theme-toggle"]')).toBeNull()
-    expect(composeToolbar.querySelector('[data-slot="desktop-keyboard-shortcuts-trigger"]')).not.toBeNull()
+    expect(composeToolbar.querySelector('[data-slot="desktop-keyboard-shortcuts-trigger"]')).toBeNull()
+    expect(composeToolbar.querySelector('[data-slot="desktop-theme-toggle"]')).toBeNull()
+    expect(dynamicIsland.querySelector('[data-slot="desktop-keyboard-shortcuts-trigger"]')).not.toBeNull()
+    expect(getRequiredElement(dynamicIsland, '[data-slot="desktop-theme-toggle"]').getAttribute("aria-label")).toBe("Switch to light mode")
     expect(surface.container.querySelector('[data-slot="desktop-action-toolbar"]')).toBeNull()
     const historyActions = getRequiredElement(surface.container, '[data-slot="desktop-history-actions"]')
     expect(historyActions.querySelector('button[aria-label="Switch to light mode"]')).toBeNull()
@@ -1394,7 +1396,6 @@ describe("WorkspaceSurface", () => {
       "Undo",
       "Redo",
     ])
-	    expect(getRequiredElement(composeToolbar, '[data-slot="desktop-theme-toggle"]').getAttribute("aria-label")).toBe("Switch to light mode")
     const resizeToolbar = getRequiredElement(surface.container, '[data-slot="desktop-resize-toolbar"]')
     expect(resizeToolbar.parentElement?.className).toContain("bottom-4")
     expect(resizeToolbar.parentElement?.className).toContain("right-5")
@@ -1423,11 +1424,11 @@ describe("WorkspaceSurface", () => {
     })
   })
 
-  it("opens keyboard shortcuts from the compose toolbar", () => {
+  it("opens keyboard shortcuts from the dynamic island toolbar", () => {
     const surface = renderDesktopOverlaySurface({ paneToolbarVariant: "desktop-zoom" })
-    const composeToolbar = getRequiredElement(surface.container, '[data-slot="dashboard-compose-toolbar"]')
+    const dynamicIsland = getRequiredElement(surface.container, '[data-slot="desktop-dynamic-island"]')
     const shortcutsTrigger = getRequiredElement(
-      composeToolbar,
+      dynamicIsland,
       '[data-slot="desktop-keyboard-shortcuts-trigger"]',
     )
 

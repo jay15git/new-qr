@@ -132,6 +132,9 @@ describe("FloatingToolbar", () => {
     expect(historyActions).not.toBeNull()
     expect(historyActions?.querySelector('button[aria-label="Switch to light mode"]')).toBeNull()
     expect(utilityToolbar?.querySelector('[data-slot="desktop-theme-toggle"]')).toBeNull()
+    const dynamicIsland = surface.container.querySelector('[data-slot="desktop-dynamic-island"]')
+    expect(dynamicIsland?.querySelector('[data-slot="desktop-theme-toggle"]')).not.toBeNull()
+    expect(dynamicIsland?.querySelector('[data-slot="desktop-keyboard-shortcuts-trigger"]')).not.toBeNull()
     expect(Array.from(historyActions?.querySelectorAll("button") ?? []).map((button) => button.getAttribute("aria-label"))).toEqual([
       "Reset defaults",
       "Undo",
@@ -148,6 +151,9 @@ describe("FloatingToolbar", () => {
     expect(getRequiredButton(utilityToolbar as HTMLElement, "Download")).not.toBeNull()
     expect(utilityToolbar?.querySelector('[data-slot="desktop-keyboard-shortcuts-trigger"]')).toBeNull()
     expect(utilityToolbar?.querySelector('[data-slot="desktop-theme-toggle"]')).toBeNull()
+    const dynamicIsland = surface.container.querySelector('[data-slot="desktop-dynamic-island"]')
+    expect(dynamicIsland?.querySelector('[data-slot="desktop-keyboard-shortcuts-trigger"]')).not.toBeNull()
+    expect(dynamicIsland?.querySelector('[data-slot="desktop-theme-toggle"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="dashboard-compose-toolbar"]')).toBeNull()
   })
 

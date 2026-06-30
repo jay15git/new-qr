@@ -40,11 +40,6 @@ import {
   DESKTOP_COMPOSE_TOOLBAR_ICON_BUTTON_CLASS,
   DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS,
 } from "@/features/desktop-shell/components/DesktopUtilityToolbar"
-import {
-  DesktopKeyboardShortcutsTrigger,
-  DesktopThemeToggleButton,
-} from "@/features/desktop-shell/components/DesktopChromeControls"
-import type { DesktopThemeMode } from "@/features/desktop-shell/components/FloatingToolbar"
 import { Pane, type DraftingLayerMenuAction } from "@/features/workspace/components/Pane"
 import { InsertMenu } from "@/features/workspace/components/InsertMenu"
 import { getQrLayout } from "@/features/workspace/model/layout-engine"
@@ -178,8 +173,6 @@ type CanvasProps = {
   selectedLayerId?: string | null
   selectedLayerIds?: string[]
   toolbarVariant?: DraftingPaneToolbarVariant
-  desktopTheme?: DesktopThemeMode
-  onDesktopThemeChange?: (theme: DesktopThemeMode) => void
 }
 
 function groupPanes<T>(panes: T[], groups: number[]) {
@@ -836,8 +829,6 @@ export function Canvas({
   selectedLayerId,
   selectedLayerIds,
   toolbarVariant = "default",
-  desktopTheme = "dark",
-  onDesktopThemeChange,
 }: CanvasProps) {
   const [zoomLevels, setZoomLevels] = useState<Record<string, number>>({})
   const [panOffsets, setPanOffsets] = useState<DraftingPanePanOffsets>({})
@@ -1469,34 +1460,6 @@ export function Canvas({
 
             {isDesktopZoomToolbar && desktopLayerToolbarControls?.layer ? (
               <DesktopLayerSettingsToolbar controls={desktopLayerToolbarControls} />
-            ) : null}
-
-            {isDesktopZoomToolbar && onDesktopThemeChange ? (
-              <>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="inline-flex">
-                      <DesktopKeyboardShortcutsTrigger popoverSide="left" variant="glass" />
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>Keyboard shortcuts</TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <DesktopThemeToggleButton
-                      theme={desktopTheme}
-                      onToggle={() =>
-                        onDesktopThemeChange(desktopTheme === "light" ? "dark" : "light")
-                      }
-                      variant="glass"
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {desktopTheme === "light" ? "Switch to dark mode" : "Switch to light mode"}
-                  </TooltipContent>
-                </Tooltip>
-              </>
             ) : null}
 
           </div>

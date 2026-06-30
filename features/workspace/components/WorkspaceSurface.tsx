@@ -5038,8 +5038,6 @@ export function WorkspaceSurface({
               }}
               onUndo={handleUndoDraftingWorkspace}
               panes={panes}
-              desktopTheme={desktopTheme}
-              onDesktopThemeChange={onDesktopThemeChange}
               showCanvasGrid={paneToolbarVariant === "desktop-zoom" ? showDesktopCanvasGrid : true}
               toolbarVariant={paneToolbarVariant}
               selectedLayerId={selectedLayerId}

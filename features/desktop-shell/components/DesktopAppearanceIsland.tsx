@@ -20,6 +20,11 @@ import {
   AppearanceStrokeControls,
 } from "@/features/desktop-shell/components/AppearancePopoverControls"
 import { DesktopScanSafetyPopover } from "@/features/desktop-shell/components/DesktopScanSafetyPopover"
+import {
+  DesktopKeyboardShortcutsTrigger,
+  DesktopThemeToggleButton,
+} from "@/features/desktop-shell/components/DesktopChromeControls"
+import type { DesktopThemeMode } from "@/features/desktop-shell/components/FloatingToolbar"
 import { DESKTOP_INSPECTOR_FG_SECONDARY } from "@/features/desktop-shell/components/InspectorControls"
 import { DesktopUtilityToolbarButton } from "@/features/desktop-shell/components/DesktopUtilityToolbar"
 import type { DesktopAppearanceSnapshot } from "@/features/desktop-shell/model/appearance"
@@ -245,8 +250,10 @@ export function DesktopDynamicIslandChrome({
   onPatch,
   onRedo,
   onResetDefaults,
+  onThemeChange,
   onUndo,
   scanSafetyResult = DEFAULT_SCAN_SAFETY_RESULT,
+  theme = "dark",
 }: {
   appearance?: DesktopAppearanceSnapshot | null
   canRedo?: boolean
@@ -255,8 +262,10 @@ export function DesktopDynamicIslandChrome({
   onPatch?: (patch: Partial<DraftingCanvasLayer>) => void
   onRedo?: () => void
   onResetDefaults?: () => void
+  onThemeChange?: (theme: DesktopThemeMode) => void
   onUndo?: () => void
   scanSafetyResult?: ScanSafetyResult
+  theme?: DesktopThemeMode
 }) {
   const hasAppearance = Boolean(appearance && layerLabel && onPatch)
 
@@ -286,6 +295,15 @@ export function DesktopDynamicIslandChrome({
             </>
           ) : null}
           <DesktopScanSafetyPopover result={scanSafetyResult} />
+          <DesktopDynamicIslandDivider />
+          <DesktopKeyboardShortcutsTrigger popoverSide="bottom" variant="glass" />
+          {onThemeChange ? (
+            <DesktopThemeToggleButton
+              theme={theme}
+              onToggle={() => onThemeChange(theme === "light" ? "dark" : "light")}
+              variant="glass"
+            />
+          ) : null}
         </div>
       }
       showViewControls={false}

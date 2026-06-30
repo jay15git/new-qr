@@ -1308,8 +1308,10 @@ export function FloatingToolbar({
               onPatch={controller?.onAppearancePatch}
               onRedo={controller?.onRedo}
               onResetDefaults={controller?.onResetDefaults}
+              onThemeChange={model.onDesktopThemeChange}
               onUndo={controller?.onUndo}
               scanSafetyResult={controller?.scanSafetyResult}
+              theme={actualDesktopTheme}
             />
           </div>
         </div>
