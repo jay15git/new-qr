@@ -28,10 +28,12 @@ This version has breaking changes. Read the relevant guide in `node_modules/next
 - `lib/utils.ts` only provides `cn()`.
 
 ## MCP Tools
-- **Use available MCP tools for every task** instead of falling back to raw bash commands. This includes:
-  - `context7_*` tools for library/framework documentation lookups
-  - `pencil_*` tools if working with `.pen` design files in `designs/`
-- **Do not use these MCPs in this repo:** `paper`, `react-grab-mcp`, `supabase_*`
+- **Use available MCP tools for every task** instead of falling back to raw bash commands when a tool fits.
+- **Codebase search:** use the `cocoindex-code` MCP `search` tool for semantic exploration (how features work, fuzzy concept lookup, unfamiliar areas). Prefer it over broad `grep` or manual file scanning.
+- **Structural code patterns:** use `ccc grep` via the `ccc` skill when you need AST-style by-example matching (function defs, call sites) — not exposed on MCP.
+- **Index freshness:** session hook runs incremental `ccc index` on start; MCP `search` also refreshes by default (`refresh_index: true`). Run `ccc index` manually after large refactors if results look stale.
+- **Other MCPs:** `context7_*` for library/framework docs; `pencil_*` for `.pen` design files in `designs/`.
+- **Do not use in this repo:** `paper`, `react-grab-mcp`, `supabase_*`, `codedb`, `graphify`, `code-review-graph`.
 - If a tool exists for the job, use it. Do not manually `cat`, `grep`, or `sed` when a structured tool is available.
 
 ## Testing Notes
@@ -59,16 +61,4 @@ This version has breaking changes. Read the relevant guide in `node_modules/next
 ## Search / Editing Gotchas
 - Exclude `.next` and `node_modules` when searching; they create noisy false positives.
 - Ignore generated/runtime directories and local artifacts covered by `.gitignore`, especially `.next/`, `node_modules/`, `coverage/`, `build/`, and `.env*`.
-
-## graphify
-
-This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
-
-When the user types `/graphify`, invoke the `skill` tool with `skill: "graphify"` before doing anything else.
-
-Rules:
-- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
-- Dirty graphify-out/ files are expected after hooks or incremental updates; dirty graph files are not a reason to skip graphify. Only skip graphify if the task is about stale or incorrect graph output, or the user explicitly says not to use it.
-- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
-- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
-- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+- CocoIndex Code index lives in `.cocoindex_code/` (gitignored). Project MCP config is `.cursor/mcp.json`.

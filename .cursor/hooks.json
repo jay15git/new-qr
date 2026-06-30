@@ -4,6 +4,9 @@
     "sessionStart": [
       {
         "command": ".cursor/hooks/caveman-session-start.sh"
+      },
+      {
+        "command": ".cursor/hooks/ccc-session-index.sh"
       }
     ]
   }
