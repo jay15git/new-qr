@@ -47,11 +47,13 @@ import {
   createDraftingQrArtworkState,
   sanitizeDraftingQrArtworkMarkup,
 } from "@/features/workspace/rendering/qr-artwork"
+import { DraftingLayerTiltShell } from "@/features/workspace/components/DraftingLayerTiltShell"
 import { DraftingQrLayerContent } from "@/features/workspace/components/DraftingQrLayerContent"
 import { getDraftingLayerBoxShadow } from "@/features/workspace/rendering/layer-appearance"
 import {
   getDraftingCardBorder,
   getDraftingCardShadow,
+  getLayerControlShellStyle,
   getLayerPlacementStyle,
   getTextLayerStyle,
   getTextRunStyle,
@@ -1872,51 +1874,52 @@ export const Pane = memo(function Pane({
         key={`${layer.id}:controls`}
         style={{
           height: controlHeight,
-          transform: `translate3d(${layer.x - RESIZE_CONTROL_PADDING_PX}px, ${layer.y - RESIZE_CONTROL_PADDING_PX}px, 0) rotate(${layer.rotation}deg)`,
-          transformOrigin: "center center",
           width: controlWidth,
           zIndex: 10000,
+          ...getLayerControlShellStyle(layer, RESIZE_CONTROL_PADDING_PX),
         }}
         onContextMenu={(event) => openLayerContextMenu(event, [layer.id])}
       >
-        <div
-          className="pointer-events-none absolute left-1/2 top-0 w-px -translate-x-1/2 -translate-y-full bg-[var(--drafting-resize-frame)]"
-          style={{ height: ROTATE_HANDLE_OFFSET_PX }}
-        />
-        {isRotating ? (
+        <DraftingLayerTiltShell className="relative" layer={layer}>
           <div
-            className="pointer-events-none absolute left-1/2 top-0 rounded-full border border-white/[0.12] bg-[var(--desktop-glass-bg)] px-2.5 py-1 text-[0.68rem] font-semibold text-white/82 shadow-[var(--desktop-glass-shadow)] backdrop-blur-2xl"
-            data-slot="drafting-layer-rotation-value"
-            data-toolbar-appearance="desktop-glass"
+            className="pointer-events-none absolute left-1/2 top-0 w-px -translate-x-1/2 -translate-y-full bg-[var(--drafting-resize-frame)]"
+            style={{ height: ROTATE_HANDLE_OFFSET_PX }}
+          />
+          {isRotating ? (
+            <div
+              className="pointer-events-none absolute left-1/2 top-0 rounded-full border border-white/[0.12] bg-[var(--desktop-glass-bg)] px-2.5 py-1 text-[0.68rem] font-semibold text-white/82 shadow-[var(--desktop-glass-shadow)] backdrop-blur-2xl"
+              data-slot="drafting-layer-rotation-value"
+              data-toolbar-appearance="desktop-glass"
+              style={{
+                transform: `translate(-50%, calc(-${ROTATE_HANDLE_OFFSET_PX}px - ${ROTATE_HANDLE_RADIUS_PX}px - ${ROTATE_LABEL_GAP_PX}px - 100%))`,
+              }}
+            >
+              {rotationDegrees}°
+            </div>
+          ) : null}
+          <LayerSizeValue height={layer.height} width={layer.width} />
+          <button
+            aria-label={`Rotate ${layer.name}`}
+            className="pointer-events-auto absolute left-1/2 top-0 z-30 size-3 rounded-full border border-[#a8b0bb] bg-white shadow-[var(--drafting-shadow-rest)]"
+            data-slot="drafting-layer-rotate-handle"
+            onClick={(event) => event.stopPropagation()}
+            onPointerCancel={endLayerInteraction}
+            onPointerDown={(event) => startLayerInteraction(event, layer, "rotate")}
+            onPointerMove={updateLayerInteraction}
+            onPointerUp={endLayerInteraction}
             style={{
-              transform: `translate(-50%, calc(-${ROTATE_HANDLE_OFFSET_PX}px - ${ROTATE_HANDLE_RADIUS_PX}px - ${ROTATE_LABEL_GAP_PX}px - 100%))`,
+              transform: `translate(-50%, calc(-${ROTATE_HANDLE_OFFSET_PX}px - 50%))`,
             }}
-          >
-            {rotationDegrees}°
-          </div>
-        ) : null}
-        <LayerSizeValue height={layer.height} width={layer.width} />
-        <button
-          aria-label={`Rotate ${layer.name}`}
-          className="pointer-events-auto absolute left-1/2 top-0 z-30 size-3 rounded-full border border-[#a8b0bb] bg-white shadow-[var(--drafting-shadow-rest)]"
-          data-slot="drafting-layer-rotate-handle"
-          onClick={(event) => event.stopPropagation()}
-          onPointerCancel={endLayerInteraction}
-          onPointerDown={(event) => startLayerInteraction(event, layer, "rotate")}
-          onPointerMove={updateLayerInteraction}
-          onPointerUp={endLayerInteraction}
-          style={{
-            transform: `translate(-50%, calc(-${ROTATE_HANDLE_OFFSET_PX}px - 50%))`,
-          }}
-          type="button"
-        />
-        {renderResizeFrameControls(
-          layer.name,
-          (event, direction) => startLayerInteraction(event, layer, "resize", direction),
-          endLayerInteraction,
-          updateLayerInteraction,
-          endLayerInteraction,
-        )}
+            type="button"
+          />
+          {renderResizeFrameControls(
+            layer.name,
+            (event, direction) => startLayerInteraction(event, layer, "resize", direction),
+            endLayerInteraction,
+            updateLayerInteraction,
+            endLayerInteraction,
+          )}
+        </DraftingLayerTiltShell>
       </div>
     )
   }
@@ -2017,10 +2020,12 @@ export const Pane = memo(function Pane({
           onPointerCancel={endLayerInteraction}
           onContextMenu={(event) => openLayerContextMenu(event, [layer.id])}
         >
-          {(layer.children ?? [])
-            .filter((child) => child.isVisible)
-            .sort((a, b) => a.zIndex - b.zIndex)
-            .map((child) => renderNestedLayer(child))}
+          <DraftingLayerTiltShell layer={layer}>
+            {(layer.children ?? [])
+              .filter((child) => child.isVisible)
+              .sort((a, b) => a.zIndex - b.zIndex)
+              .map((child) => renderNestedLayer(child))}
+          </DraftingLayerTiltShell>
         </div>
       )
     }
@@ -2053,14 +2058,16 @@ export const Pane = memo(function Pane({
           onPointerCancel={endLayerInteraction}
           onContextMenu={(event) => openLayerContextMenu(event, [layer.id])}
         >
-          <DraftingQrLayerContent
-            canvasSvgMarkup={markup}
-            layer={layer}
-            qrMarkup={markup ?? ""}
-            shapeTiltInnerStyle={shapeTiltInnerStyle}
-            shapeTiltPerspectiveStyle={shapeTiltPerspectiveStyle}
-            state={state}
-          />
+          <DraftingLayerTiltShell layer={layer}>
+            <DraftingQrLayerContent
+              canvasSvgMarkup={markup}
+              layer={layer}
+              qrMarkup={markup ?? ""}
+              shapeTiltInnerStyle={shapeTiltInnerStyle}
+              shapeTiltPerspectiveStyle={shapeTiltPerspectiveStyle}
+              state={state}
+            />
+          </DraftingLayerTiltShell>
         </div>
       )
     }
@@ -2093,35 +2100,37 @@ export const Pane = memo(function Pane({
           onPointerCancel={endLayerInteraction}
           onContextMenu={(event) => openLayerContextMenu(event, [layer.id])}
         >
-          {isEditing ? (
-            <textarea
-              aria-label="Edit text layer"
-              className="h-full w-full resize-none cursor-text overflow-hidden border-0 bg-transparent p-0 outline-none"
-              data-slot="drafting-text-editor"
-              ref={(element) => {
-                textEditorRefs.current[layer.id] = element
-              }}
-              spellCheck={false}
-              style={getTextLayerStyle(layer)}
-              value={editingTextDraft}
-              onBlur={commitEditingTextDraft}
-              onClick={(event) => event.stopPropagation()}
-              onDoubleClick={(event) => event.stopPropagation()}
-              onInput={handleTextEditorInput}
-              onKeyDown={(event) => {
-                event.stopPropagation()
-                if (event.key === "Escape") {
-                  event.preventDefault()
-                  commitEditingTextDraft()
-                }
-              }}
-              onPointerDown={(event) => event.stopPropagation()}
-            />
-          ) : (
-            <div className="h-full w-full" data-slot="drafting-text-content" style={getTextLayerStyle(layer)}>
-              {renderTextLayerContent(layer)}
-            </div>
-          )}
+          <DraftingLayerTiltShell layer={layer}>
+            {isEditing ? (
+              <textarea
+                aria-label="Edit text layer"
+                className="h-full w-full resize-none cursor-text overflow-hidden border-0 bg-transparent p-0 outline-none"
+                data-slot="drafting-text-editor"
+                ref={(element) => {
+                  textEditorRefs.current[layer.id] = element
+                }}
+                spellCheck={false}
+                style={getTextLayerStyle(layer)}
+                value={editingTextDraft}
+                onBlur={commitEditingTextDraft}
+                onClick={(event) => event.stopPropagation()}
+                onDoubleClick={(event) => event.stopPropagation()}
+                onInput={handleTextEditorInput}
+                onKeyDown={(event) => {
+                  event.stopPropagation()
+                  if (event.key === "Escape") {
+                    event.preventDefault()
+                    commitEditingTextDraft()
+                  }
+                }}
+                onPointerDown={(event) => event.stopPropagation()}
+              />
+            ) : (
+              <div className="h-full w-full" data-slot="drafting-text-content" style={getTextLayerStyle(layer)}>
+                {renderTextLayerContent(layer)}
+              </div>
+            )}
+          </DraftingLayerTiltShell>
         </div>
       )
     }
@@ -2152,7 +2161,9 @@ export const Pane = memo(function Pane({
           onPointerCancel={endLayerInteraction}
           onContextMenu={(event) => openLayerContextMenu(event, [layer.id])}
         >
-          <DraftingImageLayerContent layer={layer} />
+          <DraftingLayerTiltShell layer={layer}>
+            <DraftingImageLayerContent layer={layer} />
+          </DraftingLayerTiltShell>
         </div>
       )
     }
@@ -2183,7 +2194,9 @@ export const Pane = memo(function Pane({
           onPointerCancel={endLayerInteraction}
           onContextMenu={(event) => openLayerContextMenu(event, [layer.id])}
         >
-          <DraftingShapeLayerContent layer={layer} />
+          <DraftingLayerTiltShell layer={layer}>
+            <DraftingShapeLayerContent layer={layer} />
+          </DraftingLayerTiltShell>
         </div>
       )
     }
@@ -2228,24 +2241,26 @@ export const Pane = memo(function Pane({
         onPointerCancel={endLayerInteraction}
         onContextMenu={(event) => openLayerContextMenu(event, [layer.id])}
       >
-        {isImageMode && cardState.cardImage.value ? (
-          <div
-            aria-hidden="true"
-            data-slot="dashboard-compose-card-image"
-            className="pointer-events-none absolute inset-0 z-0"
-            style={{
-              ...cardImageStyle,
-              borderRadius: "inherit",
-              opacity: cardState.cardImage.opacity / 100,
-            }}
-          />
-        ) : null}
-        {isPaperShaderMode ? (
-          <DraftingCardPaperShaderLayer paperShader={cardState.paperShader} />
-        ) : null}
-        {isImageFilterMode ? (
-          <DraftingCardPaperShaderLayer paperShader={imageFilterShader} />
-        ) : null}
+        <DraftingLayerTiltShell layer={layer}>
+          {isImageMode && cardState.cardImage.value ? (
+            <div
+              aria-hidden="true"
+              data-slot="dashboard-compose-card-image"
+              className="pointer-events-none absolute inset-0 z-0"
+              style={{
+                ...cardImageStyle,
+                borderRadius: "inherit",
+                opacity: cardState.cardImage.opacity / 100,
+              }}
+            />
+          ) : null}
+          {isPaperShaderMode ? (
+            <DraftingCardPaperShaderLayer paperShader={cardState.paperShader} />
+          ) : null}
+          {isImageFilterMode ? (
+            <DraftingCardPaperShaderLayer paperShader={imageFilterShader} />
+          ) : null}
+        </DraftingLayerTiltShell>
       </div>
     )
   }

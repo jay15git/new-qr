@@ -84,22 +84,42 @@ export function getBackgroundShapeTiltInnerStyle(
   }
 }
 
-export function getLayerCssTransform(
+export function getLayerPlacementTransform(
   layer: LayerTransformInput & Pick<DraftingCanvasLayer, "scaleX" | "scaleY">,
 ) {
-  const tiltX = clampBackgroundShapeTilt(layer.tiltX ?? 0)
-  const tiltY = clampBackgroundShapeTilt(layer.tiltY ?? 0)
   const rotation = Number.isFinite(layer.rotation) ? layer.rotation : 0
   const scaleX = layer.scaleX ?? 1
   const scaleY = layer.scaleY ?? 1
   const translation = `translate3d(${layer.x}px, ${layer.y}px, 0)`
   const scale = scaleX === 1 && scaleY === 1 ? "" : ` scale(${scaleX}, ${scaleY})`
+  const rotationPart = rotation !== 0 ? ` rotate(${rotation}deg)` : ""
 
-  if (tiltX === 0 && tiltY === 0) {
-    return `${translation}${scale} rotate(${rotation}deg)`
-  }
+  return `${translation}${scale}${rotationPart}`
+}
 
-  return `${translation}${scale} rotate(${rotation}deg) skewY(${tiltX}deg) skewX(${tiltY}deg)`
+/** @deprecated Use getLayerPlacementTransform for shell placement; tilt is applied via DraftingLayerTiltShell. */
+export function getLayerCssTransform(
+  layer: LayerTransformInput & Pick<DraftingCanvasLayer, "scaleX" | "scaleY">,
+) {
+  return getLayerPlacementTransform(layer)
+}
+
+export function getLayerTiltPerspectiveStyle(
+  layer: Pick<DraftingCanvasLayer, "tiltX" | "tiltY">,
+) {
+  return getBackgroundShapeTiltPerspectiveStyle({
+    tiltX: layer.tiltX ?? 0,
+    tiltY: layer.tiltY ?? 0,
+  })
+}
+
+export function getLayerTiltInnerStyle(
+  layer: Pick<DraftingCanvasLayer, "tiltX" | "tiltY">,
+): Pick<BackgroundShapeTiltContainerStyle, "transform" | "transformOrigin" | "transformStyle"> {
+  return getBackgroundShapeTiltInnerStyle({
+    tiltX: layer.tiltX ?? 0,
+    tiltY: layer.tiltY ?? 0,
+  })
 }
 
 export function appendTiltSkewToSvgTransform(

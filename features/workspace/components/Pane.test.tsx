@@ -455,7 +455,7 @@ describe("Pane", () => {
     expect(frame.className).toContain("border")
     expect(frame.style.width).toBe("304px")
     expect(frame.style.height).toBe("400px")
-    expect(frame.style.transform).toBe("translate3d(-152px, -200px, 0) rotate(0deg)")
+    expect(frame.style.transform).toBe("translate3d(-152px, -200px, 0)")
     expect(frame.style.zIndex).toBe("10000")
   })
 
@@ -1230,7 +1230,7 @@ describe("Pane", () => {
 
     expect(rotationValue).not.toBeNull()
     expect(rotationValue.style.transform).toBe(
-      "translate(-50%, calc(-34px - 10px - 8px - 100%))",
+      "translate(-50%, calc(-34px - 6px - 8px - 100%))",
     )
     expect(rotationValue.textContent).toBe("0°")
 

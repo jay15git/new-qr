@@ -15,7 +15,9 @@ import {
 } from "@/features/workspace/rendering/layer-appearance"
 import { clampBackgroundShapeTilt } from "@/features/qr-code/model/state"
 import {
-  getLayerCssTransform,
+  getBackgroundShapeCssTiltTransform,
+  getLayerPlacementTransform,
+  getLayerTiltPerspectiveStyle,
 } from "@/features/workspace/rendering/layer-transform"
 
 export { toRgba } from "@/features/workspace/rendering/layer-appearance"
@@ -39,15 +41,35 @@ export function getLayerPlacementStyle(
   layer: DraftingCanvasLayer,
   nested = false,
 ): CSSProperties {
+  const tiltPerspectiveStyle = nested ? {} : getLayerTiltPerspectiveStyle(layer)
+
   return {
     height: layer.height,
     left: nested ? 0 : "50%",
     opacity: layer.opacity,
     top: nested ? 0 : "50%",
-    transform: nested ? undefined : getLayerCssTransform(layer),
+    transform: nested ? undefined : getLayerPlacementTransform(layer),
     transformOrigin: "center center",
+    transformStyle: tiltPerspectiveStyle.perspective ? "preserve-3d" : undefined,
     width: layer.width,
     zIndex: layer.zIndex,
+    ...tiltPerspectiveStyle,
+  }
+}
+
+export function getLayerControlShellStyle(
+  layer: Pick<DraftingCanvasLayer, "rotation" | "tiltX" | "tiltY" | "x" | "y">,
+  paddingPx = 0,
+): CSSProperties {
+  const rotation = Number.isFinite(layer.rotation) ? layer.rotation : 0
+  const tiltPerspectiveStyle = getLayerTiltPerspectiveStyle(layer)
+  const rotationPart = rotation !== 0 ? ` rotate(${rotation}deg)` : ""
+
+  return {
+    transform: `translate3d(${layer.x - paddingPx}px, ${layer.y - paddingPx}px, 0)${rotationPart}`,
+    transformOrigin: "center center",
+    transformStyle: tiltPerspectiveStyle.perspective ? "preserve-3d" : undefined,
+    ...tiltPerspectiveStyle,
   }
 }
 
@@ -68,7 +90,10 @@ export function getExportLayerTransform(layer: DraftingCanvasLayer) {
   }
 
   if (tiltX !== 0 || tiltY !== 0) {
-    parts.push(`skewY(${tiltX}deg)`, `skewX(${tiltY}deg)`)
+    const tiltTransform = getBackgroundShapeCssTiltTransform({ tiltX, tiltY })
+    if (tiltTransform) {
+      parts.push(tiltTransform)
+    }
   }
 
   return parts.length > 0 ? parts.join(" ") : undefined

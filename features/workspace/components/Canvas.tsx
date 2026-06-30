@@ -26,7 +26,6 @@ import {
   MousePointer2Icon,
   PlusIcon,
   Redo2Icon,
-  SlidersHorizontalIcon,
   Trash2Icon,
   TypeIcon,
   Undo2Icon,
@@ -47,11 +46,6 @@ import { InsertMenu } from "@/features/workspace/components/InsertMenu"
 import { getQrLayout } from "@/features/workspace/model/layout-engine"
 import type { QrStudioState } from "@/features/qr-code/model/state"
 import { Button } from "@/components/ui/button"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 import {
   ResizableHandle,
   ResizablePanel,
@@ -78,25 +72,6 @@ type DraftingPanelLayouts = Record<string, Record<string, number>>
 type DraftingPanePanOffsets = Record<string, { x: number; y: number }>
 export type DraftingPaneToolbarVariant = "default" | "desktop-zoom"
 export type DraftingPaneCanvasTool = "select" | "pan" | "text"
-
-type DesktopLayerToolbarLayer = {
-  blur: number
-  id: string
-  isLocked: boolean
-  isVisible: boolean
-  name: string
-  opacity: number
-  shadowBlur: number
-  shadowColor: string
-  shadowOffsetX: number
-  shadowOffsetY: number
-  shadowOpacity: number
-}
-
-type DesktopLayerToolbarControls = {
-  layer: DesktopLayerToolbarLayer | null
-  onLayerChange: (patch: Partial<DesktopLayerToolbarLayer>) => void
-}
 
 const CANVAS_PAN_CURSOR_LOCK_CLASS = "drafting-canvas-panning"
 
@@ -191,7 +166,6 @@ type CanvasProps = {
     layerIds: string[],
     options?: { additive?: boolean },
   ) => void
-  desktopLayerToolbarControls?: DesktopLayerToolbarControls
   activeCanvasTool?: DraftingPaneCanvasTool | null
   onAddTextLayerAt?: (paneId: string, point: { x: number; y: number }) => void
   onCanvasToolChange?: (tool: DraftingPaneCanvasTool | null) => void
@@ -252,165 +226,6 @@ function getTouchDistance(touches: React.TouchList) {
   }
 
   return Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY)
-}
-
-function DesktopLayerSettingsToolbar({ controls }: { controls: DesktopLayerToolbarControls }) {
-  const { layer, onLayerChange } = controls
-
-  if (!layer) {
-    return null
-  }
-
-  return (
-    <div
-      aria-label={`${layer.name} layer appearance controls`}
-      className="flex max-w-full items-center gap-1"
-      data-slot="desktop-layer-settings-toolbar"
-    >
-      <Popover>
-        <DesktopTooltip content="Layer appearance" side="left" sideOffset={10}>
-          <PopoverTrigger asChild>
-            <button
-              aria-label="Layer appearance"
-              className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-current transition-[background-color,color] duration-150 hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
-              type="button"
-            >
-              <SlidersHorizontalIcon aria-hidden="true" className="size-3.5" />
-            </button>
-          </PopoverTrigger>
-        </DesktopTooltip>
-        <PopoverContent
-          align="center"
-          side="top"
-          sideOffset={12}
-          className="w-72 rounded-2xl border-white/[0.12] bg-neutral-950/95 p-3 text-white shadow-[var(--desktop-glass-shadow)] backdrop-blur-2xl"
-          data-slot="desktop-layer-appearance-popover"
-        >
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-white">{layer.name}</p>
-              <p className="text-[11px] font-medium text-white/45">Layer appearance</p>
-            </div>
-            <span className="rounded-full bg-white/[0.08] px-2 py-1 text-xs font-semibold tabular-nums text-white/70">
-              {layer.opacity}%
-            </span>
-          </div>
-          <div className="space-y-2">
-            <p className="px-1 text-[10px] font-bold uppercase tracking-normal text-white/45">
-              Appearance
-            </p>
-            <DesktopLayerToolbarNumberInput
-              label="Layer opacity"
-              max={100}
-              min={0}
-              value={layer.opacity}
-              onChange={(opacity) => onLayerChange({ opacity })}
-            />
-            <DesktopLayerToolbarNumberInput
-              label="Layer blur"
-              max={96}
-              min={0}
-              value={layer.blur}
-              onChange={(blur) => onLayerChange({ blur })}
-            />
-          </div>
-          <div className="mt-4 space-y-2">
-            <p className="px-1 text-[10px] font-bold uppercase tracking-normal text-white/45">
-              Shadow
-            </p>
-            <DesktopLayerToolbarColorInput
-              label="Layer shadow color"
-              value={layer.shadowColor}
-              onChange={(shadowColor) => onLayerChange({ shadowColor })}
-            />
-            <DesktopLayerToolbarNumberInput
-              label="Shadow blur"
-              max={128}
-              min={0}
-              value={layer.shadowBlur}
-              onChange={(shadowBlur) => onLayerChange({ shadowBlur })}
-            />
-            <DesktopLayerToolbarNumberInput
-              label="Shadow opacity"
-              max={100}
-              min={0}
-              value={layer.shadowOpacity}
-              onChange={(shadowOpacity) => onLayerChange({ shadowOpacity })}
-            />
-            <div className="grid grid-cols-2 gap-2">
-              <DesktopLayerToolbarNumberInput
-                label="Shadow X"
-                value={layer.shadowOffsetX}
-                onChange={(shadowOffsetX) => onLayerChange({ shadowOffsetX })}
-              />
-              <DesktopLayerToolbarNumberInput
-                label="Shadow Y"
-                value={layer.shadowOffsetY}
-                onChange={(shadowOffsetY) => onLayerChange({ shadowOffsetY })}
-              />
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
-    </div>
-  )
-}
-
-function DesktopLayerToolbarNumberInput({
-  label,
-  max,
-  min,
-  onChange,
-  value,
-}: {
-  label: string
-  max?: number
-  min?: number
-  onChange: (value: number) => void
-  value: number
-}) {
-  return (
-    <label className="flex h-8 min-w-0 items-center justify-between gap-2 rounded-full bg-white/[0.08] pl-3 pr-1 text-[10px] font-bold uppercase tracking-normal text-current">
-      <span className="min-w-0 truncate text-white/52">{label.replace(/^Layer |^Shadow /, "")}</span>
-      <input
-        aria-label={label}
-        className="h-6 w-14 shrink-0 rounded-full border-0 bg-black/20 px-1 text-center text-xs font-semibold text-current outline-none"
-        max={max}
-        min={min}
-        type="number"
-        value={value}
-        onChange={(event) => {
-          const nextValue = Number(event.currentTarget.value)
-          if (Number.isFinite(nextValue)) {
-            onChange(nextValue)
-          }
-        }}
-      />
-    </label>
-  )
-}
-
-function DesktopLayerToolbarColorInput({
-  label,
-  onChange,
-  value,
-}: {
-  label: string
-  onChange: (value: string) => void
-  value: string
-}) {
-  return (
-    <label className="flex h-8 items-center justify-between gap-2 rounded-full bg-white/[0.08] pl-3 pr-1 text-[10px] font-bold uppercase tracking-normal text-current">
-      <span className="whitespace-nowrap text-white/52">Color</span>
-      <input
-        aria-label={label}
-        className="size-6 rounded-full border-0 bg-transparent p-0"
-        type="color"
-        value={value}
-        onChange={(event) => onChange(event.currentTarget.value)}
-      />
-    </label>
-  )
 }
 
 function DraftingPaneSurface({
@@ -844,7 +659,6 @@ export function Canvas({
   onLayerPaste,
   onLayerSelect,
   onLayerSelectionChange,
-  desktopLayerToolbarControls,
   activeCanvasTool,
   onAddTextLayerAt,
   onCanvasToolChange,
@@ -1472,10 +1286,6 @@ export function Canvas({
               </>
             ) : null}
 
-            {isDesktopZoomToolbar && desktopLayerToolbarControls?.layer ? (
-              <DesktopLayerSettingsToolbar controls={desktopLayerToolbarControls} />
-            ) : null}
-
           </div>
         </div>
 
@@ -1486,28 +1296,24 @@ export function Canvas({
               data-toolbar-appearance="desktop-glass"
               className={cn("pointer-events-auto", DESKTOP_CANVAS_GLASS_TOOLBAR_VERTICAL_SHELL_CLASS)}
             >
-              <DesktopTooltip content="Increase canvas size" side="left" sideOffset={10}>
-                <button
-                  aria-label="Increase canvas size"
-                  className={DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS}
-                  disabled={activeZoom >= MAX_PREVIEW_ZOOM}
-                  type="button"
-                  onClick={handleZoomIn}
-                >
-                  <PlusIcon className="size-3.5" strokeWidth={2.3} />
-                </button>
-              </DesktopTooltip>
-              <DesktopTooltip content="Decrease canvas size" side="left" sideOffset={10}>
-                <button
-                  aria-label="Decrease canvas size"
-                  className={DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS}
-                  disabled={activeZoom <= MIN_PREVIEW_ZOOM}
-                  type="button"
-                  onClick={handleZoomOut}
-                >
-                  <MinusIcon className="size-3.5" strokeWidth={2.6} />
-                </button>
-              </DesktopTooltip>
+              <button
+                aria-label="Increase canvas size"
+                className={DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS}
+                disabled={activeZoom >= MAX_PREVIEW_ZOOM}
+                type="button"
+                onClick={handleZoomIn}
+              >
+                <PlusIcon className="size-3.5" strokeWidth={2.3} />
+              </button>
+              <button
+                aria-label="Decrease canvas size"
+                className={DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS}
+                disabled={activeZoom <= MIN_PREVIEW_ZOOM}
+                type="button"
+                onClick={handleZoomOut}
+              >
+                <MinusIcon className="size-3.5" strokeWidth={2.6} />
+              </button>
             </div>
           </div>
         ) : null}

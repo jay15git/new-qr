@@ -450,24 +450,8 @@ describe("Canvas", () => {
     expect(bottomToolbar?.querySelector('button[aria-label="Redo"]')).toBeNull()
   })
 
-  it("orders desktop bottom toolbar controls by interaction, view, creation, and layer details", () => {
+  it("orders desktop bottom toolbar controls by interaction, view, and creation", () => {
     const workspace = renderWorkspace({
-      desktopLayerToolbarControls: {
-        layer: {
-          blur: 0,
-          id: "pane-1:qr",
-          isLocked: false,
-          isVisible: true,
-          name: "QR code",
-          opacity: 1,
-          shadowBlur: 0,
-          shadowColor: "#000000",
-          shadowOffsetX: 0,
-          shadowOffsetY: 0,
-          shadowOpacity: 0,
-        },
-        onLayerChange: vi.fn(),
-      },
       onAddQrCode: vi.fn(),
       onAddTextLayerAt: vi.fn(),
       paneCount: 1,
@@ -496,7 +480,6 @@ describe("Canvas", () => {
       "Hide canvas grid",
       "Add text on canvas",
       "Add content",
-      "Layer appearance",
     ])
   })
 
@@ -579,13 +562,12 @@ describe("Canvas", () => {
     expect(workspace.container.querySelector('button[aria-label="Show canvas grid"]')).toBeNull()
   })
 
-  it("keeps the desktop layer appearance control free of active scale motion", () => {
+  it("keeps the desktop compose toolbar free of active scale motion", () => {
     const source = readFileSync(
       resolve(process.cwd(), "features/workspace/components/Canvas.tsx"),
       "utf8",
     )
 
-    expect(source).toContain('aria-label="Layer appearance"')
     expect(source).not.toContain("active:scale-95")
   })
 
@@ -654,7 +636,6 @@ function renderWorkspace({
   onAddQrCode,
   onInsertLayer = vi.fn(),
   insertNodeId = "pane-1",
-  desktopLayerToolbarControls,
   onLayerSelect,
   onSwapPanes = vi.fn(),
   onUndo,
@@ -675,7 +656,6 @@ function renderWorkspace({
   onAddQrCode?: ComponentProps<typeof Canvas>["onAddQrCode"]
   onInsertLayer?: ComponentProps<typeof Canvas>["onInsertLayer"]
   insertNodeId?: ComponentProps<typeof Canvas>["insertNodeId"]
-  desktopLayerToolbarControls?: ComponentProps<typeof Canvas>["desktopLayerToolbarControls"]
   onLayerSelect?: (paneId: string, layerId: string | null) => void
   onSwapPanes?: (sourcePaneId: string, targetPaneId: string) => void
   onUndo?: () => void
@@ -696,7 +676,6 @@ function renderWorkspace({
         activeCanvasTool={activeCanvasTool}
         canRedo={canRedo}
         canUndo={canUndo}
-        desktopLayerToolbarControls={desktopLayerToolbarControls}
         onRedo={onRedo}
         onPaneQrClick={() => undefined}
         onPaneSelect={() => undefined}

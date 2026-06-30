@@ -3904,10 +3904,6 @@ export function WorkspaceSurface({
     bottomSpace: selectedCardState.bottomSpace,
     cardEnabled: selectedCardState.enabled,
     cardFill: selectedCardState.fill,
-    cardImageFit: selectedCardState.cardImage.fit,
-    cardImageOpacity: selectedCardState.cardImage.opacity,
-    cardImageSourceMode: getDesktopAssetSourceMode(selectedCardState.cardImage.source),
-    cardImageUrl: selectedCardState.cardImage.value ?? "",
     cardPatternId: selectedCardState.patternId,
     cardRadius: selectedCardState.cornerRadius,
     padding: selectedCardState.padding,
@@ -3968,10 +3964,6 @@ export function WorkspaceSurface({
     layers: activeCanvasLayerRows.map(toDesktopLayerRow),
     selectedLayerId: selectedLayerId ?? activeCanvasLayerRows[0]?.id ?? "",
   }
-  const selectedDesktopLayer =
-    desktopLayersSettings.layers.find((layer) => layer.id === desktopLayersSettings.selectedLayerId) ??
-    desktopLayersSettings.layers[0] ??
-    null
   const desktopExportSettings: DesktopExportSettings = {
     extension: selectedDownloadExtension,
     qualityPresetId: selectedRasterExportPresetId,
@@ -4188,13 +4180,6 @@ export function WorkspaceSurface({
         width: patch.borderWidth ?? current.border.width,
       },
       bottomSpace: patch.bottomSpace ?? current.bottomSpace,
-      cardImage: {
-        ...current.cardImage,
-        fit: patch.cardImageFit ?? current.cardImage.fit,
-        opacity: patch.cardImageOpacity ?? current.cardImage.opacity,
-        source: patch.cardImageSourceMode ?? current.cardImage.source,
-        value: patch.cardImageUrl ?? current.cardImage.value,
-      },
       cornerRadius: patch.cardRadius ?? current.cornerRadius,
       enabled: patch.cardEnabled ?? current.enabled,
       fill: patch.cardFill ?? current.fill,
@@ -4208,12 +4193,7 @@ export function WorkspaceSurface({
         offsetY: patch.shadowOffsetY ?? current.shadow.offsetY,
         opacity: patch.shadowOpacity ?? current.shadow.opacity,
       },
-      styleMode:
-        patch.cardImageUrl || patch.cardImageSourceMode
-          ? "image"
-          : patch.cardPatternId
-            ? "pattern"
-            : current.styleMode,
+      styleMode: patch.cardPatternId ? "pattern" : current.styleMode,
     }))
     if (patch.cardEnabled !== undefined || patch.shadowBlur !== undefined || patch.shadowColor !== undefined || patch.shadowOffsetX !== undefined || patch.shadowOffsetY !== undefined || patch.shadowOpacity !== undefined) {
       handleLayerChange(activeQrNodeId, getDraftingCardLayerId(activeQrNodeId), {
@@ -4228,6 +4208,21 @@ export function WorkspaceSurface({
         },
       })
     }
+  }
+
+  function updateDesktopImageSettings(patch: Partial<DesktopImageSettings>) {
+    setSelectedCardState((current) => ({
+      ...current,
+      cardImage: {
+        ...current.cardImage,
+        fit: patch.fit ?? current.cardImage.fit,
+        opacity: patch.opacity ?? current.cardImage.opacity,
+        source: patch.sourceMode ?? current.cardImage.source,
+        value: patch.remoteUrl !== undefined ? patch.remoteUrl : current.cardImage.value,
+      },
+      styleMode:
+        patch.remoteUrl || patch.sourceMode ? "image" : current.styleMode,
+    }))
   }
 
   function resetDesktopShapeSettings() {
@@ -4316,18 +4311,6 @@ export function WorkspaceSurface({
         [activeQrNodeId]: nextLayers,
       }))
     }
-  }
-
-  function patchSelectedDesktopLayer(patch: Partial<DesktopLayerRow>) {
-    if (!selectedDesktopLayer) {
-      return
-    }
-
-    updateDesktopLayersSettings({
-      layers: desktopLayersSettings.layers.map((layer) =>
-        layer.id === selectedDesktopLayer.id ? { ...layer, ...patch } : layer,
-      ),
-    })
   }
 
   function updateDesktopExportSettings(patch: Partial<DesktopExportSettings>) {
@@ -4458,13 +4441,7 @@ export function WorkspaceSurface({
     },
     onExportSettingsChange: updateDesktopExportSettings,
     onImageReset: resetDesktopShapeSettings,
-    onImageSettingsChange: (patch) =>
-      updateDesktopShapeSettings({
-        cardImageFit: patch.fit,
-        cardImageOpacity: patch.opacity,
-        cardImageSourceMode: patch.sourceMode,
-        cardImageUrl: patch.remoteUrl,
-      }),
+    onImageSettingsChange: updateDesktopImageSettings,
     onLayersReset: () =>
       setLayerStateByNodeId((current) => ({
         ...current,
@@ -5011,14 +4988,6 @@ export function WorkspaceSurface({
               }}
               onLayerSelect={handleLayerSelect}
               onLayerSelectionChange={handleLayerSelectionChange}
-              desktopLayerToolbarControls={
-                paneToolbarVariant === "desktop-zoom"
-                  ? {
-                      layer: selectedDesktopLayer,
-                      onLayerChange: patchSelectedDesktopLayer,
-                    }
-                  : undefined
-              }
               onPaneQrClick={handlePaneQrClick}
               onPaneSelect={handlePaneSelection}
               onRedo={handleRedoDraftingWorkspace}

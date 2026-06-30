@@ -431,10 +431,6 @@ export type DesktopShapeSettings = {
   bottomSpace: number
   cardEnabled: boolean
   cardFill: string
-  cardImageFit: "contain" | "cover"
-  cardImageOpacity: number
-  cardImageSourceMode: DesktopAssetSourceMode
-  cardImageUrl: string
   cardPatternId: DraftingCardPatternSelectionId
   cardRadius: number
   padding: number
@@ -824,10 +820,6 @@ const DEFAULT_DESKTOP_SHAPE_SETTINGS: DesktopShapeSettings = {
   bottomSpace: DEFAULT_DRAFTING_CARD_STATE.bottomSpace,
   cardEnabled: DEFAULT_DRAFTING_CARD_STATE.enabled,
   cardFill: DEFAULT_DRAFTING_CARD_STATE.fill,
-  cardImageFit: DEFAULT_DRAFTING_CARD_STATE.cardImage.fit,
-  cardImageOpacity: DEFAULT_DRAFTING_CARD_STATE.cardImage.opacity,
-  cardImageSourceMode: "upload",
-  cardImageUrl: "",
   cardPatternId: DEFAULT_DRAFTING_CARD_STATE.patternId,
   cardRadius: DEFAULT_DRAFTING_CARD_STATE.cornerRadius,
   padding: DEFAULT_DRAFTING_CARD_STATE.padding,
@@ -3045,47 +3037,6 @@ function DesktopShapeInspector({
               ))}
             </DesktopInspectorAnimatedOptionGrid>
           </DesktopInspectorOptionGridScrollArea>
-        </DesktopInspectorSection>
-
-        <DesktopInspectorSection className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
-          <DesktopInspectorLabel className="mb-3">Image</DesktopInspectorLabel>
-          <DesktopInspectorSegmentedControl
-            ariaLabelPrefix="Use"
-            dataSlot="desktop-shape-image-source"
-            items={DESKTOP_ASSET_SOURCE_OPTIONS}
-            value={settings.cardImageSourceMode}
-            onValueChange={(cardImageSourceMode) =>
-              onShapeSettingsChange({ cardImageSourceMode })
-            }
-          />
-          <DesktopInspectorTextInput
-            aria-label="Shape image URL"
-            className="mt-2"
-            placeholder="https://example.com/shape.png"
-            value={settings.cardImageUrl}
-            onChange={(event) => onShapeSettingsChange({ cardImageUrl: event.currentTarget.value })}
-          />
-          <DesktopInspectorSegmentedControl
-            className="mt-2.5"
-            itemAriaLabel={(option) => `Use ${option.value} shape image fit`}
-            itemClassName="capitalize"
-            items={[
-              { label: "cover", value: "cover" },
-              { label: "contain", value: "contain" },
-            ]}
-            value={settings.cardImageFit}
-            onValueChange={(cardImageFit) => onShapeSettingsChange({ cardImageFit })}
-          />
-          <div className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
-            <DesktopMotionSliderRow
-              label="Image opacity"
-              max={100}
-              min={0}
-              value={settings.cardImageOpacity}
-              valueLabel={`${Math.round(settings.cardImageOpacity)}%`}
-              onChange={(cardImageOpacity) => onShapeSettingsChange({ cardImageOpacity })}
-            />
-          </div>
         </DesktopInspectorSection>
 
         <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>

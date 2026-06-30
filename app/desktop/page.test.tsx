@@ -44,11 +44,11 @@ describe("desktop page", () => {
     expect(client.props.fontClassName).toBe("mock-satoshi-font")
   })
 
-  it("keeps portaled layer appearance popovers in sync with desktop light mode", () => {
+  it("keeps portaled appearance popovers in sync with desktop light mode", () => {
     const workspaceSource = readFileSync("features/desktop-shell/components/DesktopWorkspace.tsx", "utf8")
 
     expect(workspaceSource).toContain(
-      'body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"]',
+      'body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot^="desktop-appearance-"][data-slot$="-popover"]',
     )
     expect(workspaceSource).toContain("rgba(255, 255, 255, 0.86)")
     expect(workspaceSource).toContain('input[type="number"]')
