@@ -3891,8 +3891,8 @@ function DesktopContentInspector({
                   aria-label={`Use ${option.label} content`}
                   aria-pressed={isSelected}
                   className={cn(
-                    "relative flex h-[54px] min-w-0 flex-col items-center justify-center gap-1 px-1",
-                    desktopInspectorOptionGridItemClass(),
+                    "group relative mx-auto flex aspect-square size-[3.375rem] min-w-0 flex-col items-center justify-center gap-1 p-1.5 text-center transition",
+                    desktopInspectorOptionGridItemClass("tight"),
                     DESKTOP_INSPECTOR_OPTION_TILE_SURFACE_CLASS,
                     DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
                     isSelected && "text-[var(--desktop-inspector-option-selected-fg)]",
@@ -3902,8 +3902,15 @@ function DesktopContentInspector({
                   type="button"
                   onClick={() => onContentTypeChange(type)}
                 >
-                  <Icon className="relative z-10 size-4 shrink-0" />
-                  <span className="relative z-10 max-w-full truncate">{option.label}</span>
+                  <Icon className="relative z-10 size-5 shrink-0" strokeWidth={1.75} />
+                  <span
+                    className={cn(
+                      "relative z-10 max-w-full truncate leading-none",
+                      DESKTOP_INSPECTOR_TYPE_LABEL_CLASS,
+                    )}
+                  >
+                    {option.label}
+                  </span>
                 </button>
               )
             })}
