@@ -1357,7 +1357,7 @@ describe("WorkspaceSurface", () => {
 
     expect(composeToolbar.getAttribute("data-toolbar-appearance")).toBe("desktop-glass")
     expect(composeToolbar.className).toContain("rounded-full")
-    expect(composeToolbar.className).toContain("bg-black/55")
+    expect(composeToolbar.className).toContain("bg-[var(--desktop-glass-bg)]")
     expect(surface.container.querySelector('button[aria-label="Zoom out preview"]')).toBeNull()
     expect(surface.container.querySelector('button[aria-label="Zoom in preview"]')).toBeNull()
     expect(surface.container.querySelector('button[aria-label="Reset view"]')).toBeNull()

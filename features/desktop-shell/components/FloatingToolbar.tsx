@@ -1360,7 +1360,7 @@ export function DesktopThemeStyles() {
   return (
     <style>{`
       body:has([data-slot="desktop-floating-toolbar-root"]) {
-        --desktop-glass-bg: rgba(0, 0, 0, 0.55);
+        --desktop-glass-bg: rgba(0, 0, 0, 0.95);
         --desktop-glass-border: rgba(255, 255, 255, 0.06);
         --desktop-glass-fg: rgba(255, 255, 255, 0.72);
         --desktop-glass-shadow: 0 24px 64px rgba(0, 0, 0, 0.34);
@@ -1384,7 +1384,7 @@ export function DesktopThemeStyles() {
       }
 
       body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) {
-        --desktop-glass-bg: rgba(255, 255, 255, 0.72);
+        --desktop-glass-bg: rgba(255, 255, 255, 0.78);
         --desktop-glass-border: rgba(15, 23, 42, 0.12);
         --desktop-glass-fg: rgba(15, 23, 42, 0.68);
         --desktop-glass-shadow: 0 24px 64px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.86);
@@ -1472,7 +1472,7 @@ export function DesktopThemeStyles() {
       [data-desktop-theme="light"] [data-slot="desktop-utility-toolbar"],
       [data-desktop-theme="light"] [data-slot="desktop-dynamic-island"],
       [data-desktop-theme="light"] [data-slot="desktop-action-toolbar"] {
-        background: rgba(255, 255, 255, 0.72) !important;
+        background: var(--desktop-glass-bg) !important;
         border-color: rgba(15, 23, 42, 0.12) !important;
         color: rgba(15, 23, 42, 0.68) !important;
         box-shadow: 0 24px 64px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.86) !important;
@@ -1667,7 +1667,7 @@ export function DesktopThemeStyles() {
       }
 
       [data-slot="desktop-floating-inspector"] {
-        --surface-1: rgba(0, 0, 0, 0.55);
+        --surface-1: var(--desktop-glass-bg);
         --surface-2: var(--desktop-inspector-section-bg);
         --scroll-edge-fade-color: #1a1a1a;
         --scroll-edge-chevron-color: rgba(255, 255, 255, 0.45);
@@ -1698,7 +1698,7 @@ export function DesktopThemeStyles() {
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-floating-inspector"] {
-        --surface-1: rgba(255, 255, 255, 0.72);
+        --surface-1: var(--desktop-glass-bg);
         --surface-2: var(--desktop-inspector-section-bg);
         --scroll-edge-fade-color: rgba(255, 255, 255, 0.88);
         --scroll-edge-chevron-color: rgba(15, 23, 42, 0.42);
@@ -1729,7 +1729,7 @@ export function DesktopThemeStyles() {
       }
 
       body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot^="desktop-appearance-"][data-slot$="-popover"] [data-slot="desktop-floating-inspector"] {
-        --surface-1: rgba(255, 255, 255, 0.72);
+        --surface-1: var(--desktop-glass-bg);
         --surface-2: var(--desktop-inspector-section-bg);
         --scroll-edge-fade-color: rgba(255, 255, 255, 0.88);
         --scroll-edge-chevron-color: rgba(15, 23, 42, 0.42);
@@ -2023,7 +2023,7 @@ export function DesktopThemeStyles() {
       }
 
       [data-slot="desktop-left-toolbar-shell"] {
-        background: rgba(0, 0, 0, 0.55) !important;
+        background: var(--desktop-glass-bg) !important;
         border-color: rgba(255, 255, 255, 0.06) !important;
         border-radius: var(--desktop-settings-toolbar-corner-radius, 36px) !important;
         box-shadow: var(--desktop-glass-panel-shadow) !important;
@@ -2039,7 +2039,7 @@ export function DesktopThemeStyles() {
       }
 
       [data-desktop-theme="light"] [data-slot="desktop-left-toolbar-shell"] {
-        background: rgba(255, 255, 255, 0.72) !important;
+        background: var(--desktop-glass-bg) !important;
         border-color: rgba(15, 23, 42, 0.12) !important;
         box-shadow: 0 24px 64px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.86) !important;
       }

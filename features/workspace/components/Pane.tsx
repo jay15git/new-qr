@@ -938,7 +938,7 @@ function LayerFloatingToolbarButton({
 function LayerSizeValue({ height, width }: Pick<DraftingCanvasLayer, "height" | "width">) {
   return (
     <div
-      className="pointer-events-none absolute bottom-0 left-1/2 w-max min-w-[4.75rem] whitespace-nowrap rounded-full border border-white/[0.12] bg-black/55 px-2.5 py-1 text-center text-[0.68rem] font-semibold leading-none text-white/82 shadow-[var(--desktop-glass-shadow)] backdrop-blur-2xl"
+      className="pointer-events-none absolute bottom-0 left-1/2 w-max min-w-[4.75rem] whitespace-nowrap rounded-full border border-white/[0.12] bg-[var(--desktop-glass-bg)] px-2.5 py-1 text-center text-[0.68rem] font-semibold leading-none text-white/82 shadow-[var(--desktop-glass-shadow)] backdrop-blur-2xl"
       data-slot="drafting-layer-size-value"
       data-toolbar-appearance="desktop-glass"
       style={{
@@ -1885,7 +1885,7 @@ export const Pane = memo(function Pane({
         />
         {isRotating ? (
           <div
-            className="pointer-events-none absolute left-1/2 top-0 rounded-full border border-white/[0.12] bg-black/55 px-2.5 py-1 text-[0.68rem] font-semibold text-white/82 shadow-[var(--desktop-glass-shadow)] backdrop-blur-2xl"
+            className="pointer-events-none absolute left-1/2 top-0 rounded-full border border-white/[0.12] bg-[var(--desktop-glass-bg)] px-2.5 py-1 text-[0.68rem] font-semibold text-white/82 shadow-[var(--desktop-glass-shadow)] backdrop-blur-2xl"
             data-slot="drafting-layer-rotation-value"
             data-toolbar-appearance="desktop-glass"
             style={{
@@ -1954,7 +1954,7 @@ export const Pane = memo(function Pane({
         />
         {isRotating ? (
           <div
-            className="pointer-events-none absolute left-1/2 top-0 rounded-full border border-white/[0.12] bg-black/55 px-2.5 py-1 text-[0.68rem] font-semibold text-white/82 shadow-[var(--desktop-glass-shadow)] backdrop-blur-2xl"
+            className="pointer-events-none absolute left-1/2 top-0 rounded-full border border-white/[0.12] bg-[var(--desktop-glass-bg)] px-2.5 py-1 text-[0.68rem] font-semibold text-white/82 shadow-[var(--desktop-glass-shadow)] backdrop-blur-2xl"
             data-slot="drafting-layer-rotation-value"
             data-toolbar-appearance="desktop-glass"
             style={{
