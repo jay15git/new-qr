@@ -1361,24 +1361,24 @@ export function DesktopThemeStyles() {
     <style>{`
       body:has([data-slot="desktop-floating-toolbar-root"]) {
         --desktop-glass-bg: rgba(0, 0, 0, 0.55);
-        --desktop-glass-border: rgba(255, 255, 255, 0.12);
+        --desktop-glass-border: rgba(255, 255, 255, 0.06);
         --desktop-glass-fg: rgba(255, 255, 255, 0.72);
-        --desktop-glass-shadow: 0 12px 48px -16px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-        --desktop-glass-panel-border: rgba(255, 255, 255, 0.1);
-        --desktop-glass-panel-shadow: 0 20px 80px -24px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        --desktop-glass-shadow: 0 24px 64px rgba(0, 0, 0, 0.34);
+        --desktop-glass-panel-border: rgba(255, 255, 255, 0.06);
+        --desktop-glass-panel-shadow: var(--desktop-glass-shadow);
         --desktop-glass-button-hover-bg: rgba(255, 255, 255, 0.11);
         --desktop-glass-button-hover-fg: rgba(255, 255, 255, 1);
         --desktop-glass-button-focus-ring: rgba(255, 255, 255, 0.45);
         --desktop-appearance-popover-bg: rgba(10, 10, 10, 0.96);
-        --desktop-appearance-popover-border: rgba(255, 255, 255, 0.1);
-        --desktop-appearance-popover-shadow: 0 20px 80px -24px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        --desktop-appearance-popover-border: rgba(255, 255, 255, 0.06);
+        --desktop-appearance-popover-shadow: var(--desktop-glass-shadow);
         --desktop-inspector-fg-primary: rgba(255, 255, 255, 0.94);
         --desktop-inspector-fg-secondary: rgba(255, 255, 255, 0.76);
         --desktop-inspector-fg-tertiary: rgba(255, 255, 255, 0.50);
         --desktop-inspector-fg-muted: rgba(255, 255, 255, 0.42);
         --desktop-inspector-fg-label: var(--desktop-inspector-fg-secondary);
         --desktop-inspector-dropdown-bg: rgba(12, 12, 16, 0.9);
-        --desktop-inspector-dropdown-border: rgba(255, 255, 255, 0.08);
+        --desktop-inspector-dropdown-border: rgba(255, 255, 255, 0.06);
         --desktop-inspector-control-hover-bg: rgba(255, 255, 255, 0.09);
         --desktop-inspector-option-selected-bg: rgba(255, 255, 255, 0.14);
       }
@@ -1389,7 +1389,7 @@ export function DesktopThemeStyles() {
         --desktop-glass-fg: rgba(15, 23, 42, 0.68);
         --desktop-glass-shadow: 0 24px 64px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.86);
         --desktop-glass-panel-border: rgba(15, 23, 42, 0.12);
-        --desktop-glass-panel-shadow: 0 24px 64px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.86);
+        --desktop-glass-panel-shadow: var(--desktop-glass-shadow);
         --desktop-glass-button-hover-bg: rgba(15, 23, 42, 0.08);
         --desktop-glass-button-hover-fg: rgba(15, 23, 42, 0.95);
         --desktop-glass-button-focus-ring: rgba(15, 23, 42, 0.36);
@@ -1424,7 +1424,7 @@ export function DesktopThemeStyles() {
         background-color: var(--desktop-inspector-dropdown-bg) !important;
         border-color: var(--desktop-inspector-dropdown-border) !important;
         color: var(--desktop-inspector-fg-secondary) !important;
-        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14) !important;
+        box-shadow: var(--desktop-glass-shadow) !important;
         --tw-ring-color: transparent !important;
       }
 
@@ -2024,7 +2024,7 @@ export function DesktopThemeStyles() {
 
       [data-slot="desktop-left-toolbar-shell"] {
         background: rgba(0, 0, 0, 0.55) !important;
-        border-color: rgba(255, 255, 255, 0.12) !important;
+        border-color: rgba(255, 255, 255, 0.06) !important;
         border-radius: var(--desktop-settings-toolbar-corner-radius, 36px) !important;
         box-shadow: var(--desktop-glass-panel-shadow) !important;
         backdrop-filter: blur(40px) !important;

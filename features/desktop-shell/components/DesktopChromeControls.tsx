@@ -125,7 +125,7 @@ export function DesktopKeyboardShortcutsTrigger({
         data-slot="desktop-keyboard-shortcuts-popover"
         side={popoverSide}
         sideOffset={12}
-        className="z-[20000] flex h-[min(44rem,calc(100dvh-7rem))] max-h-[min(44rem,calc(100dvh-7rem))] w-[min(27rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-[16px] border border-[#242424] bg-[#0a0a0a] p-0 text-white shadow-[0_24px_70px_rgba(0,0,0,0.35)]"
+        className="z-[20000] flex h-[min(44rem,calc(100dvh-7rem))] max-h-[min(44rem,calc(100dvh-7rem))] w-[min(27rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-[16px] border border-[#242424] bg-[#0a0a0a] p-0 text-white shadow-[var(--desktop-glass-shadow)]"
         style={
           {
             "--desktop-inspector-field-bg": "#141414",
@@ -221,7 +221,7 @@ export function DesktopKeyboardShortcutsTrigger({
                                     </span>
                                   ) : null}
                                   <Kbd
-                                    className="border-[#333333] bg-[#202020] text-white/88 shadow-[0_3px_6px_-2px_rgba(0,0,0,0.25)]"
+                                    className="border-[#333333] bg-[#202020] text-white/88 shadow-none"
                                     data-slot="desktop-shortcut-kbd"
                                     size="md"
                                     variant="sculpted"

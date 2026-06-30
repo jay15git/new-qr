@@ -456,15 +456,21 @@ function DesktopWorkspaceStyles() {
 
       body:has([data-slot="desktop-workspace"][data-desktop-theme="dark"]) [data-slot="drafting-layer-context-menu"] {
         background: rgb(23, 23, 23) !important;
-        border-color: rgba(255, 255, 255, 0.12) !important;
+        border-color: rgba(255, 255, 255, 0.06) !important;
         color: rgba(255, 255, 255, 0.84) !important;
         box-shadow: var(--desktop-glass-shadow) !important;
       }
 
       body:has([data-slot="desktop-workspace"][data-desktop-theme="dark"]) [data-slot="drafting-layer-floating-toolbar"] {
         background: rgb(23, 23, 23) !important;
-        border-color: rgba(255, 255, 255, 0.12) !important;
+        border-color: rgba(255, 255, 255, 0.06) !important;
         color: rgba(255, 255, 255, 0.84) !important;
+        box-shadow: var(--desktop-glass-shadow) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="dark"]) [data-slot="drafting-layer-size-value"],
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="dark"]) [data-slot="drafting-layer-rotation-value"] {
+        border-color: rgba(255, 255, 255, 0.06) !important;
         box-shadow: var(--desktop-glass-shadow) !important;
       }
 
@@ -509,6 +515,15 @@ function DesktopWorkspaceStyles() {
         border-color: rgba(15, 23, 42, 0.12) !important;
         color: rgba(15, 23, 42, 0.82) !important;
         box-shadow: 0 24px 64px rgba(15, 23, 42, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+      }
+
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="dark"]) [data-slot="desktop-layer-appearance-popover"],
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="dark"]) [data-slot^="desktop-appearance-"][data-slot$="-popover"],
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="dark"]) [data-slot="desktop-scan-safety-popover"],
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="dark"]) [data-slot="desktop-zoom-popover"],
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="dark"]) [data-slot="desktop-insert-menu-popover"] {
+        border-color: rgba(255, 255, 255, 0.06) !important;
+        box-shadow: var(--desktop-glass-shadow) !important;
       }
 
       body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="desktop-layer-appearance-popover"] p,

@@ -107,7 +107,7 @@ export const DESKTOP_INSPECTOR_RESET_CLASS = cn(
   DESKTOP_INSPECTOR_TYPE_VALUE_CLASS,
 )
 export const DESKTOP_INSPECTOR_DROPDOWN_MENU_CLASS =
-  "desktop-inspector-dropdown-menu z-50 min-w-0 rounded-[10px] border border-[var(--desktop-inspector-dropdown-border)] bg-[var(--desktop-inspector-dropdown-bg)] p-1 text-[var(--desktop-inspector-fg-secondary)] shadow-[0_10px_28px_rgba(0,0,0,0.14)] ring-0 backdrop-blur-xl"
+  "desktop-inspector-dropdown-menu z-50 min-w-0 rounded-[10px] border border-[var(--desktop-inspector-dropdown-border)] bg-[var(--desktop-inspector-dropdown-bg)] p-1 text-[var(--desktop-inspector-fg-secondary)] shadow-[var(--desktop-glass-shadow)] ring-0 backdrop-blur-xl"
 export const DESKTOP_INSPECTOR_DROPDOWN_TRIGGER_CLASS = cn(
   "desktop-inspector-input-bg cursor-pointer bg-[var(--desktop-inspector-field-bg)] font-medium text-[var(--desktop-inspector-fg-tertiary)] outline-none transition hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)] data-[state=open]:bg-[var(--desktop-inspector-control-hover-bg)] data-[state=open]:text-[var(--desktop-inspector-fg-primary)]",
   DESKTOP_INSPECTOR_TYPE_VALUE_CLASS,

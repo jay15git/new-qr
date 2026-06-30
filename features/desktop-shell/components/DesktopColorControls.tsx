@@ -108,7 +108,7 @@ export function DesktopColorPickerPopover({
       >
         <ColorPicker
           className={cn(
-            "max-w-none !bg-[var(--desktop-color-picker-popover-bg)] !text-[var(--desktop-color-picker-popover-fg)] border-[var(--desktop-color-picker-popover-border)] shadow-2xl shadow-black/30 backdrop-blur-xl",
+            "max-w-none !bg-[var(--desktop-color-picker-popover-bg)] !text-[var(--desktop-color-picker-popover-fg)] border-[var(--desktop-color-picker-popover-border)] shadow-[var(--desktop-glass-shadow)] backdrop-blur-xl",
           )}
           defaultFormat="hex"
           onValueChange={(nextValue) => onChange(nextValue)}

@@ -266,7 +266,7 @@ function DesktopLayerSettingsToolbar({ controls }: { controls: DesktopLayerToolb
           align="center"
           side="top"
           sideOffset={12}
-          className="w-72 rounded-2xl border-white/[0.12] bg-neutral-950/95 p-3 text-white shadow-[0_18px_48px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl"
+          className="w-72 rounded-2xl border-white/[0.12] bg-neutral-950/95 p-3 text-white shadow-[var(--desktop-glass-shadow)] backdrop-blur-2xl"
           data-slot="desktop-layer-appearance-popover"
         >
           <div className="mb-3 flex items-center justify-between gap-3">

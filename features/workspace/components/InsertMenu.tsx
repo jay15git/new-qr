@@ -22,7 +22,7 @@ import {
 import { cn } from "@/lib/utils"
 
 const DESKTOP_INSERT_POPOVER_SHELL =
-  "w-[min(18rem,calc(100vw-2rem))] rounded-[20px] border border-white/[0.12] bg-black/70 p-2 text-white/84 shadow-[0_24px_64px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-2xl"
+  "w-[min(18rem,calc(100vw-2rem))] rounded-[20px] border border-white/[0.12] bg-black/70 p-2 text-white/84 shadow-[var(--desktop-glass-shadow)] backdrop-blur-2xl"
 
 const DESKTOP_INSERT_MENU_ITEM =
   "flex h-10 w-full items-center gap-2 rounded-[10px] px-2 text-left text-sm font-semibold text-current transition hover:bg-white/[0.11] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-not-allowed disabled:opacity-40"
