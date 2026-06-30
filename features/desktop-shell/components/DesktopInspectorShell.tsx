@@ -90,7 +90,7 @@ export function DesktopInspectorScrollArea({ children }: { children: ReactNode }
       data-slot="desktop-inspector-scroll-area"
       scrollFade
       className="min-h-0 flex-1"
-      viewportClassName="px-3 py-3"
+      viewportClassName="py-3"
     >
       <div data-slot="desktop-inspector-scroll">{children}</div>
     </ScrollArea>

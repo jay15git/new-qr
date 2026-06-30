@@ -310,7 +310,7 @@ describe("FloatingToolbar", () => {
     const expectedSlots = [
       ["logo", "desktop-logo-inspector"],
       ["motion", "desktop-motion-inspector"],
-      ["encoding", "desktop-encoding-inspector"],
+      ["pattern", "desktop-pattern-inspector"],
       ["layers", "desktop-layers-inspector"],
       ["export", "desktop-export-inspector"],
     ] as const
@@ -1436,7 +1436,11 @@ describe("FloatingToolbar", () => {
     })
 
     expect(surface.container.querySelector('[data-slot="desktop-scan-safety-trigger"]')).not.toBeNull()
-    expect(surface.container.textContent).toContain("Not scannable")
+    expect(
+      surface.container
+        .querySelector('[data-slot="desktop-scan-safety-trigger"]')
+        ?.getAttribute("aria-label"),
+    ).toContain("Not scannable")
   })
 
   it("shows the iconstack search placeholder before a logo query is entered", async () => {

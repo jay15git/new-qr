@@ -285,7 +285,6 @@ export function DesktopDynamicIslandChrome({
               />
             </>
           ) : null}
-          <DesktopDynamicIslandDivider />
           <DesktopScanSafetyPopover result={scanSafetyResult} />
         </div>
       }

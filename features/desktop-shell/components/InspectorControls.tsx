@@ -99,7 +99,7 @@ export const DESKTOP_INSPECTOR_SCRUB_NUMBER_FIELD_CLASS = cn(
 export const DESKTOP_INSPECTOR_FOCUS_CLASS =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]"
 export const DESKTOP_INSPECTOR_HEADER_CLASS =
-  "flex min-w-0 items-center justify-center px-4 py-3 text-center"
+  "flex min-w-0 items-center justify-center py-3 text-center"
 export const DESKTOP_INSPECTOR_FOOTER_CLASS =
   "bg-[var(--desktop-inspector-footer-bg)] p-2.5"
 export const DESKTOP_INSPECTOR_RESET_CLASS = cn(

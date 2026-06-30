@@ -38,18 +38,9 @@ export function DesktopScanSafetyPopover({ result }: { result: ScanSafetyResult 
       <PopoverTrigger asChild>
         <DesktopUtilityToolbarButton
           aria-label={`Scan safety: ${result.summary}`}
-          className="relative gap-1 px-2"
           data-slot="desktop-scan-safety-trigger"
         >
-          <ShieldCheckIcon className="size-3.5 shrink-0" />
-          <span
-            className={cn(
-              "max-w-[4.5rem] truncate rounded-full px-1.5 py-0.5 text-[9px] font-bold leading-none",
-              getStatusPillClass(result.status),
-            )}
-          >
-            {result.summary}
-          </span>
+          <ShieldCheckIcon />
         </DesktopUtilityToolbarButton>
       </PopoverTrigger>
       <PopoverContent

@@ -78,6 +78,7 @@
 [data-slot="desktop-toolbar-brand"] .t-icon-swap[data-state="a"] > .t-icon[data-icon="a"],
 [data-slot="desktop-toolbar-brand"] .t-icon-swap[data-state="b"] > .t-icon[data-icon="b"] {
   opacity: 1;
+  visibility: visible;
   filter: blur(0);
   transform: scale(1);
 }
@@ -85,8 +86,13 @@
 [data-slot="desktop-toolbar-brand"] .t-icon-swap[data-state="a"] > .t-icon[data-icon="b"],
 [data-slot="desktop-toolbar-brand"] .t-icon-swap[data-state="b"] > .t-icon[data-icon="a"] {
   opacity: 0;
+  visibility: hidden;
   filter: blur(var(--icon-swap-blur));
   transform: scale(var(--icon-swap-start-scale));
+}
+
+[data-slot="desktop-toolbar-brand"] img {
+  filter: none !important;
 }
 
 /* Sidebar left ↔ right: blur + fade only, no scale */
@@ -114,4 +120,59 @@
 
 [data-slot="desktop-left-toolbar-shell"] {
   border-radius: var(--desktop-settings-toolbar-corner-radius, 36px);
+  --desktop-settings-toolbar-rail-hitbox-half: 1.5625rem;
+  --desktop-settings-toolbar-inspector-header-height: 2.75rem;
+  --desktop-toolbar-rail-width: 4.5rem;
+  --desktop-toolbar-rail-padding-x: 0.375rem;
+  --desktop-toolbar-rail-hitbox-size: 3.125rem;
+  --desktop-toolbar-rail-icon-size: 2.75rem;
+  --desktop-toolbar-rail-pill-inset: calc(
+    var(--desktop-toolbar-rail-padding-x) +
+      (
+        var(--desktop-toolbar-rail-width) - 2 * var(--desktop-toolbar-rail-padding-x) -
+          var(--desktop-toolbar-rail-hitbox-size)
+      ) / 2 +
+      (var(--desktop-toolbar-rail-hitbox-size) - var(--desktop-toolbar-rail-icon-size)) / 2
+  );
+  --desktop-toolbar-rail-pill-inset-y: calc(
+    (var(--desktop-toolbar-rail-hitbox-size) - var(--desktop-toolbar-rail-icon-size)) / 2
+  );
+  --desktop-inspector-scroll-padding-block-start: 0.75rem;
+  --desktop-settings-toolbar-top-inset: max(
+    0.5rem,
+    calc(
+      var(--desktop-settings-toolbar-corner-radius, 36px) -
+        var(--desktop-settings-toolbar-rail-hitbox-half)
+    )
+  );
+}
+
+@media (max-width: 768px) {
+  [data-slot="desktop-left-toolbar-shell"] {
+    --desktop-settings-toolbar-rail-hitbox-half: 1.4375rem;
+    --desktop-toolbar-rail-width: 3.5rem;
+    --desktop-toolbar-rail-padding-x: 0.25rem;
+    --desktop-toolbar-rail-hitbox-size: 2.875rem;
+    --desktop-toolbar-rail-icon-size: 2.5rem;
+  }
+}
+
+[data-slot="desktop-left-toolbar-shell"] [data-slot="desktop-floating-inspector"] {
+  padding-top: var(--desktop-settings-toolbar-top-inset);
+  padding-inline-end: var(--desktop-toolbar-rail-pill-inset);
+  box-sizing: border-box;
+}
+
+[data-slot="desktop-left-toolbar-shell"] [data-slot="desktop-floating-toolbar"] {
+  padding-top: var(--desktop-settings-toolbar-top-inset);
+  box-sizing: border-box;
+}
+
+[data-slot="desktop-left-toolbar-shell"] [data-slot="desktop-toolbar-tools"] {
+  margin-top: calc(
+    var(--desktop-settings-toolbar-inspector-header-height) +
+      var(--desktop-inspector-scroll-padding-block-start) -
+      var(--desktop-toolbar-rail-hitbox-size) - var(--desktop-toolbar-rail-pill-inset-y)
+  );
+  box-sizing: border-box;
 }

@@ -15,7 +15,6 @@ import type {
   QrFinderPatternOuterStyle,
   QrErrorCorrectionLevel,
   QrFileExtension,
-  QrMode,
   QrTypeNumber,
 } from "@/features/qr-code/model/types"
 import type { StudioCornerDotStyle } from "@/features/qr-code/model/state"
@@ -26,7 +25,6 @@ import {
   BoldIcon,
   ChevronDownIcon,
   ItalicIcon,
-  Settings,
   ShapesIcon,
   Sparkles,
   LayoutGrid,
@@ -244,7 +242,6 @@ export type DesktopToolbarToolId =
   | "logo"
   | "shape"
   | "motion"
-  | "encoding"
   | "text"
   | "image"
   | "decorations"
@@ -299,12 +296,6 @@ const DESKTOP_TOOLBAR_TOOLS: DesktopToolbarTool[] = [
     id: "motion",
     title: "Motion",
     renderIcon: () => <PlayIcon size={18} />,
-  },
-  {
-    group: "QR",
-    id: "encoding",
-    title: "Encoding",
-    renderIcon: () => <Settings className="size-[18px]" />,
   },
   {
     group: "Manage",
@@ -479,7 +470,6 @@ export type DesktopEncodingSettings = {
   errorCorrectionLevel: QrErrorCorrectionLevel
   typeNumber: QrTypeNumber
   boostLevel: boolean
-  mode: QrMode
   valueSegmentsText: string
 }
 
@@ -756,13 +746,6 @@ const DESKTOP_RASTER_EXPORT_PRESETS = [
   { id: "max-quality", label: "Max quality", primaryUse: "handoff, archive", sizePx: 4096 },
 ] as const
 
-const DESKTOP_QR_MODE_OPTIONS: Array<{ label: string; value: QrMode }> = [
-  { label: "Byte", value: "Byte" },
-  { label: "Alphanumeric", value: "Alphanumeric" },
-  { label: "Numeric", value: "Numeric" },
-  { label: "Kanji", value: "Kanji" },
-]
-
 const DESKTOP_CROSS_ORIGIN_OPTIONS: Array<{ label: string; value: QrCrossOrigin }> = [
   { label: "Default", value: "" },
   { label: "Anonymous", value: "anonymous" },
@@ -890,7 +873,6 @@ const DEFAULT_DESKTOP_ENCODING_SETTINGS: DesktopEncodingSettings = {
   errorCorrectionLevel: "Q",
   typeNumber: 0,
   boostLevel: true,
-  mode: "Byte",
   valueSegmentsText: "",
 }
 
@@ -3962,13 +3944,17 @@ function DesktopContentInspector({
 
 function DesktopPatternInspector({
   desktopTheme,
+  encodingSettings,
   errorCorrectionLevel,
+  onEncodingSettingsChange,
   onErrorCorrectionLevelChange,
   onPatternSettingsChange,
   settings,
 }: {
   desktopTheme: DesktopThemeMode
+  encodingSettings: DesktopEncodingSettings
   errorCorrectionLevel: QrErrorCorrectionLevel
+  onEncodingSettingsChange: (patch: Partial<DesktopEncodingSettings>) => void
   onErrorCorrectionLevelChange: (errorCorrectionLevel: QrErrorCorrectionLevel) => void
   onPatternSettingsChange: (patch: Partial<DesktopPatternSettings>) => void
   settings: DesktopPatternSettings
@@ -4219,6 +4205,52 @@ function DesktopPatternInspector({
               ERROR_CORRECTION_LEVEL_OPTIONS.find((option) => option.value === errorCorrectionLevel)
                 ?.summary
             }
+          </p>
+        </DesktopInspectorSection>
+
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)} data-slot="desktop-pattern-type-number">
+          <DesktopMotionSliderRow
+            label="Type number"
+            max={TYPE_NUMBER_MAX}
+            min={TYPE_NUMBER_MIN}
+            value={encodingSettings.typeNumber}
+            valueLabel={formatQrTypeNumberLabel(encodingSettings.typeNumber)}
+            onChange={(typeNumber) =>
+              onEncodingSettingsChange({ typeNumber: typeNumber as QrTypeNumber })
+            }
+          />
+        </DesktopInspectorSection>
+
+        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)} data-slot="desktop-pattern-boost-ecc">
+          <DesktopMotionToggleRow
+            checked={encodingSettings.boostLevel}
+            label="Boost error correction"
+            onChange={(boostLevel) => onEncodingSettingsChange({ boostLevel })}
+          />
+          <p className={cn("mt-2", DESKTOP_INSPECTOR_CAPTION_CLASS, DESKTOP_INSPECTOR_FG_TERTIARY)}>
+            Raise ECC without increasing QR version when possible.
+          </p>
+        </DesktopInspectorSection>
+
+        <DesktopInspectorSection as="details" className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, "px-3 py-2.5")}>
+          <summary className={cn("cursor-pointer select-none", DESKTOP_INSPECTOR_LABEL_CLASS)}>
+            Advanced segments
+          </summary>
+          <textarea
+            aria-label="QR encoding segments"
+            className={cn(
+              "mt-2 min-h-24 w-full resize-y rounded-[6px] border border-[var(--desktop-inspector-control-border)] bg-[var(--desktop-inspector-control-bg)] px-2.5 py-2",
+              DESKTOP_INSPECTOR_CAPTION_CLASS,
+            )}
+            data-slot="desktop-encoding-segments"
+            placeholder={"One segment per line\nhttps://example.com\nextra-data"}
+            value={encodingSettings.valueSegmentsText}
+            onChange={(event) =>
+              onEncodingSettingsChange({ valueSegmentsText: event.currentTarget.value })
+            }
+          />
+          <p className={cn("mt-2", DESKTOP_INSPECTOR_CAPTION_CLASS, DESKTOP_INSPECTOR_FG_TERTIARY)}>
+            Optional multi-segment encoding. Overrides the main content value when non-empty.
           </p>
         </DesktopInspectorSection>
       </DesktopInspectorScrollArea>
@@ -4850,108 +4882,6 @@ function isUsernameContentType(type: QrInputType) {
 
 function stringContentValue(value: StaticQrContentValue | undefined) {
   return typeof value === "string" ? value : ""
-}
-
-function DesktopEncodingInspector({
-  onEncodingSettingsChange,
-  settings,
-}: {
-  onEncodingSettingsChange: (patch: Partial<DesktopEncodingSettings>) => void
-  settings: DesktopEncodingSettings
-}) {
-  return (
-    <div data-slot="desktop-encoding-inspector" className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <DesktopInspectorHeader title="Encoding" />
-      <DesktopInspectorScrollArea>
-        <DesktopInspectorSection>
-          <DesktopMotionSliderRow
-            label="Type number"
-            max={TYPE_NUMBER_MAX}
-            min={TYPE_NUMBER_MIN}
-            value={settings.typeNumber}
-            valueLabel={formatQrTypeNumberLabel(settings.typeNumber)}
-            onChange={(typeNumber) => onEncodingSettingsChange({ typeNumber: typeNumber as QrTypeNumber })}
-          />
-        </DesktopInspectorSection>
-
-        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
-          <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Encoding mode</p>
-          <DesktopInspectorSegmentedControl
-            columns={2}
-            dataSlot="desktop-encoding-mode"
-            itemAriaLabel={(option) => `Use ${option.label} encoding mode`}
-            items={DESKTOP_QR_MODE_OPTIONS}
-            value={settings.mode}
-            onValueChange={(mode) => onEncodingSettingsChange({ mode })}
-          />
-        </DesktopInspectorSection>
-
-        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
-          <DesktopMotionToggleRow
-            checked={settings.boostLevel}
-            label="Boost error correction"
-            onChange={(boostLevel) => onEncodingSettingsChange({ boostLevel })}
-          />
-          <p className={cn("mt-2", DESKTOP_INSPECTOR_CAPTION_CLASS, DESKTOP_INSPECTOR_FG_TERTIARY)}>
-            Raise ECC without increasing QR version when possible.
-          </p>
-        </DesktopInspectorSection>
-
-        <DesktopInspectorSection className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS)}>
-          <p className={DESKTOP_INSPECTOR_SECTION_HEADING_CLASS}>Error Correction</p>
-          <div className={desktopInspectorOptionStackClass()} data-slot="desktop-error-correction-grid">
-            {ERROR_CORRECTION_LEVEL_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                aria-label={`Use ${option.title} error correction`}
-                aria-pressed={settings.errorCorrectionLevel === option.value}
-                className={cn(
-                  "min-w-0 px-3 py-2 text-left",
-                  desktopInspectorOptionGridItemClass(),
-                  DESKTOP_INSPECTOR_CONTROL_CLASS,
-                  settings.errorCorrectionLevel === option.value &&
-                    DESKTOP_INSPECTOR_SELECTED_CLASS,
-                )}
-                type="button"
-                onClick={() => onEncodingSettingsChange({ errorCorrectionLevel: option.value })}
-              >
-                <span className="flex min-w-0 items-center justify-between gap-3">
-                  <span className={cn("mb-0", DESKTOP_INSPECTOR_VALUE_CLASS)}>
-                    {option.title} ({option.label})
-                  </span>
-                </span>
-                <span className={cn("mt-1 block leading-4", DESKTOP_INSPECTOR_CAPTION_CLASS)}>
-                  {option.summary}
-                </span>
-              </button>
-            ))}
-          </div>
-        </DesktopInspectorSection>
-
-        <DesktopInspectorSection as="details" className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, "px-3 py-2.5")}>
-          <summary className={cn("cursor-pointer select-none", DESKTOP_INSPECTOR_LABEL_CLASS)}>
-            Advanced segments
-          </summary>
-          <textarea
-            aria-label="QR encoding segments"
-            className={cn(
-              "mt-2 min-h-24 w-full resize-y rounded-[6px] border border-[var(--desktop-inspector-control-border)] bg-[var(--desktop-inspector-control-bg)] px-2.5 py-2",
-              DESKTOP_INSPECTOR_CAPTION_CLASS,
-            )}
-            data-slot="desktop-encoding-segments"
-            placeholder={"One segment per line\nhttps://example.com\nextra-data"}
-            value={settings.valueSegmentsText}
-            onChange={(event) =>
-              onEncodingSettingsChange({ valueSegmentsText: event.currentTarget.value })
-            }
-          />
-          <p className={cn("mt-2", DESKTOP_INSPECTOR_CAPTION_CLASS, DESKTOP_INSPECTOR_FG_TERTIARY)}>
-            Optional multi-segment encoding. Overrides the main content value when non-empty.
-          </p>
-        </DesktopInspectorSection>
-      </DesktopInspectorScrollArea>
-    </div>
-  )
 }
 
 function DesktopImageInspector({
@@ -6024,8 +5954,10 @@ export function DesktopFloatingInspector({
       ) : activeTool === "pattern" ? (
         <DesktopPatternInspector
           desktopTheme={actualDesktopTheme}
+          encodingSettings={actualEncodingSettings}
           errorCorrectionLevel={actualEncodingSettings.errorCorrectionLevel}
           settings={actualPatternSettings}
+          onEncodingSettingsChange={onEncodingSettingsChange}
           onErrorCorrectionLevelChange={(errorCorrectionLevel) =>
             onEncodingSettingsChange({ errorCorrectionLevel })
           }
@@ -6053,11 +5985,6 @@ export function DesktopFloatingInspector({
         <DesktopMotionInspector
           settings={actualMotionSettings}
           onMotionSettingsChange={onMotionSettingsChange}
-        />
-      ) : activeTool === "encoding" ? (
-        <DesktopEncodingInspector
-          settings={actualEncodingSettings}
-          onEncodingSettingsChange={onEncodingSettingsChange}
         />
       ) : activeTool === "layers" ? (
         <DesktopLayersInspector

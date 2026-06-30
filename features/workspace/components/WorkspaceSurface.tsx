@@ -3935,7 +3935,6 @@ export function WorkspaceSurface({
     errorCorrectionLevel: selectedQrErrorCorrectionLevel,
     typeNumber: selectedQrTypeNumber,
     boostLevel: selectedBoostLevel,
-    mode: selectedQrMode,
     valueSegmentsText: selectedValueSegmentsText,
   }
   const desktopAccessibilitySettings: DesktopAccessibilitySettings = {
@@ -4254,7 +4253,6 @@ export function WorkspaceSurface({
     if (patch.typeNumber !== undefined) setSelectedQrTypeNumber(patch.typeNumber)
     if (patch.errorCorrectionLevel) setSelectedQrErrorCorrectionLevel(patch.errorCorrectionLevel)
     if (patch.boostLevel !== undefined) setSelectedBoostLevel(patch.boostLevel)
-    if (patch.mode) setSelectedQrMode(patch.mode)
     if (patch.valueSegmentsText !== undefined) setSelectedValueSegmentsText(patch.valueSegmentsText)
   }
 

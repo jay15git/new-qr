@@ -1,7 +1,6 @@
 "use client"
 
 import {
-  Github01Icon,
   SidebarLeftIcon,
   SidebarRightIcon,
 } from "@hugeicons/core-free-icons"
@@ -174,7 +173,7 @@ export function DesktopSettingsToolbarShell({
     <TabsSubtleIconRail
       aria-label="Desktop tools"
       data-slot="desktop-floating-toolbar"
-      className="relative h-full min-h-0 min-w-0 overflow-x-hidden overflow-y-auto px-1.5 pb-1.5 pt-0 text-[var(--desktop-toolbar-fg)] max-md:px-1 max-md:pb-1"
+      className="relative h-full min-h-0 min-w-0 overflow-x-hidden overflow-y-auto px-1.5 pb-1.5 text-[var(--desktop-toolbar-fg)] max-md:px-1 max-md:pb-1"
       selectedIndex={
         actualActiveTool
           ? DESKTOP_TOOLBAR_TOOLS.findIndex((tool) => tool.id === actualActiveTool)
@@ -199,11 +198,11 @@ export function DesktopSettingsToolbarShell({
         >
           <span className="t-icon-swap" data-state={brandIconSwapState}>
             <span className="t-icon grid place-items-center" data-icon="a">
-              <HugeiconsIcon
-                icon={Github01Icon}
-                size={DESKTOP_TOOLBAR_BRAND_ICON_SIZE}
-                color="currentColor"
-                strokeWidth={1.8}
+              <img
+                alt=""
+                className="size-10 rounded-full object-contain max-md:size-9"
+                draggable={false}
+                src="/brand/openai-toolbar-icon.png"
               />
             </span>
             <span className="t-icon grid place-items-center" data-icon="b">
@@ -233,7 +232,7 @@ export function DesktopSettingsToolbarShell({
         </span>
       </TabsSubtleIconRailAccessory>
       <div
-        className="mt-3 flex w-full flex-col items-center"
+        className="flex w-full flex-col items-center"
         data-slot="desktop-toolbar-tools"
       >
         {DESKTOP_TOOLBAR_TOOLS.map((tool, index) => {
