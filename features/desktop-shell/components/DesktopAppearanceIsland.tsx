@@ -31,6 +31,7 @@ import type { DesktopAppearanceSnapshot } from "@/features/desktop-shell/model/a
 import type { ScanSafetyResult } from "@/features/qr-code/scan-safety/types"
 import { DEFAULT_SCAN_SAFETY_RESULT } from "@/features/qr-code/scan-safety/types"
 import DynamicIsland from "@/components/smoothui/dynamic-island"
+import { DesktopTooltip } from "@/features/desktop-shell/components/DesktopTooltip"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
 import { cn } from "@/lib/utils"
@@ -128,14 +129,16 @@ function DesktopAppearancePopover({
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <DesktopUtilityToolbarButton
-          aria-label={label}
-          data-slot={`desktop-appearance-${popoverId}-trigger`}
-        >
-          {renderIcon()}
-        </DesktopUtilityToolbarButton>
-      </PopoverTrigger>
+      <DesktopTooltip content={label} side="bottom" sideOffset={10}>
+        <PopoverTrigger asChild>
+          <DesktopUtilityToolbarButton
+            aria-label={label}
+            data-slot={`desktop-appearance-${popoverId}-trigger`}
+          >
+            {renderIcon()}
+          </DesktopUtilityToolbarButton>
+        </PopoverTrigger>
+      </DesktopTooltip>
       <PopoverContent
         align="center"
         data-slot={`desktop-appearance-${popoverId}-popover`}
@@ -180,27 +183,33 @@ export function DesktopHistoryActionButtons({
       className="flex min-w-0 items-center gap-0.5"
       data-slot="desktop-history-actions"
     >
-      <DesktopUtilityToolbarButton
-        aria-label="Reset defaults"
-        disabled={!onResetDefaults}
-        onClick={onResetDefaults}
-      >
-        <RotateCcwIcon className="size-3.5" />
-      </DesktopUtilityToolbarButton>
-      <DesktopUtilityToolbarButton
-        aria-label="Undo"
-        disabled={!canUndo || !onUndo}
-        onClick={onUndo}
-      >
-        <Undo2Icon className="size-3.5" />
-      </DesktopUtilityToolbarButton>
-      <DesktopUtilityToolbarButton
-        aria-label="Redo"
-        disabled={!canRedo || !onRedo}
-        onClick={onRedo}
-      >
-        <Redo2Icon className="size-3.5" />
-      </DesktopUtilityToolbarButton>
+      <DesktopTooltip content="Reset defaults" side="bottom" sideOffset={10}>
+        <DesktopUtilityToolbarButton
+          aria-label="Reset defaults"
+          disabled={!onResetDefaults}
+          onClick={onResetDefaults}
+        >
+          <RotateCcwIcon className="size-3.5" />
+        </DesktopUtilityToolbarButton>
+      </DesktopTooltip>
+      <DesktopTooltip content="Undo" side="bottom" sideOffset={10}>
+        <DesktopUtilityToolbarButton
+          aria-label="Undo"
+          disabled={!canUndo || !onUndo}
+          onClick={onUndo}
+        >
+          <Undo2Icon className="size-3.5" />
+        </DesktopUtilityToolbarButton>
+      </DesktopTooltip>
+      <DesktopTooltip content="Redo" side="bottom" sideOffset={10}>
+        <DesktopUtilityToolbarButton
+          aria-label="Redo"
+          disabled={!canRedo || !onRedo}
+          onClick={onRedo}
+        >
+          <Redo2Icon className="size-3.5" />
+        </DesktopUtilityToolbarButton>
+      </DesktopTooltip>
     </div>
   )
 }

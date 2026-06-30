@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react"
 import { CopyPlusIcon, FrameIcon, ImageIcon, TypeIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { DesktopTooltip } from "@/features/desktop-shell/components/DesktopTooltip"
 import {
   Popover,
   PopoverContent,
@@ -121,20 +122,21 @@ export function InsertMenu({
 
   const trigger =
     variant === "bottom-toolbar" ? (
-      <Button
-        aria-label="Add content"
-        className={
-          triggerClassName ??
-          "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
-        }
-        data-slot="drafting-insert-menu-trigger"
-        size="icon-md"
-        title="Add content"
-        type="button"
-        variant="ghost"
-      >
-        <CopyPlusIcon />
-      </Button>
+      <DesktopTooltip content="Add content" side="left" sideOffset={10}>
+        <Button
+          aria-label="Add content"
+          className={
+            triggerClassName ??
+            "h-8 w-8 rounded-md border-0 bg-transparent p-0 text-[var(--drafting-ink-muted)] shadow-none transition-colors duration-150 hover:bg-transparent hover:text-[var(--drafting-ink)]"
+          }
+          data-slot="drafting-insert-menu-trigger"
+          size="icon-md"
+          type="button"
+          variant="ghost"
+        >
+          <CopyPlusIcon />
+        </Button>
+      </DesktopTooltip>
     ) : variant === "toolbar" ? (
       <Button
         className={triggerClassName}

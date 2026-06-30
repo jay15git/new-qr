@@ -3,6 +3,7 @@
 import { ShieldCheckIcon } from "lucide-react"
 
 import { DesktopUtilityToolbarButton } from "@/features/desktop-shell/components/DesktopUtilityToolbar"
+import { DesktopTooltip } from "@/features/desktop-shell/components/DesktopTooltip"
 import {
   DESKTOP_INSPECTOR_FG_MUTED,
   DESKTOP_INSPECTOR_SECTION_HEADING_CLASS,
@@ -35,14 +36,16 @@ function truncateText(value: string, maxLength = 80): string {
 export function DesktopScanSafetyPopover({ result }: { result: ScanSafetyResult }) {
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <DesktopUtilityToolbarButton
-          aria-label={`Scan safety: ${result.summary}`}
-          data-slot="desktop-scan-safety-trigger"
-        >
-          <ShieldCheckIcon />
-        </DesktopUtilityToolbarButton>
-      </PopoverTrigger>
+      <DesktopTooltip content={`Scan safety: ${result.summary}`} side="bottom" sideOffset={10}>
+        <PopoverTrigger asChild>
+          <DesktopUtilityToolbarButton
+            aria-label={`Scan safety: ${result.summary}`}
+            data-slot="desktop-scan-safety-trigger"
+          >
+            <ShieldCheckIcon />
+          </DesktopUtilityToolbarButton>
+        </PopoverTrigger>
+      </DesktopTooltip>
       <PopoverContent
         align="center"
         className="z-[20000] w-[min(20rem,calc(100vw-1rem))] overflow-hidden rounded-[16px] border border-[var(--desktop-appearance-popover-border)] bg-[var(--desktop-appearance-popover-bg)] p-0 text-[var(--desktop-inspector-fg-secondary)] shadow-[var(--desktop-appearance-popover-shadow)] backdrop-blur-xl"

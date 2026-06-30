@@ -22,6 +22,7 @@ import {
   DESKTOP_GLASS_TOOLBAR_ICON_BUTTON_CLASS,
   DesktopUtilityToolbarButton,
 } from "@/features/desktop-shell/components/DesktopUtilityToolbar"
+import { DesktopTooltip } from "@/features/desktop-shell/components/DesktopTooltip"
 import { DRAFTING_KEYBOARD_SHORTCUT_GROUPS } from "@/features/workspace/model/keyboard-shortcuts"
 import { cn } from "@/lib/utils"
 
@@ -110,16 +111,18 @@ export function DesktopKeyboardShortcutsTrigger({
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <ChromeControlButton
-          aria-label="Open keyboard shortcuts"
-          className={className}
-          data-slot="desktop-keyboard-shortcuts-trigger"
-          variant={variant}
-        >
-          <HugeiconsIcon icon={KeyboardIcon} size={16} color="currentColor" strokeWidth={1.8} />
-        </ChromeControlButton>
-      </PopoverTrigger>
+      <DesktopTooltip content="Keyboard shortcuts" side="bottom" sideOffset={10}>
+        <PopoverTrigger asChild>
+          <ChromeControlButton
+            aria-label="Open keyboard shortcuts"
+            className={className}
+            data-slot="desktop-keyboard-shortcuts-trigger"
+            variant={variant}
+          >
+            <HugeiconsIcon icon={KeyboardIcon} size={16} color="currentColor" strokeWidth={1.8} />
+          </ChromeControlButton>
+        </PopoverTrigger>
+      </DesktopTooltip>
       <PopoverContent
         align={popoverAlign}
         data-slot="desktop-keyboard-shortcuts-popover"
@@ -259,18 +262,24 @@ export function DesktopThemeToggleButton({
   variant?: ChromeControlVariant
 }) {
   return (
-    <ChromeControlButton
-      aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-      className={className}
-      data-slot="desktop-theme-toggle"
-      onClick={onToggle}
-      variant={variant}
+    <DesktopTooltip
+      content={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+      side="bottom"
+      sideOffset={10}
     >
-      {theme === "light" ? (
-        <MoonIcon className="size-3.5" />
-      ) : (
-        <SunIcon className="size-3.5" />
-      )}
-    </ChromeControlButton>
+      <ChromeControlButton
+        aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+        className={className}
+        data-slot="desktop-theme-toggle"
+        onClick={onToggle}
+        variant={variant}
+      >
+        {theme === "light" ? (
+          <MoonIcon className="size-3.5" />
+        ) : (
+          <SunIcon className="size-3.5" />
+        )}
+      </ChromeControlButton>
+    </DesktopTooltip>
   )
 }

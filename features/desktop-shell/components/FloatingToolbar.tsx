@@ -203,12 +203,7 @@ import {
   desktopInspectorOptionGridItemClass,
   desktopInspectorOptionStackClass,
 } from "@/features/desktop-shell/components/InspectorControls"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { DesktopTooltip } from "@/features/desktop-shell/components/DesktopTooltip"
 import {
   DEFAULT_QR_INPUT_TYPE,
   QR_INPUT_OPTIONS,
@@ -1274,7 +1269,6 @@ export function FloatingToolbar({
   } = model
 
   return (
-    <TooltipProvider delayDuration={150}>
       <section
         aria-label="Desktop workspace prototype"
         data-desktop-theme={actualDesktopTheme}
@@ -1320,30 +1314,34 @@ export function FloatingToolbar({
             data-slot="desktop-utility-toolbar"
             className="pointer-events-auto"
           >
-            <DesktopUtilityToolbarButton
-              aria-label="Save"
-              data-slot="desktop-save-trigger"
-              onClick={() => controller?.onSave?.()}
-            >
-              <HugeiconsIcon
-                icon={SaveIcon}
-                size={16}
-                color="currentColor"
-                strokeWidth={1.8}
-              />
-            </DesktopUtilityToolbarButton>
-            <DesktopUtilityToolbarButton
-              aria-label="Download"
-              data-slot="desktop-download-trigger"
-              onClick={() => controller?.onExportDownload?.()}
-            >
-              <HugeiconsIcon
-                icon={Download02Icon}
-                size={16}
-                color="currentColor"
-                strokeWidth={1.8}
-              />
-            </DesktopUtilityToolbarButton>
+            <DesktopTooltip content="Save" side="left" sideOffset={10}>
+              <DesktopUtilityToolbarButton
+                aria-label="Save"
+                data-slot="desktop-save-trigger"
+                onClick={() => controller?.onSave?.()}
+              >
+                <HugeiconsIcon
+                  icon={SaveIcon}
+                  size={16}
+                  color="currentColor"
+                  strokeWidth={1.8}
+                />
+              </DesktopUtilityToolbarButton>
+            </DesktopTooltip>
+            <DesktopTooltip content="Download" side="left" sideOffset={10}>
+              <DesktopUtilityToolbarButton
+                aria-label="Download"
+                data-slot="desktop-download-trigger"
+                onClick={() => controller?.onExportDownload?.()}
+              >
+                <HugeiconsIcon
+                  icon={Download02Icon}
+                  size={16}
+                  color="currentColor"
+                  strokeWidth={1.8}
+                />
+              </DesktopUtilityToolbarButton>
+            </DesktopTooltip>
           </DesktopUtilityToolbar>
         </div>
         <DesktopSettingsToolbarShell
@@ -1354,7 +1352,6 @@ export function FloatingToolbar({
           }
         />
       </section>
-    </TooltipProvider>
   )
 }
 
@@ -1455,6 +1452,22 @@ export function DesktopThemeStyles() {
 
       [data-desktop-theme="dark"] {
         color-scheme: dark;
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) .desktop-tooltip-content,
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) .desktop-tooltip-content {
+        border-radius: 9999px !important;
+        background: rgba(15, 15, 15, 0.94) !important;
+        color: rgba(255, 255, 255, 0.96) !important;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18) !important;
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="dark"]) .desktop-tooltip-content,
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="dark"]) .desktop-tooltip-content {
+        border-radius: 9999px !important;
+        background: rgba(255, 255, 255, 0.96) !important;
+        color: rgba(15, 15, 15, 0.94) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28) !important;
       }
 
       [data-desktop-theme="dark"] [data-slot="desktop-left-toolbar-shell"],

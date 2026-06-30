@@ -15,7 +15,6 @@ import {
   DesktopSettingsToolbarShell,
 } from "@/features/desktop-shell/components/DesktopSettingsToolbarShell"
 import { createDraftingTextLayer, type DraftingCanvasLayer } from "@/features/workspace/model/layers"
-import { TooltipProvider } from "@/components/ui/tooltip"
 import { renderWithAsyncJsdomRoot } from "@/test-utils/jsdom-react-root"
 
 const NODE_ID = "test-node"
@@ -209,8 +208,7 @@ describe("FloatingToolbar", () => {
   it("collapses and expands the settings toolbar from the brand sidebar control", async () => {
     sessionStorage.clear()
     const surface = await renderWithAsyncJsdomRoot(
-      <TooltipProvider>
-        <DesktopSettingsToolbarShell
+      <DesktopSettingsToolbarShell
           hovered
           showInspector
           inspector={<div data-slot="desktop-floating-inspector">Inspector</div>}
@@ -221,7 +219,6 @@ describe("FloatingToolbar", () => {
             } as unknown as DesktopInspectorModel
           }
         />
-      </TooltipProvider>,
     )
     const shell = getRequiredElement(surface.container, '[data-slot="desktop-left-toolbar-shell"]')
     const brandButton = getRequiredButton(shell, "Collapse settings panel")
@@ -305,7 +302,7 @@ describe("FloatingToolbar", () => {
     expect(source).toContain("background: rgba(255, 255, 255, 0.16)")
     expect(source).not.toContain("box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12)")
     expect(source).not.toContain("box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08)")
-    expect(source).toContain('[data-slot="tooltip-content"]')
+    expect(source).toContain(".desktop-tooltip-content")
     expect(source).toContain("background: rgba(15, 15, 15, 0.94) !important")
     expect(source).toContain('[data-slot="elastic-slider"]')
     expect(source).toContain("--elastic-slider-bg: rgba(15, 23, 42, 0.035)")

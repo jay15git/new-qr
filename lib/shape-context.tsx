@@ -117,9 +117,7 @@ function ShapeProvider({
   }, []);
 
   return (
-    <ShapeContext.Provider
-      value={{ shape, setShape, classes: shapeMap[shape] ?? shapeMap.rounded }}
-    >
+    <ShapeContext.Provider value={{ shape, setShape, classes: shapeMap[shape] }}>
       {children}
     </ShapeContext.Provider>
   );

@@ -14,11 +14,7 @@ import {
   TabsSubtleIconRailItem,
   TabsSubtleIconRailSeparator,
 } from "@/components/ui/tabs-subtle-icon-rail"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { DesktopTooltip } from "@/features/desktop-shell/components/DesktopTooltip"
 import { DESKTOP_INSPECTOR_FOCUS_CLASS } from "@/features/desktop-shell/components/InspectorControls"
 import {
   DesktopSettingsPanelMotionFrozenProvider,
@@ -242,26 +238,16 @@ export function DesktopSettingsToolbarShell({
           return (
             <div key={tool.id} className="contents">
               {startsGroup ? <TabsSubtleIconRailSeparator /> : null}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <TabsSubtleIconRailItem
-                    aria-label={`Open ${tool.title}`}
-                    data-desktop-tool-button="true"
-                    data-tool-id={tool.id}
-                    index={index}
-                  >
-                    {tool.renderIcon()}
-                  </TabsSubtleIconRailItem>
-                </TooltipTrigger>
-                <TooltipContent
-                  hideArrow
-                  side="right"
-                  sideOffset={10}
-                  className="border border-white/[0.12] bg-[#15161a] text-white shadow-xl"
+              <DesktopTooltip content={tool.title} side="right" sideOffset={10}>
+                <TabsSubtleIconRailItem
+                  aria-label={`Open ${tool.title}`}
+                  data-desktop-tool-button="true"
+                  data-tool-id={tool.id}
+                  index={index}
                 >
-                  {tool.title}
-                </TooltipContent>
-              </Tooltip>
+                  {tool.renderIcon()}
+                </TabsSubtleIconRailItem>
+              </DesktopTooltip>
             </div>
           )
         })}

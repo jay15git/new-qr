@@ -405,16 +405,18 @@ function DesktopWorkspaceStyles() {
         opacity: 1;
       }
 
-      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="tooltip-content"] {
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) .desktop-tooltip-content {
         border-radius: 9999px !important;
         background: rgba(15, 15, 15, 0.94) !important;
         color: rgba(255, 255, 255, 0.96) !important;
         box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18) !important;
       }
 
-      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="tooltip-content"] svg {
-        fill: rgba(15, 15, 15, 0.94) !important;
-        background: rgba(15, 15, 15, 0.94) !important;
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="dark"]) .desktop-tooltip-content {
+        border-radius: 9999px !important;
+        background: rgba(255, 255, 255, 0.96) !important;
+        color: rgba(15, 15, 15, 0.94) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28) !important;
       }
 
       body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot="dashboard-compose-toolbar"][data-toolbar-appearance="desktop-glass"] button:hover {
