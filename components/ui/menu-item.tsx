@@ -6,11 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useDropdown } from "@/components/ui/dropdown";
 import { cn } from "@/lib/utils";
 import { fontWeights } from "@/lib/font-weight";
-import { shapeMap } from "@/lib/shape-context";
-
-// MenuItem is only used inside Dropdown, which opts out of the global pill
-// shape — see dropdown.tsx for the rationale.
-const shape = shapeMap.rounded;
 
 interface MenuItemProps extends HTMLAttributes<HTMLDivElement> {
   /** Optional leading icon. When omitted, the row renders text-only with no
@@ -29,7 +24,7 @@ const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(
   ) => {
     const internalRef = useRef<HTMLDivElement>(null);
     const hasMounted = useRef(false);
-    const { registerItem, activeIndex, checkedIndex } = useDropdown();
+    const { registerItem, activeIndex, checkedIndex, shape } = useDropdown();
 
     useEffect(() => {
       registerItem(index, internalRef.current);
@@ -85,7 +80,7 @@ const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(
             />
           </span>
         )}
-        <span className="inline-grid flex-1 text-[13px]">
+        <span className="inline-grid min-w-0 flex-1 text-[13px]">
           <span
             className="col-start-1 row-start-1 invisible"
             style={{ fontVariationSettings: fontWeights.semibold }}
@@ -109,38 +104,49 @@ const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(
             {label}
           </span>
         </span>
-        <AnimatePresence>
-          {checked && (
-            <motion.svg
-              key="check"
-              width={16}
-              height={16}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-foreground shrink-0"
-              initial={{ opacity: 1 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 1 }}
-            >
-              <motion.path
-                d="M4 12L9 17L20 6"
-                initial={{ pathLength: skipAnimation ? 1 : 0 }}
-                animate={{
-                  pathLength: 1,
-                  transition: { duration: 0.08, ease: "easeOut" },
-                }}
-                exit={{
-                  pathLength: 0,
-                  transition: { duration: 0.04, ease: "easeIn" },
-                }}
+        <span className="inline-grid size-4 shrink-0">
+          <AnimatePresence>
+            {checked ? (
+              <motion.svg
+                key="check"
+                width={16}
+                height={16}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="col-start-1 row-start-1 text-foreground"
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 1 }}
+              >
+                <motion.path
+                  d="M4 12L9 17L20 6"
+                  initial={{ pathLength: skipAnimation ? 1 : 0 }}
+                  animate={{
+                    pathLength: 1,
+                    transition: { duration: 0.08, ease: "easeOut" },
+                  }}
+                  exit={{
+                    pathLength: 0,
+                    transition: { duration: 0.04, ease: "easeIn" },
+                  }}
+                />
+              </motion.svg>
+            ) : (
+              <svg
+                key="check-spacer"
+                width={16}
+                height={16}
+                viewBox="0 0 24 24"
+                className="col-start-1 row-start-1 invisible"
+                aria-hidden="true"
               />
-            </motion.svg>
-          )}
-        </AnimatePresence>
+            )}
+          </AnimatePresence>
+        </span>
       </div>
     );
   }

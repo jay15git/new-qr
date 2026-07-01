@@ -262,7 +262,7 @@ export function DesktopInspectorColorRow({
       <span className="flex items-center gap-2">
         <input
           aria-label={`${label} swatch`}
-          className="box-border size-7 shrink-0 cursor-pointer appearance-none rounded-full border-2 border-[var(--desktop-inspector-swatch-ring)] bg-transparent p-0.5"
+          className="desktop-inspector-color-swatch size-7 shrink-0 cursor-pointer rounded-full"
           data-slot="desktop-color-swatch-ring"
           type="color"
           value={value}

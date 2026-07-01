@@ -98,6 +98,10 @@ function DesktopWorkspaceStyles() {
         background: var(--workspace-shell-light);
       }
 
+      [data-slot="desktop-workspace"][data-desktop-theme="dark"] [data-slot="desktop-floating-inspector"] {
+        --scroll-edge-fade-color: #0a0a0a;
+      }
+
       [data-slot="desktop-workspace"] [data-slot="dashboard-compose-surface"] {
         background-color: transparent !important;
       }

@@ -27,7 +27,11 @@ import {
   FileUploadTrigger,
 } from "@/components/ui/file-upload"
 import { Input } from "@/components/ui/input"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Dropdown } from "@/components/ui/dropdown"
+import { MenuItem } from "@/components/ui/menu-item"
 import { cn } from "@/lib/utils"
+import { SurfaceProvider } from "@/lib/surface-context"
 
 import "./desktop-inspector-morph-filter.css"
 
@@ -1197,6 +1201,7 @@ export function DesktopInspectorMorphFilterMenu<T extends string>({
 }) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
+  const checkedIndex = options.findIndex((option) => option.value === value)
 
   useEffect(() => {
     if (!open) {
@@ -1238,36 +1243,39 @@ export function DesktopInspectorMorphFilterMenu<T extends string>({
         data-slot={dataSlot}
         style={morphStyle}
       >
-        <div
-          aria-label={ariaLabel}
-          className="t-morph-menu p-1"
-          data-slot={menuDataSlot}
-          role="menu"
-        >
-          {options.map((option) => {
-            const isSelected = option.value === value
-
-            return (
-              <button
-                key={option.value}
-                aria-checked={isSelected}
-                className={cn(
-                  "flex h-8 w-full cursor-pointer items-center rounded-[6px] px-3 text-left",
-                  DESKTOP_INSPECTOR_DROPDOWN_ITEM_CLASS,
-                  isSelected &&
-                    "bg-[var(--desktop-inspector-option-selected-bg)] text-[var(--desktop-inspector-fg-primary)]",
-                )}
-                role="menuitemradio"
-                type="button"
-                onClick={() => {
-                  onValueChange(option.value)
-                  setOpen(false)
-                }}
+        <div className="t-morph-menu p-1" data-slot={menuDataSlot}>
+          <SurfaceProvider value={2}>
+            <ScrollArea
+              chevron
+              cueSize="tight"
+              data-slot={`${dataSlot}-scroll-area`}
+              scrollFade
+              className="min-h-0 flex-1 overflow-hidden"
+              viewportClassName="pr-0.5"
+            >
+              <Dropdown
+                aria-label={ariaLabel}
+                checkedIndex={checkedIndex >= 0 ? checkedIndex : undefined}
+                flat
+                shapeVariant="pill"
+                className="w-full gap-0 p-0"
               >
-                {option.label}
-              </button>
-            )
-          })}
+                {options.map((option, index) => (
+                  <MenuItem
+                    key={option.value}
+                    checked={option.value === value}
+                    className="h-8 w-full min-w-0 px-3 py-0 text-[12px]"
+                    index={index}
+                    label={option.label}
+                    onSelect={() => {
+                      onValueChange(option.value)
+                      setOpen(false)
+                    }}
+                  />
+                ))}
+              </Dropdown>
+            </ScrollArea>
+          </SurfaceProvider>
         </div>
         <button
           aria-expanded={open}

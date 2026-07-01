@@ -98,6 +98,8 @@
   --shadow-2: var(--shadow-2);
   --shadow-1: var(--shadow-1);
   --color-shadow-color: var(--shadow-color);
+  --color-hover: color-mix(in oklab, var(--foreground) 8%, var(--background));
+  --color-active: color-mix(in oklab, var(--foreground) 12%, var(--background));
 }
 
 :root {

@@ -7,6 +7,8 @@ import {
   createContext,
   useContext,
   forwardRef,
+  type FocusEvent,
+  type KeyboardEvent,
   type ReactNode,
   type HTMLAttributes,
 } from "react";
@@ -14,19 +16,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { spring } from "@/lib/springs";
 import { useProximityHover } from "@/hooks/use-proximity-hover";
-import { shapeMap } from "@/lib/shape-context";
+import { shapeMap, type ShapeClasses } from "@/lib/shape-context";
 import { Elevated } from "@/lib/elevated";
 
-// Dropdown opts out of the global pill/rounded shape context — popover surfaces
-// look cleaner with the smaller "rounded" radii regardless of how the rest of
-// the UI is shaped (the heavy pill bubbling distorts perceived padding at this
-// scale and produces the corner-shadow asymmetry).
-const shape = shapeMap.rounded;
+type DropdownShapeVariant = keyof typeof shapeMap;
 
 interface DropdownContextValue {
   registerItem: (index: number, element: HTMLElement | null) => void;
   activeIndex: number | null;
   checkedIndex?: number;
+  shape: ShapeClasses;
 }
 
 const DropdownContext = createContext<DropdownContextValue | null>(null);
@@ -40,10 +39,25 @@ export function useDropdown() {
 interface DropdownProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
   checkedIndex?: number;
+  /** Item/hover pill shape. Defaults to rounded for standalone popovers. */
+  shapeVariant?: DropdownShapeVariant;
+  /** Skip elevated surface/shadow — for menus embedded in an existing shell. */
+  flat?: boolean;
 }
 
 const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
-  ({ children, checkedIndex, className, ...props }, ref) => {
+  (
+    {
+      children,
+      checkedIndex,
+      shapeVariant = "rounded",
+      flat = false,
+      className,
+      ...props
+    },
+    ref,
+  ) => {
+    const shape = shapeMap[shapeVariant];
     const containerRef = useRef<HTMLDivElement>(null);
     const {
       activeIndex,
@@ -68,65 +82,72 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
     const isHoveringOther =
       activeIndex !== null && activeIndex !== checkedIndex;
 
-    return (
-      <DropdownContext.Provider value={{ registerItem, activeIndex, checkedIndex }}>
-        <Elevated
-          offset={2}
-          shadowLevel={3}
-          ref={(node) => {
-            (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
-            if (typeof ref === "function") ref(node);
-            else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
-          }}
-          onMouseEnter={handlers.onMouseEnter}
-          onMouseMove={handlers.onMouseMove}
-          onMouseLeave={handlers.onMouseLeave}
-          onFocus={(e) => {
-            const indexAttr = (e.target as HTMLElement)
-              .closest("[data-proximity-index]")
-              ?.getAttribute("data-proximity-index");
-            if (indexAttr != null) {
-              const idx = Number(indexAttr);
-              setActiveIndex(idx);
-              setFocusedIndex(
-                (e.target as HTMLElement).matches(":focus-visible") ? idx : null
-              );
-            }
-          }}
-          onBlur={(e) => {
-            if (containerRef.current?.contains(e.relatedTarget as Node)) return;
-            setFocusedIndex(null);
-            setActiveIndex(null);
-          }}
-          onKeyDown={(e) => {
-            const items = Array.from(
-              containerRef.current?.querySelectorAll('[role="menuitemradio"]') ?? []
-            ) as HTMLElement[];
-            const currentIdx = items.indexOf(e.target as HTMLElement);
-            if (currentIdx === -1) return;
+    const menuClassName = cn(
+      `relative flex flex-col gap-0.5 w-72 max-w-full ${shape.container} p-1 select-none`,
+      flat && "w-full bg-transparent shadow-none",
+      className,
+    );
 
-            if (["ArrowDown", "ArrowUp", "ArrowRight", "ArrowLeft"].includes(e.key)) {
-              e.preventDefault();
-              const next = ["ArrowDown", "ArrowRight"].includes(e.key)
-                ? (currentIdx + 1) % items.length
-                : (currentIdx - 1 + items.length) % items.length;
-              items[next].focus();
-            } else if (e.key === "Home") {
-              e.preventDefault();
-              items[0]?.focus();
-            } else if (e.key === "End") {
-              e.preventDefault();
-              items[items.length - 1]?.focus();
-            }
-          }}
-          role="menu"
-          className={cn(
-            `relative flex flex-col gap-0.5 w-72 max-w-full ${shape.container} p-1 select-none`,
-            className
-          )}
-          {...props}
-        >
-          {/* Selected background */}
+    const menuProps = {
+      onMouseEnter: handlers.onMouseEnter,
+      onMouseMove: handlers.onMouseMove,
+      onMouseLeave: handlers.onMouseLeave,
+      onFocus: (e: FocusEvent<HTMLDivElement>) => {
+        const indexAttr = (e.target as HTMLElement)
+          .closest("[data-proximity-index]")
+          ?.getAttribute("data-proximity-index");
+        if (indexAttr != null) {
+          const idx = Number(indexAttr);
+          setActiveIndex(idx);
+          setFocusedIndex(
+            (e.target as HTMLElement).matches(":focus-visible") ? idx : null,
+          );
+        }
+      },
+      onBlur: (e: FocusEvent<HTMLDivElement>) => {
+        if (containerRef.current?.contains(e.relatedTarget as Node)) return;
+        setFocusedIndex(null);
+        setActiveIndex(null);
+      },
+      onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => {
+        const items = Array.from(
+          containerRef.current?.querySelectorAll('[role="menuitemradio"]') ??
+            [],
+        ) as HTMLElement[];
+        const currentIdx = items.indexOf(e.target as HTMLElement);
+        if (currentIdx === -1) return;
+
+        if (
+          ["ArrowDown", "ArrowUp", "ArrowRight", "ArrowLeft"].includes(e.key)
+        ) {
+          e.preventDefault();
+          const next = ["ArrowDown", "ArrowRight"].includes(e.key)
+            ? (currentIdx + 1) % items.length
+            : (currentIdx - 1 + items.length) % items.length;
+          items[next].focus();
+        } else if (e.key === "Home") {
+          e.preventDefault();
+          items[0]?.focus();
+        } else if (e.key === "End") {
+          e.preventDefault();
+          items[items.length - 1]?.focus();
+        }
+      },
+      role: "menu" as const,
+      className: menuClassName,
+      ...props,
+    };
+
+    const assignRef = (node: HTMLDivElement | null) => {
+      (containerRef as React.MutableRefObject<HTMLDivElement | null>).current =
+        node;
+      if (typeof ref === "function") ref(node);
+      else if (ref)
+        (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+    };
+
+    const menuBody = (
+      <>
           <AnimatePresence>
             {checkedRect && (
               <motion.div
@@ -198,11 +219,26 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
             )}
           </AnimatePresence>
 
-          {children}
-        </Elevated>
+        {children}
+      </>
+    );
+
+    return (
+      <DropdownContext.Provider
+        value={{ registerItem, activeIndex, checkedIndex, shape }}
+      >
+        {flat ? (
+          <div ref={assignRef} {...menuProps}>
+            {menuBody}
+          </div>
+        ) : (
+          <Elevated offset={2} shadowLevel={3} ref={assignRef} {...menuProps}>
+            {menuBody}
+          </Elevated>
+        )}
       </DropdownContext.Provider>
     );
-  }
+  },
 );
 
 Dropdown.displayName = "Dropdown";

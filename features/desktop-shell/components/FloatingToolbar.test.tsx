@@ -724,7 +724,7 @@ describe("FloatingToolbar", () => {
 
     expect(swatch.className).toContain("rounded-full")
     expect(swatch.className).toContain("size-7")
-    expect(swatch.className).toContain("border-2")
+    expect(swatch.querySelector('[data-slot="desktop-color-swatch-fill"]')).not.toBeNull()
     expect(swatch.className).not.toContain("w-12")
     expect(swatch.className).not.toContain("rounded-[6px]")
     expect(swatch.getAttribute("data-slot")).toBe("desktop-color-picker")
@@ -747,7 +747,7 @@ describe("FloatingToolbar", () => {
     const patternPaletteControls = patternSwatch.parentElement
     expect(patternSwatch.className).toContain("rounded-full")
     expect(patternSwatch.className).toContain("size-7")
-    expect(patternSwatch.className).toContain("border-2")
+    expect(patternSwatch.querySelector('[data-slot="desktop-color-swatch-fill"]')).not.toBeNull()
     expect(patternSwatch.className).not.toContain("border-white")
     expect(patternSwatch.getAttribute("data-slot")).toBe("desktop-color-picker")
     expect(patternPaletteLabel).not.toBeNull()

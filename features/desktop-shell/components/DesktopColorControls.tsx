@@ -1,5 +1,7 @@
 "use client"
 
+import type { ComponentProps } from "react"
+
 import { ColorPicker } from "@/components/ui/color-picker"
 import {
   Popover,
@@ -12,6 +14,40 @@ import {
   DesktopInspectorTextInput,
 } from "@/features/desktop-shell/components/InspectorControls"
 import { cn } from "@/lib/utils"
+
+export const DESKTOP_COLOR_SWATCH_BUTTON_CLASS =
+  "relative flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full bg-transparent transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
+
+export const DESKTOP_COLOR_SWATCH_FILL_CLASS =
+  "size-6 shrink-0 rounded-full border-2 border-[var(--desktop-inspector-swatch-ring)] box-border"
+
+export function DesktopColorSwatchButton({
+  "aria-label": ariaLabel,
+  className,
+  color,
+  ...props
+}: {
+  "aria-label": string
+  className?: string
+  color: string
+} & Omit<ComponentProps<"button">, "children" | "className" | "type">) {
+  return (
+    <button
+      aria-label={ariaLabel}
+      className={cn(DESKTOP_COLOR_SWATCH_BUTTON_CLASS, className)}
+      data-slot="desktop-color-picker"
+      type="button"
+      {...props}
+    >
+      <span
+        aria-hidden="true"
+        className={DESKTOP_COLOR_SWATCH_FILL_CLASS}
+        data-slot="desktop-color-swatch-fill"
+        style={{ backgroundColor: color }}
+      />
+    </button>
+  )
+}
 
 export function DesktopColorInputRow({
   ariaLabel,
@@ -58,7 +94,6 @@ export function DesktopColorSwatchPicker({
   return (
     <DesktopColorPickerPopover
       aria-label={ariaLabel}
-      triggerClassName="size-7 shrink-0 border-2 border-[var(--desktop-inspector-swatch-ring)] p-0.5"
       value={value}
       onChange={onChange}
     />
@@ -83,21 +118,11 @@ export function DesktopColorPickerPopover({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button
+        <DesktopColorSwatchButton
           aria-label={triggerLabel}
-          className={cn(
-            "box-border grid cursor-pointer overflow-hidden rounded-full bg-transparent p-0 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35",
-            triggerClassName,
-          )}
-          data-slot="desktop-color-picker"
-          type="button"
-        >
-          <span
-            aria-hidden="true"
-            className="block size-full min-h-0 min-w-0 rounded-full"
-            style={{ backgroundColor: value }}
-          />
-        </button>
+          className={triggerClassName}
+          color={value}
+        />
       </PopoverTrigger>
       <PopoverContent
         align="center"

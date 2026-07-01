@@ -10,7 +10,7 @@
   --morph-open-w: 144px;
   --morph-open-h: 272px;
   --morph-r-closed: calc(var(--morph-closed-size) / 2);
-  --morph-r-open: 10px;
+  --morph-r-open: 16px;
   --morph-fade-dur: 200ms;
   --morph-slide: 40px;
   --morph-rotate: 45deg;
@@ -38,6 +38,8 @@
   height: var(--morph-open-h);
   border-radius: var(--morph-r-open);
   background: var(--desktop-inspector-morph-filter-bg);
+  --surface-2: var(--desktop-inspector-morph-filter-bg);
+  --scroll-edge-fade-color: var(--desktop-inspector-morph-filter-bg);
   transition:
     width var(--morph-open-dur) var(--morph-ease),
     height var(--morph-open-dur) var(--morph-ease),
@@ -85,8 +87,10 @@
     scale(var(--morph-scale));
   filter: blur(var(--morph-blur));
   pointer-events: none;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   transition:
     opacity var(--morph-fade-dur) var(--morph-close-ease),
     transform var(--morph-open-dur) var(--morph-close-ease),
