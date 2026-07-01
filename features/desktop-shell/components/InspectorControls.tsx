@@ -29,6 +29,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
+import "./desktop-inspector-morph-filter.css"
+
 const DESKTOP_INSPECTOR_IMAGE_UPLOAD_MAX_SIZE = 5 * 1024 * 1024
 
 export const DESKTOP_INSPECTOR_FG_PRIMARY =
@@ -1162,6 +1164,125 @@ export function DesktopInspectorSearchInput({
         onChange={(event) => onValueChange(event.currentTarget.value)}
         {...props}
       />
+    </div>
+  )
+}
+
+export function DesktopInspectorMorphFilterMenu<T extends string>({
+  ariaLabel,
+  className,
+  "data-slot": dataSlot = "desktop-inspector-morph-filter-menu",
+  icon,
+  isActive = false,
+  menuDataSlot = "desktop-inspector-filter-menu",
+  morphClassName,
+  morphStyle,
+  options,
+  triggerDataSlot = "desktop-inspector-filter-trigger",
+  value,
+  onValueChange,
+}: {
+  ariaLabel: string
+  className?: string
+  "data-slot"?: string
+  icon: ReactNode
+  isActive?: boolean
+  menuDataSlot?: string
+  morphClassName?: string
+  morphStyle?: CSSProperties
+  options: ReadonlyArray<{ label: string; value: T }>
+  triggerDataSlot?: string
+  value: T
+  onValueChange: (value: T) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) {
+      return
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false)
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown)
+    document.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown)
+      document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [open])
+
+  return (
+    <div className={cn("relative size-8 shrink-0 overflow-visible", className)} ref={rootRef}>
+      <div
+        className={cn(
+          "desktop-inspector-morph-filter border border-[var(--desktop-inspector-dropdown-border)] bg-[var(--desktop-inspector-field-bg)] text-[var(--desktop-inspector-fg-secondary)] shadow-[var(--desktop-glass-shadow)]",
+          morphClassName,
+          isActive &&
+            !open &&
+            "bg-[var(--desktop-inspector-control-hover-bg)] text-[var(--desktop-inspector-fg-primary)]",
+        )}
+        data-open={open ? "true" : "false"}
+        data-slot={dataSlot}
+        style={morphStyle}
+      >
+        <div
+          aria-label={ariaLabel}
+          className="t-morph-menu p-1"
+          data-slot={menuDataSlot}
+          role="menu"
+        >
+          {options.map((option) => {
+            const isSelected = option.value === value
+
+            return (
+              <button
+                key={option.value}
+                aria-checked={isSelected}
+                className={cn(
+                  "flex h-8 w-full cursor-pointer items-center rounded-[6px] px-3 text-left",
+                  DESKTOP_INSPECTOR_DROPDOWN_ITEM_CLASS,
+                  isSelected &&
+                    "bg-[var(--desktop-inspector-option-selected-bg)] text-[var(--desktop-inspector-fg-primary)]",
+                )}
+                role="menuitemradio"
+                type="button"
+                onClick={() => {
+                  onValueChange(option.value)
+                  setOpen(false)
+                }}
+              >
+                {option.label}
+              </button>
+            )
+          })}
+        </div>
+        <button
+          aria-expanded={open}
+          aria-label={ariaLabel}
+          className={cn(
+            "t-morph-plus outline-none focus-visible:ring-2 focus-visible:ring-[var(--desktop-inspector-focus)]",
+            isActive && "text-[var(--desktop-inspector-fg-primary)]",
+          )}
+          data-slot={triggerDataSlot}
+          type="button"
+          onClick={() => setOpen((current) => !current)}
+        >
+          {icon}
+        </button>
+      </div>
     </div>
   )
 }

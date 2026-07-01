@@ -5,6 +5,7 @@ import {
   CircleUnlock02Icon,
   Download02Icon,
   EyeIcon,
+  FilterMailIcon,
   Image02Icon,
   SaveIcon,
   ViewOffSlashIcon,
@@ -35,11 +36,20 @@ import {
 import { BlocksIcon } from "@/components/vendor/animate-ui/icons/blocks"
 import { DEFAULT_BRAND_ICON_COLOR } from "@/features/qr-code/assets/brand-icon-svg"
 import {
+  getBrandIconById,
+  POPULAR_BRAND_ICON_IDS,
+  type BrandIconEntry,
+} from "@/features/qr-code/assets/brand-icons"
+import {
+  filterCuratedIconstackIcons,
+} from "@/features/qr-code/assets/iconstack-curated"
+import {
   ICONSTACK_LIBRARIES,
   toIconstackSelectionId,
   type IconstackLibraryId,
   type IconstackSearchResult,
 } from "@/features/qr-code/assets/iconstack-api"
+import { useIconstackCuratedIcons } from "@/features/qr-code/hooks/useIconstackCuratedIcons"
 import { useIconstackIconSearch } from "@/features/qr-code/hooks/useIconstackIconSearch"
 import {
   DRAFTING_CARD_PATTERN_NONE_ID,
@@ -190,6 +200,7 @@ import {
   DESKTOP_INSPECTOR_SECTION_HEADING_CLASS,
   DESKTOP_INSPECTOR_SELECTED_CLASS,
   DesktopInspectorAnimatedOptionGrid,
+  DesktopInspectorMorphFilterMenu,
   DesktopInspectorImageFileUpload,
   DesktopInspectorLabel,
   DesktopInspectorNativeSelect,
@@ -1369,6 +1380,7 @@ export function DesktopThemeStyles() {
         --desktop-inspector-fg-muted: rgba(255, 255, 255, 0.42);
         --desktop-inspector-fg-label: var(--desktop-inspector-fg-secondary);
         --desktop-inspector-dropdown-bg: rgba(12, 12, 16, 0.9);
+        --desktop-inspector-morph-filter-bg: rgb(23, 24, 29);
         --desktop-inspector-dropdown-border: rgba(255, 255, 255, 0.06);
         --desktop-inspector-control-hover-bg: rgba(255, 255, 255, 0.09);
         --desktop-inspector-option-selected-bg: rgba(255, 255, 255, 0.14);
@@ -1393,6 +1405,7 @@ export function DesktopThemeStyles() {
         --desktop-inspector-fg-muted: rgba(15, 23, 42, 0.38);
         --desktop-inspector-fg-label: rgba(15, 23, 42, 0.85);
         --desktop-inspector-dropdown-bg: rgba(255, 255, 255, 0.84);
+        --desktop-inspector-morph-filter-bg: rgb(255, 255, 255);
         --desktop-inspector-dropdown-border: rgba(15, 23, 42, 0.09);
         --desktop-inspector-control-hover-bg: rgba(15, 23, 42, 0.06);
         --desktop-inspector-option-selected-bg: rgba(15, 23, 42, 0.08);
@@ -2156,13 +2169,25 @@ function DesktopLogoInspector({
 }) {
   const [library, setLibrary] = useState<IconstackLibraryId | "all">("all")
   const [query, setQuery] = useState("")
-  const activeLibraryLabel =
-    DESKTOP_ICONSTACK_LIBRARY_OPTIONS.find((option) => option.value === library)?.label ??
-    "All libraries"
+  const isLibraryFilterActive = library !== "all"
+  const popularBrandIcons = useMemo(
+    () => POPULAR_BRAND_ICON_IDS.map((id) => getBrandIconById(id)),
+    [],
+  )
+  const curatedIconSlots = useMemo(() => filterCuratedIconstackIcons(library), [library])
   const { canSearch, error, isLoading, previewSvgs, results, total } = useIconstackIconSearch({
     enabled: settings.sourceMode === "brand",
     library,
     query,
+  })
+  const {
+    error: curatedError,
+    icons: curatedIcons,
+    isLoading: isCuratedLoading,
+    previewSvgs: curatedPreviewSvgs,
+  } = useIconstackCuratedIcons({
+    enabled: settings.sourceMode === "brand" && !canSearch,
+    library,
   })
 
   return (
@@ -2186,49 +2211,32 @@ function DesktopLogoInspector({
         {settings.sourceMode === "brand" ? (
           <DesktopInspectorSection className={DESKTOP_INSPECTOR_SECTION_GAP_CLASS}>
             <div className="flex min-w-0 items-center gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    aria-label="Filter logo icons"
-                    className={cn(
-                      "flex h-8 min-w-[92px] flex-1 items-center justify-between gap-2 rounded-full px-3",
-                      DESKTOP_INSPECTOR_VALUE_CLASS,
-                      DESKTOP_INSPECTOR_DROPDOWN_TRIGGER_CLASS,
-                    )}
-                    data-slot="desktop-inspector-filter-trigger desktop-logo-library-filter-trigger"
-                    type="button"
-                  >
-                    <span className="min-w-0 truncate">{activeLibraryLabel}</span>
-                    <ChevronDownIcon className={cn("size-3.5 shrink-0", DESKTOP_INSPECTOR_FG_MUTED)} />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className={cn("w-36", DESKTOP_INSPECTOR_DROPDOWN_MENU_CLASS)}
-                  data-slot="desktop-inspector-filter-menu desktop-logo-library-filter-menu"
-                >
-                  <DropdownMenuRadioGroup
-                    aria-label="Logo icon libraries"
-                    value={library}
-                    onValueChange={(value) => setLibrary(value as IconstackLibraryId | "all")}
-                  >
-                    {DESKTOP_ICONSTACK_LIBRARY_OPTIONS.map((option) => (
-                      <DropdownMenuRadioItem
-                        key={option.value}
-                        className={DESKTOP_INSPECTOR_DROPDOWN_ITEM_CLASS}
-                        value={option.value}
-                      >
-                        {option.label}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
               <DesktopInspectorSearchInput
                 aria-label="Search logo icons"
+                className="h-8 min-w-0 w-full flex-1"
+                iconClassName="left-3"
+                inputClassName="rounded-full pl-8 pr-3"
                 placeholder="Search"
                 value={query}
                 onValueChange={setQuery}
+              />
+              <DesktopInspectorMorphFilterMenu
+                ariaLabel="Filter logo icon libraries"
+                data-slot="desktop-logo-library-morph"
+                icon={
+                  <HugeiconsIcon
+                    icon={FilterMailIcon}
+                    size={16}
+                    color="currentColor"
+                    strokeWidth={1.8}
+                  />
+                }
+                isActive={isLibraryFilterActive}
+                menuDataSlot="desktop-inspector-filter-menu desktop-logo-library-filter-menu"
+                options={DESKTOP_ICONSTACK_LIBRARY_OPTIONS}
+                triggerDataSlot="desktop-inspector-filter-trigger desktop-logo-library-filter-trigger"
+                value={library}
+                onValueChange={setLibrary}
               />
             </div>
 
@@ -2245,15 +2253,50 @@ function DesktopLogoInspector({
                 selectedKey={settings.selectedBrandIconId}
               >
                 {!canSearch ? (
-                  <p
-                    className={cn(
-                      "col-span-4 px-1 py-6 text-center",
-                      DESKTOP_INSPECTOR_CAPTION_CLASS,
-                      DESKTOP_INSPECTOR_FG_MUTED,
-                    )}
-                  >
-                    Search 51,000+ icons…
-                  </p>
+                  <>
+                    {popularBrandIcons.map((brandIcon) => (
+                      <DesktopBrandIconButton
+                        brandIcon={brandIcon}
+                        key={brandIcon.id}
+                        selected={settings.selectedBrandIconId === brandIcon.id}
+                        onClick={() =>
+                          onLogoSettingsChange({
+                            selectedBrandIconId: brandIcon.id,
+                          })
+                        }
+                      />
+                    ))}
+                    {isCuratedLoading
+                      ? curatedIconSlots.map((icon) => (
+                          <DesktopIconstackIconSkeleton key={`${icon.library}-${icon.id}`} />
+                        ))
+                      : curatedIcons.map((result) => (
+                          <DesktopIconstackIconButton
+                            key={result.id}
+                            previewSvg={curatedPreviewSvgs[result.id]}
+                            result={result}
+                            selected={
+                              settings.selectedBrandIconId === toIconstackSelectionId(result)
+                            }
+                            onClick={() =>
+                              onLogoSettingsChange({
+                                selectedBrandIconId: toIconstackSelectionId(result),
+                              })
+                            }
+                          />
+                        ))}
+                    {curatedError ? (
+                      <p
+                        className={cn(
+                          "col-span-4 px-1 py-2 text-center",
+                          DESKTOP_INSPECTOR_CAPTION_CLASS,
+                          DESKTOP_INSPECTOR_FG_MUTED,
+                        )}
+                      >
+                        {curatedError}
+                      </p>
+                    ) : null}
+                  </>
                 ) : isLoading ? (
                   <p
                     className={cn(
@@ -2516,6 +2559,51 @@ function DesktopLogoInspector({
       </DesktopInspectorScrollArea>
 
     </div>
+  )
+}
+
+function DesktopIconstackIconSkeleton() {
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "h-12 min-w-0 animate-pulse rounded-[7px] bg-[var(--desktop-inspector-control-hover-bg)]",
+        desktopInspectorOptionGridItemClass(),
+      )}
+    />
+  )
+}
+
+function DesktopBrandIconButton({
+  brandIcon,
+  onClick,
+  selected,
+}: {
+  brandIcon: BrandIconEntry
+  onClick: () => void
+  selected: boolean
+}) {
+  const Icon = brandIcon.icon
+
+  return (
+    <button
+      aria-label={`Use ${brandIcon.label} brand icon`}
+      aria-pressed={selected}
+      data-desktop-animated-option-selection="true"
+      data-desktop-option-tile="true"
+      className={cn(
+        "relative grid h-12 min-w-0 place-items-center rounded-[7px] border-2 border-transparent bg-transparent text-[var(--desktop-inspector-fg-tertiary)] transition hover:border-[var(--desktop-inspector-control-border-hover)] hover:bg-[var(--desktop-inspector-control-hover-bg)] hover:text-[var(--desktop-inspector-fg-primary)]",
+        desktopInspectorOptionGridItemClass(),
+        DESKTOP_INSPECTOR_OPTION_TILE_BUTTON_CLASS,
+        selected && "text-[var(--desktop-inspector-option-selected-fg)]",
+      )}
+      type="button"
+      onClick={onClick}
+    >
+      <span className="relative z-10 flex size-4 items-center justify-center">
+        <Icon className="size-4" />
+      </span>
+    </button>
   )
 }
 
@@ -3747,8 +3835,15 @@ function DesktopContentInspector({
 }) {
   const [collectionId, setCollectionId] = useState<DesktopContentCollectionId>("popular")
   const [query, setQuery] = useState("")
-  const activeCollectionLabel =
-    DESKTOP_CONTENT_FILTER_OPTIONS.find((collection) => collection.id === collectionId)?.label ?? "Popular"
+  const contentFilterOptions = useMemo(
+    () =>
+      DESKTOP_CONTENT_FILTER_OPTIONS.map((option) => ({
+        label: option.label,
+        value: option.id,
+      })),
+    [],
+  )
+  const isCollectionFilterActive = collectionId !== "all"
   const visibleTypes = useMemo(() => {
     const collectionTypes =
       collectionId === "all"
@@ -3777,60 +3872,38 @@ function DesktopContentInspector({
 
       <DesktopInspectorScrollArea>
         <DesktopInspectorSection dataSlot="desktop-content-type-section">
-          <div className="min-w-0">
-            <div
-              className="flex h-9 w-full min-w-0 items-center gap-2"
-              data-slot="desktop-content-filter-search-row"
-            >
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    aria-label="Filter QR types"
-                    className={cn(
-                      "flex h-full min-w-[84px] max-w-24 shrink-0 items-center justify-between gap-2 rounded-[7px] px-3",
-                      DESKTOP_INSPECTOR_VALUE_CLASS,
-                      DESKTOP_INSPECTOR_DROPDOWN_TRIGGER_CLASS,
-                    )}
-                    data-slot="desktop-inspector-filter-trigger desktop-content-type-filter-trigger"
-                    type="button"
-                  >
-                    <span className="min-w-0 truncate">{activeCollectionLabel}</span>
-                    <ChevronDownIcon className={cn("size-3.5 shrink-0", DESKTOP_INSPECTOR_FG_MUTED)} />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className={cn("w-32", DESKTOP_INSPECTOR_DROPDOWN_MENU_CLASS)}
-                  data-slot="desktop-inspector-filter-menu desktop-content-type-filter-menu"
-                >
-                  <DropdownMenuRadioGroup
-                    aria-label="QR type filters"
-                    value={collectionId}
-                    onValueChange={(value) => setCollectionId(value as DesktopContentCollectionId)}
-                  >
-                    {DESKTOP_CONTENT_FILTER_OPTIONS.map((collection) => (
-                      <DropdownMenuRadioItem
-                        key={collection.id}
-                        className={DESKTOP_INSPECTOR_DROPDOWN_ITEM_CLASS}
-                        value={collection.id}
-                      >
-                        {collection.label}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <DesktopInspectorSearchInput
-                aria-label="Search QR types"
-                className="h-full min-w-0 flex-1 shrink self-stretch"
-                iconClassName="left-2.5"
-                inputClassName="rounded-[7px] pr-3"
-                placeholder="Search"
-                value={query}
-                onValueChange={setQuery}
-              />
-            </div>
+          <div
+            className="flex min-w-0 items-center gap-2"
+            data-slot="desktop-content-filter-search-row"
+          >
+            <DesktopInspectorSearchInput
+              aria-label="Search QR types"
+              className="h-8 min-w-0 w-full flex-1"
+              iconClassName="left-3"
+              inputClassName="rounded-full pl-8 pr-3"
+              placeholder="Search"
+              value={query}
+              onValueChange={setQuery}
+            />
+            <DesktopInspectorMorphFilterMenu
+              ariaLabel="Filter QR types"
+              data-slot="desktop-content-type-morph"
+              icon={
+                <HugeiconsIcon
+                  icon={FilterMailIcon}
+                  size={16}
+                  color="currentColor"
+                  strokeWidth={1.8}
+                />
+              }
+              isActive={isCollectionFilterActive}
+              menuDataSlot="desktop-inspector-filter-menu desktop-content-type-filter-menu"
+              morphClassName="desktop-inspector-morph-filter--compact"
+              options={contentFilterOptions}
+              triggerDataSlot="desktop-inspector-filter-trigger desktop-content-type-filter-trigger"
+              value={collectionId}
+              onValueChange={setCollectionId}
+            />
           </div>
 
           <DesktopInspectorOptionGridScrollArea

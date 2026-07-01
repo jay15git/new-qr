@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 
 import {
   DESKTOP_INSPECTOR_INPUT_CLASS,
+  DesktopInspectorMorphFilterMenu,
   DesktopInspectorNativeSelect,
   DesktopInspectorScrubbableNumberInput,
   DesktopInspectorSearchInput,
@@ -68,5 +69,27 @@ describe("desktop inspector controls", () => {
     expect(markup).toContain('data-slot="desktop-inspector-scrubbable-number"')
     expect(markup).toContain("cursor-ew-resize")
     expect(markup).toContain("appearance-none")
+  })
+
+  it("renders the morph library filter with closed morph markup", () => {
+    const markup = renderToStaticMarkup(
+      <DesktopInspectorMorphFilterMenu
+        ariaLabel="Filter logo icon libraries"
+        icon={<span data-slot="filter-icon" />}
+        options={[
+          { label: "All libraries", value: "all" },
+          { label: "Lucide", value: "lucide" },
+        ]}
+        value="all"
+        onValueChange={vi.fn()}
+      />,
+    )
+
+    expect(markup).toContain('data-slot="desktop-inspector-morph-filter-menu"')
+    expect(markup).toContain('class="desktop-inspector-morph-filter')
+    expect(markup).toContain('data-open="false"')
+    expect(markup).toContain('class="t-morph-menu p-1"')
+    expect(markup).toContain('class="t-morph-plus')
+    expect(markup).toContain('aria-label="Filter logo icon libraries"')
   })
 })

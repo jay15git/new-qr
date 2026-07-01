@@ -383,18 +383,13 @@ describe("FloatingToolbar", () => {
     expect(inspector?.querySelector('[data-slot="desktop-content-type-filters"]')).toBeNull()
     expect(inspector?.querySelector('[data-slot="desktop-content-type-filter-trigger"]')).not.toBeNull()
     const filterSearchRow = inspector?.querySelector('[data-slot="desktop-content-filter-search-row"]')
-    expect(filterSearchRow?.className).toContain("w-full")
-    expect(filterSearchRow?.className).not.toContain("bg-white/[0.08]")
+    expect(filterSearchRow?.className).toContain("gap-2")
     const filterTrigger = filterSearchRow?.querySelector('[data-slot="desktop-content-type-filter-trigger"]')
-    expect(filterTrigger?.className).toContain("desktop-inspector-input-bg")
-    expect(filterTrigger?.className).toContain("min-w-[84px]")
-    expect(filterTrigger?.className).toContain("max-w-24")
-    expect(filterTrigger?.querySelector("svg[data-slot='filter-icon']")).toBeNull()
+    expect(filterTrigger?.className).toContain("t-morph-plus")
     const searchInput = filterSearchRow?.querySelector('input[aria-label="Search QR types"]')
     expect(searchInput).not.toBeNull()
     expect(searchInput?.className).toContain("desktop-inspector-input-bg")
-    expect(searchInput?.className).toContain("rounded-[7px]")
-    expect(searchInput?.parentElement?.className).toContain("h-full")
+    expect(searchInput?.className).toContain("rounded-full")
     expect(inspector?.querySelector('[data-slot="desktop-content-fields"]')).not.toBeNull()
     expect(inspector?.textContent).toContain("Content")
     expect(inspector?.textContent).toContain("Popular")
@@ -1446,17 +1441,20 @@ describe("FloatingToolbar", () => {
     ).toContain("Not scannable")
   })
 
-  it("shows the iconstack search placeholder before a logo query is entered", async () => {
+  it("shows popular brand icons and search caption before a logo query is entered", async () => {
     const surface = await renderPrototype()
 
     await openTool(surface.container, "logo")
 
-    expect(surface.container.textContent).toContain("Search 51,000+ icons")
+    expect(surface.container.textContent).not.toContain("Search 51,000+ icons…")
+    expect(
+      surface.container.querySelector('[aria-label="Use WhatsApp brand icon"]'),
+    ).not.toBeNull()
     expect(
       surface.container.querySelector('[aria-label="Search logo icons"]'),
     ).not.toBeNull()
     expect(
-      surface.container.querySelector('[data-slot*="desktop-logo-library-filter-trigger"]'),
+      surface.container.querySelector('[aria-label="Filter logo icon libraries"]'),
     ).not.toBeNull()
   })
 

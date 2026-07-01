@@ -3,12 +3,16 @@
 import { useEffect, useMemo, useState } from "react"
 
 import {
-  fetchIconSvg,
   parseIconstackResultIconId,
   searchIcons,
+  toIconstackSelectionId,
   type IconstackLibraryId,
   type IconstackSearchResult,
 } from "@/features/qr-code/assets/iconstack-api"
+import {
+  fetchAndCacheIconstackSvg,
+  getCachedIconstackSvg,
+} from "@/features/qr-code/assets/iconstack-svg-cache"
 import { isValidIconstackSvgMarkup } from "@/features/qr-code/assets/iconstack-svg"
 
 const SEARCH_DEBOUNCE_MS = 300
@@ -66,16 +70,20 @@ export function useIconstackIconSearch({
             response.results.map(async (result) => {
               try {
                 const iconId = parseIconstackResultIconId(result)
-                const svgResponse = await fetchIconSvg({
-                  library: result.library,
-                  id: iconId,
-                })
+                const selectionId = toIconstackSelectionId(result)
+                const cachedSvg = getCachedIconstackSvg(selectionId)
+                const svg =
+                  cachedSvg ??
+                  (await fetchAndCacheIconstackSvg({
+                    library: result.library,
+                    id: iconId,
+                  }))
 
-                if (!isValidIconstackSvgMarkup(svgResponse.svg)) {
+                if (!isValidIconstackSvgMarkup(svg)) {
                   return null
                 }
 
-                return [result.id, svgResponse.svg] as const
+                return [result.id, svg] as const
               } catch {
                 return null
               }
