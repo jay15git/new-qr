@@ -5,6 +5,14 @@ import {
   type DraftingCardPatternSelectionId,
 } from "@/features/workspace/model/card-patterns"
 import {
+  createUniformPerSideBorder,
+  type DraftingBorderStyle,
+  type DraftingPerSideBorderState,
+  type DraftingShadowKind,
+  normalizeBorderStyle,
+  normalizePerSideBorderState,
+} from "@/features/workspace/model/effects"
+import {
   createDefaultPaperShaderParams,
   DEFAULT_PAPER_SHADER_ID,
   getPaperShaderDefinition,
@@ -19,15 +27,21 @@ export type DraftingCardStyleMode = "pattern" | "image" | "image-filter" | "pape
 export type DraftingCardBorderState = {
   color: string
   opacity: number
+  sides: DraftingPerSideBorderState
+  style: DraftingBorderStyle
   width: number
 }
 
 export type DraftingCardShadowState = {
   blur: number
   color: string
+  inset: boolean
+  kind: DraftingShadowKind
   offsetX: number
   offsetY: number
   opacity: number
+  spread: number
+  visible: boolean
 }
 
 export type DraftingCardImageState = {
@@ -73,6 +87,8 @@ export const DEFAULT_DRAFTING_CARD_STATE: DraftingCardState = {
   border: {
     color: "#111827",
     opacity: 100,
+    sides: createUniformPerSideBorder({ color: "#111827", opacity: 100, style: "solid", width: 0 }),
+    style: "solid",
     width: 0,
   },
   bottomSpace: 128,
@@ -93,9 +109,13 @@ export const DEFAULT_DRAFTING_CARD_STATE: DraftingCardState = {
   shadow: {
     blur: 44,
     color: "#1d1606",
+    inset: false,
+    kind: "box",
     offsetX: 0,
     offsetY: 20,
     opacity: 52,
+    spread: 0,
+    visible: true,
   },
   styleMode: "pattern",
 }
@@ -103,10 +123,7 @@ export const DEFAULT_DRAFTING_CARD_STATE: DraftingCardState = {
 export function cloneDraftingCardState(state: DraftingCardState): DraftingCardState {
   return {
     ...state,
-    border: {
-      ...DEFAULT_DRAFTING_CARD_STATE.border,
-      ...state.border,
-    },
+    border: normalizeDraftingCardBorder(state.border),
     cardImage: { ...state.cardImage },
     imageFilter: cloneDraftingCardPaperShaderState(state.imageFilter),
     paperShader: cloneDraftingCardPaperShaderState(state.paperShader),
@@ -120,48 +137,88 @@ export function cloneDraftingCardState(state: DraftingCardState): DraftingCardSt
   }
 }
 
-function normalizeDraftingCardShadow(
+export function normalizeDraftingCardBorder(
+  border: Partial<DraftingCardBorderState> | undefined,
+): DraftingCardBorderState {
+  const fallback = DEFAULT_DRAFTING_CARD_STATE.border
+  const width = Math.max(0, border?.width ?? fallback.width)
+  const color = border?.color ?? fallback.color
+  const opacity = border?.opacity ?? fallback.opacity
+  const style = normalizeBorderStyle(border?.style, fallback.style)
+
+  return {
+    color,
+    opacity,
+    sides: normalizePerSideBorderState(border?.sides, { color, opacity, style, width }),
+    style,
+    width,
+  }
+}
+
+export function normalizeDraftingCardShadow(
   shadow: DraftingCardShadowState | DraftingCardShadowPreset,
 ): DraftingCardShadowState {
   if (typeof shadow === "string") {
     return getLegacyDraftingCardShadow(shadow)
   }
 
+  const fallback = DEFAULT_DRAFTING_CARD_STATE.shadow
+
   return {
-    ...DEFAULT_DRAFTING_CARD_STATE.shadow,
-    ...shadow,
+    blur: clampShadowNumber(shadow.blur, fallback.blur, 0, 128),
+    color: shadow.color ?? fallback.color,
+    inset: shadow.inset ?? fallback.inset,
+    kind: shadow.kind === "drop" ? "drop" : "box",
+    offsetX: clampShadowNumber(shadow.offsetX, fallback.offsetX, -256, 256),
+    offsetY: clampShadowNumber(shadow.offsetY, fallback.offsetY, -256, 256),
+    opacity: clampShadowNumber(shadow.opacity, fallback.opacity, 0, 100),
+    spread: clampShadowNumber(shadow.spread, fallback.spread, -128, 128),
+    visible:
+      typeof shadow.visible === "boolean"
+        ? shadow.visible
+        : (shadow.opacity ?? fallback.opacity) > 0,
   }
+}
+
+function clampShadowNumber(value: unknown, fallback: number, min: number, max: number) {
+  const parsed = typeof value === "number" && Number.isFinite(value) ? value : fallback
+  return Math.min(max, Math.max(min, parsed))
 }
 
 function getLegacyDraftingCardShadow(shadow: DraftingCardShadowPreset): DraftingCardShadowState {
   switch (shadow) {
     case "none":
       return {
+        ...DEFAULT_DRAFTING_CARD_STATE.shadow,
         blur: 0,
-        color: DEFAULT_DRAFTING_CARD_STATE.shadow.color,
         offsetX: 0,
         offsetY: 0,
         opacity: 0,
+        visible: false,
       }
     case "soft":
       return {
+        ...DEFAULT_DRAFTING_CARD_STATE.shadow,
         blur: 30,
         color: "#1d1606",
         offsetX: 0,
         offsetY: 14,
         opacity: 45,
+        visible: true,
       }
     case "strong":
       return {
+        ...DEFAULT_DRAFTING_CARD_STATE.shadow,
         blur: 54,
         color: "#1d1606",
         offsetX: 0,
         offsetY: 26,
         opacity: 55,
+        visible: true,
       }
     case "medium":
     default:
-      return { ...DEFAULT_DRAFTING_CARD_STATE.shadow }
+      return { ...DEFAULT_DRAFTING_CARD_STATE.shadow, visible: true }
   }
 }
 

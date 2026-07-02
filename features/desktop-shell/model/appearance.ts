@@ -1,20 +1,40 @@
 import type { BackgroundShapeOptions } from "@/features/qr-code/model/state"
 import type { DraftingCardBorderState, DraftingCardShadowState } from "@/features/workspace/model/card-state"
+import type {
+  DraftingBorderStyle,
+  DraftingOutlineState,
+  DraftingPerSideBorderState,
+  DraftingShadowLayerState,
+} from "@/features/workspace/model/effects"
+import type { DraftingFilterEffect } from "@/features/workspace/model/filters"
 import {
   DEFAULT_DRAFTING_IMAGE_LAYER,
   DEFAULT_DRAFTING_SHAPE_LAYER,
   type DraftingCanvasLayer,
 } from "@/features/workspace/model/layers"
+import {
+  DEFAULT_DRAFTING_OUTLINE,
+  legacyShadowToShadowLayer,
+} from "@/features/workspace/model/effects"
 
 export type DesktopAppearanceSnapshot = {
+  backdropFilters: DraftingFilterEffect[]
   blur: number
+  borderSides?: DraftingPerSideBorderState
+  borderStyle?: DraftingBorderStyle
   cornerRadius?: number
+  layerFilters: DraftingFilterEffect[]
   opacity: number
+  outline: DraftingOutlineState
   shadow: DraftingCardShadowState
+  shadows: DraftingShadowLayerState[]
   stroke?: string
   strokeOpacity?: number
+  strokeStyle?: DraftingBorderStyle
   strokeWidth?: number
   supportsCornerRadius: boolean
+  supportsOutline: boolean
+  supportsPerSideBorder: boolean
   supportsStroke: boolean
   usesBorderSemantics?: boolean
 }
@@ -27,16 +47,29 @@ export function getDesktopAppearanceSnapshot(
     qrBackgroundShapeOptions?: BackgroundShapeOptions
   },
 ): DesktopAppearanceSnapshot {
+  const layerFilters = layer.layerFilters ?? []
+  const backdropFilters = layer.backdropFilters ?? []
+  const outline = layer.outline ?? DEFAULT_DRAFTING_OUTLINE
+  const shadows = layer.shadows ?? [legacyShadowToShadowLayer(layer.shadow)]
+
   if (layer.kind === "card" && options?.cardBorder) {
     return {
+      backdropFilters,
       blur: layer.blur,
+      borderSides: options.cardBorder.sides,
+      borderStyle: options.cardBorder.style,
       cornerRadius: options.cardCornerRadius,
+      layerFilters,
       opacity: layer.opacity,
+      outline,
       shadow: layer.shadow,
+      shadows,
       stroke: options.cardBorder.color,
       strokeOpacity: options.cardBorder.opacity,
       strokeWidth: options.cardBorder.width,
       supportsCornerRadius: true,
+      supportsOutline: true,
+      supportsPerSideBorder: true,
       supportsStroke: true,
       usesBorderSemantics: true,
     }
@@ -46,37 +79,59 @@ export function getDesktopAppearanceSnapshot(
     const shapeOptions = options.qrBackgroundShapeOptions
 
     return {
+      backdropFilters,
       blur: layer.blur,
+      layerFilters,
       opacity: layer.opacity,
+      outline,
       shadow: {
         blur: shapeOptions.edgeBlur ?? layer.shadow.blur,
         color: shapeOptions.shadowColor || layer.shadow.color,
+        inset: layer.shadow.inset,
+        kind: layer.shadow.kind,
         offsetX: shapeOptions.shadowOffsetX ?? layer.shadow.offsetX,
         offsetY: shapeOptions.shadowOffsetY ?? layer.shadow.offsetY,
         opacity: shapeOptions.shadowOpacity ?? layer.shadow.opacity,
+        spread: layer.shadow.spread,
+        visible: layer.shadow.visible,
       },
+      shadows,
       stroke: shapeOptions.strokeColor,
       strokeOpacity: shapeOptions.strokeOpacity,
       strokeWidth: shapeOptions.strokeWidth,
       supportsCornerRadius: false,
+      supportsOutline: false,
+      supportsPerSideBorder: false,
       supportsStroke: true,
     }
   }
 
+  const isRectShape =
+    layer.kind === "shape" && (layer.shapeId ?? DEFAULT_DRAFTING_SHAPE_LAYER.shapeId) === "rect"
+
   return {
+    backdropFilters,
     blur: layer.blur,
+    borderSides: layer.borderSides,
     cornerRadius:
       layer.kind === "image"
         ? (layer.cornerRadius ?? DEFAULT_DRAFTING_IMAGE_LAYER.cornerRadius)
-        : layer.kind === "shape" && (layer.shapeId ?? DEFAULT_DRAFTING_SHAPE_LAYER.shapeId) === "rect"
+        : isRectShape
           ? (layer.cornerRadius ?? DEFAULT_DRAFTING_SHAPE_LAYER.cornerRadius)
           : undefined,
+    layerFilters,
     opacity: layer.opacity,
+    outline,
     shadow: layer.shadow,
+    shadows,
     stroke: layer.stroke,
     strokeOpacity: layer.strokeOpacity,
+    strokeStyle: layer.strokeStyle,
     strokeWidth: layer.strokeWidth,
     supportsCornerRadius: layer.kind === "image" || layer.kind === "shape",
+    supportsOutline: layer.kind === "card" || layer.kind === "image" || layer.kind === "text" || isRectShape,
+    supportsPerSideBorder:
+      layer.kind === "card" || layer.kind === "image" || layer.kind === "text" || isRectShape,
     supportsStroke: layer.kind === "shape",
   }
 }
@@ -99,8 +154,16 @@ export function buildDesktopAppearancePatch(
 ): DesktopAppearancePatchResult {
   const layerPatch: Partial<DraftingCanvasLayer> = {}
 
+  if (patch.backdropFilters !== undefined) {
+    layerPatch.backdropFilters = patch.backdropFilters
+  }
+
   if (patch.blur !== undefined) {
     layerPatch.blur = patch.blur
+  }
+
+  if (patch.layerFilters !== undefined) {
+    layerPatch.layerFilters = patch.layerFilters
   }
 
   if (patch.opacity !== undefined) {
@@ -111,6 +174,18 @@ export function buildDesktopAppearancePatch(
     layerPatch.cornerRadius = patch.cornerRadius
   }
 
+  if (patch.outline !== undefined) {
+    layerPatch.outline = patch.outline
+  }
+
+  if (patch.borderSides !== undefined) {
+    layerPatch.borderSides = patch.borderSides
+  }
+
+  if (patch.shadows !== undefined) {
+    layerPatch.shadows = patch.shadows
+  }
+
   if (patch.shadow) {
     layerPatch.shadow = {
       ...layer.shadow,
@@ -119,19 +194,18 @@ export function buildDesktopAppearancePatch(
   }
 
   if (layer.kind === "card" && options?.cardBorder) {
+    const primaryShadow = patch.shadows?.[0] ?? (patch.shadow ? { ...layer.shadow, ...patch.shadow } : undefined)
+
     return {
       cardBorder: {
         color: patch.stroke ?? options.cardBorder.color,
         opacity: patch.strokeOpacity ?? options.cardBorder.opacity,
+        sides: patch.borderSides ?? options.cardBorder.sides,
+        style: patch.strokeStyle ?? options.cardBorder.style,
         width: patch.strokeWidth ?? options.cardBorder.width,
       },
       cardCornerRadius: patch.cornerRadius,
-      cardShadow: patch.shadow
-        ? {
-            ...layer.shadow,
-            ...patch.shadow,
-          }
-        : undefined,
+      cardShadow: primaryShadow,
       layerPatch,
     }
   }
@@ -185,6 +259,10 @@ export function buildDesktopAppearancePatch(
 
   if (patch.strokeOpacity !== undefined) {
     layerPatch.strokeOpacity = patch.strokeOpacity
+  }
+
+  if (patch.strokeStyle !== undefined) {
+    layerPatch.strokeStyle = patch.strokeStyle
   }
 
   return { layerPatch }

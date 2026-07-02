@@ -3,6 +3,28 @@ import type {
   DraftingCardState,
 } from "@/features/workspace/model/card-state"
 import {
+  createDefaultDraftingShadowLayer,
+  DEFAULT_DRAFTING_OUTLINE,
+  type DraftingBorderStyle,
+  type DraftingOutlineState,
+  type DraftingPerSideBorderState,
+  type DraftingShadowLayerState,
+  legacyShadowToShadowLayer,
+  normalizeBorderStyle,
+  normalizeOutlineState,
+  normalizePerSideBorderState,
+  normalizeShadowLayerState,
+  shadowLayerToLegacyShadow,
+} from "@/features/workspace/model/effects"
+import {
+  createDefaultDraftingFilterEffect,
+  getBlurAmountFromFilters,
+  normalizeFilterEffects,
+  syncBlurFilter,
+  syncLegacyBlurFromFilters,
+  type DraftingFilterEffect,
+} from "@/features/workspace/model/filters"
+import {
   DEFAULT_DRAFTING_FONT_ID,
   getDraftingFontByFamily,
   getDraftingFontById,
@@ -15,6 +37,7 @@ import {
   type QrStudioState,
   type StudioGradient,
 } from "@/features/qr-code/model/state"
+import { normalizeDraftingCardShadow } from "@/features/workspace/model/card-state"
 
 export type DraftingCanvasLayerKind = "card" | "group" | "image" | "qr" | "shape" | "text"
 export type DraftingImageSourceMode = "none" | "upload" | "url"
@@ -39,7 +62,9 @@ export type DraftingTextRun = {
 }
 
 export type DraftingCanvasLayer = {
+  backdropFilters: DraftingFilterEffect[]
   blur: number
+  borderSides?: DraftingPerSideBorderState
   height: number
   id: string
   isLocked: boolean
@@ -57,21 +82,25 @@ export type DraftingCanvasLayer = {
   imageFit?: DraftingImageFit
   imageSource?: DraftingImageSourceMode
   imageValue?: string
+  layerFilters: DraftingFilterEffect[]
   letterSpacing?: number
   lineHeight?: number
   name: string
   nodeId: string
   opacity: number
+  outline: DraftingOutlineState
   rotation: number
   scaleX?: number
   scaleY?: number
   shapeId?: DraftingElementShapeId
   stroke?: string
   strokeOpacity?: number
+  strokeStyle?: DraftingBorderStyle
   strokeWidth?: number
   tiltX: number
   tiltY: number
   shadow: DraftingCardShadowState
+  shadows: DraftingShadowLayerState[]
   text?: string
   textAlign?: DraftingTextAlign
   textRuns?: DraftingTextRun[]
@@ -100,9 +129,13 @@ const DRAFTING_QR_LAYER_SUFFIX = ":qr"
 const DEFAULT_LAYER_SHADOW: DraftingCardShadowState = {
   blur: 0,
   color: "#111827",
+  inset: false,
+  kind: "box",
   offsetX: 0,
   offsetY: 0,
   opacity: 0,
+  spread: 0,
+  visible: false,
 }
 export const DEFAULT_DRAFTING_TEXT_LAYER = {
   fill: "#171717",
@@ -132,6 +165,7 @@ export const DEFAULT_DRAFTING_SHAPE_LAYER = {
   shapeId: "rounded-square",
   stroke: "#171717",
   strokeOpacity: 100,
+  strokeStyle: "solid",
   strokeWidth: 0,
 } as const satisfies Partial<DraftingCanvasLayer>
 
@@ -164,38 +198,46 @@ export function createDefaultDraftingLayers(
 
   return [
     {
+      backdropFilters: [],
       blur: 0,
       height: cardHeight,
       id: getDraftingCardLayerId(nodeId),
       isLocked: false,
       isVisible: cardState.enabled,
       kind: "card",
+      layerFilters: [],
       name: "Card",
       nodeId,
       opacity: 1,
+      outline: { ...DEFAULT_DRAFTING_OUTLINE },
       rotation: 0,
       tiltX: 0,
       tiltY: 0,
-      shadow: { ...cardState.shadow },
+      shadow: normalizeDraftingCardShadow(cardState.shadow),
+      shadows: [legacyShadowToShadowLayer(normalizeDraftingCardShadow(cardState.shadow))],
       width: cardWidth,
       x: cardX,
       y: cardY,
       zIndex: 0,
     },
     {
+      backdropFilters: [],
       blur: 0,
       height: qrDimensions.height,
       id: getDraftingQrLayerId(nodeId),
       isLocked: false,
       isVisible: true,
       kind: "qr",
+      layerFilters: [],
       name: "QR code",
       nodeId,
       opacity: 1,
+      outline: { ...DEFAULT_DRAFTING_OUTLINE },
       rotation: 0,
       tiltX: 0,
       tiltY: 0,
       shadow: { ...DEFAULT_LAYER_SHADOW },
+      shadows: [legacyShadowToShadowLayer(DEFAULT_LAYER_SHADOW)],
       width: qrDimensions.width,
       x: -qrDimensions.width / 2,
       y: cardY + cardState.padding,
@@ -272,8 +314,22 @@ export function createDraftingShapeLayer(
 export function cloneDraftingCanvasLayer(layer: DraftingCanvasLayer): DraftingCanvasLayer {
   return {
     ...layer,
+    backdropFilters: (layer.backdropFilters ?? []).map((filter) => ({ ...filter })),
+    borderSides: layer.borderSides
+      ? {
+          bottom: { ...layer.borderSides.bottom },
+          left: { ...layer.borderSides.left },
+          right: { ...layer.borderSides.right },
+          top: { ...layer.borderSides.top },
+        }
+      : undefined,
     children: layer.children?.map(cloneDraftingCanvasLayer),
-    shadow: { ...layer.shadow },
+    layerFilters: (layer.layerFilters ?? []).map((filter) => ({ ...filter })),
+    outline: { ...(layer.outline ?? DEFAULT_DRAFTING_OUTLINE) },
+    shadow: { ...(layer.shadow ?? DEFAULT_LAYER_SHADOW) },
+    shadows: (layer.shadows ?? [legacyShadowToShadowLayer(layer.shadow ?? DEFAULT_LAYER_SHADOW)]).map(
+      (shadow) => ({ ...shadow }),
+    ),
     textRuns: layer.textRuns?.map((run) => ({ ...run })),
   }
 }
@@ -319,7 +375,37 @@ export function patchDraftingCanvasLayer(
   layer: DraftingCanvasLayer,
   patch: Partial<DraftingCanvasLayer>,
 ): DraftingCanvasLayer {
-  return normalizeDraftingCanvasLayer(layer.nodeId, { ...layer, ...patch }, [layer]) ?? layer
+  const merged = { ...layer, ...patch }
+
+  if (patch.shadow && !patch.shadows) {
+    merged.shadows = [
+      legacyShadowToShadowLayer(
+        {
+          ...layer.shadow,
+          ...patch.shadow,
+        },
+        layer.shadows[0]?.id,
+      ),
+      ...layer.shadows.slice(1),
+    ]
+  }
+
+  if (patch.shadows) {
+    merged.shadow = normalizeDraftingLayerShadow(
+      shadowLayerToLegacyShadow(patch.shadows[0] ?? layer.shadows[0] ?? legacyShadowToShadowLayer(layer.shadow)),
+      layer.shadow,
+    )
+  }
+
+  if (patch.blur !== undefined && patch.layerFilters === undefined) {
+    merged.layerFilters = syncBlurFilter(layer.layerFilters, patch.blur)
+  }
+
+  if (patch.layerFilters) {
+    merged.blur = syncLegacyBlurFromFilters(patch.layerFilters)
+  }
+
+  return normalizeDraftingCanvasLayer(layer.nodeId, merged, [layer]) ?? layer
 }
 
 export function reorderDraftingCanvasLayer(
@@ -456,6 +542,7 @@ export function groupDraftingCanvasLayers(
   const lowestZIndex = Math.min(...selectedLayers.map((layer) => layer.zIndex))
   const groupLayer = patchDraftingCanvasLayer(
     {
+      backdropFilters: [],
       blur: 0,
       children: selectedLayers
         .sort((a, b) => a.zIndex - b.zIndex)
@@ -471,13 +558,16 @@ export function groupDraftingCanvasLayers(
       isLocked: false,
       isVisible: true,
       kind: "group",
+      layerFilters: [],
       name: options.name,
       nodeId: selectedLayers[0]?.nodeId ?? layers[0]?.nodeId ?? "preview",
       opacity: 1,
+      outline: { ...DEFAULT_DRAFTING_OUTLINE },
       rotation: 0,
       tiltX: 0,
       tiltY: 0,
       shadow: { ...DEFAULT_LAYER_SHADOW },
+      shadows: [legacyShadowToShadowLayer(DEFAULT_LAYER_SHADOW)],
       width: bounds.right - bounds.left,
       x: bounds.left,
       y: bounds.top,
@@ -662,8 +752,23 @@ function normalizeSharedDraftingCanvasLayerFields({
   value,
   width,
 }: NormalizeDraftingLayerContext): Omit<DraftingCanvasLayer, "kind"> {
+  const legacyBlur = clamp(readFiniteNumber(value.blur, fallback.blur), 0, 96)
+  const layerFilters = normalizeDraftingLayerFilters(
+    value.layerFilters,
+    fallback.layerFilters ?? [],
+    legacyBlur,
+  )
+  const shadow = normalizeDraftingLayerShadow(value.shadow, fallback.shadow)
+  const shadows = normalizeDraftingLayerShadows(
+    value.shadows,
+    shadow,
+    fallback.shadows ?? [legacyShadowToShadowLayer(shadow)],
+  )
+
   return {
-    blur: clamp(readFiniteNumber(value.blur, fallback.blur), 0, 96),
+    backdropFilters: normalizeFilterEffects(value.backdropFilters, fallback.backdropFilters ?? []),
+    blur: syncLegacyBlurFromFilters(layerFilters),
+    borderSides: normalizeDraftingLayerBorderSides(value.borderSides, fallback.borderSides),
     children: undefined,
     height: Math.max(1, height),
     id: typeof value.id === "string" ? value.id : fallback.id,
@@ -677,20 +782,23 @@ function normalizeSharedDraftingCanvasLayerFields({
     fontSize: undefined,
     fontStyle: undefined,
     fontWeight: undefined,
+    layerFilters,
     letterSpacing: undefined,
     lineHeight: undefined,
     name: typeof value.name === "string" && value.name.trim() ? value.name : fallback.name,
     nodeId,
     opacity: clamp(readFiniteNumber(value.opacity, fallback.opacity), 0, 1),
+    outline: normalizeOutlineState(value.outline, fallback.outline ?? DEFAULT_DRAFTING_OUTLINE),
     rotation: readFiniteNumber(value.rotation, fallback.rotation),
     scaleX: normalizeFlipScale(value.scaleX, fallback.scaleX ?? 1),
     scaleY: normalizeFlipScale(value.scaleY, fallback.scaleY ?? 1),
-    tiltX: clampBackgroundShapeTilt(readFiniteNumber(value.tiltX, fallback.tiltX)),
-    tiltY: clampBackgroundShapeTilt(readFiniteNumber(value.tiltY, fallback.tiltY)),
-    shadow: normalizeDraftingLayerShadow(value.shadow, fallback.shadow),
+    shadow,
+    shadows,
     text: undefined,
     textAlign: undefined,
     textRuns: undefined,
+    tiltX: clampBackgroundShapeTilt(readFiniteNumber(value.tiltX, fallback.tiltX)),
+    tiltY: clampBackgroundShapeTilt(readFiniteNumber(value.tiltY, fallback.tiltY)),
     underline: undefined,
     width: Math.max(1, width),
     x: readFiniteNumber(value.x, fallback.x),
@@ -754,6 +862,7 @@ function normalizeImageDraftingCanvasLayer(
 
   return {
     ...normalizeSharedDraftingCanvasLayerFields(context),
+    borderSides: normalizeDraftingLayerBorderSides(value.borderSides, fallback.borderSides),
     cornerRadius: clamp(
       readFiniteNumber(value.cornerRadius, fallback.cornerRadius ?? DEFAULT_DRAFTING_IMAGE_LAYER.cornerRadius),
       0,
@@ -779,6 +888,7 @@ function normalizeShapeDraftingCanvasLayer(
 
   return {
     ...normalizeSharedDraftingCanvasLayerFields(context),
+    borderSides: normalizeDraftingLayerBorderSides(value.borderSides, fallback.borderSides),
     cornerRadius: clamp(
       readFiniteNumber(value.cornerRadius, fallback.cornerRadius ?? DEFAULT_DRAFTING_SHAPE_LAYER.cornerRadius),
       0,
@@ -800,6 +910,10 @@ function normalizeShapeDraftingCanvasLayer(
       readFiniteNumber(value.strokeOpacity, fallback.strokeOpacity ?? DEFAULT_DRAFTING_SHAPE_LAYER.strokeOpacity),
       0,
       100,
+    ),
+    strokeStyle: normalizeBorderStyle(
+      value.strokeStyle,
+      fallback.strokeStyle ?? DEFAULT_DRAFTING_SHAPE_LAYER.strokeStyle,
     ),
     strokeWidth: clamp(
       readFiniteNumber(value.strokeWidth, fallback.strokeWidth ?? DEFAULT_DRAFTING_SHAPE_LAYER.strokeWidth),
@@ -859,24 +973,86 @@ function normalizeDraftingLayerShadow(
   fallback: DraftingCardShadowState,
 ): DraftingCardShadowState {
   if (!isRecord(value)) {
-    return { ...fallback }
+    return normalizeDraftingCardShadow(fallback)
   }
 
-  return {
-    blur: clamp(readFiniteNumber(value.blur, fallback.blur), 0, 128),
+  return normalizeDraftingCardShadow({
+    ...fallback,
+    blur: readFiniteNumber(value.blur, fallback.blur),
     color: typeof value.color === "string" ? value.color : fallback.color,
-    offsetX: clamp(readFiniteNumber(value.offsetX, fallback.offsetX), -256, 256),
-    offsetY: clamp(readFiniteNumber(value.offsetY, fallback.offsetY), -256, 256),
-    opacity: clamp(readFiniteNumber(value.opacity, fallback.opacity), 0, 100),
+    inset: typeof value.inset === "boolean" ? value.inset : fallback.inset,
+    kind: value.kind === "drop" ? "drop" : fallback.kind,
+    offsetX: readFiniteNumber(value.offsetX, fallback.offsetX),
+    offsetY: readFiniteNumber(value.offsetY, fallback.offsetY),
+    opacity: readFiniteNumber(value.opacity, fallback.opacity),
+    spread: readFiniteNumber(value.spread, fallback.spread),
+    visible: typeof value.visible === "boolean" ? value.visible : fallback.visible,
+  })
+}
+
+function normalizeDraftingLayerShadows(
+  value: unknown,
+  primaryShadow: DraftingCardShadowState,
+  fallback: DraftingShadowLayerState[],
+): DraftingShadowLayerState[] {
+  if (!Array.isArray(value) || value.length === 0) {
+    if (fallback.length > 0) {
+      return fallback.map((shadow) => ({ ...shadow }))
+    }
+
+    return [legacyShadowToShadowLayer(primaryShadow)]
   }
+
+  return value
+    .map((entry, index) =>
+      normalizeShadowLayerState(
+        entry,
+        fallback[index] ?? legacyShadowToShadowLayer(primaryShadow),
+      ),
+    )
+    .filter((shadow) => shadow.visible !== false || shadow.opacity > 0)
+}
+
+function normalizeDraftingLayerFilters(
+  value: unknown,
+  fallback: DraftingFilterEffect[],
+  legacyBlur: number,
+): DraftingFilterEffect[] {
+  const normalized = normalizeFilterEffects(value, fallback)
+
+  if (Array.isArray(value)) {
+    return syncBlurFilter(normalized, getBlurAmountFromFilters(normalized))
+  }
+
+  if (normalized.length > 0) {
+    return normalized
+  }
+
+  return legacyBlur > 0 ? syncBlurFilter([], legacyBlur) : []
+}
+
+function normalizeDraftingLayerBorderSides(
+  value: unknown,
+  fallback: DraftingPerSideBorderState | undefined,
+): DraftingPerSideBorderState | undefined {
+  if (value === undefined && fallback === undefined) {
+    return undefined
+  }
+
+  return normalizePerSideBorderState(value, fallback?.top)
 }
 
 function createFallbackLayer(
   nodeId: string,
   kind: DraftingCanvasLayerKind,
 ): DraftingCanvasLayer {
+  const defaultShadow = { ...DEFAULT_LAYER_SHADOW }
+  const defaultShadowLayer = legacyShadowToShadowLayer(defaultShadow)
+
   return {
+    backdropFilters: [],
     blur: 0,
+    borderSides: undefined,
     cornerRadius:
       kind === "image"
         ? DEFAULT_DRAFTING_IMAGE_LAYER.cornerRadius
@@ -902,6 +1078,7 @@ function createFallbackLayer(
     fontSize: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.fontSize : undefined,
     fontStyle: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.fontStyle : undefined,
     fontWeight: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.fontWeight : undefined,
+    layerFilters: [],
     letterSpacing: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.letterSpacing : undefined,
     lineHeight: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.lineHeight : undefined,
     name:
@@ -918,16 +1095,19 @@ function createFallbackLayer(
                 : "Group",
     nodeId,
     opacity: 1,
+    outline: { ...DEFAULT_DRAFTING_OUTLINE },
     rotation: 0,
     tiltX: 0,
     tiltY: 0,
-    shadow: { ...DEFAULT_LAYER_SHADOW },
+    shadow: defaultShadow,
+    shadows: [defaultShadowLayer],
     imageFit: kind === "image" ? DEFAULT_DRAFTING_IMAGE_LAYER.imageFit : undefined,
     imageSource: kind === "image" ? DEFAULT_DRAFTING_IMAGE_LAYER.imageSource : undefined,
     imageValue: kind === "image" ? DEFAULT_DRAFTING_IMAGE_LAYER.imageValue : undefined,
     shapeId: kind === "shape" ? DEFAULT_DRAFTING_SHAPE_LAYER.shapeId : undefined,
     stroke: kind === "shape" ? DEFAULT_DRAFTING_SHAPE_LAYER.stroke : undefined,
     strokeOpacity: kind === "shape" ? DEFAULT_DRAFTING_SHAPE_LAYER.strokeOpacity : undefined,
+    strokeStyle: kind === "shape" ? DEFAULT_DRAFTING_SHAPE_LAYER.strokeStyle : undefined,
     strokeWidth: kind === "shape" ? DEFAULT_DRAFTING_SHAPE_LAYER.strokeWidth : undefined,
     text: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.text : undefined,
     textAlign: kind === "text" ? DEFAULT_DRAFTING_TEXT_LAYER.textAlign : undefined,

@@ -2,6 +2,7 @@ import type { CSSProperties } from "react"
 
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
 import { QR_BACKGROUND_SHAPES } from "@/features/qr-code/styles/background-shapes"
+import { getStrokeDasharray } from "@/features/workspace/rendering/layer-appearance"
 
 function getShapeDefinition(shapeId: NonNullable<DraftingCanvasLayer["shapeId"]>) {
   if (shapeId === "rect" || shapeId === "ellipse" || shapeId === "line" || shapeId === "arrow") {
@@ -47,13 +48,14 @@ function renderPrimitiveShape(
   const strokeWidth = layer.strokeWidth ?? 0
   const strokeOpacity = (layer.strokeOpacity ?? 100) / 100
   const fill = layer.fillMode === "none" ? "none" : (layer.fill ?? "#E8E8E8")
-  const radius = layer.cornerRadius ?? 0
+  const strokeDasharray = getStrokeDasharray(layer.strokeStyle)
 
   if (shapeId === "line") {
     return (
       <svg aria-hidden="true" className="h-full w-full" viewBox="0 0 100 100">
         <line
           stroke={stroke}
+          strokeDasharray={strokeDasharray}
           strokeLinecap="round"
           strokeOpacity={strokeOpacity}
           strokeWidth={Math.max(1, strokeWidth || 4)}
@@ -73,6 +75,7 @@ function renderPrimitiveShape(
           d="M10 50 H62 M62 50 L44 34 M62 50 L44 66"
           fill="none"
           stroke={stroke}
+          strokeDasharray={strokeDasharray}
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeOpacity={strokeOpacity}
@@ -92,12 +95,15 @@ function renderPrimitiveShape(
           rx="42"
           ry="42"
           stroke={stroke}
+          strokeDasharray={strokeDasharray}
           strokeOpacity={strokeOpacity}
           strokeWidth={strokeWidth}
         />
       </svg>
     )
   }
+
+  const radius = layer.cornerRadius ?? 0
 
   return (
     <svg aria-hidden="true" className="h-full w-full" viewBox="0 0 100 100">
@@ -107,6 +113,7 @@ function renderPrimitiveShape(
         rx={radius / 2}
         ry={radius / 2}
         stroke={stroke}
+        strokeDasharray={strokeDasharray}
         strokeOpacity={strokeOpacity}
         strokeWidth={strokeWidth}
         width="84"
@@ -135,6 +142,7 @@ export function DraftingShapeLayerContent({ layer }: { layer: DraftingCanvasLaye
             d={definition.path}
             fill={getShapePathFill(layer)}
             stroke={layer.stroke ?? "#171717"}
+            strokeDasharray={getStrokeDasharray(layer.strokeStyle)}
             strokeOpacity={(layer.strokeOpacity ?? 100) / 100}
             strokeWidth={layer.strokeWidth ?? 0}
           />

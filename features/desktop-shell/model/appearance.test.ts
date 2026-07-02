@@ -63,7 +63,17 @@ describe("desktop appearance model", () => {
     const qrPatch = buildDesktopAppearancePatch(
       qrLayer,
       {
-        shadow: { blur: 12, color: "#000000", offsetX: 4, offsetY: 6, opacity: 40 },
+        shadow: {
+          blur: 12,
+          color: "#000000",
+          inset: false,
+          kind: "box",
+          offsetX: 4,
+          offsetY: 6,
+          opacity: 40,
+          spread: 0,
+          visible: true,
+        },
         strokeWidth: 3,
       },
       { qrBackgroundShapeOptions: DEFAULT_BACKGROUND_SHAPE_OPTIONS },
@@ -86,7 +96,17 @@ describe("desktop appearance model", () => {
 
     const cardShadowPatch = buildDesktopAppearancePatch(
       cardLayer,
-      { shadow: { blur: 22, color: "#000000", offsetX: 4, offsetY: 6, opacity: 35 } },
+      { shadow: {
+          blur: 22,
+          color: "#000000",
+          inset: false,
+          kind: "box",
+          offsetX: 4,
+          offsetY: 6,
+          opacity: 35,
+          spread: 0,
+          visible: true,
+        } },
       { cardBorder: DEFAULT_DRAFTING_CARD_STATE.border },
     )
 

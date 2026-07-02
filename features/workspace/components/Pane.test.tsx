@@ -224,7 +224,7 @@ describe("Pane", () => {
     expect(card.style.borderRadius).toBe("24px")
     expect(card.style.width).toBe("280px")
     expect(card.style.height).toBe("376px")
-    expect(card.style.boxShadow).toContain("6px 8px 30px rgba(0, 0, 0, 0.35)")
+    expect(card.style.boxShadow).toContain("6px 8px 30px 0px rgba(0, 0, 0, 0.35)")
     expect(node).not.toBeNull()
     expect(node.parentElement).toBe(card.parentElement)
     expect(node.style.width).toBe("240px")
@@ -275,7 +275,7 @@ describe("Pane", () => {
 
     expect(card.getAttribute("data-card-shape")).toBeNull()
     expect(cardShape).toBeNull()
-    expect(card.style.boxShadow).toContain("6px 8px 30px rgba(0, 0, 0, 0.35)")
+    expect(card.style.boxShadow).toContain("6px 8px 30px 0px rgba(0, 0, 0, 0.35)")
     expect(qrBackground).not.toBeNull()
     expect(qrBackground?.getAttribute("data-background-shape")).toBe("flower")
     expect(qrBackground?.querySelector("svg")).not.toBeNull()

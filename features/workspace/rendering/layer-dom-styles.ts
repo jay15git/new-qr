@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react"
 
 import type { DraftingCardState } from "@/features/workspace/model/card-state"
+import { normalizeDraftingCardBorder, normalizeDraftingCardShadow } from "@/features/workspace/model/card-state"
 import { getDraftingCardPatternStyle } from "@/features/workspace/model/card-patterns"
 import {
   DEFAULT_DRAFTING_TEXT_LAYER,
@@ -10,7 +11,13 @@ import {
 import { getDraftingFontCssFamily } from "@/features/workspace/model/fonts"
 import { getDraftingTextFontFamily } from "@/features/workspace/rendering/text-layout"
 import {
-  getDraftingLayerBoxShadow,
+  buildCssFilterString,
+  getDraftingLayerDropShadowFilter,
+  getDraftingLayerShadows,
+  getDraftingOutlineStyle,
+  getDraftingPerSideBorderStyle,
+  getDraftingUniformBorderStyle,
+  mergeCssFilterStrings,
   toRgba,
 } from "@/features/workspace/rendering/layer-appearance"
 import { clampBackgroundShapeTilt } from "@/features/qr-code/model/state"
@@ -23,18 +30,61 @@ import {
 export { toRgba } from "@/features/workspace/rendering/layer-appearance"
 
 export function getDraftingCardShadow(cardState: DraftingCardState) {
-  return getDraftingLayerBoxShadow(cardState.shadow)
+  return getDraftingLayerShadows([normalizeDraftingCardShadow(cardState.shadow)])
 }
 
 export function getDraftingCardBorder(cardState: DraftingCardState) {
-  const borderWidth = Math.max(0, cardState.border.width)
+  const border = normalizeDraftingCardBorder(cardState.border)
+  const hasPerSideOverrides = border.sides.top.width !== border.width ||
+    border.sides.right.width !== border.width ||
+    border.sides.bottom.width !== border.width ||
+    border.sides.left.width !== border.width
 
-  if (borderWidth <= 0) {
+  if (hasPerSideOverrides) {
     return undefined
   }
 
-  const borderColor = toRgba(cardState.border.color, cardState.border.opacity / 100)
-  return `${borderWidth}px solid ${borderColor}`
+  return getDraftingUniformBorderStyle({
+    color: border.color,
+    opacity: border.opacity,
+    style: border.style,
+    width: border.width,
+  })
+}
+
+export function getDraftingCardBorderStyle(cardState: DraftingCardState): CSSProperties {
+  const border = normalizeDraftingCardBorder(cardState.border)
+  const uniformBorder = getDraftingCardBorder({ ...cardState, border })
+
+  if (uniformBorder) {
+    return { border: uniformBorder }
+  }
+
+  return getDraftingPerSideBorderStyle(border.sides)
+}
+
+export function getDraftingLayerEffectStyle(layer: DraftingCanvasLayer): CSSProperties {
+  const shadows =
+    layer.shadows && layer.shadows.length > 0
+      ? layer.shadows
+      : layer.shadow
+        ? [layer.shadow]
+        : []
+  const boxShadow = getDraftingLayerShadows(shadows)
+  const filter = mergeCssFilterStrings(
+    buildCssFilterString(layer.layerFilters ?? []),
+    getDraftingLayerDropShadowFilter(shadows),
+  )
+  const backdropFilter = buildCssFilterString(layer.backdropFilters ?? [])
+  const borderStyle = layer.borderSides ? getDraftingPerSideBorderStyle(layer.borderSides) : {}
+
+  return {
+    ...borderStyle,
+    ...getDraftingOutlineStyle(layer.outline),
+    ...(boxShadow !== "none" ? { boxShadow } : {}),
+    ...(filter ? { filter } : {}),
+    ...(backdropFilter ? { backdropFilter } : {}),
+  }
 }
 
 export function getLayerPlacementStyle(
@@ -123,15 +173,13 @@ export function getExportLayerPlacementStyle(
 }
 
 export function getExportLayerEffectStyle(layer: DraftingCanvasLayer): Record<string, string> {
+  const effectStyle = getDraftingLayerEffectStyle(layer)
   const style: Record<string, string> = {}
-  const boxShadow = getDraftingLayerBoxShadow(layer.shadow)
 
-  if (boxShadow !== "none") {
-    style.boxShadow = boxShadow
-  }
-
-  if (layer.blur > 0) {
-    style.filter = `blur(${layer.blur}px)`
+  for (const [key, value] of Object.entries(effectStyle)) {
+    if (typeof value === "string" && value) {
+      style[key] = value
+    }
   }
 
   return style
@@ -238,13 +286,16 @@ export function getDraftingCardDomStyle(
           backgroundSize: cardState.cardImage.fit,
         }
       : undefined
-  const border = getDraftingCardBorder(cardState)
+  const border = normalizeDraftingCardBorder(cardState.border)
+  const borderStyle = getDraftingCardBorder(cardState)
+    ? { border: getDraftingCardBorder(cardState) }
+    : getDraftingPerSideBorderStyle(border.sides)
 
   return serializeCssProperties({
     backgroundColor: cardState.fill,
     ...(cardPatternStyle as Record<string, string | number> | undefined),
     ...cardImageStyle,
-    border,
+    ...borderStyle,
     borderRadius: cardState.cornerRadius,
     boxShadow: getDraftingCardShadow({ ...cardState, shadow: layer.shadow }),
   })

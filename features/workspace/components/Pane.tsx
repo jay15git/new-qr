@@ -49,10 +49,9 @@ import {
 } from "@/features/workspace/rendering/qr-artwork"
 import { DraftingLayerTiltShell } from "@/features/workspace/components/DraftingLayerTiltShell"
 import { DraftingQrLayerContent } from "@/features/workspace/components/DraftingQrLayerContent"
-import { getDraftingLayerBoxShadow } from "@/features/workspace/rendering/layer-appearance"
 import {
-  getDraftingCardBorder,
-  getDraftingCardShadow,
+  getDraftingCardBorderStyle,
+  getDraftingLayerEffectStyle,
   getLayerControlShellStyle,
   getLayerPlacementStyle,
   getTextLayerStyle,
@@ -1226,7 +1225,7 @@ export const Pane = memo(function Pane({
     backgroundColor: cardState.fill,
     ...(isPaperShaderMode || isImageFilterMode || isImageMode ? undefined : cardPatternStyle),
     ...cardImageStyle,
-    border: getDraftingCardBorder(cardState),
+    ...getDraftingCardBorderStyle(cardState),
     borderRadius: cardState.cornerRadius,
   }
   const imageFilterShader = {
@@ -2011,7 +2010,7 @@ export const Pane = memo(function Pane({
           )}
           style={{
             ...getLayerPlacementStyle(layer),
-            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+            ...getDraftingLayerEffectStyle(layer),
           }}
           onClick={(event) => selectLayerFromClick(event, layer)}
           onPointerDown={(event) => startLayerInteraction(event, layer, "move")}
@@ -2049,7 +2048,7 @@ export const Pane = memo(function Pane({
           )}
           style={{
             ...getLayerPlacementStyle(layer),
-            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+            ...getDraftingLayerEffectStyle(layer),
           }}
           onClick={(event) => selectLayerFromClick(event, layer, { qr: true })}
           onPointerDown={(event) => startLayerInteraction(event, layer, "move")}
@@ -2089,8 +2088,7 @@ export const Pane = memo(function Pane({
           )}
           style={{
             ...getLayerPlacementStyle(layer),
-            boxShadow: getDraftingLayerBoxShadow(layer.shadow),
-            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+            ...getDraftingLayerEffectStyle(layer),
           }}
           onClick={(event) => selectLayerFromClick(event, layer)}
           onDoubleClick={(event) => startTextEditing(event, layer)}
@@ -2151,8 +2149,7 @@ export const Pane = memo(function Pane({
           style={{
             ...getLayerPlacementStyle(layer),
             borderRadius: layer.cornerRadius ? `${layer.cornerRadius}px` : undefined,
-            boxShadow: getDraftingLayerBoxShadow(layer.shadow),
-            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+            ...getDraftingLayerEffectStyle(layer),
           }}
           onClick={(event) => selectLayerFromClick(event, layer)}
           onPointerDown={(event) => startLayerInteraction(event, layer, "move")}
@@ -2184,8 +2181,7 @@ export const Pane = memo(function Pane({
           )}
           style={{
             ...getLayerPlacementStyle(layer),
-            boxShadow: getDraftingLayerBoxShadow(layer.shadow),
-            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+            ...getDraftingLayerEffectStyle(layer),
           }}
           onClick={(event) => selectLayerFromClick(event, layer)}
           onPointerDown={(event) => startLayerInteraction(event, layer, "move")}
@@ -2231,8 +2227,7 @@ export const Pane = memo(function Pane({
         style={{
           ...cardStyle,
           ...getLayerPlacementStyle(layer),
-          boxShadow: getDraftingCardShadow({ ...cardState, shadow: layer.shadow }),
-          filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+          ...getDraftingLayerEffectStyle(layer),
         }}
         onClick={(event) => selectLayerFromClick(event, layer)}
         onPointerDown={(event) => startLayerInteraction(event, layer, "move")}
@@ -2279,7 +2274,7 @@ export const Pane = memo(function Pane({
           className="absolute max-h-none max-w-none"
           style={{
             ...getLayerPlacementStyle(layer, true),
-            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+            ...getDraftingLayerEffectStyle(layer),
           }}
         >
           {(layer.children ?? [])
@@ -2304,7 +2299,7 @@ export const Pane = memo(function Pane({
           className="absolute max-h-none max-w-none"
           style={{
             ...getLayerPlacementStyle(layer, true),
-            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+            ...getDraftingLayerEffectStyle(layer),
           }}
         >
           <DraftingQrLayerContent
@@ -2330,7 +2325,7 @@ export const Pane = memo(function Pane({
           className="absolute max-h-none max-w-none overflow-hidden"
           style={{
             ...getLayerPlacementStyle(layer, true),
-            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+            ...getDraftingLayerEffectStyle(layer),
           }}
         >
           <div className="h-full w-full" data-slot="drafting-text-content" style={getTextLayerStyle(layer)}>
@@ -2351,7 +2346,7 @@ export const Pane = memo(function Pane({
           className="absolute max-h-none max-w-none overflow-hidden"
           style={{
             ...getLayerPlacementStyle(layer, true),
-            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+            ...getDraftingLayerEffectStyle(layer),
           }}
         >
           <DraftingImageLayerContent layer={layer} />
@@ -2371,7 +2366,7 @@ export const Pane = memo(function Pane({
           className="absolute max-h-none max-w-none overflow-visible"
           style={{
             ...getLayerPlacementStyle(layer, true),
-            filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+            ...getDraftingLayerEffectStyle(layer),
           }}
         >
           <DraftingShapeLayerContent layer={layer} />
@@ -2390,8 +2385,7 @@ export const Pane = memo(function Pane({
         style={{
           ...cardStyle,
           ...getLayerPlacementStyle(layer, true),
-          boxShadow: getDraftingCardShadow({ ...cardState, shadow: layer.shadow }),
-          filter: layer.blur > 0 ? `blur(${layer.blur}px)` : undefined,
+          ...getDraftingLayerEffectStyle(layer),
         }}
       >
         {isPaperShaderMode ? <DraftingCardPaperShaderLayer paperShader={cardState.paperShader} /> : null}

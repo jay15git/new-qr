@@ -1,0 +1,97 @@
+import { describe, expect, it } from "vitest"
+
+import { createUniformPerSideBorder } from "@/features/workspace/model/effects"
+import { createDefaultDraftingFilterEffect } from "@/features/workspace/model/filters"
+import {
+  buildCssFilterString,
+  getDraftingLayerShadows,
+  getDraftingOutlineStyle,
+  getDraftingPerSideBorderStyle,
+  getDraftingUniformBorderStyle,
+  getStrokeDasharray,
+  mergeCssFilterStrings,
+} from "@/features/workspace/rendering/layer-appearance"
+
+describe("layer appearance css builders", () => {
+  it("builds dashed stroke dash arrays", () => {
+    expect(getStrokeDasharray("dashed")).toBe("8 4")
+    expect(getStrokeDasharray("dotted")).toBe("2 2")
+    expect(getStrokeDasharray("solid")).toBeUndefined()
+  })
+
+  it("builds box shadows with spread and inset", () => {
+    expect(
+      getDraftingLayerShadows([
+        {
+          blur: 12,
+          color: "#111827",
+          inset: true,
+          kind: "box",
+          offsetX: 2,
+          offsetY: 4,
+          opacity: 50,
+          spread: 3,
+          visible: true,
+        },
+      ]),
+    ).toBe("inset 2px 4px 12px 3px rgba(17, 24, 39, 0.5)")
+  })
+
+  it("builds outline css", () => {
+    expect(
+      getDraftingOutlineStyle({
+        color: "#000000",
+        offset: 4,
+        opacity: 100,
+        style: "dashed",
+        visible: true,
+        width: 2,
+      }),
+    ).toEqual({
+      outline: "2px dashed rgba(0, 0, 0, 1)",
+      outlineOffset: "4px",
+    })
+  })
+
+  it("builds per-side border css", () => {
+    const sides = createUniformPerSideBorder({
+      color: "#111827",
+      opacity: 100,
+      style: "solid",
+      width: 0,
+    })
+    sides.bottom = { color: "#111827", opacity: 100, style: "dashed", width: 2 }
+
+    expect(getDraftingPerSideBorderStyle(sides)).toEqual({
+      borderTopWidth: "0",
+      borderRightWidth: "0",
+      borderLeftWidth: "0",
+      borderBottomWidth: "2px",
+      borderBottomStyle: "dashed",
+      borderBottomColor: "rgba(17, 24, 39, 1)",
+    })
+  })
+
+  it("builds uniform border shorthand", () => {
+    expect(
+      getDraftingUniformBorderStyle({
+        color: "#111827",
+        opacity: 100,
+        style: "dotted",
+        width: 1,
+      }),
+    ).toBe("1px dotted rgba(17, 24, 39, 1)")
+  })
+
+  it("chains css filters and drop shadows", () => {
+    const filter = buildCssFilterString([
+      createDefaultDraftingFilterEffect("blur", { amount: 4 }),
+      createDefaultDraftingFilterEffect("brightness", { amount: 120 }),
+    ])
+
+    expect(filter).toBe("blur(4px) brightness(1.2)")
+    expect(mergeCssFilterStrings(filter, "drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.4))")).toBe(
+      "blur(4px) brightness(1.2) drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.4))",
+    )
+  })
+})

@@ -8,13 +8,15 @@ import {
   Redo2Icon,
   RotateCcwIcon,
   SquareRoundCornerIcon,
+  SquareIcon,
   Undo2Icon,
 } from "lucide-react"
 import { type ReactNode } from "react"
 
 import {
-  AppearanceBlurControls,
+  AppearanceFilterControls,
   AppearanceOpacityControls,
+  AppearanceOutlineControls,
   AppearanceRadiusControls,
   AppearanceShadowControls,
   AppearanceStrokeControls,
@@ -36,7 +38,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import type { DraftingCanvasLayer } from "@/features/workspace/model/layers"
 import { cn } from "@/lib/utils"
 
-type AppearancePopoverId = "shadow" | "blur" | "stroke" | "opacity" | "radius"
+type AppearancePopoverId = "shadow" | "stroke" | "opacity" | "radius" | "outline" | "filters"
 
 function getAppearancePopoverLabel(
   popoverId: AppearancePopoverId,
@@ -45,14 +47,16 @@ function getAppearancePopoverLabel(
   switch (popoverId) {
     case "shadow":
       return "Shadow settings"
-    case "blur":
-      return "Blur settings"
     case "stroke":
       return appearance.usesBorderSemantics ? "Border settings" : "Stroke settings"
     case "opacity":
       return "Opacity settings"
     case "radius":
       return "Corner radius settings"
+    case "outline":
+      return "Outline settings"
+    case "filters":
+      return "Filter settings"
   }
 }
 
@@ -72,10 +76,10 @@ const APPEARANCE_POPOVERS: Array<{
     ),
   },
   {
-    id: "blur",
+    id: "filters",
     renderIcon: () => <DropletsIcon className="size-3.5" />,
     renderControls: ({ appearance, onPatch }) => (
-      <AppearanceBlurControls appearance={appearance} onPatch={onPatch} />
+      <AppearanceFilterControls appearance={appearance} onPatch={onPatch} />
     ),
   },
   {
@@ -83,6 +87,13 @@ const APPEARANCE_POPOVERS: Array<{
     renderIcon: () => <PencilLineIcon className="size-3.5" />,
     renderControls: ({ appearance, onPatch }) => (
       <AppearanceStrokeControls appearance={appearance} onPatch={onPatch} />
+    ),
+  },
+  {
+    id: "outline",
+    renderIcon: () => <SquareIcon className="size-3.5" />,
+    renderControls: ({ appearance, onPatch }) => (
+      <AppearanceOutlineControls appearance={appearance} onPatch={onPatch} />
     ),
   },
   {
@@ -119,6 +130,10 @@ function DesktopAppearancePopover({
   }) => ReactNode
   renderIcon: () => ReactNode
 }) {
+  if (popoverId === "outline" && !appearance.supportsOutline) {
+    return null
+  }
+
   if (popoverId === "stroke" && !appearance.supportsStroke) {
     return null
   }

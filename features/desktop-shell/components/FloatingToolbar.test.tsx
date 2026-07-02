@@ -14,6 +14,7 @@ import {
   DESKTOP_SETTINGS_TOOLBAR_COLLAPSED_STORAGE_KEY,
   DesktopSettingsToolbarShell,
 } from "@/features/desktop-shell/components/DesktopSettingsToolbarShell"
+import { getDesktopAppearanceSnapshot } from "@/features/desktop-shell/model/appearance"
 import { createDraftingTextLayer, type DraftingCanvasLayer } from "@/features/workspace/model/layers"
 import { renderWithAsyncJsdomRoot } from "@/test-utils/jsdom-react-root"
 
@@ -792,7 +793,7 @@ describe("FloatingToolbar", () => {
     const auroraPreset = getRequiredButton(surface.container, "Use Aurora pattern palette")
 
     expect(presetGrid).not.toBeNull()
-    expect(presetButtons).toHaveLength(11)
+    expect(presetButtons).toHaveLength(31)
     expect(customPreset.getAttribute("aria-pressed")).toBe("false")
     expect(signalPreset.getAttribute("aria-pressed")).toBe("true")
     expect(auroraPreset.getAttribute("aria-pressed")).toBe("false")
@@ -1401,13 +1402,7 @@ describe("FloatingToolbar", () => {
     const surface = await renderPrototype({
       controller: {
         activeTool: null,
-        appearanceSnapshot: {
-          blur: layer.blur,
-          opacity: layer.opacity,
-          shadow: layer.shadow,
-          supportsCornerRadius: false,
-          supportsStroke: false,
-        },
+        appearanceSnapshot: getDesktopAppearanceSnapshot(layer),
         onAppearancePatch,
         selectedAppearanceLayer: layer,
         selectedElementLayer: layer,
@@ -1416,7 +1411,7 @@ describe("FloatingToolbar", () => {
 
     expect(surface.container.querySelector('[data-slot="desktop-appearance-island"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="desktop-appearance-shadow-trigger"]')).not.toBeNull()
-    expect(surface.container.querySelector('[data-slot="desktop-appearance-blur-trigger"]')).not.toBeNull()
+    expect(surface.container.querySelector('[data-slot="desktop-appearance-filters-trigger"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="desktop-appearance-opacity-trigger"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="desktop-appearance-stroke-trigger"]')).toBeNull()
   })
