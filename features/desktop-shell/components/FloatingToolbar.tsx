@@ -1593,6 +1593,17 @@ export function DesktopThemeStyles() {
         --scroll-edge-chevron-color: rgba(255, 255, 255, 0.45);
       }
 
+      [data-slot^="desktop-appearance-"][data-slot$="-popover"] {
+        --scroll-edge-fade-color: #0a0a0a;
+        --scroll-edge-chevron-color: rgba(255, 255, 255, 0.45);
+      }
+
+      body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot^="desktop-appearance-"][data-slot$="-popover"],
+      body:has([data-slot="desktop-workspace"][data-desktop-theme="light"]) [data-slot^="desktop-appearance-"][data-slot$="-popover"] {
+        --scroll-edge-fade-color: rgba(255, 255, 255, 0.88);
+        --scroll-edge-chevron-color: rgba(15, 23, 42, 0.42);
+      }
+
       body:has([data-slot="desktop-floating-toolbar-root"][data-desktop-theme="light"]) [data-slot="desktop-keyboard-shortcuts-popover"] {
         --scroll-edge-fade-color: rgba(255, 255, 255, 0.88);
         --scroll-edge-chevron-color: rgba(15, 23, 42, 0.42);

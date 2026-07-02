@@ -4,6 +4,7 @@ import { EyeIcon, EyeOffIcon, MinusIcon, PlusIcon } from "lucide-react"
 
 import {
   DESKTOP_INSPECTOR_SECTION_GAP_CLASS,
+  DESKTOP_INSPECTOR_SECTION_HEADING_CLASS,
   DesktopInspectorLabel,
   DesktopInspectorNativeSelect,
   DesktopInspectorSection,
@@ -12,6 +13,8 @@ import {
 import {
   DesktopInspectorColorRow,
   DesktopInspectorElasticSliderRow,
+  DesktopInspectorNumberField,
+  DesktopInspectorValueGrid,
 } from "@/features/desktop-shell/components/DesktopInspectorShell"
 import type { DesktopAppearanceSnapshot } from "@/features/desktop-shell/model/appearance"
 import {
@@ -38,40 +41,55 @@ import { cn } from "@/lib/utils"
 const DEFAULT_SHADOW_COLOR = "#111827"
 
 function ShadowLayerRow({
+  index,
   shadow,
   onChange,
   onRemove,
 }: {
+  index: number
   shadow: DraftingShadowLayerState
   onChange: (patch: Partial<DraftingShadowLayerState>) => void
   onRemove: () => void
 }) {
+  const shadowLabel = `Shadow ${index + 1}`
+
   return (
-    <div className="rounded-[10px] border border-[var(--desktop-inspector-control-border-hover)] p-2">
-      <div className="mb-2 flex items-center justify-end gap-1">
-        <button
-          aria-label={shadow.visible ? "Hide shadow" : "Show shadow"}
-          className="grid size-7 place-items-center rounded-md text-[var(--desktop-inspector-fg-secondary)] hover:bg-[var(--desktop-inspector-control-hover-bg)]"
-          type="button"
-          onClick={() => onChange({ visible: !shadow.visible })}
+    <div className="grid gap-2">
+      <div className="flex items-center justify-between gap-2">
+        <span
+          className={cn(
+            "min-w-0 truncate",
+            DESKTOP_INSPECTOR_SECTION_HEADING_CLASS,
+            "mb-0",
+          )}
         >
-          {shadow.visible ? <EyeIcon className="size-3.5" /> : <EyeOffIcon className="size-3.5" />}
-        </button>
-        <button
-          aria-label="Remove shadow"
-          className="grid size-7 place-items-center rounded-md text-[var(--desktop-inspector-fg-secondary)] hover:bg-[var(--desktop-inspector-control-hover-bg)]"
-          type="button"
-          onClick={onRemove}
-        >
-          <MinusIcon className="size-3.5" />
-        </button>
+          {shadowLabel}
+        </span>
+        <div className="flex shrink-0 items-center gap-1">
+          <button
+            aria-label={shadow.visible ? `Hide ${shadowLabel}` : `Show ${shadowLabel}`}
+            className="grid size-7 place-items-center rounded-md text-[var(--desktop-inspector-fg-secondary)] hover:bg-[var(--desktop-inspector-control-hover-bg)]"
+            type="button"
+            onClick={() => onChange({ visible: !shadow.visible })}
+          >
+            {shadow.visible ? <EyeIcon className="size-3.5" /> : <EyeOffIcon className="size-3.5" />}
+          </button>
+          <button
+            aria-label={`Remove ${shadowLabel}`}
+            className="grid size-7 place-items-center rounded-md text-[var(--desktop-inspector-fg-secondary)] hover:bg-[var(--desktop-inspector-control-hover-bg)]"
+            type="button"
+            onClick={onRemove}
+          >
+            <MinusIcon className="size-3.5" />
+          </button>
+        </div>
       </div>
       <DesktopInspectorColorRow
-        label="Shadow color"
+        label="Color"
         value={shadow.color}
         onChange={(color) => onChange({ color: color || DEFAULT_SHADOW_COLOR })}
       />
-      <div className="mt-2 grid gap-2">
+      <div className="grid gap-2">
         <DesktopInspectorElasticSliderRow
           label="Blur"
           max={128}
@@ -88,22 +106,22 @@ function ShadowLayerRow({
           valueLabel={`${Math.round(shadow.opacity)}%`}
           onChange={(opacity) => onChange({ opacity })}
         />
-        <DesktopInspectorElasticSliderRow
-          label="Offset X"
-          max={128}
-          min={-128}
-          value={shadow.offsetX}
-          valueLabel={`${Math.round(shadow.offsetX)}`}
-          onChange={(offsetX) => onChange({ offsetX })}
-        />
-        <DesktopInspectorElasticSliderRow
-          label="Offset Y"
-          max={128}
-          min={-128}
-          value={shadow.offsetY}
-          valueLabel={`${Math.round(shadow.offsetY)}`}
-          onChange={(offsetY) => onChange({ offsetY })}
-        />
+        <DesktopInspectorValueGrid>
+          <DesktopInspectorNumberField
+            label="X"
+            max={128}
+            min={-128}
+            value={shadow.offsetX}
+            onChange={(offsetX) => onChange({ offsetX })}
+          />
+          <DesktopInspectorNumberField
+            label="Y"
+            max={128}
+            min={-128}
+            value={shadow.offsetY}
+            onChange={(offsetY) => onChange({ offsetY })}
+          />
+        </DesktopInspectorValueGrid>
       </div>
     </div>
   )
@@ -160,6 +178,7 @@ export function AppearanceShadowControls({
         {shadows.map((shadow, index) => (
           <ShadowLayerRow
             key={shadow.id}
+            index={index}
             shadow={shadow}
             onChange={(patch) =>
               updateShadows(

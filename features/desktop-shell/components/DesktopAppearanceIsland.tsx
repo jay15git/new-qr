@@ -10,6 +10,8 @@ import {
 } from "lucide-react"
 import { type ReactNode } from "react"
 
+import { ScrollArea } from "@/components/ui/scroll-area"
+
 import {
   AppearanceFilterControls,
   AppearanceOpacityControls,
@@ -245,14 +247,20 @@ function DesktopAppearancePopover({
         align="center"
         data-slot={`desktop-appearance-${popoverId}-popover`}
         sideOffset={12}
-        className="z-[20000] w-[min(18rem,calc(100vw-1rem))] overflow-hidden rounded-[16px] border border-[var(--desktop-appearance-popover-border)] bg-[var(--desktop-appearance-popover-bg)] p-0 text-[var(--desktop-inspector-fg-secondary)] shadow-[var(--desktop-appearance-popover-shadow)] backdrop-blur-xl"
+        className="z-[20000] flex h-[min(28rem,calc(100dvh-8rem))] max-h-[min(28rem,calc(100dvh-8rem))] w-[min(18rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-[16px] border border-[var(--desktop-appearance-popover-border)] bg-[var(--desktop-appearance-popover-bg)] p-0 text-[var(--desktop-inspector-fg-secondary)] shadow-[var(--desktop-appearance-popover-shadow)] backdrop-blur-xl"
       >
-        <div
-          className="max-h-[min(28rem,calc(100dvh-8rem))] overflow-y-auto p-3"
-          data-slot="desktop-floating-inspector"
+        <ScrollArea
+          chevron
+          cueSize="comfortable"
+          className="h-full min-h-0 flex-1"
+          data-slot="desktop-inspector-scroll-area"
+          scrollFade
+          viewportClassName="px-3 py-3"
         >
-          {renderControls({ appearance, onPatch })}
-        </div>
+          <div data-slot="desktop-inspector-scroll">
+            <div data-slot="desktop-floating-inspector">{renderControls({ appearance, onPatch })}</div>
+          </div>
+        </ScrollArea>
       </PopoverContent>
     </Popover>
   )
