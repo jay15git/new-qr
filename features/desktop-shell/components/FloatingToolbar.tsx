@@ -436,9 +436,6 @@ type DesktopShapeColorMode = "solid" | "gradient"
 
 export type DesktopShapeSettings = {
   backgroundShapeId: QrBackgroundShapeId
-  borderColor: string
-  borderOpacity: number
-  borderWidth: number
   bottomSpace: number
   cardEnabled: boolean
   cardFill: string
@@ -454,9 +451,6 @@ export type DesktopShapeSettings = {
   shapeShadowOffsetY: number
   shapeShadowOpacity: number
   shapeSolidColor: string
-  shapeStrokeColor: string
-  shapeStrokeOpacity: number
-  shapeStrokeWidth: number
   shapeTiltX: number
   shapeTiltY: number
   shadowBlur: number
@@ -494,8 +488,6 @@ export type DesktopDecorationsSettings = {
   kind: "badge" | "frame" | "label" | "sticker"
   patternId: DraftingCardPatternSelectionId
   radius: number
-  strokeColor: string
-  strokeWidth: number
 }
 
 export type DesktopEffectsSettings = {
@@ -663,6 +655,26 @@ const DESKTOP_DOTS_PALETTE_PRESETS: Array<{
   { label: "Signal", colors: ["#04879c", "#0c3c78", "#090030", "#f30a49"] },
   { label: "Candy", colors: ["#fb7185", "#f0abfc", "#c084fc", "#38bdf8"] },
   { label: "Mono", colors: ["#020617", "#334155", "#94a3b8", "#f8fafc"] },
+  { label: "Forest", colors: ["#14532d", "#15803d", "#4ade80", "#bbf7d0"] },
+  { label: "Berry", colors: ["#881337", "#be123c", "#f43f5e", "#fecdd3"] },
+  { label: "Coral", colors: ["#ff7e5f", "#feb47b", "#ff6b6b", "#fff5ee"] },
+  { label: "Sage", colors: ["#3f4f2e", "#5c6b4a", "#9caf88", "#e8ede4"] },
+  { label: "Lavender", colors: ["#8b5cf6", "#c4b5fd", "#ede9fe", "#faf5ff"] },
+  { label: "Midnight", colors: ["#0f0a1e", "#1a1145", "#2d1b69", "#4c1d95"] },
+  { label: "Terracotta", colors: ["#b7410e", "#cd5c2e", "#e8a87c", "#faebd7"] },
+  { label: "Ice", colors: ["#a5f3fc", "#e0f7fa", "#f0fdff", "#ffffff"] },
+  { label: "Blush", colors: ["#db2777", "#f9a8d4", "#fce7f3", "#fdf2f8"] },
+  { label: "Lime", colors: ["#65a30d", "#84cc16", "#d9f99d", "#1a2e05"] },
+  { label: "Copper", colors: ["#92400e", "#b45309", "#d97706", "#fde68a"] },
+  { label: "Storm", colors: ["#1e3a5f", "#2c5282", "#4a6fa5", "#a0aec0"] },
+  { label: "Orchid", colors: ["#86198f", "#c026d3", "#f0abfc", "#fdf4ff"] },
+  { label: "Sand", colors: ["#c2a366", "#d4b896", "#ede0c8", "#8b6914"] },
+  { label: "Jade", colors: ["#0f766e", "#14b8a6", "#99f6e4", "#042f2e"] },
+  { label: "Plum", colors: ["#4c0519", "#831843", "#be185d", "#fbcfe8"] },
+  { label: "Sky", colors: ["#7dd3fc", "#bae6fd", "#e0f2fe", "#f0f9ff"] },
+  { label: "Ember", colors: ["#ff6b35", "#e85d04", "#3d2314", "#1a1108"] },
+  { label: "Frost", colors: ["#b8c5d6", "#d6deeb", "#eef2f7", "#93c5fd"] },
+  { label: "Tropical", colors: ["#00c9a7", "#00b4d8", "#48cae4", "#0077b6"] },
 ]
 
 const DESKTOP_ICONSTACK_LIBRARY_OPTIONS: Array<{
@@ -825,9 +837,6 @@ const DEFAULT_DESKTOP_CORNERS_SETTINGS: DesktopCornersSettings = {
 
 const DEFAULT_DESKTOP_SHAPE_SETTINGS: DesktopShapeSettings = {
   backgroundShapeId: "none",
-  borderColor: DEFAULT_DRAFTING_CARD_STATE.border.color,
-  borderOpacity: DEFAULT_DRAFTING_CARD_STATE.border.opacity,
-  borderWidth: DEFAULT_DRAFTING_CARD_STATE.border.width,
   bottomSpace: DEFAULT_DRAFTING_CARD_STATE.bottomSpace,
   cardEnabled: DEFAULT_DRAFTING_CARD_STATE.enabled,
   cardFill: DEFAULT_DRAFTING_CARD_STATE.fill,
@@ -851,9 +860,6 @@ const DEFAULT_DESKTOP_SHAPE_SETTINGS: DesktopShapeSettings = {
   shapeShadowOffsetY: DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetY,
   shapeShadowOpacity: DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOpacity,
   shapeSolidColor: "#18181b",
-  shapeStrokeColor: DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeColor,
-  shapeStrokeOpacity: DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeOpacity,
-  shapeStrokeWidth: DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeWidth,
   shapeTiltX: DEFAULT_BACKGROUND_SHAPE_OPTIONS.tiltX,
   shapeTiltY: DEFAULT_BACKGROUND_SHAPE_OPTIONS.tiltY,
   shadowBlur: DEFAULT_DRAFTING_CARD_STATE.shadow.blur,
@@ -891,8 +897,6 @@ const DEFAULT_DESKTOP_DECORATIONS_SETTINGS: DesktopDecorationsSettings = {
   kind: "frame",
   patternId: DRAFTING_CARD_PATTERN_NONE_ID,
   radius: DEFAULT_DRAFTING_CARD_STATE.cornerRadius,
-  strokeColor: DEFAULT_DRAFTING_CARD_STATE.border.color,
-  strokeWidth: DEFAULT_DRAFTING_CARD_STATE.border.width,
 }
 
 const DEFAULT_DESKTOP_EFFECTS_SETTINGS: DesktopEffectsSettings = {
@@ -5173,18 +5177,6 @@ function DesktopDecorationsInspector({
               min={0}
               value={settings.radius}
               onChange={(radius) => onDecorationsSettingsChange({ radius })}
-            />
-            <DesktopColorInputRow
-              label="Decoration stroke color"
-              value={settings.strokeColor}
-              onChange={(strokeColor) => onDecorationsSettingsChange({ strokeColor })}
-            />
-            <DesktopNumberRow
-              label="Decoration stroke"
-              max={24}
-              min={0}
-              value={settings.strokeWidth}
-              onChange={(strokeWidth) => onDecorationsSettingsChange({ strokeWidth })}
             />
           </div>
         </DesktopInspectorSection>

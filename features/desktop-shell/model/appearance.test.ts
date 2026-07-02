@@ -14,21 +14,18 @@ import {
 const NODE_ID = "node-1"
 
 describe("desktop appearance model", () => {
-  it("maps card border state into a shared appearance snapshot", () => {
+  it("maps card corner radius into a shared appearance snapshot", () => {
     const layer = createDraftingShapeLayer(NODE_ID)
     const snapshot = getDesktopAppearanceSnapshot(
       { ...layer, kind: "card" },
       {
-        cardBorder: DEFAULT_DRAFTING_CARD_STATE.border,
         cardCornerRadius: DEFAULT_DRAFTING_CARD_STATE.cornerRadius,
       },
     )
 
-    expect(snapshot.stroke).toBe(DEFAULT_DRAFTING_CARD_STATE.border.color)
-    expect(snapshot.strokeWidth).toBe(DEFAULT_DRAFTING_CARD_STATE.border.width)
-    expect(snapshot.supportsStroke).toBe(true)
+    expect(snapshot.cornerRadius).toBe(DEFAULT_DRAFTING_CARD_STATE.cornerRadius)
     expect(snapshot.supportsCornerRadius).toBe(true)
-    expect(snapshot.usesBorderSemantics).toBe(true)
+    expect(snapshot.supportsOutline).toBe(true)
   })
 
   it("reads qr layer shadow from the layer model", () => {
@@ -62,9 +59,8 @@ describe("desktop appearance model", () => {
       { qrBackgroundShapeOptions: DEFAULT_BACKGROUND_SHAPE_OPTIONS },
     )
 
-    expect(snapshot.stroke).toBe(DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeColor)
     expect(snapshot.shadow.color).toBe(layer.shadow.color)
-    expect(snapshot.supportsStroke).toBe(true)
+    expect(snapshot.supportsOutline).toBe(false)
   })
 
   it("builds qr and card appearance patches into their domain stores", () => {
@@ -83,25 +79,16 @@ describe("desktop appearance model", () => {
           spread: 0,
           visible: true,
         },
-        strokeWidth: 3,
       },
       { qrBackgroundShapeOptions: DEFAULT_BACKGROUND_SHAPE_OPTIONS },
     )
 
-    expect(qrPatch.qrBackgroundShapeOptions?.shadowOffsetX).toBeUndefined()
-    expect(qrPatch.qrBackgroundShapeOptions?.edgeBlur).toBeUndefined()
+    expect(qrPatch.qrBackgroundShapeOptions).toBeUndefined()
     expect(qrPatch.layerPatch.shadow?.blur).toBe(12)
-    expect(qrPatch.qrBackgroundShapeOptions?.strokeWidth).toBe(3)
 
     const cardLayer = { ...createDraftingShapeLayer(NODE_ID), kind: "card" as const }
-    const cardPatch = buildDesktopAppearancePatch(
-      cardLayer,
-      { stroke: "#ff00ff", strokeWidth: 8, cornerRadius: 24 },
-      { cardBorder: DEFAULT_DRAFTING_CARD_STATE.border },
-    )
+    const cardPatch = buildDesktopAppearancePatch(cardLayer, { cornerRadius: 24 })
 
-    expect(cardPatch.cardBorder?.color).toBe("#ff00ff")
-    expect(cardPatch.cardBorder?.width).toBe(8)
     expect(cardPatch.cardCornerRadius).toBe(24)
 
     const cardShadowPatch = buildDesktopAppearancePatch(
@@ -117,7 +104,6 @@ describe("desktop appearance model", () => {
           spread: 0,
           visible: true,
         } },
-      { cardBorder: DEFAULT_DRAFTING_CARD_STATE.border },
     )
 
     expect(cardShadowPatch.cardShadow?.blur).toBe(22)

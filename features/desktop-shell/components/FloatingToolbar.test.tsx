@@ -1413,7 +1413,6 @@ describe("FloatingToolbar", () => {
     expect(surface.container.querySelector('[data-slot="desktop-appearance-shadow-trigger"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="desktop-appearance-filters-trigger"]')).not.toBeNull()
     expect(surface.container.querySelector('[data-slot="desktop-appearance-opacity-trigger"]')).not.toBeNull()
-    expect(surface.container.querySelector('[data-slot="desktop-appearance-stroke-trigger"]')).toBeNull()
   })
 
   it("renders scan safety in the dynamic island", async () => {
@@ -1474,7 +1473,6 @@ function StatefulSelectedTextToolbar({ initialLayer }: { initialLayer: DraftingC
             opacity: layer.opacity,
             shadow: layer.shadow,
             supportsCornerRadius: false,
-            supportsStroke: false,
           },
           onAppearancePatch: (patch) => setLayer((current) => ({ ...current, ...patch })),
           onElementLayerPatch: (patch) => setLayer((current) => ({ ...current, ...patch })),

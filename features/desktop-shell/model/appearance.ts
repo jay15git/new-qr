@@ -1,10 +1,7 @@
 import type { BackgroundShapeOptions } from "@/features/qr-code/model/state"
-import type { BackgroundShapeOptions } from "@/features/qr-code/model/state"
-import type { DraftingCardBorderState, DraftingCardShadowState } from "@/features/workspace/model/card-state"
+import type { DraftingCardShadowState } from "@/features/workspace/model/card-state"
 import type {
-  DraftingBorderStyle,
   DraftingOutlineState,
-  DraftingPerSideBorderState,
   DraftingShadowLayerState,
 } from "@/features/workspace/model/effects"
 import type { DraftingFilterEffect } from "@/features/workspace/model/filters"
@@ -21,29 +18,19 @@ import {
 export type DesktopAppearanceSnapshot = {
   backdropFilters: DraftingFilterEffect[]
   blur: number
-  borderSides?: DraftingPerSideBorderState
-  borderStyle?: DraftingBorderStyle
   cornerRadius?: number
   layerFilters: DraftingFilterEffect[]
   opacity: number
   outline: DraftingOutlineState
   shadow: DraftingCardShadowState
   shadows: DraftingShadowLayerState[]
-  stroke?: string
-  strokeOpacity?: number
-  strokeStyle?: DraftingBorderStyle
-  strokeWidth?: number
   supportsCornerRadius: boolean
   supportsOutline: boolean
-  supportsPerSideBorder: boolean
-  supportsStroke: boolean
-  usesBorderSemantics?: boolean
 }
 
 export function getDesktopAppearanceSnapshot(
   layer: DraftingCanvasLayer,
   options?: {
-    cardBorder?: DraftingCardBorderState
     cardCornerRadius?: number
     qrBackgroundShapeOptions?: BackgroundShapeOptions
   },
@@ -53,32 +40,22 @@ export function getDesktopAppearanceSnapshot(
   const outline = layer.outline ?? DEFAULT_DRAFTING_OUTLINE
   const shadows = layer.shadows ?? [legacyShadowToShadowLayer(layer.shadow)]
 
-  if (layer.kind === "card" && options?.cardBorder) {
+  if (layer.kind === "card" && options?.cardCornerRadius !== undefined) {
     return {
       backdropFilters,
       blur: layer.blur,
-      borderSides: options.cardBorder.sides,
-      borderStyle: options.cardBorder.style,
       cornerRadius: options.cardCornerRadius,
       layerFilters,
       opacity: layer.opacity,
       outline,
       shadow: layer.shadow,
       shadows,
-      stroke: options.cardBorder.color,
-      strokeOpacity: options.cardBorder.opacity,
-      strokeWidth: options.cardBorder.width,
       supportsCornerRadius: true,
       supportsOutline: true,
-      supportsPerSideBorder: true,
-      supportsStroke: true,
-      usesBorderSemantics: true,
     }
   }
 
   if (layer.kind === "qr" && options?.qrBackgroundShapeOptions) {
-    const shapeOptions = options.qrBackgroundShapeOptions
-
     return {
       backdropFilters,
       blur: layer.blur,
@@ -87,13 +64,8 @@ export function getDesktopAppearanceSnapshot(
       outline,
       shadow: layer.shadow,
       shadows,
-      stroke: shapeOptions.strokeColor,
-      strokeOpacity: shapeOptions.strokeOpacity,
-      strokeWidth: shapeOptions.strokeWidth,
       supportsCornerRadius: false,
       supportsOutline: false,
-      supportsPerSideBorder: false,
-      supportsStroke: true,
     }
   }
 
@@ -103,7 +75,6 @@ export function getDesktopAppearanceSnapshot(
   return {
     backdropFilters,
     blur: layer.blur,
-    borderSides: layer.borderSides,
     cornerRadius:
       layer.kind === "image"
         ? (layer.cornerRadius ?? DEFAULT_DRAFTING_IMAGE_LAYER.cornerRadius)
@@ -115,20 +86,12 @@ export function getDesktopAppearanceSnapshot(
     outline,
     shadow: layer.shadow,
     shadows,
-    stroke: layer.stroke,
-    strokeOpacity: layer.strokeOpacity,
-    strokeStyle: layer.strokeStyle,
-    strokeWidth: layer.strokeWidth,
     supportsCornerRadius: layer.kind === "image" || layer.kind === "shape",
     supportsOutline: layer.kind === "card" || layer.kind === "image" || layer.kind === "text" || isRectShape,
-    supportsPerSideBorder:
-      layer.kind === "card" || layer.kind === "image" || layer.kind === "text" || isRectShape,
-    supportsStroke: layer.kind === "shape",
   }
 }
 
 export type DesktopAppearancePatchResult = {
-  cardBorder?: Partial<DraftingCardBorderState>
   cardCornerRadius?: number
   cardShadow?: Partial<DraftingCardShadowState>
   layerPatch: Partial<DraftingCanvasLayer>
@@ -138,8 +101,8 @@ export type DesktopAppearancePatchResult = {
 export function buildDesktopAppearancePatch(
   layer: DraftingCanvasLayer,
   patch: Partial<DraftingCanvasLayer>,
-  options?: {
-    cardBorder?: DraftingCardBorderState
+  _options?: {
+    cardBorder?: unknown
     qrBackgroundShapeOptions?: BackgroundShapeOptions
   },
 ): DesktopAppearancePatchResult {
@@ -169,10 +132,6 @@ export function buildDesktopAppearancePatch(
     layerPatch.outline = patch.outline
   }
 
-  if (patch.borderSides !== undefined) {
-    layerPatch.borderSides = patch.borderSides
-  }
-
   if (patch.shadows !== undefined) {
     layerPatch.shadows = patch.shadows
   }
@@ -184,59 +143,18 @@ export function buildDesktopAppearancePatch(
     }
   }
 
-  if (layer.kind === "card" && options?.cardBorder) {
+  if (layer.kind === "card") {
     const primaryShadow = patch.shadows?.[0] ?? (patch.shadow ? { ...layer.shadow, ...patch.shadow } : undefined)
 
     return {
-      cardBorder: {
-        color: patch.stroke ?? options.cardBorder.color,
-        opacity: patch.strokeOpacity ?? options.cardBorder.opacity,
-        sides: patch.borderSides ?? options.cardBorder.sides,
-        style: patch.strokeStyle ?? options.cardBorder.style,
-        width: patch.strokeWidth ?? options.cardBorder.width,
-      },
       cardCornerRadius: patch.cornerRadius,
       cardShadow: primaryShadow,
       layerPatch,
     }
   }
 
-  if (layer.kind === "qr" && options?.qrBackgroundShapeOptions) {
-    const qrBackgroundShapeOptions: Partial<BackgroundShapeOptions> = {}
-
-    if (
-      patch.stroke !== undefined ||
-      patch.strokeWidth !== undefined ||
-      patch.strokeOpacity !== undefined
-    ) {
-      qrBackgroundShapeOptions.strokeColor =
-        patch.stroke ?? options.qrBackgroundShapeOptions.strokeColor
-      qrBackgroundShapeOptions.strokeWidth =
-        patch.strokeWidth ?? options.qrBackgroundShapeOptions.strokeWidth
-      qrBackgroundShapeOptions.strokeOpacity =
-        patch.strokeOpacity ?? options.qrBackgroundShapeOptions.strokeOpacity
-    }
-
-    return {
-      layerPatch,
-      ...(Object.keys(qrBackgroundShapeOptions).length > 0 ? { qrBackgroundShapeOptions } : {}),
-    }
-  }
-
-  if (patch.stroke !== undefined) {
-    layerPatch.stroke = patch.stroke
-  }
-
-  if (patch.strokeWidth !== undefined) {
-    layerPatch.strokeWidth = patch.strokeWidth
-  }
-
-  if (patch.strokeOpacity !== undefined) {
-    layerPatch.strokeOpacity = patch.strokeOpacity
-  }
-
-  if (patch.strokeStyle !== undefined) {
-    layerPatch.strokeStyle = patch.strokeStyle
+  if (layer.kind === "qr") {
+    return { layerPatch }
   }
 
   return { layerPatch }

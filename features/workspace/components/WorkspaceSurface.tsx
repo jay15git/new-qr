@@ -3790,8 +3790,6 @@ export function WorkspaceSurface({
   const selectedAppearanceLayer = selectedTransformLayer
   const desktopAppearanceSnapshot = selectedAppearanceLayer
     ? getDesktopAppearanceSnapshot(selectedAppearanceLayer, {
-        cardBorder:
-          selectedAppearanceLayer.kind === "card" ? selectedCardState.border : undefined,
         cardCornerRadius:
           selectedAppearanceLayer.kind === "card" ? selectedCardState.cornerRadius : undefined,
         qrBackgroundShapeOptions:
@@ -3807,8 +3805,6 @@ export function WorkspaceSurface({
     }
 
     const result = buildDesktopAppearancePatch(selectedAppearanceLayer, patch, {
-      cardBorder:
-        selectedAppearanceLayer.kind === "card" ? selectedCardState.border : undefined,
       qrBackgroundShapeOptions:
         selectedAppearanceLayer.kind === "qr"
           ? draftingStudioState.backgroundShapeOptions
@@ -3821,14 +3817,10 @@ export function WorkspaceSurface({
 
     if (
       selectedAppearanceLayer.kind === "card" &&
-      (result.cardBorder || result.cardCornerRadius !== undefined || result.cardShadow)
+      (result.cardCornerRadius !== undefined || result.cardShadow)
     ) {
       setSelectedCardState((current) => ({
         ...current,
-        border: {
-          ...current.border,
-          ...(result.cardBorder ?? {}),
-        },
         cornerRadius: result.cardCornerRadius ?? current.cornerRadius,
         shadow: result.cardShadow
           ? {
@@ -3837,14 +3829,6 @@ export function WorkspaceSurface({
             }
           : current.shadow,
       }))
-    }
-
-    if (selectedAppearanceLayer.kind === "qr" && result.qrBackgroundShapeOptions) {
-      updateDesktopShapeSettings({
-        shapeStrokeColor: result.qrBackgroundShapeOptions.strokeColor,
-        shapeStrokeOpacity: result.qrBackgroundShapeOptions.strokeOpacity,
-        shapeStrokeWidth: result.qrBackgroundShapeOptions.strokeWidth,
-      })
     }
   }
 
@@ -3898,9 +3882,6 @@ export function WorkspaceSurface({
     )
   const desktopShapeSettings: DesktopShapeSettings = {
     backgroundShapeId: selectedBackgroundShapeId,
-    borderColor: selectedCardState.border.color,
-    borderOpacity: selectedCardState.border.opacity,
-    borderWidth: selectedCardState.border.width,
     bottomSpace: selectedCardState.bottomSpace,
     cardEnabled: selectedCardState.enabled,
     cardFill: selectedCardState.fill,
@@ -3916,9 +3897,6 @@ export function WorkspaceSurface({
     shapeShadowOffsetY: activeQrLayer?.shadow.offsetY ?? 0,
     shapeShadowOpacity: activeQrLayer?.shadow.opacity ?? 0,
     shapeSolidColor: selectedBackgroundColor,
-    shapeStrokeColor: selectedBackgroundShapeOptions.strokeColor,
-    shapeStrokeOpacity: selectedBackgroundShapeOptions.strokeOpacity,
-    shapeStrokeWidth: selectedBackgroundShapeOptions.strokeWidth,
     shapeTiltX: selectedBackgroundShapeOptions.tiltX,
     shapeTiltY: selectedBackgroundShapeOptions.tiltY,
     shadowBlur: selectedCardState.shadow.blur,
@@ -3948,8 +3926,6 @@ export function WorkspaceSurface({
     kind: "frame",
     patternId: selectedCardState.patternId,
     radius: selectedCardState.cornerRadius,
-    strokeColor: selectedCardState.border.color,
-    strokeWidth: selectedCardState.border.width,
   }
   const desktopEffectsSettings: DesktopEffectsSettings = {
     filterId: selectedCardState.imageFilter.shaderId,
@@ -4158,9 +4134,6 @@ export function WorkspaceSurface({
     }
     const shapeOptionsPatch: Partial<BackgroundShapeOptions> = {}
     if (patch.shapePadding !== undefined) shapeOptionsPatch.paddingPx = patch.shapePadding
-    if (patch.shapeStrokeColor !== undefined) shapeOptionsPatch.strokeColor = patch.shapeStrokeColor
-    if (patch.shapeStrokeOpacity !== undefined) shapeOptionsPatch.strokeOpacity = patch.shapeStrokeOpacity
-    if (patch.shapeStrokeWidth !== undefined) shapeOptionsPatch.strokeWidth = patch.shapeStrokeWidth
     if (patch.shapeTiltX !== undefined) shapeOptionsPatch.tiltX = patch.shapeTiltX
     if (patch.shapeTiltY !== undefined) shapeOptionsPatch.tiltY = patch.shapeTiltY
     if (Object.keys(shapeOptionsPatch).length > 0) {
@@ -4198,12 +4171,6 @@ export function WorkspaceSurface({
     }
     setSelectedCardState((current) => ({
       ...current,
-      border: {
-        ...current.border,
-        color: patch.borderColor ?? current.border.color,
-        opacity: patch.borderOpacity ?? current.border.opacity,
-        width: patch.borderWidth ?? current.border.width,
-      },
       bottomSpace: patch.bottomSpace ?? current.bottomSpace,
       cornerRadius: patch.cardRadius ?? current.cornerRadius,
       enabled: patch.cardEnabled ?? current.enabled,
@@ -4407,8 +4374,6 @@ export function WorkspaceSurface({
     onDecorationsReset: resetDesktopShapeSettings,
     onDecorationsSettingsChange: (patch) =>
       updateDesktopShapeSettings({
-        borderColor: patch.strokeColor,
-        borderWidth: patch.strokeWidth,
         cardFill: patch.fill,
         cardPatternId: patch.patternId,
         cardRadius: patch.radius,
