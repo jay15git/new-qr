@@ -176,50 +176,31 @@ export function EffectsSection({
             key={shadow.id}
             className="mb-3 rounded-[8px] border border-[var(--drafting-line)] p-2"
           >
-            <div className="mb-2 flex items-center justify-between">
-              <select
-                aria-label="Shadow type"
-                className="drafting-type-input h-8 rounded-[6px] border border-[var(--drafting-line)] bg-[var(--drafting-panel-bg-hover)] px-2"
-                value={shadow.kind}
-                onChange={(event) =>
+            <div className="mb-2 flex items-center justify-end gap-1">
+              <button
+                aria-label={shadow.visible ? "Hide shadow" : "Show shadow"}
+                className="inline-flex size-7 items-center justify-center rounded-md border border-[var(--drafting-line)]"
+                type="button"
+                onClick={() =>
                   updateShadows(
                     layer.shadows.map((entry, entryIndex) =>
-                      entryIndex === index
-                        ? { ...entry, kind: event.currentTarget.value as "box" | "drop" }
-                        : entry,
+                      entryIndex === index ? { ...entry, visible: !entry.visible } : entry,
                     ),
                   )
                 }
               >
-                <option value="box">Box</option>
-                <option value="drop">Drop</option>
-              </select>
-              <div className="flex gap-1">
-                <button
-                  aria-label={shadow.visible ? "Hide shadow" : "Show shadow"}
-                  className="inline-flex size-7 items-center justify-center rounded-md border border-[var(--drafting-line)]"
-                  type="button"
-                  onClick={() =>
-                    updateShadows(
-                      layer.shadows.map((entry, entryIndex) =>
-                        entryIndex === index ? { ...entry, visible: !entry.visible } : entry,
-                      ),
-                    )
-                  }
-                >
-                  {shadow.visible ? <EyeIcon className="size-3.5" /> : <EyeOffIcon className="size-3.5" />}
-                </button>
-                <button
-                  aria-label="Remove shadow"
-                  className="inline-flex size-7 items-center justify-center rounded-md border border-[var(--drafting-line)]"
-                  type="button"
-                  onClick={() =>
-                    updateShadows(layer.shadows.filter((_, entryIndex) => entryIndex !== index))
-                  }
-                >
-                  <MinusIcon className="size-3.5" />
-                </button>
-              </div>
+                {shadow.visible ? <EyeIcon className="size-3.5" /> : <EyeOffIcon className="size-3.5" />}
+              </button>
+              <button
+                aria-label="Remove shadow"
+                className="inline-flex size-7 items-center justify-center rounded-md border border-[var(--drafting-line)]"
+                type="button"
+                onClick={() =>
+                  updateShadows(layer.shadows.filter((_, entryIndex) => entryIndex !== index))
+                }
+              >
+                <MinusIcon className="size-3.5" />
+              </button>
             </div>
             <label className="grid min-w-0 grid-cols-[2rem_minmax(0,1fr)] items-center gap-2">
               <input
@@ -270,19 +251,6 @@ export function EffectsSection({
                 }
               />
               <InspectorNumberInput
-                label="Spread"
-                max={128}
-                min={-128}
-                value={shadow.spread}
-                onChange={(spread) =>
-                  updateShadows(
-                    layer.shadows.map((entry, entryIndex) =>
-                      entryIndex === index ? { ...entry, spread } : entry,
-                    ),
-                  )
-                }
-              />
-              <InspectorNumberInput
                 label="Opacity"
                 max={100}
                 min={0}
@@ -322,20 +290,6 @@ export function EffectsSection({
                 }
               />
             </DraftingInspectorValueGrid>
-            <label className="mt-2 flex items-center gap-2 text-xs text-[var(--drafting-ink-muted)]">
-              <input
-                checked={shadow.inset}
-                type="checkbox"
-                onChange={(event) =>
-                  updateShadows(
-                    layer.shadows.map((entry, entryIndex) =>
-                      entryIndex === index ? { ...entry, inset: event.currentTarget.checked } : entry,
-                    ),
-                  )
-                }
-              />
-              Inner shadow
-            </label>
           </div>
         ))}
       </DraftingInspectorSection>

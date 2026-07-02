@@ -64,7 +64,7 @@ export const DEFAULT_DRAFTING_SHADOW_LAYER: Omit<DraftingShadowLayerState, "id">
   blur: 0,
   color: "#111827",
   inset: false,
-  kind: "box",
+  kind: "drop",
   offsetX: 0,
   offsetY: 0,
   opacity: 0,
@@ -108,8 +108,8 @@ export function normalizeBorderStyle(value: unknown, fallback: DraftingBorderSty
   return value === "solid" || value === "dashed" || value === "dotted" ? value : fallback
 }
 
-export function normalizeShadowKind(value: unknown, fallback: DraftingShadowKind): DraftingShadowKind {
-  return value === "box" || value === "drop" ? value : fallback
+export function normalizeShadowKind(_value: unknown, _fallback: DraftingShadowKind): DraftingShadowKind {
+  return "drop"
 }
 
 export function normalizeOutlineState(
@@ -227,7 +227,7 @@ export function legacyShadowToShadowLayer(
     color: shadow.color,
     id: id ?? createDraftingShadowLayerId(),
     inset: shadow.inset ?? false,
-    kind: shadow.kind ?? "box",
+    kind: "drop",
     offsetX: shadow.offsetX,
     offsetY: shadow.offsetY,
     opacity: shadow.opacity,

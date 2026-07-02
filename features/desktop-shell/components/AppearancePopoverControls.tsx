@@ -50,34 +50,23 @@ function ShadowLayerRow({
 }) {
   return (
     <div className="rounded-[10px] border border-[var(--desktop-inspector-control-border-hover)] p-2">
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <DesktopInspectorSegmentedControl
-          ariaLabelPrefix="Shadow type"
-          items={[
-            { label: "Box", value: "box" },
-            { label: "Drop", value: "drop" },
-          ]}
-          onValueChange={(kind: DraftingShadowLayerState["kind"]) => onChange({ kind })}
-          value={shadow.kind}
-        />
-        <div className="flex items-center gap-1">
-          <button
-            aria-label={shadow.visible ? "Hide shadow" : "Show shadow"}
-            className="grid size-7 place-items-center rounded-md text-[var(--desktop-inspector-fg-secondary)] hover:bg-[var(--desktop-inspector-control-hover-bg)]"
-            type="button"
-            onClick={() => onChange({ visible: !shadow.visible })}
-          >
-            {shadow.visible ? <EyeIcon className="size-3.5" /> : <EyeOffIcon className="size-3.5" />}
-          </button>
-          <button
-            aria-label="Remove shadow"
-            className="grid size-7 place-items-center rounded-md text-[var(--desktop-inspector-fg-secondary)] hover:bg-[var(--desktop-inspector-control-hover-bg)]"
-            type="button"
-            onClick={onRemove}
-          >
-            <MinusIcon className="size-3.5" />
-          </button>
-        </div>
+      <div className="mb-2 flex items-center justify-end gap-1">
+        <button
+          aria-label={shadow.visible ? "Hide shadow" : "Show shadow"}
+          className="grid size-7 place-items-center rounded-md text-[var(--desktop-inspector-fg-secondary)] hover:bg-[var(--desktop-inspector-control-hover-bg)]"
+          type="button"
+          onClick={() => onChange({ visible: !shadow.visible })}
+        >
+          {shadow.visible ? <EyeIcon className="size-3.5" /> : <EyeOffIcon className="size-3.5" />}
+        </button>
+        <button
+          aria-label="Remove shadow"
+          className="grid size-7 place-items-center rounded-md text-[var(--desktop-inspector-fg-secondary)] hover:bg-[var(--desktop-inspector-control-hover-bg)]"
+          type="button"
+          onClick={onRemove}
+        >
+          <MinusIcon className="size-3.5" />
+        </button>
       </div>
       <DesktopInspectorColorRow
         label="Shadow color"
@@ -92,14 +81,6 @@ function ShadowLayerRow({
           value={shadow.blur}
           valueLabel={`${Math.round(shadow.blur)}`}
           onChange={(blur) => onChange({ blur })}
-        />
-        <DesktopInspectorElasticSliderRow
-          label="Spread"
-          max={128}
-          min={-128}
-          value={shadow.spread}
-          valueLabel={`${Math.round(shadow.spread)}`}
-          onChange={(spread) => onChange({ spread })}
         />
         <DesktopInspectorElasticSliderRow
           label="Opacity"
@@ -125,15 +106,6 @@ function ShadowLayerRow({
           valueLabel={`${Math.round(shadow.offsetY)}`}
           onChange={(offsetY) => onChange({ offsetY })}
         />
-        <label className="flex items-center justify-between gap-2 text-[11px] text-[var(--desktop-inspector-fg-secondary)]">
-          <span>Inner shadow</span>
-          <input
-            checked={shadow.inset}
-            className="size-4 accent-[var(--desktop-inspector-option-selected-border)]"
-            type="checkbox"
-            onChange={(event) => onChange({ inset: event.currentTarget.checked })}
-          />
-        </label>
       </div>
     </div>
   )

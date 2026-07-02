@@ -4,7 +4,7 @@ import { createUniformPerSideBorder } from "@/features/workspace/model/effects"
 import { createDefaultDraftingFilterEffect } from "@/features/workspace/model/filters"
 import {
   buildCssFilterString,
-  getDraftingLayerShadows,
+  getDraftingLayerDropShadowFilter,
   getDraftingOutlineStyle,
   getDraftingPerSideBorderStyle,
   getDraftingUniformBorderStyle,
@@ -19,22 +19,22 @@ describe("layer appearance css builders", () => {
     expect(getStrokeDasharray("solid")).toBeUndefined()
   })
 
-  it("builds box shadows with spread and inset", () => {
+  it("builds drop shadows", () => {
     expect(
-      getDraftingLayerShadows([
+      getDraftingLayerDropShadowFilter([
         {
           blur: 12,
           color: "#111827",
-          inset: true,
-          kind: "box",
+          inset: false,
+          kind: "drop",
           offsetX: 2,
           offsetY: 4,
           opacity: 50,
-          spread: 3,
+          spread: 0,
           visible: true,
         },
       ]),
-    ).toBe("inset 2px 4px 12px 3px rgba(17, 24, 39, 0.5)")
+    ).toBe("drop-shadow(2px 4px 12px rgba(17, 24, 39, 0.5))")
   })
 
   it("builds outline css", () => {

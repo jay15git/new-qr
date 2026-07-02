@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react"
 
 import type { DraftingCardState } from "@/features/workspace/model/card-state"
-import { normalizeDraftingCardBorder, normalizeDraftingCardShadow } from "@/features/workspace/model/card-state"
+import { normalizeDraftingCardBorder } from "@/features/workspace/model/card-state"
 import { getDraftingCardPatternStyle } from "@/features/workspace/model/card-patterns"
 import {
   DEFAULT_DRAFTING_TEXT_LAYER,
@@ -13,7 +13,6 @@ import { getDraftingTextFontFamily } from "@/features/workspace/rendering/text-l
 import {
   buildCssFilterString,
   getDraftingLayerDropShadowFilter,
-  getDraftingLayerShadows,
   getDraftingOutlineStyle,
   getDraftingPerSideBorderStyle,
   getDraftingUniformBorderStyle,
@@ -28,10 +27,6 @@ import {
 } from "@/features/workspace/rendering/layer-transform"
 
 export { toRgba } from "@/features/workspace/rendering/layer-appearance"
-
-export function getDraftingCardShadow(cardState: DraftingCardState) {
-  return getDraftingLayerShadows([normalizeDraftingCardShadow(cardState.shadow)])
-}
 
 export function getDraftingCardBorder(cardState: DraftingCardState) {
   const border = normalizeDraftingCardBorder(cardState.border)
@@ -70,7 +65,6 @@ export function getDraftingLayerEffectStyle(layer: DraftingCanvasLayer): CSSProp
       : layer.shadow
         ? [layer.shadow]
         : []
-  const boxShadow = getDraftingLayerShadows(shadows)
   const filter = mergeCssFilterStrings(
     buildCssFilterString(layer.layerFilters ?? []),
     getDraftingLayerDropShadowFilter(shadows),
@@ -81,7 +75,6 @@ export function getDraftingLayerEffectStyle(layer: DraftingCanvasLayer): CSSProp
   return {
     ...borderStyle,
     ...getDraftingOutlineStyle(layer.outline),
-    ...(boxShadow !== "none" ? { boxShadow } : {}),
     ...(filter ? { filter } : {}),
     ...(backdropFilter ? { backdropFilter } : {}),
   }
@@ -297,7 +290,6 @@ export function getDraftingCardDomStyle(
     ...cardImageStyle,
     ...borderStyle,
     borderRadius: cardState.cornerRadius,
-    boxShadow: getDraftingCardShadow({ ...cardState, shadow: layer.shadow }),
   })
 }
 

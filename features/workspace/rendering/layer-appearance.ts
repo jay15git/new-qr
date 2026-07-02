@@ -43,42 +43,13 @@ export function getDraftingShadowLayerCss(shadow: DraftingShadowLayerState | Dra
   if (
     shadow.visible === false ||
     shadow.opacity <= 0 ||
-    (shadow.blur <= 0 && shadow.offsetX === 0 && shadow.offsetY === 0 && (shadow.spread ?? 0) === 0)
+    (shadow.blur <= 0 && shadow.offsetX === 0 && shadow.offsetY === 0)
   ) {
     return null
   }
 
   const color = toRgba(shadow.color, shadow.opacity / 100)
-  const spread = shadow.spread ?? 0
-  const insetPrefix = shadow.inset ? "inset " : ""
-
-  if (shadow.kind === "drop") {
-    return `drop-shadow(${shadow.offsetX}px ${shadow.offsetY}px ${shadow.blur}px ${color})`
-  }
-
-  return `${insetPrefix}${shadow.offsetX}px ${shadow.offsetY}px ${shadow.blur}px ${spread}px ${color}`
-}
-
-export function getDraftingLayerBoxShadow(
-  shadow: DraftingCardShadowState | DraftingShadowLayerState,
-) {
-  const css = getDraftingShadowLayerCss(shadow)
-
-  if (!css || shadow.kind === "drop") {
-    return "none"
-  }
-
-  return css
-}
-
-export function getDraftingLayerShadows(
-  shadows: Array<DraftingCardShadowState | DraftingShadowLayerState>,
-) {
-  const boxShadows = shadows
-    .map((shadow) => getDraftingShadowLayerCss(shadow))
-    .filter((value): value is string => Boolean(value) && !value.startsWith("drop-shadow("))
-
-  return boxShadows.length > 0 ? boxShadows.join(", ") : "none"
+  return `drop-shadow(${shadow.offsetX}px ${shadow.offsetY}px ${shadow.blur}px ${color})`
 }
 
 export function getDraftingLayerDropShadowFilter(
@@ -86,7 +57,7 @@ export function getDraftingLayerDropShadowFilter(
 ) {
   const dropShadows = shadows
     .map((shadow) => getDraftingShadowLayerCss(shadow))
-    .filter((value): value is string => Boolean(value) && value.startsWith("drop-shadow("))
+    .filter((value): value is string => Boolean(value))
 
   return dropShadows.length > 0 ? dropShadows.join(" ") : undefined
 }
