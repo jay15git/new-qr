@@ -19,7 +19,10 @@ export const DESKTOP_COLOR_SWATCH_BUTTON_CLASS =
   "relative flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full bg-transparent transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
 
 export const DESKTOP_COLOR_SWATCH_FILL_CLASS =
-  "size-6 shrink-0 rounded-full border-2 border-[var(--desktop-inspector-swatch-ring)] box-border"
+  "relative size-6 shrink-0 overflow-hidden rounded-full border-2 border-[var(--desktop-inspector-swatch-ring)] box-border"
+
+const DESKTOP_COLOR_SWATCH_CHECKERBOARD =
+  "conic-gradient(var(--checker-a, #808080) 0 25%, var(--checker-b, #c0c0c0) 0 50%, var(--checker-a, #808080) 0 75%, var(--checker-b, #c0c0c0) 0)"
 
 export function DesktopColorSwatchButton({
   "aria-label": ariaLabel,
@@ -43,8 +46,21 @@ export function DesktopColorSwatchButton({
         aria-hidden="true"
         className={DESKTOP_COLOR_SWATCH_FILL_CLASS}
         data-slot="desktop-color-swatch-fill"
-        style={{ backgroundColor: color }}
-      />
+      >
+        <span
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{
+            backgroundImage: DESKTOP_COLOR_SWATCH_CHECKERBOARD,
+            backgroundSize: "8px 8px",
+          }}
+        />
+        <span
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{ backgroundColor: color }}
+        />
+      </span>
     </button>
   )
 }
