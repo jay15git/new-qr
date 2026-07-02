@@ -59,7 +59,7 @@ function resolveImageSettings(props: NewQrCodeProps, size: number): ImageSetting
     return undefined
   }
 
-  const width = logo.width ?? Math.max(1, Math.round(size * coerceNumber(logo.size, 0, 1, 0.4)))
+  const width = logo.width ?? Math.max(1, Math.round(size * coerceNumber(logo.size, 0, 1, 0.1)))
   const height = logo.height ?? width
 
   return {

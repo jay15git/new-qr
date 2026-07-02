@@ -63,7 +63,7 @@ export function toQrcodeReactProps(state: QrStudioState) {
   const qrSize = clampQrSize(state.width);
   const logoSize = Math.max(
     1,
-    Math.round(qrSize * coerceNumber(state.imageOptions.imageSize, 0, 1, 0.4)),
+    Math.round(qrSize * coerceNumber(state.imageOptions.imageSize, 0, 1, 0.1)),
   );
 
   return {

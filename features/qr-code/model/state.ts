@@ -501,7 +501,7 @@ export function createDefaultQrStudioState(): QrStudioState {
     },
     imageOptions: {
       hideBackgroundDots: true,
-      imageSize: 0.4,
+      imageSize: 0.1,
       margin: 12,
       crossOrigin: "anonymous",
       opacity: 1,

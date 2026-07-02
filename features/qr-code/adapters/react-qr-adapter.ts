@@ -21,7 +21,7 @@ export function toReactQrCodeProps(state: QrStudioState): ReactQRCodeProps {
   const marginFactor = 1 - coerceNumber(state.imageOptions.margin, 0, 40, 0) / qrSize;
   const ratioSize = Math.max(
     0,
-    coerceNumber(state.imageOptions.imageSize, 0, 1, 0.4) * marginFactor,
+    coerceNumber(state.imageOptions.imageSize, 0, 1, 0.1) * marginFactor,
   );
   const defaultLogoSize = Math.max(1, Math.round(qrSize * ratioSize));
   const unifiedGradient =

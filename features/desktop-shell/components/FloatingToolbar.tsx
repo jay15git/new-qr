@@ -787,7 +787,7 @@ const DEFAULT_DESKTOP_LOGO_SETTINGS: DesktopLogoSettings = {
   margin: 12,
   remoteUrl: "",
   selectedBrandIconId: "",
-  size: 40,
+  size: 10,
   solidColor: DEFAULT_BRAND_ICON_COLOR,
   sourceMode: "brand",
   uploadMode: "upload",
