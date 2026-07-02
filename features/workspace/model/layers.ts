@@ -64,7 +64,6 @@ export type DraftingTextRun = {
 }
 
 export type DraftingCanvasLayer = {
-  backdropFilters: DraftingFilterEffect[]
   blur: number
   borderSides?: DraftingPerSideBorderState
   height: number
@@ -200,7 +199,6 @@ export function createDefaultDraftingLayers(
 
   return [
     {
-      backdropFilters: [],
       blur: 0,
       height: cardHeight,
       id: getDraftingCardLayerId(nodeId),
@@ -223,7 +221,6 @@ export function createDefaultDraftingLayers(
       zIndex: 0,
     },
     {
-      backdropFilters: [],
       blur: 0,
       height: qrDimensions.height,
       id: getDraftingQrLayerId(nodeId),
@@ -316,7 +313,6 @@ export function createDraftingShapeLayer(
 export function cloneDraftingCanvasLayer(layer: DraftingCanvasLayer): DraftingCanvasLayer {
   return {
     ...layer,
-    backdropFilters: (layer.backdropFilters ?? []).map((filter) => ({ ...filter })),
     borderSides: layer.borderSides
       ? {
           bottom: { ...layer.borderSides.bottom },
@@ -546,7 +542,6 @@ export function groupDraftingCanvasLayers(
   const lowestZIndex = Math.min(...selectedLayers.map((layer) => layer.zIndex))
   const groupLayer = patchDraftingCanvasLayer(
     {
-      backdropFilters: [],
       blur: 0,
       children: selectedLayers
         .sort((a, b) => a.zIndex - b.zIndex)
@@ -770,7 +765,6 @@ function normalizeSharedDraftingCanvasLayerFields({
   )
 
   return {
-    backdropFilters: normalizeFilterEffects(value.backdropFilters, fallback.backdropFilters ?? []),
     blur: syncLegacyBlurFromFilters(layerFilters),
     borderSides: normalizeDraftingLayerBorderSides(value.borderSides, fallback.borderSides),
     children: undefined,
@@ -1075,7 +1069,6 @@ function createFallbackLayer(
   const defaultShadowLayer = legacyShadowToShadowLayer(defaultShadow)
 
   return {
-    backdropFilters: [],
     blur: 0,
     borderSides: undefined,
     cornerRadius:

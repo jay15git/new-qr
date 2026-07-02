@@ -37,6 +37,32 @@ export const DRAFTING_FILTER_DEFAULTS: Record<DraftingFilterType, number> = {
   sepia: 0,
 }
 
+export const DRAFTING_FILTER_VISIBLE_DEFAULTS: Record<DraftingFilterType, number> = {
+  blur: 12,
+  brightness: 120,
+  contrast: 120,
+  grayscale: 50,
+  "hue-rotate": 45,
+  invert: 100,
+  saturation: 150,
+  sepia: 50,
+}
+
+const DRAFTING_FILTER_LABELS: Record<DraftingFilterType, string> = {
+  blur: "Blur",
+  brightness: "Brightness",
+  contrast: "Contrast",
+  grayscale: "Grayscale",
+  "hue-rotate": "Hue rotate",
+  invert: "Invert",
+  saturation: "Saturation",
+  sepia: "Sepia",
+}
+
+export function getDraftingFilterLabel(type: DraftingFilterType) {
+  return DRAFTING_FILTER_LABELS[type]
+}
+
 export const DRAFTING_FILTER_RANGES: Record<
   DraftingFilterType,
   { defaultValue: number; max: number; min: number; unit?: string }
@@ -142,4 +168,26 @@ export function syncBlurFilter(
 
 export function syncLegacyBlurFromFilters(filters: DraftingFilterEffect[]) {
   return getBlurAmountFromFilters(filters)
+}
+
+export function isDraftingFilterActive(filters: DraftingFilterEffect[], type: DraftingFilterType) {
+  return filters.some((filter) => filter.type === type && filter.enabled)
+}
+
+export function toggleDraftingFilter(
+  filters: DraftingFilterEffect[],
+  type: DraftingFilterType,
+): DraftingFilterEffect[] {
+  const existing = filters.find((filter) => filter.type === type)
+
+  if (existing) {
+    return filters.filter((filter) => filter.type !== type)
+  }
+
+  return [
+    ...filters,
+    createDefaultDraftingFilterEffect(type, {
+      amount: DRAFTING_FILTER_VISIBLE_DEFAULTS[type],
+    }),
+  ]
 }

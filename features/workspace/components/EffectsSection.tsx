@@ -50,10 +50,6 @@ export function EffectsSection({
     onPatch({ layerFilters })
   }
 
-  const updateBackdropFilters = (backdropFilters: DraftingFilterEffect[]) => {
-    onPatch({ backdropFilters })
-  }
-
   return (
     <DraftingInspectorSection dataSlot="drafting-effects-section" title="Effects">
       <DraftingInspectorSection dataSlot="drafting-outline-section" title="Outline">
@@ -299,11 +295,6 @@ export function EffectsSection({
           filters={layer.layerFilters}
           label="Layer"
           onChange={updateLayerFilters}
-        />
-        <FilterSection
-          filters={layer.backdropFilters}
-          label="Backdrop"
-          onChange={updateBackdropFilters}
         />
       </DraftingInspectorSection>
     </DraftingInspectorSection>

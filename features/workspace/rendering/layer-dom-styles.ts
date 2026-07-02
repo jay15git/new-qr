@@ -69,14 +69,12 @@ export function getDraftingLayerEffectStyle(layer: DraftingCanvasLayer): CSSProp
     buildCssFilterString(layer.layerFilters ?? []),
     getDraftingLayerDropShadowFilter(shadows),
   )
-  const backdropFilter = buildCssFilterString(layer.backdropFilters ?? [])
   const borderStyle = layer.borderSides ? getDraftingPerSideBorderStyle(layer.borderSides) : {}
 
   return {
     ...borderStyle,
     ...getDraftingOutlineStyle(layer.outline),
     ...(filter ? { filter } : {}),
-    ...(backdropFilter ? { backdropFilter } : {}),
   }
 }
 

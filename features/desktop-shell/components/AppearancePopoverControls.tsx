@@ -17,6 +17,7 @@ import type { DesktopAppearanceSnapshot } from "@/features/desktop-shell/model/a
 import {
   createDefaultDraftingFilterEffect,
   DRAFTING_FILTER_RANGES,
+  DRAFTING_FILTER_VISIBLE_DEFAULTS,
   DRAFTING_LAYER_FILTER_TYPES,
   type DraftingFilterEffect,
   type DraftingFilterType,
@@ -262,16 +263,12 @@ export function AppearanceFilterControls({
     onPatch({ layerFilters })
   }
 
-  const updateBackdropFilters = (backdropFilters: DraftingFilterEffect[]) => {
-    onPatch({ backdropFilters })
-  }
-
   return (
     <DesktopInspectorSection
       className={cn(DESKTOP_INSPECTOR_SECTION_GAP_CLASS, className)}
       dataSlot="desktop-appearance-filter-controls"
     >
-      <DesktopInspectorLabel>Layer filters</DesktopInspectorLabel>
+      <DesktopInspectorLabel>Filters</DesktopInspectorLabel>
       <div className="grid gap-2">
         {appearance.layerFilters.map((effect) => (
           <FilterEffectRow
@@ -294,38 +291,11 @@ export function AppearanceFilterControls({
         existingTypes={appearance.layerFilters.map((effect) => effect.type)}
         label="layer"
         onAdd={(type) =>
-          updateLayerFilters([...appearance.layerFilters, createDefaultDraftingFilterEffect(type)])
-        }
-      />
-
-      <DesktopInspectorLabel className="mt-3">Backdrop filters</DesktopInspectorLabel>
-      <div className="grid gap-2">
-        {appearance.backdropFilters.map((effect) => (
-          <FilterEffectRow
-            key={effect.id}
-            effect={effect}
-            onChange={(patch) =>
-              updateBackdropFilters(
-                appearance.backdropFilters.map((entry) =>
-                  entry.id === effect.id ? { ...entry, ...patch } : entry,
-                ),
-              )
-            }
-            onRemove={() =>
-              updateBackdropFilters(
-                appearance.backdropFilters.filter((entry) => entry.id !== effect.id),
-              )
-            }
-          />
-        ))}
-      </div>
-      <FilterPickerMenu
-        existingTypes={appearance.backdropFilters.map((effect) => effect.type)}
-        label="backdrop"
-        onAdd={(type) =>
-          updateBackdropFilters([
-            ...appearance.backdropFilters,
-            createDefaultDraftingFilterEffect(type),
+          updateLayerFilters([
+            ...appearance.layerFilters,
+            createDefaultDraftingFilterEffect(type, {
+              amount: DRAFTING_FILTER_VISIBLE_DEFAULTS[type],
+            }),
           ])
         }
       />

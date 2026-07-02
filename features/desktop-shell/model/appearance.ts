@@ -16,7 +16,6 @@ import {
 } from "@/features/workspace/model/effects"
 
 export type DesktopAppearanceSnapshot = {
-  backdropFilters: DraftingFilterEffect[]
   blur: number
   cornerRadius?: number
   layerFilters: DraftingFilterEffect[]
@@ -36,13 +35,11 @@ export function getDesktopAppearanceSnapshot(
   },
 ): DesktopAppearanceSnapshot {
   const layerFilters = layer.layerFilters ?? []
-  const backdropFilters = layer.backdropFilters ?? []
   const outline = layer.outline ?? DEFAULT_DRAFTING_OUTLINE
   const shadows = layer.shadows ?? [legacyShadowToShadowLayer(layer.shadow)]
 
   if (layer.kind === "card" && options?.cardCornerRadius !== undefined) {
     return {
-      backdropFilters,
       blur: layer.blur,
       cornerRadius: options.cardCornerRadius,
       layerFilters,
@@ -57,7 +54,6 @@ export function getDesktopAppearanceSnapshot(
 
   if (layer.kind === "qr" && options?.qrBackgroundShapeOptions) {
     return {
-      backdropFilters,
       blur: layer.blur,
       layerFilters,
       opacity: layer.opacity,
@@ -73,7 +69,6 @@ export function getDesktopAppearanceSnapshot(
     layer.kind === "shape" && (layer.shapeId ?? DEFAULT_DRAFTING_SHAPE_LAYER.shapeId) === "rect"
 
   return {
-    backdropFilters,
     blur: layer.blur,
     cornerRadius:
       layer.kind === "image"
@@ -107,10 +102,6 @@ export function buildDesktopAppearancePatch(
   },
 ): DesktopAppearancePatchResult {
   const layerPatch: Partial<DraftingCanvasLayer> = {}
-
-  if (patch.backdropFilters !== undefined) {
-    layerPatch.backdropFilters = patch.backdropFilters
-  }
 
   if (patch.blur !== undefined) {
     layerPatch.blur = patch.blur
