@@ -51,15 +51,13 @@ describe("drafting qr artwork helpers", () => {
     state.backgroundShapeId = "ghost"
     state.backgroundShapeOptions = {
       ...state.backgroundShapeOptions,
-      edgeBlur: 8,
-      shadowOffsetX: 12,
-      shadowOffsetY: -10,
+      paddingPx: 16,
+      strokeWidth: 4,
     }
 
     const naturalOuter = getQrRenderedDimensions(state)
     const layout = getDraftingQrLayerLayout(naturalOuter.width * 0.75, state)
 
-    expect(layout.innerWidth).toBe(Math.round(state.width * 0.75))
     expect(layout.metrics.outerWidth).toBeCloseTo(naturalOuter.width * 0.75, 4)
     expect(layout.metrics.translateX).toBeGreaterThan(0)
     expect(layout.metrics.backingRegion.width).toBeGreaterThanOrEqual(layout.innerWidth)

@@ -149,7 +149,7 @@ describe("Pane", () => {
     expect((node as HTMLElement).style.height).toBe("240px")
   })
 
-  it("sizes the preview from rendered qr bounds so shadow blur does not shrink the qr core", async () => {
+  it("sizes the preview from rendered qr bounds using padding and stroke only", async () => {
     const state = setSquareQrSize(createDefaultQrStudioState(), 240)
     state.backgroundShapeOptions = {
       edgeBlur: 10,
@@ -177,11 +177,11 @@ describe("Pane", () => {
     const node = container.querySelector('[data-slot="dashboard-compose-node"]') as HTMLElement
 
     expect(node).not.toBeNull()
-    expect(node.style.width).toBe("328px")
-    expect(node.style.height).toBe("328px")
+    expect(node.style.width).toBe("288px")
+    expect(node.style.height).toBe("288px")
     expect(card).not.toBeNull()
-    expect(card.style.width).toBe("368px")
-    expect(card.style.height).toBe("464px")
+    expect(card.style.width).toBe("328px")
+    expect(card.style.height).toBe("424px")
   })
 
   it("renders the editable card layer behind the qr artwork", async () => {

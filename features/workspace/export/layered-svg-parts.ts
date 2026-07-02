@@ -6,10 +6,7 @@ import {
 } from "@/features/workspace/model/layers"
 import { getDraftingFontCssFamily } from "@/features/workspace/model/fonts"
 import { layoutDraftingText } from "@/features/workspace/rendering/text-layout"
-import {
-  applyDraftingQrForegroundShadow,
-  hasDraftingLayerShadow,
-} from "@/features/workspace/rendering/qr-layer-shadow"
+import { hasDraftingLayerShadow } from "@/features/workspace/rendering/qr-layer-shadow"
 import { scaleNestedSvgMarkup } from "@/features/workspace/rendering/qr-artwork"
 import { getLayerSvgTransform } from "@/features/workspace/rendering/layer-transform"
 import { getShapeSvgPath } from "@/features/workspace/rendering/shape-layer"
@@ -117,10 +114,7 @@ function getDraftingLayerSvg(
 }
 
 function getDraftingLayerFilterMarkup(layer: DraftingCanvasLayer) {
-  const hasShadow =
-    layer.kind !== "qr" &&
-    layer.shadow.opacity > 0 &&
-    (layer.shadow.blur > 0 || layer.shadow.offsetX !== 0 || layer.shadow.offsetY !== 0)
+  const hasShadow = hasDraftingLayerShadow(layer)
   const hasBlur = layer.blur > 0
 
   if (!hasShadow && !hasBlur) {
@@ -224,11 +218,8 @@ function getDraftingQrLayerSvg(
   const filter = getDraftingLayerFilterMarkup(layer)
     ? ` filter="url(#${getSvgId(layer.id)}-filter)"`
     : ""
-  const shadowedQrMarkup = hasDraftingLayerShadow(layer)
-    ? applyDraftingQrForegroundShadow(qrMarkup, layer)
-    : qrMarkup
 
-  return `<g opacity="${layer.opacity}" transform="${getDraftingLayerSvgTransform(layer)}"${filter}>${getDraftingQrBackgroundSvgMarkup(layer, state)}${scaleNestedSvgMarkup(shadowedQrMarkup, layer.width, layer.height)}</g>`
+  return `<g opacity="${layer.opacity}" transform="${getDraftingLayerSvgTransform(layer)}"${filter}>${getDraftingQrBackgroundSvgMarkup(layer, state)}${scaleNestedSvgMarkup(qrMarkup, layer.width, layer.height)}</g>`
 }
 
 function getDraftingTextLayerSvg(layer: DraftingCanvasLayer) {

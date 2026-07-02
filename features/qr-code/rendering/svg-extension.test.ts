@@ -796,7 +796,7 @@ describe("qr rendering helpers", () => {
     expect(transform).not.toBe("translate(0 33) scale(1)")
   })
 
-  it("expands vector background shape bounds with padding, stroke, and edge blur", () => {
+  it("expands vector background shape bounds with padding and stroke", () => {
     const state = createDefaultQrStudioState()
     state.backgroundShapeId = "circle"
     state.backgroundOptions.color = "#d0bcff"
@@ -833,40 +833,24 @@ describe("qr rendering helpers", () => {
     })
 
     const backgroundShape = svg.querySelector('[data-qr-layer="background-shape"]')
-    const shadowShape = svg.querySelector('[data-qr-layer="background-shape-blur"]')
-    const shadowFilter = svg.querySelector('[data-qr-layer="background-shape-blur-filter"]')
-    const gaussianBlur = shadowFilter?.querySelectorAll("feGaussianBlur")[0]
-    const offset = shadowFilter?.querySelectorAll("feOffset")[0]
-    const flood = shadowFilter?.querySelectorAll("feFlood")[0]
-    const composite = shadowFilter?.querySelectorAll("feComposite")[0]
     const qrContent = svg.querySelector('[data-qr-layer="qr-content"]')
 
-    expect(svg.getAttribute("width")).toBe("406")
-    expect(svg.getAttribute("height")).toBe("406")
-    expect(svg.getAttribute("viewBox")).toBe("0 0 406 406")
-    expect(qrContent?.getAttribute("transform")).toBe("translate(31 53)")
+    expect(svg.getAttribute("width")).toBe("374")
+    expect(svg.getAttribute("height")).toBe("374")
+    expect(svg.getAttribute("viewBox")).toBe("0 0 374 374")
+    expect(qrContent?.getAttribute("transform")).toBe("translate(27 27)")
     expect(qrContent?.children).toContain(qrPath)
     expect(backgroundShape?.getAttribute("transform")).toBe(
-      "translate(7 29) scale(1.15)",
+      "translate(3 3) scale(1.15)",
     )
     expect(backgroundShape?.getAttribute("stroke")).toBe("#111827")
     expect(backgroundShape?.getAttribute("stroke-width")).toBe("6")
     expect(backgroundShape?.getAttribute("stroke-opacity")).toBe("0.42")
-    expect(shadowShape?.getAttribute("filter")).toBe("url('#background-shape-blur-filter')")
-    expect(shadowShape?.getAttribute("stroke")).toBe("#020617")
-    expect(shadowShape?.getAttribute("stroke-width")).toBe("6")
-    expect(gaussianBlur?.getAttribute("stdDeviation")).toBe("8")
-    expect(gaussianBlur?.getAttribute("in")).toBe("SourceAlpha")
-    expect(offset?.getAttribute("dx")).toBe("12")
-    expect(offset?.getAttribute("dy")).toBe("-10")
-    expect(flood?.getAttribute("flood-color")).toBe("#020617")
-    expect(flood?.getAttribute("flood-opacity")).toBe("0.58")
-    expect(composite?.getAttribute("operator")).toBe("in")
-    expect(svg.children[1]?.getAttribute("data-qr-layer")).toBe("background-shape-blur")
-    expect(svg.children[2]?.getAttribute("data-qr-layer")).toBe("background-shape")
+    expect(svg.querySelector('[data-qr-layer="background-shape-blur"]')).toBeNull()
+    expect(svg.children[1]?.getAttribute("data-qr-layer")).toBe("background-shape")
   })
 
-  it("expands the default qr background surface with padding, stroke, and edge blur", () => {
+  it("expands the default qr background surface with padding and stroke", () => {
     const state = createDefaultQrStudioState()
     state.backgroundOptions.color = "#f8fafc"
     state.backgroundOptions.round = 0.25
@@ -906,19 +890,15 @@ describe("qr rendering helpers", () => {
       width: 320,
     })
 
-    const shadowSurface = svg.querySelector('[data-qr-layer="background-surface-blur"]')
-    const shadowFilter = svg.querySelector('[data-qr-layer="background-surface-blur-filter"]')
-    const gaussianBlur = shadowFilter?.querySelectorAll("feGaussianBlur")[0]
-    const offset = shadowFilter?.querySelectorAll("feOffset")[0]
     const qrContent = svg.querySelector('[data-qr-layer="qr-content"]')
 
-    expect(svg.getAttribute("width")).toBe("408")
-    expect(svg.getAttribute("height")).toBe("408")
-    expect(svg.getAttribute("viewBox")).toBe("0 0 408 408")
-    expect(qrContent?.getAttribute("transform")).toBe("translate(58 26)")
+    expect(svg.getAttribute("width")).toBe("368")
+    expect(svg.getAttribute("height")).toBe("368")
+    expect(svg.getAttribute("viewBox")).toBe("0 0 368 368")
+    expect(qrContent?.getAttribute("transform")).toBe("translate(24 24)")
     expect(qrContent?.children).toContain(qrPath)
-    expect(backgroundRect.getAttribute("x")).toBe("38")
-    expect(backgroundRect.getAttribute("y")).toBe("6")
+    expect(backgroundRect.getAttribute("x")).toBe("4")
+    expect(backgroundRect.getAttribute("y")).toBe("4")
     expect(backgroundRect.getAttribute("width")).toBe("360")
     expect(backgroundRect.getAttribute("height")).toBe("360")
     expect(backgroundRect.getAttribute("rx")).toBe("45")
@@ -926,17 +906,11 @@ describe("qr rendering helpers", () => {
     expect(backgroundRect.getAttribute("stroke-width")).toBe("8")
     expect(backgroundRect.getAttribute("stroke-opacity")).toBe("0.55")
     expect(backgroundRect.getAttribute("clip-path")).toBeNull()
-    expect(shadowSurface?.getAttribute("filter")).toBe("url('#background-surface-blur-filter')")
-    expect(shadowSurface?.getAttribute("stroke")).toBe("#020617")
-    expect(shadowSurface?.getAttribute("stroke-width")).toBe("8")
-    expect(gaussianBlur?.getAttribute("stdDeviation")).toBe("10")
-    expect(offset?.getAttribute("dx")).toBe("-14")
-    expect(offset?.getAttribute("dy")).toBe("18")
-    expect(svg.children[1]?.getAttribute("data-qr-layer")).toBe("background-surface-blur")
-    expect(svg.children[2]).toBe(backgroundRect)
+    expect(svg.querySelector('[data-qr-layer="background-surface-blur"]')).toBeNull()
+    expect(svg.children[1]).toBe(backgroundRect)
   })
 
-  it("keeps shadow geometry bounds when shadow opacity is zero", () => {
+  it("keeps qr background geometry unchanged when legacy shadow fields differ", () => {
     const visibleShadowState = createDefaultQrStudioState()
     visibleShadowState.backgroundOptions.color = "#f8fafc"
     visibleShadowState.backgroundShapeOptions = {

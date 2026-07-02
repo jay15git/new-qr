@@ -2219,7 +2219,7 @@ export const Pane = memo(function Pane({
         data-selected={isLayerSelected ? "true" : "false"}
         {...layerExportAttrs("card")}
         className={cn(
-          "absolute max-h-none max-w-none transition-[box-shadow,background-color,border-radius] duration-150",
+          "absolute max-h-none max-w-none transition-[filter,background-color,border-radius] duration-150",
           LAYER_MOVE_CURSOR_CLASS,
           "overflow-visible",
           layer.isLocked && "cursor-default",

@@ -9,11 +9,13 @@ import {
   type DraftingOutlineState,
   type DraftingPerSideBorderState,
   type DraftingShadowLayerState,
+  hasLegacyBackgroundShapeShadow,
   legacyShadowToShadowLayer,
   normalizeBorderStyle,
   normalizeOutlineState,
   normalizePerSideBorderState,
   normalizeShadowLayerState,
+  shadowFromBackgroundShapeOptions,
   shadowLayerToLegacyShadow,
 } from "@/features/workspace/model/effects"
 import {
@@ -368,7 +370,9 @@ export function normalizeDraftingCanvasLayers(
     ...(hasCard ? [] : [fallback[0]!]),
     ...normalized,
     ...(hasQr ? [] : [fallback[1]!]),
-  ].sort((a, b) => a.zIndex - b.zIndex)
+  ]
+    .sort((a, b) => a.zIndex - b.zIndex)
+    .map((layer) => migrateLegacyQrLayerShadow(layer, qrState))
 }
 
 export function patchDraftingCanvasLayer(
@@ -1040,6 +1044,27 @@ function normalizeDraftingLayerBorderSides(
   }
 
   return normalizePerSideBorderState(value, fallback?.top)
+}
+
+function migrateLegacyQrLayerShadow(
+  layer: DraftingCanvasLayer,
+  qrState: QrStudioState,
+): DraftingCanvasLayer {
+  if (layer.kind !== "qr") {
+    return layer
+  }
+
+  const hasLayerShadow =
+    layer.shadow.opacity > 0 &&
+    (layer.shadow.blur > 0 || layer.shadow.offsetX !== 0 || layer.shadow.offsetY !== 0)
+
+  if (hasLayerShadow || !hasLegacyBackgroundShapeShadow(qrState.backgroundShapeOptions)) {
+    return layer
+  }
+
+  return patchDraftingCanvasLayer(layer, {
+    shadow: shadowFromBackgroundShapeOptions(qrState.backgroundShapeOptions),
+  })
 }
 
 function createFallbackLayer(

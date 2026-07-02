@@ -3841,11 +3841,6 @@ export function WorkspaceSurface({
 
     if (selectedAppearanceLayer.kind === "qr" && result.qrBackgroundShapeOptions) {
       updateDesktopShapeSettings({
-        shapeShadowBlur: result.qrBackgroundShapeOptions.edgeBlur,
-        shapeShadowColor: result.qrBackgroundShapeOptions.shadowColor,
-        shapeShadowOffsetX: result.qrBackgroundShapeOptions.shadowOffsetX,
-        shapeShadowOffsetY: result.qrBackgroundShapeOptions.shadowOffsetY,
-        shapeShadowOpacity: result.qrBackgroundShapeOptions.shadowOpacity,
         shapeStrokeColor: result.qrBackgroundShapeOptions.strokeColor,
         shapeStrokeOpacity: result.qrBackgroundShapeOptions.strokeOpacity,
         shapeStrokeWidth: result.qrBackgroundShapeOptions.strokeWidth,
@@ -3896,6 +3891,11 @@ export function WorkspaceSurface({
     cornerSquareSolidColor: selectedCornerSquareColor,
     cornerSquareType: selectedQrFinderPatternOuterStyle,
   }
+  const activeQrLayer =
+    activeCanvasLayers.find((layer) => layer.kind === "qr") ??
+    createDefaultDraftingLayers(activeQrNodeId, draftingStudioState, selectedCardState).find(
+      (layer) => layer.kind === "qr",
+    )
   const desktopShapeSettings: DesktopShapeSettings = {
     backgroundShapeId: selectedBackgroundShapeId,
     borderColor: selectedCardState.border.color,
@@ -3910,11 +3910,11 @@ export function WorkspaceSurface({
     shapeColorMode: selectedBackgroundColorMode,
     shapeGradient: selectedBackgroundGradient,
     shapePadding: selectedBackgroundShapeOptions.paddingPx,
-    shapeShadowBlur: selectedBackgroundShapeOptions.edgeBlur,
-    shapeShadowColor: selectedBackgroundShapeOptions.shadowColor,
-    shapeShadowOffsetX: selectedBackgroundShapeOptions.shadowOffsetX,
-    shapeShadowOffsetY: selectedBackgroundShapeOptions.shadowOffsetY,
-    shapeShadowOpacity: selectedBackgroundShapeOptions.shadowOpacity,
+    shapeShadowBlur: activeQrLayer?.shadow.blur ?? 0,
+    shapeShadowColor: activeQrLayer?.shadow.color ?? "#111827",
+    shapeShadowOffsetX: activeQrLayer?.shadow.offsetX ?? 0,
+    shapeShadowOffsetY: activeQrLayer?.shadow.offsetY ?? 0,
+    shapeShadowOpacity: activeQrLayer?.shadow.opacity ?? 0,
     shapeSolidColor: selectedBackgroundColor,
     shapeStrokeColor: selectedBackgroundShapeOptions.strokeColor,
     shapeStrokeOpacity: selectedBackgroundShapeOptions.strokeOpacity,
@@ -4158,11 +4158,6 @@ export function WorkspaceSurface({
     }
     const shapeOptionsPatch: Partial<BackgroundShapeOptions> = {}
     if (patch.shapePadding !== undefined) shapeOptionsPatch.paddingPx = patch.shapePadding
-    if (patch.shapeShadowBlur !== undefined) shapeOptionsPatch.edgeBlur = patch.shapeShadowBlur
-    if (patch.shapeShadowColor !== undefined) shapeOptionsPatch.shadowColor = patch.shapeShadowColor
-    if (patch.shapeShadowOffsetX !== undefined) shapeOptionsPatch.shadowOffsetX = patch.shapeShadowOffsetX
-    if (patch.shapeShadowOffsetY !== undefined) shapeOptionsPatch.shadowOffsetY = patch.shapeShadowOffsetY
-    if (patch.shapeShadowOpacity !== undefined) shapeOptionsPatch.shadowOpacity = patch.shapeShadowOpacity
     if (patch.shapeStrokeColor !== undefined) shapeOptionsPatch.strokeColor = patch.shapeStrokeColor
     if (patch.shapeStrokeOpacity !== undefined) shapeOptionsPatch.strokeOpacity = patch.shapeStrokeOpacity
     if (patch.shapeStrokeWidth !== undefined) shapeOptionsPatch.strokeWidth = patch.shapeStrokeWidth
@@ -4170,6 +4165,36 @@ export function WorkspaceSurface({
     if (patch.shapeTiltY !== undefined) shapeOptionsPatch.tiltY = patch.shapeTiltY
     if (Object.keys(shapeOptionsPatch).length > 0) {
       setSelectedBackgroundShapeOptions((current) => ({ ...current, ...shapeOptionsPatch }))
+    }
+
+    const qrShadowPatch =
+      patch.shapeShadowBlur !== undefined ||
+      patch.shapeShadowColor !== undefined ||
+      patch.shapeShadowOffsetX !== undefined ||
+      patch.shapeShadowOffsetY !== undefined ||
+      patch.shapeShadowOpacity !== undefined
+        ? {
+            blur: patch.shapeShadowBlur,
+            color: patch.shapeShadowColor,
+            offsetX: patch.shapeShadowOffsetX,
+            offsetY: patch.shapeShadowOffsetY,
+            opacity: patch.shapeShadowOpacity,
+          }
+        : null
+
+    if (qrShadowPatch) {
+      const qrLayerId = getDraftingQrLayerId(activeQrNodeId)
+      const currentQrLayer = findDraftingLayerById(activeCanvasLayers, qrLayerId)
+      if (currentQrLayer) {
+        handleLayerChange(activeQrNodeId, qrLayerId, {
+          shadow: {
+            ...currentQrLayer.shadow,
+            ...Object.fromEntries(
+              Object.entries(qrShadowPatch).filter(([, value]) => value !== undefined),
+            ),
+          },
+        })
+      }
     }
     setSelectedCardState((current) => ({
       ...current,

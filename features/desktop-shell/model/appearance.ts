@@ -1,4 +1,5 @@
 import type { BackgroundShapeOptions } from "@/features/qr-code/model/state"
+import type { BackgroundShapeOptions } from "@/features/qr-code/model/state"
 import type { DraftingCardBorderState, DraftingCardShadowState } from "@/features/workspace/model/card-state"
 import type {
   DraftingBorderStyle,
@@ -84,17 +85,7 @@ export function getDesktopAppearanceSnapshot(
       layerFilters,
       opacity: layer.opacity,
       outline,
-      shadow: {
-        blur: shapeOptions.edgeBlur ?? layer.shadow.blur,
-        color: shapeOptions.shadowColor || layer.shadow.color,
-        inset: layer.shadow.inset,
-        kind: layer.shadow.kind,
-        offsetX: shapeOptions.shadowOffsetX ?? layer.shadow.offsetX,
-        offsetY: shapeOptions.shadowOffsetY ?? layer.shadow.offsetY,
-        opacity: shapeOptions.shadowOpacity ?? layer.shadow.opacity,
-        spread: layer.shadow.spread,
-        visible: layer.shadow.visible,
-      },
+      shadow: layer.shadow,
       shadows,
       stroke: shapeOptions.strokeColor,
       strokeOpacity: shapeOptions.strokeOpacity,
@@ -211,22 +202,7 @@ export function buildDesktopAppearancePatch(
   }
 
   if (layer.kind === "qr" && options?.qrBackgroundShapeOptions) {
-    const nextShadow = {
-      ...layer.shadow,
-      ...(patch.shadow ?? {}),
-    }
     const qrBackgroundShapeOptions: Partial<BackgroundShapeOptions> = {}
-
-    if (patch.shadow) {
-      qrBackgroundShapeOptions.shadowColor = nextShadow.color
-      qrBackgroundShapeOptions.shadowOffsetX = nextShadow.offsetX
-      qrBackgroundShapeOptions.shadowOffsetY = nextShadow.offsetY
-      qrBackgroundShapeOptions.shadowOpacity = nextShadow.opacity
-
-      if (patch.shadow.blur !== undefined) {
-        qrBackgroundShapeOptions.edgeBlur = patch.shadow.blur
-      }
-    }
 
     if (
       patch.stroke !== undefined ||
@@ -241,11 +217,9 @@ export function buildDesktopAppearancePatch(
         patch.strokeOpacity ?? options.qrBackgroundShapeOptions.strokeOpacity
     }
 
-    layerPatch.shadow = nextShadow
-
     return {
       layerPatch,
-      qrBackgroundShapeOptions,
+      ...(Object.keys(qrBackgroundShapeOptions).length > 0 ? { qrBackgroundShapeOptions } : {}),
     }
   }
 

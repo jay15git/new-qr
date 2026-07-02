@@ -961,11 +961,6 @@ export function hasActiveBackgroundShapeOptions(
     options &&
       ((options.paddingPx ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.paddingPx) >
         DEFAULT_BACKGROUND_SHAPE_OPTIONS.paddingPx ||
-        (options.strokeWidth ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeWidth) > 0 ||
-        (options.edgeBlur ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.edgeBlur) > 0 ||
-        (options.shadowOffsetX ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetX) !==
-          DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetX ||
-        (options.shadowOffsetY ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetY) !==
-          DEFAULT_BACKGROUND_SHAPE_OPTIONS.shadowOffsetY),
+        (options.strokeWidth ?? DEFAULT_BACKGROUND_SHAPE_OPTIONS.strokeWidth) > 0),
   );
 }

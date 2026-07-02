@@ -2514,17 +2514,10 @@ function getBackgroundRenderMetrics(
 ): BackgroundRenderMetrics {
   const shapeOutset = shapeOptions.paddingPx
   const strokeOutset = Math.ceil(shapeOptions.strokeWidth / 2)
-  const shadowGeometryIsActive =
-    shapeOptions.edgeBlur > 0 ||
-    shapeOptions.shadowOffsetX !== 0 ||
-    shapeOptions.shadowOffsetY !== 0
-  const shadowAlphaOutset = shadowGeometryIsActive
-    ? strokeOutset + Math.ceil(shapeOptions.edgeBlur * 2)
-    : strokeOutset
-  const leftEffectOutset = Math.max(strokeOutset, shadowAlphaOutset - shapeOptions.shadowOffsetX)
-  const rightEffectOutset = Math.max(strokeOutset, shadowAlphaOutset + shapeOptions.shadowOffsetX)
-  const topEffectOutset = Math.max(strokeOutset, shadowAlphaOutset - shapeOptions.shadowOffsetY)
-  const bottomEffectOutset = Math.max(strokeOutset, shadowAlphaOutset + shapeOptions.shadowOffsetY)
+  const leftEffectOutset = strokeOutset
+  const rightEffectOutset = strokeOutset
+  const topEffectOutset = strokeOutset
+  const bottomEffectOutset = strokeOutset
   const translateX = shapeOutset + leftEffectOutset
   const translateY = shapeOutset + topEffectOutset
 
@@ -2970,14 +2963,9 @@ function createBackgroundShapeBlurPath({
 }
 
 function hasActiveBackgroundShapeShadow(
-  shapeOptions: ReturnType<typeof normalizeBackgroundShapeOptions>,
+  _shapeOptions: ReturnType<typeof normalizeBackgroundShapeOptions>,
 ) {
-  return (
-    shapeOptions.shadowOpacity > 0 &&
-    (shapeOptions.edgeBlur > 0 ||
-      shapeOptions.shadowOffsetX !== 0 ||
-      shapeOptions.shadowOffsetY !== 0)
-  )
+  return false
 }
 
 function applyBackgroundShapeShadowSourceStroke(

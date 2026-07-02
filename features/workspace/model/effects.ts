@@ -208,6 +208,42 @@ export function shadowLayerToLegacyShadow(shadow: DraftingShadowLayerState) {
   }
 }
 
+export function hasLegacyBackgroundShapeShadow(options: {
+  edgeBlur: number
+  shadowOffsetX: number
+  shadowOffsetY: number
+  shadowOpacity: number
+}) {
+  return (
+    options.shadowOpacity > 0 &&
+    (options.edgeBlur > 0 ||
+      options.shadowOffsetX !== 0 ||
+      options.shadowOffsetY !== 0)
+  )
+}
+
+export function shadowFromBackgroundShapeOptions(options: {
+  edgeBlur: number
+  shadowColor: string
+  shadowOffsetX: number
+  shadowOffsetY: number
+  shadowOpacity: number
+}) {
+  const visible = hasLegacyBackgroundShapeShadow(options)
+
+  return {
+    blur: options.edgeBlur,
+    color: options.shadowColor,
+    inset: false,
+    kind: "drop" as const,
+    offsetX: options.shadowOffsetX,
+    offsetY: options.shadowOffsetY,
+    opacity: options.shadowOpacity,
+    spread: 0,
+    visible,
+  }
+}
+
 export function legacyShadowToShadowLayer(
   shadow: {
     blur: number
