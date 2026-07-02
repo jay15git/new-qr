@@ -9,6 +9,7 @@ import { Dithering } from "@paper-design/shaders-react"
 import Floating, {
   FloatingElement,
 } from "@/components/fancy/image/parallax-floating"
+import VariableFontCursorProximity from "@/components/fancy/text/variable-font-cursor-proximity"
 
 const Preview = () => {
   const [scope, animate] = useAnimate()
@@ -42,9 +43,17 @@ const Preview = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.88, delay: 1.5 }}
       >
-        <p className="font-playwrite text-5xl md:text-7xl z-50 text-black">
+        <VariableFontCursorProximity
+          as="p"
+          className="font-caveat text-5xl md:text-7xl z-50 text-black"
+          fromFontVariationSettings="'wght' 400"
+          toFontVariationSettings="'wght' 700"
+          radius={180}
+          falloff="gaussian"
+          containerRef={scope}
+        >
           QRafty
-        </p>
+        </VariableFontCursorProximity>
         <p className="mt-8 text-xs z-50 hover:scale-110 transition-transform bg-black text-white rounded-full py-2 w-20 cursor-pointer">
           Download
         </p>

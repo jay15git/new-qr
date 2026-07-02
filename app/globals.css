@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Playwrite+TZ&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -12,7 +12,7 @@
   --font-sans: var(--font-body);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-display);
-  --font-playwrite: "Playwrite TZ", cursive;
+  --font-caveat: "Caveat", cursive;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -352,8 +352,8 @@
   initial-value: 0.2;
 }
 
-@utility font-playwrite {
-  font-family: "Playwrite TZ", cursive;
+@utility font-caveat {
+  font-family: "Caveat", cursive;
 }
 
 @utility scroll-fade-effect-y {
